@@ -44,7 +44,7 @@ enum class TransformStateAttribute {
     TRANSLATEY,
 };
 
-class ACE_EXPORT TransformComponent : public SoleChildComponent {
+class ACE_FORCE_EXPORT TransformComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(TransformComponent, SoleChildComponent);
 
 public:

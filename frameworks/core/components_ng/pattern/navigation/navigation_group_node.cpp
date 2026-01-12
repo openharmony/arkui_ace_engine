@@ -1764,6 +1764,7 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
                 navigation->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
             }
             navigation->RemoveDialogDestination();
+            navigation->ContentChangeReport(curNode);
             auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
@@ -1990,6 +1991,7 @@ void NavigationGroupNode::DialogTransitionPushAnimation(const RefPtr<FrameNode>&
         auto curNode = weakCurNode.Upgrade();
         auto preNode = weakPreNode.Upgrade();
         navigation->ResetTransitionAnimationNodeState(preNode, curNode);
+        navigation->ContentChangeReport(curNode);
     };
     auto finishWrapper = [onFinishCb = std::move(onFinish), weak = WeakPtr(navigationPattern)]() {
         auto pattern = weak.Upgrade();
@@ -2098,6 +2100,7 @@ void NavigationGroupNode::DialogTransitionPopAnimation(const RefPtr<FrameNode>& 
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
             navigation->CleanPopAnimations();
+            navigation->ContentChangeReport(curNode);
         };
     auto finishWrapper = [onFinishCb = std::move(onFinish), weak = WeakPtr(navigationPattern)]() {
         auto pattern = weak.Upgrade();

@@ -323,8 +323,10 @@ public:
     void DumpTreeJsonForDiff(std::unique_ptr<JsonValue>& json);
     void DumpSimplifyTreeBase(std::shared_ptr<JsonValue>& current);
     void DumpSimplifyTree(int32_t depth, std::shared_ptr<JsonValue>& current);
-    void DumpSimplifyTreeWithParamConfig(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
-        ParamConfig config = ParamConfig());
+    void DumpSimplifyTreeNode(std::shared_ptr<JsonValue>& current, ParamConfig config);
+    void DumpSimplifyTreeWithParamConfig(int32_t depth, std::shared_ptr<JsonValue>& current,
+        bool onlyNeedVisible, ParamConfig config = ParamConfig(),
+        std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker = nullptr);
     virtual bool IsContextTransparent();
 
     bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
@@ -1005,6 +1007,11 @@ public:
         return isCNode_ || isArkTsFrameNode_ || isRootBuilderNode_ || isArkTsRenderNode_;
     }
 
+    bool IsBuildByUser() const
+    {
+        return isBuildByJS_ || IsReusableNode() || isRoot_ || isStaticNode_;
+    }
+
     virtual RefPtr<UINode> GetCurrentPageRootNode()
     {
         return nullptr;
@@ -1199,30 +1206,18 @@ public:
         return isFree_;
     }
 
-    void SetIsFree(bool isFree)
+    virtual void SetIsFree(bool isFree)
     {
         isFree_ = isFree;
     }
 
-    void PostAfterAttachMainTreeTask(std::function<void()>&& task)
-    {
-        if (!IsFree()) {
-            TAG_LOGW(AceLogTag::ACE_NATIVE_NODE,
-                "PostAfterAttachMainTreeTask failed, node: %{public}d is not free", GetId());
-            return;
-        }
-        afterAttachMainTreeTasks_.emplace_back(std::move(task));
-    }
+    void MarkNodeTreeNotFree();
 
-    void ExecuteAfterAttachMainTreeTasks()
-    {
-        for (auto& task : afterAttachMainTreeTasks_) {
-            if (task) {
-                task();
-            }
-        }
-        afterAttachMainTreeTasks_.clear();
-    }
+    void MarkNodeTreeFree(bool isNeedMarkNodeTreeFree = false);
+
+    void PostAfterAttachMainTreeTask(std::function<void()>&& task);
+
+    void ExecuteAfterAttachMainTreeTasks();
 
     void FindTopNavDestination(RefPtr<FrameNode>& result);
 
@@ -1337,6 +1332,8 @@ protected:
     std::list<RefPtr<FrameNode>> adoptedChildren_;
 
 private:
+    void DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr<JsonValue>& current, bool onlyNeedVisible,
+        ParamConfig config, std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker);
     void DoAddChild(std::list<RefPtr<UINode>>::iterator& it, const RefPtr<UINode>& child, bool silently = false,
         bool addDefaultTransition = false);
     void UpdateBuilderNodeColorMode(const RefPtr<UINode>& child);
@@ -1357,7 +1354,9 @@ private:
     void SetObserverParentForLayoutChildren(const RefPtr<UINode>& parent);
     void ClearObserverParentForLayoutChildren();
 
-    bool CheckThreadSafeNodeTree(bool needCheck);
+    bool CheckThreadSafeNodeTree();
+    void MarkNodeNotFree();
+    void MarkNodeFree();
     virtual bool MaybeRelease() override;
     void DumpBasicInfo(int32_t depth, bool hasJson, const std::string& desc);
     void DumpMoreBasicInfo();
@@ -1374,6 +1373,7 @@ private:
     bool onMainTree_ = false;
     bool isThreadSafeNode_ = false;
     bool isFree_ = false; // the thread safe node in free state can be operated by non UI threads
+    bool isRunningPendingUnsafeTask_ = false;
     std::vector<std::function<void()>> afterAttachMainTreeTasks_;
     bool removeSilently_ = true;
     bool isInDestroying_ = false;

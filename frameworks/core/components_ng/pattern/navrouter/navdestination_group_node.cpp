@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/navrouter/navdestination_group_node.h"
 
 #include "core/common/force_split/force_split_utils.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_title_util.h"
 #include "core/components_ng/pattern/navigation/navigation_transition_proxy.h"
@@ -1170,6 +1171,17 @@ void NavDestinationGroupNode::StartCustomTransitionAnimation(NavDestinationTrans
     // only do remove or set visibility in longest custom transition animation's finish callback.
     if (transition.duration + transition.delay == longestAnimationDuration) {
         finish = BuildTransitionFinishCallback(false, std::move(transition.onTransitionEnd));
+        if (isEnter) {
+            std::function<void()> finishWrapper = [innerFinish = std::move(finish), weakNode = WeakClaim(this)]() {
+                if (innerFinish) {
+                    innerFinish();
+                }
+                auto destNode = weakNode.Upgrade();
+                CHECK_NULL_VOID(destNode);
+                destNode->ContentChangeReport();
+            };
+            finish = std::move(finishWrapper);
+        }
     } else {
         finish = [onTransitionEnd = std::move(transition.onTransitionEnd), weak = WeakClaim(this)]() {
             auto node = weak.Upgrade();
@@ -1351,5 +1363,14 @@ bool NavDestinationGroupNode::GetCanReused() const
         }
     }
     return canReused_;
+}
+
+void NavDestinationGroupNode::ContentChangeReport()
+{
+    auto context = GetContext();
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnPageTransitionEnd(WeakClaim(this).Upgrade());
 }
 } // namespace OHOS::Ace::NG

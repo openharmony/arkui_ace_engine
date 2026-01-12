@@ -2745,6 +2745,122 @@ HWTEST_F(ListLayoutTestNg, ListIsAtBottom001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListIsAtBottom002
+ * @tc.desc: test func IsAtBottom when List last item hight is zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListIsAtBottom002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List, last item hight is zero.
+       @tc.expected: List is at bottom and not scrollable.
+     */
+    ListModelNG model = CreateList();
+    ListItemModelNG itemModel1;
+    itemModel1.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
+    ViewStackProcessor::GetInstance()->Pop();
+    ListItemModelNG itemModel2;
+    itemModel2.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetHeight(CalcLength(0));
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+    FlushUITasks();
+    FlushIdleTask(pattern_);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_FALSE(pattern_->IsScrollable());
+}
+
+/**
+ * @tc.name: ListIsAtBottom003
+ * @tc.desc: test func IsAtBottom when List with leans and last item hight is zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListIsAtBottom003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List, last item hight is zero.
+       @tc.expected: List is at bottom and not scrollable.
+     */
+    ListModelNG model = CreateList();
+    model.SetLanes(1);
+    ListItemModelNG itemModel1;
+    itemModel1.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
+    ViewStackProcessor::GetInstance()->Pop();
+    ListItemModelNG itemModel2;
+    itemModel2.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetHeight(CalcLength(0));
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+    FlushUITasks();
+    FlushIdleTask(pattern_);
+    EXPECT_TRUE(pattern_->IsAtBottom());
+    EXPECT_FALSE(pattern_->IsScrollable());
+}
+
+/**
+ * @tc.name: ListIsAtTop001
+ * @tc.desc: test func IsAtTop when List first item hight is zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListIsAtTop001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List, first item hight is zero.
+       @tc.expected: List is at top and not scrollable.
+     */
+    ListModelNG model = CreateList();
+    model.SetInitialIndex(1);
+    ListItemModelNG itemModel1;
+    itemModel1.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetHeight(CalcLength(0));
+    ViewStackProcessor::GetInstance()->Pop();
+    ListItemModelNG itemModel2;
+    itemModel2.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+    FlushUITasks();
+    FlushIdleTask(pattern_);
+    EXPECT_TRUE(pattern_->IsAtTop());
+    EXPECT_FALSE(pattern_->IsScrollable());
+}
+
+/**
+ * @tc.name: ListIsAtTop002
+ * @tc.desc: test func IsAtTop when List with leans and first item hight is zero.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListIsAtTop002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List, first item hight is zero.
+       @tc.expected: List is at top and not scrollable.
+     */
+    ListModelNG model = CreateList();
+    model.SetLanes(1);
+    model.SetInitialIndex(1);
+    ListItemModelNG itemModel1;
+    itemModel1.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetHeight(CalcLength(0));
+    ViewStackProcessor::GetInstance()->Pop();
+    ListItemModelNG itemModel2;
+    itemModel2.Create([](int32_t) {}, V2::ListItemStyle::NONE);
+    ViewAbstract::SetWidth(CalcLength(WIDTH));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
+    ViewStackProcessor::GetInstance()->Pop();
+    CreateDone();
+    FlushUITasks();
+    FlushIdleTask(pattern_);
+    EXPECT_TRUE(pattern_->IsAtTop());
+    EXPECT_FALSE(pattern_->IsScrollable());
+}
+
+/**
  * @tc.name: ListRepeatCacheCount001
  * @tc.desc: List cacheCount
  * @tc.type: FUNC
@@ -4633,5 +4749,35 @@ HWTEST_F(ListLayoutTestNg, SupportEmptyBranchInLazyLoading001, TestSize.Level1)
 
     auto wrapper2 = layoutAlgorithm->GetListItem(AceType::RawPtr(frameNode_), 0);
     EXPECT_NE(wrapper2, nullptr);
+
+    // set value of SupportLazyLoadingEmptyBranch only affects the first time setting
+    model.SetSupportEmptyBranchInLazyLoading(false);
+    EXPECT_EQ(layoutProperty->GetSupportLazyLoadingEmptyBranch().value_or(false), true);
+}
+
+/**
+ * @tc.name: TestLanesCacheRangeInBusy
+ * @tc.desc: Test List cached node with lanes
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, TestLanesCacheRangeInBusy, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(2);
+    model.SetLanes(1);
+    CreateItemsInLazyForEach(10, 100.0f, nullptr); /* 10: item count */
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. SetCacheRange
+     * @tc.expected: 1 ListItem cached.
+     */
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushUITasks(frameNode_);
+    ASSERT_NE(listPattern->GetPredictLayoutParamV2(), std::nullopt);
+    auto param = listPattern->GetPredictLayoutParamV2().value();
+    for (auto it : param.items) {
+        EXPECT_EQ(it.forceCache, true);
+    }
 }
 } // namespace OHOS::Ace::NG

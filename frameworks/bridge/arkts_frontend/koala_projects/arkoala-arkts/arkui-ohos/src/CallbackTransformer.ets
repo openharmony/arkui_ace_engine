@@ -14,9 +14,10 @@
  */
 
 import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
-import { KPointer, nullptr } from '@koalaui/interop';
+import { KPointer, nullptr, pointer, int32 } from '@koalaui/interop';
 import { IncrementalNode, GlobalStateManager } from '@koalaui/runtime';
 import { PeerNode } from "./PeerNode"
+import { ArkUIAniModule } from "arkui.ani"
 import { CustomBuilder, CustomBuilderT } from "./component/builder"
 import { CustomNodeBuilder, ArkComponentRootPeer, CustomBuilderT_Arkui_Component_Enums_ResponseType } from "#generated"
 import { UIContextUtil } from './base/UIContextUtil';
@@ -49,8 +50,23 @@ function componentRootPeerFactory(): PeerNode {
     return ArkComponentRootPeer.create(undefined)
 }
 
+class FreeRootNode extends PeerNode {
+    protected constructor(peerPtr: pointer, id: int32, name: string = '', flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+
+    public static create(): FreeRootNode {
+        const peerId = PeerNode.nextId()
+        const peerPtr = ArkUIAniModule._DetachedFreeRoot_Construct(peerId);
+        if (!peerPtr) {
+            throw new Error('create FreeRootNode fail')
+        }
+        return new FreeRootNode(peerPtr, peerId, 'FreeRootNode')
+    }
+}
+
 function componentFreeRootFactory(): IncrementalNode {
-    return new IncrementalNode();
+    return FreeRootNode.create();
 }
 
 export class CallbackTransformer {

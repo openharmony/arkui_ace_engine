@@ -1908,5 +1908,45 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg056, TestSize.Level
     PipelineContextFourTestNg::context_->minPlatformVersion_ = originalMinPlatformVersion;
 }
 
+/**
+ * @tc.name: OnHideTest001
+ * @tc.desc: Test onHide not send event when is formrender.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextFourTestNg, OnHideTest001, TestSize.Level1)
+{
+    auto frontend = AceType::MakeRefPtr<MockFrontend>();
+    ASSERT_NE(frontend, nullptr);
+    auto rootBackup = context_->GetRootElement();
+    ASSERT_NE(rootBackup, nullptr);
+    auto weakFrontendBackup = context_->weakFrontend_;
+    auto formBackup = context_->IsFormRender();
+    bool accessibilityEnableBackup = AceApplicationInfo::GetInstance().IsAccessibilityEnabled();
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(true);
+
+    context_->weakFrontend_ = frontend;
+
+    EXPECT_CALL(*frontend, GetAccessibilityManager())
+        .Times(1);
+
+    context_->rootNode_ = nullptr;
+    // 1. no rootNode and IsFormRenderExceptDynamicComponent
+    context_->SetIsFormRender(true);
+    context_->OnHide();
+    // 2. no rootNode and not IsFormRenderExceptDynamicComponent
+    context_->SetIsFormRender(false);
+    context_->OnHide();
+    // 3. has rootNode and IsFormRenderExceptDynamicComponent
+    context_->rootNode_ = rootBackup;
+    context_->SetIsFormRender(true);
+    context_->OnHide();
+    // 4. has rootNode and not IsFormRenderExceptDynamicComponent
+    context_->SetIsFormRender(false);
+    context_->OnHide();
+
+    context_->weakFrontend_ = weakFrontendBackup;
+    context_->SetIsFormRender(formBackup);
+    AceApplicationInfo::GetInstance().SetAccessibilityEnabled(accessibilityEnableBackup);
+}
 } // namespace NG
 } // namespace OHOS::Ace

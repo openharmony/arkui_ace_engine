@@ -606,7 +606,6 @@ void ParseDragInteractionOptions(ani_env* env, ArkUIDragPreviewOption& previewOp
     SetPropertyValueByName(env, dragInteractionOptions, "defaultAnimationBeforeLifting",
         previewOptions.defaultAnimationBeforeLifting);
     SetPropertyValueByName(env, dragInteractionOptions, "enableHapticFeedback", previewOptions.enableHapticFeedback);
-    SetPropertyValueByName(env, dragInteractionOptions, "isDragPreviewEnabled", previewOptions.isDragPreviewEnabled);
     SetPropertyValueByName(env, dragInteractionOptions, "enableEdgeAutoScroll", previewOptions.enableEdgeAutoScroll);
     SetPropertyValueByName(env, dragInteractionOptions, "isLiftingDisabled", previewOptions.isLiftingDisabled);
 }
@@ -645,12 +644,12 @@ ani_object ExtractorFromPtrToUnifiedData(ani_env* env, [[maybe_unused]] ani_obje
     if (!modifier || !modifier->getDragAniModifier() || !env) {
         return result_obj;
     }
-    auto unifiedDataPtr = reinterpret_cast<OHOS::UDMF::UnifiedData*>(
-        modifier->getDragAniModifier()->getUnifiedData(pointer));
+    auto unifiedDataPtr = modifier->getDragAniModifier()->getUnifiedData(pointer).GetSharedPtr();
     if (!unifiedDataPtr) {
         return result_obj;
     }
-    std::shared_ptr<OHOS::UDMF::UnifiedData> unifiedData(unifiedDataPtr);
+    std::shared_ptr<OHOS::UDMF::UnifiedData> unifiedData =
+        std::static_pointer_cast<OHOS::UDMF::UnifiedData>(unifiedDataPtr);
     auto unifiedData_obj = OHOS::UDMF::AniConverter::WrapUnifiedData(env, unifiedData);
     ani_boolean isUnifiedData;
     ani_class dataClass;

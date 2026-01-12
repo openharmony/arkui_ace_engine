@@ -32,6 +32,10 @@ const testList: TestListOption[] = [
   { title: '自定义弹窗_基本功能_6', url: 'pages/components/dialog/page/CustomDialogTestLevel0_6' },
   { title: '自定义弹窗_基本功能_模糊效果', url: 'pages/components/dialog/page/CustomDialogTestLevel0_7' },
   { title: '自定义弹窗_基本功能_避让键盘', url: 'pages/components/dialog/page/CustomDialogTestLevel0_8' },
+  { title: '自定义弹窗_基本功能_层级', url: 'pages/components/dialog/page/CustomDialogTestLevel0_9' },
+  { title: '自定义弹窗_组合场景', url: 'pages/components/dialog/page/CustomDialogTestLevel1_0' },
+  { title: '自定义弹窗_组合场景_1', url: 'pages/components/dialog/page/CustomDialogTestLevel1_1' },
+  { title: '自定义弹窗_组合场景_2_输入法/焦点', url: 'pages/components/dialog/page/CustomDialogTestLevel1_2' },
 ]
 
 @Entry

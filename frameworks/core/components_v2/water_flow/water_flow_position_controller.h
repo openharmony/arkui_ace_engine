@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,7 +20,7 @@
 #include "core/components/scroll/scrollable.h"
 
 namespace OHOS::Ace::V2 {
-class ACE_EXPORT WaterFlowPositionController : public ScrollController {
+class ACE_FORCE_EXPORT WaterFlowPositionController : public ScrollController {
     DECLARE_ACE_TYPE(WaterFlowPositionController, ScrollController);
 
 public:

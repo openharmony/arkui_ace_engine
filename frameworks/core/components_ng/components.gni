@@ -116,6 +116,7 @@ template("build_component_ng") {
           "//foundation/graphic/graphic_2d/utils/color_manager/export",
           "//foundation/multimedia/image_framework/interfaces/innerkits/include",
           "//base/hiviewdfx/hilog/interfaces/native/innerkits/include",
+          "//base/hiviewdfx/hitrace/interfaces/native/innerkits/include/hitrace_meter",
           "//foundation/graphic/graphic_2d/rosen/modules/2d_engine",
           "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/include",
           "//foundation/graphic/graphic_2d/rosen/modules/2d_graphics/src",
@@ -216,7 +217,9 @@ template("build_component_ng") {
             "ets_runtime:libark_jsruntime",
             "napi:ace_napi",
           ]
-          defines += [ "INCLUDE_GENERATED_SOURCES" ]
+          if (!ace_engine_feature_wearable) {
+            defines += [ "INCLUDE_GENERATED_SOURCES" ]
+          }
         }
       }
 

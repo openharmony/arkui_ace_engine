@@ -117,6 +117,7 @@ export class GridRowModifier extends CommonMethodModifier implements GridRowAttr
         {
             this._onBreakpointChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onBreakpointChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onBreakpointChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -128,6 +129,7 @@ export class GridRowModifier extends CommonMethodModifier implements GridRowAttr
         {
             this._alignItems_0_flag = AttributeUpdaterFlag.UPDATE
             this._alignItems_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alignItems_0_flag = AttributeUpdaterFlag.SKIP

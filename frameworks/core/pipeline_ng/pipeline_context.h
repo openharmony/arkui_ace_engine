@@ -1377,6 +1377,17 @@ public:
         const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver) override;
 
     const RefPtr<InspectorOffscreenNodesMgr>& GetInspectorOffscreenNodesMgr();
+
+    void SetXComponentDisplayConstraintEnabled(bool isEnable) override
+    {
+        xComponentDisplayConstraintEnabled_ = isEnable;
+    }
+
+    bool GetXComponentDisplayConstraintEnabled() override
+    {
+        return xComponentDisplayConstraintEnabled_;
+    }
+
 protected:
     void StartWindowSizeChangeAnimate(int32_t width, int32_t height, WindowSizeChangeReason type,
         const std::shared_ptr<Rosen::RSTransaction>& rsTransaction = nullptr,
@@ -1748,6 +1759,7 @@ private:
     std::set<WeakPtr<NG::UINode>> needRenderForLayoutChildrenNodes_;
     std::optional<bool> isRecycledInvisibleImageMemory_ = std::nullopt;
     RefPtr<InspectorOffscreenNodesMgr> inspectorOffscreenNodesMgr_;
+    bool xComponentDisplayConstraintEnabled_ = false;
 };
 
 /**

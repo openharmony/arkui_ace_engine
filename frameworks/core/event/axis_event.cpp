@@ -22,14 +22,49 @@ namespace OHOS::Ace {
 AxisEvent AxisEvent::CreateScaleEvent(float scale) const
 {
     if (NearZero(scale)) {
-        return { id, x, y, screenX, screenY, globalDisplayX, globalDisplayY, verticalAxis, horizontalAxis,
-            pinchAxisScale, rotateAxisAngle, isRotationEvent, action, time, deviceId, sourceType, sourceTool,
-            pointerEvent, pressedCodes, targetDisplayId, originalId, isInjected, scrollStep, axes };
+        return CloneWith(1);
     }
-    return { id, x / scale, y / scale, screenX / scale, screenY / scale, globalDisplayX / scale, globalDisplayY / scale,
-        verticalAxis, horizontalAxis, pinchAxisScale, rotateAxisAngle, isRotationEvent, action, time, deviceId,
-        sourceType, sourceTool, pointerEvent, pressedCodes, targetDisplayId, originalId, isInjected, scrollStep, axes };
+    return CloneWith(scale);
 }
+
+AxisEvent AxisEvent::CloneWith(float scale) const
+    {
+        if (NearEqual(scale, 0.f)) {
+            return {};
+        }
+        AxisEvent axisEvent;
+        axisEvent.id = id;
+        axisEvent.x = x / scale;
+        axisEvent.y = y / scale;
+        axisEvent.screenX = screenX / scale;
+        axisEvent.screenY = screenY / scale;
+        axisEvent.globalDisplayX = globalDisplayX / scale;
+        axisEvent.globalDisplayY = globalDisplayY / scale;
+        axisEvent.verticalAxis = verticalAxis;
+        axisEvent.horizontalAxis = horizontalAxis;
+        axisEvent.pinchAxisScale = pinchAxisScale;
+        axisEvent.rotateAxisAngle = rotateAxisAngle;
+        axisEvent.isRotationEvent = isRotationEvent;
+        axisEvent.action = action;
+        axisEvent.time = time;
+        axisEvent.deviceId = deviceId;
+        axisEvent.sourceType = sourceType;
+        axisEvent.sourceTool = sourceTool;
+        axisEvent.pointerEvent = pointerEvent;
+        axisEvent.touchEventId = touchEventId;
+        axisEvent.pressedCodes = pressedCodes;
+        axisEvent.targetDisplayId = targetDisplayId;
+        axisEvent.originalId = originalId;
+        axisEvent.isInjected = isInjected;
+        axisEvent.scrollStep = scrollStep;
+        axisEvent.axes = axes;
+        axisEvent.passThrough = passThrough;
+        // Only set postEventNodeId when the event supports passThrough
+        if (passThrough) {
+            axisEvent.postEventNodeId = postEventNodeId;
+        }
+        return axisEvent;
+    }
 
 Offset AxisEvent::GetOffset() const
 {

@@ -1624,6 +1624,8 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void SetBackground(std::function<void()>&& buildFunc) override;
+    void SetBackgroundWithResourceObj(
+        std::function<void()>&& buildFunc, const RefPtr<ResourceObject>& resObj) override;
     void SetBackgroundAlign(const Alignment& align) override
     {
         NG::ViewAbstract::SetBackgroundAlign(align);
@@ -2001,7 +2003,7 @@ public:
         const std::string& key, EdgesParam& edges, const RefPtr<ResourceObject>& resObj);
     static void RegisterEdgesWidthResObj(
         const std::string& key, NG::BorderWidthProperty& borderWidth, const RefPtr<ResourceObject>& resObj);
-    static void RegisterEdgeMarginsResObj(
+    ACE_FORCE_EXPORT static void RegisterEdgeMarginsResObj(
         const std::string& key, NG::MarginProperty& margins, const RefPtr<ResourceObject>& resObj);
     static void RegisterLocalizedBorderColor(
         const std::string& key, NG::BorderColorProperty& borderColors, const RefPtr<ResourceObject>& resObj);

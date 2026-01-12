@@ -1495,4 +1495,38 @@ HWTEST_F(XComponentTestNg, XComponentImageAnalyzerTest, TestSize.Level1)
     pattern->imageAnalyzerManager_ = nullptr;
     EXPECT_FALSE(pattern->IsSupportImageAnalyzerFeature());
 }
+
+/**
+ * @tc.name: AddLayoutTask001
+ * @tc.desc: LayoutTask
+ * @tc.type: FUNC
+ */
+HWTEST_F(XComponentTestNg, AddLayoutTask001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. set type = XCOMPONENT_COMPONENT_TYPE_VALUE and call CreateXComponentNode
+     * @tc.expected: xcomponent frameNode create successfully
+     */
+    testProperty.xcType = XCOMPONENT_COMPONENT_TYPE_VALUE;
+    auto frameNode = CreateXComponentNode(testProperty);
+    ASSERT_TRUE(frameNode);
+    auto pattern = frameNode->GetPattern<XComponentPattern>();
+    ASSERT_TRUE(pattern);
+    pattern->surfaceId_ = SURFACE_ID;
+    pattern->drawSize_ = SizeT<float>(400.0f, 400.0f);
+    pattern->surfaceSize_ = MAX_SIZE;
+    
+    Rect displayWindowRectInfo = Rect(0, 0, 400, 400);
+    MockPipelineContext::pipeline_->SetDisplayWindowRectInfo(displayWindowRectInfo);
+    
+    /**
+     * @tc.steps: step2. call EnableImageAnalyzer
+     * @tc.expected: IsSupportImageAnalyzerFeature() return right value
+     */
+    pattern->AddLayoutTask();
+ 
+    EXPECT_EQ(pattern->surfaceSize_.Width(), 400.0f);
+    EXPECT_EQ(pattern->surfaceSize_.Height(), 400.0f);
+}
+
 } // namespace OHOS::Ace::NG

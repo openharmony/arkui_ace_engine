@@ -16,14 +16,14 @@
 #include "base/utils/system_properties.h"
 
 #include <regex>
+#include <unistd.h>
 
 #include "display_info.h"
 #include "display_manager.h"
-#include "locale_config.h"
+#include "locale_config.h" // should move to localization.h
 #include "parameter.h"
 #include "parameters.h"
 
-#include "adapter/ohos/entrance/ace_container.h"
 #include "adapter/ohos/osal/window_utils.h"
 #include "core/common/ace_application_info.h"
 
@@ -206,9 +206,6 @@ bool IsCacheNavigationNodeEnable()
 
 bool IsHookModeEnabled()
 {
-#ifdef PREVIEW
-    return false;
-#endif
     const int bufferLen = 128;
     char paramOutBuf[bufferLen] = { 0 };
     constexpr char hook_mode[] = "startup:";
@@ -712,8 +709,7 @@ std::string SystemProperties::paramDeviceType_ = InitSysDeviceType();
 int32_t SystemProperties::mcc_ = MCC_UNDEFINED;
 int32_t SystemProperties::mnc_ = MNC_UNDEFINED;
 ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
-LongScreenType SystemProperties::LongScreen_ { LongScreenType::NOT_LONG };
-bool SystemProperties::unZipHap_ = true;
+std::atomic<bool> SystemProperties::unZipHap_(true);
 ACE_WEAK_SYM bool SystemProperties::rosenBackendEnabled_ = IsRosenBackendEnabled();
 ACE_WEAK_SYM bool SystemProperties::isHookModeEnabled_ = IsHookModeEnabled();
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(IsDebugBoundaryEnabled() && developerModeOn_);
@@ -723,8 +719,6 @@ bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
-std::string SystemProperties::configDeviceType_ = "";
-ACE_WEAK_SYM bool SystemProperties::transformEnabled_ = IsMouseTransformEnable();
 ACE_WEAK_SYM bool SystemProperties::compatibleInputTransEnabled_ = IsCompatibleInputTransEnabled();
 float SystemProperties::scrollCoefficients_ = ReadScrollCoefficients();
 ACE_WEAK_SYM DebugFlags SystemProperties::debugFlags_ = GetDebugFlags();
@@ -783,6 +777,9 @@ bool SystemProperties::prebuildInMultiFrameEnabled_ = IsPrebuildInMultiFrameEnab
 bool SystemProperties::isOpenYuvDecode_ = false;
 bool SystemProperties::isPCMode_ = false;
 bool SystemProperties::isAutoFillSupport_ = false;
+
+std::once_flag SystemProperties::getSysPropertiesFlag_;
+
 bool SystemProperties::IsOpIncEnable()
 {
     return opincEnabled_;
@@ -906,65 +903,78 @@ void SystemProperties::InitDeviceInfo(
     resolution_ = resolution;
     deviceWidth_ = deviceWidth;
     deviceHeight_ = deviceHeight;
-    needAvoidWindow_ = system::GetBoolParameter(PROPERTY_NEED_AVOID_WINDOW, false);
-    debugEnabled_ = IsDebugEnabled();
-    transformEnabled_ = IsMouseTransformEnable();
-    compatibleInputTransEnabled_ = IsCompatibleInputTransEnabled();
-    debugFlags_ = GetDebugFlags();
-    layoutDetectEnabled_ = IsLayoutDetectEnabled();
-    multiInstanceEnabled_ = IsMultiInstanceEnabled();
-    svgTraceEnable_ = IsSvgTraceEnabled();
-    layoutTraceEnable_.store(IsLayoutTraceEnabled() && developerModeOn_);
-    attributeSetTraceEnable_.store(IsAttributeSetTraceEnabled() && developerModeOn_);
-    traceInputEventEnable_.store(IsTraceInputEventEnabled() && developerModeOn_);
-    stateManagerEnable_.store(IsStateManagerEnable());
-    buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
-    dynamicDetectionTraceEnable_ = IsDynamicDetectionTraceEnabled();
-    syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
-    measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
-    safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
-    vsyncModeTraceEnable_ = IsVsyncModeDebugTraceEnabled();
-    pixelRoundEnable_ = IsPixelRoundEnabled();
-    accessibilityEnabled_ = IsAccessibilityEnabled();
-    canvasDebugMode_ = ReadCanvasDebugMode();
-    safeRefactorMode_ = ReadSafeRefactorMode();
-    isHookModeEnabled_ = IsHookModeEnabled();
-    debugAutoUIEnabled_ = system::GetParameter(ENABLE_DEBUG_AUTOUI_KEY, "false") == "true";
-    debugOffsetLogEnabled_ = system::GetParameter(ENABLE_DEBUG_OFFSET_LOG_KEY, "false") == "true";
-    downloadByNetworkEnabled_ = system::GetParameter(ENABLE_DOWNLOAD_BY_NETSTACK_KEY, "true") == "true";
-    recycleImageEnabled_ = system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "false") == "true";
-    animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
-    pageTransitionFrzEnabled_ = system::GetBoolParameter("const.arkui.pagetransitionfreeze", false);
-    forcibleLandscapeEnabled_ = system::GetBoolParameter("const.settings.forcible_landscape_enable", false);
-    softPagetransition_ = system::GetBoolParameter("const.arkui.softPagetransition", false);
-    WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
-    resourceDecoupling_ = IsResourceDecoupling();
-    configChangePerform_ = configChangePerform_ || IsConfigChangePerform();
-    navigationBlurEnabled_ = IsNavigationBlurEnabled();
-    arkUIHookEnabled_ = IsArkUIHookEnabled();
-    gridCacheEnabled_ = IsGridCacheEnabled();
-    gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
-    sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
-    acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
-    faultInjectEnabled_  = IsFaultInjectEnabled();
-    windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
-    taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
-    formSkeletonBlurEnabled_ = system::GetBoolParameter("const.form.skeleton_view.blur_style_enable", true);
-    formSharedImageCacheThreshold_ =
-        system::GetIntParameter("const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
-    syncLoadEnabled_ = system::GetBoolParameter("persist.ace.scrollable.syncload.enable", false);
-    whiteBlockEnabled_ = system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
-    previewStatus_ = system::GetIntParameter<int32_t>("const.arkui.previewStatus", 0);
     if (isRound_) {
         screenShape_ = ScreenShape::ROUND;
     } else {
         screenShape_ = ScreenShape::NOT_ROUND;
     }
-    InitDeviceTypeBySystemProperty();
-    GetLayoutBreakpoints(widthLayoutBreakpoints_, heightLayoutBreakpoints_);
-    isPCMode_ = system::GetParameter("persist.sceneboard.ispcmode", "false") == "true";
-    isAutoFillSupport_ = system::GetBoolParameter("const.arkui.autoFillSupport", false);
-    isOpenYuvDecode_ = ReadIsOpenYuvDecode();
+}
+
+void SystemProperties::ReadSystemParametersCallOnce()
+{
+    std::call_once(getSysPropertiesFlag_, [] () {
+        developerModeOn_ = IsDeveloperModeOn();
+        debugEnabled_ = IsDebugEnabled();
+        debugFlags_ = GetDebugFlags();
+        multiInstanceEnabled_ = IsMultiInstanceEnabled();
+        layoutDetectEnabled_ = IsLayoutDetectEnabled();
+        svgTraceEnable_ = IsSvgTraceEnabled();
+        buildTraceEnable_ = IsBuildTraceEnabled() && developerModeOn_;
+        dynamicDetectionTraceEnable_ = IsDynamicDetectionTraceEnabled();
+        syncDebugTraceEnable_ = IsSyncDebugTraceEnabled();
+        measureDebugTraceEnable_ = IsMeasureDebugTraceEnabled();
+        vsyncModeTraceEnable_ = IsVsyncModeDebugTraceEnabled();
+        safeAreaDebugTraceEnable_ = IsSafeAreaDebugTraceEnabled();
+        pixelRoundEnable_ = IsPixelRoundEnabled();
+        accessibilityEnabled_ = IsAccessibilityEnabled();
+        canvasDebugMode_ = ReadCanvasDebugMode();
+        safeRefactorMode_ = ReadSafeRefactorMode();
+        isHookModeEnabled_ = IsHookModeEnabled();
+        debugAutoUIEnabled_ = IsDebugAutoUIEnabled();
+        debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
+        downloadByNetworkEnabled_ = IsDownloadByNetworkDisabled();
+        recycleImageEnabled_ = IsRecycleImageEnabled();
+        pageTransitionFrzEnabled_ = system::GetBoolParameter("const.arkui.pagetransitionfreeze", false);
+        forcibleLandscapeEnabled_ = system::GetBoolParameter("const.settings.forcible_landscape_enable", false);
+        softPagetransition_ = system::GetBoolParameter("const.arkui.softPagetransition", false);
+        configChangePerform_ = configChangePerform_ || IsConfigChangePerform();
+        navigationBlurEnabled_ = IsNavigationBlurEnabled();
+        acePerformanceMonitorEnable_.store(IsAcePerformanceMonitorEnabled());
+        layoutTraceEnable_.store(IsLayoutTraceEnabled() && developerModeOn_);
+        attributeSetTraceEnable_.store(IsAttributeSetTraceEnabled() && developerModeOn_);
+        traceInputEventEnable_.store(IsTraceInputEventEnabled() && developerModeOn_);
+        stateManagerEnable_.store(IsStateManagerEnable());
+        arkUIHookEnabled_ = IsArkUIHookEnabled();
+        resourceDecoupling_ = IsResourceDecoupling();
+        gridCacheEnabled_ = IsGridCacheEnabled();
+        gridIrregularLayoutEnable_ = IsGridIrregularLayoutEnabled();
+        sideBarContainerBlurEnable_ = IsSideBarContainerBlurEnable();
+        faultInjectEnabled_  = IsFaultInjectEnabled();
+        windowRectResizeEnabled_ = IsWindowRectResizeEnabled();
+        taskPriorityAdjustmentEnable_ = IsTaskPriorityAdjustmentEnable();
+        syncLoadEnabled_ = system::GetBoolParameter("persist.ace.scrollable.syncload.enable", false);
+        whiteBlockEnabled_ = system::GetParameter("persist.resourceschedule.whiteblock", "0") == "1";
+        needAvoidWindow_ = system::GetBoolParameter(PROPERTY_NEED_AVOID_WINDOW, false);
+        compatibleInputTransEnabled_ = IsCompatibleInputTransEnabled();
+        previewStatus_ = system::GetIntParameter<int32_t>("const.arkui.previewStatus", 0);
+        isPCMode_ = system::GetParameter("persist.sceneboard.ispcmode", "false") == "true";
+        isAutoFillSupport_ = system::GetBoolParameter("const.arkui.autoFillSupport", false);
+        isOpenYuvDecode_ = ReadIsOpenYuvDecode();
+
+        // watch animation scale
+        animationScale_ = std::atof(system::GetParameter(ANIMATION_SCALE_KEY, "1").c_str());
+        WatchParameter(ANIMATION_SCALE_KEY, OnAnimationScaleChanged, nullptr);
+
+        // init layout breakpoints
+        GetLayoutBreakpoints(widthLayoutBreakpoints_, heightLayoutBreakpoints_);
+
+        // init form sys params
+        formSkeletonBlurEnabled_ = system::GetBoolParameter("const.form.skeleton_view.blur_style_enable", true);
+        formSharedImageCacheThreshold_ = system::GetIntParameter(
+            "const.form.shared_image.cache_threshold", DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD);
+
+        InitDeviceTypeBySystemProperty();
+    });
 }
 
 ACE_WEAK_SYM void SystemProperties::SetDeviceOrientation(int32_t orientation)
@@ -1220,14 +1230,6 @@ void SystemProperties::EnableSystemParameterDebugStatemgrCallback(const char* ke
     }
 }
 
-void SystemProperties::EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context)
-{
-    bool isDebugBoundary = strcmp(value, "true") == 0;
-    SetDebugBoundaryEnabled(isDebugBoundary);
-    auto container = reinterpret_cast<Platform::AceContainer*>(context);
-    CHECK_NULL_VOID(container);
-    container->RenderLayoutBoundary(isDebugBoundary);
-}
 
 void SystemProperties::EnableSystemParameterPerformanceMonitorCallback(const char* key, const char* value,
     void* context)
@@ -1235,25 +1237,6 @@ void SystemProperties::EnableSystemParameterPerformanceMonitorCallback(const cha
     if (strcmp(value, "true") == 0 || strcmp(value, "false") == 0) {
         SetPerformanceMonitorEnabled(strcmp(value, "true") == 0);
     }
-}
-
-void SystemProperties::OnFocusActiveChanged(const char* key, const char* value, void* context)
-{
-    bool focusCanBeActive = true;
-    if (value && strcmp(value, "0") == 0) {
-        focusCanBeActive = false;
-    }
-    if (focusCanBeActive != focusCanBeActive_) {
-        SetFocusCanBeActive(focusCanBeActive);
-        if (!focusCanBeActive) {
-            auto container = reinterpret_cast<Platform::AceContainer*>(context);
-            CHECK_NULL_VOID(container);
-            ContainerScope scope(container->GetInstanceId());
-            container->SetIsFocusActive(focusCanBeActive);
-        }
-        LOGI("focusCanBeActive turns to %{public}d", focusCanBeActive);
-    }
-    return;
 }
 
 float SystemProperties::GetDefaultResolution()
@@ -1392,7 +1375,8 @@ ACE_WEAK_SYM float SystemProperties::GetScrollCoefficients()
 
 ACE_WEAK_SYM bool SystemProperties::GetTransformEnabled()
 {
-    return transformEnabled_;
+    static bool transformEnabled = IsMouseTransformEnable();
+    return transformEnabled;
 }
 
 ACE_WEAK_SYM bool SystemProperties::GetCompatibleInputTransEnabled()

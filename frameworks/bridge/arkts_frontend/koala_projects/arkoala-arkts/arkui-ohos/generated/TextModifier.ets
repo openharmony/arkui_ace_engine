@@ -29,7 +29,7 @@ import { Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptiveP
 import { Resource } from "global.resource"
 import { LengthMetrics } from "arkui.Graphics"
 import { DecorationStyleInterface } from "./component/styledString"
-import { TextDataDetectorConfig, EditMenuOptions, TextDirection, FontSettingOptions, SelectedDragPreviewStyle } from "./component/textCommon"
+import { TextDataDetectorConfig, TextVerticalAlign, EditMenuOptions, TextDirection, FontSettingOptions, SelectedDragPreviewStyle } from "./component/textCommon"
 import { CustomBuilder } from "./component/builder"
 import { SelectionMenuOptions } from "./component/richEditor"
 import { TextModifier } from "arkui.TextModifier"
@@ -66,6 +66,8 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
     _lineSpacing_0_0value?: LengthMetrics | undefined
     _textAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _textAlign_0_0value?: TextAlign | undefined
+    _textVerticalAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _textVerticalAlign_0_0value?: TextVerticalAlign | undefined
     _lineHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _lineHeight_0_0value?: double | string | Resource | undefined
     _textOverflow_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -313,6 +315,24 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 default: {
                     this._textAlign_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setTextAlignAttribute((undefined as TextAlign | undefined));
+                }
+            }
+        }
+        if (this._textVerticalAlign_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._textVerticalAlign_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setTextVerticalAlignAttribute((this._textVerticalAlign_0_0value as TextVerticalAlign | undefined));
+                    this._textVerticalAlign_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._textVerticalAlign_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._textVerticalAlign_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setTextVerticalAlignAttribute((undefined as TextVerticalAlign | undefined));
                 }
             }
         }
@@ -1139,6 +1159,19 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
                 }
             }
         }
+        if (modifier._textVerticalAlign_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._textVerticalAlign_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.textVerticalAlign(modifier._textVerticalAlign_0_0value);
+                    break;
+                }
+                default: {
+                    this.textVerticalAlign((undefined as TextVerticalAlign | undefined));
+                }
+            }
+        }
         if (modifier._lineHeight_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._lineHeight_0_flag) {
@@ -1652,6 +1685,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1663,6 +1697,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1674,6 +1709,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._minFontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1685,6 +1721,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._maxFontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxFontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxFontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1696,6 +1733,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
             this._minFontScale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.SKIP
@@ -1707,6 +1745,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxFontScale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.SKIP
@@ -1718,6 +1757,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -1729,6 +1769,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._lineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
             this._lineSpacing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._lineSpacing_0_flag = AttributeUpdaterFlag.SKIP
@@ -1740,9 +1781,21 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._textAlign_0_flag = AttributeUpdaterFlag.UPDATE
             this._textAlign_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textAlign_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    textVerticalAlign(value: TextVerticalAlign | undefined): this {
+        if (((this._textVerticalAlign_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._textVerticalAlign_0_flag = AttributeUpdaterFlag.UPDATE
+            this._textVerticalAlign_0_0value = value
+        } else
+        {
+            this._textVerticalAlign_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -1751,6 +1804,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._lineHeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._lineHeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._lineHeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -1762,6 +1816,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._textOverflow_0_flag = AttributeUpdaterFlag.UPDATE
             this._textOverflow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textOverflow_0_flag = AttributeUpdaterFlag.SKIP
@@ -1773,6 +1828,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontFamily_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.SKIP
@@ -1784,6 +1840,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxLines_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxLines_0_flag = AttributeUpdaterFlag.SKIP
@@ -1795,6 +1852,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._decoration_0_flag = AttributeUpdaterFlag.UPDATE
             this._decoration_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._decoration_0_flag = AttributeUpdaterFlag.SKIP
@@ -1806,6 +1864,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.UPDATE
             this._letterSpacing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.SKIP
@@ -1817,6 +1876,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._textCase_0_flag = AttributeUpdaterFlag.UPDATE
             this._textCase_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textCase_0_flag = AttributeUpdaterFlag.SKIP
@@ -1828,6 +1888,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._baselineOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._baselineOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._baselineOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -1839,6 +1900,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._copyOption_0_flag = AttributeUpdaterFlag.UPDATE
             this._copyOption_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._copyOption_0_flag = AttributeUpdaterFlag.SKIP
@@ -1850,6 +1912,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._draggable_0_flag = AttributeUpdaterFlag.UPDATE
             this._draggable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._draggable_0_flag = AttributeUpdaterFlag.SKIP
@@ -1861,6 +1924,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._textShadow_0_flag = AttributeUpdaterFlag.UPDATE
             this._textShadow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textShadow_0_flag = AttributeUpdaterFlag.SKIP
@@ -1872,6 +1936,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._heightAdaptivePolicy_0_flag = AttributeUpdaterFlag.UPDATE
             this._heightAdaptivePolicy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._heightAdaptivePolicy_0_flag = AttributeUpdaterFlag.SKIP
@@ -1883,6 +1948,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._textIndent_0_flag = AttributeUpdaterFlag.UPDATE
             this._textIndent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textIndent_0_flag = AttributeUpdaterFlag.SKIP
@@ -1894,6 +1960,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._wordBreak_0_flag = AttributeUpdaterFlag.UPDATE
             this._wordBreak_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._wordBreak_0_flag = AttributeUpdaterFlag.SKIP
@@ -1905,6 +1972,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._lineBreakStrategy_0_flag = AttributeUpdaterFlag.UPDATE
             this._lineBreakStrategy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._lineBreakStrategy_0_flag = AttributeUpdaterFlag.SKIP
@@ -1916,6 +1984,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._onCopy_0_flag = AttributeUpdaterFlag.UPDATE
             this._onCopy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onCopy_0_flag = AttributeUpdaterFlag.SKIP
@@ -1927,6 +1996,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._caretColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._caretColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._caretColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1938,6 +2008,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedBackgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1949,6 +2020,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._ellipsisMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._ellipsisMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._ellipsisMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1960,6 +2032,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._enableDataDetector_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableDataDetector_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableDataDetector_0_flag = AttributeUpdaterFlag.SKIP
@@ -1971,6 +2044,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.UPDATE
             this._dataDetectorConfig_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._dataDetectorConfig_0_flag = AttributeUpdaterFlag.SKIP
@@ -1982,6 +2056,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onTextSelectionChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1993,6 +2068,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._fontFeature_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontFeature_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontFeature_0_flag = AttributeUpdaterFlag.SKIP
@@ -2004,6 +2080,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._marqueeOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._marqueeOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._marqueeOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -2015,6 +2092,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._onMarqueeStateChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onMarqueeStateChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onMarqueeStateChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -2026,6 +2104,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._privacySensitive_0_flag = AttributeUpdaterFlag.UPDATE
             this._privacySensitive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._privacySensitive_0_flag = AttributeUpdaterFlag.SKIP
@@ -2037,6 +2116,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._textSelectable_0_flag = AttributeUpdaterFlag.UPDATE
             this._textSelectable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textSelectable_0_flag = AttributeUpdaterFlag.SKIP
@@ -2048,6 +2128,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._editMenuOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._editMenuOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._editMenuOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -2059,6 +2140,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._halfLeading_0_flag = AttributeUpdaterFlag.UPDATE
             this._halfLeading_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._halfLeading_0_flag = AttributeUpdaterFlag.SKIP
@@ -2070,6 +2152,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableHapticFeedback_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
@@ -2081,6 +2164,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.UPDATE
             this._compressLeadingPunctuation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.SKIP
@@ -2092,6 +2176,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._includeFontPadding_0_flag = AttributeUpdaterFlag.UPDATE
             this._includeFontPadding_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._includeFontPadding_0_flag = AttributeUpdaterFlag.SKIP
@@ -2103,6 +2188,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
             this._fallbackLineSpacing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
@@ -2114,6 +2200,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedDragPreviewStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -2125,6 +2212,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
         {
             this._textDirection_0_flag = AttributeUpdaterFlag.UPDATE
             this._textDirection_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textDirection_0_flag = AttributeUpdaterFlag.SKIP
@@ -2137,6 +2225,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             this._font_0_flag = AttributeUpdaterFlag.UPDATE
             this._font_0_0value = fontValue
             this._font_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._font_0_flag = AttributeUpdaterFlag.SKIP
@@ -2149,6 +2238,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontWeight_0_0value = weight
             this._fontWeight_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -2161,6 +2251,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             this._selection_0_flag = AttributeUpdaterFlag.UPDATE
             this._selection_0_0value = selectionStart
             this._selection_0_1value = selectionEnd
+            this._state.fireChange()
         } else
         {
             this._selection_0_flag = AttributeUpdaterFlag.SKIP
@@ -2175,6 +2266,7 @@ export class TextModifier extends CommonMethodModifier implements TextAttribute,
             this._bindSelectionMenu_0_1value = content
             this._bindSelectionMenu_0_2value = responseType
             this._bindSelectionMenu_0_3value = options
+            this._state.fireChange()
         } else
         {
             this._bindSelectionMenu_0_flag = AttributeUpdaterFlag.SKIP

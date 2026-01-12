@@ -456,4 +456,10 @@ void RosenWindow::SetDVSyncUpdate(uint64_t dvsyncTime)
     CHECK_NULL_VOID(rsUIDirector_);
     rsUIDirector_->SetDVSyncUpdate(dvsyncTime);
 }
+
+void RosenWindow::FlushVsync()
+{
+    CHECK_NULL_VOID(rsWindow_);
+    rsWindow_->FlushVsync();
+}
 } // namespace OHOS::Ace::NG

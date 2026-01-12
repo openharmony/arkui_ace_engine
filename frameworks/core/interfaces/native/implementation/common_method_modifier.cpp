@@ -759,13 +759,13 @@ auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_
     auto optParam = Converter::OptConvert<NG::MenuParam>(menuOption->previewAnimationOptions);
     if (optParam) {
         menuParam.previewAnimationOptions = optParam->previewAnimationOptions;
+        menuParam.hasPreviewTransitionEffect = optParam->hasPreviewTransitionEffect;
+        menuParam.previewTransition = optParam->previewTransition;
         if (menuParam.previewMode != MenuPreviewMode::CUSTOM ||
             optParam->hasPreviewTransitionEffect || optParam->hasTransitionEffect ||
             menuParam.contextMenuRegisterType == NG::ContextMenuRegisterType::CUSTOM_TYPE) {
             return;
         }
-        menuParam.hasPreviewTransitionEffect = optParam->hasPreviewTransitionEffect;
-        menuParam.previewTransition = optParam->previewTransition;
         menuParam.hoverImageAnimationOptions = optParam->hoverImageAnimationOptions;
         menuParam.isShowHoverImage = optParam->isShowHoverImage;
         menuParam.hoverScaleInterruption = optParam->hoverScaleInterruption;
@@ -1534,7 +1534,7 @@ OHOS::Ace::Color Convert(const Ark_ColorMetrics& src)
     uint8_t blue = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.blue_));
     uint8_t alpha = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.alpha_));
     auto dst = Color::FromARGB(alpha, red, green, blue);
-    dst.SetColorSpace(static_cast<ColorSpace>(src.colorSpace_));
+    dst.SetColorSpace(Converter::OptConvert<ColorSpace>(src.colorSpace_).value_or(ColorSpace::SRGB));
     return dst;
 }
 
@@ -1609,9 +1609,15 @@ template<>
 RotateAngleOpt Convert(const Ark_RotateAngleOptions& src)
 {
     RotateAngleOpt options;
-    options.vec4f.emplace_back(OptConvert<float>(src.angleX));
-    options.vec4f.emplace_back(OptConvert<float>(src.angleY));
-    options.vec4f.emplace_back(OptConvert<float>(src.angleZ));
+    std::optional<float> angleX = 0.0f;
+    std::optional<float> angleY = 0.0f;
+    std::optional<float> angleZ = 0.0f;
+    ConvertAngleWithDefault(src.angleX, angleX, 0.0f);
+    ConvertAngleWithDefault(src.angleY, angleY, 0.0f);
+    ConvertAngleWithDefault(src.angleZ, angleZ, 0.0f);
+    options.vec4f.emplace_back(angleX);
+    options.vec4f.emplace_back(angleY);
+    options.vec4f.emplace_back(angleZ);
     options.vec4f.emplace_back(OptConvert<float>(src.perspective));
 
     auto centerX =  OptConvert<Dimension>(src.centerX);
@@ -2085,6 +2091,31 @@ NG::AccessibilityActionOptions Convert(const Ark_AccessibilityActionOptions& src
 {
     auto scrollStep = Converter::OptConvert<int32_t>(src.scrollStep).value_or(1);
     return AccessibilityActionOptions { .scrollStep = scrollStep };
+}
+
+template<>
+NG::AccessibilityGroupOptions Convert(const Ark_AccessibilityOptions& src)
+{
+    auto stateControllerByType = AccessibilityRoleType::ROLE_NONE;
+    auto stateTypePtr = Converter::GetOptPtr(&src.stateControllerRoleType);
+    if (stateTypePtr) {
+        stateControllerByType = static_cast<AccessibilityRoleType>(stateTypePtr.value());
+    }
+    auto actionControllerByType = AccessibilityRoleType::ROLE_NONE;
+    auto actionTypePtr = Converter::GetOptPtr(&src.actionControllerRoleType);
+    if (actionTypePtr) {
+        actionControllerByType = static_cast<AccessibilityRoleType>(actionTypePtr.value());
+    }
+
+    NG::AccessibilityGroupOptions groupOptions = {
+        .accessibilityTextPreferred = Converter::OptConvert<bool>(src.accessibilityPreferred).value_or(false),
+        .stateControllerByType = stateControllerByType,
+        .stateControllerByInspector = Converter::OptConvert<std::string>(src.stateControllerId).value_or(""),
+        .actionControllerByType = actionControllerByType,
+        .actionControllerByInspector = Converter::OptConvert<std::string>(src.actionControllerId).value_or(""),
+    };
+
+    return groupOptions;
 }
 
 void AssignArkValue(Ark_TouchTestInfo& dst, const TouchTestInfo& src, ConvContext *ctx)
@@ -2719,6 +2750,18 @@ void SetCompositingFilterImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::SetCompositingFilter(frameNode, ptrOpt.value());
 }
+void SetMaterialFilterImpl(Ark_NativePointer node,
+                           const Opt_uiEffect_Filter* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto ptrOpt = Converter::OptConvertPtr<OHOS::Rosen::Filter*>(value);
+    if (!ptrOpt || !(ptrOpt.value())) {
+        ViewAbstract::SetMaterialFilter(frameNode, nullptr);
+        return;
+    }
+    ViewAbstract::SetMaterialFilter(frameNode, ptrOpt.value());
+}
 void SetOpacityImpl(Ark_NativePointer node,
                     const Opt_Union_F64_Resource* value)
 {
@@ -2866,6 +2909,10 @@ void SetBorderRadius1Impl(Ark_NativePointer node, const Opt_Union_Length_BorderR
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG || frameNode->GetTag() == V2::TEXTAREA_ETS_TAG) {
+        TextFieldModifier::SetBorderRadiusImpl(node, value);
+        return;
+    }
     auto radiuses = Converter::OptConvertPtr<BorderRadiusProperty>(value);
     if (radiuses) {
         // Implement Reset value
@@ -3749,6 +3796,14 @@ void SetUseEffect0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     ViewAbstractModelStatic::SetUseEffect(frameNode, convValue, std::nullopt);
+}
+void SetUseUnionEffectImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ViewAbstract::SetUseUnion(frameNode, convValue.value_or(false));
 }
 void SetRenderGroupImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
@@ -5507,7 +5562,7 @@ void SetLinearGradientBlurImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto radius = Converter::OptConvertPtr<Dimension>(value);
+    auto radius = Converter::OptConvertPtr<float>(value);
     auto convValue = Converter::OptConvertPtr<NG::LinearGradientBlurPara>(options);
     Validator::ValidateNonNegative(radius);
     NG::LinearGradientBlurPara para(
@@ -5516,9 +5571,9 @@ void SetLinearGradientBlurImpl(Ark_NativePointer node,
         para = convValue.value();
     }
     if (radius.has_value()) {
-        para.blurRadius_ = radius.value();
+        para.blurRadius_ = CalcDimension(radius.value(), DimensionUnit::PX);
     } else {
-        para.blurRadius_ = Dimension(0.0, DimensionUnit::VP);
+        para.blurRadius_ = Dimension(0.0, DimensionUnit::PX);
     }
     ViewAbstractModelStatic::SetLinearGradientBlur(frameNode, std::optional<NG::LinearGradientBlurPara>(para));
 }
@@ -5693,25 +5748,31 @@ void SetBlendModeImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::SetBlendApplyType(frameNode, blendApplyType);
 }
 void SetAdvancedBlendModeImpl(Ark_NativePointer node,
-                              const Ark_Union_BlendMode_Blender* effect,
+                              const Opt_Union_BlendMode_Blender* effect,
                               const Opt_BlendApplyType* type)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(effect);
     BlendMode blendMode = BlendMode::NONE;
     BlendApplyType blendApplyType = BlendApplyType::FAST;
-    Converter::VisitUnionPtr(effect,
+    Converter::VisitUnionPtr(
+        effect,
         [&blendMode, &blendApplyType, frameNode](const Ark_BlendMode& value) {
             blendMode = Converter::OptConvert<BlendMode>(value).value_or(blendMode);
-            blendApplyType = BlendApplyType::OFFSCREEN;
             ViewAbstractModelStatic::SetBlendMode(frameNode, blendMode);
         },
-        [](const Ark_uiEffect_BrightnessBlender& value) {
-            LOGE("CommonMethodModifier::AdvancedBlendModeImpl Ark_uiEffect_BrightnessBlender is not supported yet.");
+        [frameNode](const Ark_uiEffect_BrightnessBlender& value) {
+            auto ptrOpt = Converter::OptConvert<OHOS::Rosen::Blender*>(value);
+            if (!ptrOpt || !(ptrOpt.value())) {
+                ViewAbstractModelStatic::SetBlender(frameNode, nullptr);
+                return;
+            }
+            ViewAbstractModelStatic::SetBlender(frameNode, ptrOpt.value());
         },
-        []() {}
-    );
+        [&blendMode, frameNode]() {
+            ViewAbstractModelStatic::SetBlendMode(frameNode, blendMode);
+            ViewAbstractModelStatic::SetBlender(frameNode, nullptr);
+        });
     std::optional<BlendApplyType> blendApplyTypeOpt = Converter::OptConvertPtr<BlendApplyType>(type);
     blendApplyType = blendApplyTypeOpt.value_or(blendApplyType);
     ViewAbstractModelStatic::SetBlendApplyType(frameNode, blendApplyType);
@@ -6069,7 +6130,7 @@ void SetBindContextMenu0Impl(Ark_NativePointer node,
     BindContextMenuBase(node, content, responseType, options, menuParam);
     BindContextMenuToSelectableItems(node);
 }
-void SetBindContextMenu1Impl(Ark_NativePointer node,
+void SetBindContextMenuWithResponseImpl(Ark_NativePointer node,
                              const Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType* content,
                              const Opt_ContextMenuOptions* options)
 {
@@ -6080,7 +6141,7 @@ void SetBindContextMenu1Impl(Ark_NativePointer node,
     BindContextMenuBoth(node, content, options, menuParam);
     BindContextMenuToSelectableItems(node);
 }
-void SetBindContextMenu2Impl(Ark_NativePointer node,
+void SetBindContextMenu1Impl(Ark_NativePointer node,
                              const Opt_Boolean* isShown,
                              const Opt_CustomNodeBuilder* content,
                              const Opt_ContextMenuOptions* options)
@@ -6385,11 +6446,15 @@ void SetAccessibilityGroupWithConfigImpl(Ark_NativePointer node,
     if (isGroupValue) {
         isGroupFlag = *isGroupValue;
     }
-    auto optValue = Converter::GetOptPtr(config);
-    auto accessibilityPreferred = optValue ?
-        Converter::OptConvert<bool>(optValue->accessibilityPreferred) : std::nullopt;
     ViewAbstractModelNG::SetAccessibilityGroup(frameNode, isGroupFlag);
+    auto optValue = Converter::GetOptPtr(config);
+    CHECK_NULL_VOID(optValue);
+    auto accessibilityPreferred =
+        Converter::OptConvert<bool>(optValue->accessibilityPreferred);
     ViewAbstractModelNG::SetAccessibilityTextPreferred(frameNode, accessibilityPreferred.value_or(false));
+
+    NG::AccessibilityGroupOptions groupOptions = Converter::Convert<NG::AccessibilityGroupOptions>(*optValue);
+    ViewAbstractModelNG::SetAccessibilityGroupOptions(frameNode, groupOptions);
 }
 void SetOnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
                                            const Opt_GestureRecognizerJudgeBeginCallback* callback_,
@@ -6494,6 +6559,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetBackgroundFilterImpl,
         CommonMethodModifier::SetForegroundFilterImpl,
         CommonMethodModifier::SetCompositingFilterImpl,
+        CommonMethodModifier::SetMaterialFilterImpl,
         CommonMethodModifier::SetOpacityImpl,
         CommonMethodModifier::SetBorderImpl,
         CommonMethodModifier::SetBorderStyleImpl,
@@ -6544,6 +6610,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetHueRotateImpl,
         CommonMethodModifier::SetUseShadowBatchingImpl,
         CommonMethodModifier::SetUseEffect0Impl,
+        CommonMethodModifier::SetUseUnionEffectImpl,
         CommonMethodModifier::SetRenderGroupImpl,
         CommonMethodModifier::SetFreezeImpl,
         CommonMethodModifier::SetTranslateImpl,
@@ -6663,8 +6730,8 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetBindMenu0Impl,
         CommonMethodModifier::SetBindMenu1Impl,
         CommonMethodModifier::SetBindContextMenu0Impl,
+        CommonMethodModifier::SetBindContextMenuWithResponseImpl,
         CommonMethodModifier::SetBindContextMenu1Impl,
-        CommonMethodModifier::SetBindContextMenu2Impl,
         CommonMethodModifier::SetBindContentCover0Impl,
         CommonMethodModifier::SetBindContentCover1Impl,
         CommonMethodModifier::SetBindSheetImpl,

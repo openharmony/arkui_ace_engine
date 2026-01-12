@@ -178,9 +178,9 @@ ace_unittest("theme_manager_test_ng") {
   type = "new"
   module_output = "manager"
   sources = [
+    # "$ace_root/frameworks/core/components_ng/pattern/picker/picker_theme.cpp",
     "$ace_root/frameworks/core/components/checkable/checkable_theme.cpp",
     "$ace_root/frameworks/core/components/dialog/dialog_theme.cpp",
-    "$ace_root/frameworks/core/components/picker/picker_theme.cpp",
     "$ace_root/frameworks/core/components/theme/app_theme.cpp",
     "$ace_root/frameworks/core/components/theme/theme_manager_impl.cpp",
     "$ace_root/frameworks/core/components/theme/theme_manager_multi_thread.cpp",

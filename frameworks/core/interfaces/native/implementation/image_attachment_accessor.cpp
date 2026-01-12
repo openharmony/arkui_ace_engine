@@ -126,14 +126,37 @@ RefPtr<ImageSpan> Convert(const Ark_ResourceImageAttachmentOptions& value)
     return AceType::MakeRefPtr<ImageSpan>(imageOptions);
 }
 
+Opt_Length OptValueFromOptDimension(const std::optional<Dimension>& src)
+{
+    if (!src.has_value()) {
+        Opt_Length dst;
+        dst.tag = INTEROP_TAG_UNDEFINED;
+        return dst;
+    }
+    return ArkValue<Opt_Length>(src->ConvertToVp());
+}
+
+Ark_BorderRadiuses ArkValueFromOptBorderRadius(const OHOS::Ace::NG::BorderRadiusProperty& src)
+{
+    Ark_BorderRadiuses arkBorder = {
+        .topLeft = OptValueFromOptDimension(src.radiusTopLeft),
+        .topRight = OptValueFromOptDimension(src.radiusTopRight),
+        .bottomLeft = OptValueFromOptDimension(src.radiusBottomLeft),
+        .bottomRight = OptValueFromOptDimension(src.radiusBottomRight),
+    };
+    return arkBorder;
+}
+
 void AssignArkValue(Ark_ImageAttachmentLayoutStyle& dst, const ImageSpanAttribute& src, ConvContext *ctx)
 {
-    Ark_ImageAttachmentLayoutStyle style = {
-        .margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(src.marginProp, ctx),
-        .padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(src.paddingProp, ctx),
-        .borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(src.borderRadius, ctx),
-    };
-    dst = style;
+    dst.margin = ArkUnion<Opt_Union_LengthMetrics_Margin, Ark_Padding>(src.marginProp, ctx);
+    dst.padding = ArkUnion<Opt_Union_LengthMetrics_Padding, Ark_Padding>(src.paddingProp, ctx);
+    if (src.borderRadius) {
+        dst.borderRadius = ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses, Ark_BorderRadiuses>(
+            ArkValueFromOptBorderRadius(src.borderRadius.value()));
+    } else {
+        dst.borderRadius =  ArkUnion<Opt_Union_LengthMetrics_BorderRadiuses>(Ark_Empty());
+    }
 }
 } // namespace Converter
 } // namespace OHOS::Ace::NG
@@ -171,6 +194,14 @@ Ark_image_PixelMap GetValueImpl(Ark_ImageAttachment peer)
     LOGE("ARKOALA ImageAttachmentAccessor::GetPixelMapImpl PixelMap is not supported on current platform.");
     return nullptr;
 #endif
+}
+Opt_String GetResourceValueImpl(Ark_ImageAttachment peer)
+{
+    auto invalid = Converter::ArkValue<Opt_String>();
+    CHECK_NULL_RETURN(peer && peer->span, invalid);
+    auto image = peer->span->GetImageSpanOptions().image;
+    CHECK_NULL_RETURN(image, invalid);
+    return Converter::ArkValue<Opt_String>(image.value());
 }
 Opt_SizeOptions GetSizeImpl(Ark_ImageAttachment peer)
 {
@@ -233,6 +264,7 @@ const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor()
         ImageAttachmentAccessor::ConstructImpl,
         ImageAttachmentAccessor::GetFinalizerImpl,
         ImageAttachmentAccessor::GetValueImpl,
+        ImageAttachmentAccessor::GetResourceValueImpl,
         ImageAttachmentAccessor::GetSizeImpl,
         ImageAttachmentAccessor::GetVerticalAlignImpl,
         ImageAttachmentAccessor::GetObjectFitImpl,

@@ -56,6 +56,8 @@
 #include "core/components_v2/inspector/shape_composed_element.h"
 #include "core/components_v2/list/render_list.h"
 #include "core/pipeline/base/factories/flutter_render_factory.h"
+#include "core/common/dynamic_module_helper.h"
+#include "compatible/components/text_field/modifier/text_field_modifier.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -68,6 +70,20 @@ constexpr float ZOOM_DISTANCE_DEFAULT = 50.0;
 constexpr float ZOOM_DISTANCE_MOVE_PER_WHEEL = 5.0;
 constexpr int32_t FLUSH_RELOAD_TRANSITION_DURATION_MS = 400;
 constexpr int32_t TIME_THRESHOLD = 2 * 1000000; // 2 millisecond
+
+const ArkUITextFieldModifierCompatible* GetTextFieldInnerModifier()
+{
+    static const ArkUITextFieldModifierCompatible* textFieldModifier_ = nullptr;
+    if (textFieldModifier_) {
+        return textFieldModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("textarea");
+    if (loader) {
+        textFieldModifier_ = reinterpret_cast<const ArkUITextFieldModifierCompatible*>(loader->GetCustomModifier());
+        return textFieldModifier_;
+    }
+    return nullptr;
+}
 
 PipelineContext::TimeProvider g_defaultTimeProvider = []() -> uint64_t {
     struct timespec ts;
@@ -2012,6 +2028,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         FlushPipelineWithoutAnimation();
         FlushAnimationTasks();
         window_->FlushLayoutSize(width_, height_);
+        window_->FlushVsync();
         hasIdleTasks_ = false;
         if (asyncEventsHookListener_ != nullptr) {
             ACE_SCOPED_TRACE("arkoala callbacks");
@@ -3086,10 +3103,9 @@ void PipelineContext::ProcessDragEventEnd(
     auto preTargetDragDropNode = GetPreTargetRenderNode();
 
     auto textfield = renderNode->FindChildNodeOfClass<RenderTextField>(globalPoint, globalPoint);
-    if (textfield) {
-        auto value = textfield->GetEditingValue();
-        value.Append(selectedText_);
-        textfield->SetEditingValue(std::move(value));
+    auto* modifier = GetTextFieldInnerModifier();
+    if (textfield && modifier) {
+        modifier->setEditingValue(textfield, selectedText_);
     }
 
     if (targetDragDropNode && targetDragDropNode->GetOnDrop()) {

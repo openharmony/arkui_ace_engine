@@ -74,13 +74,13 @@ import { ArkMarqueeNode } from './typedNode/ArkMarqueeNode'
 import { ArkSymbolGlyphNode } from './typedNode/ArkSymbolGlyphNode'
 import { ArkXComponentNode } from "./typedNode/ArkXComponentNode"
 import { ModifierType } from './typedNode/ArkCommonModifier'
-import { ListOptions, ListAttribute, ArkListPeer } from './component/list'
+import { ListOptions, ListAttribute, ArkListPeer, UIListEvent, UIListEventInternal } from './component/list'
 import { ListItemOptions, ListItemAttribute, ArkListItemPeer } from './component/listItem'
 import { ListItemGroupOptions, ListItemGroupAttribute, ArkListItemGroupPeer } from './component/listItemGroup'
-import { Scroller, ScrollAttribute, ArkScrollPeer } from './component/scroll'
-import { GridLayoutOptions, GridAttribute, ArkGridPeer } from './component/grid'
+import { Scroller, ScrollAttribute, ArkScrollPeer, UIScrollEvent, UIScrollEventInternal } from './component/scroll'
+import { GridLayoutOptions, GridAttribute, ArkGridPeer, UIGridEvent, UIGridEventInternal } from './component/grid'
 import { GridItemOptions, GridItemAttribute, ArkGridItemPeer } from './component/gridItem'
-import { WaterFlowOptions, WaterFlowAttribute, ArkWaterFlowPeer } from './component/waterFlow'
+import { WaterFlowOptions, WaterFlowAttribute, ArkWaterFlowPeer, UIWaterFlowEvent, UIWaterFlowEventInternal } from './component/waterFlow'
 import { FlowItemAttribute, ArkFlowItemPeer } from './component/flowItem'
 import { ColumnOptions, ColumnOptionsV2, ColumnAttribute, ArkColumnPeer } from './component/column'
 import { RowOptions, RowOptionsV2, RowAttribute, ArkRowPeer } from './component/row'
@@ -365,6 +365,9 @@ export class FrameNode implements MaterializedBase {
         return node;
     }
     public getChild(index: int32, expandMode?: ExpandMode | undefined): FrameNode | null {
+        if (this.isDisposed()) {
+            return null;
+        }
         let expand_casted: number = 1;
         if (expandMode !== undefined && expandMode !== null) {
             expand_casted = expandMode;
@@ -457,6 +460,9 @@ export class FrameNode implements MaterializedBase {
         }
         this.nodePtr_ = undefined;
         this.renderNode_?.resetNodePtr();
+    }
+    public isDisposed(): boolean {
+        return (this.nodePtr_ == undefined);
     }
     public resetNodePtr(): void {
         if (this.peer?.ptr) {
@@ -577,7 +583,18 @@ export class FrameNode implements MaterializedBase {
     public invalidate(): void {
         FrameNodeExtender.invalidate(this);
     };
+    public disposeTreeRecursively(): void {
+        let theChildCount = this.getChildrenCount();
+        for (let i = 0;i < theChildCount; i++) {
+            const childI = this.getChild(i);
+            if (childI) {
+                childI.disposeTreeRecursively();
+            }
+        }
+        this.nodePtr_ = undefined;
+    }
     public disposeTree(): void {
+        this.disposeTreeRecursively();
         FrameNodeExtender.disposeTree(this);
     };
     public setCrossLanguageOptions(options: CrossLanguageOptions): void {
@@ -607,12 +624,20 @@ export class FrameNode implements MaterializedBase {
         const error = Error("The parameter 'child' is invalid: the child node is undefined or null.");
         throw new BusinessError(100025, error);
     }
+    if (this.isDisposed()) {
+        const error = Error('The current node has been disposed.');
+        throw new BusinessError(100026, error);
+    }
     if (!this.isModifiable()) {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
     if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
         const error = Error("The parameter 'child' is invalid: the child node is not modifiable.");
+        throw new BusinessError(100025, error);
+    }
+    if (child.isDisposed()) {
+        const error = Error("The parameter 'child' is invalid: the child node has been disposed.");
         throw new BusinessError(100025, error);
     }
     const child_casted = child as (FrameNode);
@@ -628,12 +653,20 @@ export class FrameNode implements MaterializedBase {
         const error = Error("The parameter 'child' is invalid: the child node is undefined or null.");
         throw new BusinessError(100025, error);
     }
+    if (this.isDisposed()) {
+        const error = Error('The current node has been disposed.');
+        throw new BusinessError(100026, error);
+    }
     if (!this.isModifiable()) {
         const error = Error('The FrameNode is not modifiable.');
         throw new BusinessError(100021, error);
     }
     if (child.getType() === 'ProxyFrameNode' || !this.checkValid(child)) {
         const error = Error("The parameter 'child' is invalid: the child node is not modifiable.");
+        throw new BusinessError(100025, error);
+    }
+    if (child.isDisposed()) {
+        const error = Error("The parameter 'child' is invalid: the child node has been disposed.");
         throw new BusinessError(100025, error);
     }
     const child_casted = child as (FrameNode);
@@ -831,6 +864,10 @@ export class FrameNode implements MaterializedBase {
         return FrameNodeExtender.isOnRenderTree(this);
     }
     public isOnMainTree(): boolean {
+        if (this.nodePtr_ == undefined) {
+            const error = Error("The current FrameNode has been disposed. Code: 100026");
+            throw new BusinessError(100026, error);
+        }
         return FrameNodeExtender.isOnMainTree(this);
     }
       public invalidateAttributes(): void {
@@ -1560,6 +1597,46 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getListAttribute(node: FrameNode): ListAttribute | undefined {
+        if (node.getType() !== 'List') {
+            return undefined
+        }
+        let listNode = node as ListFrameNode
+        if (listNode !== undefined) {
+            return listNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function getListEvent(node: FrameNode): UIListEvent | undefined {
+        if (node.getType() !== 'List') {
+            return undefined
+        }
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const event = UIListEventInternal.construct(ptr);
+        if (event !== undefined) {
+            return event
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindListController(node: FrameNode, controller: Scroller): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'List') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let listNode = node as ListFrameNode
+        if (!listNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        listNode.initialize({scroller: controller})
+        return
+    }
+
+    // @ts-ignore
     export function createListItemNode(context: UIContext): ListItemFrameNode {
         return new ListItemFrameNode(context, 'ListItem', (node: FrameNode, type: ModifierType): ArkListItemNode => {
             let arknode = new ArkListItemNode();
@@ -1568,6 +1645,18 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    export function getListItemAttribute(node: FrameNode): ListItemAttribute | undefined {
+        if (node.getType() !== 'ListItem') {
+            return undefined
+        }
+        let listItemNode = node as ListItemFrameNode
+        if (listItemNode !== undefined) {
+            return listItemNode.attribute
+        }
+        return undefined
     }
 
     // @ts-ignore
@@ -1582,6 +1671,18 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getListItemGroupAttribute(node: FrameNode): ListItemGroupAttribute | undefined {
+        if (node.getType() !== 'ListItemGroup') {
+            return undefined
+        }
+        let listItemGroupNode = node as ListItemGroupFrameNode
+        if (listItemGroupNode !== undefined) {
+            return listItemGroupNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     export function createScrollNode(context: UIContext): ScrollFrameNode {
         return new ScrollFrameNode(context, 'Scroll', (node: FrameNode, type: ModifierType): ArkScrollNode => {
             let arknode = new ArkScrollNode();
@@ -1590,6 +1691,46 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    export function getScrollAttribute(node: FrameNode): ScrollAttribute | undefined {
+        if (node.getType() !== 'Scroll') {
+            return undefined
+        }
+        let scrollNode = node as ScrollFrameNode
+        if (scrollNode !== undefined) {
+            return scrollNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function getScrollEvent(node: FrameNode): UIScrollEvent | undefined {
+        if (node.getType() !== 'Scroll') {
+            return undefined
+        }
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const event = UIScrollEventInternal.construct(ptr);
+        if (event !== undefined) {
+            return event
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindScrollController(node: FrameNode, controller: Scroller): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'Scroll') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let scrollNode = node as ScrollFrameNode
+        if (!scrollNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        scrollNode.initialize(controller)
+        return
     }
 
     // @ts-ignore
@@ -1604,6 +1745,48 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getGridAttribute(node: FrameNode): GridAttribute | undefined {
+        if (node.getType() !== 'Grid') {
+            return undefined
+        }
+        let gridNode = node as GridFrameNode
+        if (gridNode !== undefined) {
+            return gridNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function getGridEvent(node: FrameNode): UIGridEvent | undefined {
+        if (node.getType() !== 'Grid') {
+            return undefined
+        }
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const event = UIGridEventInternal.construct(ptr);
+        if (event !== undefined) {
+            return event
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindGridController(node: FrameNode, controller: Scroller): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'Grid') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let gridNode = node as GridFrameNode
+        if (!gridNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        let arkGridNode = gridNode.attribute as ArkGridNode;
+        arkGridNode.getPeer()?.setGridOptionsAttribute(controller, undefined)
+        arkGridNode.markDirty()
+        return
+    }
+
+    // @ts-ignore
     export function createGridItemNode(context: UIContext): GridItemFrameNode {
         return new GridItemFrameNode(context, 'GridItem', (node: FrameNode, type: ModifierType): ArkGridItemNode => {
             let arknode = new ArkGridItemNode();
@@ -1612,6 +1795,18 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    export function getGridItemAttribute(node: FrameNode): GridItemAttribute | undefined {
+        if (node.getType() !== 'GridItem') {
+            return undefined
+        }
+        let gridItemNode = node as GridItemFrameNode
+        if (gridItemNode !== undefined) {
+            return gridItemNode.attribute
+        }
+        return undefined
     }
 
     // @ts-ignore
@@ -1626,6 +1821,46 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getWaterFlowAttribute(node: FrameNode): WaterFlowAttribute | undefined {
+        if (node.getType() !== 'WaterFlow') {
+            return undefined
+        }
+        let waterFlowNode = node as WaterFlowFrameNode
+        if (waterFlowNode !== undefined) {
+            return waterFlowNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function getWaterFlowEvent(node: FrameNode): UIWaterFlowEvent | undefined {
+        if (node.getType() !== 'WaterFlow') {
+            return undefined
+        }
+        const ptr = FrameNodeExtender.getFrameNodePtr(node);
+        const event = UIWaterFlowEventInternal.construct(ptr);
+        if (event !== undefined) {
+            return event
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    export function bindWaterFlowController(node: FrameNode, controller: Scroller): void {
+        if (node === null || node === undefined || controller === null || controller === undefined || node.getType() !== 'WaterFlow') {
+            const error = Error('Parameter error. Possible causes: 1. The component type of the node is incorrect. 2. The node is null or undefined. 3. The controller is null or undefined.');
+            throw new BusinessError(100023, error);
+        }
+        let waterFlowNode = node as WaterFlowFrameNode
+        if (!waterFlowNode.isModifiable()) {
+            const error = Error('The FrameNode is not modifiable.');
+            throw new BusinessError(100021, error);
+        }
+        waterFlowNode.initialize({scroller: controller})
+        return
+    }
+
+    // @ts-ignore
     export function createFlowItemNode(context: UIContext): FlowItemFrameNode {
         return new FlowItemFrameNode(context, 'FlowItem', (node: FrameNode, type: ModifierType): ArkFlowItemNode => {
             let arknode = new ArkFlowItemNode();
@@ -1634,6 +1869,18 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    function getFlowItemAttribute(node: FrameNode): FlowItemAttribute | undefined {
+        if (node.getType() !== 'FlowItem') {
+            return undefined
+        }
+        let flowItemNode = node as FlowItemFrameNode
+        if (flowItemNode !== undefined) {
+            return flowItemNode.attribute
+        }
+        return undefined
     }
 
     // @ts-ignore

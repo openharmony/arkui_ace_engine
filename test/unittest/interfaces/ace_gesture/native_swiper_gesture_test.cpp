@@ -130,8 +130,8 @@ HWTEST_F(NativeSwiperGestureTest, NativeSwiperGestureTest002, TestSize.Level1)
 HWTEST_F(NativeSwiperGestureTest, NativeSwiperGestureTest003, TestSize.Level1)
 {
     //In the native api, different inputs will result in an expected 0.
-    std::unordered_map<double, double> speedTestCases = { { -10.0f, 0.0f }, { 0.0f, 0.0f },
-    { 1.0f, 0.0f }, { 50.0f, 0.0f }, { 100.0f, 0.0f }, { 200.0f, 0.0f } };
+    std::unordered_map<double, double> speedTestCases = { { -10.0f, 100.0f }, { 0.0f, 100.0f },
+    { 1.0f, 1.0f }, { 50.0f, 50.0f }, { 100.0f, 100.0f }, { 200.0f, 200.0f } };
 
     constexpr static int DEFAULT_FINGER_COUNT = 1;
     constexpr static ArkUI_GestureDirectionMask DEFAULT_DIRECTION_MASK = GESTURE_DIRECTION_LEFT;

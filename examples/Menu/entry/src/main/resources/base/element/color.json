@@ -3,6 +3,140 @@
     {
       "name": "start_window_background",
       "value": "#FFFFFF"
+    },
+    {
+      "name": "rColor",
+      "value": "#DDBA3333"
+    },
+    {
+      "name": "rColor2",
+      "value": "#0000CD"
+    },
+    {
+      "name": "Color_Gray",
+      "value": "#FF808080"
+    },
+    {
+      "name": "Color_purple",
+      "value": "#FF6C0D94"
+    },
+    {
+      "name": "Color_green",
+      "value": "#FF00FF00"
+    },
+    {
+      "name": "Color_yellow",
+      "value": "#FFECD509"
+    },
+    {
+      "name": "Color_blue",
+      "value": "#FF0000FF"
+    },
+    {
+      "name": "Color_black",
+      "value": "#FF000000"
+    },
+    {
+      "name": "Color_white",
+      "value": "#FFFFFFFF"
+    },
+    {
+      "name": "Color_orange",
+      "value": "#FFFF7E00"
+    },
+    {
+      "name": "Color_red",
+      "value": "#FFFF0000"
+    },
+
+    {
+      "name": "double_bgColor",
+      "value": "#f8e354"
+    },
+    {
+      "name": "double_borderColor",
+      "value": "#7b6c05"
+    },
+    {
+      "name": "double_outlineColor",
+      "value": "#31057b"
+    },
+    {
+      "name": "double_shadowColor",
+      "value": "#ddc209"
+    },
+    {
+      "name": "double_textColor",
+      "value": "#269c92"
+    },
+    {
+      "name": "double_maskColor",
+      "value": "#927f35"
+    },
+    {
+      "name": "double_itemDividerColor",
+      "value": "#a48f3c"
+    },
+    {
+      "name": "double_itemGroupDividerColor",
+      "value": "#1a2347"
+    },
+    {
+      "name": "double_popupIconColor",
+      "value": "#bd7e22"
+    },
+    {
+      "name": "double_popupMsgColor",
+      "value": "#51360f"
+    },
+    {
+      "name": "double_popupBtnColor",
+      "value": "#0f2a51"
+    },
+
+    {
+      "name": "single_light_bgColor",
+      "value": "#70b979"
+    },
+    {
+      "name": "single_light_borderColor",
+      "value": "#1f3e22"
+    },
+    {
+      "name": "single_light_outlineColor",
+      "value": "#82415b"
+    },
+    {
+      "name": "single_light_shadowColor",
+      "value": "#1f843b"
+    },
+    {
+      "name": "single_light_textColor",
+      "value": "#f66d21"
+    },
+    {
+      "name": "single_light_maskColor",
+      "value": "#408348"
+    },
+    {
+      "name": "single_light_itemDividerColor",
+      "value": "#7970b9"
+    },
+    {
+      "name": "single_light_itemGroupDividerColor",
+      "value": "#b97970"
+    },
+    {
+      "name": "single_light_popupIconColor",
+      "value": "#83d0fa"
+    },
+    {
+      "name": "single_light_popupMsgColor",
+      "value": "#f45c0a"
+    },
+    {
+      "name": "single_light_popupBtnColor",
+      "value": "#0aa1f4"
     }
   ]
 }

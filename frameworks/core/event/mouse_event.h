@@ -380,7 +380,7 @@ public:
     {
         return pressedButtonsArray_;
     }
-
+    MouseEvent ConvertToMouseEvent() const;
     void SetIsRightButtonEventFromDoulbeTap(bool isRightButtonEventFromDoulbeTap)
     {
         isRightButtonEventFromDoulbeTap_ = isRightButtonEventFromDoulbeTap;

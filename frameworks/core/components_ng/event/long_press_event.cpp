@@ -69,6 +69,18 @@ void LongPressEventActuator::SetLongPressEventType(GestureTypeName typeName)
     gestureInfo->SetIsSystemGesture(true);
 }
 
+void LongPressEventActuator::CopyInnerEvent(const RefPtr<LongPressEventActuator>& longPressEventActuator)
+{
+    SetOnAccessibility(longPressEventActuator->onAccessibilityEventFunc_);
+    longPressEvent_ = longPressEventActuator->longPressEvent_;
+    auto originalLongPressRecognizer = longPressEventActuator->longPressRecognizer_;
+    if (originalLongPressRecognizer) {
+        auto originalGestureInfo = longPressEventActuator->longPressRecognizer_->GetOrCreateGestureInfo();
+        CHECK_NULL_VOID(originalGestureInfo);
+        SetLongPressEventType(originalGestureInfo->GetType());
+    }
+}
+
 void LongPressEventActuatorWithMultiSelect::OnCollectTouchTarget(const OffsetF& coordinateOffset,
     const TouchRestrict& touchRestrict, const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
     ResponseLinkResult& responseLinkResult)
@@ -76,9 +88,24 @@ void LongPressEventActuatorWithMultiSelect::OnCollectTouchTarget(const OffsetF& 
     LongPressEventActuator::OnCollectTouchTarget(
         coordinateOffset, touchRestrict, getEventTargetImpl, result, responseLinkResult);
 
+    if (touchRestrict.sourceTool == SourceTool::MOUSE) {
+        return;
+    }
+
     if (multiSelectHandler_) {
         auto recognizer = GetLongPressRecognizer();
         multiSelectHandler_(recognizer);
+    }
+}
+
+void LongPressEventActuatorWithMultiSelect::CopyLongPressEvent(
+    const RefPtr<LongPressEventActuator>& longPressEventActuator)
+{
+    LongPressEventActuator::CopyLongPressEvent(longPressEventActuator);
+    CopyInnerEvent(longPressEventActuator);
+    if (AceType::InstanceOf<LongPressEventActuatorWithMultiSelect>(longPressEventActuator)) {
+        auto multiSelectActuator = AceType::DynamicCast<LongPressEventActuatorWithMultiSelect>(longPressEventActuator);
+        multiSelectHandler_ = multiSelectActuator->multiSelectHandler_;
     }
 }
 } // namespace OHOS::Ace::NG

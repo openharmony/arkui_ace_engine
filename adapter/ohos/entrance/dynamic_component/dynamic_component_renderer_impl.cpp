@@ -291,6 +291,7 @@ void DynamicComponentRendererImpl::OnAccessibilityParentRectInfoUpdate()
 void DynamicComponentRendererImpl::InitUiContent(
     OHOS::AbilityRuntime::Context *abilityContext)
 {
+    ACE_UINODE_TRACE(host_);
     rendererDumpInfo_.ReSet();
     // create UI Content
     TAG_LOGI(aceLogTag_, "create UI Content");

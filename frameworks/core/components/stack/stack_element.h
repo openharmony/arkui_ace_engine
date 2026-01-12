@@ -59,7 +59,7 @@ class ACE_FORCE_EXPORT StackElement : public ComponentGroupElement, public Focus
 
 public:
     void PerformBuild() override;
-    void PushComponent(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
+    ACE_FORCE_EXPORT void PushComponent(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     void PopComponent();
     void PushToastComponent(const RefPtr<Component>& newComponent, int32_t toastId);
     void PopToastComponent(int32_t toastPopId);
@@ -72,7 +72,7 @@ public:
     bool PopPopupIfExist() const;
     bool PopDialogIfExist() const;
     void PopMenu();
-    void PopVideo();
+    ACE_FORCE_EXPORT void PopVideo();
     void PopInstant();
     void PushInstant(const RefPtr<Component>& newComponent, bool disableTouchEvent = true);
     bool HasOverlayChild();

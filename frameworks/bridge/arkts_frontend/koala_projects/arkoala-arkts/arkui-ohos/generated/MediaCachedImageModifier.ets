@@ -951,6 +951,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._alt_0_flag = AttributeUpdaterFlag.UPDATE
             this._alt_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alt_0_flag = AttributeUpdaterFlag.SKIP
@@ -962,6 +963,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._matchTextDirection_0_flag = AttributeUpdaterFlag.UPDATE
             this._matchTextDirection_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._matchTextDirection_0_flag = AttributeUpdaterFlag.SKIP
@@ -973,6 +975,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._fitOriginalSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._fitOriginalSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fitOriginalSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -984,6 +987,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._fillColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fillColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fillColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -995,6 +999,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._objectFit_0_flag = AttributeUpdaterFlag.UPDATE
             this._objectFit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._objectFit_0_flag = AttributeUpdaterFlag.SKIP
@@ -1006,6 +1011,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._imageMatrix_0_flag = AttributeUpdaterFlag.UPDATE
             this._imageMatrix_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._imageMatrix_0_flag = AttributeUpdaterFlag.SKIP
@@ -1017,6 +1023,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._objectRepeat_0_flag = AttributeUpdaterFlag.UPDATE
             this._objectRepeat_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._objectRepeat_0_flag = AttributeUpdaterFlag.SKIP
@@ -1028,6 +1035,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._autoResize_0_flag = AttributeUpdaterFlag.UPDATE
             this._autoResize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._autoResize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1039,6 +1047,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._renderMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._renderMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._renderMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1050,6 +1059,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._dynamicRangeMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._dynamicRangeMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._dynamicRangeMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1061,6 +1071,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._interpolation_0_flag = AttributeUpdaterFlag.UPDATE
             this._interpolation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._interpolation_0_flag = AttributeUpdaterFlag.SKIP
@@ -1072,6 +1083,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._sourceSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._sourceSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._sourceSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1083,6 +1095,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._syncLoad_0_flag = AttributeUpdaterFlag.UPDATE
             this._syncLoad_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._syncLoad_0_flag = AttributeUpdaterFlag.SKIP
@@ -1094,6 +1107,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._colorFilter_0_flag = AttributeUpdaterFlag.UPDATE
             this._colorFilter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._colorFilter_0_flag = AttributeUpdaterFlag.SKIP
@@ -1105,6 +1119,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._copyOption_0_flag = AttributeUpdaterFlag.UPDATE
             this._copyOption_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._copyOption_0_flag = AttributeUpdaterFlag.SKIP
@@ -1116,6 +1131,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._draggable_0_flag = AttributeUpdaterFlag.UPDATE
             this._draggable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._draggable_0_flag = AttributeUpdaterFlag.SKIP
@@ -1127,6 +1143,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._pointLight_0_flag = AttributeUpdaterFlag.UPDATE
             this._pointLight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._pointLight_0_flag = AttributeUpdaterFlag.SKIP
@@ -1138,6 +1155,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.UPDATE
             this._edgeAntialiasing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._edgeAntialiasing_0_flag = AttributeUpdaterFlag.SKIP
@@ -1149,6 +1167,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onComplete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.SKIP
@@ -1160,6 +1179,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._onError_0_flag = AttributeUpdaterFlag.UPDATE
             this._onError_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onError_0_flag = AttributeUpdaterFlag.SKIP
@@ -1171,6 +1191,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFinish_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.SKIP
@@ -1182,6 +1203,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableAnalyzer_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
@@ -1193,6 +1215,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._analyzerConfig_0_flag = AttributeUpdaterFlag.UPDATE
             this._analyzerConfig_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._analyzerConfig_0_flag = AttributeUpdaterFlag.SKIP
@@ -1204,6 +1227,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._resizable_0_flag = AttributeUpdaterFlag.UPDATE
             this._resizable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._resizable_0_flag = AttributeUpdaterFlag.SKIP
@@ -1215,6 +1239,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._privacySensitive_0_flag = AttributeUpdaterFlag.UPDATE
             this._privacySensitive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._privacySensitive_0_flag = AttributeUpdaterFlag.SKIP
@@ -1226,6 +1251,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._enhancedImageQuality_0_flag = AttributeUpdaterFlag.UPDATE
             this._enhancedImageQuality_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enhancedImageQuality_0_flag = AttributeUpdaterFlag.SKIP
@@ -1237,6 +1263,7 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         {
             this._orientation_0_flag = AttributeUpdaterFlag.UPDATE
             this._orientation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._orientation_0_flag = AttributeUpdaterFlag.SKIP

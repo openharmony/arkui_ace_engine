@@ -3331,7 +3331,7 @@ struct CJUIRichEditorModifier {
     void (*resetRichEditorEnableDataDetector)(ArkUINodeHandle node);
     void (*setRichEditorCopyOptions)(ArkUINodeHandle node, ArkUI_Int32 copyOptionsValue);
     void (*resetRichEditorCopyOptions)(ArkUINodeHandle node);
-    void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetRichEditorCaretColor)(ArkUINodeHandle node);
     void (*setOnReady)(ArkUINodeHandle node, void* callback);
     void (*resetOnReady)(ArkUINodeHandle node);
@@ -3339,7 +3339,7 @@ struct CJUIRichEditorModifier {
     void (*resetOnDeleteComplete)(ArkUINodeHandle node);
     void (*setOnEditingChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnEditingChange)(ArkUINodeHandle node);
-    void (*setRichEditorSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setRichEditorSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetRichEditorSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*setRichEditorEnterKeyType)(ArkUINodeHandle node, ArkUI_Uint32 enterKeyType);
     void (*resetRichEditorEnterKeyType)(ArkUINodeHandle node);

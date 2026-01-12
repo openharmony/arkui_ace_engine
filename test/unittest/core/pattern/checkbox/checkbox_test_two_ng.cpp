@@ -532,6 +532,7 @@ HWTEST_F(CheckBoxTwoTestNG, CheckBoxPatternTest0129, TestSize.Level1)
     auto pipeline = frameNode->GetContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->FlushBuildFinishCallbacks();
+    pattern->UpdateState();
     pattern->StartCustomNodeAnimation(true);
     auto host = pattern->GetHost();
     auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
@@ -566,6 +567,7 @@ HWTEST_F(CheckBoxTwoTestNG, CheckBoxPatternTest0130, TestSize.Level1)
     auto pipeline = frameNode->GetContext();
     ASSERT_NE(pipeline, nullptr);
     pipeline->FlushBuildFinishCallbacks();
+    pattern->UpdateState();
     pattern->StartCustomNodeAnimation(false);
     auto host = pattern->GetHost();
     auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());

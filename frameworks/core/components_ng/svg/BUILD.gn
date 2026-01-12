@@ -53,5 +53,6 @@ build_component_ng("svg_ng") {
     "svg_dom.cpp",
     "svg_fit_convertor.cpp",
     "svg_utils.cpp",
+    "svg_transform_utils.cpp",
   ]
 }

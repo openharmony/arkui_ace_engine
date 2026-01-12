@@ -20,9 +20,12 @@
 #include "core/components_ng/pattern/gesture/gesture_model.h"
 #include "core/event/focus_axis_event.h"
 
+namespace OHOS::Ace {
+struct ChangeValueInfo;
+}
 namespace OHOS::Ace::NG {
 using TouchRecognizerMap = std::map<WeakPtr<TouchEventTarget>, std::unordered_set<int32_t>>;
-class CommonBridge {
+class ACE_FORCE_EXPORT CommonBridge {
 public:
     static ArkUINativeModuleValue SetBackground(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetBackground(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -484,6 +487,8 @@ public:
     static ArkUINativeModuleValue ResetOnPreDrag(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnVisibleAreaChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnVisibleAreaChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetOnVisibleAreaApproximateChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetOnVisibleAreaApproximateChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnTouchIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnTouchIntercept(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnChildTouchTest(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -513,6 +518,8 @@ public:
     static ArkUINativeModuleValue ResetExcludeFromRenderGroup(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetChainWeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetChainWeight(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetUseUnionEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetUseUnionEffect(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

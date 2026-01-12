@@ -323,6 +323,18 @@ void CustomNode::DumpInfo()
 void CustomNode::FireRecycleRenderFunc()
 {
     if (HasRecycleRenderFunc()) {
+        // Get the current color mode and notify the node to change the color mode
+        auto context = PipelineContext::GetCurrentContext();
+        if (SystemProperties::ConfigChangePerform()) {
+            if (context) {
+                auto colorMode = context->GetColorMode();
+                SetRerenderable(true);
+                SetMeasureAnyway(true);
+                NotifyColorModeChange(static_cast<uint32_t>(colorMode));
+            } else {
+                TAG_LOGD(AceLogTag::ACE_STATE_MGMT, "Can't get colorMode, fail to notify color mode change.");
+            }
+        }
         std::string reuseId = GetReuseId().empty() ? "-1" : GetReuseId();
         std::string parentInfo = "-1";
         if (SystemProperties::GetDynamicDetectionTraceEnabled()) {

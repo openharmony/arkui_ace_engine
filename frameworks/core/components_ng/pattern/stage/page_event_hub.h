@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace::NG {
 
-class PageEventHub : public EventHub {
+class ACE_FORCE_EXPORT PageEventHub : public EventHub {
     DECLARE_ACE_TYPE(PageEventHub, EventHub);
 
 public:

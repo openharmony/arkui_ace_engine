@@ -18,7 +18,7 @@
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { Resource_serializer } from "./../framework/resource"
-import { RectResult_serializer, RectResult, NestedScrollOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, NestedScrollOptions, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { RectResult_serializer, SizeResult_serializer, RectResult, SizeResult, NestedScrollOptions_serializer, EdgeEffectOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, Bindable_F64_serializer, Bindable, NestedScrollOptions, CommonMethod, EdgeEffectOptions, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from "./common"
 import { Edge, ScrollSource, BarState, Color, EdgeEffect } from "./enums"
 import { Length, VoidCallback, Dimension } from "./units"
 import { Resource } from "global.resource"
@@ -115,6 +115,9 @@ export class Scroller implements MaterializedBase {
         const x_casted = x as (double)
         const y_casted = y as (double)
         return this.getItemIndex_serialize(x_casted, y_casted)
+    }
+    public contentSize(): SizeResult {
+        return this.contentSize_serialize()
     }
     scrollTo_serialize(options: ScrollOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
@@ -261,6 +264,12 @@ export class Scroller implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._Scroller_getItemIndex(this.peer!.ptr, x, y)
         return retval
     }
+    contentSize_serialize(): SizeResult {
+        const retval  = ArkUIGeneratedNativeModule._Scroller_contentSize(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : SizeResult = SizeResult_serializer.read(retvalDeserializer)
+        return returnResult
+    }
 }
 export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
     attributeSet?: ScrollModifier;
@@ -297,6 +306,62 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ScrollAttribute_setScrollable(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setMaxZoomScaleAttribute(value: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeFloat64(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_setMaxZoomScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setMinZoomScaleAttribute(value: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeFloat64(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_setMinZoomScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setZoomScaleAttribute(value: double | Bindable<double> | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Bindable<double>) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as Bindable<double>
+                Bindable_F64_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_setZoomScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableBouncesZoomAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_setEnableBouncesZoom(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnWillScrollAttribute(value: ScrollOnWillScrollCallback | undefined): void {
@@ -359,6 +424,42 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollAttribute_setOnScrollStop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnDidZoomAttribute(value: ScrollOnDidZoomCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_setOnDidZoom(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnZoomStartAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_setOnZoomStart(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnZoomStopAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollAttribute_setOnZoomStop(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setScrollBarAttribute(value: BarState | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -371,7 +472,7 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollAttribute_setScrollBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarColorAttribute(value: Color | int32 | string | undefined): void {
+    setScrollBarColorAttribute(value: Color | int32 | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -388,6 +489,10 @@ export class ArkScrollPeer extends ArkScrollableCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -533,7 +638,8 @@ export enum ScrollDirection {
     HORIZONTAL = 1,
     Horizontal = 1,
     NONE = 2,
-    None = 2
+    None = 2,
+    FREE = 4
 }
 export enum ScrollAlign {
     START = 0,
@@ -564,6 +670,7 @@ export interface ScrollOptions {
     xOffset: double | string;
     yOffset: double | string;
     animation?: ScrollAnimationOptions | boolean;
+    canOverScroll?: boolean;
 }
 export interface ScrollPageOptions {
     next: boolean;
@@ -587,6 +694,18 @@ export interface ScrollAttribute extends ScrollableCommonMethod {
     scrollable(value: ScrollDirection | undefined): this {
         throw new Error("Unimplemented method scrollable")
     }
+    maxZoomScale(value: double | undefined): this {
+        throw new Error("Unimplemented method maxZoomScale")
+    }
+    minZoomScale(value: double | undefined): this {
+        throw new Error("Unimplemented method minZoomScale")
+    }
+    zoomScale(value: double | Bindable<double> | undefined): this {
+        throw new Error("Unimplemented method zoomScale")
+    }
+    enableBouncesZoom(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableBouncesZoom")
+    }
     onWillScroll(value: ScrollOnWillScrollCallback | undefined): this {
         throw new Error("Unimplemented method onWillScroll")
     }
@@ -598,8 +717,17 @@ export interface ScrollAttribute extends ScrollableCommonMethod {
     }
     onScrollStart(value: VoidCallback | undefined): this
     onScrollStop(value: VoidCallback | undefined): this
+    onDidZoom(value: ScrollOnDidZoomCallback | undefined): this {
+        throw new Error("Unimplemented method onDidZoom")
+    }
+    onZoomStart(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onZoomStart")
+    }
+    onZoomStop(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onZoomStop")
+    }
     scrollBar(value: BarState | undefined): this
-    scrollBarColor(value: Color | int32 | string | undefined): this
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this
     scrollBarWidth(value: double | string | undefined): this
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         throw new Error("Unimplemented method onScrollFrameBegin")
@@ -625,13 +753,20 @@ export interface ScrollAttribute extends ScrollableCommonMethod {
 }
 export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements ScrollAttribute {
     scrollable_value?: ScrollDirection | undefined
+    maxZoomScale_value?: double | undefined
+    minZoomScale_value?: double | undefined
+    zoomScale_value?: double | Bindable<double> | undefined
+    enableBouncesZoom_value?: boolean | undefined
     onWillScroll_value?: ScrollOnWillScrollCallback | undefined
     onDidScroll_value?: ScrollOnScrollCallback | undefined
     onScrollEdge_value?: OnScrollEdgeCallback | undefined
     onScrollStart_value?: VoidCallback | undefined
     onScrollStop_value?: VoidCallback | undefined
+    onDidZoom_value?: ScrollOnDidZoomCallback | undefined
+    onZoomStart_value?: VoidCallback | undefined
+    onZoomStop_value?: VoidCallback | undefined
     scrollBar_value?: BarState | undefined
-    scrollBarColor_value?: Color | int32 | string | undefined
+    scrollBarColor_value?: Color | int32 | string | Resource | undefined
     scrollBarWidth_value?: double | string | undefined
     onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
     nestedScroll_value?: NestedScrollOptions | undefined
@@ -645,6 +780,18 @@ export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements Sc
         return this
     }
     scrollable(value: ScrollDirection | undefined): this {
+        return this
+    }
+    maxZoomScale(value: double | undefined): this {
+        return this
+    }
+    minZoomScale(value: double | undefined): this {
+        return this
+    }
+    zoomScale(value: double | Bindable<double> | undefined): this {
+        return this
+    }
+    enableBouncesZoom(value: boolean | undefined): this {
         return this
     }
     onWillScroll(value: ScrollOnWillScrollCallback | undefined): this {
@@ -662,10 +809,19 @@ export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements Sc
     onScrollStop(value: VoidCallback | undefined): this {
         return this
     }
+    onDidZoom(value: ScrollOnDidZoomCallback | undefined): this {
+        return this
+    }
+    onZoomStart(value: VoidCallback | undefined): this {
+        return this
+    }
+    onZoomStop(value: VoidCallback | undefined): this {
+        return this
+    }
     scrollBar(value: BarState | undefined): this {
         return this
     }
-    scrollBarColor(value: Color | int32 | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
         return this
     }
     scrollBarWidth(value: double | string | undefined): this {
@@ -701,6 +857,7 @@ export class ArkScrollStyle extends ArkScrollableCommonMethodStyle implements Sc
 }
 export type ScrollOnScrollCallback = (xOffset: double, yOffset: double, scrollState: ScrollState) => void;
 export type ScrollOnWillScrollCallback = (xOffset: double, yOffset: double, scrollState: ScrollState, scrollSource: ScrollSource) => OffsetResult | undefined;
+export type ScrollOnDidZoomCallback = (scale: double) => void;
 
 export class ArkScrollComponent extends ArkScrollableCommonMethodComponent implements ScrollAttribute {
     getPeer(): ArkScrollPeer {
@@ -722,6 +879,38 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         if (this.checkPriority("scrollable")) {
             const value_casted = value as (ScrollDirection | undefined)
             this.getPeer()?.setScrollableAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public maxZoomScale(value: double | undefined): this {
+        if (this.checkPriority("maxZoomScale")) {
+            const value_casted = value as (double | undefined)
+            this.getPeer()?.setMaxZoomScaleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public minZoomScale(value: double | undefined): this {
+        if (this.checkPriority("minZoomScale")) {
+            const value_casted = value as (double | undefined)
+            this.getPeer()?.setMinZoomScaleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public zoomScale(value: double | Bindable<double> | undefined): this {
+        if (this.checkPriority("zoomScale")) {
+            const value_casted = value as (double | Bindable<double> | undefined)
+            this.getPeer()?.setZoomScaleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableBouncesZoom(value: boolean | undefined): this {
+        if (this.checkPriority("enableBouncesZoom")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableBouncesZoomAttribute(value_casted)
             return this
         }
         return this
@@ -766,6 +955,30 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
+    public onDidZoom(value: ScrollOnDidZoomCallback | undefined): this {
+        if (this.checkPriority("onDidZoom")) {
+            const value_casted = value as (ScrollOnDidZoomCallback | undefined)
+            this.getPeer()?.setOnDidZoomAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onZoomStart(value: VoidCallback | undefined): this {
+        if (this.checkPriority("onZoomStart")) {
+            const value_casted = value as (VoidCallback | undefined)
+            this.getPeer()?.setOnZoomStartAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onZoomStop(value: VoidCallback | undefined): this {
+        if (this.checkPriority("onZoomStop")) {
+            const value_casted = value as (VoidCallback | undefined)
+            this.getPeer()?.setOnZoomStopAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public scrollBar(value: BarState | undefined): this {
         if (this.checkPriority("scrollBar")) {
             const value_casted = value as (BarState | undefined)
@@ -774,9 +987,9 @@ export class ArkScrollComponent extends ArkScrollableCommonMethodComponent imple
         }
         return this
     }
-    public scrollBarColor(value: Color | int32 | string | undefined): this {
+    public scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
         if (this.checkPriority("scrollBarColor")) {
-            const value_casted = value as (Color | int32 | string | undefined)
+            const value_casted = value as (Color | int32 | string | Resource | undefined)
             this.getPeer()?.setScrollBarColorAttribute(value_casted)
             return this
         }
@@ -926,6 +1139,17 @@ export class Scroller_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return ScrollerInternal.fromPtr(ptr)
+    }
+}
+export class UIScrollEvent_serializer {
+    public static write(buffer: SerializerBase, value: UIScrollEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): UIScrollEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return UIScrollEventInternal.fromPtr(ptr)
     }
 }
 export class ScrollAnimationOptions_serializer {
@@ -1087,6 +1311,14 @@ export class ScrollOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForCanOverScroll  = value.canOverScroll
+        if (valueHolderForCanOverScroll !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCanOverScrollTmpValue  = valueHolderForCanOverScroll!
+            valueSerializer.writeBoolean(valueHolderForCanOverScrollTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ScrollOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -1125,7 +1357,13 @@ export class ScrollOptions_serializer {
             animationTmpBuf = (animationTmpBuf_ as ScrollAnimationOptions | boolean)
         }
         const animationTmpResult : ScrollAnimationOptions | boolean | undefined = animationTmpBuf
-        let value : ScrollOptions = ({xOffset: xOffsetTmpResult, yOffset: yOffsetTmpResult, animation: animationTmpResult} as ScrollOptions)
+        const canOverScrollTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let canOverScrollTmpBuf : boolean | undefined = undefined
+        if ((canOverScrollTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            canOverScrollTmpBuf = valueDeserializer.readBoolean()
+        }
+        const canOverScrollTmpResult : boolean | undefined = canOverScrollTmpBuf
+        let value : ScrollOptions = ({xOffset: xOffsetTmpResult, yOffset: yOffsetTmpResult, animation: animationTmpResult, canOverScroll: canOverScrollTmpResult} as ScrollOptions)
         return value
     }
 }
@@ -1364,3 +1602,57 @@ export class ScrollSnapOptions_serializer {
         return value
     }
 }
+export interface UIScrollEvent extends UIScrollableCommonEvent {
+    setOnWillScroll(callback_: ScrollOnWillScrollCallback | undefined): void
+    setOnDidScroll(callback_: ScrollOnScrollCallback | undefined): void
+}
+export class UIScrollEventInternal extends UIScrollableCommonEventInternal implements MaterializedBase,UIScrollEvent {
+    constructor(peerPtr: KPointer) {
+        super(peerPtr)
+    }
+    static construct(ptr: KPointer): UIScrollEventInternal {
+        const retval  = ArkUIGeneratedNativeModule._UIScrollEvent_construct(ptr)
+        return new UIScrollEventInternal(retval)
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._UIScrollEvent_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): UIScrollEventInternal {
+        return new UIScrollEventInternal(ptr)
+    }
+    public setOnWillScroll(callback_: ScrollOnWillScrollCallback | undefined): void {
+        const callback__casted = callback_ as (ScrollOnWillScrollCallback | undefined)
+        this.setOnWillScroll_serialize(callback__casted)
+        return
+    }
+    public setOnDidScroll(callback_: ScrollOnScrollCallback | undefined): void {
+        const callback__casted = callback_ as (ScrollOnScrollCallback | undefined)
+        this.setOnDidScroll_serialize(callback__casted)
+        return
+    }
+    setOnWillScroll_serialize(callback_: ScrollOnWillScrollCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIScrollEvent_setOnWillScroll(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnDidScroll_serialize(callback_: ScrollOnScrollCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIScrollEvent_setOnDidScroll(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+

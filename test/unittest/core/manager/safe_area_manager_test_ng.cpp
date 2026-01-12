@@ -16,7 +16,6 @@
 #define protected public
 #define private public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
@@ -30,7 +29,6 @@
 using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
-
 namespace {
 constexpr double DISPLAY_WIDTH = 720;
 constexpr double DISPLAY_HEIGHT = 1280;
@@ -42,7 +40,6 @@ constexpr double SYSTEM_TOP_START = 0.0f;
 constexpr double SYSTEM_TOP_END = 30.0f;
 constexpr double SYSTEM_BOTTOM_START = DISPLAY_HEIGHT - 30.0f;
 constexpr double SYSTEM_BOTTOM_END = DISPLAY_HEIGHT - 0.0f;
-
 constexpr double CUTOUT_LEFT_START = 10.0f;
 constexpr double CUTOUT_LEFT_END = 40.0f;
 constexpr double CUTOUT_RIGHT_START = DISPLAY_WIDTH - 40.0f;
@@ -51,7 +48,6 @@ constexpr double CUTOUT_TOP_START = 20.0f;
 constexpr double CUTOUT_TOP_END = 50.0f;
 constexpr double CUTOUT_BOTTOM_START = DISPLAY_HEIGHT - 50.0f;
 constexpr double CUTOUT_BOTTOM_END = DISPLAY_HEIGHT - 20.0f;
-
 constexpr double CUTOUT_WITH_ROOT_LEFT_START = 0.0f;
 constexpr double CUTOUT_WITH_ROOT_LEFT_END = CUTOUT_LEFT_END;
 constexpr double CUTOUT_WITH_ROOT_RIGHT_START = CUTOUT_RIGHT_START;
@@ -60,7 +56,6 @@ constexpr double CUTOUT_WITH_ROOT_TOP_START = 0.0f;
 constexpr double CUTOUT_WITH_ROOT_TOP_END = CUTOUT_TOP_END;
 constexpr double CUTOUT_WITH_ROOT_BOTTOM_START = CUTOUT_BOTTOM_START;
 constexpr double CUTOUT_WITH_ROOT_BOTTOM_END = DISPLAY_HEIGHT;
-
 constexpr double NAV_LEFT_START = 20.0f;
 constexpr double NAV_LEFT_END = 50.0f;
 constexpr double NAV_RIGHT_START = DISPLAY_WIDTH - 50.0f;
@@ -69,13 +64,11 @@ constexpr double NAV_TOP_START = 40.0f;
 constexpr double NAV_TOP_END = 70.0f;
 constexpr double NAV_BOTTOM_START = DISPLAY_HEIGHT - 70.0f;
 constexpr double NAV_BOTTOM_END = DISPLAY_HEIGHT - 40.0f;
-
 constexpr double KEYBOARD_HEIGHT = 420.0f;
 } // namespace
 
 class SafeAreaManagerTest : public testing::Test {
 public:
-
     static void SetUpTestCase();
     static void TearDownTestCase();
     void SetUp() override;
@@ -89,7 +82,6 @@ public:
 
     void CommonExpectEQ(const Rect& s1, const Rect& s2);
     RefPtr<SafeAreaManager> safeAreaManager_;
-    
     NG::SafeAreaInsets cutoutArea =
         NG::SafeAreaInsets({ CUTOUT_LEFT_START, CUTOUT_LEFT_END }, { CUTOUT_TOP_START, CUTOUT_TOP_END },
             { CUTOUT_RIGHT_START, CUTOUT_RIGHT_END }, { CUTOUT_BOTTOM_START, CUTOUT_BOTTOM_END });
@@ -152,7 +144,6 @@ HWTEST_F(SafeAreaManagerTest, IsSafeAreaValidTest, TestSize.Level1)
     EXPECT_EQ(safeAreaManager_->IsFullScreen(), false);
     EXPECT_EQ(safeAreaManager_->IsNeedAvoidWindow(), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), false);
-
     auto res = safeAreaManager_->GetCutoutSafeArea();
     CommonExpectEQ(
         Rect { res.left_.start, res.right_.end, res.top_.start, res.bottom_.end }, Rect { 0.0f, 0.0f, 0.0f, 0.0f });
@@ -165,26 +156,21 @@ HWTEST_F(SafeAreaManagerTest, IsSafeAreaValidTest, TestSize.Level1)
     res = safeAreaManager_->GetCombinedSafeArea(SafeAreaExpandOpts());
     CommonExpectEQ(
         Rect { res.left_.start, res.right_.end, res.top_.start, res.bottom_.end }, Rect { 0.0f, 0.0f, 0.0f, 0.0f });
-
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(true), true);
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(true), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), false);
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(false), true);
-
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(false), true);
-
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(false), true);
-
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), true);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
-
     EXPECT_EQ(safeAreaManager_->IsAtomicService(), false);
     EXPECT_EQ(safeAreaManager_->SetIsAtomicService(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsAtomicService(true), false);
@@ -214,7 +200,6 @@ HWTEST_F(SafeAreaManagerTest, CutoutSafeAreaTest, TestSize.Level1)
     auto safeAreaWithoutProcess = safeAreaManager_->GetSafeAreaWithoutProcess();
     EXPECT_EQ(safeArea, safeAreaWithoutProcess);
     EXPECT_EQ(cutoutSafeArea, safeArea);
-
     CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
         Rect { 0.0f, DISPLAY_WIDTH, 0.0f, DISPLAY_HEIGHT });
     /**
@@ -254,15 +239,12 @@ HWTEST_F(SafeAreaManagerTest, SystemSafeAreaTest, TestSize.Level1)
     EXPECT_EQ(ret, true);
     ret = safeAreaManager_->UpdateSystemSafeArea(systemArea);
     EXPECT_EQ(ret, false);
-
     auto systemSafeArea = safeAreaManager_->GetSystemSafeArea();
     EXPECT_EQ(systemSafeArea, systemArea);
-
     auto safeArea = safeAreaManager_->GetSafeArea();
     auto safeAreaWithoutProcess = safeAreaManager_->GetSafeAreaWithoutProcess();
     EXPECT_EQ(safeArea, safeAreaWithoutProcess);
     EXPECT_EQ(systemSafeArea, safeArea);
-
     CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
         Rect { SYSTEM_LEFT_START, SYSTEM_RIGHT_END, SYSTEM_TOP_START, SYSTEM_BOTTOM_END });
 }
@@ -282,11 +264,9 @@ HWTEST_F(SafeAreaManagerTest, NavSafeAreaTest, TestSize.Level1)
     EXPECT_EQ(ret, true);
     ret = safeAreaManager_->UpdateNavSafeArea(navArea);
     EXPECT_EQ(ret, false);
-
     auto safeArea = safeAreaManager_->GetSafeArea();
     auto safeAreaWithoutProcess = safeAreaManager_->GetSafeAreaWithoutProcess();
     EXPECT_EQ(safeArea, safeAreaWithoutProcess);
-
     CommonExpectEQ(Rect { safeArea.left_.start, safeArea.right_.end, safeArea.top_.start, safeArea.bottom_.end },
         Rect { NAV_LEFT_START, NAV_RIGHT_END, NAV_TOP_START, NAV_BOTTOM_END });
 }
@@ -338,20 +318,26 @@ HWTEST_F(SafeAreaManagerTest, UpdateKeyboardSafeAreaWebTest, TestSize.Level1)
     MockContainer container(nullptr);
     safeAreaManager_->SetIsFullScreen(true);
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
+
     auto ret = safeAreaManager_->UpdateKeyboardWebSafeArea(KEYBOARD_HEIGHT);
     EXPECT_EQ(ret, true);
+
     ret = safeAreaManager_->UpdateKeyboardWebSafeArea(KEYBOARD_HEIGHT);
     EXPECT_EQ(ret, false);
+
     auto keyboardInset = safeAreaManager_->GetKeyboardWebInset();
     EXPECT_EQ(keyboardInset.start, DISPLAY_HEIGHT - KEYBOARD_HEIGHT);
     EXPECT_EQ(keyboardInset.end, DISPLAY_HEIGHT);
+
     MockContainer::SetUp();
     safeAreaManager_->SetIsFullScreen(false);
     safeAreaManager_->UpdateSystemSafeArea(systemArea);
+
     ret = safeAreaManager_->UpdateKeyboardWebSafeArea(KEYBOARD_HEIGHT);
     EXPECT_EQ(ret, true);
     ret = safeAreaManager_->UpdateKeyboardWebSafeArea(KEYBOARD_HEIGHT);
     EXPECT_EQ(ret, false);
+
     keyboardInset = safeAreaManager_->GetKeyboardWebInset();
     EXPECT_EQ(keyboardInset.start, SYSTEM_BOTTOM_START - KEYBOARD_HEIGHT);
     EXPECT_EQ(keyboardInset.end, SYSTEM_BOTTOM_START);
@@ -1299,7 +1285,6 @@ HWTEST_F(SafeAreaManagerTest, NeedExpandNodeListTest, TestSize.Level1)
     auto frameNode1 = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, 1, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto frameNode2 = FrameNode::CreateFrameNode(V2::FLEX_ETS_TAG, 2, AceType::MakeRefPtr<LinearLayoutPattern>(true));
     auto frameNode3 = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-
     frameNode1->MountToParent(frameNode0);
     frameNode2->MountToParent(frameNode1);
     frameNode3->MountToParent(frameNode2);
@@ -1308,15 +1293,12 @@ HWTEST_F(SafeAreaManagerTest, NeedExpandNodeListTest, TestSize.Level1)
     EXPECT_EQ(frameNode1->GetParent()->GetTag(), V2::PAGE_ETS_TAG);
     EXPECT_EQ(frameNode2->GetParent()->GetTag(), V2::COLUMN_ETS_TAG);
     EXPECT_EQ(frameNode3->GetParent()->GetTag(), V2::FLEX_ETS_TAG);
-
     SafeAreaExpandOpts opts = { .type = SAFE_AREA_TYPE_SYSTEM, .edges = SAFE_AREA_EDGE_TOP };
     auto columnLayoutProperty = frameNode1->GetLayoutProperty();
     EXPECT_NE(columnLayoutProperty, nullptr);
-
     columnLayoutProperty->UpdateSafeAreaExpandOpts(opts);
     auto flexLayoutProperty = frameNode2->GetLayoutProperty();
     EXPECT_NE(flexLayoutProperty, nullptr);
-
     flexLayoutProperty->UpdateSafeAreaExpandOpts(opts);
     auto rowLayoutProperty = frameNode3->GetLayoutProperty();
     EXPECT_NE(rowLayoutProperty, nullptr);
@@ -1367,7 +1349,6 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
     auto frameNode3 = FrameNode::CreateFrameNode(
         V2::NAVDESTINATION_CONTENT_ETS_TAG, 3, AceType::MakeRefPtr<LinearLayoutPattern>(true), false);
     auto frameNode4 = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 4, AceType::MakeRefPtr<LinearLayoutPattern>(false));
-
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode0), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode1), true);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode2), true);
@@ -1381,7 +1362,6 @@ HWTEST_F(SafeAreaManagerTest, AddNodeToExpandListIfNeededTest, TestSize.Level1)
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode3), false);
     EXPECT_EQ(safeAreaManager_->AddNodeToExpandListIfNeeded(frameNode4), false);
     EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 5);
-
     safeAreaManager_->ClearNeedExpandNode();
     EXPECT_EQ(safeAreaManager_->GetExpandNodeSet().size(), 0);
 }

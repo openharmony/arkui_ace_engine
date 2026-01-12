@@ -131,6 +131,10 @@ public:
         const std::string& ComponentName, const std::string& propertyName, const std::string& jsonPath) override;
     void SaveGetStateMgmtInfoFunction(GetStateMgmtInfoFunction&& callback) override;
     void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
+    void SaveGetWebInfoByRequestFunction(GetWebInfoByRequestFunction&& callback) override;
+    void GetWebInfoByRequest(int32_t webId, const std::string& request) override;
+    void SendWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request,
+        const std::string& result, WebRequestErrorCode errorCode) override;
 
     void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId);
 

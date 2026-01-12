@@ -18,7 +18,7 @@
 
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/picker/picker_base_component.h"
+#include "core/components/button/button_theme.h"
 #include "core/components_ng/pattern/button/button_layout_property.h"
 #include "core/components_ng/pattern/picker/datepicker_event_hub.h"
 #include "core/components_ng/pattern/picker/datepicker_layout_property.h"
@@ -29,7 +29,6 @@
 
 namespace OHOS::Ace::NG {
 class DateTimeAnimationController;
-class CheckBoxPaintProperty;
 class DatePickerPattern;
 class ACE_EXPORT DatePickerDialogView {
 public:
@@ -75,8 +74,8 @@ private:
     static RefPtr<FrameNode> CreateStackNode();
     static RefPtr<FrameNode> CreateColumnNode();
     static RefPtr<FrameNode> CreateButtonNode();
-    static void UpdateCheckboxPaintProperty(const RefPtr<CheckBoxPaintProperty>& checkboxPaintProps,
-    bool isLunar, const CheckboxSettingData& checkboxSettingData);
+    static void UpdateCheckboxPaintProperty(
+        FrameNode* frameNode, bool isLunar, const CheckboxSettingData& checkboxSettingData);
     static void CreateLunarswitchNode(const RefPtr<FrameNode>& contentColumn, const RefPtr<FrameNode>& dateNode,
         std::function<void(const bool)>&& changeEvent, bool isLunar, const CheckboxSettingData& checkboxSettingData);
     static void SetTitleMouseHoverEvent(const RefPtr<FrameNode>& titleRow);

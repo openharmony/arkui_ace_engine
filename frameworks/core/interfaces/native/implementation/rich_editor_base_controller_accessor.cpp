@@ -224,6 +224,14 @@ void SetTypingStyleImpl(Ark_RichEditorBaseController peer,
     auto typingStyle = Converter::OptConvert<UpdateSpanStyle>(*value);
     peer->SetTypingStyle(typingStyle, textStyle);
 }
+void SetTypingParagraphStyleImpl(Ark_RichEditorBaseController peer,
+                                 const Opt_RichEditorParagraphStyle* style)
+{
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(style);
+    auto typingParagraphStyle = Converter::OptConvert<UpdateParagraphStyle>(*style);
+    peer->SetTypingParagraphStyle(typingParagraphStyle);
+}
 void SetSelectionImpl(Ark_RichEditorBaseController peer,
                       const Ark_Int32* selectionStart,
                       const Ark_Int32* selectionEnd,
@@ -294,6 +302,7 @@ const GENERATED_ArkUIRichEditorBaseControllerAccessor* GetRichEditorBaseControll
         RichEditorBaseControllerAccessor::CloseSelectionMenuImpl,
         RichEditorBaseControllerAccessor::GetTypingStyleImpl,
         RichEditorBaseControllerAccessor::SetTypingStyleImpl,
+        RichEditorBaseControllerAccessor::SetTypingParagraphStyleImpl,
         RichEditorBaseControllerAccessor::SetSelectionImpl,
         RichEditorBaseControllerAccessor::IsEditingImpl,
         RichEditorBaseControllerAccessor::StopEditingImpl,

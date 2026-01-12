@@ -29,7 +29,17 @@ class DataCoder {
    * Serialize an object to a JSON2
    */
   public static stringify<T>(value: T): string {
-    return this.FORMAT_TAG + JSON2.stringify(value);
+    const origValue = ObserveV2.IsMakeObserved(value)
+      ? UIUtilsImpl.instance().getTarget(value)
+      : value;
+
+    const result = this.FORMAT_TAG + JSON2.stringify(origValue);
+
+    if (ObserveV2.IsMakeObserved(value)) {
+      DataCoder.touchAll(value as unknown as object);
+    }
+
+    return result;
   }
 
   /**
@@ -57,16 +67,21 @@ class DataCoder {
       factory = (_: object): TypeConstructor<S> => {
         return class {
           constructor() {
-            return defaultSubCreator();
+            return defaultSubCreator() ?? DataCoder.throwInvalidSubCreatorResult();
           }
         } as TypeConstructor<S>;
       };
     }
 
     try {
-      const dst = { root: origTarget };
-      const src = { root: source };
-      this.restorePropValue(dst, 'root', src, 'root', { factory });
+      if (!nullOrUndef(source) && globalThis.isSendable(source)) {
+        // The root is Sendable; only properties are restored
+        this.restoreObject(origTarget, source, {});
+      } else {
+        const dst = { root: origTarget };
+        const src = { root: source };
+        this.restorePropValue(dst, 'root', src, 'root', { factory });
+      }
     } finally {
       this.visited_.clear();
     }
@@ -76,19 +91,33 @@ class DataCoder {
       return target;
     }
 
-    // Touch the makeObserved collection items so its getter records dependencies
+    return DataCoder.touchAll(target);
+  }
+
+  // Recursively touch all properties of an object to record dependencies
+  private static touchAll<T>(target: T, visited: Set<object> = new Set()): T {
+    if (typeof target !== 'object' || target === null || visited.has(target)) {
+      return target;
+    }
+
+    visited.add(target);
+
     if ([Array, Map, Set, SendableArray, SendableMap, SendableSet].some(clazz => target instanceof clazz)) {
-      (target as any)?.forEach?.(() => {});
+      (target as unknown as { forEach: Function }).forEach?.((value: unknown) => {
+        DataCoder.touchAll(value, visited);
+      });
+      return target;
     }
 
-    // Touch the makeObserved Object props to record dependencies
-    if (typeof target === 'object' && target != null) {
-      Object.entries(target).forEach(() => {});
-    }
-
-    // Touch the makeObserved Date so its getter records dependencies
     if (target instanceof Date) {
       target.getTime();
+      return target;
+    }
+
+    for (const key in target) {
+      if (Object.prototype.hasOwnProperty.call(target, key)) {
+        DataCoder.touchAll((target as Record<string, unknown>)[key], visited);
+      }
     }
 
     return target;
@@ -310,6 +339,10 @@ class DataCoder {
 
   private static throwNoFactory<T>(targetProp: string): void {
     throw new Error(`Miss @Type in object defined, the property name is ${targetProp}`);
+  }
+
+  private static throwInvalidSubCreatorResult(): never {
+    throw new Error(`The defaultSubCreator returned invalid value`);
   }
 
 }

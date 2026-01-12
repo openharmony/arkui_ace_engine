@@ -17,17 +17,30 @@
 
 #include "base/memory/ace_type.h"
 #include "bridge/declarative_frontend/jsview/js_lazy_foreach_component.h"
-#include "core/components_v2/tabs/tabs_component.h"
+#include "core/common/dynamic_module_helper.h"
+#include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
 
 namespace OHOS::Ace::Framework {
+namespace {
+const ArkUIInnerTabsModifier* GetTabsInnerModifier()
+{
+    static const ArkUIInnerTabsModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("tabs");
+        CHECK_NULL_RETURN(loader, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIInnerTabsModifier*>(loader->GetCustomModifier());
+    }
+    return cachedModifier;
+}
+}
 
 void LazyForEachModelImpl::Create(const RefPtr<LazyForEachActuator>& actuator)
 {
     auto component = AceType::DynamicCast<JSLazyForEachComponent>(actuator);
 
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
-    auto tabsComponent = AceType::DynamicCast<V2::TabsComponent>(mainComponent);
-    if (tabsComponent) {
+    auto* modifier = GetTabsInnerModifier();
+    if (modifier && modifier->isTabsComponent(mainComponent)) {
         component->ExpandChildrenOnInitial();
     }
     ViewStackProcessor::GetInstance()->Push(component);

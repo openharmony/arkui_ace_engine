@@ -42,6 +42,11 @@ public:
         return *ptr_;
     }
 
+    const T* operator->() const
+    {
+        return ptr_.operator->();
+    }
+
     T* operator->()
     {
         return ptr_.operator->();
@@ -61,6 +66,11 @@ public:
     {
         ptr_ = other.ptr_;
         return *this;
+    }
+
+    operator bool() const
+    {
+        return ptr_ != nullptr;
     }
 };
 
@@ -91,11 +101,6 @@ public:
     T& operator*()
     {
         return *ptr_;
-    }
-
-    T* operator->()
-    {
-        return ptr_;
     }
 
     bool operator==(std::nullptr_t) const

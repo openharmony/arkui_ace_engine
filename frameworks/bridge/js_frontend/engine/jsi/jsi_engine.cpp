@@ -353,7 +353,7 @@ void SetDomAttributesWithObject(const shared_ptr<JsRuntime>& runtime, const std:
         auto chartBridge = AceType::MakeRefPtr<JsiChartBridge>();
         chartBridge->ParseAttrSingleSegment(runtime, value);
         command.SetSegments(chartBridge->GetSegments());
-    } else if (keyStr == DOM_CLOCK_CONFIG) {
+    } else if (keyStr == "clockconfig") {
         auto clockBridge = AceType::MakeRefPtr<JsiClockBridge>();
         clockBridge->ParseClockConfig(runtime, value);
         command.SetClockConfig(clockBridge->GetClockConfig());

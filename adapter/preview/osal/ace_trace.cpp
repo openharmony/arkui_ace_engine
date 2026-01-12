@@ -25,4 +25,5 @@ void AceAsyncTraceEnd(int32_t taskId, const char* name, bool isAnimationTrace) {
 void AceAsyncTraceBeginCommercial(int32_t taskId, const char* name, bool isAnimationTrace) {}
 void AceAsyncTraceEndCommercial(int32_t taskId, const char* name, bool isAnimationTrace) {}
 void AceCountTrace(const char *key, int32_t count) {}
+void AceSetResTraceId(uint32_t traceType, uint64_t traceId, uint32_t* pOldTraceType, uint64_t* pOldTraceId) {}
 } // namespace OHOS::Ace

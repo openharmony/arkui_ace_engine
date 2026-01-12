@@ -449,7 +449,8 @@ shared_ptr<JsValue> JsiAnimatorBridgeUtils::JsAnimatorReset(shared_ptr<JsRuntime
     auto page = GetPageById(runtime, pageId);
     if (!page) {
         LOGE("no page found for pageId: %{public}d", pageId);
-        runtime->ThrowError("Internal error. Can not find the page for pageId.", ERROR_CODE_INTERNAL_ERROR);
+        runtime->ThrowError("Internal error. Specified page is not found. Can not find the page for pageId.",
+            ERROR_CODE_INTERNAL_ERROR);
         EventReport::SendAnimationException(AnimationExcepType::ANIMATION_PAGE_ERR);
         return runtime->NewUndefined();
     }

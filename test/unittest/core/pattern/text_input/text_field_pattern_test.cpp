@@ -69,7 +69,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern002, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern003
- * @tc.desc: Test TextPattern OnIsFocusActiveUpdate
+ * @tc.desc: Test TextPattern OnIsFocusActiveUpdate.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
@@ -89,7 +89,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern004
- * @tc.desc: Test TextPattern HandleExtendAction
+ * @tc.desc: Test TextPattern HandleExtendAction.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
@@ -109,7 +109,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern005
- * @tc.desc: Test TextPattern HandleBlurEvent
+ * @tc.desc: Test TextPattern HandleBlurEvent.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
@@ -134,7 +134,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern006
- * @tc.desc: Test TextPattern HandleOnUndoAction
+ * @tc.desc: Test TextPattern HandleOnUndoAction.
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)
@@ -1747,8 +1747,14 @@ HWTEST_F(TextFieldPatternTest, TextPattern076, TestSize.Level0)
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
+    /**
+     * @tc.steps: step2. GetPattern.
+     */
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step3. CreateTextField.
+     */
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
     pattern = pattern_;
     pattern->textRect_.width_ = 10;
@@ -1774,6 +1780,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern077, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step2. create mock paragraph.
+     */
     pattern->paragraph_ = MockParagraph::GetOrCreateMockParagraph();
     Offset offset(1.0, 1.0);
     pattern->ConvertTouchOffsetToCaretPosition(offset);
@@ -1801,6 +1810,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern078, TestSize.Level0)
     ASSERT_NE(textFieldNode, nullptr);
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step3. handle select.
+     */
     pattern->HandleSelect(CaretMoveIntent::ParagraghEnd);
 }
 
@@ -2964,6 +2976,12 @@ HWTEST_F(TextFieldPatternTest, TextFieldShiftMultipleSelection001, TestSize.Leve
     ASSERT_NE(pattern, nullptr);
     pattern->frameRect_ = RectF(0, 0, 10, 50);
 
+    /**
+      *
+      * @tc.step:
+      * create a key event
+      *
+      */
     KeyEvent keyEvent;
     keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
     keyEvent.action = KeyAction::DOWN;
@@ -3089,7 +3107,7 @@ HWTEST_F(TextFieldPatternTest, AdjustAutoScrollOffset, TestSize.Level1)
 
 /**
  * @tc.name: TextFieldPatternTestMultiThread
- * @tc.desc: Test OnAttachToFrameNodeMultiThread.
+ * @tc.desc: Test OnAttachToFrameNodeMultiThread
  */
 HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread, TestSize.Level1)
 {
@@ -3104,7 +3122,7 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread, TestSize.Level1)
 
 /**
  * @tc.name: TextFieldPatternTestMultiThread2
- * @tc.desc: Test OnAttachToFrameNodeMultiThread.
+ * @tc.desc: Test OnAttachToFrameNodeMultiThread
  */
 HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread2, TestSize.Level1)
 {
@@ -3119,7 +3137,7 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread2, TestSize.Level1
 
 /**
  * @tc.name: TextFieldPatternTestMultiThread3
- * @tc.desc: Test OnAttachToFrameNodeMultiThread.
+ * @tc.desc: Test OnAttachToFrameNodeMultiThread
  */
 HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread3, TestSize.Level1)
 {
@@ -3130,11 +3148,18 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread3, TestSize.Level1
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->StartTwinklingMultiThread();
+    MoveCaretToContentRectData val = {
+        .index = 0,
+        .textAffinity = TextAffinity::DOWNSTREAM,
+        .isEditorValueChanged = true,
+        .moveContent = false
+    };
+    pattern->MoveCaretToContentRectMultiThread(val);
 }
 
 /**
  * @tc.name: TextInputResponseAreaGetChildOffset
- * @tc.desc: test TextInputResponseArea GetChildOffset method.
+ * @tc.desc: test TextInputResponseArea GetChildOffset method
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextInputResponseAreaGetChildOffset, TestSize.Level0)
@@ -3157,10 +3182,10 @@ HWTEST_F(TextFieldPatternTest, TextInputResponseAreaGetChildOffset, TestSize.Lev
      * @tc.steps: step2. get childOffset
      */
     auto offset = responseArea->GetChildOffset(parentSize, contentRect, childSize, nodeWidth);
-    EXPECT_EQ(offset, OffsetF(75.0f, 20.0f));
+    EXPECT_EQ(offset, OffsetF(20.0f, 30.0f));
     responseArea->hostPattern_.Reset();
     offset = responseArea->GetChildOffset(parentSize, contentRect, childSize, nodeWidth);
-    EXPECT_EQ(offset, OffsetF(40.0f, 40.0f));
+    EXPECT_EQ(offset, OffsetF(15.0f, 30.0f));
 }
 
 /**

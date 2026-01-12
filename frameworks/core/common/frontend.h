@@ -90,7 +90,7 @@ enum class FrontendType {
 struct PageTarget;
 
 
-// for Arkts1.2
+// for Arkts static
 struct PageRouterOptions {
     std::string url;
     std::string params;
@@ -193,36 +193,22 @@ public:
 
     virtual void PushPage(const std::string& url, const std::string& params) = 0;
 
-    // For ArkTS1.2
-    virtual void* PushExtender(const std::string& url, const std::string& params, bool recoverable,
-        std::function<void()>&& finishCallback, void* jsNode)
-    {
-        return nullptr;
-    };
-    virtual void PushNamedRouteExtender(const PageRouterOptions& options,
-        std::function<void()>&& finishCallback, void* jsNode)
-    {
-        return;
-    }
-    virtual void* ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
-        std::function<void()>&& enterFinishCallback, void* jsNode)
-    {
-        return nullptr;
-    };
-    virtual void ReplaceNamedRouteExtender(const PageRouterOptions& options,
-        std::function<void()>&& finishCallback, void* jsNode)
-    {
-        return;
-    }
-    virtual void* RunPageExtender(const std::string& url, const std::string& params, bool recoverable,
-        std::function<void()>&& finishCallback, void* jsNode)
-    {
-        return nullptr;
-    };
-    virtual void BackExtender(const std::string& url, const std::string& params) {};
-    virtual void ClearExtender() {};
-    virtual void ShowAlertBeforeBackPageExtender(const std::string& url) {};
-    virtual void HideAlertBeforeBackPageExtender() {};
+    // For ArkTS static
+    virtual void PushExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) {}
+    virtual void PushNamedRouteExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) {}
+    virtual void ReplaceExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) {}
+    virtual void ReplaceNamedRouteExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) {}
+    virtual void RunPageExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) {}
+    virtual void BackExtender(const std::string& url, const std::string& params) {}
+    virtual void BackToIndexExtender(int32_t index, const std::string& params) {}
+    virtual void ClearExtender() {}
+    virtual void ShowAlertBeforeBackPageExtender(const std::string& url) {}
+    virtual void HideAlertBeforeBackPageExtender() {}
 
     // Gets front-end event handler to handle ace event.
     virtual RefPtr<AceEventHandler> GetEventHandler() = 0;
@@ -483,74 +469,68 @@ public:
 
     virtual void OpenStateMgmtInterop() {}
 
-    // For arkts 1.2
+    // For arkts static
     virtual void NotifyArkoalaConfigurationChange(bool isNeedUpdate) {}
     virtual void InitXBarProxy() {}
 
-    // Create ArkTS1.1 page in ArkTS1.2
+    // Create ArkTS dynamic page in ArkTS static
     virtual void* CreateDynamicPage(int32_t pageId, const std::string& url, const std::string& params, bool recoverable)
     {
         return nullptr;
     }
-    // ArkTS1.2 create ArkTS1.1 page
+    // ArkTS static create ArkTS dynamic page
     virtual void* CreateDynamicExtender(const std::string& url, bool recoverable)
     {
         return nullptr;
     }
-    // ArkTS1.2 push ArkTS1.1
-    virtual void* PushDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
-        std::function<void()>&& finishCallback, void* pageNode)
-    {
-        return nullptr;
-    }
-    // ArkTS1.2 replace ArkTS1.1
-    virtual void* ReplaceDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
-        std::function<void()>&& finishCallback, void* pageNode)
-    {
-        return nullptr;
-    }
-    
-    // push from ArkTS1.1
+    // ArkTS static push ArkTS dynamic
+    virtual void PushDynamicExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* pageNode) {};
+    // ArkTS static replace ArkTS dynamic
+    virtual void ReplaceDynamicExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* pageNode) {};
+
+    // push from ArkTS dynamic
     virtual void PushFromDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& callback, uint32_t routerMode) {}
-    // replace from ArkTS1.1
+    // replace from ArkTS dynamic
     virtual void ReplaceFromDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& callback, uint32_t routerMode) {}
-    // back from ArkTS1.1
+    // back from ArkTS dynamic
     virtual void BackFromDynamicExtender(const std::string& url, const std::string& params) {}
-    // clear from ArkTS1.1
+    // clear from ArkTS dynamic
     virtual void ClearFromDynamicExtender() {}
-    // getLength from ArkTS1.1
+    // getLength from ArkTS dynamic
     virtual int32_t GetLengthFromDynamicExtender()
     {
         return 0;
     }
-    // getStackSize from ArkTS1.1
+    // getStackSize from ArkTS dynamic
     virtual int32_t GetStackSizeFromDynamicExtender()
     {
         return 0;
     }
-    // getParams from ArkTS1.1
+    // getParams from ArkTS dynamic
     virtual std::string GetParamsFromDynamicExtender()
     {
         return "";
     }
-    // getStateByUrl from ArkTS1.1
+    // getStateByUrl from ArkTS dynamic
     virtual bool GetStateByUrlFromDynamicExtender(const std::string& url, std::vector<RouterStateInfo>& stateArray)
     {
         return false;
     }
-    // getStateByIndex from ArkTS1.1
+    // getStateByIndex from ArkTS dynamic
     virtual bool GetStateByIndexFromDynamicExtender(int32_t index, RouterStateInfo& state)
     {
         return false;
     }
-    // getState from ArkTS1.1
+    // getState from ArkTS dynamic
     virtual bool GetStateFromDynamicExtender(RouterStateInfo& state)
     {
         return false;
     }
-    // from pageIndex when ArkTS1.2 push ArkTS1.1
+    // from pageIndex when ArkTS static push ArkTS dynamic
     virtual int32_t GetCurrentPageIndex() const
     {
         return -1;

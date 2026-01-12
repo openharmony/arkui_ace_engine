@@ -20,15 +20,15 @@
 
 namespace OHOS::Ace {
 
-class RosenUniversalPainter {
+class ACE_FORCE_EXPORT RosenUniversalPainter {
 public:
     RosenUniversalPainter() = default;
     ~RosenUniversalPainter() = default;
 
-    static void DrawHoverBackground(
+    ACE_FORCE_EXPORT static void DrawHoverBackground(
         RSCanvas* canvas, const Rect& paintRect, uint32_t hoverBackgroundColor, double borderRadius);
 
-    static void DrawRRectBackground(
+    ACE_FORCE_EXPORT static void DrawRRectBackground(
         RSCanvas* canvas, const RRect& paintRRect, uint32_t backgroundColor, double dipScale);
 
     static double NormalizeToPx(const Dimension& dimension, double scale);

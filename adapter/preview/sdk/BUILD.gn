@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -132,13 +132,23 @@ if (is_ohos_standard_system) {
 
   ohos_copy("copy_component_model_abc_library") {
     deps = [
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:flowitem",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:gauge",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkbox",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkboxgroup",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:rating",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:waterflow",
     ]
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
             "root_out_dir")
     sources = [
+      "${out_path}/arkui/ace_engine/arkflowitem.abc",
       "${out_path}/arkui/ace_engine/arkgauge.abc",
+      "${out_path}/arkui/ace_engine/arkcheckbox.abc",
+      "${out_path}/arkui/ace_engine/arkcheckboxgroup.abc",
+      "${out_path}/arkui/ace_engine/arkrating.abc",
+      "${out_path}/arkui/ace_engine/arkwaterflow.abc",
     ]
 
     # Output path description: 

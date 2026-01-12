@@ -171,4 +171,20 @@ void ListItemModelStatic::SetAutoScale(FrameNode* frameNode, const std::optional
         ACE_RESET_NODE_LAYOUT_PROPERTY(ArcListItemLayoutProperty, AutoScale, frameNode);
     }
 }
+
+void ListItemModelStatic::ExpandSwipeAction(const NG::FrameNode* listItem, ListItemSwipeActionDirection direction)
+{
+    CHECK_NULL_VOID(listItem);
+    auto listItemPattern = listItem->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(listItemPattern);
+    listItemPattern->ExpandSwipeAction(direction);
+}
+
+void ListItemModelStatic::CollapseSwipeAction(const NG::FrameNode* listItem)
+{
+    CHECK_NULL_VOID(listItem);
+    auto listItemPattern = listItem->GetPattern<ListItemPattern>();
+    CHECK_NULL_VOID(listItemPattern);
+    listItemPattern->CloseSwipeAction(nullptr);
+}
 } // namespace OHOS::Ace::NG

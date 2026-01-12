@@ -1908,7 +1908,7 @@ const ArkUI_AttributeItem* GetMotionPath(ArkUI_NodeHandle node)
     g_attributeItem.size = NUM_0;
     auto* fullImpl = GetFullImpl();
     if (!fullImpl->getNodeModifiers()->getCommonModifier()->getMotionPath(node->uiNodeHandle, &motionPathOptions)) {
-        auto optionPath = new (std::nothrow) char[1];
+        auto optionPath = new char[1];
         optionPath[0] = '\0';
         motionPathOptions.path = optionPath;
         motionPathOptions.from = 0.0f;
@@ -20844,7 +20844,7 @@ const ArkUI_AttributeItem* GetContainerPickerIndicatorStyle(ArkUI_NodeHandle nod
     indicatorStyle =
         fullImpl->getNodeModifiers()->getContainerPickerModifier()->getContainerPickerIndicator(node->uiNodeHandle);
     if (indicatorStyle.type == 1) {
-        g_numberValues[0].i32 = indicatorStyle.type;
+        g_numberValues[0].i32 = static_cast<int32_t>(indicatorStyle.type);
         g_numberValues[1].f32 = indicatorStyle.strokeWidth;
         g_numberValues[2].u32 = indicatorStyle.dividerColor;
         g_numberValues[3].f32 = indicatorStyle.startMargin;

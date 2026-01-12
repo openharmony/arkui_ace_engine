@@ -26,7 +26,7 @@ import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
 import { KeyType, KeySource, Color, HitTestMode, ImageSize, Alignment, BorderStyle, ColoringStrategy, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, ObscuredReasons, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, Axis, ResponseType, FunctionKey, ModifierKey, InteractionHand, GradientDirection, SharedTransitionEffectType, ArrowPointPosition, Placement, LineCapStyle, LineJoinStyle, BarState, CrownSensitivity, EdgeEffect, TextDecorationType, TextDecorationStyle, PlayMode, VerticalAlign, HorizontalAlign, FontWeight, FontStyle, TouchType, CrownAction, ClickEffectLevel, NestedScrollMode, ResponseRegionSupportedTool, PixelRoundCalcPolicy, ScrollSource, IlluminatedType, AccessibilityHoverType, AxisAction, AxisType, AxisModel, MouseButton, MouseAction, TipsAnchorType } from "./enums"
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
-import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, ResourceStr, AccessibilityOptions, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
+import { Position_serializer, DirectionalEdgesT_serializer, Position, DirectionalEdgesT, ConstraintSizeOptions_serializer, ConstraintSizeOptions, ResourceColor, SizeOptions, SizeOptions_serializer, ChainWeightOptions_serializer, Padding_serializer, LocalizedPadding_serializer, BorderOptions_serializer, EdgeStyles_serializer, EdgeWidths_serializer, LocalizedEdgeWidths_serializer, EdgeColors_serializer, LocalizedEdgeColors_serializer, BorderRadiuses_serializer, LocalizedBorderRadiuses_serializer, OutlineOptions_serializer, EdgeOutlineStyles_serializer, EdgeOutlineWidths_serializer, OutlineRadiuses_serializer, Edges_serializer, LocalizedEdges_serializer, LocalizedPosition_serializer, AccessibilityActionOptions_serializer, AccessibilityOptions_serializer, Length, ChainWeightOptions, Padding, LocalizedPadding, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, ResourceStr, AccessibilityOptions, ScrollBarMargin_serializer, ScrollBarMargin, Bias, Font, Bias_serializer, Area_serializer, Font_serializer } from "./units"
 import { Resource_serializer } from "./../framework/resource"
 import { Resource } from "global.resource"
 import { TextRange_serializer, TextRange } from "./textCommon"
@@ -82,6 +82,7 @@ import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
 import { Want_serializer } from "./../framework/ohos.app.ability.Want"
 import { UIContext_serializer } from "./../framework/ohos.arkui.UIContext"
 import { unifiedDataChannel_UnifiedData_serializer, unifiedDataChannel_Summary_serializer } from "./../framework/ohos.data.unifiedDataChannel"
+import { OnScrollFrameBeginCallback } from "./scroll"
 // instructive change start
 import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
 import { AnimationExtender } from '#generated';
@@ -2873,6 +2874,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setCompositingFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setMaterialFilterAttribute(value: uiEffect.Filter | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            uiEffect_Filter_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setMaterialFilter(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOpacityAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -3691,6 +3704,18 @@ export class ArkCommonMethodPeer extends PeerNode {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._CommonMethod_setUseEffect0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setUseUnionEffectAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setUseUnionEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setRenderGroupAttribute(value: boolean | undefined): void {
@@ -5465,16 +5490,22 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBlendMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setAdvancedBlendModeAttribute(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): void {
+    setAdvancedBlendModeAttribute(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (effect instanceof BlendMode) {
-            thisSerializer.writeInt8((0).toByte())
-            const effectForIdx0  = effect as BlendMode
-            thisSerializer.writeInt32(effectForIdx0.valueOf())
-        } else if (effect instanceof uiEffect.Blender) {
-            thisSerializer.writeInt8((1).toByte())
-            const effectForIdx1  = effect as uiEffect.Blender
-            uiEffect_BrightnessBlender_serializer.write(thisSerializer, effectForIdx1)
+        if (effect !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const effectTmpValue  = effect!
+            if (effectTmpValue instanceof BlendMode) {
+                thisSerializer.writeInt8((0).toByte())
+                const effectTmpValueForIdx0  = effectTmpValue as BlendMode
+                thisSerializer.writeInt32(effectTmpValueForIdx0.valueOf())
+            } else if (effectTmpValue instanceof uiEffect.Blender) {
+                thisSerializer.writeInt8((1).toByte())
+                const effectTmpValueForIdx1  = effectTmpValue as uiEffect.Blender
+                uiEffect_BrightnessBlender_serializer.write(thisSerializer, effectTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         if (type !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -5662,7 +5693,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenu0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBindContextMenu1Attribute(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): void {
+    setBindContextMenuWithResponseAttribute(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -5678,10 +5709,10 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenu1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuWithResponse(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBindContextMenu2Attribute(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): void {
+    setBindContextMenu1Attribute(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (isShown !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -5704,7 +5735,7 @@ export class ArkCommonMethodPeer extends PeerNode {
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
-        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenu2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenu1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setBindContentCover0Attribute(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): void {
@@ -6197,7 +6228,7 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBar(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setScrollBarColorAttribute(value: Color | int32 | string | undefined): void {
+    setScrollBarColorAttribute(value: Color | int32 | string | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -6214,6 +6245,10 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as string
                 thisSerializer.writeString(valueTmpValueForIdx2)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((3).toByte())
+                const valueTmpValueForIdx3  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -6239,6 +6274,18 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBarWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setScrollBarMarginAttribute(value: ScrollBarMargin | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ScrollBarMargin_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setScrollBarMargin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setNestedScrollAttribute(value: NestedScrollOptions | undefined): void {
@@ -6283,6 +6330,106 @@ export class ArkScrollableCommonMethodPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ScrollableCommonMethod_setFriction(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setContentStartOffsetAttribute(value: double | Resource | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setContentStartOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setContentEndOffsetAttribute(value: double | Resource | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setContentEndOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnWillStartDraggingAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setOnWillStartDragging(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnWillStopDraggingAttribute(value: OnWillStopDraggingCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setOnWillStopDragging(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnDidStopDraggingAttribute(value: OnDidStopDraggingCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setOnDidStopDragging(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnWillStartFlingAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setOnWillStartFling(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnDidStopFlingAttribute(value: VoidCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.holdAndWriteCallback(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ScrollableCommonMethod_setOnDidStopFling(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setOnReachStartAttribute(value: (() => void) | undefined): void {
@@ -7493,6 +7640,9 @@ export interface ResponseRegion {
 export type CustomProperty = undefined | null | Object | Record<string, CustomProperty> | Array<CustomProperty>;
 // instructive change end
 export interface CommonMethod {
+    __get__commonStyles__Internal(): Array<(instance: CommonMethod) => void> | undefined {
+        return undefined;
+    }
     width(value: Length | LayoutPolicy | undefined): this {
         throw new Error("Unimplemented method width")
     }
@@ -7570,6 +7720,9 @@ export interface CommonMethod {
     }
     compositingFilter(value: uiEffect.Filter | undefined): this {
         throw new Error("Unimplemented method compositingFilter")
+    }
+    materialFilter(value: uiEffect.Filter | undefined): this {
+        throw new Error("Unimplemented method materialFilter")
     }
     opacity(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method opacity")
@@ -7731,6 +7884,9 @@ export interface CommonMethod {
     }
     useEffect(value: boolean | undefined): this {
         throw new Error("Unimplemented method useEffect")
+    }
+    useUnionEffect(value: boolean | undefined): this {
+        throw new Error("Unimplemented method useUnionEffect")
     }
     renderGroup(value: boolean | undefined): this {
         throw new Error("Unimplemented method renderGroup")
@@ -8092,7 +8248,7 @@ export interface CommonMethod {
     blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
         throw new Error("Unimplemented method blendMode")
     }
-    advancedBlendMode(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): this {
+    advancedBlendMode(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): this {
         throw new Error("Unimplemented method advancedBlendMode")
     }
     geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
@@ -8113,8 +8269,8 @@ export interface CommonMethod {
     bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
         throw new Error("Unimplemented method bindContextMenu")
     }
-    bindContextMenu(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
-        throw new Error("Unimplemented method bindContextMenu")
+    bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
+        throw new Error("Unimplemented method bindContextMenuWithResponse")
     }
     bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
         throw new Error("Unimplemented method bindContextMenu")
@@ -8155,7 +8311,9 @@ export interface CommonMethod {
     // instructive change begin
     applyAttributesFinish(): void {}
     // instructive change end
-}
+// do not delete the comment on the next line
+} // end CommonMethod
+
 export class ArkCommonMethodStyle implements CommonMethod {
     width_value?: Length | LayoutPolicy | undefined
     height_value?: Length | LayoutPolicy | undefined
@@ -8183,6 +8341,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     backgroundFilter_value?: uiEffect.Filter | undefined
     foregroundFilter_value?: uiEffect.Filter | undefined
     compositingFilter_value?: uiEffect.Filter | undefined
+    materialFilter_value?: uiEffect.Filter | undefined
     opacity_value?: double | Resource | undefined
     border_value?: BorderOptions | undefined
     borderStyle_value?: BorderStyle | EdgeStyles | undefined
@@ -8233,6 +8392,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     hueRotate_value?: double | string | undefined
     useShadowBatching_value?: boolean | undefined
     useEffect_value?: boolean | undefined
+    useUnionEffect_value?: boolean | undefined
     renderGroup_value?: boolean | undefined
     freeze_value?: boolean | undefined
     translate_value?: TranslateOptions | undefined
@@ -8396,6 +8556,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     compositingFilter(value: uiEffect.Filter | undefined): this {
         return this
     }
+    materialFilter(value: uiEffect.Filter | undefined): this {
+        return this
+    }
     opacity(value: double | Resource | undefined): this {
         return this
     }
@@ -8553,6 +8716,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     useEffect(value: boolean | undefined): this {
+        return this
+    }
+    useUnionEffect(value: boolean | undefined): this {
         return this
     }
     renderGroup(value: boolean | undefined): this {
@@ -8915,7 +9081,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
         return this
     }
-    advancedBlendMode(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): this {
+    advancedBlendMode(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): this {
         return this
     }
     geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
@@ -8936,7 +9102,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
         return this
     }
-    bindContextMenu(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
+    bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
         return this
     }
     bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
@@ -9132,11 +9298,14 @@ export interface ScrollableCommonMethod extends CommonMethod {
     scrollBar(value: BarState | undefined): this {
         throw new Error("Unimplemented method scrollBar")
     }
-    scrollBarColor(value: Color | int32 | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
         throw new Error("Unimplemented method scrollBarColor")
     }
     scrollBarWidth(value: double | string | undefined): this {
         throw new Error("Unimplemented method scrollBarWidth")
+    }
+    scrollBarMargin(value: ScrollBarMargin | undefined): this {
+        throw new Error("Unimplemented method scrollBarMargin")
     }
     nestedScroll(value: NestedScrollOptions | undefined): this {
         throw new Error("Unimplemented method nestedScroll")
@@ -9146,6 +9315,27 @@ export interface ScrollableCommonMethod extends CommonMethod {
     }
     friction(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method friction")
+    }
+    contentStartOffset(value: double | Resource | undefined): this {
+        throw new Error("Unimplemented method contentStartOffset")
+    }
+    contentEndOffset(value: double | Resource | undefined): this {
+        throw new Error("Unimplemented method contentEndOffset")
+    }
+    onWillStartDragging(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onWillStartDragging")
+    }
+    onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+        throw new Error("Unimplemented method onWillStopDragging")
+    }
+    onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+        throw new Error("Unimplemented method onDidStopDragging")
+    }
+    onWillStartFling(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onWillStartFling")
+    }
+    onDidStopFling(value: VoidCallback | undefined): this {
+        throw new Error("Unimplemented method onDidStopFling")
     }
     onReachStart(value: (() => void) | undefined): this {
         throw new Error("Unimplemented method onReachStart")
@@ -9185,10 +9375,13 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
     scrollBar(value: BarState | undefined): this {
         return this
     }
-    scrollBarColor(value: Color | int32 | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
         return this
     }
     scrollBarWidth(value: double | string | undefined): this {
+        return this
+    }
+    scrollBarMargin(value: ScrollBarMargin | undefined): this {
         return this
     }
     nestedScroll(value: NestedScrollOptions | undefined): this {
@@ -9198,6 +9391,27 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
         return this
     }
     friction(value: double | Resource | undefined): this {
+        return this
+    }
+    contentStartOffset(value: double | Resource | undefined): this {
+        return this
+    }
+    contentEndOffset(value: double | Resource | undefined): this {
+        return this
+    }
+    onWillStartDragging(value: VoidCallback | undefined): this {
+        return this
+    }
+    onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+        return this
+    }
+    onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+        return this
+    }
+    onWillStartFling(value: VoidCallback | undefined): this {
+        return this
+    }
+    onDidStopFling(value: VoidCallback | undefined): this {
         return this
     }
     onReachStart(value: (() => void) | undefined): this {
@@ -9236,6 +9450,8 @@ export class ArkScrollableCommonMethodStyle extends ArkCommonMethodStyle impleme
 }
 export type OnWillScrollCallback = (scrollOffset: double, scrollState: ScrollState, scrollSource: ScrollSource) => ScrollResult | undefined;
 export type OnScrollCallback = (scrollOffset: double, scrollState: ScrollState) => void;
+export type OnWillStopDraggingCallback = (velocity: double) => void;
+export type OnDidStopDraggingCallback = (willFling: boolean) => void;
 export type OnItemDragStartCallback = (event: ItemDragInfo, itemIndex: int32) => CustomBuilder | undefined;
 export type OnMoveHandler = (from: int32, to: int32) => void;
 export interface ItemDragEventHandler {
@@ -9254,6 +9470,7 @@ export enum EffectEdge {
 }
 export interface EditModeOptions {
     enableGatherSelectedItemsAnimation?: boolean;
+    onGetPreviewBadge?: (() => boolean | int32);
 }
 export interface BackgroundBrightnessOptions {
     rate: double;
@@ -9324,6 +9541,7 @@ export interface Bindable<T = void> {
 }
 export type BindableResourceStr = ResourceStr | Bindable<ResourceStr> | Bindable<Resource> | Bindable<string>;
 export type BindableResourceStrArray = Array<ResourceStr> | Bindable<Array<ResourceStr>> | Bindable<Array<Resource>> | Bindable<Array<string>>;
+export type InputEventType = TouchEvent | MouseEvent | AxisEvent;
 export class ArkCommonMethodComponent extends ComponentBase implements CommonMethod {
     getPeer(): ArkCommonMethodPeer {
         if (!this.peer) {
@@ -9533,6 +9751,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("compositingFilter")) {
             const value_casted = value as (uiEffect.Filter | undefined)
             this.getPeer()?.setCompositingFilterAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public materialFilter(value: uiEffect.Filter | undefined): this {
+        if (this.checkPriority("materialFilter")) {
+            const value_casted = value as (uiEffect.Filter | undefined)
+            this.getPeer()?.setMaterialFilterAttribute(value_casted)
             return this
         }
         return this
@@ -9961,6 +10187,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("useEffect")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setUseEffect0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public useUnionEffect(value: boolean | undefined): this {
+        if (this.checkPriority("useUnionEffect")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setUseUnionEffectAttribute(value_casted)
             return this
         }
         return this
@@ -10968,9 +11202,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public advancedBlendMode(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): this {
+    public advancedBlendMode(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): this {
         if (this.checkPriority("advancedBlendMode")) {
-            const effect_casted = effect as (BlendMode | uiEffect.Blender)
+            const effect_casted = effect as (BlendMode | uiEffect.Blender | undefined)
             const type_casted = type as (BlendApplyType | undefined)
             this.getPeer()?.setAdvancedBlendModeAttribute(effect_casted, type_casted)
             return this
@@ -11033,11 +11267,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public bindContextMenu(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
-        if (this.checkPriority("bindContextMenu")) {
+    public bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
+        if (this.checkPriority("bindContextMenuWithResponse")) {
             const content_casted = content as (CustomBuilderT<ResponseType> | undefined)
             const options_casted = options as (ContextMenuOptions | undefined)
-            this.getPeer()?.setBindContextMenu1Attribute(content_casted, options_casted)
+            this.getPeer()?.setBindContextMenuWithResponseAttribute(content_casted, options_casted)
             return this
         }
         return this
@@ -11047,7 +11281,7 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const isShown_casted = isShown as (boolean | undefined)
             const content_casted = content as (CustomBuilder | undefined)
             const options_casted = options as (ContextMenuOptions | undefined)
-            this.getPeer()?.setBindContextMenu2Attribute(isShown_casted, content_casted, options_casted)
+            this.getPeer()?.setBindContextMenu1Attribute(isShown_casted, content_casted, options_casted)
             return this
         }
         return this
@@ -11275,9 +11509,9 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         }
         return this
     }
-    public scrollBarColor(value: Color | int32 | string | undefined): this {
+    public scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
         if (this.checkPriority("scrollBarColor")) {
-            const value_casted = value as (Color | int32 | string | undefined)
+            const value_casted = value as (Color | int32 | string | Resource | undefined)
             this.getPeer()?.setScrollBarColorAttribute(value_casted)
             return this
         }
@@ -11287,6 +11521,14 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         if (this.checkPriority("scrollBarWidth")) {
             const value_casted = value as (double | string | undefined)
             this.getPeer()?.setScrollBarWidthAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public scrollBarMargin(value: ScrollBarMargin | undefined): this {
+        if (this.checkPriority("scrollBarMargin")) {
+            const value_casted = value as (ScrollBarMargin | undefined)
+            this.getPeer()?.setScrollBarMarginAttribute(value_casted)
             return this
         }
         return this
@@ -11311,6 +11553,62 @@ export class ArkScrollableCommonMethodComponent extends ArkCommonMethodComponent
         if (this.checkPriority("friction")) {
             const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setFrictionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public contentStartOffset(value: double | Resource | undefined): this {
+        if (this.checkPriority("contentStartOffset")) {
+            const value_casted = value as (double | Resource | undefined)
+            this.getPeer()?.setContentStartOffsetAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public contentEndOffset(value: double | Resource | undefined): this {
+        if (this.checkPriority("contentEndOffset")) {
+            const value_casted = value as (double | Resource | undefined)
+            this.getPeer()?.setContentEndOffsetAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWillStartDragging(value: VoidCallback | undefined): this {
+        if (this.checkPriority("onWillStartDragging")) {
+            const value_casted = value as (VoidCallback | undefined)
+            this.getPeer()?.setOnWillStartDraggingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+        if (this.checkPriority("onWillStopDragging")) {
+            const value_casted = value as (OnWillStopDraggingCallback | undefined)
+            this.getPeer()?.setOnWillStopDraggingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+        if (this.checkPriority("onDidStopDragging")) {
+            const value_casted = value as (OnDidStopDraggingCallback | undefined)
+            this.getPeer()?.setOnDidStopDraggingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onWillStartFling(value: VoidCallback | undefined): this {
+        if (this.checkPriority("onWillStartFling")) {
+            const value_casted = value as (VoidCallback | undefined)
+            this.getPeer()?.setOnWillStartFlingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public onDidStopFling(value: VoidCallback | undefined): this {
+        if (this.checkPriority("onDidStopFling")) {
+            const value_casted = value as (VoidCallback | undefined)
+            this.getPeer()?.setOnDidStopFlingAttribute(value_casted)
             return this
         }
         return this
@@ -11674,6 +11972,17 @@ export class UICommonEvent_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return UICommonEventInternal.fromPtr(ptr)
+    }
+}
+export class UIScrollableCommonEvent_serializer {
+    public static write(buffer: SerializerBase, value: UIScrollableCommonEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): UIScrollableCommonEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return UIScrollableCommonEventInternal.fromPtr(ptr)
     }
 }
 export class VerticalAlignParam_serializer {
@@ -12491,6 +12800,14 @@ export class EditModeOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForOnGetPreviewBadge  = value.onGetPreviewBadge
+        if (valueHolderForOnGetPreviewBadge !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnGetPreviewBadgeTmpValue  = valueHolderForOnGetPreviewBadge!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnGetPreviewBadgeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): EditModeOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -12500,7 +12817,29 @@ export class EditModeOptions_serializer {
             enableGatherSelectedItemsAnimationTmpBuf = valueDeserializer.readBoolean()
         }
         const enableGatherSelectedItemsAnimationTmpResult : boolean | undefined = enableGatherSelectedItemsAnimationTmpBuf
-        let value : EditModeOptions = ({enableGatherSelectedItemsAnimation: enableGatherSelectedItemsAnimationTmpResult} as EditModeOptions)
+        const onGetPreviewBadgeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onGetPreviewBadgeTmpBuf : (() => boolean | int32) | undefined = undefined
+        if ((onGetPreviewBadgeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onGetPreviewBadgeTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onGetPreviewBadgeTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onGetPreviewBadgeTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onGetPreviewBadgeTmpBuf = ():boolean | int32 => {
+                const onGetPreviewBadgeTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.writeInt32(onGetPreviewBadgeTmpBuf_BufResource.resourceId);
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.writePointer(onGetPreviewBadgeTmpBuf_BufCall);
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.writePointer(onGetPreviewBadgeTmpBuf_BufCallSync);
+                let onGetPreviewBadgeTmpBuf_BufContinuationValue : boolean | int32 | undefined;
+                const onGetPreviewBadgeTmpBuf_BufContinuationCallback : ((value: boolean | int32) => void) = (value: boolean | int32):void => {
+                onGetPreviewBadgeTmpBuf_BufContinuationValue = value;
+            }
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.holdAndWriteCallback(onGetPreviewBadgeTmpBuf_BufContinuationCallback);
+                InteropNativeModule._CallCallbackSync(10, 250356603, onGetPreviewBadgeTmpBuf_BufArgsSerializer.asBuffer(), onGetPreviewBadgeTmpBuf_BufArgsSerializer.length());
+                onGetPreviewBadgeTmpBuf_BufArgsSerializer.release();
+                return (onGetPreviewBadgeTmpBuf_BufContinuationValue as boolean | int32);
+            }
+        }
+        const onGetPreviewBadgeTmpResult : (() => boolean | int32) | undefined = onGetPreviewBadgeTmpBuf
+        let value : EditModeOptions = ({enableGatherSelectedItemsAnimation: enableGatherSelectedItemsAnimationTmpResult, onGetPreviewBadge: onGetPreviewBadgeTmpResult} as EditModeOptions)
         return value
     }
 }
@@ -25724,6 +26063,113 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
     }
     preventDefault_serialize(): void {
         ArkUIGeneratedNativeModule._TouchEvent_preventDefault(this.peer!.ptr)
+    }
+}
+export interface UIScrollableCommonEvent extends UICommonEvent {
+    setOnReachStart(callback_: (() => void) | undefined): void
+    setOnReachEnd(callback_: (() => void) | undefined): void
+    setOnScrollStart(callback_: (() => void) | undefined): void
+    setOnScrollStop(callback_: (() => void) | undefined): void
+    setOnScrollFrameBegin(callback_: OnScrollFrameBeginCallback | undefined): void
+}
+export class UIScrollableCommonEventInternal extends UICommonEventInternal implements MaterializedBase,UIScrollableCommonEvent {
+    constructor(peerPtr: KPointer) {
+        super(peerPtr)
+    }
+    static construct(ptr: KPointer): UIScrollableCommonEventInternal {
+        const retval  = ArkUIGeneratedNativeModule._UIScrollableCommonEvent_construct(ptr)
+        return new UIScrollableCommonEventInternal(retval)
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._UIScrollableCommonEvent_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): UIScrollableCommonEventInternal {
+        return new UIScrollableCommonEventInternal(ptr)
+    }
+    public setOnReachStart(callback_: (() => void) | undefined): void {
+        const callback__casted = callback_ as ((() => void) | undefined)
+        this.setOnReachStart_serialize(callback__casted)
+        return
+    }
+    public setOnReachEnd(callback_: (() => void) | undefined): void {
+        const callback__casted = callback_ as ((() => void) | undefined)
+        this.setOnReachEnd_serialize(callback__casted)
+        return
+    }
+    public setOnScrollStart(callback_: (() => void) | undefined): void {
+        const callback__casted = callback_ as ((() => void) | undefined)
+        this.setOnScrollStart_serialize(callback__casted)
+        return
+    }
+    public setOnScrollStop(callback_: (() => void) | undefined): void {
+        const callback__casted = callback_ as ((() => void) | undefined)
+        this.setOnScrollStop_serialize(callback__casted)
+        return
+    }
+    public setOnScrollFrameBegin(callback_: OnScrollFrameBeginCallback | undefined): void {
+        const callback__casted = callback_ as (OnScrollFrameBeginCallback | undefined)
+        this.setOnScrollFrameBegin_serialize(callback__casted)
+        return
+    }
+    setOnReachStart_serialize(callback_: (() => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIScrollableCommonEvent_setOnReachStart(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnReachEnd_serialize(callback_: (() => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIScrollableCommonEvent_setOnReachEnd(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnScrollStart_serialize(callback_: (() => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIScrollableCommonEvent_setOnScrollStart(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnScrollStop_serialize(callback_: (() => void) | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIScrollableCommonEvent_setOnScrollStop(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnScrollFrameBegin_serialize(callback_: OnScrollFrameBeginCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIScrollableCommonEvent_setOnScrollFrameBegin(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export namespace cursorControl {

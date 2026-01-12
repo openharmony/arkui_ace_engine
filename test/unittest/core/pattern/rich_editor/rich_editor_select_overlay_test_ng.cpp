@@ -88,10 +88,17 @@ void RichEditorSelectOverlayTestNg::TearDownTestSuite()
  */
 HWTEST_F(RichEditorSelectOverlayTestNg, GetSelectArea, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get RichEditorPattern and set hasTransform_ true
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     richEditorPattern->selectOverlay_->hasTransform_ = true;
+
+    /**
+     * @tc.steps: step2. get select area
+     */
     RectF rect(10, 10, 100, 100);
     auto selectArea = richEditorPattern->selectOverlay_->GetSelectArea();
     EXPECT_NE(selectArea.GetX(), rect.GetX());
@@ -258,9 +265,14 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnAncestorNodeChanged, TestSize.Level0)
     richEditorNode_->parent_ = frameNode;
     FrameNodeChangeInfoFlag flag = FRAME_NODE_CHANGE_GEOMETRY_CHANGE;
     richEditorNode_->changeInfoFlag_ = FRAME_NODE_CHANGE_END_SCROLL;
-    EXPECT_NE(richEditorPattern->selectOverlay_->GetPattern<RichEditorPattern>(), nullptr);
-    richEditorPattern->selectOverlay_->OnAncestorNodeChanged(flag);
+    auto selectOverlay = richEditorPattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+    EXPECT_NE(selectOverlay->GetPattern<RichEditorPattern>(), nullptr);
+    selectOverlay->OnAncestorNodeChanged(flag);
     EXPECT_NE(richEditorNode_->changeInfoFlag_, FRAME_NODE_CHANGE_INFO_NONE);
+    auto viewPort = selectOverlay->GetAncestorNodeViewPort();
+    ASSERT_TRUE(viewPort.has_value());
+    EXPECT_EQ(viewPort.value(), RectF(0.0f, 0.0f, 0.0f, 0.0f));
 }
 
 /**
@@ -306,6 +318,29 @@ HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove002, TestSize.Level0)
     richEditorPattern->selectOverlay_->SetHandleLevelMode(HandleLevelMode::EMBED);
     richEditorPattern->selectOverlay_->OnHandleMove(RectF(1.0f, 0.0f, 10.0f, 10.0f), false);
     EXPECT_NE(richEditorPattern->textSelector_.firstHandle.GetOffset().GetX(), 1.0f);
+}
+
+/**
+ * @tc.name: OnHandleMove003
+ * @tc.desc: test OnHandleMove
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove003, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto focusHub = richEditorPattern->GetHost()->GetOrCreateFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+    focusHub->currentFocus_ = true;
+    AddImageSpan();
+    richEditorPattern->selectOverlay_->handleLevelMode_ = HandleLevelMode::EMBED;
+    richEditorPattern->selectOverlay_->hasTransform_ = true;
+    richEditorPattern->ShowSelectOverlay(
+        richEditorPattern->textSelector_.firstHandle, richEditorPattern->textSelector_.secondHandle, false);
+    richEditorPattern->selectOverlay_->SetHandleLevelMode(HandleLevelMode::EMBED);
+    richEditorPattern->selectOverlay_->OnHandleMove(RectF(1.0f, 0.0f, 10.0f, 10.0f), false);
+    EXPECT_NE(richEditorPattern->magnifierController_->localOffset_.GetX(), 0.0f);
 }
 
 /**
@@ -1446,11 +1481,11 @@ HWTEST_F(RichEditorSelectOverlayTestNg, DumpInfo002, TestSize.Level0)
 }
 
 /**
- * @tc.name: OnHandleMove001
+ * @tc.name: OnHandleMove004
  * @tc.desc: test OnHandleMove
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove003, TestSize.Level0)
+HWTEST_F(RichEditorSelectOverlayTestNg, OnHandleMove004, TestSize.Level0)
 {
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
@@ -1633,5 +1668,38 @@ HWTEST_F(RichEditorSelectOverlayTestNg, IsHandlesShow001, TestSize.Level0)
 
     auto ret = richEditorPattern->IsHandlesShow();
     EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: ChangeHandleHeight001
+ * @tc.desc: test RichEditorSelectOverlay ChangeHandleHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorSelectOverlayTestNg, ChangeHandleHeight001, TestSize.Level1)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto selectOverlay = richEditorPattern->selectOverlay_;
+    ASSERT_NE(selectOverlay, nullptr);
+
+    richEditorPattern->textSelector_.Update(0, 5);
+    auto& firstHandle = richEditorPattern->textSelector_.firstHandle;
+    auto& secondHandle = richEditorPattern->textSelector_.secondHandle;
+    float handleHeight = 100.0f;
+    firstHandle.SetHeight(handleHeight);
+    secondHandle.SetHeight(handleHeight);
+
+    GestureEvent info;
+    selectOverlay->ChangeHandleHeight(info, true);
+    EXPECT_TRUE(NearEqual(firstHandle.Height(), handleHeight));
+    selectOverlay->ChangeHandleHeight(info, false);
+    EXPECT_TRUE(NearEqual(secondHandle.Height(), handleHeight));
+    selectOverlay->handleLevelMode_ = HandleLevelMode::EMBED;
+    selectOverlay->ChangeHandleHeight(info, false);
+    EXPECT_TRUE(NearEqual(secondHandle.Height(), handleHeight));
+    selectOverlay->hasTransform_ = true;
+    selectOverlay->ChangeHandleHeight(info, true);
+    EXPECT_TRUE(NearEqual(firstHandle.Height(), handleHeight));
 }
 } // namespace OHOS::Ace::NG

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { KPointer, KInt, KLong, KBoolean, KFloat, KUInt, KSerializerBuffer  } from '@koalaui/interop';
+import { KPointer, KInt, KLong, KBoolean, KFloat, KDouble, KUInt, KSerializerBuffer  } from '@koalaui/interop';
 import { default as drawing } from '@ohos.graphics.drawing';
 import image from '@ohos.multimedia.image';
 import webview from '@ohos.web.webview';
@@ -69,6 +69,7 @@ export class ArkUIAniModule {
     native static _Extractors_ToICurvePtr(value: curves.ICurve): KPointer;
     native static _Extractors_ToMatrix4TransitPtr(value: matrix4.Matrix4Transit): KPointer;
     native static _Extractors_ToUiEffectFilterPtr(value: uiEffect.Filter): KPointer;
+    native static _Extractors_ToUiEffectBrightnessBlenderPtr(value: uiEffect.BrightnessBlender): KPointer;
     native static _Extractors_ToUiEffectVisualEffectPtr(value: uiEffect.VisualEffect): KPointer;
     native static _Extractors_ToUiMaterialMaterialPtr(value: uiMaterial.Material): KPointer;
     native static _Extractors_ToDrawContextPtr(value: DrawContext): KPointer;
@@ -113,6 +114,7 @@ export class ArkUIAniModule {
     native static _CustomNode_QueryRouterPageInfo(ptr: KPointer): uiObserver.RouterPageInfo
     native static _CustomNode_QueryRouterPageInfo1(uniqueId: KInt): uiObserver.RouterPageInfo
     native static _BuilderProxyNode_Construct(id: KInt): KPointer
+    native static _DetachedFreeRoot_Construct(id: KInt): KPointer;
     native static _ContentSlot_construct(id: KInt): KPointer
     native static _ContentSlotInterface_setContentSlotOptions(slot: KPointer, content: KPointer): void
     native static _SetDrawCallback(ptr: KPointer, callback: ((context: DrawContext) => void)): void
@@ -126,6 +128,14 @@ export class ArkUIAniModule {
     native static _ResetWaterFlowFooter(ptr: KPointer): void
     native static _SetWaterFlowScroller(ptr: KPointer, scroller: KPointer): void
     native static _SetWaterFlowLayoutMode(ptr: KPointer, mode: KInt): void
+    native static _SetListItemGroupSpace(ptr: KPointer, value: KDouble | string): void
+    native static _SetListItemGroupStyle(ptr: KPointer, value: KInt): void
+    native static _SetListItemGroupHeaderContent(ptr: KPointer, footerContent: KPointer): void
+    native static _SetListItemGroupHeader(ptr: KPointer, footer: KPointer): void
+    native static _ResetListItemGroupHeader(ptr: KPointer): void
+    native static _SetListItemGroupFooterContent(ptr: KPointer, footerContent: KPointer): void
+    native static _SetListItemGroupFooter(ptr: KPointer, footer: KPointer): void
+    native static _ResetListItemGroupFooter(ptr: KPointer): void
     native static _UpdateWaterFlowSection(ptr: KPointer, changeInfo: SectionChangeInfo): void
     native static _SetListChildrenMainSize(ptr: KPointer, value: ChildrenMainSize | undefined): void
     native static _LazyForEachNode_Construct(id: KInt, isRepeat: boolean): KPointer
@@ -206,13 +216,13 @@ export class ArkUIAniModule {
 
     // for componentSnapshot
     native static _ComponentSnapshot_createFromBuilderWithCallback(ptr: KPointer, destroyCallback: () => void,
-        callback: AsyncCallback<image.PixelMap>, delay?: number, checkImageStatus?: boolean,
+        callback: AsyncCallback<image.PixelMap>, delay?: int32, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): void
     native static _ComponentSnapshot_createFromBuilderWithPromise(ptr: KPointer, destroyCallback: () => void,
-        delay?: number, checkImageStatus?: boolean,
+        delay?: int32, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap> | null
     native static _ComponentSnapshot_createFromComponentWithPromise(ptr: KPointer, destroyCallback: () => void,
-        delay?: number, checkImageStatus?: boolean,
+        delay?: int32, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): Promise<image.PixelMap> | null
 
     // for dragController
@@ -231,8 +241,9 @@ export class ArkUIAniModule {
     native static _DragController_setDragEventStrictReportingEnabled(enable: boolean): void
     native static _DragController_cancelDataLoading(key: string): void
     native static _DragController_notifyDragStartReques(requestStatus: dragController.DragStartRequestStatus): void
+    native static _DragController_enableDropDisallowedBadge(enabled: boolean): void
     native static _DragController_getDragPreview(): dragController.DragPreview
-    native static _DragController_setForegroundColor(color: ResourceColor, dragPreviewPtr: KPointer): void
+    native static _DragController_setForegroundColor(color: KLong, dragPreviewPtr: KPointer): void
     native static _DragController_animate(options: dragController.AnimationOptions, handler: () =>void,
         dragPreviewPtr: KPointer): void
     native static _DragController_cleanDragAction(dragActionptr: KPointer): void

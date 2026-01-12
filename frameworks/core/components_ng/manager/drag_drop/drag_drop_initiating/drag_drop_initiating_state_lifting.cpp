@@ -219,10 +219,6 @@ bool DragDropInitiatingStateLifting::CheckDoShowPreview(const RefPtr<FrameNode>&
         TAG_LOGI(AceLogTag::ACE_DRAG, "Not need to show drag preview because of bind context menu");
         return false;
     }
-    if (!frameNode->GetDragPreviewOption().isDragPreviewEnabled) {
-        TAG_LOGI(AceLogTag::ACE_DRAG, "Not need to show drag preview because disable drag preview");
-        return false;
-    }
     return true;
 }
 

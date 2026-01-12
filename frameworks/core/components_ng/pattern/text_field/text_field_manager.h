@@ -43,6 +43,11 @@ struct LaterAvoidInfo {
     int32_t orientation = -1;
 };
 
+enum class CustomKeyboardContinueFeature {
+    ENABLED = 0,
+    DISABLED = 1,
+};
+
 using FillContentMap = std::unordered_map<std::string, std::variant<std::string, bool, int32_t>>;
 
 class ACE_EXPORT TextFieldManagerNG : public ManagerInterface {
@@ -304,6 +309,26 @@ public:
     FillContentMap GetFillContentMap(int32_t id);
     void RemoveFillContentMap(int32_t id);
 
+    void SetLastAvoidOrientation(int32_t lastAvoidOrientation)
+    {
+        lastAvoidOrientation_ = lastAvoidOrientation;
+    }
+
+    std::optional<int32_t> GetLastAvoidOrientation() const
+    {
+        return lastAvoidOrientation_;
+    }
+
+    void SetLastRootHeight(double lastRootHeight)
+    {
+        lastRootHeight_ = lastRootHeight;
+    }
+
+    std::optional<double> GetLastRootHeight() const
+    {
+        return lastRootHeight_;
+    }
+
     int32_t GetAttachInputId() const
     {
         return attachInputId_;
@@ -334,6 +359,16 @@ public:
     }
     void SetIsAskCeliaSupported(bool isAskCeliaSupported);
     std::optional<bool> IsAskCeliaSupported();
+
+    bool GetCustomKeyboardContinueFeature() const
+    {
+        return continueFeature_;
+    }
+
+    void SetCustomKeyboardContinueFeature(bool continueFeature)
+    {
+        continueFeature_ = continueFeature;
+    }
 
 private:
     bool ScrollToSafeAreaHelper(const SafeAreaInsets::Inset& bottomInset, bool isShowKeyboard);
@@ -369,6 +404,7 @@ private:
     LaterAvoidInfo laterAvoidInfo_;
     bool isScrollableChild_ = false;
     bool isImeAttached_ = false;
+    bool continueFeature_ = false;
     std::unordered_map<int32_t, std::function<void()>> avoidSystemKeyboardCallbacks_;
     std::unordered_map<int32_t, std::function<void()>> avoidCustomKeyboardCallbacks_;
     float lastKeyboardOffset_ = 0.0f;
@@ -376,6 +412,8 @@ private:
     int32_t currentCustomId_ = -1;
     WeakPtr<FrameNode> preNode_;
     int32_t attachInputId_ = -1;
+    std::optional<int32_t> lastAvoidOrientation_ = -1;
+    std::optional<double> lastRootHeight_;
     std::optional<bool> isAskCeliaSupported_;
 };
 

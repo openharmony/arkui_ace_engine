@@ -100,6 +100,8 @@ public:
         }
     }
 
+    void CopyInnerEvent(const RefPtr<LongPressEventActuator>& longPressEventActuator);
+
 private:
     bool isForDrag_ = false;
     bool isDisableMouseLeft_ = false;
@@ -125,15 +127,8 @@ public:
         const GetEventTargetImpl& getEventTargetImpl, TouchTestResult& result,
         ResponseLinkResult& responseLinkResult) override;
 
-    void CopyLongPressEvent(const RefPtr<LongPressEventActuator>& longPressEventActuator) override
-    {
-        LongPressEventActuator::CopyLongPressEvent(longPressEventActuator);
-        if (AceType::InstanceOf<LongPressEventActuatorWithMultiSelect>(longPressEventActuator)) {
-            auto multiSelectActuator =
-                AceType::DynamicCast<LongPressEventActuatorWithMultiSelect>(longPressEventActuator);
-            multiSelectHandler_ = multiSelectActuator->multiSelectHandler_;
-        }
-    }
+    void CopyLongPressEvent(const RefPtr<LongPressEventActuator>& longPressEventActuator) override;
+
     void SetMultiSelectHandler(MultiSelectHandler&& handler)
     {
         multiSelectHandler_ = handler;

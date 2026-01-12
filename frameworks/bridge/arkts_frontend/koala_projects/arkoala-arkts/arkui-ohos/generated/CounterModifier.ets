@@ -183,6 +183,7 @@ export class CounterModifier extends CommonMethodModifier implements CounterAttr
         {
             this._onInc_0_flag = AttributeUpdaterFlag.UPDATE
             this._onInc_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onInc_0_flag = AttributeUpdaterFlag.SKIP
@@ -194,6 +195,7 @@ export class CounterModifier extends CommonMethodModifier implements CounterAttr
         {
             this._onDec_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDec_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDec_0_flag = AttributeUpdaterFlag.SKIP
@@ -205,6 +207,7 @@ export class CounterModifier extends CommonMethodModifier implements CounterAttr
         {
             this._enableDec_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableDec_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableDec_0_flag = AttributeUpdaterFlag.SKIP
@@ -216,6 +219,7 @@ export class CounterModifier extends CommonMethodModifier implements CounterAttr
         {
             this._enableInc_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableInc_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableInc_0_flag = AttributeUpdaterFlag.SKIP

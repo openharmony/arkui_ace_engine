@@ -103,6 +103,12 @@ void* UdmfClientImpl::TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedDataIm
     return unifiedData.get();
 }
 
+std::shared_ptr<void> UdmfClientImpl::TransformUnifiedDataSharedPtr(RefPtr<UnifiedData>& unifiedDataImpl)
+{
+    CHECK_NULL_RETURN(unifiedDataImpl, nullptr);
+    return AceType::DynamicCast<UnifiedDataImpl>(unifiedDataImpl)->GetUnifiedData();
+}
+
 RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataForNative(void* rawData)
 {
     CHECK_NULL_RETURN(rawData, nullptr);

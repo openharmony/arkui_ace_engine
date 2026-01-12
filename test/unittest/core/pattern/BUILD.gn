@@ -120,7 +120,7 @@ group("core_pattern_unittest") {
     "time_picker:time_picker_test_ng",
     "toggle:toggle_test_ng",
     "ui_extension:ui_extension_component_test_ng",
-    "union_container:union_container_test",
+    "union_effect_container:union_effect_container_test",
     "video:video_test_ng",
     "view_context:view_context_test_ng",
     "waterflow:water_flow_static_test",

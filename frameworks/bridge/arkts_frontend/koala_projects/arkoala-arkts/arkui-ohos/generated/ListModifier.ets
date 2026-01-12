@@ -16,8 +16,8 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethod, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod, ChildrenMainSize, EditModeOptions, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback } from "./component/common"
-import { BarState, Color, CrownSensitivity, EdgeEffect, Axis, ScrollSource } from "./component/enums"
+import { CommonMethod, NestedScrollOptions, OnWillStopDraggingCallback, OnDidStopDraggingCallback, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod, ChildrenMainSize, EditModeOptions, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback } from "./component/common"
+import { BarState, Color, CrownSensitivity, EdgeEffect, Axis, FocusWrapMode, ScrollSource } from "./component/enums"
 import { Resource } from "global.resource"
 import { extractors, AttributeModifier } from "#handwritten"
 import { RectShape } from "@ohos.arkui.shape"
@@ -26,10 +26,10 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { ModifierState } from './CommonModifier'
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkListPeer, ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, OnScrollVisibleContentChangeCallback, VisibleListContentInfo, ScrollState, ListAttribute } from "./component/list"
+import { ArkListPeer, ListItemAlign, ListDividerOptions, ChainAnimationOptions, StickyStyle, ScrollSnapAlign, ScrollSnapAnimationSpeed, OnScrollVisibleContentChangeCallback, VisibleListContentInfo, ScrollState, ListAttribute } from "./component/list"
 import { int32 } from "@koalaui/common"
 import { OnScrollFrameBeginCallback } from "./component/scroll"
-import { LengthConstrain, Dimension } from "./component/units"
+import { VoidCallback, LengthConstrain, Dimension, ItemFillPolicy, CacheCountInfo, ScrollBarMargin } from "./component/units"
 export class ListModifier extends CommonMethodModifier implements ListAttribute,AttributeModifier<ListAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState	
@@ -47,9 +47,9 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
     _listDirection_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _listDirection_0_0value?: Axis | undefined
     _contentStartOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _contentStartOffset_0_0value?: double | undefined
+    _contentStartOffset_0_0value?: double | Resource | undefined
     _contentEndOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _contentEndOffset_0_0value?: double | undefined
+    _contentEndOffset_0_0value?: double | Resource | undefined
     _divider_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _divider_0_0value?: ListDividerOptions | null | undefined
     _multiSelectable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -72,6 +72,12 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
     _supportEmptyBranchInLazyLoading_0_0value?: boolean | undefined
     _stackFromEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _stackFromEnd_0_0value?: boolean | undefined
+    _focusWrapMode_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _focusWrapMode_0_0value?: FocusWrapMode | undefined
+    _syncLoad_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _syncLoad_0_0value?: boolean | undefined
+    _scrollSnapAnimationSpeed_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _scrollSnapAnimationSpeed_0_0value?: ScrollSnapAnimationSpeed | undefined
     _editModeOptions_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _editModeOptions_0_0value?: EditModeOptions | undefined
     _onScrollIndex_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -97,23 +103,35 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
     _onDidScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onDidScroll_0_0value?: OnScrollCallback | undefined
     _lanes_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _lanes_0_0value?: int32 | LengthConstrain | undefined
+    _lanes_0_0value?: int32 | LengthConstrain | ItemFillPolicy | undefined
     _lanes_0_1value?: Dimension | undefined
     _cachedCount_1_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _cachedCount_1_0value?: int32 | undefined
+    _cachedCount_1_0value?: int32 | CacheCountInfo | undefined
     _cachedCount_1_1value?: boolean | undefined
     _scrollBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollBar_0_0value?: BarState | undefined
     _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarColor_0_0value?: Color | int32 | string | undefined
+    _scrollBarColor_0_0value?: Color | int32 | string | Resource | undefined
     _scrollBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollBarWidth_0_0value?: double | string | undefined
+    _scrollBarMargin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _scrollBarMargin_0_0value?: ScrollBarMargin | undefined
     _nestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _nestedScroll_0_0value?: NestedScrollOptions | undefined
     _enableScrollInteraction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableScrollInteraction_0_0value?: boolean | undefined
     _friction_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _friction_0_0value?: double | Resource | undefined
+    _onWillStartDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillStartDragging_0_0value?: VoidCallback | undefined
+    _onWillStopDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillStopDragging_0_0value?: OnWillStopDraggingCallback | undefined
+    _onDidStopDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDidStopDragging_0_0value?: OnDidStopDraggingCallback | undefined
+    _onWillStartFling_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillStartFling_0_0value?: VoidCallback | undefined
+    _onDidStopFling_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDidStopFling_0_0value?: VoidCallback | undefined
     _onReachStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onReachStart_0_0value?: (() => void) | undefined
     _onReachEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -180,7 +198,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._contentStartOffset_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setContentStartOffsetAttribute((this._contentStartOffset_0_0value as double | undefined));
+                    peer.setContentStartOffsetAttribute((this._contentStartOffset_0_0value as double | Resource | undefined));
                     this._contentStartOffset_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -190,7 +208,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._contentStartOffset_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setContentStartOffsetAttribute((undefined as double | undefined));
+                    peer.setContentStartOffsetAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -198,7 +216,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._contentEndOffset_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setContentEndOffsetAttribute((this._contentEndOffset_0_0value as double | undefined));
+                    peer.setContentEndOffsetAttribute((this._contentEndOffset_0_0value as double | Resource | undefined));
                     this._contentEndOffset_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -208,7 +226,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._contentEndOffset_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setContentEndOffsetAttribute((undefined as double | undefined));
+                    peer.setContentEndOffsetAttribute((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -428,6 +446,60 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
+        if (this._focusWrapMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._focusWrapMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setFocusWrapModeAttribute((this._focusWrapMode_0_0value as FocusWrapMode | undefined));
+                    this._focusWrapMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._focusWrapMode_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._focusWrapMode_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setFocusWrapModeAttribute((undefined as FocusWrapMode | undefined));
+                }
+            }
+        }
+        if (this._syncLoad_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._syncLoad_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSyncLoadAttribute((this._syncLoad_0_0value as boolean | undefined));
+                    this._syncLoad_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._syncLoad_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._syncLoad_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setSyncLoadAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (this._scrollSnapAnimationSpeed_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._scrollSnapAnimationSpeed_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setScrollSnapAnimationSpeedAttribute((this._scrollSnapAnimationSpeed_0_0value as ScrollSnapAnimationSpeed | undefined));
+                    this._scrollSnapAnimationSpeed_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._scrollSnapAnimationSpeed_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._scrollSnapAnimationSpeed_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setScrollSnapAnimationSpeedAttribute((undefined as ScrollSnapAnimationSpeed | undefined));
+                }
+            }
+        }
         if (this._onScrollIndex_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onScrollIndex_0_flag) {
@@ -630,7 +702,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._lanes_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setLanesAttribute((this._lanes_0_0value as int32 | LengthConstrain | undefined), (this._lanes_0_1value as Dimension | undefined | undefined));
+                    peer.setLanesAttribute((this._lanes_0_0value as int32 | LengthConstrain | ItemFillPolicy | undefined), (this._lanes_0_1value as Dimension | undefined | undefined));
                     this._lanes_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -640,7 +712,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._lanes_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setLanesAttribute((undefined as int32 | LengthConstrain | undefined), (undefined as Dimension | undefined | undefined));
+                    peer.setLanesAttribute((undefined as int32 | LengthConstrain | ItemFillPolicy | undefined), (undefined as Dimension | undefined | undefined));
                 }
             }
         }
@@ -648,7 +720,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._cachedCount_1_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setCachedCount1Attribute((this._cachedCount_1_0value as int32 | undefined), (this._cachedCount_1_1value as boolean | undefined));
+                    peer.setCachedCount1Attribute((this._cachedCount_1_0value as int32 | CacheCountInfo | undefined), (this._cachedCount_1_1value as boolean | undefined));
                     this._cachedCount_1_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -658,7 +730,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._cachedCount_1_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setCachedCount1Attribute((undefined as int32 | undefined), (undefined as boolean | undefined));
+                    peer.setCachedCount1Attribute((undefined as int32 | CacheCountInfo | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -684,7 +756,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             switch (this._scrollBarColor_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | int32 | string | undefined));
+                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | int32 | string | Resource | undefined));
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -694,7 +766,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarColorAttribute((undefined as Color | int32 | string | undefined));
+                    peer.setScrollBarColorAttribute((undefined as Color | int32 | string | Resource | undefined));
                 }
             }
         }
@@ -713,6 +785,24 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 default: {
                     this._scrollBarWidth_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setScrollBarWidthAttribute((undefined as double | string | undefined));
+                }
+            }
+        }
+        if (this._scrollBarMargin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._scrollBarMargin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setScrollBarMarginAttribute((this._scrollBarMargin_0_0value as ScrollBarMargin | undefined));
+                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setScrollBarMarginAttribute((undefined as ScrollBarMargin | undefined));
                 }
             }
         }
@@ -767,6 +857,96 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 default: {
                     this._friction_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setFrictionAttribute((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (this._onWillStartDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillStartDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillStartDraggingAttribute((this._onWillStartDragging_0_0value as VoidCallback | undefined));
+                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillStartDraggingAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._onWillStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillStopDraggingAttribute((this._onWillStopDragging_0_0value as OnWillStopDraggingCallback | undefined));
+                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillStopDraggingAttribute((undefined as OnWillStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (this._onDidStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDidStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDidStopDraggingAttribute((this._onDidStopDragging_0_0value as OnDidStopDraggingCallback | undefined));
+                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDidStopDraggingAttribute((undefined as OnDidStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (this._onWillStartFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillStartFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillStartFlingAttribute((this._onWillStartFling_0_0value as VoidCallback | undefined));
+                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillStartFlingAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._onDidStopFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDidStopFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDidStopFlingAttribute((this._onDidStopFling_0_0value as VoidCallback | undefined));
+                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDidStopFlingAttribute((undefined as VoidCallback | undefined));
                 }
             }
         }
@@ -989,7 +1169,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.contentStartOffset((undefined as double | undefined));
+                    this.contentStartOffset((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -1002,7 +1182,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.contentEndOffset((undefined as double | undefined));
+                    this.contentEndOffset((undefined as double | Resource | undefined));
                 }
             }
         }
@@ -1162,6 +1342,45 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
             }
         }
+        if (modifier._focusWrapMode_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._focusWrapMode_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.focusWrapMode(modifier._focusWrapMode_0_0value);
+                    break;
+                }
+                default: {
+                    this.focusWrapMode((undefined as FocusWrapMode | undefined));
+                }
+            }
+        }
+        if (modifier._syncLoad_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._syncLoad_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.syncLoad(modifier._syncLoad_0_0value);
+                    break;
+                }
+                default: {
+                    this.syncLoad((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (modifier._scrollSnapAnimationSpeed_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._scrollSnapAnimationSpeed_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.scrollSnapAnimationSpeed(modifier._scrollSnapAnimationSpeed_0_0value);
+                    break;
+                }
+                default: {
+                    this.scrollSnapAnimationSpeed((undefined as ScrollSnapAnimationSpeed | undefined));
+                }
+            }
+        }
         if (modifier._onScrollIndex_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onScrollIndex_0_flag) {
@@ -1314,7 +1533,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.lanes((undefined as int32 | LengthConstrain | undefined), (undefined as Dimension | undefined | undefined));
+                    this.lanes((undefined as int32 | LengthConstrain | ItemFillPolicy | undefined), (undefined as Dimension | undefined | undefined));
                 }
             }
         }
@@ -1327,7 +1546,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.cachedCount((undefined as int32 | undefined), (undefined as boolean | undefined));
+                    this.cachedCount((undefined as int32 | CacheCountInfo | undefined), (undefined as boolean | undefined));
                 }
             }
         }
@@ -1353,7 +1572,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                     break;
                 }
                 default: {
-                    this.scrollBarColor((undefined as Color | int32 | string | undefined));
+                    this.scrollBarColor((undefined as Color | int32 | string | Resource | undefined));
                 }
             }
         }
@@ -1367,6 +1586,19 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this.scrollBarWidth((undefined as double | string | undefined));
+                }
+            }
+        }
+        if (modifier._scrollBarMargin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._scrollBarMargin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.scrollBarMargin(modifier._scrollBarMargin_0_0value);
+                    break;
+                }
+                default: {
+                    this.scrollBarMargin((undefined as ScrollBarMargin | undefined));
                 }
             }
         }
@@ -1406,6 +1638,71 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
                 }
                 default: {
                     this.friction((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._onWillStartDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillStartDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillStartDragging(modifier._onWillStartDragging_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillStartDragging((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onWillStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillStopDragging(modifier._onWillStopDragging_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillStopDragging((undefined as OnWillStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onDidStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDidStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDidStopDragging(modifier._onDidStopDragging_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDidStopDragging((undefined as OnDidStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onWillStartFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillStartFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillStartFling(modifier._onWillStartFling_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillStartFling((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onDidStopFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDidStopFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDidStopFling(modifier._onDidStopFling_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDidStopFling((undefined as VoidCallback | undefined));
                 }
             }
         }
@@ -1545,6 +1842,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._alignListItem_0_flag = AttributeUpdaterFlag.UPDATE
             this._alignListItem_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._alignListItem_0_flag = AttributeUpdaterFlag.SKIP
@@ -1556,28 +1854,31 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._listDirection_0_flag = AttributeUpdaterFlag.UPDATE
             this._listDirection_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._listDirection_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    contentStartOffset(value: double | undefined): this {
+    contentStartOffset(value: double | Resource | undefined): this {
         if (((this._contentStartOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentStartOffset_0_0value) !== (value)))
         {
             this._contentStartOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentStartOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentStartOffset_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    contentEndOffset(value: double | undefined): this {
+    contentEndOffset(value: double | Resource | undefined): this {
         if (((this._contentEndOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentEndOffset_0_0value) !== (value)))
         {
             this._contentEndOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentEndOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentEndOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -1589,6 +1890,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._divider_0_flag = AttributeUpdaterFlag.UPDATE
             this._divider_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._divider_0_flag = AttributeUpdaterFlag.SKIP
@@ -1600,6 +1902,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._multiSelectable_0_flag = AttributeUpdaterFlag.UPDATE
             this._multiSelectable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._multiSelectable_0_flag = AttributeUpdaterFlag.SKIP
@@ -1611,6 +1914,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.UPDATE
             this._cachedCount_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.SKIP
@@ -1622,6 +1926,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._chainAnimation_0_flag = AttributeUpdaterFlag.UPDATE
             this._chainAnimation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._chainAnimation_0_flag = AttributeUpdaterFlag.SKIP
@@ -1633,6 +1938,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._chainAnimationOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._chainAnimationOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._chainAnimationOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -1644,6 +1950,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._sticky_0_flag = AttributeUpdaterFlag.UPDATE
             this._sticky_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._sticky_0_flag = AttributeUpdaterFlag.SKIP
@@ -1655,6 +1962,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._scrollSnapAlign_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollSnapAlign_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollSnapAlign_0_flag = AttributeUpdaterFlag.SKIP
@@ -1666,6 +1974,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._childrenMainSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._childrenMainSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._childrenMainSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1677,6 +1986,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.UPDATE
             this._maintainVisibleContentPosition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maintainVisibleContentPosition_0_flag = AttributeUpdaterFlag.SKIP
@@ -1699,6 +2009,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._stackFromEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._stackFromEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stackFromEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -1717,11 +2028,45 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         }
         return this
     }
+    focusWrapMode(value: FocusWrapMode | undefined): this {
+        if (((this._focusWrapMode_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._focusWrapMode_0_flag = AttributeUpdaterFlag.UPDATE
+            this._focusWrapMode_0_0value = value
+        } else
+        {
+            this._focusWrapMode_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    syncLoad(value: boolean | undefined): this {
+        if (((this._syncLoad_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._syncLoad_0_0value) !== (value)))
+        {
+            this._syncLoad_0_flag = AttributeUpdaterFlag.UPDATE
+            this._syncLoad_0_0value = value
+        } else
+        {
+            this._syncLoad_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    scrollSnapAnimationSpeed(value: ScrollSnapAnimationSpeed | undefined): this {
+        if (((this._scrollSnapAnimationSpeed_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._scrollSnapAnimationSpeed_0_flag = AttributeUpdaterFlag.UPDATE
+            this._scrollSnapAnimationSpeed_0_0value = value
+        } else
+        {
+            this._scrollSnapAnimationSpeed_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
     onScrollIndex(value: ((start: int32,end: int32,center: int32) => void) | undefined): this {
         if (((this._onScrollIndex_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._onScrollIndex_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollIndex_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollIndex_0_flag = AttributeUpdaterFlag.SKIP
@@ -1733,6 +2078,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onScrollVisibleContentChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollVisibleContentChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollVisibleContentChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1744,6 +2090,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onItemMove_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemMove_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemMove_0_flag = AttributeUpdaterFlag.SKIP
@@ -1755,6 +2102,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onItemDragStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1766,6 +2114,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onItemDragEnter_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragEnter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragEnter_0_flag = AttributeUpdaterFlag.SKIP
@@ -1777,6 +2126,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onItemDragMove_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragMove_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragMove_0_flag = AttributeUpdaterFlag.SKIP
@@ -1788,6 +2138,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onItemDragLeave_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDragLeave_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDragLeave_0_flag = AttributeUpdaterFlag.SKIP
@@ -1799,6 +2150,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onItemDrop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onItemDrop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onItemDrop_0_flag = AttributeUpdaterFlag.SKIP
@@ -1810,6 +2162,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollFrameBegin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.SKIP
@@ -1821,6 +2174,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onWillScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1832,30 +2186,33 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidScroll_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    lanes(value: int32 | LengthConstrain | undefined, gutter?: Dimension): this {
+    lanes(value: int32 | LengthConstrain | ItemFillPolicy | undefined, gutter?: Dimension): this {
         if (((this._lanes_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || (true))
         {
             this._lanes_0_flag = AttributeUpdaterFlag.UPDATE
             this._lanes_0_0value = value
             this._lanes_0_1value = gutter
+            this._state.fireChange()
         } else
         {
             this._lanes_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    cachedCount(count: int32 | undefined, show: boolean | undefined): this {
+    cachedCount(count: int32 | CacheCountInfo | undefined, show: boolean | undefined): this {
         if (((this._cachedCount_1_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._cachedCount_1_0value) !== (count)) || ((this._cachedCount_1_1value) !== (show)))
         {
             this._cachedCount_1_flag = AttributeUpdaterFlag.UPDATE
             this._cachedCount_1_0value = count
             this._cachedCount_1_1value = show
+            this._state.fireChange()
         } else
         {
             this._cachedCount_1_flag = AttributeUpdaterFlag.SKIP
@@ -1867,17 +2224,19 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    scrollBarColor(value: Color | int32 | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
         if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1889,9 +2248,21 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    scrollBarMargin(value: ScrollBarMargin | undefined): this {
+        if (((this._scrollBarMargin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._scrollBarMargin_0_0value) !== (value)))
+        {
+            this._scrollBarMargin_0_flag = AttributeUpdaterFlag.UPDATE
+            this._scrollBarMargin_0_0value = value
+        } else
+        {
+            this._scrollBarMargin_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -1900,6 +2271,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._nestedScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1911,6 +2283,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableScrollInteraction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.SKIP
@@ -1922,9 +2295,65 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._friction_0_flag = AttributeUpdaterFlag.UPDATE
             this._friction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._friction_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillStartDragging(value: VoidCallback | undefined): this {
+        if (((this._onWillStartDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillStartDragging_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillStartDragging_0_0value = value
+        } else
+        {
+            this._onWillStartDragging_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+        if (((this._onWillStopDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillStopDragging_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillStopDragging_0_0value = value
+        } else
+        {
+            this._onWillStopDragging_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+        if (((this._onDidStopDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDidStopDragging_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDidStopDragging_0_0value = value
+        } else
+        {
+            this._onDidStopDragging_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillStartFling(value: VoidCallback | undefined): this {
+        if (((this._onWillStartFling_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillStartFling_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillStartFling_0_0value = value
+        } else
+        {
+            this._onWillStartFling_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onDidStopFling(value: VoidCallback | undefined): this {
+        if (((this._onDidStopFling_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDidStopFling_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDidStopFling_0_0value = value
+        } else
+        {
+            this._onDidStopFling_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -1933,6 +2362,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1944,6 +2374,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -1955,6 +2386,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1966,6 +2398,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.SKIP
@@ -1977,6 +2410,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._flingSpeedLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.SKIP
@@ -1988,6 +2422,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.UPDATE
             this._clipContent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.SKIP
@@ -1999,6 +2434,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
             this._digitalCrownSensitivity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
@@ -2010,6 +2446,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.UPDATE
             this._backToTop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.SKIP
@@ -2022,6 +2459,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
             this._edgeEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._edgeEffect_0_0value = edgeEffect
             this._edgeEffect_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._edgeEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -2034,6 +2472,7 @@ export class ListModifier extends CommonMethodModifier implements ListAttribute,
             this._fadingEdge_0_flag = AttributeUpdaterFlag.UPDATE
             this._fadingEdge_0_0value = enabled
             this._fadingEdge_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._fadingEdge_0_flag = AttributeUpdaterFlag.SKIP

@@ -27,7 +27,7 @@ class FrameNode;
 class InspectorFilter;
 
 // PaintProperty are used to set render properties.
-class PaintProperty : public Property {
+class ACE_FORCE_EXPORT PaintProperty : public Property {
     DECLARE_ACE_TYPE(PaintProperty, Property);
 
 public:

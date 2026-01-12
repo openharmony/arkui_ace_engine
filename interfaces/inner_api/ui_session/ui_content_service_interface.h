@@ -29,6 +29,8 @@ class ImageSource;
 } // namespace Media
 } // namespace OHOS
 namespace OHOS::Ace {
+using GetWebInfoByRequestCallback =
+    std::function<void(int32_t, int32_t, const std::string&, const std::string&, WebRequestErrorCode)>;
 class ACE_FORCE_EXPORT IUiContentService : public OHOS::IRemoteBroker {
 public:
     using EventCallback = std::function<void(std::string)>;
@@ -78,6 +80,7 @@ public:
         GET_HIT_TEST_NODE_INFO_FOR_TOUCH,
         REQUEST_STATE_MGMT_INFO,
         GET_MULTI_IMAGES_BY_ID,
+        GET_WEBINFO_BY_REQUEST,
     };
 
     /**
@@ -358,6 +361,11 @@ public:
      */
     virtual int32_t GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
         const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback) = 0;
+
+    virtual int32_t GetWebInfoByRequest(
+        int32_t webId,
+        const std::string& request,
+        const GetWebInfoByRequestCallback& finishCallback) = 0;
 };
 class ACE_FORCE_EXPORT ReportService : public OHOS::IRemoteBroker {
 public:
@@ -387,7 +395,8 @@ public:
         REPORT_HIT_TEST_NODE_INFOS,
         REPORT_STATE_MGMT_INFO,
         SEND_ARKUI_IMAGES_BY_ID,
-        SEND_ARKWEB_IMAGES_BY_ID
+        SEND_ARKWEB_IMAGES_BY_ID,
+        SEND_WEB_INFO_BY_REQUEST,
     };
 
     /**
@@ -502,6 +511,12 @@ public:
      * @description: define send the state management info to the proxy interface
      */
     virtual void ReportGetStateMgmtInfo(std::vector<std::string> results) = 0;
+
+    virtual void SendWebInfoRequestResult(
+        uint32_t windowId,
+        int32_t webId,
+        const std::string& request,
+        const std::string& result, WebRequestErrorCode errorCode) = 0;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_SERVICE_INTERFACE_H

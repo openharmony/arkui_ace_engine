@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1917,6 +1917,7 @@ void ArkTSUtils::ParsePadding(
         } else {
             result.value = dimen.Value();
         }
+        result.isSet = true;
     }
 }
 
@@ -1934,6 +1935,48 @@ void ArkTSUtils::ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, 
         } else {
             result.value = dimen.Value();
         }
+        result.isSet = true;
+    }
+}
+
+void ArkTSUtils::ParsePadding(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
+    ArkUISizeType& result, std::vector<RefPtr<ResourceObject>>& resObjs)
+{
+    RefPtr<ResourceObject> resObj;
+    ArkTSUtils::ParsePadding(vm, value, dimen, result, resObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        resObjs.push_back(resObj);
+    }
+}
+
+void ArkTSUtils::ParseMargin(
+    const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result)
+{
+    RefPtr<ResourceObject> resObj;
+    ParseMargin(vm, value,  dimen, result, resObj);
+}
+
+void ArkTSUtils::ParseMargin(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
+    ArkUISizeType& result, RefPtr<ResourceObject>& resObj)
+{
+    if (ArkTSUtils::ParseJsDimensionVp(vm, value, dimen, resObj)) {
+        result.unit = static_cast<int8_t>(dimen.Unit());
+        if (dimen.CalcValue() != "") {
+            result.string = dimen.CalcValue().c_str();
+        } else {
+            result.value = dimen.Value();
+        }
+        result.isSet = true;
+    }
+}
+
+void ArkTSUtils::ParseMargin(const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen,
+    ArkUISizeType& result, std::vector<RefPtr<ResourceObject>>& resObjs)
+{
+    RefPtr<ResourceObject> resObj;
+    ArkTSUtils::ParseMargin(vm, value, dimen, result, resObj);
+    if (SystemProperties::ConfigChangePerform()) {
+        resObjs.push_back(resObj);
     }
 }
 
@@ -1992,6 +2035,184 @@ bool ArkTSUtils::ParseResponseRegion(
         regionUnits[i + 2] = static_cast<int32_t>(widthDimen.Unit()); // 2: width Unit
         regionValues[i + 3] = static_cast<ArkUI_Float32>(heightDimen.Value()); // 3: height value
         regionUnits[i + 3] = static_cast<int32_t>(heightDimen.Unit()); // 3: height Unit
+    }
+    return true;
+}
+bool ArkTSUtils::CheckLengthMetrics(EcmaVM* vm, const Local<panda::ObjectRef>& jsObject)
+{
+    if (jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "strat")) ||
+        jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "end")) ||
+        jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "topStart")) ||
+        jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "topEnd")) ||
+        jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "bottomStart")) ||
+        jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "bottomEnd"))) {
+        return true;
+    }
+    auto jsTop = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "top"));
+    if (jsTop->IsObject(vm)) {
+        auto topObj = jsTop->ToObject(vm);
+        if (topObj->Has(vm, panda::StringRef::NewFromUtf8(vm, "value"))) {
+            return true;
+        }
+    }
+    auto jsBottom = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "bottom"));
+    if (jsBottom->IsObject(vm)) {
+        auto bottomObj = jsBottom->ToObject(vm);
+        if (bottomObj->Has(vm, panda::StringRef::NewFromUtf8(vm, "value"))) {
+            return true;
+        }
+    }
+    return false;
+}
+
+bool ArkTSUtils::ParseLocalizedMargin(
+    const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result)
+{
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, value, dimen)) {
+        result.unit = static_cast<int8_t>(dimen.Unit());
+        if (dimen.CalcValue() != "") {
+            result.string = dimen.CalcValue().c_str();
+        } else {
+            result.value = dimen.Value();
+        }
+        result.isSet = true;
+        return true;
+    }
+    return false;
+}
+
+bool ArkTSUtils::ParseLocalizedPadding(
+    const EcmaVM* vm, const Local<JSValueRef>& value, CalcDimension& dimen, ArkUISizeType& result)
+{
+    if (ArkTSUtils::ParseJsLengthMetrics(vm, value, dimen)) {
+        if (LessOrEqual(dimen.Value(), 0.0)) {
+            dimen.SetValue(0.0);
+            dimen.SetUnit(DimensionUnit::VP);
+        }
+        result.unit = static_cast<int8_t>(dimen.Unit());
+        if (dimen.CalcValue() != "") {
+            result.string = dimen.CalcValue().c_str();
+        } else {
+            result.value = dimen.Value();
+        }
+        result.isSet = true;
+        return true;
+    }
+    return false;
+}
+
+bool ArkTSUtils::ParseJsDimensionRect(const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue, DimensionRect& result)
+{
+    result.SetOffset(DimensionOffset(CalcDimension(0, DimensionUnit::VP), CalcDimension(0, DimensionUnit::VP)));
+    result.SetSize(DimensionSize(CalcDimension(1, DimensionUnit::PERCENT), CalcDimension(1, DimensionUnit::PERCENT)));
+    if (!jsValue->IsObject(vm)) {
+        return true;
+    }
+    auto obj = jsValue->ToObject(vm);
+    auto x = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "x"));
+    auto y = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "y"));
+    auto width = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "width"));
+    auto height = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "height"));
+    CalcDimension xDimen = result.GetOffset().GetX();
+    CalcDimension yDimen = result.GetOffset().GetY();
+    CalcDimension widthDimen = result.GetWidth();
+    CalcDimension heightDimen = result.GetHeight();
+    auto s1 = width->ToString(vm)->ToString(vm);
+    auto s2 = height->ToString(vm)->ToString(vm);
+    if (s1.find('-') != std::string::npos) {
+        width = OHOS::Ace::Framework::ToJSValue("100%");
+    }
+    if (s2.find('-') != std::string::npos) {
+        height = OHOS::Ace::Framework::ToJSValue("100%");
+    }
+    if (ArkTSUtils::ParseJsDimensionNG(vm, x, xDimen, DimensionUnit::VP)) {
+        auto offset = result.GetOffset();
+        offset.SetX(xDimen);
+        result.SetOffset(offset);
+    }
+    if (ArkTSUtils::ParseJsDimensionNG(vm, y, yDimen, DimensionUnit::VP)) {
+        auto offset = result.GetOffset();
+        offset.SetY(yDimen);
+        result.SetOffset(offset);
+    }
+    if (ArkTSUtils::ParseJsDimensionNG(vm, width, widthDimen, DimensionUnit::VP)) {
+        if (widthDimen.Unit() == DimensionUnit::PERCENT && widthDimen.Value() < 0) {
+            return true;
+        }
+        result.SetWidth(widthDimen);
+    }
+    if (ArkTSUtils::ParseJsDimensionNG(vm, height, heightDimen, DimensionUnit::VP)) {
+        if (heightDimen.Unit() == DimensionUnit::PERCENT && heightDimen.Value() < 0) {
+            return true;
+        }
+        result.SetHeight(heightDimen);
+    }
+    return true;
+}
+
+bool ArkTSUtils::ParseJsResponseRegion(
+    const EcmaVM* vm, const Local<panda::JSValueRef>& jsValue, ArkUI_Float32* values, int32_t* units, uint32_t length)
+{
+    if (!jsValue->IsArray(vm) && !jsValue->IsObject(vm)) {
+        return false;
+    }
+    const uint32_t DIMENSION_LENGTH = 4;
+    if (jsValue->IsArray(vm)) {
+        auto transArray = static_cast<Local<panda::ArrayRef>>(jsValue);
+        uint32_t arrayLength = transArray->Length(vm);
+        for (uint32_t i = 0; i < arrayLength; i++) {
+            CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+            CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+            CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+            DimensionOffset offsetDimen(xDimen, yDimen);
+            DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+            if (ArkTSUtils::ParseJsDimensionRect(vm, transArray->GetValueAt(vm, jsValue, i), dimenRect)) {
+                values[DIMENSION_LENGTH * i] = static_cast<ArkUI_Float32>(dimenRect.GetOffset().GetX().Value());
+                units[DIMENSION_LENGTH * i] = static_cast<int32_t>(dimenRect.GetOffset().GetX().Unit());
+                values[DIMENSION_LENGTH * i + NUM_1] = static_cast<ArkUI_Float32>(dimenRect.GetOffset().GetY().Value());
+                units[DIMENSION_LENGTH * i + NUM_1] = static_cast<int32_t>(dimenRect.GetOffset().GetY().Unit());
+                values[DIMENSION_LENGTH * i + NUM_2] = static_cast<ArkUI_Float32>(dimenRect.GetWidth().Value());
+                units[DIMENSION_LENGTH * i + NUM_2] = static_cast<int32_t>(dimenRect.GetWidth().Unit());
+                values[DIMENSION_LENGTH * i + NUM_3] = static_cast<ArkUI_Float32>(dimenRect.GetHeight().Value());
+                units[DIMENSION_LENGTH * i + NUM_3] = static_cast<int32_t>(dimenRect.GetHeight().Unit());
+            } else {
+                return false;
+            }
+        }
+        return true;
+    }
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    CalcDimension heightDimen = CalcDimension(1, DimensionUnit::PERCENT);
+    DimensionOffset offsetDimen(xDimen, yDimen);
+    DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+    if (ArkTSUtils::ParseJsDimensionRect(vm, jsValue, dimenRect)) {
+        values[NUM_0] = static_cast<ArkUI_Float32>(dimenRect.GetOffset().GetX().Value());
+        units[NUM_0] = static_cast<int32_t>(dimenRect.GetOffset().GetX().Unit());
+        values[NUM_1] = static_cast<ArkUI_Float32>(dimenRect.GetOffset().GetY().Value());
+        units[NUM_1] = static_cast<int32_t>(dimenRect.GetOffset().GetY().Unit());
+        values[NUM_2] = static_cast<ArkUI_Float32>(dimenRect.GetWidth().Value());
+        units[NUM_2] = static_cast<int32_t>(dimenRect.GetWidth().Unit());
+        values[NUM_3] = static_cast<ArkUI_Float32>(dimenRect.GetHeight().Value());
+        units[NUM_3] = static_cast<int32_t>(dimenRect.GetHeight().Unit());
+        return true;
+    }
+    return false;
+}
+
+bool ArkTSUtils::HandleCallbackJobs(
+    const EcmaVM* vm, panda::TryCatch& trycatch, const Local<JSValueRef>& resultException)
+{
+    JSNApi::ExecutePendingJob(vm);
+    auto runtime =
+        std::static_pointer_cast<Framework::ArkJSRuntime>(Framework::JsiDeclarativeEngineInstance::GetCurrentRuntime());
+    if (resultException.IsEmpty() || trycatch.HasCaught()) {
+        LOGW("after call jsFunction hasError, empty: %{public}d, caught: %{public}d", resultException.IsEmpty(),
+            trycatch.HasCaught());
+        runtime->HandleUncaughtException(trycatch);
+        return false;
     }
     return true;
 }
@@ -3215,4 +3436,153 @@ int32_t ArkTSUtils::GetStringFormatStartIndex(const EcmaVM* vm, const Local<pand
     }
     return 0;
 }
+
+void ArkTSUtils::ParseMarginOrPaddingCorner(const EcmaVM* vm, const Local<JSValueRef>& value,
+    std::optional<CalcDimension>& top, std::optional<CalcDimension>& bottom, std::optional<CalcDimension>& left,
+    std::optional<CalcDimension>& right)
+{
+    CalcDimension leftDimen;
+    if (ParseJsDimensionVp(vm, GetProperty(vm, value, static_cast<int32_t>(Framework::ArkUIIndex::LEFT)), leftDimen)) {
+        left = leftDimen;
+    }
+    CalcDimension rightDimen;
+    if (ParseJsDimensionVp(
+            vm, GetProperty(vm, value, static_cast<int32_t>(Framework::ArkUIIndex::RIGHT)), rightDimen)) {
+        right = rightDimen;
+    }
+    CalcDimension topDimen;
+    if (ParseJsDimensionVp(vm, GetProperty(vm, value, static_cast<int32_t>(Framework::ArkUIIndex::TOP)), topDimen)) {
+        top = topDimen;
+    }
+    CalcDimension bottomDimen;
+    if (ParseJsDimensionVp(
+            vm, GetProperty(vm, value, static_cast<int32_t>(Framework::ArkUIIndex::BOTTOM)), bottomDimen)) {
+        bottom = bottomDimen;
+    }
+}
+
+bool ArkTSUtils::HasProperty(const EcmaVM* vm, const Local<panda::ObjectRef>& obj, const std::string& propertyName)
+{
+    CHECK_NULL_RETURN(vm, false);
+    auto stringRef = panda::StringRef::NewFromUtf8(vm, propertyName.c_str());
+    return obj->Has(vm, stringRef);
+}
+
+Local<JSValueRef> ArkTSUtils::GetProperty(
+    const EcmaVM* vm, const Local<panda::ObjectRef>& obj, const std::string& propertyName)
+{
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    auto stringRef = panda::StringRef::NewFromUtf8(vm, propertyName.c_str());
+    return obj->Get(vm, stringRef);
+}
+
+Local<JSValueRef> ArkTSUtils::GetProperty(const EcmaVM* vm, const Local<panda::ObjectRef>& obj, int32_t propertyIndex)
+{
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    return obj->Get(vm, panda::ExternalStringCache::GetCachedString(vm, propertyIndex));
+}
+
+bool ArkTSUtils::CheckJavaScriptScope(const EcmaVM* vm)
+{
+    return !(Framework::JsiDeclarativeEngineInstance::GetCurrentRuntime() == nullptr || vm == nullptr);
+}
+
+template<typename T>
+Local<JSValueRef> ArkTSUtils::ToJsValueWithVM(const EcmaVM* vm, T val)
+{
+    if constexpr (std::is_same_v<T, bool>) {
+        return panda::BooleanRef::New(vm, val);
+    } else if constexpr (std::is_same_v<T, int64_t>) {
+        return panda::NumberRef::New(vm, val);
+    } else if constexpr (std::is_integral<T>::value && std::is_signed<T>::value) {
+        return panda::IntegerRef::New(vm, val);
+    } else if constexpr (std::is_unsigned_v<T>) {
+        return panda::IntegerRef::NewFromUnsigned(vm, val);
+    } else if constexpr (std::is_floating_point_v<T>) {
+        return panda::NumberRef::New(vm, val);
+    } else if constexpr (std::is_same_v<T, std::string>) {
+        return panda::StringRef::NewFromUtf8(vm, val.c_str());
+    } else if constexpr (std::is_same_v<T, const char*>) {
+        return panda::StringRef::NewFromUtf8(vm, val);
+    } else if constexpr (std::is_same_v<T, std::u16string>) {
+        return panda::StringRef::NewFromUtf16(vm, val.c_str());
+    }
+
+    return panda::JSValueRef::Undefined(vm);
+}
+
+template<class T>
+Local<JSValueRef> ArkTSUtils::ConvertToJSValue(const EcmaVM* vm, T&& value)
+{
+    using ValueType = std::remove_cv_t<std::remove_reference_t<T>>;
+    if constexpr (std::is_arithmetic_v<ValueType> || std::is_same_v<ValueType, std::string> ||
+                  std::is_same_v<ValueType, std::u16string>) {
+        return ToJsValueWithVM(vm, std::forward<T>(value));
+    } else if constexpr (std::is_enum_v<ValueType>) {
+        return ToJsValueWithVM(vm, static_cast<std::make_signed_t<ValueType>>(value));
+    } else if constexpr (std::is_same_v<ValueType, Dimension> || std::is_same_v<ValueType, CalcDimension>) {
+        if (value.Unit() == DimensionUnit::VP) {
+            return ToJsValueWithVM(vm, value.Value());
+        } else {
+            LOGE("Failed to convert to JS value with dimension which it not using 'VP' unit");
+            return Local<JSValueRef>();
+        }
+    } else {
+        LOGE("Failed to convert to JS value");
+        return Local<JSValueRef>();
+    }
+}
+
+template<class T>
+void ArkTSUtils::ConvertToJSValuesImpl(
+    const EcmaVM* vm, std::vector<Local<JSValueRef>>& result, T&& value)
+{
+    result.emplace_back(ConvertToJSValue(vm, std::forward<T>(value)));
+}
+
+template<class T, class V, class... Args>
+void ArkTSUtils::ConvertToJSValuesImpl(
+    const EcmaVM* vm, std::vector<Local<JSValueRef>>& result, T&& value, V&& nextValue, Args&&... args)
+{
+    result.emplace_back(ConvertToJSValue(vm, std::forward<T>(value)));
+    ConvertToJSValuesImpl(vm, result, std::forward<V>(nextValue), std::forward<Args>(args)...);
+}
+
+template<class... Args>
+std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues(const EcmaVM* vm, Args... args)
+{
+    std::vector<Local<JSValueRef>> result;
+    ConvertToJSValuesImpl(vm, result, args...);
+    return result;
+}
+
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<double>(const EcmaVM* vm, double);
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<int32_t>(const EcmaVM* vm, int32_t);
+
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ConvertToJSValue<CalcDimension>(
+    const EcmaVM* vm, CalcDimension&& value);
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ConvertToJSValue<Dimension>(
+    const EcmaVM* vm, Dimension&& value);
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ConvertToJSValue<ScrollState>(
+    const EcmaVM* vm, ScrollState&& value);
+template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ConvertToJSValue<int32_t>(const EcmaVM* vm, int32_t&& value);
+
+template ACE_FORCE_EXPORT void ArkTSUtils::ConvertToJSValuesImpl<ScrollState>(
+    const EcmaVM*, std::vector<Local<JSValueRef>>&, ScrollState&&);
+template ACE_FORCE_EXPORT void ArkTSUtils::ConvertToJSValuesImpl<int32_t>(
+    const EcmaVM*, std::vector<Local<JSValueRef>>&, int32_t&&);
+
+template ACE_FORCE_EXPORT void ArkTSUtils::ConvertToJSValuesImpl<CalcDimension, ScrollState>(
+    const EcmaVM*, std::vector<Local<JSValueRef>>&, CalcDimension&&, ScrollState&&);
+template ACE_FORCE_EXPORT void ArkTSUtils::ConvertToJSValuesImpl<Dimension, ScrollState>(
+    const EcmaVM*, std::vector<Local<JSValueRef>>&, Dimension&&, ScrollState&&);
+template ACE_FORCE_EXPORT void ArkTSUtils::ConvertToJSValuesImpl<int32_t, int32_t>(
+    const EcmaVM*, std::vector<Local<JSValueRef>>&, int32_t&&, int32_t&&);
+
+template ACE_FORCE_EXPORT std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues<CalcDimension, ScrollState>(
+    const EcmaVM*, CalcDimension, ScrollState);
+template ACE_FORCE_EXPORT std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues<Dimension, ScrollState>(
+    const EcmaVM*, Dimension, ScrollState);
+template ACE_FORCE_EXPORT std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues<int32_t, int32_t>(
+    const EcmaVM*, int32_t, int32_t);
 } // namespace OHOS::Ace::NG

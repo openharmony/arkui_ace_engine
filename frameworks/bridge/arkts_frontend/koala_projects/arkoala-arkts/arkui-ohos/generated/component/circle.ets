@@ -114,8 +114,6 @@ export class ArkCircleComponent extends ArkCommonShapeMethodComponent implements
 export function CircleImpl(
     @memo
     style: ((attributes: CircleAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkCircleComponent>((): ArkCircleComponent => {
         return new ArkCircleComponent()
@@ -124,7 +122,6 @@ export function CircleImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

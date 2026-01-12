@@ -30,6 +30,7 @@ ohos_unittest("statistic_event_test") {
   module_out_path = "$basic_test_output_path"
 
   sources = [
+    "$ace_root/adapter/ohos/services/uiservice/src/common_statistic_event.cpp",
     "$ace_root/adapter/ohos/services/uiservice/src/statistic_event_manager.cpp",
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_statistic_event.cpp",
     "$ace_root/frameworks/core/common/statistic_event_reporter.cpp",

@@ -15,6 +15,8 @@
 
 #include "core/components/navigation_bar/navigation_container_component.h"
 
+#include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/navigation_bar/navigation_bar_component.h"
 #include "core/components/navigation_bar/navigation_bar_component_v2.h"
@@ -22,6 +24,8 @@
 #include "core/components/navigation_bar/render_navigation_container.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/stage/stage_component.h"
+#include "core/components/tab_bar/tab_theme.h"
+
 namespace OHOS::Ace {
 
 namespace {
@@ -32,6 +36,27 @@ constexpr int32_t BOTTOM_TAB_ICON_AND_TEXT_PADDING = 2;
 constexpr double SECTION_INDEX_PART_WEIGHT = 1.0;
 constexpr double SECTION_CONTENT_PART_WEIGHT = 2.0;
 
+const ArkUIInnerTabBarModifier* GetTabBarInnerModifier()
+{
+    static const ArkUIInnerTabBarModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("tab-bar");
+        CHECK_NULL_RETURN(loader, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIInnerTabBarModifier*>(loader->GetCustomModifier());
+    }
+    return cachedModifier;
+}
+
+const ArkUIInnerTabsModifier* GetTabsInnerModifier()
+{
+    static const ArkUIInnerTabsModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("tabs");
+        CHECK_NULL_RETURN(loader, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIInnerTabsModifier*>(loader->GetCustomModifier());
+    }
+    return cachedModifier;
+}
 } // namespace
 
 RefPtr<RenderNode> NavigationContainerComponent::CreateRenderNode()
@@ -58,32 +83,41 @@ uint32_t NavigationContainerComponent::GetGlobalTabControllerId()
 }
 
 RefPtr<ComposedComponent> NavigationContainerComponent::BuildToolBar(
-    const RefPtr<NavigationDeclaration>& declaration, const RefPtr<TabController>& controller)
+    const RefPtr<NavigationDeclaration>& declaration, const RefPtr<AceType>& controller)
 {
 #ifndef WEARABLE_PRODUCT
+    auto* modifier = GetTabBarInnerModifier();
     std::list<RefPtr<Component>> tabBarItems;
-    for (const auto& item : declaration->toolbarItems) {
-        if (!item->icon.empty()) {
-            auto itemContainer = AceType::MakeRefPtr<ColumnComponent>(
-                FlexAlign::CENTER, FlexAlign::CENTER, std::list<RefPtr<OHOS::Ace::Component>>());
-            auto iconBox = AceType::MakeRefPtr<BoxComponent>();
-            iconBox->SetChild(AceType::MakeRefPtr<ImageComponent>(item->icon));
-            iconBox->SetHeight(BOTTOM_TAB_ICON_SIZE, DimensionUnit::VP);
-            iconBox->SetWidth(BOTTOM_TAB_ICON_SIZE, DimensionUnit::VP);
-            itemContainer->AppendChild(iconBox);
-            auto padding = AceType::MakeRefPtr<PaddingComponent>();
-            padding->SetPaddingTop(Dimension(BOTTOM_TAB_ICON_AND_TEXT_PADDING, DimensionUnit::VP));
-            itemContainer->AppendChild(padding);
-            itemContainer->AppendChild(AceType::MakeRefPtr<TextComponent>(item->value));
-            tabBarItems.push_back(AceType::MakeRefPtr<TabBarItemComponent>(itemContainer));
-        } else {
-            tabBarItems.push_back(
-                AceType::MakeRefPtr<TabBarItemComponent>(AceType::MakeRefPtr<TextComponent>(item->value)));
+    if (modifier) {
+        for (const auto& item : declaration->toolbarItems) {
+            RefPtr<Component> tabItem;
+            if (!item->icon.empty()) {
+                auto itemContainer = AceType::MakeRefPtr<ColumnComponent>(
+                    FlexAlign::CENTER, FlexAlign::CENTER, std::list<RefPtr<OHOS::Ace::Component>>());
+                auto iconBox = AceType::MakeRefPtr<BoxComponent>();
+                iconBox->SetChild(AceType::MakeRefPtr<ImageComponent>(item->icon));
+                iconBox->SetHeight(BOTTOM_TAB_ICON_SIZE, DimensionUnit::VP);
+                iconBox->SetWidth(BOTTOM_TAB_ICON_SIZE, DimensionUnit::VP);
+                itemContainer->AppendChild(iconBox);
+                auto padding = AceType::MakeRefPtr<PaddingComponent>();
+                padding->SetPaddingTop(Dimension(BOTTOM_TAB_ICON_AND_TEXT_PADDING, DimensionUnit::VP));
+                itemContainer->AppendChild(padding);
+                itemContainer->AppendChild(AceType::MakeRefPtr<TextComponent>(item->value));
+                tabItem = modifier->createTabBarItem(itemContainer);
+            } else {
+                tabItem = modifier->createTabBarItem(AceType::MakeRefPtr<TextComponent>(item->value));
+            }
+            if (tabItem) {
+                tabBarItems.push_back(tabItem);
+            }
         }
     }
-    auto tabBar = AceType::MakeRefPtr<TabBarComponent>(tabBarItems, controller);
+    RefPtr<Component> tabBar;
     auto theme = AceType::MakeRefPtr<ThemeManagerImpl>()->GetTheme<TabTheme>();
-    tabBar->InitBottomTabStyle(theme);
+    if (modifier) {
+        tabBar = modifier->createTabBar(tabBarItems, controller);
+        modifier->initBottomTabStyle(tabBar, theme);
+    }
 
     auto component = declaration->toolBarBuilder;
     auto display = AceType::MakeRefPtr<DisplayComponent>();
@@ -113,7 +147,7 @@ RefPtr<ComposedComponent> NavigationContainerComponent::BuildToolBar(
 bool NavigationContainerComponent::NeedSection() const
 {
     bool isSupportDeviceType = SystemProperties::GetDeviceType() == DeviceType::TABLET ||
-        SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE;
+                               SystemProperties::GetDeviceType() == DeviceType::TWO_IN_ONE;
     bool isWideScreen = SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE;
     return isSupportDeviceType && isWideScreen;
 }
@@ -134,7 +168,9 @@ void NavigationContainerComponent::Build(const WeakPtr<PipelineContext>& context
     auto originalFlexItem = AceType::MakeRefPtr<FlexItemComponent>(1.0, 1.0, 0.0, originalContent);
     originalFlexItem->SetFlexWeight(0.0);
     fixPart->AppendChild(originalFlexItem);
-    tabController_ = TabController::GetController(GetGlobalTabControllerId());
+    if (auto modifier = GetTabsInnerModifier()) {
+        tabController_ = modifier->getController(GetGlobalTabControllerId());
+    }
     fixPart->AppendChild(NavigationContainerComponent::BuildToolBar(declaration_, tabController_));
 
     if (NeedSection()) {

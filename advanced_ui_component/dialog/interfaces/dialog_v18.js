@@ -4194,6 +4194,24 @@ export class PopoverDialog extends ViewPU {
         if (this.targetBuilder === undefined || this.targetBuilder === null) {
             this.targetBuilder = this.emptyBuilder;
         }
+        if (this.popover) {
+            this.popover.placement = this.popover?.placement ?? Placement.Bottom;
+            this.popover.enableArrow = this.popover?.enableArrow ?? true;
+            this.popover.onStateChange = this.popover?.onStateChange ?? ((h) => {
+                if (!h.isVisible) {
+                    this.visible = false;
+                }
+            });
+            this.popover.radius = this.popover?.radius ?? {
+                'id': -1,
+                'type': 10002,
+                params: ['sys.float.corner_radius_level16'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            };
+            this.popover.shadow = this.popover?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD;
+            this.popover.backgroundBlurStyle = this.popover?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK;
+        }
     }
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -4214,39 +4232,7 @@ export class PopoverDialog extends ViewPU {
                     hilog.error(0x3900, 'Ace', `dialog popup error, code: ${code}, message: ${message}`);
                 }
             });
-            Column.bindPopup(this.visible, {
-                builder: this.popover?.builder,
-                placement: this.popover?.placement ?? Placement.Bottom,
-                popupColor: this.popover?.popupColor,
-                enableArrow: this.popover?.enableArrow ?? true,
-                autoCancel: this.popover?.autoCancel,
-                onStateChange: this.popover?.onStateChange ?? ((e) => {
-                    if (!e.isVisible) {
-                        this.visible = false;
-                    }
-                }),
-                arrowOffset: this.popover?.arrowOffset,
-                showInSubWindow: this.popover?.showInSubWindow,
-                mask: this.popover?.mask,
-                targetSpace: this.popover?.targetSpace,
-                offset: this.popover?.offset,
-                width: this.popover?.width,
-                arrowPointPosition: this.popover?.arrowPointPosition,
-                arrowWidth: this.popover?.arrowWidth,
-                arrowHeight: this.popover?.arrowHeight,
-                radius: this.popover?.radius ?? {
-                    'id': -1,
-                    'type': 10002,
-                    params: ['sys.float.corner_radius_level16'],
-                    'bundleName': '__harDefaultBundleName__',
-                    'moduleName': '__harDefaultModuleName__'
-                },
-                shadow: this.popover?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
-                backgroundBlurStyle: this.popover?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
-                focusable: this.popover?.focusable,
-                transition: this.popover?.transition,
-                onWillDismiss: this.popover?.onWillDismiss
-            });
+            Column.bindPopup(this.visible, this.popover);
         }, Column);
         this.targetBuilder.bind(this)();
         Column.pop();

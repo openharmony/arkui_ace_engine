@@ -1665,14 +1665,13 @@ void TextFieldPattern::OnFocusCustomKeyboardChange()
     if (!textFieldManager->NeedCloseKeyboard()) {
         return;
     }
-    if (customKeyboard_) {
-        bool matched = GetCustomKeyboardIsMatched(customKeyboard_->GetId());
-        textFieldManager->ProcessCustomKeyboard(matched, currentNode->GetId());
-        SetCustomKeyboardNodeId(customKeyboard_);
+    if ((customKeyboard_ || customKeyboardBuilder_) && textFieldManager->GetCustomKeyboardContinueFeature()) {
+        textFieldManager->ProcessCustomKeyboard(true, currentNode->GetId());
+        SetPreKeyboardNode();
         return;
     }
     textFieldManager->ProcessCustomKeyboard(false, currentNode->GetId());
-    SetCustomKeyboardNodeId(nullptr);
+    SetPreKeyboardNode();
 }
 
 bool TextFieldPattern::NeedCloseKeyboard()
@@ -2121,7 +2120,8 @@ void TextFieldPattern::HandleOnCameraInput()
             textConfig.windowId = systemWindowId;
         }
 #endif
-        auto ret = inputMethod->Attach(textChangeListener_, false, textConfig);
+        auto ret = inputMethod->Attach(textChangeListener_, false, textConfig,
+            MiscServices::ClientType::INNER_KIT_ARKUI);
         if (ret == MiscServices::ErrorCode::NO_ERROR) {
             auto pipeline = GetContext();
             CHECK_NULL_VOID(pipeline);
@@ -5115,7 +5115,8 @@ bool TextFieldPattern::RequestKeyboard(bool isFocusViewChanged, bool needStartTw
     attachOptions.isShowKeyboard = needShowSoftKeyboard;
     attachOptions.requestKeyboardReason =
         static_cast<OHOS::MiscServices::RequestKeyboardReason>(static_cast<int32_t>(sourceType));
-    auto ret = inputMethod->Attach(textChangeListener_, attachOptions, textConfig);
+    auto ret = inputMethod->Attach(textChangeListener_, attachOptions, textConfig,
+        MiscServices::ClientType::INNER_KIT_ARKUI);
     CHECK_NULL_RETURN(context, false);
     auto textFieldManager = AceType::DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_RETURN(textFieldManager, false);
@@ -5405,11 +5406,10 @@ void TextFieldPattern::RequestCustomKeyboardBuilder()
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+    SetPreKeyboardNode();
     if (customKeyboardBuilder_) {
-        SetCustomKeyboardNodeId(nullptr);
         overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
     } else {
-        SetCustomKeyboardNodeId(customKeyboard_);
         overlayManager->BindKeyboardWithNode(customKeyboard_, frameNode->GetId());
     }
 }
@@ -11978,7 +11978,7 @@ void TextFieldPattern::SetCustomKeyboard(const std::function<void()>&& keyboardB
     customKeyboardBuilder_ = keyboardBuilder;
 }
 
-void TextFieldPattern::SetCustomKeyboardNodeId(const RefPtr<UINode>& customKeyboardNode)
+void TextFieldPattern::SetPreKeyboardNode()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -11988,21 +11988,6 @@ void TextFieldPattern::SetCustomKeyboardNodeId(const RefPtr<UINode>& customKeybo
     CHECK_NULL_VOID(textFieldManager);
     WeakPtr<FrameNode> weakNode = frameNode;
     textFieldManager->SetPreNode(weakNode);
-    if (customKeyboardNode) {
-        textFieldManager->SetCustomKeyboardId(customKeyboardNode->GetId());
-    } else {
-        textFieldManager->SetCustomKeyboardId(-1);
-    }
-}
-
-bool TextFieldPattern::GetCustomKeyboardIsMatched(int32_t CustomKeyboardId)
-{
-    auto pipeline = GetContext();
-    CHECK_NULL_RETURN(pipeline, false);
-    auto textFieldManager = DynamicCast<TextFieldManagerNG>(pipeline->GetTextFieldManager());
-    CHECK_NULL_RETURN(textFieldManager, false);
-    auto id = textFieldManager->GetCustomKeyboardId();
-    return CustomKeyboardId == id;
 }
 
 void TextFieldPattern::SetCustomKeyboardWithNode(const RefPtr<UINode>& keyboardBuilder)

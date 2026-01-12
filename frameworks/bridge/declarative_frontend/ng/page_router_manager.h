@@ -186,20 +186,21 @@ public:
     // router operation
     void Push(const RouterPageInfo& target);
 
-    // For ArkTS1.2
-    RefPtr<FrameNode> PushExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode);
-    void PushNamedRouteExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode);
-    RefPtr<FrameNode> ReplaceExtender(
-        const RouterPageInfo& target, std::function<void()>&& enterFinishCallback, void* jsNode);
+    // For ArkTS static
+    void PushExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode);
+    void PushNamedRouteExtender(
+        const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode);
+    void ReplaceExtender(const RouterPageInfo& target, std::function<void()>&& enterFinishCallback, void* jsNode);
     void ReplaceNamedRouteExtender(
         const RouterPageInfo& target, std::function<void()>&& enterFinishCallback, void* jsNode);
-    RefPtr<FrameNode> RunPageExtender(
-        const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode);
+    void RunPageExtender(const RouterPageInfo& target, std::function<void()>&& finishCallback, void* jsNode);
+    void BackWithTargetExtender(const RouterPageInfo& target);
+    void BackToIndexWithTargetExtender(int32_t index, const std::string& params);
 
-    // ArkTS1.2 push ArkTS1.1
-    RefPtr<FrameNode> PushDynamicExtender(
+    // ArkTS static push ArkTS dynamic
+    void PushDynamicExtender(
         const RouterPageInfo& target, std::function<void()>&& finishCallback, const RefPtr<FrameNode>& pageNode);
-    RefPtr<FrameNode> ReplaceDynamicExtender(
+    void ReplaceDynamicExtender(
         const RouterPageInfo& target, std::function<void()>&& finishCallback, const RefPtr<FrameNode>& pageNode);
 
     void PushNamedRoute(const RouterPageInfo& target);
@@ -269,6 +270,7 @@ public:
     RefPtr<FrameNode> CreateDynamicPage(int32_t pageId, const RouterPageInfo& target);
 
     void FireNavigateChangeCallback(const std::string& to);
+    void NotifyPageTransitionEnd(const RefPtr<PipelineContext>& context, const RefPtr<FrameNode>& page);
 
 protected:
     class RouterOptScope {
@@ -307,6 +309,7 @@ protected:
     void StartPush(const RouterPageInfo& target);
     void StartReplace(const RouterPageInfo& target);
     void StartBack(const RouterPageInfo& target);
+    void StartBackExtender(const RouterPageInfo& target);
     void StartBackToIndex(int32_t index, const std::string& params);
     virtual bool StartPop();
     void StartRestore(const RouterPageInfo& target);
@@ -349,11 +352,11 @@ protected:
     static bool OnPopPageToIndex(int32_t index, bool needShowNext, bool needTransition);
     static bool OnCleanPageStack();
 
-    // For ArkTS1.2
+    // For ArkTS static
     virtual bool LoadPageExtender(int32_t pageId, const RouterPageInfo& target, void* jsNode,
         bool needHideLast = true, bool needTransition = true);
     RefPtr<FrameNode> CreatePageExtender(int32_t pageId, const RouterPageInfo& target);
-    // ArkTS1.2 push ArkTS1.1
+    // ArkTS static push ArkTS dynamic
     bool LoadDynamicPageExtender(
         const RefPtr<FrameNode>& pageNode, bool needHideLast = true, bool needTransition = true);
     bool CreateDynamicPageOhmUrl(const std::string& url, std::string& ohmUrl);
@@ -364,6 +367,8 @@ protected:
     bool CheckIndexValid(int32_t index) const;
     bool CheckOhmUrlValid(const std::string& ohmUrl);
     void ThrowError(const std::string& msg, int32_t code);
+
+    void ThrowRuntimeError(const std::string& msg, int32_t code);
 
     bool TryPreloadNamedRouter(const std::string& name, std::function<void()>&& finishCallback);
     void PushNamedRouteInner(const RouterPageInfo& target);

@@ -404,6 +404,9 @@ void CreateLayeredDrawable(ani_env* env, [[maybe_unused]] ani_class aniClass, an
         std::unique_ptr<uint8_t[]> maskData;
         size_t maskLen = 0;
         std::shared_ptr<Global::Resource::ResourceManager> resMgr(Global::Resource::CreateResourceManager());
+        if (resMgr == nullptr) {
+            return;
+        }
         auto state = resMgr->GetMediaDataByName(DEFAULT_MASK, maskLen, maskData);
         if (state == Global::Resource::SUCCESS && maskLen > 0) {
             drawable->SetMaskData(maskData.release(), maskLen);

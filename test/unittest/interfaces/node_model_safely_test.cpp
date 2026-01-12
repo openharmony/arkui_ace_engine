@@ -443,7 +443,7 @@ HWTEST_F(NodeModelSafelyTest, NodeModelSafelyTest016, TestSize.Level1)
     ASSERT_NE(node, nullptr);
 
     int32_t ret = SetMeasuredSizeSafely(nullptr, 100, 100);
-    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
 
     ret = SetMeasuredSizeSafely(node, 100, 100);
     EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD);
@@ -465,7 +465,7 @@ HWTEST_F(NodeModelSafelyTest, NodeModelSafelyTest017, TestSize.Level1)
     ASSERT_NE(node, nullptr);
 
     int32_t ret = SetLayoutPositionSafely(nullptr, 100, 100);
-    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
 
     ret = SetLayoutPositionSafely(node, 100, 100);
     EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD);
@@ -487,7 +487,7 @@ HWTEST_F(NodeModelSafelyTest, NodeModelSafelyTest018, TestSize.Level1)
     ASSERT_NE(node, nullptr);
 
     int32_t ret = MeasureNodeSafely(nullptr, nullptr);
-    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
 
     DisposeNodeSafely(node);
 }
@@ -503,7 +503,7 @@ HWTEST_F(NodeModelSafelyTest, NodeModelSafelyTest019, TestSize.Level1)
     ASSERT_NE(node, nullptr);
 
     int32_t ret = LayoutNodeSafely(nullptr, 0, 0);
-    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD);
+    EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_PARAM_INVALID);
 
     ret = LayoutNodeSafely(node, 0, 0);
     EXPECT_EQ(ret, OHOS::Ace::ERROR_CODE_NATIVE_IMPL_NODE_ON_INVALID_THREAD);

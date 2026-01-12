@@ -30,7 +30,8 @@ public:
 
     Rosen::TextRectHeightStyle GetHeightStyle(bool needLineHighest) override;
     void Layout(float width) override;
-    void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles) override;
+    void ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles,
+        const std::optional<TextStyle>& firstValidTextStyle) override;
     float GetHeight() override;
     size_t GetLineCount() override;
     void AddText(const std::u16string& text) override;

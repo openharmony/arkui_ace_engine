@@ -1,4 +1,4 @@
-# Copyright (c) 2024 Huawei Device Co., Ltd.
+# Copyright (c) 2024-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -109,7 +109,6 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/accessibility/static/accessibility_static_utils.cpp",
     "$ace_root/frameworks/core/animation/animation_pub.cpp",
     "$ace_root/frameworks/core/components/checkable/checkable_theme.cpp",
-    "$ace_root/frameworks/core/components/picker/picker_theme.cpp",
     "$ace_root/frameworks/core/components_ng/manager/form_event/form_event_manager.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/app_bar/atomic_service_pattern.cpp",
@@ -183,6 +182,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/text_clock/text_clock_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/text_picker/textpicker_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/time_picker/timepicker_model_static.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/waterflow/bridge/waterflow/water_flow_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/ani/richtext_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/ani/web_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/window_scene/root/root_scene_model.cpp",
@@ -193,6 +193,8 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/test/mock/core/render/mock_offscreen_canvas_rendering_context_2d_model_ng.cpp",
     "$ace_root/test/unittest/core/pattern/particle/mock/mock_rosen_particle_context.cpp",
     "$ace_root/test/mock/interfaces/mock_node_modifiers.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/checkbox/bridge/checkbox_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/checkboxgroup/bridge/checkboxgroup_static_modifier.cpp",
   ]
   sources += rebased_common_sources
   sources += rebased_generated_sources

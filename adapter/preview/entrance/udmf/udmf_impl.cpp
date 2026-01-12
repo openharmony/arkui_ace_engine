@@ -49,6 +49,11 @@ void* UdmfClientImpl::TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData)
     return nullptr;
 }
 
+std::shared_ptr<void> UdmfClientImpl::TransformUnifiedDataSharedPtr(RefPtr<UnifiedData>& unifiedDataImpl)
+{
+    return nullptr;
+}
+
 RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedData(napi_value napiValue)
 {
     return nullptr;

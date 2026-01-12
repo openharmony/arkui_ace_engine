@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,9 +81,10 @@ public:
     void AddUpdateCallBack(const std::function<void(std::vector<float>&)>& updateCallback) override;
     void AddInitTypeCallBack(const std::function<void(int32_t&)>& initTypeCallback) override;
 
-    void InitContext(bool isRoot, const std::optional<ContextParam>& param) override;
+    void InitContext(bool isRoot, const std::optional<ContextParam>& param, FrameNode* host = nullptr) override;
 
-    void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode) override;
+    void InitContext(bool isRoot, const std::optional<ContextParam>& param, bool isLayoutNode,
+        FrameNode* host = nullptr) override;
 
     void CreateNodeByType(
         const ContextParam& param, bool isTextureExportNode, std::shared_ptr<Rosen::RSUIContext>& rsContext);
@@ -163,7 +164,7 @@ public:
 
     void ClearFocusState() override;
 
-    const std::shared_ptr<Rosen::RSNode>& GetRSNode();
+    ACE_FORCE_EXPORT const std::shared_ptr<Rosen::RSNode>& GetRSNode();
 
     void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
 
@@ -177,34 +178,20 @@ public:
 
     void StopRecordingIfNeeded() override;
 
-    void SetDrawContentAtLast(bool useDrawContentLastOrder) override
-    {
-        CHECK_NULL_VOID(rsNode_);
-        rsNode_->SetPaintOrder(useDrawContentLastOrder);
-    }
+    void SetDrawContentAtLast(bool useDrawContentLastOrder) override;
 
-    void SetClipToFrame(bool useClip) override
-    {
-        CHECK_NULL_VOID(rsNode_);
-        rsNode_->SetClipToFrame(useClip);
-    }
+    void SetClipToFrame(bool useClip) override;
 
-    void SetClipToBounds(bool useClip) override
-    {
-        CHECK_NULL_VOID(rsNode_);
-        rsNode_->SetClipToBounds(useClip);
-    }
+    void SetClipToBounds(bool useClip) override;
 
-    void SetVisible(bool visible) override
-    {
-        CHECK_NULL_VOID(rsNode_);
-        rsNode_->SetVisible(visible);
-    }
+    void SetVisible(bool visible) override;
 
     void BindColorPicker(ColorPlaceholder placeholder, ColorPickStrategy strategy, uint32_t interval) override;
 
     template<typename ModifierName, auto Setter, typename T>
     void AddOrUpdateModifier(std::shared_ptr<ModifierName>& modifier, const T& value);
+    void SetNeedCallbackAreaChange();
+    void SetNeedCallbackAreaChangeMultiThread();
 
     void FlushContentDrawFunction(CanvasDrawFunction&& contentDraw) override;
 
@@ -217,21 +204,40 @@ public:
     void AnimateHoverEffectScaleMultiThread(bool isHovered);
     void AnimateHoverEffectBoardMultiThread(bool isHovered);
     void UpdateBackBlurRadius(const Dimension& radius) override;
+    void UpdateBackBlurRadiusMultiThread(const Dimension& radius);
     void UpdateBackBlurStyle(
         const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions()) override;
+    void UpdateBackBlurStyleMultiThread(
+        const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions = SysOptions());
+    void UpdateBackBlurStyleMultiThreadInner(
+        const std::optional<BlurStyleOption>& bgBlurStyle, const SysOptions& sysOptions);
     void UpdateBackgroundEffect(
         const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions = SysOptions()) override;
+    void UpdateBackgroundEffectMultiThread(
+        const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions = SysOptions());
+    void UpdateBackgroundEffectMultiThreadInner(
+        const std::optional<EffectOption>& effectOption, const SysOptions& sysOptions);
     void UpdateMotionBlur(const MotionBlurOption& motionBlurOption) override;
+    void UpdateMotionBlurMultiThread(const MotionBlurOption& motionBlurOption);
     void UpdateBackBlur(
         const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions()) override;
+    void UpdateBackBlurMultiThread(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions());
     void UpdateNodeBackBlur(const Dimension& radius, const BlurOption& blurOption) override;
+    void UpdateNodeBackBlurMultiThread(const Dimension& radius, const BlurOption& blurOption);
     void UpdateFrontBlur(
         const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions = SysOptions()) override;
+    void UpdateFrontBlurMultiThread(
+        const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions);
     void UpdateFrontBlurRadius(const Dimension& radius) override;
+    void UpdateFrontBlurRadiusMultiThread(const Dimension& radius);
     void UpdateFrontBlurStyle(
         const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions = SysOptions()) override;
+    void UpdateFrontBlurStyleMultiThread(
+        const std::optional<BlurStyleOption>& fgBlurStyle, const SysOptions& sysOptions = SysOptions());
     void OnForegroundEffectUpdate(float radius) override;
     void ResetBackBlurStyle() override;
+    void ResetBackBlurStyleMultiThread();
     void OnSphericalEffectUpdate(double radio) override;
     void OnPixelStretchEffectUpdate(const PixStretchEffectOption& option) override;
     void OnLightUpEffectUpdate(double radio) override;
@@ -460,6 +466,7 @@ public:
     void SetOpacity(float opacity) override;
     void SetTranslate(float translateX, float translateY, float translateZ) override;
     void SetHostNode(const WeakPtr<FrameNode>& host) override;
+    void SetHostNodeMultiThread(const WeakPtr<FrameNode>& host);
 
     OffsetF GetBaseTransalteInXY() const override;
     void SetBaseTranslateInXY(const OffsetF& offset) override;
@@ -491,6 +498,7 @@ public:
     void MarkUiFirstNode(bool isUiFirstNode) override;
 
     void SetRSUIContext(PipelineContext* context) override;
+    void SetRSUIContextMultiThread(PipelineContext* context);
 
     void SetDrawNode() override;
     bool AddNodeToRsTree() override;
@@ -639,7 +647,7 @@ protected:
 
     void OnUseEffectUpdate(bool useEffect) override;
     void OnUseEffectTypeUpdate(EffectType effectType) override;
-    void OnUseUnionUpdate(bool useUnion) override;
+    void OnUseUnionEffectUpdate(bool useUnion) override;
     bool GetStatusByEffectTypeAndWindow() override;
     void OnUseShadowBatchingUpdate(bool useShadowBatching) override;
     void OnFreezeUpdate(bool isFreezed) override;
@@ -712,6 +720,8 @@ protected:
     void PaintBorderImageGradient();
     void PaintMouseSelectRect(const RectF& rect, const Color& fillColor, const Color& strokeColor);
     void UpdateForeBlurStyleForColorMode(const std::optional<BlurStyleOption>& fgBlurStyle,
+        const SysOptions& sysOptions);
+    void UpdateForeBlurStyleForColorModeMultiThread(const std::optional<BlurStyleOption>& fgBlurStyle,
         const SysOptions& sysOptions);
     void SetBackBlurFilter();
     void SetFrontBlurFilter();

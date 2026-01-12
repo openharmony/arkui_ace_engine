@@ -18,19 +18,19 @@
 
 import { KBoolean, KStringPtr, MaterializedBase } from "@koalaui/interop"
 import { int32, int64 } from "@koalaui/common"
-import { AccessibilityHoverType, Alignment, AnimationPropertyType, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisType, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, Color, ColoringStrategy, ColorSpace, ObscuredReasons, ModifierKey, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, ResponseType, FunctionKey, CopyOptions, CrownAction, CrownSensitivity, DialogButtonStyle, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FoldStatus, FontStyle, FontWeight, GradientDirection, HeightBreakpoint, HorizontalAlign, IlluminatedType, ImageFit, ImageSpanAlignment, InteractionHand, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, MouseAction, MouseButton, NestedScrollMode, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PlayMode, RelateType, ResponseRegionSupportedTool, ScrollSource, SharedTransitionEffectType, TextAlign, TextCase, TextContentStyle, TextDecorationStyle, TextDecorationType, TextHeightAdaptivePolicy, TextOverflow, TextSelectableMode, TitleHeight, TouchType, TransitionType, Nullable, WidthBreakpoint, VerticalAlign, Week, WordBreak, XComponentType, TipsAnchorType } from "./../../component/enums"
-import { AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, AvailableLayoutArea, BlendApplyType, BlendMode, BlurStyle, BlurStyleActivePolicy, TouchEvent, ChainStyle, Rectangle, ResponseRegion, TouchTestInfo, SafeAreaType, SafeAreaEdge, MenuElement, CommonMethod, LayoutPolicy, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilityFocusCallback, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, CustomProperty, BackgroundOptions, BackgroundImageOptions, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, ContentClipMode, ContentTransitionEffect, DismissReason, DragBehavior, DraggingSizeChangeEffect, DragPreviewMode, DragResult, EffectEdge, FinishCallbackType, HapticFeedbackMode, HoverModeAreaType, KeyboardAvoidMode, LayoutSafeAreaEdge, LayoutSafeAreaType, RectResult, CommonConfiguration, MenuPolicy, MenuPreviewMode, ModalMode, NestedScrollOptions, PixelMapMock, PopupStateChangeParam, PreviewScaleMode, RepeatMode, SelectionOptions, ScrollResult, ScrollSizeMode, TextContentControllerBase, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SizeResult, SourceTool, SourceType, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestStrategy, TransitionEdge, AsymmetricTransitionOption, TransitionHierarchyStrategy, UICommonEvent, HoverCallback, KeyframeState, KeyframeAnimateParam, VerticalAlignParam, Measurable, Layoutable, ChildrenMainSize, DateRange, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, ModifierKeyStateGetter, EdgeEffectOptions, EditModeOptions, ExpectedFrameRateRange, HorizontalAlignParam, InputCounterOptions, ItemDragEventHandler, OnMoveHandler, ItemDragInfo, FractionStop, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, MeasureResult, MotionBlurAnchor, OverlayOffset, PopupBorderLinearGradient, PopupButton, SheetDismiss, SpringBackAction, TouchObject, BlurStyleOptions, BindOptions, ContextMenuAnimationOptions, AnimationNumberRange, MultiShadowOptions, FadingEdgeOptions, HistoricalPoint, LightSource, MenuMaskType, PopupMaskType, ReuseIdCallback, SheetTitleOptions, TerminationInfo, TextDecorationOptions, DividerStyle, PointLightStyle, BorderRadiusType, PopupStateChangeCallback, EventTarget, BaseEvent, GeometryInfo, PickerDialogButtonStyle, PickerTextStyle, PopupCommonOptions, PopupMessageOptions, SingleLengthDetent, DoubleLengthDetents, TripleLengthDetents } from "./../../component/common"
+import { AccessibilityHoverType, Alignment, AnimationPropertyType, AnimationStatus, AppRotation, ArrowPointPosition, Axis, AxisAction, AxisType, AxisModel, BarState, BorderStyle, CheckBoxShape, ClickEffectLevel, Color, ColoringStrategy, ColorSpace, ObscuredReasons, ModifierKey, HitTestMode, ImageSize, HoverEffect, Visibility, ItemAlign, LocalizedAlignment, Direction, RenderFit, FocusDrawLevel, ImageRepeat, RenderStrategy, ResponseType, FunctionKey, CopyOptions, CrownAction, CrownSensitivity, DialogButtonStyle, DividerMode, Edge, EdgeEffect, EllipsisMode, EmbeddedType, FillMode, FlexAlign, FlexDirection, FlexWrap, FocusWrapMode, FoldStatus, FontStyle, FontWeight, GradientDirection, HeightBreakpoint, HorizontalAlign, IlluminatedType, ImageFit, ImageSpanAlignment, InteractionHand, KeySource, KeyType, LineBreakStrategy, LineCapStyle, LineJoinStyle, MarqueeUpdateStrategy, MouseAction, MouseButton, NestedScrollMode, OptionWidthMode, PageFlipMode, PixelRoundCalcPolicy, PixelRoundMode, Placement, PresetFillType, PlayMode, RelateType, ResponseRegionSupportedTool, ScrollSource, SharedTransitionEffectType, TextAlign, TextCase, TextContentStyle, TextDecorationStyle, TextDecorationType, TextHeightAdaptivePolicy, TextOverflow, TextSelectableMode, TitleHeight, TouchType, TransitionType, Nullable, WidthBreakpoint, VerticalAlign, Week, WordBreak, XComponentType, TipsAnchorType } from "./../../component/enums"
+import { AccessibilityAction, AccessibilityActionInterceptResult, AccessibilityRoleType, AccessibilitySamePageMode, AdaptiveColor, AvailableLayoutArea, BlendApplyType, BlendMode, BlurStyle, BlurStyleActivePolicy, TouchEvent, ChainStyle, Rectangle, ResponseRegion, TouchTestInfo, SafeAreaType, SafeAreaEdge, MenuElement, CommonMethod, LayoutPolicy, TouchResult, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, StateStyles, PixelStretchEffectOptions, AccessibilityFocusCallback, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, CustomProperty, BackgroundOptions, BackgroundImageOptions, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, ContentClipMode, ContentTransitionEffect, DismissReason, DragBehavior, DraggingSizeChangeEffect, DragPreviewMode, DragResult, EffectEdge, FinishCallbackType, HapticFeedbackMode, HoverModeAreaType, KeyboardAvoidMode, LayoutSafeAreaEdge, LayoutSafeAreaType, RectResult, CommonConfiguration, MenuPolicy, MenuPreviewMode, ModalMode, NestedScrollOptions, PixelMapMock, PopupStateChangeParam, PreviewScaleMode, RepeatMode, SelectionOptions, ScrollResult, ScrollSizeMode, TextContentControllerBase, ShadowType, SheetKeyboardAvoidMode, SheetMode, SheetSize, SheetType, SizeResult, SourceTool, SourceType, CaretOffset, TextContentControllerOptions, ThemeColorMode, TouchTestStrategy, TransitionEdge, AsymmetricTransitionOption, TransitionHierarchyStrategy, UICommonEvent, HoverCallback, KeyframeState, KeyframeAnimateParam, UIScrollableCommonEvent, OnWillScrollCallback, OnScrollCallback, VerticalAlignParam, Measurable, Layoutable, ChildrenMainSize, DateRange, DismissContentCoverAction, DismissPopupAction, DismissSheetAction, ModifierKeyStateGetter, EdgeEffectOptions, EditModeOptions, ExpectedFrameRateRange, HorizontalAlignParam, InputCounterOptions, ItemDragEventHandler, OnMoveHandler, ItemDragInfo, FractionStop, LocalizedHorizontalAlignParam, LocalizedVerticalAlignParam, MeasureResult, MotionBlurAnchor, OverlayOffset, PopupBorderLinearGradient, PopupButton, SheetDismiss, SpringBackAction, TouchObject, BlurStyleOptions, BindOptions, ContextMenuAnimationOptions, AnimationNumberRange, MultiShadowOptions, FadingEdgeOptions, HistoricalPoint, LightSource, MenuMaskType, PopupMaskType, ReuseIdCallback, SheetTitleOptions, TerminationInfo, TextDecorationOptions, DividerStyle, PointLightStyle, BorderRadiusType, PopupStateChangeCallback, EventTarget, BaseEvent, GeometryInfo, PickerDialogButtonStyle, PickerTextStyle, PopupCommonOptions, PopupMessageOptions, SingleLengthDetent, DoubleLengthDetents, TripleLengthDetents } from "./../../component/common"
 import { AnimationMode, BarMode, BarPosition, LayoutStyle, TabContentTransitionProxy, TabsAnimationEvent, TabsCacheMode, TabsController, TabContentAnimatedTransition, TabsOptions, BarGridColumnOptions, ScrollableBarModeOptions } from "./../../component/tabs"
 import { ArrowPosition, AvoidanceMode, MenuAlignType, MenuItemConfiguration, SelectOption, MenuOutlineOptions } from "./../../component/select"
 import { AttributeModifier, extractors, DrawModifier, GestureModifier, WrappedBuilder, ContentModifier, UIGestureEvent, LocalStorage, AttributeUpdater, CustomStyles } from "#handwritten"
 import { AttributeUpdaterFlag } from "./../../AttributeUpdaterFlag"
-import { AudioSessionType, BlankScreenDetectionMethod, BlurOnKeyboardHideMode, CacheMode, CameraCaptureState, CameraCaptureStateChangeInfo, ClientAuthenticationHandler, ConsoleMessage, MessageLevel, ConsoleMessageSource, ContextMenuDataMediaType, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, DataResubmissionHandler, DetectedBlankScreenReason, EventResult, FileSelectorMode, AcceptableFileType, FileSelectorParam, FileSelectorResult, FullScreenExitHandler, GestureFocusMode, HttpAuthHandler, JsGeolocation, JsResult, MicrophoneCaptureState, MicrophoneCaptureStateChangeInfo, MixedMode, NativeEmbedParamStatus, NativeEmbedStatus, NativeMediaPlayerConfig, NavigationPolicy, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PdfLoadResult, PermissionRequest, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureConfig, SslError, SslErrorHandler, ThreatType, UrlRegexRule, ViewportFit, WebBypassVsyncCondition, WebCaptureMode, WebContextMenuParam, WebContextMenuResult, WebDarkMode, WebElementType, WebKeyboardAvoidMode, WebKeyboardController, WebLayoutMode, WebNavigationType, WebResourceError, Header, WebResourceRequest, WebResourceResponse, WebResponseType, WebRotateEffect, WindowFeatures, AdsBlockedDetails, BlankScreenDetails, BlankScreenDetectionConfig, EmbedOptions, FirstMeaningfulPaint, FullScreenEnterEvent, IntelligentTrackingPreventionDetails, JavaScriptProxy, LargestContentfulPaint, LoadCommittedDetails, NativeEmbedParamItem, NativeEmbedParamDataInfo, NativeEmbedVisibilityInfo, NestedScrollOptionsExt, OnAlertEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnContextMenuShowEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, OnLoadFinishedEvent, OnLoadInterceptEvent, OnLoadStartedEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPdfLoadEvent, OnPdfScrollEvent, OnPermissionRequestEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScreenCaptureRequestEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, OnWindowNewExtEvent, RenderProcessNotRespondingData, ScriptItem, SslErrorEvent, WebKeyboardCallbackInfo, WebKeyboardOptions, WebMediaOptions, WebOptions, BlankScreenDetectionEventInfo, SelectionMenuOptionsExt, NativeEmbedInfo, NativeEmbedDataInfo, NativeEmbedMouseInfo, NativeEmbedTouchInfo } from "./../../component/web"
-import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWithAffinity, MenuType, TextEditControllerEx, PreviewText, StyledStringController, StyledStringChangedListener, TextBaseController, TextRange, TextDataDetectorType, TextDeleteDirection, TextDirection, TextMenuItemId, TextMenuShowMode, TextMenuItem, DeleteValue, EditMenuOptions, OnCreateMenuCallback, OnMenuItemClickCallback, FontSettingOptions, InsertValue, StyledStringChangeValue, OnDidChangeCallback, TextMenuOptions, AccessibilitySpanOptions, DecorationStyleResult, TextChangeOptions, CaretStyle, EditableTextChangeValue, TextDataDetectorConfig, SelectedDragPreviewStyle } from "./../../component/textCommon"
+import { AudioSessionType, BlankScreenDetectionMethod, BlurOnKeyboardHideMode, CacheMode, CameraCaptureState, CameraCaptureStateChangeInfo, ClientAuthenticationHandler, ConsoleMessage, MessageLevel, ConsoleMessageSource, ContextMenuDataMediaType, ContextMenuEditStateFlags, ContextMenuInputFieldType, ContextMenuMediaType, ContextMenuSourceType, ControllerHandler, DataResubmissionHandler, DetectedBlankScreenReason, EventResult, FileSelectorMode, AcceptableFileType, FileSelectorParam, FileSelectorResult, FullScreenExitHandler, GestureFocusMode, HttpAuthHandler, JsGeolocation, JsResult, MicrophoneCaptureState, MicrophoneCaptureStateChangeInfo, MixedMode, NativeEmbedParamStatus, NativeEmbedStatus, NativeMediaPlayerConfig, NavigationPolicy, OnAudioStateChangedEvent, OnConsoleEvent, OnDataResubmittedEvent, OnFaviconReceivedEvent, OnFirstContentfulPaintEvent, OnOverScrollEvent, OnProgressChangeEvent, OnScaleChangeEvent, OnScrollEvent, OnSearchResultReceiveEvent, OnShowFileSelectorEvent, OverScrollMode, PdfLoadResult, PermissionRequest, ProtectedResourceType, RenderExitReason, RenderMode, RenderProcessNotRespondingReason, ScreenCaptureHandler, ScreenCaptureConfig, SslError, SslErrorHandler, ThreatType, UrlRegexRule, ViewportFit, WebBypassVsyncCondition, WebCaptureMode, WebContextMenuParam, WebContextMenuResult, WebDarkMode, WebElementType, WebKeyboardAvoidMode, WebKeyboardController, WebLayoutMode, WebNavigationType, WebResourceError, Header, WebResourceRequest, WebResourceResponse, WebResponseType, WebRotateEffect, WindowFeatures, AdsBlockedDetails, BlankScreenDetails, BlankScreenDetectionConfig, EmbedOptions, FirstMeaningfulPaint, FirstScreenPaint, FullScreenEnterEvent, IntelligentTrackingPreventionDetails, JavaScriptProxy, LargestContentfulPaint, LoadCommittedDetails, NativeEmbedParamItem, NativeEmbedParamDataInfo, NativeEmbedVisibilityInfo, NestedScrollOptionsExt, OnAlertEvent, OnBeforeUnloadEvent, OnClientAuthenticationEvent, OnConfirmEvent, OnContextMenuShowEvent, OnDownloadStartEvent, OnErrorReceiveEvent, OnGeolocationShowEvent, OnHttpAuthRequestEvent, OnHttpErrorReceiveEvent, OnInterceptRequestEvent, OnLoadFinishedEvent, OnLoadInterceptEvent, OnLoadStartedEvent, OnPageBeginEvent, OnPageEndEvent, OnPageVisibleEvent, OnPdfLoadEvent, OnPdfScrollEvent, OnPermissionRequestEvent, OnPromptEvent, OnRefreshAccessedHistoryEvent, OnRenderExitedEvent, OnResourceLoadEvent, OnScreenCaptureRequestEvent, OnSslErrorEventReceiveEvent, OnTitleReceiveEvent, OnTouchIconUrlReceivedEvent, OnWindowNewEvent, OnWindowNewExtEvent, RenderProcessNotRespondingData, ScriptItem, SslErrorEvent, WebKeyboardCallbackInfo, WebKeyboardOptions, WebMediaOptions, WebOptions, BlankScreenDetectionEventInfo, SelectionMenuOptionsExt, NativeEmbedInfo, NativeEmbedDataInfo, NativeEmbedMouseInfo, NativeEmbedTouchInfo } from "./../../component/web"
+import { AutoCapitalizationMode, KeyboardAppearance, LayoutManager, PositionWithAffinity, MenuType, TextEditControllerEx, PreviewText, StyledStringController, StyledStringChangedListener, TextBaseController, TextRange, TextChangeReason, TextVerticalAlign, TextDataDetectorType, TextDeleteDirection, TextDirection, TextMenuItemId, TextMenuShowMode, TextMenuItem, DeleteValue, EditMenuOptions, OnCreateMenuCallback, OnMenuItemClickCallback, FontSettingOptions, InsertValue, StyledStringChangeValue, OnDidChangeCallback, OnPrepareMenuCallback, TextMenuOptions, AccessibilitySpanOptions, DecorationStyleResult, TextChangeOptions, CaretStyle, EditableTextChangeValue, TextDataDetectorConfig, SelectedDragPreviewStyle } from "./../../component/textCommon"
 import { BadgePosition, BadgeStyle, BadgeParamWithNumber, BadgeParam, BadgeParamWithString } from "./../../component/badge"
 import { BarrierDirection, LocalizedBarrierDirection, BarrierStyle, LocalizedBarrierStyle, GuideLinePosition, GuideLineStyle } from "./../../component/relativeContainer"
 import { BarStyle, LaunchMode, NavBarPosition, NavigationMode, NavigationOperation, NavigationTitleMode, NavPathInfo, NavPathStack, NavigationOptions, PopInfo, NavigationInterception, ToolbarItemStatus, NavContentInfo, NavigationAnimatedTransition, NavigationTransitionProxy, InterceptionShowCallback, NavBar, InterceptionModeCallback, NavigationModuleInfo, NavigationCommonTitle, NavigationMenuItem, UpdateTransitionCallback, ToolbarItem, MoreButtonOptions, NavigationCustomTitle, NavigationTitleOptions, NavigationMenuOptions, NavigationToolbarOptions } from "./../../component/navigation"
 import { BaseShape, BuilderNodeOps, BuilderNodeOptions, CommonShape, CustomDialogControllerExtender, LevelOrderExtender, CustomDialogControllerOptionsExtender, CustomDialogControllerExternalOptionsExtender, Offset_componentutils, PerfMonitorActionType, PerfMonitorSourceType, PositionF64Inner, RotateResult, ScaleResult, SizeF64Inner, TranslateResult, DisturbanceFieldOptionsInner, DoubleAnimationParam, Callback_Extender_OnProgress, Callback_Extender_OnFinish, EdgeF64, EdgeI32, ErrorEvent, Event, LengthMetricsCustom, MessageEvents, ParticlePropertyAnimationNumberInner, ParticleOptionsInner, ParticlesInner, PositionLengthMetricsInner, PostMessageOptions, SizeTLengthMetrics, SnapshotOptions, WorkerOptions, ComponentInfo, Matrix4Result, NodeEdgesLengthMetrics, PageRouterOptions, ParticleAnnulusRegionInner, ParticlePropertyAnimationColorInner, ParticleColorUpdaterOptionsInner, ParticleColorPropertyUpdaterConfigsInner, ParticleUpdaterOptionsInner, ParticlePropertyUpdaterConfigsInner, RestrictedWorker, RestrictedWorker_onexit_Callback, RestrictedWorker_onerror_Callback, RestrictedWorker_onmessage_Callback, WorkerEventListener, EmitterPropertyInner, ParticleColorPropertyOptionsInner, ParticlePropertyOptionsInner, AccelerationOptionsInner, EmitterOptionsInner } from "./../../component/idlize"
-import { Length, SizeOptions, ColorFilter, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, ResourceStr, AccessibilityOptions, Bias, DirectionalEdgesT, VP, DividerStyleOptions, LengthConstrain, Offset, PX, LPX, MarkStyle } from "./../../component/units"
+import { Length, SizeOptions, ColorFilter, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, ResourceStr, AccessibilityOptions, Bias, CacheCountInfo, DirectionalEdgesT, ItemFillPolicy, VP, DividerStyleOptions, LengthConstrain, Offset, ScrollBarMargin, PX, LPX, MarkStyle } from "./../../component/units"
 import { Resource } from "global.resource"
 import { BreakpointsReference, GridRowDirection, BreakPoints, GridRowColumnOption, GridRowSizeOption, GutterOption, GridRowOptions } from "./../../component/gridRow"
 import { default as bundleManager } from "@ohos.bundle.bundleManager"
@@ -39,7 +39,7 @@ import { CalendarAlign, CalendarPickerDialog, CalendarDialogOptions, CalendarOpt
 import { CancelButtonStyle, SearchController, SearchType, CancelButtonSymbolOptions, SearchOptions, IconOptions, SearchButtonOptions, CancelButtonOptions } from "./../../component/search"
 import { CanvasGradient, CanvasPath, CanvasPattern, OffscreenCanvas, ImageBitmap, RenderingContextSettings, OffscreenCanvasRenderingContext2D, Path2D, TextMetrics, DrawingRenderingContext, ImageData, CanvasRenderer, ImageSmoothingQuality, CanvasLineCap, CanvasLineJoin, CanvasDirection, CanvasTextAlign, CanvasTextBaseline, CanvasFillRule, CanvasRenderingContext2D } from "./../../component/canvas"
 import { Matrix2D } from "./../../component/matrix2d"
-import { ChainEdgeEffect, ListItemAlign, ListItemGroupArea, ListScroller, CloseSwipeActionOptions, VisibleListContentInfo, ScrollSnapAlign, ScrollState, StickyStyle, ListOptions, ChainAnimationOptions, ListDividerOptions } from "./../../component/list"
+import { ChainEdgeEffect, ListItemAlign, ListItemGroupArea, ListScroller, CloseSwipeActionOptions, VisibleListContentInfo, ScrollSnapAlign, ScrollSnapAnimationSpeed, ScrollState, StickyStyle, UIListEvent, OnListScrollIndexCallback, OnScrollVisibleContentChangeCallback, ListOptions, ChainAnimationOptions, ListDividerOptions } from "./../../component/list"
 import { CircleShape, ShapeSize, EllipseShape, PathShape, RectShape, CommonShapeMethod, PathShapeOptions, RectShapeOptions, RoundRectShapeOptions } from "@ohos.arkui.shape"
 import { ColorContent, ResizableOptions, DynamicRangeMode, ImageContent, ImageInterpolation, ImageAttribute, ImageRenderMode, ImageRotateOrientation, ImageCompleteEvent, ImageSourceSize, ImageAlt, ImageError } from "./../../component/image"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
@@ -52,8 +52,8 @@ import { CustomBuilder, CustomBuilderT } from "./../../component/builder"
 import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
-import { StyledString, GestureStyle, GestureStyleInterface, LetterSpacingStyle, LineHeightStyle, StyleOptions, MutableStyledString, ImageAttachment, CustomSpan, SpanStyle, StyledStringKey, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, UrlStyle, BaselineOffsetStyle, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, TextShadowStyle, DecorationStyle, DecorationStyleInterface, TextStyle, TextStyleInterface, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInterface, BackgroundColorStyle, ColorFilterType, AttachmentType, ImageAttachmentInterface, ResourceImageAttachmentOptions, StyledStringValue } from "./../../component/styledString"
-import { UIContext, DynamicSyncScene, Font, MediaQuery, UIInspector, Router, PromptAction, ComponentUtils, UIObserver, OverlayManager, OverlayManagerOptions, DragController, MeasureUtils, FocusController, PageInfo, CursorController, ContextMenuController, ComponentSnapshot, FrameCallback, ContentCoverController, TextMenuController, TargetInfo } from "@ohos.arkui.UIContext"
+import { StyledString, GestureStyle, GestureStyleInterface, LeadingMarginSpan, LeadingMarginSpanDrawInfo, LetterSpacingStyle, LineHeightStyle, StyleOptions, MutableStyledString, ImageAttachment, CustomSpan, SpanStyle, StyledStringKey, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback, UrlStyle, BaselineOffsetStyle, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, TextShadowStyle, DecorationStyle, DecorationStyleInterface, TextStyle, TextStyleInterface, ImageAttachmentLayoutStyle, ParagraphStyle, ParagraphStyleInterface, BackgroundColorStyle, ColorFilterType, AttachmentType, ImageAttachmentInterface, ResourceImageAttachmentOptions, StyledStringValue } from "./../../component/styledString"
+import { UIContext, DynamicSyncScene, Font, MediaQuery, UIInspector, Router, PromptAction, ComponentUtils, UIObserver, OverlayManager, OverlayManagerOptions, DragController, MeasureUtils, FocusController, PageInfo, CursorController, ContextMenuController, ComponentSnapshot, FrameCallback, ContentCoverController, TextMenuController, TargetInfo, CustomKeyboardContinueFeature } from "@ohos.arkui.UIContext"
 import { BuildOptions } from "arkui.BuilderNode"
 import { default as ConfigurationConstant } from "@ohos.app.ability.ConfigurationConstant"
 import { ContentType, EnterKeyType, InputType, SubmitEvent, TextInputController, TextInputStyle, PasswordIcon, UnderlineColor, TextInputOptions } from "./../../component/textInput"
@@ -80,7 +80,7 @@ import { FormDimension, FormRenderingMode, FormShape, FormSize, ErrorInformation
 import { FrictionMotion, ScrollMotion, SpringProp, SpringMotion } from "./../../component/animator"
 import { FullscreenInfo, PlaybackInfo, PlaybackSpeed, PreparedInfo, SeekMode, VideoController, PosterOptions, VideoOptions } from "./../../component/video"
 import { GaugeConfiguration, GaugeOptions, GaugeShadowOptions, GaugeIndicatorOptions } from "./../../component/gauge"
-import { GridDirection, GridItemAlignment, ComputedBarAttribute, GridLayoutOptions } from "./../../component/grid"
+import { GridDirection, GridItemAlignment, UIGridEvent, OnGridScrollIndexCallback, ComputedBarAttribute, GridLayoutOptions } from "./../../component/grid"
 import { GridItemStyle, GridItemOptions } from "./../../component/gridItem"
 import { AsyncCallback, BusinessError } from "@ohos.base"
 import { default as colorSpaceManager } from "@ohos.graphics.colorSpaceManager"
@@ -96,8 +96,8 @@ import { default as text } from "@ohos.graphics.text"
 import { LayoutMode, SelectedMode, TabBarSymbol, TabBarIconStyle, TabBarOptions, BoardStyle, SubTabBarIndicatorStyle, TabBarLabelStyle, BottomTabBarStyle, SubTabBarStyle } from "./../../component/tabContent"
 import { LinearIndicatorController, LinearIndicatorStartOptions, LinearIndicatorStyle } from "./../../component/linearindicator"
 import { ListItemGroupStyle, ListItemGroupOptions } from "./../../component/listItemGroup"
-import { ListItemStyle, SwipeActionState, SwipeEdgeEffect, ListItemOptions, SwipeActionItem, SwipeActionOptions } from "./../../component/listItem"
-import { Scroller, ScrollAlign, OffsetResult, OnScrollFrameBeginHandlerResult, ScrollDirection, ScrollOptions, ScrollEdgeOptions, ScrollPageOptions, ScrollToIndexOptions, ScrollAnimationOptions, OffsetOptions, ScrollSnapOptions } from "./../../component/scroll"
+import { ListItemStyle, ListItemSwipeActionDirection, ListItemSwipeActionManager, SwipeActionState, SwipeEdgeEffect, ListItemOptions, SwipeActionItem, SwipeActionOptions } from "./../../component/listItem"
+import { Scroller, ScrollAlign, OffsetResult, OnScrollFrameBeginHandlerResult, ScrollDirection, ScrollOptions, ScrollEdgeOptions, ScrollPageOptions, ScrollToIndexOptions, OnScrollFrameBeginCallback, UIScrollEvent, ScrollOnWillScrollCallback, ScrollOnScrollCallback, ScrollAnimationOptions, OffsetOptions, ScrollSnapOptions } from "./../../component/scroll"
 import { LoadingProgressConfiguration, LoadingProgressStyle } from "./../../component/loadingProgress"
 import { MarqueeStartPolicy, MarqueeState, MarqueeUpdatePolicy, TextController, TextAttribute, TextOptions, TextOverflowOptions, TextResponseType, TextSpanType, TextMarqueeOptions } from "./../../component/text"
 import { ModelType, SceneOptions } from "./../../component/component3d"
@@ -115,7 +115,7 @@ import { RadioIndicatorType, RadioConfiguration, RadioOptions, RadioStyle } from
 import { RefreshStatus, RefreshOptions } from "./../../component/refresh"
 import { default as resourceManager } from "@ohos.resourceManager"
 import { RawFileDescriptor } from "global.rawFileDescriptor"
-import { RichEditorBaseController, RichEditorTextStyle, RichEditorParagraphResult, RichEditorSpan, RichEditorController, RichEditorTextSpanOptions, RichEditorImageSpanOptions, RichEditorBuilderSpanOptions, RichEditorSymbolSpanOptions, RichEditorUpdateTextSpanStyleOptions, RichEditorUpdateImageSpanStyleOptions, RichEditorUpdateSymbolSpanStyleOptions, RichEditorParagraphStyleOptions, RichEditorRange, RichEditorImageSpanResult, RichEditorTextSpanResult, RichEditorSelection, RichEditorDeleteDirection, RichEditorOptions, RichEditorResponseType, RichEditorSpanType, RichEditorStyledStringController, RichEditorStyledStringOptions, KeyboardOptions, PreviewMenuOptions, RichEditorDeleteValue, RichEditorGesture, RichEditorInsertValue, RichEditorSpanPosition, CopyEvent, CutEvent, PasteEvent, RichEditorChangeValue, RichEditorSymbolSpanStyle, RichEditorSpanStyleOptions, RichEditorUrlStyle, SelectionMenuOptions, MenuOnAppearCallback, MenuCallback, LeadingMarginPlaceholder, PlaceholderStyle, RichEditorLayoutStyle, RichEditorParagraphStyle, RichEditorImageSpanStyle, RichEditorImageSpanStyleResult, RichEditorTextStyleResult, OnHoverCallback } from "./../../component/richEditor"
+import { RichEditorBaseController, RichEditorTextStyle, RichEditorParagraphStyle, RichEditorParagraphResult, RichEditorSpan, RichEditorController, RichEditorTextSpanOptions, RichEditorImageSpanOptions, RichEditorBuilderSpanOptions, RichEditorSymbolSpanOptions, RichEditorUpdateTextSpanStyleOptions, RichEditorUpdateImageSpanStyleOptions, RichEditorUpdateSymbolSpanStyleOptions, RichEditorParagraphStyleOptions, RichEditorRange, RichEditorImageSpanResult, RichEditorTextSpanResult, RichEditorSelection, RichEditorDeleteDirection, RichEditorOptions, RichEditorResponseType, RichEditorSpanType, RichEditorStyledStringController, RichEditorStyledStringOptions, UndoStyle, KeyboardOptions, PreviewMenuOptions, RichEditorDeleteValue, RichEditorGesture, RichEditorInsertValue, RichEditorSpanPosition, CopyEvent, CutEvent, PasteEvent, RichEditorChangeValue, RichEditorSymbolSpanStyle, RichEditorSpanStyleOptions, RichEditorUrlStyle, SelectionMenuOptions, MenuOnAppearCallback, MenuCallback, LeadingMarginPlaceholder, PlaceholderStyle, RichEditorLayoutStyle, RichEditorImageSpanStyle, RichEditorImageSpanStyleResult, RichEditorTextStyleResult, OnHoverCallback } from "./../../component/richEditor"
 import { RootSceneSession } from "./../../component/rootScene"
 import { RouteType, SlideEffect } from "./../../component/pageTransition"
 import { RowOptionsV2, RowOptions } from "./../../component/row"
@@ -145,7 +145,7 @@ import { default as ExtensionContext } from "application.ExtensionContext"
 import { RecordData, PluginComponentTemplate, PluginErrorData, PluginComponentOptions } from "./../../component/pluginComponent"
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { Vec4 } from "graphics3d.SceneTypes"
-import { WaterFlowLayoutMode, SectionOptions, WaterFlowSections, WaterFlowOptions, GetItemMainSizeByIndex } from "./../../component/waterFlow"
+import { UIWaterFlowEvent, OnWaterFlowScrollIndexCallback, WaterFlowLayoutMode, SectionOptions, WaterFlowSections, WaterFlowOptions, GetItemMainSizeByIndex } from "./../../component/waterFlow"
 import { default as cert } from "@ohos.security.cert"
 import { default as print } from "@ohos.print"
 import { default as window } from "@ohos.window"
@@ -228,7 +228,7 @@ export class TypeChecker {
     static isAccessibilityHoverType(value: Object | string | number | undefined): boolean {
         return value instanceof AccessibilityHoverType
     }
-    static isAccessibilityOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isAccessibilityOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
         return value instanceof AccessibilityOptions
     }
     static isAccessibilityRoleType(value: Object | string | number | undefined): boolean {
@@ -549,6 +549,9 @@ export class TypeChecker {
     static isButtonType(value: Object | string | number | undefined): boolean {
         return value instanceof ButtonType
     }
+    static isCacheCountInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof CacheCountInfo
+    }
     static isCacheMode(value: Object | string | number | undefined): boolean {
         return value instanceof CacheMode
     }
@@ -822,6 +825,9 @@ export class TypeChecker {
     static isCustomDialogControllerOptionsExtender(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean, arg29: boolean, arg30: boolean, arg31: boolean, arg32: boolean, arg33: boolean, arg34: boolean, arg35: boolean, arg36: boolean, arg37: boolean): boolean {
         return value instanceof CustomDialogControllerOptionsExtender
     }
+    static isCustomKeyboardContinueFeature(value: Object | string | number | undefined): boolean {
+        return value instanceof CustomKeyboardContinueFeature
+    }
     static isCustomPopupOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean, arg10: boolean, arg11: boolean, arg12: boolean, arg13: boolean, arg14: boolean, arg15: boolean, arg16: boolean, arg17: boolean, arg18: boolean, arg19: boolean, arg20: boolean, arg21: boolean, arg22: boolean, arg23: boolean, arg24: boolean, arg25: boolean, arg26: boolean, arg27: boolean, arg28: boolean): boolean {
         return value instanceof CustomPopupOptions
     }
@@ -1050,7 +1056,7 @@ export class TypeChecker {
     static isEditableTextChangeValue(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof EditableTextChangeValue
     }
-    static isEditMenuOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+    static isEditMenuOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof EditMenuOptions
     }
     static isEditModeOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
@@ -1161,6 +1167,9 @@ export class TypeChecker {
     static isFirstMeaningfulPaint(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof FirstMeaningfulPaint
     }
+    static isFirstScreenPaint(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+        return value instanceof FirstScreenPaint
+    }
     static isFlexAlign(value: Object | string | number | undefined): boolean {
         return value instanceof FlexAlign
     }
@@ -1190,6 +1199,9 @@ export class TypeChecker {
     }
     static isFocusPriority(value: Object | string | number | undefined): boolean {
         return value instanceof FocusPriority
+    }
+    static isFocusWrapMode(value: Object | string | number | undefined): boolean {
+        return value instanceof FocusWrapMode
     }
     static isFolderStackOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof FolderStackOptions
@@ -1341,7 +1353,7 @@ export class TypeChecker {
     static isGestureStyle(value: Object | string | number | undefined): boolean {
         return value instanceof GestureStyle
     }
-    static isGestureStyleInterface(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+    static isGestureStyleInterface(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof GestureStyleInterface
     }
     static isGradientDirection(value: Object | string | number | undefined): boolean {
@@ -1458,7 +1470,7 @@ export class TypeChecker {
     static isImageAnalyzerType(value: Object | string | number | undefined): boolean {
         return value instanceof ImageAnalyzerType
     }
-    static isImageAttachment(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
+    static isImageAttachment(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof ImageAttachment
     }
     static isImageAttachmentInterface(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
@@ -1560,6 +1572,9 @@ export class TypeChecker {
     static isItemDragInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof ItemDragInfo
     }
+    static isItemFillPolicy(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof ItemFillPolicy
+    }
     static isItemState(value: Object | string | number | undefined): boolean {
         return value instanceof ItemState
     }
@@ -1631,6 +1646,12 @@ export class TypeChecker {
     }
     static isLeadingMarginPlaceholder(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof LeadingMarginPlaceholder
+    }
+    static isLeadingMarginSpan(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof LeadingMarginSpan
+    }
+    static isLeadingMarginSpanDrawInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
+        return value instanceof LeadingMarginSpanDrawInfo
     }
     static isLengthConstrain(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof LengthConstrain
@@ -1721,6 +1742,12 @@ export class TypeChecker {
     }
     static isListItemStyle(value: Object | string | number | undefined): boolean {
         return value instanceof ListItemStyle
+    }
+    static isListItemSwipeActionDirection(value: Object | string | number | undefined): boolean {
+        return value instanceof ListItemSwipeActionDirection
+    }
+    static isListItemSwipeActionManager(value: Object | string | number | undefined): boolean {
+        return value instanceof ListItemSwipeActionManager
     }
     static isListOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof ListOptions
@@ -2238,10 +2265,10 @@ export class TypeChecker {
     static isPanRecognizer(value: Object | string | number | undefined): boolean {
         return value instanceof PanRecognizer
     }
-    static isParagraphStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
+    static isParagraphStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean): boolean {
         return value instanceof ParagraphStyle
     }
-    static isParagraphStyleInterface(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
+    static isParagraphStyleInterface(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean, arg8: boolean, arg9: boolean): boolean {
         return value instanceof ParagraphStyleInterface
     }
     static isParticleAnnulusRegionInner(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
@@ -2454,6 +2481,9 @@ export class TypeChecker {
     static isPreparedInfo(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof PreparedInfo
     }
+    static isPresetFillType(value: Object | string | number | undefined): boolean {
+        return value instanceof PresetFillType
+    }
     static isPreviewConfiguration(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PreviewConfiguration
     }
@@ -2598,7 +2628,7 @@ export class TypeChecker {
     static isRichEditorBuilderSpanOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof RichEditorBuilderSpanOptions
     }
-    static isRichEditorChangeValue(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+    static isRichEditorChangeValue(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
         return value instanceof RichEditorChangeValue
     }
     static isRichEditorController(value: Object | string | number | undefined): boolean {
@@ -2637,7 +2667,7 @@ export class TypeChecker {
     static isRichEditorParagraphResult(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof RichEditorParagraphResult
     }
-    static isRichEditorParagraphStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
+    static isRichEditorParagraphStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean): boolean {
         return value instanceof RichEditorParagraphStyle
     }
     static isRichEditorParagraphStyleOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
@@ -2799,6 +2829,9 @@ export class TypeChecker {
     static isScrollBarDirection(value: Object | string | number | undefined): boolean {
         return value instanceof ScrollBarDirection
     }
+    static isScrollBarMargin(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+        return value instanceof ScrollBarMargin
+    }
     static isScrollBarOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof ScrollBarOptions
     }
@@ -2814,7 +2847,7 @@ export class TypeChecker {
     static isScrollMotion(value: Object | string | number | undefined): boolean {
         return value instanceof ScrollMotion
     }
-    static isScrollOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
+    static isScrollOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof ScrollOptions
     }
     static isScrollPageOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
@@ -2828,6 +2861,9 @@ export class TypeChecker {
     }
     static isScrollSnapAlign(value: Object | string | number | undefined): boolean {
         return value instanceof ScrollSnapAlign
+    }
+    static isScrollSnapAnimationSpeed(value: Object | string | number | undefined): boolean {
+        return value instanceof ScrollSnapAnimationSpeed
     }
     static isScrollSnapOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof ScrollSnapOptions
@@ -3270,6 +3306,9 @@ export class TypeChecker {
     static isTextChangeOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof TextChangeOptions
     }
+    static isTextChangeReason(value: Object | string | number | undefined): boolean {
+        return value instanceof TextChangeReason
+    }
     static isTextClockConfiguration(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof TextClockConfiguration
     }
@@ -3291,7 +3330,7 @@ export class TypeChecker {
     static isTextController(value: Object | string | number | undefined): boolean {
         return value instanceof TextController
     }
-    static isTextDataDetectorConfig(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
+    static isTextDataDetectorConfig(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
         return value instanceof TextDataDetectorConfig
     }
     static isTextDataDetectorType(value: Object | string | number | undefined): boolean {
@@ -3408,6 +3447,9 @@ export class TypeChecker {
     static isTextTimerOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof TextTimerOptions
     }
+    static isTextVerticalAlign(value: Object | string | number | undefined): boolean {
+        return value instanceof TextVerticalAlign
+    }
     static isThemeColorMode(value: Object | string | number | undefined): boolean {
         return value instanceof ThemeColorMode
     }
@@ -3522,6 +3564,12 @@ export class TypeChecker {
     static isUIGestureEvent(value: Object | string | number | undefined): boolean {
         return value instanceof UIGestureEvent
     }
+    static isUIGridEvent(value: Object | string | number | undefined): boolean {
+        return value instanceof UIGridEvent
+    }
+    static isUIListEvent(value: Object | string | number | undefined): boolean {
+        return value instanceof UIListEvent
+    }
     static isuiMaterial_Material(value: Object | string | number | undefined): boolean {
         return value instanceof uiMaterial.Material
     }
@@ -3540,8 +3588,20 @@ export class TypeChecker {
     static isuiObserver_RouterPageState(value: Object | string | number | undefined): boolean {
         return value instanceof uiObserver.RouterPageState
     }
+    static isUIScrollableCommonEvent(value: Object | string | number | undefined): boolean {
+        return value instanceof UIScrollableCommonEvent
+    }
+    static isUIScrollEvent(value: Object | string | number | undefined): boolean {
+        return value instanceof UIScrollEvent
+    }
+    static isUIWaterFlowEvent(value: Object | string | number | undefined): boolean {
+        return value instanceof UIWaterFlowEvent
+    }
     static isUnderlineColor(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean): boolean {
         return value instanceof UnderlineColor
+    }
+    static isUndoStyle(value: Object | string | number | undefined): boolean {
+        return value instanceof UndoStyle
     }
     static isunifiedDataChannel_Summary(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof unifiedDataChannel.Summary
@@ -4164,6 +4224,12 @@ export class TypeChecker {
     static curves_Curve_FromNumeric(ordinal: int32): curves.Curve {
         return curves.Curve.fromValue(ordinal)
     }
+    static CustomKeyboardContinueFeature_ToNumeric(value: CustomKeyboardContinueFeature): int32 {
+        return value.valueOf()
+    }
+    static CustomKeyboardContinueFeature_FromNumeric(ordinal: int32): CustomKeyboardContinueFeature {
+        return CustomKeyboardContinueFeature.fromValue(ordinal)
+    }
     static DataPanelType_ToNumeric(value: DataPanelType): int32 {
         return value.valueOf()
     }
@@ -4385,6 +4451,12 @@ export class TypeChecker {
     }
     static FocusPriority_FromNumeric(ordinal: int32): FocusPriority {
         return FocusPriority.fromValue(ordinal)
+    }
+    static FocusWrapMode_ToNumeric(value: FocusWrapMode): int32 {
+        return value.valueOf()
+    }
+    static FocusWrapMode_FromNumeric(ordinal: int32): FocusWrapMode {
+        return FocusWrapMode.fromValue(ordinal)
     }
     static FoldStatus_ToNumeric(value: FoldStatus): int32 {
         return value.valueOf()
@@ -4764,6 +4836,12 @@ export class TypeChecker {
     static ListItemStyle_FromNumeric(ordinal: int32): ListItemStyle {
         return ListItemStyle.fromValue(ordinal)
     }
+    static ListItemSwipeActionDirection_ToNumeric(value: ListItemSwipeActionDirection): int32 {
+        return value.valueOf()
+    }
+    static ListItemSwipeActionDirection_FromNumeric(ordinal: int32): ListItemSwipeActionDirection {
+        return ListItemSwipeActionDirection.fromValue(ordinal)
+    }
     static LoadingProgressStyle_ToNumeric(value: LoadingProgressStyle): int32 {
         return value.valueOf()
     }
@@ -5094,6 +5172,12 @@ export class TypeChecker {
     static PreDragStatus_FromNumeric(ordinal: int32): PreDragStatus {
         return PreDragStatus.fromValue(ordinal)
     }
+    static PresetFillType_ToNumeric(value: PresetFillType): int32 {
+        return value.valueOf()
+    }
+    static PresetFillType_FromNumeric(ordinal: int32): PresetFillType {
+        return PresetFillType.fromValue(ordinal)
+    }
     static PreviewScaleMode_ToNumeric(value: PreviewScaleMode): int32 {
         return value.valueOf()
     }
@@ -5279,6 +5363,12 @@ export class TypeChecker {
     }
     static ScrollSnapAlign_FromNumeric(ordinal: int32): ScrollSnapAlign {
         return ScrollSnapAlign.fromValue(ordinal)
+    }
+    static ScrollSnapAnimationSpeed_ToNumeric(value: ScrollSnapAnimationSpeed): int32 {
+        return value.valueOf()
+    }
+    static ScrollSnapAnimationSpeed_FromNumeric(ordinal: int32): ScrollSnapAnimationSpeed {
+        return ScrollSnapAnimationSpeed.fromValue(ordinal)
     }
     static ScrollSource_ToNumeric(value: ScrollSource): int32 {
         return value.valueOf()
@@ -5574,6 +5664,12 @@ export class TypeChecker {
     static TextCase_FromNumeric(ordinal: int32): TextCase {
         return TextCase.fromValue(ordinal)
     }
+    static TextChangeReason_ToNumeric(value: TextChangeReason): int32 {
+        return value.valueOf()
+    }
+    static TextChangeReason_FromNumeric(ordinal: int32): TextChangeReason {
+        return TextChangeReason.fromValue(ordinal)
+    }
     static TextContentStyle_ToNumeric(value: TextContentStyle): int32 {
         return value.valueOf()
     }
@@ -5651,6 +5747,12 @@ export class TypeChecker {
     }
     static TextSpanType_FromNumeric(ordinal: int32): TextSpanType {
         return TextSpanType.fromValue(ordinal)
+    }
+    static TextVerticalAlign_ToNumeric(value: TextVerticalAlign): int32 {
+        return value.valueOf()
+    }
+    static TextVerticalAlign_FromNumeric(ordinal: int32): TextVerticalAlign {
+        return TextVerticalAlign.fromValue(ordinal)
     }
     static ThemeColorMode_ToNumeric(value: ThemeColorMode): int32 {
         return value.valueOf()
@@ -5741,6 +5843,12 @@ export class TypeChecker {
     }
     static uiObserver_RouterPageState_FromNumeric(ordinal: int32): uiObserver.RouterPageState {
         return uiObserver.RouterPageState.fromValue(ordinal)
+    }
+    static UndoStyle_ToNumeric(value: UndoStyle): int32 {
+        return value.valueOf()
+    }
+    static UndoStyle_FromNumeric(ordinal: int32): UndoStyle {
+        return UndoStyle.fromValue(ordinal)
     }
     static uniformTypeDescriptor_UniformDataType_ToNumeric(value: uniformTypeDescriptor.UniformDataType): int32 {
         return value.getOrdinal()

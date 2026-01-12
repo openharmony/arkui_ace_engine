@@ -30,7 +30,7 @@ constexpr int32_t MODE_DRAG = 0;
 constexpr int32_t MODE_LOOP = 1;
 constexpr int32_t MODE_EXIT = 2;
 
-class RenderLoadingProgress : public RenderNode {
+class ACE_FORCE_EXPORT RenderLoadingProgress : public RenderNode {
     DECLARE_ACE_TYPE(RenderLoadingProgress, RenderNode);
 
 public:

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -46,6 +46,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_event_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_child_touch_test_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_gesture_judge_function.h"
@@ -7861,10 +7862,6 @@ void JSViewAbstract::ParseDragInteractionOptions(const JSCallbackInfo& info,
         if (hapicFeedback->IsBoolean()) {
             previewOption.enableHapticFeedback = hapicFeedback->ToBoolean();
         }
-        auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
-        if (dragPreview->IsBoolean()) {
-            previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
-        }
         auto enableEdgeAutoScroll = interObj->GetProperty("enableEdgeAutoScroll");
         if (enableEdgeAutoScroll->IsBoolean()) {
             previewOption.enableEdgeAutoScroll = enableEdgeAutoScroll->ToBoolean();
@@ -9591,6 +9588,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("background", &JSViewAbstract::JsBackground);
     JSClass<JSViewAbstract>::StaticMethod("bindMenu", &JSViewAbstract::JsBindMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContextMenu", &JSViewAbstract::JsBindContextMenu);
+    JSClass<JSViewAbstract>::StaticMethod("bindContextMenuWithResponse", &JSViewAbstract::JsBindContextMenuWithResponse);
     JSClass<JSViewAbstract>::StaticMethod("bindContentCover", &JSViewAbstract::JsBindContentCover);
     JSClass<JSViewAbstract>::StaticMethod("bindSheet", &JSViewAbstract::JsBindSheet);
     JSClass<JSViewAbstract>::StaticMethod("draggable", &JSViewAbstract::JsSetDraggable);
@@ -9718,7 +9716,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("renderGroup", &JSViewAbstract::JSRenderGroup);
     JSClass<JSViewAbstract>::StaticMethod("excludeFromRenderGroup", &JSViewAbstract::JSExcludeFromRenderGroup);
     JSClass<JSViewAbstract>::StaticMethod("renderFit", &JSViewAbstract::JSRenderFit);
-    JSClass<JSViewAbstract>::StaticMethod("useUnion", &JSViewAbstract::JSUseUnion);
+    JSClass<JSViewAbstract>::StaticMethod("useUnionEffect", &JSViewAbstract::JSUseUnion);
 
     JSClass<JSViewAbstract>::StaticMethod("freeze", &JSViewAbstract::JsSetFreeze);
 
@@ -12653,11 +12651,12 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     // parse custom background
     Color color = Color::TRANSPARENT;
     RefPtr<ResourceObject> backgroundColorResObj;
+    RefPtr<ResourceObject> backgroundResObj;
     std::function<void()> builderFunc;
     BackgroundType backgroundType = BackgroundType::COLOR;
     if (!ParseJsColor(info[0], color, backgroundColorResObj)) {
         ViewAbstractModel::GetInstance()->ClearResObj("customBackgroundColor");
-        if (ParseBackgroundBuilder(info, info[0], builderFunc)) {
+        if (ParseBackgroundBuilder(info, info[0], builderFunc, backgroundResObj)) {
             backgroundType = BackgroundType::CUSTOM_BUILDER;
         } else {
             return;
@@ -12691,26 +12690,29 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     }
 
     ViewAbstractModel::GetInstance()->SetIsBuilderBackground(BackgroundType::CUSTOM_BUILDER == backgroundType);
-    ViewAbstractModel::GetInstance()->SetBackground(std::move(builderFunc));
     ViewAbstractModel::GetInstance()->SetBackgroundIgnoresLayoutSafeAreaEdges(ignoreLayoutSafeAreaEdges);
     ViewAbstractModel::GetInstance()->SetBackgroundAlign(alignment);
     if (SystemProperties::ConfigChangePerform()) {
+        ViewAbstractModel::GetInstance()->SetBackgroundWithResourceObj(std::move(builderFunc), backgroundResObj);
         ViewAbstractModel::GetInstance()->SetCustomBackgroundColorWithResourceObj(color, backgroundColorResObj);
     } else {
+        ViewAbstractModel::GetInstance()->SetBackground(std::move(builderFunc));
         ViewAbstractModel::GetInstance()->SetCustomBackgroundColor(color);
     }
 }
 
-bool JSViewAbstract::ParseBackgroundBuilder(
-    const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, std::function<void()>& builderFunc)
+bool JSViewAbstract::ParseBackgroundBuilder(const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc,
+    std::function<void()>& builderFunc, RefPtr<ResourceObject>& resObj)
 {
     if (!jsFunc->IsObject()) {
+        resObj = nullptr;
         return false;
     }
 
     JSRef<JSObject> backgroundObj = JSRef<JSObject>::Cast(jsFunc);
     auto contentObj = backgroundObj->GetProperty(static_cast<int32_t>(ArkUIIndex::BUILDER));
     if (!contentObj->IsFunction()) {
+        resObj = nullptr;
         return false;
     }
     auto jsBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(contentObj));
@@ -12722,6 +12724,12 @@ bool JSViewAbstract::ParseBackgroundBuilder(
         PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
+
+    if (SystemProperties::ConfigChangePerform()) {
+        if (!resObj) {
+            resObj = AceType::MakeRefPtr<ResourceObject>();
+        }
+    }
 
     return true;
 }

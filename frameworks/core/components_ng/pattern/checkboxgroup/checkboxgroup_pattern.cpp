@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 const Color ITEM_FILL_COLOR = Color::TRANSPARENT;
-
+const char NAVDESTINATION_CONTENT_ETS_TAG[] = "NavDestinationContent";
 inline std::string ToString(const CheckBoxGroupPaintProperty::SelectStatus& status)
 {
     const LinearEnumMapNode<CheckBoxGroupPaintProperty::SelectStatus, std::string> table[] = {
@@ -70,11 +70,24 @@ void CheckBoxGroupPattern::OnDetachFromFrameNodeImpl(FrameNode* frameNode)
     groupManager->RemoveCheckBoxGroup(group, frameNode->GetId());
 }
 
+bool CheckBoxGroupPattern::IsArkTSStatic()
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, false);
+    return pipeline->GetFrontendType() == FrontendType::ARK_TS
+ 	         || pipeline->GetFrontendType() == FrontendType::DYNAMIC_HYBRID_STATIC
+ 	         || pipeline->GetFrontendType() == FrontendType::STATIC_HYBRID_DYNAMIC;
+}
+
 void CheckBoxGroupPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
     FireBuilder();
-    UpdateState();
+    if (!IsArkTSStatic()) {
+        UpdateState();
+    }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -810,11 +823,15 @@ void CheckBoxGroupPattern::OnAttachToMainTree()
 void CheckBoxGroupPattern::OnAttachToMainTreeImpl(const RefPtr<FrameNode>& host)
 {
     CHECK_NULL_VOID(host);
+    if (IsArkTSStatic()) {
+        UpdateGroupManager();
+        UpdateState();
+    }
     auto groupManager = GetGroupManager();
     CHECK_NULL_VOID(groupManager);
     auto parent = host->GetParent();
     while (parent) {
-        if (parent->GetTag() == V2::NAVDESTINATION_CONTENT_ETS_TAG) {
+        if (parent->GetTag() == NAVDESTINATION_CONTENT_ETS_TAG) {
             currentNavId_ = std::to_string(parent->GetId());
             groupManager->SetLastNavId(currentNavId_);
             UpdateState();
@@ -841,6 +858,13 @@ std::string CheckBoxGroupPattern::GetGroupNameWithNavId()
     auto groupManager = GetGroupManager();
     CHECK_NULL_RETURN(groupManager, eventHub->GetGroupName());
     return eventHub->GetGroupName() + groupManager->GetLastNavId();
+}
+
+void CheckBoxGroupPattern::UpdateGroupManager()
+{
+    auto manager = GroupManager::GetGroupManager();
+    CHECK_NULL_VOID(manager.Upgrade());
+    groupManager_ = manager;
 }
 
 RefPtr<GroupManager> CheckBoxGroupPattern::GetGroupManager()

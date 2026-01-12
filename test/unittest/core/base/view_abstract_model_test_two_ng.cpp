@@ -882,4 +882,45 @@ HWTEST_F(ViewAbstractModelTestTwoNg, ResetKeyboardShortcutTest001, TestSize.Leve
     viewAbstractModelNG.ResetKeyboardShortcutAll(AceType::RawPtr(targetNode));
     EXPECT_EQ(eventManager->keyboardShortcutNode_.size(), 0);
 }
+
+/**
+ * @tc.name: TestBackgroundWithResourceObj001
+ * @tc.desc: Test SetBackgroundWithResourceObj
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractModelTestTwoNg, TestBackgroundWithResourceObj001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create a FrameNode.
+     */
+    const RefPtr<FrameNode> node = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto instance = ViewStackProcessor::GetInstance();
+    instance->Push(node);
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    auto pattern = node->GetPattern<Pattern>();
+    ASSERT_TRUE(pattern);
+    pattern->resourceMgr_ = AceType::MakeRefPtr<PatternResourceManager>();
+    ASSERT_TRUE(pattern->resourceMgr_);
+    instance->ClearVisualState();
+    EXPECT_TRUE(instance->IsCurrentVisualStateProcess());
+
+    /**
+     * @tc.steps: step2. Set background options.
+     * @tc.expected: Options are set successfully.
+     */
+    int32_t flag = 0;
+    auto buildFunc = [&flag]() { flag++; };
+    auto resourceObject = AceType::MakeRefPtr<ResourceObject>();
+    viewAbstractModelNG.SetIsBuilderBackground(true);
+    viewAbstractModelNG.SetBackgroundWithResourceObj(std::move(buildFunc), resourceObject);
+    EXPECT_TRUE(pattern->resourceMgr_->resMap_.find("backgroundWithBuilder") != pattern->resourceMgr_->resMap_.end());
+    node->UpdateBackground();
+    EXPECT_EQ(flag, 1);
+    pattern->OnColorModeChange(1);
+    EXPECT_EQ(flag, 2);
+    viewAbstractModelNG.SetBackgroundWithResourceObj(nullptr, resourceObject);
+    pattern->OnColorModeChange(0);
+    EXPECT_EQ(flag, 2);
+}
 } // namespace OHOS::Ace::NG

@@ -1551,6 +1551,9 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, PlayIndicatorAnimation002, Tes
  */
 HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, StopAnimation002, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. init dotIndicatorModifier.
+     */
     OverlengthDotIndicatorModifier dotIndicatorModifier;
     LinearVector<float> itemHalfSizes = { 20.f, 20.f };
     GestureState gestureState = GestureState::GESTURE_STATE_FOLLOW_LEFT;
@@ -1561,6 +1564,13 @@ HWTEST_F(SwiperOverLengthIndicatorModifierTestNg, StopAnimation002, TestSize.Lev
 
     dotIndicatorModifier.StopAnimation(false);
     EXPECT_TRUE(dotIndicatorModifier.longPointLeftAnimEnd_);
+
+    /**
+     * @tc.steps: step4. check branch with TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE.
+     */
+    touchBottomTypeLoop = TouchBottomTypeLoop::TOUCH_BOTTOM_TYPE_LOOP_NONE;
+    dotIndicatorModifier.PlayIndicatorAnimation(margin, itemHalfSizes, gestureState, touchBottomTypeLoop);
+    EXPECT_FALSE(dotIndicatorModifier.longPointRightAnimEnd_);
 }
 
 /**

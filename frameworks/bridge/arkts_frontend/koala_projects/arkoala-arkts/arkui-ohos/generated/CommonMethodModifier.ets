@@ -76,6 +76,7 @@ export class CommonMethodModifier implements CommonMethod {
     _backgroundFilter_0_0value?: uiEffect.Filter | undefined
     _foregroundFilter_0_0value?: uiEffect.Filter | undefined
     _compositingFilter_0_0value?: uiEffect.Filter | undefined
+    _materialFilter_0_0value?: uiEffect.Filter | undefined
     _opacity_0_0value?: double | Resource | undefined
     _border_0_0value?: BorderOptions | undefined
     _borderStyle_0_0value?: BorderStyle | EdgeStyles | undefined
@@ -126,6 +127,7 @@ export class CommonMethodModifier implements CommonMethod {
     _hueRotate_0_0value?: double | string | undefined
     _useShadowBatching_0_0value?: boolean | undefined
     _useEffect_0_0value?: boolean | undefined
+    _useUnionEffect_0_0value?: boolean | undefined
     _renderGroup_0_0value?: boolean | undefined
     _freeze_0_0value?: boolean | undefined
     _translate_0_0value?: TranslateOptions | undefined
@@ -268,7 +270,7 @@ export class CommonMethodModifier implements CommonMethod {
     _overlay_0_1value?: OverlayOptions | undefined
     _blendMode_0_0value?: BlendMode | undefined
     _blendMode_0_1value?: BlendApplyType | undefined
-    _advancedBlendMode_0_0value?: BlendMode | uiEffect.Blender
+    _advancedBlendMode_0_0value?: BlendMode | uiEffect.Blender | undefined
     _advancedBlendMode_0_1value?: BlendApplyType | undefined
     _geometryTransition_1_0value?: string | undefined
     _geometryTransition_1_1value?: GeometryTransitionOptions | undefined
@@ -284,11 +286,11 @@ export class CommonMethodModifier implements CommonMethod {
     _bindContextMenu_0_0value?: CustomBuilder | undefined
     _bindContextMenu_0_1value?: ResponseType | undefined
     _bindContextMenu_0_2value?: ContextMenuOptions | undefined
-    _bindContextMenu_1_0value?: CustomBuilderT<ResponseType> | undefined
-    _bindContextMenu_1_1value?: ContextMenuOptions | undefined
-    _bindContextMenu_2_0value?: boolean | undefined
-    _bindContextMenu_2_1value?: CustomBuilder | undefined
-    _bindContextMenu_2_2value?: ContextMenuOptions | undefined
+    _bindContextMenuWithResponse_0_0value?: CustomBuilderT<ResponseType> | undefined
+    _bindContextMenuWithResponse_0_1value?: ContextMenuOptions | undefined
+    _bindContextMenu_1_0value?: boolean | undefined
+    _bindContextMenu_1_1value?: CustomBuilder | undefined
+    _bindContextMenu_1_2value?: ContextMenuOptions | undefined
     _bindContentCover_0_0value?: boolean | Bindable<boolean> | undefined
     _bindContentCover_0_1value?: CustomBuilder | undefined
     _bindContentCover_0_2value?: ModalTransition | undefined
@@ -3691,6 +3693,24 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[186] != 0)
+        {
+            switch (flagArray[186] as int32) {
+                case 1: {
+                    peer.setAdvancedBlendModeAttribute((this._advancedBlendMode_0_0value as BlendMode | uiEffect.Blender | undefined), (this._advancedBlendMode_0_1value as BlendApplyType | undefined));
+                    flagArray[186] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[186] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[186] = 0;
+                    peer.setAdvancedBlendModeAttribute((undefined as BlendMode | uiEffect.Blender | undefined), (undefined as BlendApplyType | undefined));
+                }
+            }
+        }
         if (flagArray[187] != 0)
         {
             switch (flagArray[187] as int32) {
@@ -3803,7 +3823,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (flagArray[193] as int32) {
                 case 1: {
-                    peer.setBindContextMenu1Attribute((this._bindContextMenu_1_0value as CustomBuilderT<ResponseType> | undefined), (this._bindContextMenu_1_1value as ContextMenuOptions | undefined));
+                    peer.setBindContextMenuWithResponseAttribute((this._bindContextMenuWithResponse_0_0value as CustomBuilderT<ResponseType> | undefined), (this._bindContextMenuWithResponse_0_1value as ContextMenuOptions | undefined));
                     flagArray[193] = 2;
                     break;
                 }
@@ -3813,7 +3833,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[193] = 0;
-                    peer.setBindContextMenu1Attribute((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
+                    peer.setBindContextMenuWithResponseAttribute((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
                 }
             }
         }
@@ -3821,7 +3841,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (flagArray[194] as int32) {
                 case 1: {
-                    peer.setBindContextMenu2Attribute((this._bindContextMenu_2_0value as boolean | undefined), (this._bindContextMenu_2_1value as CustomBuilder | undefined), (this._bindContextMenu_2_2value as ContextMenuOptions | undefined | undefined));
+                    peer.setBindContextMenu1Attribute((this._bindContextMenu_1_0value as boolean | undefined), (this._bindContextMenu_1_1value as CustomBuilder | undefined), (this._bindContextMenu_1_2value as ContextMenuOptions | undefined | undefined));
                     flagArray[194] = 2;
                     break;
                 }
@@ -3831,7 +3851,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[194] = 0;
-                    peer.setBindContextMenu2Attribute((undefined as boolean | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined | undefined));
+                    peer.setBindContextMenu1Attribute((undefined as boolean | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined | undefined));
                 }
             }
         }
@@ -4031,6 +4051,42 @@ export class CommonMethodModifier implements CommonMethod {
                 default: {
                     flagArray[205] = 0;
                     peer.setAccessibilityActionOptionsAttribute((undefined as AccessibilityActionOptions | undefined));
+                }
+            }
+        }
+        if (flagArray[206] != 0)
+        {
+            switch (flagArray[206] as int32) {
+                case 1: {
+                    peer.setUseUnionEffectAttribute((this._useUnionEffect_0_0value as boolean | undefined));
+                    flagArray[206] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[206] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[206] = 0;
+                    peer.setUseUnionEffectAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[207] != 0)
+        {
+            switch (flagArray[207] as int32) {
+                case 1: {
+                    peer.setMaterialFilterAttribute((this._materialFilter_0_0value as uiEffect.Filter | undefined));
+                    flagArray[207] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[207] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[207] = 0;
+                    peer.setMaterialFilterAttribute((undefined as uiEffect.Filter | undefined));
                 }
             }
         }
@@ -6490,9 +6546,11 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[186] as int32) {
                 case 1:
                 case 3: {
+                    this.advancedBlendMode(modifier._advancedBlendMode_0_0value, modifier._advancedBlendMode_0_1value);
                     break;
                 }
                 default: {
+                    this.advancedBlendMode((undefined as BlendMode | uiEffect.Blender | undefined), (undefined as BlendApplyType | undefined));
                 }
             }
         }
@@ -6579,11 +6637,11 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[193] as int32) {
                 case 1:
                 case 3: {
-                    this.bindContextMenu(modifier._bindContextMenu_1_0value, modifier._bindContextMenu_1_1value);
+                    this.bindContextMenuWithResponse(modifier._bindContextMenuWithResponse_0_0value, modifier._bindContextMenuWithResponse_0_1value);
                     break;
                 }
                 default: {
-                    this.bindContextMenu((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
+                    this.bindContextMenuWithResponse((undefined as CustomBuilderT<ResponseType> | undefined), (undefined as ContextMenuOptions | undefined));
                 }
             }
         }
@@ -6592,7 +6650,7 @@ export class CommonMethodModifier implements CommonMethod {
             switch (flagArray[194] as int32) {
                 case 1:
                 case 3: {
-                    this.bindContextMenu(modifier._bindContextMenu_2_0value, modifier._bindContextMenu_2_1value, modifier._bindContextMenu_2_2value);
+                    this.bindContextMenu(modifier._bindContextMenu_1_0value, modifier._bindContextMenu_1_1value, modifier._bindContextMenu_1_2value);
                     break;
                 }
                 default: {
@@ -6745,12 +6803,39 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[206] != 0)
+        {
+            switch (flagArray[206] as int32) {
+                case 1:
+                case 3: {
+                    this.useUnionEffect(modifier._useUnionEffect_0_0value);
+                    break;
+                }
+                default: {
+                    this.useUnionEffect((undefined as boolean | undefined));
+                }
+            }
+        }
+        if (flagArray[207] != 0)
+        {
+            switch (flagArray[207] as int32) {
+                case 1:
+                case 3: {
+                    this.materialFilter(modifier._materialFilter_0_0value);
+                    break;
+                }
+                default: {
+                    this.materialFilter((undefined as uiEffect.Filter | undefined));
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true))
         {
             this._flagArray[0] = 1
             this._width_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[0] = 3
@@ -6762,6 +6847,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[1] = 1
             this._height_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[1] = 3
@@ -6773,6 +6859,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[2] = 1
             this._responseRegion_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[2] = 3
@@ -6784,6 +6871,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[3] = 1
             this._mouseResponseRegion_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[3] = 3
@@ -6795,6 +6883,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[4] = 1
             this._responseRegionList_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[4] = 3
@@ -6806,6 +6895,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[5] = 1
             this._size_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[5] = 3
@@ -6817,6 +6907,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[6] = 1
             this._constraintSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[6] = 3
@@ -6828,6 +6919,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[7] = 1
             this._hitTestBehavior_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[7] = 3
@@ -6839,6 +6931,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[8] = 1
             this._onChildTouchTest_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[8] = 3
@@ -6850,6 +6943,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[9] = 1
             this._layoutWeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[9] = 3
@@ -6861,6 +6955,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[10] = 1
             this._chainWeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[10] = 3
@@ -6872,6 +6967,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[11] = 1
             this._padding_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[11] = 3
@@ -6883,6 +6979,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[12] = 1
             this._safeAreaPadding_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[12] = 3
@@ -6894,6 +6991,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[13] = 1
             this._margin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[13] = 3
@@ -6905,6 +7003,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[14] = 1
             this._backgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[14] = 3
@@ -6916,6 +7015,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[15] = 1
             this._pixelRound_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[15] = 3
@@ -6927,6 +7027,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[16] = 1
             this._backgroundImage_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[16] = 3
@@ -6938,6 +7039,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[17] = 1
             this._backgroundImageSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[17] = 3
@@ -6949,6 +7051,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[18] = 1
             this._backgroundImagePosition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[18] = 3
@@ -6963,6 +7066,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[19] = 1
             this._backgroundEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[19] = 3
@@ -6974,6 +7078,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[20] = 1
             this._backgroundImageResizable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[20] = 3
@@ -6985,6 +7090,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[21] = 1
             this._foregroundEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[21] = 3
@@ -6996,6 +7102,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[22] = 1
             this._visualEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[22] = 3
@@ -7007,6 +7114,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[23] = 1
             this._backgroundFilter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[23] = 3
@@ -7018,6 +7126,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[24] = 1
             this._foregroundFilter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[24] = 3
@@ -7029,6 +7138,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[25] = 1
             this._compositingFilter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[25] = 3
@@ -7040,6 +7150,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[26] = 1
             this._opacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[26] = 3
@@ -7051,6 +7162,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[27] = 1
             this._border_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[27] = 3
@@ -7062,6 +7174,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[28] = 1
             this._borderStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[28] = 3
@@ -7073,6 +7186,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[29] = 1
             this._borderWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[29] = 3
@@ -7084,6 +7198,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[30] = 1
             this._borderColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[30] = 3
@@ -7095,6 +7210,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[31] = 1
             this._borderRadius_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[31] = 3
@@ -7106,6 +7222,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[32] = 1
             this._borderImage_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[32] = 3
@@ -7117,6 +7234,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[33] = 1
             this._outline_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[33] = 3
@@ -7128,6 +7246,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[34] = 1
             this._outlineStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[34] = 3
@@ -7139,6 +7258,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[35] = 1
             this._outlineWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[35] = 3
@@ -7150,6 +7270,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[36] = 1
             this._outlineColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[36] = 3
@@ -7161,6 +7282,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[37] = 1
             this._outlineRadius_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[37] = 3
@@ -7172,6 +7294,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[38] = 1
             this._foregroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[38] = 3
@@ -7183,6 +7306,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[39] = 1
             this._onClick_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[39] = 3
@@ -7194,6 +7318,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[40] = 1
             this._onHover_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[40] = 3
@@ -7205,6 +7330,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[41] = 1
             this._onHoverMove_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[41] = 3
@@ -7216,6 +7342,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[42] = 1
             this._onAccessibilityHover_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[42] = 3
@@ -7227,6 +7354,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[43] = 1
             this._onAccessibilityHoverTransparent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[43] = 3
@@ -7238,6 +7366,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[44] = 1
             this._hoverEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[44] = 3
@@ -7249,6 +7378,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[45] = 1
             this._onMouse_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[45] = 3
@@ -7260,6 +7390,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[46] = 1
             this._onTouch_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[46] = 3
@@ -7271,6 +7402,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[47] = 1
             this._onKeyEvent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[47] = 3
@@ -7282,6 +7414,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[48] = 1
             this._onDigitalCrown_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[48] = 3
@@ -7293,6 +7426,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[49] = 1
             this._onKeyPreIme_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[49] = 3
@@ -7304,6 +7438,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[50] = 1
             this._onKeyEventDispatch_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[50] = 3
@@ -7315,6 +7450,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[51] = 1
             this._onFocusAxisEvent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[51] = 3
@@ -7326,6 +7462,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[52] = 1
             this._onAxisEvent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[52] = 3
@@ -7337,6 +7474,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[53] = 1
             this._focusable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[53] = 3
@@ -7348,6 +7486,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[54] = 1
             this._nextFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[54] = 3
@@ -7359,6 +7498,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[55] = 1
             this._tabStop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[55] = 3
@@ -7370,6 +7510,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[56] = 1
             this._onFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[56] = 3
@@ -7381,6 +7522,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[57] = 1
             this._onBlur_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[57] = 3
@@ -7392,6 +7534,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[58] = 1
             this._tabIndex_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[58] = 3
@@ -7403,6 +7546,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[59] = 1
             this._defaultFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[59] = 3
@@ -7414,6 +7558,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[60] = 1
             this._groupDefaultFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[60] = 3
@@ -7425,6 +7570,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[61] = 1
             this._focusOnTouch_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[61] = 3
@@ -7436,6 +7582,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[62] = 1
             this._focusBox_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[62] = 3
@@ -7447,6 +7594,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[63] = 1
             this._animation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[63] = 3
@@ -7458,6 +7606,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[64] = 1
             this._transition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[64] = 3
@@ -7469,6 +7618,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[65] = 1
             this._motionBlur_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[65] = 3
@@ -7480,6 +7630,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[66] = 1
             this._brightness_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[66] = 3
@@ -7491,6 +7642,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[67] = 1
             this._contrast_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[67] = 3
@@ -7502,6 +7654,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[68] = 1
             this._grayscale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[68] = 3
@@ -7513,6 +7666,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[69] = 1
             this._colorBlend_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[69] = 3
@@ -7524,6 +7678,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[70] = 1
             this._saturate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[70] = 3
@@ -7535,6 +7690,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[71] = 1
             this._sepia_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[71] = 3
@@ -7546,6 +7702,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[72] = 1
             this._invert_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[72] = 3
@@ -7557,6 +7714,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[73] = 1
             this._hueRotate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[73] = 3
@@ -7568,6 +7726,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[74] = 1
             this._useShadowBatching_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[74] = 3
@@ -7579,6 +7738,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[75] = 1
             this._useEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[75] = 3
@@ -7590,6 +7750,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[76] = 1
             this._renderGroup_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[76] = 3
@@ -7601,6 +7762,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[77] = 1
             this._freeze_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[77] = 3
@@ -7612,6 +7774,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[78] = 1
             this._translate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[78] = 3
@@ -7623,6 +7786,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[79] = 1
             this._scale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[79] = 3
@@ -7634,6 +7798,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[80] = 1
             this._rotate_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[80] = 3
@@ -7645,6 +7810,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[81] = 1
             this._transform_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[81] = 3
@@ -7656,6 +7822,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[82] = 1
             this._transform3D_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[82] = 3
@@ -7667,6 +7834,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[83] = 1
             this._onAppear_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[83] = 3
@@ -7678,6 +7846,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[84] = 1
             this._onDisAppear_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[84] = 3
@@ -7689,6 +7858,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[85] = 1
             this._onAttach_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[85] = 3
@@ -7700,6 +7870,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[86] = 1
             this._onDetach_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[86] = 3
@@ -7711,6 +7882,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[87] = 1
             this._onAreaChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[87] = 3
@@ -7722,6 +7894,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[88] = 1
             this._visibility_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[88] = 3
@@ -7733,6 +7906,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[89] = 1
             this._flexGrow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[89] = 3
@@ -7744,6 +7918,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[90] = 1
             this._flexShrink_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[90] = 3
@@ -7755,6 +7930,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[91] = 1
             this._flexBasis_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[91] = 3
@@ -7766,6 +7942,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[92] = 1
             this._alignSelf_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[92] = 3
@@ -7777,6 +7954,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[93] = 1
             this._layoutGravity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[93] = 3
@@ -7788,6 +7966,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[94] = 1
             this._displayPriority_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[94] = 3
@@ -7799,6 +7978,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[95] = 1
             this._zIndex_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[95] = 3
@@ -7810,6 +7990,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[96] = 1
             this._direction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[96] = 3
@@ -7821,6 +8002,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[97] = 1
             this._align_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[97] = 3
@@ -7832,6 +8014,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[98] = 1
             this._position_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[98] = 3
@@ -7843,6 +8026,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[99] = 1
             this._markAnchor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[99] = 3
@@ -7854,6 +8038,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[100] = 1
             this._offset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[100] = 3
@@ -7865,6 +8050,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[101] = 1
             this._enabled_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[101] = 3
@@ -7876,6 +8062,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[102] = 1
             this._alignRules_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[102] = 3
@@ -7887,6 +8074,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[103] = 1
             this._aspectRatio_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[103] = 3
@@ -7898,6 +8086,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[104] = 1
             this._clickEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[104] = 3
@@ -7909,6 +8098,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[105] = 1
             this._onDragStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[105] = 3
@@ -7920,6 +8110,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[106] = 1
             this._onDragEnter_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[106] = 3
@@ -7931,6 +8122,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[107] = 1
             this._onDragMove_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[107] = 3
@@ -7942,6 +8134,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[108] = 1
             this._onDragLeave_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[108] = 3
@@ -7953,6 +8146,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[109] = 1
             this._onDrop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[109] = 3
@@ -7964,6 +8158,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[110] = 1
             this._onDragEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[110] = 3
@@ -7975,6 +8170,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[111] = 1
             this._allowDrop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[111] = 3
@@ -7986,6 +8182,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[112] = 1
             this._draggable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[112] = 3
@@ -7997,6 +8194,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[113] = 1
             this._dragPreview_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[113] = 3
@@ -8008,6 +8206,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[114] = 1
             this._onPreDrag_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[114] = 3
@@ -8019,6 +8218,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[115] = 1
             this._linearGradient_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[115] = 3
@@ -8030,6 +8230,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[116] = 1
             this._sweepGradient_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[116] = 3
@@ -8041,6 +8242,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[117] = 1
             this._radialGradient_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[117] = 3
@@ -8052,6 +8254,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[118] = 1
             this._motionPath_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[118] = 3
@@ -8063,6 +8266,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[119] = 1
             this._shadow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[119] = 3
@@ -8074,6 +8278,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[120] = 1
             this._clip_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[120] = 3
@@ -8085,6 +8290,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[121] = 1
             this._clipShape_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[121] = 3
@@ -8096,6 +8302,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[122] = 1
             this._mask_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[122] = 3
@@ -8107,6 +8314,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[123] = 1
             this._maskShape_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[123] = 3
@@ -8118,6 +8326,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[124] = 1
             this._key_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[124] = 3
@@ -8129,6 +8338,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[125] = 1
             this._id_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[125] = 3
@@ -8140,6 +8350,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[126] = 1
             this._geometryTransition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[126] = 3
@@ -8151,6 +8362,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[127] = 1
             this._restoreId_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[127] = 3
@@ -8162,6 +8374,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[128] = 1
             this._sphericalEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[128] = 3
@@ -8173,6 +8386,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[129] = 1
             this._lightUpEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[129] = 3
@@ -8184,6 +8398,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[130] = 1
             this._pixelStretchEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[130] = 3
@@ -8195,6 +8410,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[131] = 1
             this._accessibilityGroup_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[131] = 3
@@ -8205,6 +8421,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (((this._flagArray[137]) == (0)) || (true)) {
             this._flagArray[137] = 1
             this._accessibilityTextOfResourceType_0_0value = value
+            this._state.fireChange()
         } else {
             this._flagArray[137] = 3
         }
@@ -8214,6 +8431,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (((this._flagArray[132]) == (0)) || ((this._accessibilityTextOfStringType_0_0value) !== (value))) {
             this._flagArray[132] = 1
             this._accessibilityTextOfStringType_0_0value = value
+            this._state.fireChange()
         } else {
             this._flagArray[132] = 3
         }
@@ -8223,6 +8441,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (value instanceof Resource) {
             const value_casted = value as (Resource | undefined)
             this.accessibilityText(value_casted)
+            this._state.fireChange()
             return this
         } else {
             const value_casted = value as (string | undefined)
@@ -8235,6 +8454,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[133] = 1
             this._accessibilityNextFocusId_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[133] = 3
@@ -8246,6 +8466,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[134] = 1
             this._accessibilityDefaultFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[134] = 3
@@ -8257,6 +8478,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[135] = 1
             this._accessibilityUseSamePage_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[135] = 3
@@ -8268,6 +8490,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[136] = 1
             this._accessibilityScrollTriggerable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[136] = 3
@@ -8279,6 +8502,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[137] = 1
             this._accessibilityTextOfResourceType_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[137] = 3
@@ -8290,6 +8514,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[138] = 1
             this._accessibilityRole_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[138] = 3
@@ -8301,6 +8526,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[139] = 1
             this._onAccessibilityFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[139] = 3
@@ -8312,6 +8538,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[140] = 1
             this._onAccessibilityActionIntercept_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[140] = 3
@@ -8323,6 +8550,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[141] = 1
             this._accessibilityTextHint_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[141] = 3
@@ -8333,6 +8561,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (((this._flagArray[142]) == (0)) || ((this._accessibilityDescriptionOfStringType_0_0value) !== (value))) {
             this._flagArray[142] = 1
             this._accessibilityDescriptionOfStringType_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[142] = 3
@@ -8343,6 +8572,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (((this._flagArray[143]) == (0)) || (true)) {
             this._flagArray[143] = 1
             this._accessibilityDescriptionOfResourceType_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[143] = 3
@@ -8353,6 +8583,7 @@ export class CommonMethodModifier implements CommonMethod {
         if (value instanceof Resource) {
             const value_casted = value as (Resource | undefined)
             this.accessibilityDescription(value_casted)
+            this._state.fireChange()
             return this
         } else {
             const value_casted = value as (string | undefined)
@@ -8365,6 +8596,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[144] = 1
             this._accessibilityLevel_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[144] = 3
@@ -8376,6 +8608,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[145] = 1
             this._accessibilityVirtualNode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[145] = 3
@@ -8387,6 +8620,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[146] = 1
             this._accessibilityChecked_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[146] = 3
@@ -8398,6 +8632,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[147] = 1
             this._accessibilitySelected_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[147] = 3
@@ -8409,6 +8644,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[148] = 1
             this._obscured_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[148] = 3
@@ -8420,6 +8656,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[149] = 1
             this._reuseId_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[149] = 3
@@ -8431,6 +8668,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[150] = 1
             this._reuse_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[150] = 3
@@ -8442,6 +8680,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[151] = 1
             this._renderFit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[151] = 3
@@ -8453,6 +8692,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[152] = 1
             this._backgroundBrightness_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[152] = 3
@@ -8464,6 +8704,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[153] = 1
             this._onGestureJudgeBegin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[153] = 3
@@ -8475,6 +8716,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[154] = 1
             this._onGestureRecognizerJudgeBegin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[154] = 3
@@ -8486,6 +8728,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[155] = 1
             this._shouldBuiltInRecognizerParallelWith_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[155] = 3
@@ -8497,6 +8740,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[156] = 1
             this._monopolizeEvents_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[156] = 3
@@ -8508,6 +8752,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[157] = 1
             this._onTouchIntercept_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[157] = 3
@@ -8519,6 +8764,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[158] = 1
             this._onSizeChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[158] = 3
@@ -8530,6 +8776,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[159] = 1
             this._accessibilityFocusDrawLevel_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[159] = 3
@@ -8545,6 +8792,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[160] = 1
             this._customProperty_0_0value = name
             this._customProperty_0_1value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[160] = 3
@@ -8557,6 +8805,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[161] = 1
             this._expandSafeArea_0_0value = types
             this._expandSafeArea_0_1value = edges
+            this._state.fireChange()
         } else
         {
             this._flagArray[161] = 3
@@ -8569,6 +8818,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[162] = 1
             this._ignoreLayoutSafeArea_0_0value = types
             this._ignoreLayoutSafeArea_0_1value = edges
+            this._state.fireChange()
         } else
         {
             this._flagArray[162] = 3
@@ -8581,6 +8831,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[163] = 1
             this._background_0_0value = builder
             this._background_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[163] = 3
@@ -8593,6 +8844,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[164] = 1
             this._backgroundImage_1_0value = src
             this._backgroundImage_1_1value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[164] = 3
@@ -8605,6 +8857,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[165] = 1
             this._backgroundImage_2_0value = src
             this._backgroundImage_2_1value = repeat
+            this._state.fireChange()
         } else
         {
             this._flagArray[165] = 3
@@ -8635,6 +8888,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._backgroundBlurStyle_0_0value = style
             this._backgroundBlurStyle_0_1value = options
             this._backgroundBlurStyle_0_2value = sysOptions
+            this._state.fireChange()
         } else
         {
             this._flagArray[166] = 3
@@ -8650,6 +8904,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[167] = 1
             this._backgroundEffect_1_0value = options
             this._backgroundEffect_1_1value = sysOptions
+            this._state.fireChange()
         } else
         {
             this._flagArray[167] = 3
@@ -8663,6 +8918,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._foregroundBlurStyle_0_0value = style
             this._foregroundBlurStyle_0_1value = options
             this._foregroundBlurStyle_0_2value = sysOptions
+            this._state.fireChange()
         } else
         {
             this._flagArray[168] = 3
@@ -8675,6 +8931,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[169] = 1
             this._borderRadius_1_0value = value
             this._borderRadius_1_1value = type
+            this._state.fireChange()
         } else
         {
             this._flagArray[169] = 3
@@ -8687,6 +8944,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[170] = 1
             this._onClick_1_0value = event
             this._onClick_1_1value = distanceThreshold
+            this._state.fireChange()
         } else
         {
             this._flagArray[170] = 3
@@ -8700,6 +8958,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._focusScopeId_0_0value = id
             this._focusScopeId_0_1value = isGroup
             this._focusScopeId_0_2value = arrowStepOut
+            this._state.fireChange()
         } else
         {
             this._flagArray[171] = 3
@@ -8712,6 +8971,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[172] = 1
             this._focusScopePriority_0_0value = scopeId
             this._focusScopePriority_0_1value = priority
+            this._state.fireChange()
         } else
         {
             this._flagArray[172] = 3
@@ -8724,6 +8984,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[173] = 1
             this._transition_1_0value = effect
             this._transition_1_1value = onFinish
+            this._state.fireChange()
         } else
         {
             this._flagArray[173] = 3
@@ -8737,6 +8998,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._blur_0_0value = blurRadius
             this._blur_0_1value = options
             this._blur_0_2value = sysOptions
+            this._state.fireChange()
         } else
         {
             this._flagArray[174] = 3
@@ -8749,6 +9011,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[175] = 1
             this._linearGradientBlur_0_0value = value
             this._linearGradientBlur_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[175] = 3
@@ -8759,6 +9022,7 @@ export class CommonMethodModifier implements CommonMethod {
         if ((this._flagArray[176]) == (0))
         {
             this._flagArray[176] = 1
+            this._state.fireChange()
         } else
         {
             this._flagArray[176] = 3
@@ -8771,6 +9035,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[177] = 1
             this._useEffect_1_0value = useEffect
             this._useEffect_1_1value = effectType
+            this._state.fireChange()
         } else
         {
             this._flagArray[177] = 3
@@ -8787,6 +9052,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._backdropBlur_0_0value = radius
             this._backdropBlur_0_1value = options
             this._backdropBlur_0_2value = sysOptions
+            this._state.fireChange()
         } else
         {
             this._flagArray[178] = 3
@@ -8799,6 +9065,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[179] = 1
             this._sharedTransition_0_0value = id
             this._sharedTransition_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[179] = 3
@@ -8811,6 +9078,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[180] = 1
             this._chainMode_0_0value = direction
             this._chainMode_0_1value = style
+            this._state.fireChange()
         } else
         {
             this._flagArray[180] = 3
@@ -8823,6 +9091,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[181] = 1
             this._onDrop_1_0value = eventCallback
             this._onDrop_1_1value = dropOptions
+            this._state.fireChange()
         } else
         {
             this._flagArray[181] = 3
@@ -8835,6 +9104,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[182] = 1
             this._dragPreview_1_0value = preview
             this._dragPreview_1_1value = config
+            this._state.fireChange()
         } else
         {
             this._flagArray[182] = 3
@@ -8847,6 +9117,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[183] = 1
             this._dragPreviewOptions_0_0value = value
             this._dragPreviewOptions_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[183] = 3
@@ -8859,6 +9130,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[184] = 1
             this._overlay_0_0value = value
             this._overlay_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[184] = 3
@@ -8871,14 +9143,25 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[185] = 1
             this._blendMode_0_0value = value
             this._blendMode_0_1value = type
+            this._state.fireChange()
         } else
         {
             this._flagArray[185] = 3
         }
         return this
     }
-    advancedBlendMode(effect: BlendMode | uiEffect.Blender, type?: BlendApplyType): this {
-        throw new Error("Not implemented")
+    advancedBlendMode(effect: BlendMode | uiEffect.Blender | undefined, type?: BlendApplyType): this {
+        if (((this._flagArray[186]) == (0)) || (true) || (true))
+        {
+            this._flagArray[186] = 1
+            this._advancedBlendMode_0_0value = effect
+            this._advancedBlendMode_0_1value = type
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[186] = 3
+        }
+        return this
     }
     geometryTransition(id: string | undefined, options?: GeometryTransitionOptions): this {
         if (((this._flagArray[187]) == (0)) || ((this._geometryTransition_1_0value) !== (id)) || (true))
@@ -8886,6 +9169,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[187] = 1
             this._geometryTransition_1_0value = id
             this._geometryTransition_1_1value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[187] = 3
@@ -8898,6 +9182,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[188] = 1
             this._bindTips_0_0value = message
             this._bindTips_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[188] = 3
@@ -8910,6 +9195,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[189] = 1
             this._bindPopup_0_0value = show
             this._bindPopup_0_1value = popup
+            this._state.fireChange()
         } else
         {
             this._flagArray[189] = 3
@@ -8922,6 +9208,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[190] = 1
             this._bindMenu_0_0value = content
             this._bindMenu_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[190] = 3
@@ -8935,6 +9222,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._bindMenu_1_0value = isShow
             this._bindMenu_1_1value = content
             this._bindMenu_1_2value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[191] = 3
@@ -8948,18 +9236,20 @@ export class CommonMethodModifier implements CommonMethod {
             this._bindContextMenu_0_0value = content
             this._bindContextMenu_0_1value = responseType
             this._bindContextMenu_0_2value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[192] = 3
         }
         return this
     }
-    bindContextMenu(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
+    bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
         if (((this._flagArray[193]) == (0)) || (true) || (true))
         {
             this._flagArray[193] = 1
-            this._bindContextMenu_1_0value = content
-            this._bindContextMenu_1_1value = options
+            this._bindContextMenuWithResponse_0_0value = content
+            this._bindContextMenuWithResponse_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[193] = 3
@@ -8967,12 +9257,13 @@ export class CommonMethodModifier implements CommonMethod {
         return this
     }
     bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
-        if (((this._flagArray[194]) == (0)) || ((this._bindContextMenu_2_0value) !== (isShown)) || (true) || (true))
+        if (((this._flagArray[194]) == (0)) || ((this._bindContextMenu_1_0value) !== (isShown)) || (true) || (true))
         {
             this._flagArray[194] = 1
-            this._bindContextMenu_2_0value = isShown
-            this._bindContextMenu_2_1value = content
-            this._bindContextMenu_2_2value = options
+            this._bindContextMenu_1_0value = isShown
+            this._bindContextMenu_1_1value = content
+            this._bindContextMenu_1_2value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[194] = 3
@@ -8986,6 +9277,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._bindContentCover_0_0value = isShow
             this._bindContentCover_0_1value = builder
             this._bindContentCover_0_2value = type
+            this._state.fireChange()
         } else
         {
             this._flagArray[195] = 3
@@ -8999,6 +9291,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._bindContentCover_1_0value = isShow
             this._bindContentCover_1_1value = builder
             this._bindContentCover_1_2value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[196] = 3
@@ -9012,6 +9305,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._bindSheet_0_0value = isShow
             this._bindSheet_0_1value = builder
             this._bindSheet_0_2value = options
+            this._state.fireChange()
         } else
         {
             this._flagArray[197] = 3
@@ -9024,6 +9318,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[198] = 1
             this._onVisibleAreaChange_0_0value = ratios
             this._onVisibleAreaChange_0_1value = event
+            this._state.fireChange()
         } else
         {
             this._flagArray[198] = 3
@@ -9036,6 +9331,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[199] = 1
             this._onVisibleAreaApproximateChange_0_0value = options
             this._onVisibleAreaApproximateChange_0_1value = event
+            this._state.fireChange()
         } else
         {
             this._flagArray[199] = 3
@@ -9050,6 +9346,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._keyboardShortcut_0_0value = value
             this._keyboardShortcut_0_1value = keys
             this._keyboardShortcut_0_2value = action
+            this._state.fireChange()
         } else
         {
             this._flagArray[200] = 3
@@ -9062,6 +9359,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[201] = 1
             this._accessibilityGroup_1_0value = isGroup
             this._accessibilityGroup_1_1value = config
+            this._state.fireChange()
         } else
         {
             this._flagArray[201] = 3
@@ -9074,6 +9372,7 @@ export class CommonMethodModifier implements CommonMethod {
             this._flagArray[202] = 1
             this._onGestureRecognizerJudgeBegin_1_0value = callback_
             this._onGestureRecognizerJudgeBegin_1_1value = exposeInnerGesture
+            this._state.fireChange()
         } else
         {
             this._flagArray[202] = 3
@@ -9085,6 +9384,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             this._flagArray[203] = 1
             this._systemMaterial_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flagArray[203] = 3
@@ -9112,6 +9412,30 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._flagArray[205] = 3
+        }
+        return this
+    }
+    useUnionEffect(value: boolean | undefined): this {
+        if (((this._flagArray[206]) == (0)) || ((this._useUnionEffect_0_0value) !== (value)))
+        {
+            this._flagArray[206] = 1
+            this._useUnionEffect_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[206] = 3
+        }
+        return this
+    }
+    materialFilter(value: uiEffect.Filter | undefined): this {
+        if (((this._flagArray[207]) == (0)) || (true))
+        {
+            this._flagArray[207] = 1
+            this._materialFilter_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[207] = 3
         }
         return this
     }

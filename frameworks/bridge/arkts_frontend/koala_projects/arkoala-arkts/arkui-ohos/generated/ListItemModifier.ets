@@ -182,6 +182,7 @@ export class ListItemModifier extends CommonMethodModifier implements ListItemAt
         {
             this._selectable_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectable_0_flag = AttributeUpdaterFlag.SKIP
@@ -193,6 +194,7 @@ export class ListItemModifier extends CommonMethodModifier implements ListItemAt
         {
             this._selected_0_flag = AttributeUpdaterFlag.UPDATE
             this._selected_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selected_0_flag = AttributeUpdaterFlag.SKIP
@@ -204,6 +206,7 @@ export class ListItemModifier extends CommonMethodModifier implements ListItemAt
         {
             this._swipeAction_0_flag = AttributeUpdaterFlag.UPDATE
             this._swipeAction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._swipeAction_0_flag = AttributeUpdaterFlag.SKIP
@@ -215,6 +218,7 @@ export class ListItemModifier extends CommonMethodModifier implements ListItemAt
         {
             this._onSelect_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSelect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSelect_0_flag = AttributeUpdaterFlag.SKIP

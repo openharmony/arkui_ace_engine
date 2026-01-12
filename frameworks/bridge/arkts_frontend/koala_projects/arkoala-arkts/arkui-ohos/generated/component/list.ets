@@ -18,14 +18,14 @@
 
 import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr, Finalizable } from "@koalaui/interop"
-import { ChildrenMainSize_serializer, EditModeOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, ChildrenMainSize, EditModeOptions, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, RectResult_serializer, RectResult } from "./common"
-import { LengthConstrain_serializer, LengthConstrain, Dimension, Length, ResourceColor } from "./units"
+import { ChildrenMainSize_serializer, EditModeOptions_serializer, ArkScrollableCommonMethodPeer, ScrollableCommonMethod, ChildrenMainSize, EditModeOptions, OnItemDragStartCallback, ItemDragInfo, OnWillScrollCallback, OnScrollCallback, CommonMethod, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, RectResult_serializer, RectResult, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from "./common"
+import { LengthConstrain_serializer, LengthConstrain, Dimension, Length, ResourceColor, ItemFillPolicy_serializer, ItemFillPolicy, CacheCountInfo_serializer, CacheCountInfo } from "./units"
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
-import { Axis, ScrollSource, Color } from "./enums"
+import { Axis, FocusWrapMode, ScrollSource, Color, PresetFillType } from "./enums"
 import { OnScrollFrameBeginCallback, Scroller, Scroller_serializer, ScrollerInternal, ScrollAlign } from "./scroll"
 import { AttributeModifier, hookListAttributeModifier, AttributeUpdater, hookListChildrenMainSizeImpl } from "#handwritten"
 import { Resource } from "global.resource"
@@ -85,24 +85,40 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._ListAttribute_setListDirection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setContentStartOffsetAttribute(value: double | undefined): void {
+    setContentStartOffsetAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeFloat64(valueTmpValue)
+            if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ListAttribute_setContentStartOffset(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setContentEndOffsetAttribute(value: double | undefined): void {
+    setContentEndOffsetAttribute(value: double | Resource | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeFloat64(valueTmpValue)
+            if (valueTmpValue instanceof double) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -240,6 +256,42 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._ListAttribute_setStackFromEnd(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setFocusWrapModeAttribute(value: FocusWrapMode | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as FocusWrapMode)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ListAttribute_setFocusWrapMode(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setSyncLoadAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ListAttribute_setSyncLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setScrollSnapAnimationSpeedAttribute(value: ScrollSnapAnimationSpeed | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as ScrollSnapAnimationSpeed)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ListAttribute_setScrollSnapAnimationSpeed(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setEditModeOptionsAttribute(value: EditModeOptions | undefined): void {
@@ -387,7 +439,7 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._ListAttribute_setOnDidScroll(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLanesAttribute(value: int32 | LengthConstrain | undefined, gutter?: Dimension): void {
+    setLanesAttribute(value: int32 | LengthConstrain | ItemFillPolicy | undefined, gutter?: Dimension): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -400,6 +452,10 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as LengthConstrain
                 LengthConstrain_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof ItemFillPolicy) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as ItemFillPolicy
+                ItemFillPolicy_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -426,12 +482,20 @@ export class ArkListPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._ListAttribute_setLanes(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCachedCount1Attribute(count: int32 | undefined, show: boolean | undefined): void {
+    setCachedCount1Attribute(count: int32 | CacheCountInfo | undefined, show: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (count !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const countTmpValue  = count!
-            thisSerializer.writeInt32(countTmpValue)
+            if (countTmpValue instanceof int32) {
+                thisSerializer.writeInt8((0).toByte())
+                const countTmpValueForIdx0  = countTmpValue as int32
+                thisSerializer.writeInt32(countTmpValueForIdx0)
+            } else if (countTmpValue instanceof CacheCountInfo) {
+                thisSerializer.writeInt8((1).toByte())
+                const countTmpValueForIdx1  = countTmpValue as CacheCountInfo
+                CacheCountInfo_serializer.write(thisSerializer, countTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -505,10 +569,15 @@ export interface VisibleListContentInfo {
     itemIndexInGroup?: int32;
 }
 export type OnScrollVisibleContentChangeCallback = (start: VisibleListContentInfo, end: VisibleListContentInfo) => void;
+export type OnListScrollIndexCallback = (start: int32, end: int32, center: int32) => void;
 export interface ListOptions {
     initialIndex?: int32;
     space?: double | string;
     scroller?: Scroller;
+}
+export enum ScrollSnapAnimationSpeed {
+    NORMAL = 0,
+    SLOW = 1
 }
 export interface ListDividerOptions {
     strokeWidth: Length;
@@ -526,10 +595,10 @@ export interface ListAttribute extends ScrollableCommonMethod {
     listDirection(value: Axis | undefined): this {
         throw new Error("Unimplemented method listDirection")
     }
-    contentStartOffset(value: double | undefined): this {
+    contentStartOffset(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method contentStartOffset")
     }
-    contentEndOffset(value: double | undefined): this {
+    contentEndOffset(value: double | Resource | undefined): this {
         throw new Error("Unimplemented method contentEndOffset")
     }
     divider(value: ListDividerOptions | null | undefined): this {
@@ -564,6 +633,15 @@ export interface ListAttribute extends ScrollableCommonMethod {
     }
     stackFromEnd(value: boolean | undefined): this {
         throw new Error("Unimplemented method stackFromEnd")
+    }
+    focusWrapMode(value: FocusWrapMode | undefined): this {
+        throw new Error("Unimplemented method focusWrapMode")
+    }
+    syncLoad(value: boolean | undefined): this {
+        throw new Error("Unimplemented method syncLoad")
+    }
+    scrollSnapAnimationSpeed(value: ScrollSnapAnimationSpeed | undefined): this {
+        throw new Error("Unimplemented method scrollSnapAnimationSpeed")
     }
     editModeOptions(value: EditModeOptions | undefined): this {
         throw new Error("Unimplemented method editModeOptions")
@@ -601,10 +679,10 @@ export interface ListAttribute extends ScrollableCommonMethod {
     onDidScroll(value: OnScrollCallback | undefined): this {
         throw new Error("Unimplemented method onDidScroll")
     }
-    lanes(value: int32 | LengthConstrain | undefined, gutter?: Dimension): this {
+    lanes(value: int32 | LengthConstrain | ItemFillPolicy | undefined, gutter?: Dimension): this {
         throw new Error("Unimplemented method lanes")
     }
-    cachedCount(count: int32 | undefined, show: boolean | undefined): this {
+    cachedCount(count: int32 | CacheCountInfo | undefined, show: boolean | undefined): this {
         throw new Error("Unimplemented method cachedCount")
     }
     attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
@@ -614,8 +692,8 @@ export interface ListAttribute extends ScrollableCommonMethod {
 export class ArkListStyle extends ArkScrollableCommonMethodStyle implements ListAttribute {
     alignListItem_value?: ListItemAlign | undefined
     listDirection_value?: Axis | undefined
-    contentStartOffset_value?: double | undefined
-    contentEndOffset_value?: double | undefined
+    contentStartOffset_value?: double | Resource | undefined
+    contentEndOffset_value?: double | Resource | undefined
     divider_value?: ListDividerOptions | null | undefined
     multiSelectable_value?: boolean | undefined
     cachedCount_value?: int32 | undefined
@@ -627,6 +705,9 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     maintainVisibleContentPosition_value?: boolean | undefined
     supportEmptyBranchInLazyLoading_value?: boolean | undefined
     stackFromEnd_value?: boolean | undefined
+    focusWrapMode_value?: FocusWrapMode | undefined
+    syncLoad_value?: boolean | undefined
+    scrollSnapAnimationSpeed_value?: ScrollSnapAnimationSpeed | undefined
     editModeOptions_value?: EditModeOptions | undefined
     onScrollIndex_value?: ((start: int32,end: int32,center: int32) => void) | undefined
     onScrollVisibleContentChange_value?: OnScrollVisibleContentChangeCallback | undefined
@@ -649,10 +730,10 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     listDirection(value: Axis | undefined): this {
         return this
     }
-    contentStartOffset(value: double | undefined): this {
+    contentStartOffset(value: double | Resource | undefined): this {
         return this
     }
-    contentEndOffset(value: double | undefined): this {
+    contentEndOffset(value: double | Resource | undefined): this {
         return this
     }
     divider(value: ListDividerOptions | null | undefined): this {
@@ -686,6 +767,15 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
         return this
     }
     stackFromEnd(value: boolean | undefined): this {
+        return this
+    }
+    focusWrapMode(value: FocusWrapMode | undefined): this {
+        return this
+    }
+    syncLoad(value: boolean | undefined): this {
+        return this
+    }
+    scrollSnapAnimationSpeed(value: ScrollSnapAnimationSpeed | undefined): this {
         return this
     }
     editModeOptions(value: EditModeOptions | undefined): this {
@@ -724,10 +814,10 @@ export class ArkListStyle extends ArkScrollableCommonMethodStyle implements List
     onDidScroll(value: OnScrollCallback | undefined): this {
         return this
     }
-    lanes(value: int32 | LengthConstrain | undefined, gutter?: Dimension): this {
+    lanes(value: int32 | LengthConstrain | ItemFillPolicy | undefined, gutter?: Dimension): this {
         return this
     }
-    cachedCount(count: int32 | undefined, show: boolean | undefined): this {
+    cachedCount(count: int32 | CacheCountInfo | undefined, show: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ListAttribute> | AttributeModifier<ScrollableCommonMethod> | AttributeModifier<CommonMethod> | undefined): this {
@@ -767,17 +857,17 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public contentStartOffset(value: double | undefined): this {
+    public contentStartOffset(value: double | Resource | undefined): this {
         if (this.checkPriority("contentStartOffset")) {
-            const value_casted = value as (double | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setContentStartOffsetAttribute(value_casted)
             return this
         }
         return this
     }
-    public contentEndOffset(value: double | undefined): this {
+    public contentEndOffset(value: double | Resource | undefined): this {
         if (this.checkPriority("contentEndOffset")) {
-            const value_casted = value as (double | undefined)
+            const value_casted = value as (double | Resource | undefined)
             this.getPeer()?.setContentEndOffsetAttribute(value_casted)
             return this
         }
@@ -879,6 +969,30 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
+    public focusWrapMode(value: FocusWrapMode | undefined): this {
+        if (this.checkPriority("focusWrapMode")) {
+            const value_casted = value as (FocusWrapMode | undefined)
+            this.getPeer()?.setFocusWrapModeAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public syncLoad(value: boolean | undefined): this {
+        if (this.checkPriority("syncLoad")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setSyncLoadAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public scrollSnapAnimationSpeed(value: ScrollSnapAnimationSpeed | undefined): this {
+        if (this.checkPriority("scrollSnapAnimationSpeed")) {
+            const value_casted = value as (ScrollSnapAnimationSpeed | undefined)
+            this.getPeer()?.setScrollSnapAnimationSpeedAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public onScrollIndex(value: ((start: int32,end: int32,center: int32) => void) | undefined): this {
         if (this.checkPriority("onScrollIndex")) {
             const value_casted = value as (((start: int32,end: int32,center: int32) => void) | undefined)
@@ -967,18 +1081,18 @@ export class ArkListComponent extends ArkScrollableCommonMethodComponent impleme
         }
         return this
     }
-    public lanes(value: int32 | LengthConstrain | undefined, gutter?: Dimension): this {
+    public lanes(value: int32 | LengthConstrain | ItemFillPolicy | undefined, gutter?: Dimension): this {
         if (this.checkPriority("lanes")) {
-            const value_casted = value as (int32 | LengthConstrain | undefined)
+            const value_casted = value as (int32 | LengthConstrain | ItemFillPolicy | undefined)
             const gutter_casted = gutter as (Dimension | undefined)
             this.getPeer()?.setLanesAttribute(value_casted, gutter_casted)
             return this
         }
         return this
     }
-    public cachedCount(count: int32 | undefined, show: boolean | undefined): this {
+    public cachedCount(count: int32 | CacheCountInfo | undefined, show: boolean | undefined): this {
         if (this.checkPriority("cachedCount")) {
-            const count_casted = count as (int32 | undefined)
+            const count_casted = count as (int32 | CacheCountInfo | undefined)
             const show_casted = show as (boolean | undefined)
             this.getPeer()?.setCachedCount1Attribute(count_casted, show_casted)
             return this
@@ -1027,6 +1141,17 @@ export class ListScroller_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return ListScrollerInternal.fromPtr(ptr)
+    }
+}
+export class UIListEvent_serializer {
+    public static write(buffer: SerializerBase, value: UIListEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): UIListEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return UIListEventInternal.fromPtr(ptr)
     }
 }
 export class CloseSwipeActionOptions_serializer {
@@ -1555,3 +1680,93 @@ export class ListScroller extends Scroller implements MaterializedBase {
         return returnResult
     }
 }
+export interface UIListEvent extends UIScrollableCommonEvent {
+    setOnWillScroll(callback_: OnWillScrollCallback | undefined): void
+    setOnDidScroll(callback_: OnScrollCallback | undefined): void
+    setOnScrollIndex(callback_: OnListScrollIndexCallback | undefined): void
+    setOnScrollVisibleContentChange(callback_: OnScrollVisibleContentChangeCallback | undefined): void
+}
+export class UIListEventInternal extends UIScrollableCommonEventInternal implements MaterializedBase,UIListEvent {
+    constructor(peerPtr: KPointer) {
+        super(peerPtr)
+    }
+    static construct(ptr: KPointer): UIListEventInternal {
+        const retval  = ArkUIGeneratedNativeModule._UIListEvent_construct(ptr)
+        return new UIListEventInternal(retval)
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._UIListEvent_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): UIListEventInternal {
+        return new UIListEventInternal(ptr)
+    }
+    public setOnWillScroll(callback_: OnWillScrollCallback | undefined): void {
+        const callback__casted = callback_ as (OnWillScrollCallback | undefined)
+        this.setOnWillScroll_serialize(callback__casted)
+        return
+    }
+    public setOnDidScroll(callback_: OnScrollCallback | undefined): void {
+        const callback__casted = callback_ as (OnScrollCallback | undefined)
+        this.setOnDidScroll_serialize(callback__casted)
+        return
+    }
+    public setOnScrollIndex(callback_: OnListScrollIndexCallback | undefined): void {
+        const callback__casted = callback_ as (OnListScrollIndexCallback | undefined)
+        this.setOnScrollIndex_serialize(callback__casted)
+        return
+    }
+    public setOnScrollVisibleContentChange(callback_: OnScrollVisibleContentChangeCallback | undefined): void {
+        const callback__casted = callback_ as (OnScrollVisibleContentChangeCallback | undefined)
+        this.setOnScrollVisibleContentChange_serialize(callback__casted)
+        return
+    }
+    setOnWillScroll_serialize(callback_: OnWillScrollCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIListEvent_setOnWillScroll(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnDidScroll_serialize(callback_: OnScrollCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIListEvent_setOnDidScroll(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnScrollIndex_serialize(callback_: OnListScrollIndexCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIListEvent_setOnScrollIndex(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnScrollVisibleContentChange_serialize(callback_: OnScrollVisibleContentChangeCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIListEvent_setOnScrollVisibleContentChange(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+

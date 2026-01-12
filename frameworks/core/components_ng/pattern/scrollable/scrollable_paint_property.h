@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -47,7 +47,7 @@ enum class ContentClipMode {
 };
 using ContentClip = std::pair<ContentClipMode, RefPtr<ShapeRect>>;
 
-class ScrollablePaintProperty : public PaintProperty {
+class ACE_FORCE_EXPORT ScrollablePaintProperty : public PaintProperty {
     DECLARE_ACE_TYPE(ScrollablePaintProperty, PaintProperty);
 
 public:
@@ -82,7 +82,7 @@ public:
     ACE_DEFINE_PROPERTY_ITEM_WITH_GROUP(FadingEdgeProperty, FadingEdgeLength, Dimension, PROPERTY_UPDATE_RENDER);
     ACE_DEFINE_PROPERTY_ITEM_WITHOUT_GROUP(ContentClip, ContentClip, PROPERTY_UPDATE_RENDER);
     Dimension GetBarWidth() const;
-    Color GetBarColor() const;
+    ACE_FORCE_EXPORT Color GetBarColor() const;
 
     /**
      * @brief Return the default content clip mode.

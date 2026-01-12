@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,8 +20,20 @@
 
 namespace OHOS::Ace::NG {
 
+enum class PreviewBadgeMode {
+    NO_BADGE = 0,
+    AUTO,
+    USER_SET
+};
+
+struct PreviewBadge {
+    PreviewBadgeMode mode = PreviewBadgeMode::AUTO;
+    int32_t count;
+};
+using GetPreviewBadge = std::function<PreviewBadge()>;
 struct EditModeOptions {
     bool enableGatherSelectedItemsAnimation = false;
+    GetPreviewBadge getPreviewBadge;
 };
 
 class SelectableContainerPattern : public ScrollablePattern {

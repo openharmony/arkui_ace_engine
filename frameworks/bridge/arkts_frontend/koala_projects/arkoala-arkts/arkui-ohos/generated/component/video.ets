@@ -757,8 +757,6 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
 export function VideoImpl(
     @memo
     style: ((attributes: VideoAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkVideoComponent>((): ArkVideoComponent => {
         return new ArkVideoComponent()
@@ -767,7 +765,6 @@ export function VideoImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

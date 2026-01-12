@@ -157,6 +157,11 @@ private:
 
     std::string DumpUINode(const RefPtr<UINode>& node) const;
 
+    void SetNeedBuildAll(const bool needBuildAll)
+    {
+        needBuildAll_ = needBuildAll;
+    }
+
     // false if in LazyForEach, true if in Repeat
     bool isRepeat_ = false;
     // ArkoalaLazyNode is not instance of FrameNode, needs to propagate active state to all items inside
@@ -164,6 +169,8 @@ private:
     // true if in Swiper loop mode
     bool isLoop_ = false;
     ActiveRangeParam activeRangeParam_ = { -1, -1, -1, -1 };
+    // true if parent isn't scroll container
+    bool needBuildAll_ = true;
 
     UniqueValuedMap<int32_t, RefPtr<UINode>, WeakPtr<UINode>::Hash> node4Index_;
     CreateItemCb createItem_;

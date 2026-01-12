@@ -15,15 +15,12 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_datepicker_ffi.h"
 
-
 #include "cj_lambda.h"
-#include "bridge/common/utils/utils.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
-#include "core/components_ng/base/view_stack_processor.h"
-#include "core/components/picker/picker_data.h"
-#include "core/components/picker/picker_date_component.h"
-#include "core/components/picker/picker_theme.h"
-#include "core/components/picker/picker_time_component.h"
+#include "bridge/common/utils/utils.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
@@ -85,7 +82,7 @@ PickerTime ParseTime(FfiTime data)
     return pickerTime;
 }
 
-FFiDatePickerResult DatePickerChangeEventToFfi(const DatePickerChangeEvent& eventInfo)
+FFiDatePickerResult DatePickerChangeEventToFfi(const OHOS::Ace::NG::DatePickerChangeEvent& eventInfo)
 {
     FFiDatePickerResult result;
     auto infoStr = eventInfo.GetSelectedStr();
@@ -629,7 +626,7 @@ void FfiOHOSAceFrameworkDatePickerCreateWithChangeEvent(
     DatePickerModel::GetInstance()->SetSelectedDate(parseSelectedDate);
 
     auto changeEvent = [lambda = CJLambda::Create(callback)](const BaseEventInfo* index) -> void {
-        auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<OHOS::Ace::NG::DatePickerChangeEvent>(index);
         const auto infoResult = DatePickerChangeEventToFfi(*eventInfo);
         lambda(FfiTime { infoResult.year, infoResult.month, infoResult.day });
     };
@@ -651,7 +648,7 @@ void FfiOHOSAceFrameworkDatePickerUseMilitaryTime(bool isUseMilitaryTime)
 void FfiOHOSAceFrameworkDatePickerSetOnChange(void (*callback)(int64_t year, int64_t month, int64_t day))
 {
     auto onChange = [lambda = CJLambda::Create(callback)](const BaseEventInfo* index) -> void {
-        auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<OHOS::Ace::NG::DatePickerChangeEvent>(index);
         const auto infoResult = DatePickerChangeEventToFfi(*eventInfo);
         lambda(infoResult.year, infoResult.month, infoResult.day);
     };
@@ -667,7 +664,7 @@ void FfiOHOSAceFrameworkDatePickerSetOnChange(void (*callback)(int64_t year, int
 void FfiOHOSAceFrameworkDatePickerSetOnDateChange(void (*callback)(int64_t year, int64_t month, int64_t day))
 {
     auto onDateChange = [lambda = CJLambda::Create(callback)](const BaseEventInfo* index) -> void {
-        auto* eventInfo = TypeInfoHelper::DynamicCast<DatePickerChangeEvent>(index);
+        auto* eventInfo = TypeInfoHelper::DynamicCast<OHOS::Ace::NG::DatePickerChangeEvent>(index);
         const auto infoResult = DatePickerChangeEventToFfi(*eventInfo);
         lambda(infoResult.year, infoResult.month, infoResult.day);
     };

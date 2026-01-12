@@ -405,8 +405,6 @@ extern const char TAB_BAR_NAME[];
 extern const char TAB_CONTENT_NAME[];
 extern const char TAB_NAME[];
 extern const char TAB_TABS[];
-extern const char TAB_INDEX[];
-extern const char TAB_IS_VERTICAL[];
 extern const char TAB_CONTROLLER_ID[];
 extern const char TAB_INDICATOR[];
 extern const char TAB_INDICATOR_WIDTH[];
@@ -519,16 +517,11 @@ extern const char RATING_HORIZONTAL_PADDING[];
 extern const char RATING_VERTICAL_PADDING[];
 extern const char RATING_INDICATOR[];
 extern const char RATING_ON_CHANGE[];
-extern const int32_t DEFAULT_RATING_STAR_NUM;
+ACE_FORCE_EXPORT extern const int32_t DEFAULT_RATING_STAR_NUM;
 extern const int32_t DEFAULT_INDICATOR_VALUE;
 extern const int32_t DEFAULT_NO_INDICATOR_VALUE;
-extern const uint32_t RATING_FOCUS_BOARD_COLOR;
-extern const double DEFAULT_RATING_SCORE;
-extern const double DEFAULT_RATING_WIDTH;
-extern const double DEFAULT_RATING_HEIGHT;
-extern const double DEFAULT_RATING_STEP_SIZE;
-extern const double DEFAULT_RATING_HORIZONTAL_PADDING;
-extern const double DEFAULT_RATING_VERTICAL_PADDING;
+ACE_FORCE_EXPORT extern const double DEFAULT_RATING_SCORE;
+ACE_FORCE_EXPORT extern const double DEFAULT_RATING_STEP_SIZE;
 
 // loading progress constants
 extern const char LOADING_PROGRESS_NAME[];
@@ -567,7 +560,7 @@ extern const char SELECT_OPTION_VALUE[];
 extern const char SELECT_OPTION_TEXT[];
 extern const char SELECT_OPTION_SELECTED[];
 extern const uint32_t SELECT_DEFAULT_OPTION_SIZE;
-ACE_EXPORT extern const uint32_t SELECT_INVALID_INDEX;
+ACE_FORCE_EXPORT extern const uint32_t SELECT_INVALID_INDEX;
 
 // clip constants
 extern const char CLIP_NAME[];

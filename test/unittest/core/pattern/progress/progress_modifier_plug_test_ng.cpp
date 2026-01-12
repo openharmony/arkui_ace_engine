@@ -301,4 +301,24 @@ HWTEST_F(ProgressModifierPlugTestNg, LinearProgressModifier002, TestSize.Level1)
     EXPECT_EQ(gradientColors[0].GetLinearColor(), LinearColor(Color::WHITE));
     EXPECT_EQ(gradientColors[1].GetLinearColor(), LinearColor(Color::BLACK));
 }
+
+/**
+ * @tc.name: StopAllLoopAnimation
+ * @tc.desc: Test StopAllLoopAnimation function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressModifierPlugTestNg, StopAllLoopAnimation, TestSize.Level1)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    pipeline->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
+    auto progressModifier = AceType::MakeRefPtr<ProgressModifier>(frameNode_);
+    progressModifier->StopAllLoopAnimation();
+    EXPECT_FALSE(progressModifier->isLoading_);
+    EXPECT_FALSE(progressModifier->isSweeping_);
+    progressModifier->isLoading_ = true;
+    progressModifier->isSweeping_ = true;
+    progressModifier->StopAllLoopAnimation();
+    EXPECT_FALSE(progressModifier->isLoading_);
+    EXPECT_FALSE(progressModifier->isSweeping_);
+}
 } // namespace OHOS::Ace::NG

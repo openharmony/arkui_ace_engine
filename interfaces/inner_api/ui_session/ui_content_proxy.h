@@ -91,11 +91,30 @@ public:
     virtual int32_t GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
         const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback) override;
 
+
+    virtual int32_t GetWebInfoByRequest(
+        int32_t webId,
+        const std::string& request,
+        const GetWebInfoByRequestCallback& finishCallback) override;
+
 private:
     static inline BrokerDelegator<UIContentServiceProxy> delegator_;
     sptr<UiReportStub> report_ = nullptr;
     int32_t processId_;
     bool isConnected = false;
+};
+
+class ACE_FORCE_EXPORT UiContentProxyRecipient : public IRemoteObject::DeathRecipient {
+public:
+    using RemoteDiedHandler = std::function<void()>;
+    explicit UiContentProxyRecipient(RemoteDiedHandler handler) : handler_(std::move(handler)) {}
+
+    ~UiContentProxyRecipient() override = default;
+
+    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
+
+private:
+    RemoteDiedHandler handler_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_PROXY_H

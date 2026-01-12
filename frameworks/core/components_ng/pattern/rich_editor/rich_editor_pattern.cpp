@@ -5484,7 +5484,8 @@ bool RichEditorPattern::EnableStandardInput(bool needShowSoftKeyboard, SourceTyp
     attachOptions.requestKeyboardReason =
         static_cast<OHOS::MiscServices::RequestKeyboardReason>(static_cast<int32_t>(sourceType));
     BeforeAttachInputMethod(textconfig);
-    auto ret = inputMethod->Attach(richEditTextChangeListener_, attachOptions, textconfig);
+    auto ret = inputMethod->Attach(richEditTextChangeListener_, attachOptions, textconfig,
+        MiscServices::ClientType::INNER_KIT_ARKUI);
     if (ret == MiscServices::ErrorCode::NO_ERROR) {
         std::unordered_map<std::string, MiscServices::PrivateDataValue> privateCommand;
         privateCommand.insert(std::make_pair("isEditorConsumeAlphaKey", true));
@@ -5816,7 +5817,7 @@ void RichEditorPattern::UpdateCaretInfoToController()
 #endif
 }
 
-void RichEditorPattern::SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboardNode)
+void RichEditorPattern::SetPreKeyboardNode()
 {
     auto frameNode = GetHost();
     CHECK_NULL_VOID(frameNode);
@@ -5824,16 +5825,6 @@ void RichEditorPattern::SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboa
     CHECK_NULL_VOID(textFieldManager);
     WeakPtr<FrameNode> weakNode = frameNode;
     textFieldManager->SetPreNode(weakNode);
-    auto customKeyboardId = customKeyboardNode ? customKeyboardNode->GetId() : -1;
-    textFieldManager->SetCustomKeyboardId(customKeyboardId);
-}
-
-bool RichEditorPattern::GetCustomKeyboardIsMatched(int32_t customKeyboardId)
-{
-    auto textFieldManager = GetTextFieldManager();
-    CHECK_NULL_RETURN(textFieldManager, false);
-    auto id = textFieldManager->GetCustomKeyboardId();
-    return customKeyboardId == id;
 }
 
 bool RichEditorPattern::HasConnection() const
@@ -5933,11 +5924,10 @@ void RichEditorPattern::RequestCustomKeyboardBuilder()
     CHECK_NULL_VOID(pipeline);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_VOID(overlayManager);
+    SetPreKeyboardNode();
     if (customKeyboardBuilder_) {
-        SetCustomKeyboardNode(nullptr);
         overlayManager->BindKeyboard(customKeyboardBuilder_, frameNode->GetId());
     } else {
-        SetCustomKeyboardNode(customKeyboardNode_);
         overlayManager->BindKeyboardWithNode(customKeyboardNode_, frameNode->GetId());
     }
 }
@@ -9157,6 +9147,10 @@ void RichEditorPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, 
 
 void RichEditorPattern::HandleOnPaste()
 {
+    if (auto focusHub = GetFocusHub(); focusHub && !HasFocus()) {
+        focusHub->RequestFocusImmediately();
+        isOnlyRequestFocus_ = true;
+    }
     if (IsPreviewTextInputting()) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "Paste blocked during preview text input");
         suppressAccessibilityEvent_ = true;
@@ -9192,6 +9186,10 @@ void RichEditorPattern::HandleOnPaste()
 
 bool RichEditorPattern::ProcessAutoFill(AceAutoFillTriggerType triggerType)
 {
+    if (auto focusHub = GetFocusHub(); focusHub && !HasFocus()) {
+        focusHub->RequestFocusImmediately();
+        isOnlyRequestFocus_ = true;
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
     auto container = Container::Current();
@@ -10984,7 +10982,8 @@ void RichEditorPattern::HandleOnCameraInput()
         }
 #endif
         BeforeAttachInputMethod(textConfig);
-        auto ret = inputMethod->Attach(richEditTextChangeListener_, false, textConfig);
+        auto ret = inputMethod->Attach(richEditTextChangeListener_, false, textConfig,
+            MiscServices::ClientType::INNER_KIT_ARKUI);
         if (ret == MiscServices::ErrorCode::NO_ERROR) {
             auto pipeline = GetContext();
             CHECK_NULL_VOID(pipeline);
@@ -11470,7 +11469,7 @@ void RichEditorPattern::HandleOnDragDropTextOperation(const std::u16string& inse
         InsertValueByOperationType(insertValue, OperationType::DRAG);
         int32_t delLength = HandleOnDragDeleteForward(currentPosition);
         caretPosition_ -= delLength;
-        lastCaretPosition_ = currentPosition - strLength;
+        lastCaretPosition_ = currentPosition - delLength;
     }
 
     AfterContentChange(changeValue);
@@ -11581,14 +11580,13 @@ void RichEditorPattern::OnFocusCustomKeyboardChange()
     if (!textFieldManager->NeedCloseKeyboard()) {
         return;
     }
-    if (customKeyboardNode_) {
-        bool matched = GetCustomKeyboardIsMatched(customKeyboardNode_->GetId());
-        textFieldManager->ProcessCustomKeyboard(matched, currentNode->GetId());
-        SetCustomKeyboardNode(customKeyboardNode_);
+    if ((customKeyboardNode_ || customKeyboardBuilder_) && textFieldManager->GetCustomKeyboardContinueFeature()) {
+        textFieldManager->ProcessCustomKeyboard(true, currentNode->GetId());
+        SetPreKeyboardNode();
         return;
     }
     textFieldManager->ProcessCustomKeyboard(false, currentNode->GetId());
-    SetCustomKeyboardNode(nullptr);
+    SetPreKeyboardNode();
 }
 
 void RichEditorPattern::ProcessCustomKeyboard(bool matched, int32_t nodeId)
@@ -13553,8 +13551,7 @@ void RichEditorPattern::HandleAIWriteResult(int32_t start, int32_t end, std::vec
 
     textSelector_.Update(start, end);
     auto length = end - start;
-    CHECK_NULL_VOID(length > 0);
-    DeleteBackward(length, TextChangeReason::AI_WRITE);
+    IF_TRUE(length > 0, DeleteBackward(length, TextChangeReason::AI_WRITE));
     InsertSpanByBackData(spanString);
     BeforeIMEInsertValue(UtfUtils::Str8ToStr16(spanString->GetString()));
     InsertValueByOperationType(u"", OperationType::AI_WRITE);

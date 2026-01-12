@@ -34,6 +34,7 @@ enum NotifyMutableStateMode {
 export class ObserveSingleton implements IObserve {
     public static readonly instance: ObserveSingleton = new ObserveSingleton();
     public static readonly InvalidRenderId: RenderIdType | undefined = undefined;
+    public static readonly RenderingPause: int = -1;
     public static readonly RenderingComponent: int = 0;
     public static readonly RenderingComponentV1: int = 1;
     public static readonly RenderingComponentV2: int = 2;

@@ -69,6 +69,8 @@ void OnDetectedBlankScreen(const CallbackHelper<OnDetectBlankScreenCallback>& ar
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnTextSelectionChange(const CallbackHelper<TextSelectionChangeCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnFirstScreenPaint(const CallbackHelper<OnFirstScreenPaintCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnResourceLoad(const CallbackHelper<Callback_OnResourceLoadEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnFullScreenExit(const CallbackHelper<Callback_Void>& arkCallback,

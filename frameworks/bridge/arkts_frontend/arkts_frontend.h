@@ -106,26 +106,27 @@ public:
 
     void AddPage(const RefPtr<AcePage>& page) override {}
 
-    void* PushExtender(const std::string& url, const std::string& params, bool recoverable,
-        std::function<void()>&& finishCallback, void* jsNode) override;
+    void PushExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) override;
     void PushNamedRouteExtender(
         const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) override;
-    void* ReplaceExtender(const std::string& url, const std::string& params, bool recoverable,
-        std::function<void()>&& enterFinishCallback, void* jsNode) override;
+    void ReplaceExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) override;
     void ReplaceNamedRouteExtender(
         const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) override;
-    void* RunPageExtender(const std::string& url, const std::string& params, bool recoverable,
-        std::function<void()>&& finishCallback, void* jsNode) override;
+    void RunPageExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* jsNode) override;
     void BackExtender(const std::string& url, const std::string& params) override;
+    void BackToIndexExtender(int32_t index, const std::string& params) override;
     void ClearExtender() override;
     void ShowAlertBeforeBackPageExtender(const std::string& url) override;
     void HideAlertBeforeBackPageExtender() override;
 
     void* CreateDynamicExtender(const std::string& url, bool recoverable) override;
-    void* PushDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
-        std::function<void()>&& finishCallback, void* pageNode) override;
-    void* ReplaceDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
-        std::function<void()>&& finishCallback, void* pageNode) override;
+    void PushDynamicExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* pageNode) override;
+    void ReplaceDynamicExtender(
+        const PageRouterOptions& options, std::function<void()>&& finishCallback, void* pageNode) override;
 
     void PushFromDynamicExtender(const std::string& url, const std::string& params, bool recoverable,
         const std::function<void(const std::string&, int32_t)>& callback, uint32_t routerMode) override;
@@ -134,6 +135,7 @@ public:
     void BackFromDynamicExtender(const std::string& url, const std::string& params) override;
     void ClearFromDynamicExtender() override;
     int32_t GetLengthFromDynamicExtender() override;
+    int32_t GetStackSizeFromDynamicExtender() override;
     std::string GetParamsFromDynamicExtender() override;
     bool GetStateByUrlFromDynamicExtender(const std::string& url, std::vector<RouterStateInfo>& stateArray) override;
     bool GetStateByIndexFromDynamicExtender(int32_t index, RouterStateInfo& state) override;

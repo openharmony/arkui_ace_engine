@@ -24,13 +24,10 @@ build_component("checkable") {
     "render_checkbox_creator.cpp",
     "render_radio.cpp",
     "render_radio_creator.cpp",
-    "render_switch.cpp",
-    "render_switch_creator.cpp",
   ]
 
   rosen_sources = [
     "rosen_render_checkbox.cpp",
     "rosen_render_radio.cpp",
-    "rosen_render_switch.cpp",
   ]
 }

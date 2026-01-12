@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,8 +24,9 @@ class ACE_FORCE_EXPORT SelectableUtils final : public Singleton<SelectableUtils>
 public:
     static bool IsSelectableItem(const RefPtr<FrameNode>& frameNode);
     static bool IsSelectedItemNode(const RefPtr<FrameNode>& frameNode);
+    static std::optional<int32_t> GetBadgeNumber(const RefPtr<FrameNode>& frameNode);
     static std::vector<RefPtr<FrameNode>> GetVisibleSelectedItems(const RefPtr<FrameNode>& frameNode);
-    static bool IsGatherSelectedItemsAnimationEnabled(RefPtr<FrameNode>& frameNode);
+    static bool IsGatherSelectedItemsAnimationEnabled(const RefPtr<FrameNode>& frameNode);
     static void BindContextMenu(FrameNode* frameNode);
 
     void PublishMenuStatus(bool isShowing, const RefPtr<FrameNode>& menuNode);

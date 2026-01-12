@@ -139,6 +139,7 @@ ohos_unittest("image_file_cache_test_ng") {
     "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
     "$ace_root/test/mock/core/image_provider/mock_skia_image_data.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "image_file_cache_test_ng.cpp",
   ]
 
@@ -148,6 +149,7 @@ ohos_unittest("image_file_cache_test_ng") {
     "$ace_root/test/unittest:ace_engine_unittest_flutter_deps",
     "$ace_root/test/unittest:ace_unittest_log",
     "$ace_root/test/unittest:ace_unittest_trace",
+    "$ace_root/test/unittest:ace_core_animation",
   ]
 
   external_deps = [
@@ -336,6 +338,7 @@ ohos_unittest("image_loader_test") {
     "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
     "$ace_root/test/mock/core/common/mock_container.cpp",
     "$ace_root/test/mock/core/image_provider/mock_image_file_cache.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
     "$ace_root/test/unittest/core/rosen/mock_internal_resource.cpp",
     "image_loader_test.cpp",
   ]

@@ -29,21 +29,21 @@ StatisticEventReporter::StatisticEventReporter()
     appInfo_.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
 }
 
-std::string StatisticEventReporter::ConvertToEventName(StatisticEventType eventType)
+StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eventType)
 {
     switch (eventType) {
         case StatisticEventType::FA_APP_START:
-            return "FA_APP_START";
+            return { "FRAMEWORK", "FA_APP_START" };
         case StatisticEventType::CALL_SET_CACHE_RANGE:
-            return "CALL_SET_CACHE_RANGE";
+            return { "List", "CALL_SET_CACHE_RANGE" };
         case StatisticEventType::SEARCH_ONDIDINSERT:
-            return "SEARCH_ONDIDINSERT";
+            return { "SEARCH", "ONDIDINSERT" };
         case StatisticEventType::SEARCH_ONWILLDELETE:
-            return "SEARCH_ONWILLDELETE";
+            return { "SEARCH", "ONWILLDELETE" };
         case StatisticEventType::SEARCH_ONDIDDELETE:
-            return "SEARCH_ONDIDDELETE";
+            return { "SEARCH", "ONDIDDELETE" };
         default:
-            return "";
+            return { "", "" };
     }
 }
 
@@ -51,12 +51,12 @@ void StatisticEventReporter::SendEvent(StatisticEventType eventType)
 {
     auto iter = statisitcEventMap_.find(eventType);
     if (iter == statisitcEventMap_.end()) {
-        std::string eventName = ConvertToEventName(eventType);
-        if (eventName == "") {
+        StatisticEventInfo event = ConvertToEvent(eventType);
+        if (event.eventName == "") {
             TAG_LOGE(AceLogTag::ACE_UI_SERVICE, "invalid statistic event type");
             return;
         }
-        statisitcEventMap_[eventType] = { eventName, 1 };
+        statisitcEventMap_[eventType] = event;
     } else {
         iter->second.eventCount++;
     }

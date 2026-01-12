@@ -1964,4 +1964,22 @@ void TextModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
 {
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SelectedDragPreviewStyle, frameNode);
 }
+
+void TextModelNG::SetExternalDrawCallback(
+    FrameNode* frameNode, std::function<bool(float, float, float, float)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    if (textPattern) {
+        textPattern->SetExternalDrawCallback(std::move(callback));
+    }
+}
+
+std::optional<void*> TextModelNG::GetInnerParagraph(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, std::nullopt);
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, std::nullopt);
+    return textPattern->GetDrawParagraph();
+}
 } // namespace OHOS::Ace::NG

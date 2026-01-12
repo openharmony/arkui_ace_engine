@@ -149,6 +149,7 @@ export class StepperItemModifier extends CommonMethodModifier implements Stepper
         {
             this._prevLabel_0_flag = AttributeUpdaterFlag.UPDATE
             this._prevLabel_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._prevLabel_0_flag = AttributeUpdaterFlag.SKIP
@@ -160,6 +161,7 @@ export class StepperItemModifier extends CommonMethodModifier implements Stepper
         {
             this._nextLabel_0_flag = AttributeUpdaterFlag.UPDATE
             this._nextLabel_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._nextLabel_0_flag = AttributeUpdaterFlag.SKIP
@@ -171,6 +173,7 @@ export class StepperItemModifier extends CommonMethodModifier implements Stepper
         {
             this._status_0_flag = AttributeUpdaterFlag.UPDATE
             this._status_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._status_0_flag = AttributeUpdaterFlag.SKIP

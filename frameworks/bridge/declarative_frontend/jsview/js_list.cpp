@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -98,6 +98,18 @@ void SyncChildrenSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChi
     childrenSize->SyncChildrenSizeOver();
 }
 
+void CallSetNativeMainSize(const JSRef<JSObject>& childrenSizeObj,
+    const JSRef<JSObject>& nativeMainSize)
+{
+    auto property = childrenSizeObj->GetProperty("setNativeMainSize");
+    if (property->IsFunction()) {
+        auto setnativeMainSizeFunc = JSRef<JSFunc>::Cast(property);
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>::Cast(nativeMainSize);
+        setnativeMainSizeFunc->Call(childrenSizeObj, 1, params);
+    }
+}
+
 void InitNativeMainSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChildrenMainSize> listChildrenMainSize,
     NG::FrameNode* node = nullptr)
 {
@@ -107,6 +119,9 @@ void InitNativeMainSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListC
     }
     auto nativeMainSizeObj = JSRef<JSObject>::Cast(nativeMainSize);
     JSListChildrenMainSize* jsChildrenMainSize = nativeMainSizeObj->Unwrap<JSListChildrenMainSize>();
+    if (jsChildrenMainSize == nullptr) {
+        return;
+    }
     auto frameNode = AceType::WeakClaim(node ? node : NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     jsChildrenMainSize->SetHost(frameNode);
 
@@ -146,13 +161,7 @@ void InitNativeMainSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListC
     };
     jsChildrenMainSize->SetOnDefaultSizeUpdate(updateSizeCallback);
 
-    auto property = childrenSizeObj->GetProperty("setNativeMainSize");
-    if (property->IsFunction()) {
-        auto setnativeMainSizeFunc = JSRef<JSFunc>::Cast(property);
-        JSRef<JSVal> params[1];
-        params[0] = JSRef<JSVal>::Cast(nativeMainSize);
-        setnativeMainSizeFunc->Call(childrenSizeObj, 1, params);
-    }
+    CallSetNativeMainSize(childrenSizeObj, nativeMainSize);
 }
 } // namespace
 
@@ -651,16 +660,7 @@ void JSList::SetSyncLoad(const JSCallbackInfo& args)
 void JSList::SetEditModeOptions(const JSCallbackInfo& info)
 {
     NG::EditModeOptions options;
-    if (info.Length() >= 1) {
-        auto value = info[0];
-        if (value->IsObject()) {
-            JSRef<JSObject> obj = JSRef<JSObject>::Cast(value);
-            auto gatherAnimation = obj->GetProperty("enableGatherSelectedItemsAnimation");
-            if (gatherAnimation->IsBoolean()) {
-                options.enableGatherSelectedItemsAnimation = gatherAnimation->ToBoolean();
-            }
-        }
-    }
+    JSScrollable::ParseEditModeOptions(info, options);
     ListModel::GetInstance()->SetEditModeOptions(options);
 }
 
@@ -1102,6 +1102,10 @@ void JSListScroller::Destructor(JSListScroller* scroller)
 
 void JSListScroller::GetItemRectInGroup(const JSCallbackInfo& args)
 {
+    JSListScroller* jsScroller = JSRef<JSObject>::Cast(args.This())->Unwrap<JSListScroller>();
+    if (jsScroller == nullptr) {
+        return;
+    }
     int32_t index = -1;
     int32_t indexInGroup = -1;
     // Parameter passed into function must be 2.
@@ -1112,7 +1116,8 @@ void JSListScroller::GetItemRectInGroup(const JSCallbackInfo& args)
     auto scrollController = GetController().Upgrade();
     if (scrollController) {
         ContainerScope scope(GetInstanceId());
-        auto rectObj = CreateRectangle(scrollController->GetItemRectInGroup(index, indexInGroup));
+        JSRef<JSObject> rectObj = JSRef<JSObject>::Make(
+            jsScroller->CreateRectangle(scrollController->GetItemRectInGroup(index, indexInGroup)));
         JSRef<JSVal> rect = JSRef<JSObject>::Cast(rectObj);
         args.SetReturnValue(rect);
     } else {

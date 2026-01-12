@@ -86,6 +86,7 @@ struct AxisEvent final : public PointerEvent {
     }
 
     AxisEvent CreateScaleEvent(float scale) const;
+    AxisEvent CloneWith(float scale) const;
     Offset GetOffset() const;
     Offset GetScreenOffset() const;
     Offset GetGlobalDisplayOffset() const;

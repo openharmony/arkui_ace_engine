@@ -106,6 +106,7 @@ bool SystemProperties::syncLoadEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
 bool SystemProperties::debugThreadSafeNodeEnable_ = false;
 bool SystemProperties::prebuildInMultiFrameEnabled_ = false;
+std::once_flag SystemProperties::getSysPropertiesFlag_;
 
 bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;
@@ -424,5 +425,9 @@ float SystemProperties::GetScrollCoefficients()
 bool SystemProperties::GetTransformEnabled()
 {
     return MockSystemProperties::g_isCompatibleInputTransEnabled;
+}
+
+void SystemProperties::ReadSystemParametersCallOnce()
+{
 }
 } // namespace OHOS::Ace

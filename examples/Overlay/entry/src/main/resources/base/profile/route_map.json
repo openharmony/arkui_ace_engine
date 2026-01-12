@@ -377,6 +377,31 @@
       "buildFunction": "PopupAccessibilityModelBuilder"
     },
     {
+      "name": "PopupBorderTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupBorderTest.ets",
+      "buildFunction": "PopupBorderBuilder"
+    },
+    {
+      "name": "PopupDismiss01Test",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupDismiss01Test.ets",
+      "buildFunction": "PopupDismiss01Builder"
+    },
+    {
+      "name": "PopupListTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/popupListTest.ets",
+      "buildFunction": "PopupListBuilder"
+    },
+    {
+      "name": "TipsAvoidTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/tipsAvoidTest.ets",
+      "buildFunction": "TipsAvoidBuilder"
+    },
+    {
+      "name": "TipsStyleTest",
+      "pageSourceFile": "src/main/ets/pages/components/popup/tipsStyleTest.ets",
+      "buildFunction": "TipsStyleBuilder"
+    },
+    {
       "name": "MenuComplex",
       "pageSourceFile": "src/main/ets/pages/components/menu/MenuComplexTest.ets",
       "buildFunction": "MenuComplexBuilder"

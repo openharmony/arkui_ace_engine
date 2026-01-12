@@ -452,6 +452,8 @@ public:
     std::string GetCallbackName(const std::unique_ptr<GestureEventFunc>& callback);
 
     void ResetResponseLinkRecognizer();
+
+    virtual void CheckCurrentFingers() const = 0;
 protected:
     void Adjudicate(const RefPtr<NGGestureRecognizer>& recognizer, GestureDisposal disposal)
     {
@@ -494,6 +496,7 @@ protected:
     {
         return false;
     }
+    virtual std::string GetGestureInfoString() const;
 
     RefereeState refereeState_ = RefereeState::READY;
 

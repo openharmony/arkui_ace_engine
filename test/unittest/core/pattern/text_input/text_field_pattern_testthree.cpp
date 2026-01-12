@@ -574,6 +574,12 @@ HWTEST_F(TextFieldPatternTestThree, HandleAIWrite003, TestSize.Level0)
 #else
         pattern_->connection_= true;
 #endif
+    /**
+     *
+     *  @tc.steps: step2.
+     *  pattern call camerainput
+     *
+     */
     pattern_->HandleOnCameraInput();
     EXPECT_EQ(pattern_->selectController_->GetFirstHandleInfo().index, 26);
     EXPECT_EQ(pattern_->selectController_->GetSecondHandleInfo().index, 26);

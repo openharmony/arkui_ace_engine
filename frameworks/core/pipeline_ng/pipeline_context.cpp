@@ -838,7 +838,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         return;
     }
     SetVsyncTime(nanoTimestamp);
-    if (contentChangeMgr_) {
+    // First vsync may come before rootNode_ is created.
+    if (contentChangeMgr_ && rootNode_) {
         contentChangeMgr_->OnVsyncStart();
     }
     ACE_SCOPED_TRACE_COMMERCIAL("UIVsyncTask[timestamp:%" PRIu64 "][vsyncID:%" PRIu64 "][instanceID:%d]",
@@ -996,6 +997,7 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
     needRenderNodeByUniqueId_.clear();
     taskScheduler_->FlushAfterRenderTask();
     window_->FlushLayoutSize(width_, height_);
+    window_->FlushVsync();
     if (IsFocusWindowIdSetted()) {
         FireAllUIExtensionEvents();
     }
@@ -1017,7 +1019,8 @@ void PipelineContext::FlushVsync(uint64_t nanoTimestamp, uint64_t frameCount)
         RequestFrame();
     }
     FireFrameMetricsCallBack(frameMetrics);
-    if (contentChangeMgr_) {
+    // First vsync may come before rootNode_ is created.
+    if (contentChangeMgr_ && rootNode_) {
         contentChangeMgr_->OnVsyncEnd(rootNode_->GetRectWithRender());
     }
 }
@@ -2783,8 +2786,21 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 
     auto manager = DynamicCast<TextFieldManagerNG>(PipelineBase::GetTextFieldManager());
     CHECK_NULL_VOID(manager);
+    auto container = Container::GetContainer(instanceId_);
+    auto rotation = -1;
+    if (container) {
+        auto displayInfo = container->GetDisplayInfo();
+        if (displayInfo) {
+            rotation = static_cast<int32_t>(displayInfo->GetRotation());
+        }
+    }
+    auto screenInfoNotChange = !manager->GetLastRootHeight().has_value() ||
+        !manager->GetLastAvoidOrientation().has_value() || rotation == -1 ||
+        (rotation == manager->GetLastAvoidOrientation().value_or(-1) &&
+        NearEqual(rootHeight_, manager->GetLastRootHeight().value_or(-1.0)));
     if (!forceChange && NearEqual(keyboardHeight, safeAreaManager_->GetKeyboardInset().Length()) &&
-        prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern()) {
+        prevKeyboardAvoidMode_ == safeAreaManager_->GetKeyBoardAvoidMode() && manager->PrevHasTextFieldPattern() &&
+        screenInfoNotChange) {
         safeAreaManager_->UpdateKeyboardSafeArea(keyboardHeight);
         TAG_LOGD(
             AceLogTag::ACE_KEYBOARD, "KeyboardHeight as same as last time, don't need to calculate keyboardOffset");
@@ -2806,6 +2822,8 @@ void PipelineContext::OnVirtualKeyboardHeightChange(float keyboardHeight, double
 
     manager->UpdatePrevHasTextFieldPattern();
     prevKeyboardAvoidMode_ = safeAreaManager_->GetKeyBoardAvoidMode();
+    manager->SetLastRootHeight(rootHeight_);
+    manager->SetLastAvoidOrientation(rotation);
 
     ACE_FUNCTION_TRACE();
 #ifdef ENABLE_ROSEN_BACKEND
@@ -3992,6 +4010,7 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-visibleInfoHasTopNavNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
+        GetAppInfo(root);
         RefPtr<NG::FrameNode> topNavNode;
         rootNode_->FindTopNavDestination(topNavNode);
         if (topNavNode != nullptr) {
@@ -4002,7 +4021,6 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
             }
             auto childrenJson = root->GetValue("$children");
             auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
-            GetAppInfo(topNavDestinationJson);
             topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, { true, true, true });
             childrenJson->Put(topNavDestinationJson);
         }
@@ -5081,9 +5099,10 @@ void PipelineContext::OnHide()
     RequestFrame();
     OnVirtualKeyboardAreaChange(Rect());
     FlushWindowStateChangedCallback(false);
-    AccessibilityEvent event;
-    event.type = AccessibilityEventType::PAGE_CLOSE;
-    SendEventToAccessibility(event);
+    auto rootNode = GetRootElement();
+    if (rootNode && !IsFormRenderExceptDynamicComponent()) {
+        rootNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE);
+    }
     memoryMgr_->PostMemRecycleTask();
 }
 
@@ -6664,54 +6683,41 @@ void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(
         }
         auto childrenJson = root->GetValue("$children");
         auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
-        GetAppInfo(topNavDestinationJson);
         topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, config);
         childrenJson->Put(topNavDestinationJson);
     } else {
-        GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, config);
     }
 }
 
 void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
 {
-    constexpr int32_t SEARCH_ELEMENT_TIMEOUT_TIME = 1500;
     CHECK_NULL_VOID(taskExecutor_);
-    auto weak = WeakClaim(this);
-    taskExecutor_->PostSyncTaskTimeout(
-        [weak, onlyNeedVisible, config]() mutable {
-            auto pipelineContext = weak.Upgrade();
-            CHECK_NULL_VOID(pipelineContext);
-            auto root = JsonUtil::CreateSharedPtrJson(true);
-            auto cb = [root, onlyNeedVisible]() {
-                auto json = root->ToString();
-                json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
-                auto res = JsonUtil::Create(true);
-                res->Put("0", json.c_str());
-                UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
-                if (!onlyNeedVisible) {
-                    UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
-                }
-            };
-            ACE_SCOPED_TRACE("GetInspectorTree[onlyNeedVisible:%d][config.interactionInfo:%d]"
-                             "[config.accessibilityInfo:%d][config.cacheNodes:%d][config.withWeb:%d]",
-                onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes, config.withWeb);
-            auto rootNode = pipelineContext->GetRootElement();
-            CHECK_NULL_VOID(rootNode);
-            auto taskExecutor = pipelineContext->GetTaskExecutor();
-            CHECK_NULL_VOID(taskExecutor);
-            if (onlyNeedVisible) {
-                RefPtr<NG::FrameNode> topNavNode = nullptr;
-                rootNode->FindTopNavDestination(topNavNode);
-                pipelineContext->DumpSimplifyTreeJsonFromTopNavNode(root, topNavNode, config);
-                taskExecutor->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
-            } else {
-                pipelineContext->GetAppInfo(root);
-                rootNode->DumpSimplifyTreeWithParamConfig(0, root, false, config);
-                taskExecutor->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetInspectorTree");
-            }
-        },
-        TaskExecutor::TaskType::UI, SEARCH_ELEMENT_TIMEOUT_TIME, "ArkUIGetInspectorTree");
+    CHECK_NULL_VOID(rootNode_);
+    auto root = JsonUtil::CreateSharedPtrJson(true);
+    GetAppInfo(root);
+    auto cb = [root, onlyNeedVisible]() {
+        auto json = root->ToString();
+        json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
+        auto res = JsonUtil::Create(true);
+        res->Put("0", json.c_str());
+        UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
+        if (!onlyNeedVisible) {
+            UiSessionManager::GetInstance()->WebTaskNumsChange(-1);
+        }
+    };
+    ACE_SCOPED_TRACE("GetInspectorTree[onlyNeedVisible:%d][config.interactionInfo:%d]"
+                        "[config.accessibilityInfo:%d][config.cacheNodes:%d][config.withWeb:%d]",
+        onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes, config.withWeb);
+    if (onlyNeedVisible) {
+        RefPtr<NG::FrameNode> topNavNode = nullptr;
+        rootNode_->FindTopNavDestination(topNavNode);
+        DumpSimplifyTreeJsonFromTopNavNode(root, topNavNode, config);
+        taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
+    } else {
+        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, config);
+        taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetInspectorTree");
+    }
 }
 
 void PipelineContext::GetHitTestInfos(InteractionParamConfig config)

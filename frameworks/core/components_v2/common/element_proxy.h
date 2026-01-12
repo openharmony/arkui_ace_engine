@@ -103,13 +103,13 @@ class ElementProxyHost : virtual public AceType {
     DECLARE_ACE_TYPE(ElementProxyHost, AceType);
 
 public:
-    size_t TotalCount() const;
+    ACE_FORCE_EXPORT size_t TotalCount() const;
 
-    void UpdateChildren(const std::list<RefPtr<Component>>& components);
-    virtual void UpdateIndex();
+    ACE_FORCE_EXPORT void UpdateChildren(const std::list<RefPtr<Component>>& components);
+    ACE_FORCE_EXPORT virtual void UpdateIndex();
 
     RefPtr<Component> GetComponentByIndex(size_t index);
-    RefPtr<Element> GetElementByIndex(size_t index);
+    ACE_FORCE_EXPORT RefPtr<Element> GetElementByIndex(size_t index);
     void ReleaseElementByIndex(size_t index);
     void ReleaseElementById(const ComposeId& id);
     void AddComposeId(const ComposeId& id);
@@ -125,7 +125,7 @@ public:
     LayoutInspector::SupportInspector();
 #endif
     }
-    virtual size_t GetReloadedCheckNum();
+    ACE_FORCE_EXPORT virtual size_t GetReloadedCheckNum();
 
 private:
     RefPtr<ElementProxy> proxy_;

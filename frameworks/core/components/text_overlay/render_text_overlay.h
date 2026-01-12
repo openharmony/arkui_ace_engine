@@ -22,7 +22,7 @@
 #include "core/components/clip/render_clip.h"
 #include "core/components/select_popup/render_select_popup.h"
 #include "core/components/slider/render_slider.h"
-#include "core/components/text_field/render_text_field.h"
+#include "compatible/components/text_field/render_text_field.h"
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/gestures/drag_recognizer.h"
@@ -58,7 +58,7 @@ public:
     bool TouchTest(const Point& globalPoint, const Point& parentLocalPoint, const TouchRestrict& touchRestrict,
         TouchTestResult& result) override;
 
-    void PopOverlay();
+    ACE_FORCE_EXPORT void PopOverlay();
     void OnFocusChange(RenderStatus renderStatus);
     void SetOnRebuild(const std::function<void(bool, bool, bool, bool, bool)>& onRebuild);
     void SetStartAnimationCallback(const StartAnimationCallback& value);

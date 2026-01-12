@@ -94,7 +94,7 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
     bool isSubWindow = container->IsHostSubWindow();
     bool isDialogWindow = container->IsHostDialogWindow();
     bool isMainWindow = container->IsHostMainWindow();
-    if (!(isUECWindow || isSubWindow || isDialogWindow || isMainWindow)) {
+    if (!(isUECWindow || isSubWindow || isDialogWindow || isMainWindow) || !pipelineContext->GetOnFocus()) {
         return;
     }
     detectCount--;

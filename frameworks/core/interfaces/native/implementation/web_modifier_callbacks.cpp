@@ -462,6 +462,24 @@ void OnTextSelectionChange(const CallbackHelper<TextSelectionChangeCallback>& ar
     arkCallback.InvokeSync(selectionText);
 }
 
+void OnFirstScreenPaint(const CallbackHelper<OnFirstScreenPaintCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    const auto refNode = weakNode.Upgrade();
+    CHECK_NULL_VOID(refNode);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<FirstScreenPaintEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_FirstScreenPaint parameter;
+    parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
+    parameter.navigationStartTime = Converter::ArkValue<Ark_Int64>(eventInfo->GetNavigationStartTime());
+    parameter.firstScreenPaintTime = Converter::ArkValue<Ark_Int64>(eventInfo->GetFirstScreenPaintTime());
+    arkCallback.InvokeSync(parameter);
+}
+
 void OnResourceLoad(const CallbackHelper<Callback_OnResourceLoadEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
 {

@@ -122,6 +122,7 @@ public:
 
     void OnAttachToMainTree(bool recursive) override;
     void OnDetachFromMainTree(bool recursive, PipelineContext* context) override;
+    bool IsChildEmpty() const;
 
 private:
     RefPtr<UINode> backButton_;

@@ -190,6 +190,7 @@ void AssignArkValue(Ark_RichEditorChangeValue& dst, const RichEditorChangeValue&
         src.GetRichEditorReplacedImageSpans(), ctx);
     dst.replacedSymbolSpans = Converter::ArkValue<Array_RichEditorTextSpanResult>(
         src.GetRichEditorReplacedSymbolSpans(), ctx);
+    dst.changeReason = Converter::ArkValue<Opt_TextChangeReason>(src.GetChangeReason());
 }
 
 PlaceholderOptions GetThemePlaceholderOptions()
@@ -495,6 +496,18 @@ void SetDataDetectorConfigImpl(Ark_NativePointer node,
     }
     RichEditorModelNG::SetTextDetectConfig(frameNode, *convValue);
 }
+void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    if (!convValue) {
+        RichEditorModelNG::ResetSelectDetectEnable(frameNode);
+        return;
+    }
+    RichEditorModelNG::SetSelectDetectEnable(frameNode, *convValue);
+}
 void SetCaretColorImpl(Ark_NativePointer node,
                        const Opt_ResourceColor* value)
 {
@@ -647,7 +660,7 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
-        RichEditorModelStatic::SetSelectionMenuOptions(frameNode, nullptr, nullptr);
+        RichEditorModelNG::SetSelectionMenuOptions(frameNode, nullptr, nullptr, nullptr);
         return;
     }
     auto createMenuCallback = Converter::GetOpt(optValue->onCreateMenu);
@@ -676,8 +689,21 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
             return Converter::Convert<bool>(arkResult);
         };
     }
-    RichEditorModelStatic::SetSelectionMenuOptions(
-        frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClickCallback));
+    auto prepareMenuCallback = Converter::GetOpt(optValue->onPrepareMenu);
+    std::function<std::vector<NG::MenuOptionsParam>(const std::vector<NG::MenuItemParam>&)> onPrepareMenuCallback =
+        nullptr;
+    if (prepareMenuCallback) {
+        onPrepareMenuCallback =
+            [arkPrepareMenu = CallbackHelper(*prepareMenuCallback)](
+                const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+            auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
+            auto result = arkPrepareMenu.InvokeWithOptConvertResult<std::vector<NG::MenuOptionsParam>,
+                Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
+            return result.value_or(std::vector<NG::MenuOptionsParam>());
+        };
+    }
+    RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback),
+        std::move(onMenuItemClickCallback), std::move(onPrepareMenuCallback));
 }
 void SetEnableKeyboardOnFocusImpl(Ark_NativePointer node,
                                   const Opt_Boolean* value)
@@ -730,6 +756,19 @@ void SetMaxLinesImpl(Ark_NativePointer node,
     auto maxLineValue = isValid ? Converter::OptConvert<uint32_t>(*value).value_or(UINT_MAX) : UINT_MAX;
     RichEditorModelStatic::SetMaxLines(frameNode, maxLineValue);
 }
+void SetEnableAutoSpacingImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    if (value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        RichEditorModelNG::SetEnableAutoSpacing(frameNode, false);
+        return;
+    }
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    RichEditorModelNG::SetEnableAutoSpacing(frameNode, convValue.value());
+}
 void SetKeyboardAppearanceImpl(Ark_NativePointer node,
                                const Opt_KeyboardAppearance* value)
 {
@@ -745,6 +784,24 @@ void SetStopBackPressImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     RichEditorModelNG::SetStopBackPress(frameNode, convValue.value_or(true));
+}
+void SetUndoStyleImpl(Ark_NativePointer node,
+                      const Opt_UndoStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+    auto convValue = Converter::OptConvertPtr<UndoStyle>(value);
+    bool supportStyledUndo = convValue.value_or(UndoStyle::CLEAR_STYLE) == UndoStyle::KEEP_STYLE;
+    RichEditorModelNG::SetSupportStyledUndo(frameNode, supportStyledUndo);
+}
+void SetScrollBarColorImpl(Ark_NativePointer node,
+                           const Opt_ColorMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<Color>(value);
+    RichEditorModelNG::SetScrollBarColor(frameNode, convValue.value_or(Color::GRAY));
 }
 void SetSingleLineImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
@@ -888,6 +945,7 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
         RichEditorAttributeModifier::SetEnableDataDetectorImpl,
         RichEditorAttributeModifier::SetEnablePreviewTextImpl,
         RichEditorAttributeModifier::SetDataDetectorConfigImpl,
+        RichEditorAttributeModifier::SetEnableSelectedDataDetectorImpl,
         RichEditorAttributeModifier::SetCaretColorImpl,
         RichEditorAttributeModifier::SetSelectedBackgroundColorImpl,
         RichEditorAttributeModifier::SetOnEditingChangeImpl,
@@ -903,8 +961,11 @@ const GENERATED_ArkUIRichEditorModifier* GetRichEditorModifier()
         RichEditorAttributeModifier::SetBarStateImpl,
         RichEditorAttributeModifier::SetMaxLengthImpl,
         RichEditorAttributeModifier::SetMaxLinesImpl,
+        RichEditorAttributeModifier::SetEnableAutoSpacingImpl,
         RichEditorAttributeModifier::SetKeyboardAppearanceImpl,
         RichEditorAttributeModifier::SetStopBackPressImpl,
+        RichEditorAttributeModifier::SetScrollBarColorImpl,
+        RichEditorAttributeModifier::SetUndoStyleImpl,
         RichEditorAttributeModifier::SetSingleLineImpl,
         RichEditorAttributeModifier::SetCompressLeadingPunctuationImpl,
         RichEditorAttributeModifier::SetIncludeFontPaddingImpl,

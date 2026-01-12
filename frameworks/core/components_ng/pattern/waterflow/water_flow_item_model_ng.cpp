@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,21 +18,31 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_node.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_pattern.h"
+#include "core/components_ng/pattern/waterflow/water_flow_constants.h"
 
 namespace OHOS::Ace::NG {
 void WaterFlowItemModelNG::Create()
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::FLOW_ITEM_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", FLOW_ITEM_ETS_TAG, nodeId);
     auto frameNode = WaterFlowItemNode::GetOrCreateFlowItem(
-        V2::FLOW_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WaterFlowItemPattern>(); });
+        FLOW_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WaterFlowItemPattern>(); });
     stack->Push(frameNode);
 }
 
 RefPtr<FrameNode> WaterFlowItemModelNG::CreateFrameNode(int32_t nodeId)
 {
-    return WaterFlowItemNode::CreateFlowItem(
-        V2::FLOW_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<WaterFlowItemPattern>());
+    return WaterFlowItemNode::CreateFlowItem(FLOW_ITEM_ETS_TAG, nodeId, AceType::MakeRefPtr<WaterFlowItemPattern>());
+}
+
+void WaterFlowItemModelNG::CreateFrameNode()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", FLOW_ITEM_ETS_TAG, nodeId);
+    auto frameNode = WaterFlowItemNode::GetOrCreateFlowItem(
+        FLOW_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WaterFlowItemPattern>(); });
+    stack->Push(frameNode);
 }
 } // namespace OHOS::Ace::NG

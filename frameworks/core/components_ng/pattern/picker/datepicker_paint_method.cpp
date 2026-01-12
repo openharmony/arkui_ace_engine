@@ -18,7 +18,7 @@
 #include "base/geometry/rect.h"
 #include "base/utils/utils.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
 #include "core/components_ng/pattern/picker/datepicker_row_layout_property.h"
 #include "core/pipeline_ng/pipeline_context.h"

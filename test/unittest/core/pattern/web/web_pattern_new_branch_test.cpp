@@ -27,7 +27,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
 #include "core/components_ng/pattern/web/web_pattern.h"
-#include "frameworks/core/components_v2/inspector/textinput_composed_element.h"
+#include "frameworks/compatible/components/input/textinput_composed_element.h"
 #undef private
 #undef protected
 #include "test/mock/core/common/mock_theme_manager.h"

@@ -49,6 +49,10 @@ constexpr float DEFAULT_DIVIDER_WIDTH = 1.0f;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_TOP = 48.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_WIDTH = 24.0_vp;
 constexpr Dimension DEFAULT_CONTROL_BUTTON_HEIGHT = 24.0_vp;
+constexpr Dimension DEFAULT_DIVIDER_STROKE_WIDTH = 1.0_vp;
+constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
+constexpr Dimension DEFAULT_DIVIDER_END_MARGIN = 0.0_vp;
+constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 
 std::optional<bool> ProcessBindableShowSideBar(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
 {
@@ -83,6 +87,33 @@ std::optional<Dimension> ProcessBindableSideBarWidth(FrameNode* frameNode, const
         },
         [] {});
     return result;
+}
+
+void ProcessDividerProperties(FrameNode* frameNode, const DividerOptions& dividerOpt)
+{
+    Dimension strokeWidth = DEFAULT_DIVIDER_STROKE_WIDTH;
+    if (dividerOpt.strokeWidth.has_value() && !dividerOpt.strokeWidth->IsNegative()) {
+        strokeWidth = dividerOpt.strokeWidth.value();
+    }
+    SideBarContainerModelStatic::SetDividerStrokeWidth(frameNode, strokeWidth);
+
+    Color color = DEFAULT_DIVIDER_COLOR;
+    if (dividerOpt.color.has_value()) {
+        color = dividerOpt.color.value();
+    }
+    SideBarContainerModelStatic::SetDividerColor(frameNode, color);
+
+    Dimension startMargin = DEFAULT_DIVIDER_START_MARGIN;
+    if (dividerOpt.startMargin.has_value() && !dividerOpt.startMargin->IsNegative()) {
+        startMargin = dividerOpt.startMargin.value();
+    }
+    SideBarContainerModelStatic::SetDividerStartMargin(frameNode, startMargin);
+
+    Dimension endMargin = DEFAULT_DIVIDER_END_MARGIN;
+    if (dividerOpt.endMargin.has_value() && !dividerOpt.endMargin->IsNegative()) {
+        endMargin = dividerOpt.endMargin.value();
+    }
+    SideBarContainerModelStatic::SetDividerEndMargin(frameNode, endMargin);
 }
 } // namespace
 } // namespace OHOS::Ace::NG
@@ -342,19 +373,7 @@ void SetDividerImpl(Ark_NativePointer node,
         return;
     }
     auto dividerOpt = Converter::Convert<DividerOptions>(value->value);
-        if (dividerOpt.strokeWidth.has_value() && dividerOpt.strokeWidth->IsNegative()) {
-            dividerOpt.strokeWidth->SetValue(DEFAULT_DIVIDER_WIDTH);
-        }
-        SideBarContainerModelStatic::SetDividerStrokeWidth(frameNode, dividerOpt.strokeWidth);
-        if (dividerOpt.color.has_value()) {
-            SideBarContainerModelStatic::SetDividerColor(frameNode, dividerOpt.color.value());
-        }
-        if (dividerOpt.startMargin.has_value()) {
-            SideBarContainerModelStatic::SetDividerStartMargin(frameNode, dividerOpt.startMargin.value());
-        }
-        if (dividerOpt.endMargin.has_value()) {
-            SideBarContainerModelStatic::SetDividerEndMargin(frameNode, dividerOpt.endMargin.value());
-        }
+    ProcessDividerProperties(frameNode, dividerOpt);
 }
 void SetMinContentWidthImpl(Ark_NativePointer node,
                             const Opt_Dimension* value)

@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-type KNode = number | null;
 type ArkComponent = any;
 type Resource = any;
-type ResourceColor = any;
+type ResourceColor = Color | number | string | Resource;
 type ArkBackground = any;
 type ArkBindMenu = any;
+type ArkBorder = any;
 type ArkSearchAutoCapitalization = any;
 type ArkTextAreaAutoCapitalization = any;
 type ArkTextInputAutoCapitalization = any;
@@ -33,6 +33,8 @@ type BorderRadiuses = any;
 type Position = any;
 type Edges = any;
 type LocalizedEdges = any;
+type GradientDirection = any;
+type ArkOverlay = any;
 type EdgeColors = any;
 type LocalizedEdgeColors = any;
 type Matrix4Transit = any;
@@ -44,3 +46,43 @@ type ArkBlurOptions = any;
 type InvertOptions = any;
 declare interface PageInfo {}
 declare interface NavigationInfo {}
+
+type KNode = number | null;
+// interface_sdk-js/api/@internal/component/ets/enums.d.ts
+declare enum Color {
+  White = 0,
+  Black = 1,
+  Blue = 2,
+  Brown = 3,
+  Gray = 4,
+  Green = 5,
+  Grey = 6,
+  Orange = 7,
+  Pink = 8,
+  Red = 9,
+  Yellow = 10,
+  Transparent = 11
+}
+
+//interface_sdk-js/api/@internal/component/ets/common.d.ts
+declare enum RepeatMode {
+  Repeat,
+  Stretch,
+  Round,
+  Space,
+}
+//interface_sdk-js/api/@internal/component/ets/common.d.ts
+declare interface LinearGradient {
+  angle?: number | string;
+  direction?: GradientDirection;
+  colors: Array<[ResourceColor, number]>;
+  repeating?: boolean;
+}
+declare interface BorderImageOption {
+  slice?: Length | EdgeWidths | LocalizedEdgeWidths,
+  repeat?: RepeatMode,
+  source?: string | Resource | LinearGradient,
+  width?: Length | EdgeWidths | LocalizedEdgeWidths,
+  outset?: Length | EdgeWidths | LocalizedEdgeWidths,
+  fill?: boolean;
+}

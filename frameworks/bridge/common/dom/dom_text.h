@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::Framework {
 
-class DOMText : public DOMNode {
+class ACE_FORCE_EXPORT DOMText : public DOMNode {
     DECLARE_ACE_TYPE(DOMText, DOMNode);
 
 public:

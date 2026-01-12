@@ -106,5 +106,25 @@ void ScrollBarModelStatic::UnSetNestedScroll(RefPtr<FrameNode>& frameNode, RefPt
         pattern->SearchAndUnsetParentNestedScroll(frameNode);
     }
 }
+
+void ScrollBarModelStatic::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& color)
+{
+    if (color.has_value()) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ScrollBarPaintProperty, ScrollBarColor, color.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY_WITH_FLAG(
+            ScrollBarPaintProperty, ScrollBarColor, PROPERTY_UPDATE_RENDER, frameNode);
+        auto pipeline = frameNode->GetContext();
+        CHECK_NULL_VOID(pipeline);
+        auto scrollBarTheme = pipeline->GetTheme<ScrollBarTheme>();
+        CHECK_NULL_VOID(scrollBarTheme);
+        Color foregroundColor = scrollBarTheme->GetForegroundColor();
+        auto pattern = frameNode->GetPattern<ScrollBarPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto scrollBar = pattern->GetScrollBar();
+        CHECK_NULL_VOID(scrollBar);
+        scrollBar->SetForegroundColor(foregroundColor);
+    }
+}
 } // namespace OHOS::Ace::NG
  

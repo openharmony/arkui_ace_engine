@@ -23,7 +23,7 @@ namespace OHOS::Ace {
 /**
  * IconTheme defines base icon. using IconTheme::Builder.
  */
-class IconTheme : public virtual Theme {
+class ACE_FORCE_EXPORT IconTheme : public virtual Theme {
     DECLARE_ACE_TYPE(IconTheme, Theme);
 
 public:

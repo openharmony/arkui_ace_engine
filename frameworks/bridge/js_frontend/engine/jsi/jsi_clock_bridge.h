@@ -18,7 +18,8 @@
 
 #include "jsi_engine.h"
 
-#include "frameworks/bridge/common/dom/dom_clock.h"
+#include "base/memory/ace_type.h"
+#include "frameworks/bridge/common/dom/dom_configs.h"
 
 namespace OHOS::Ace::Framework {
 

@@ -20,7 +20,8 @@
 #include "bridge/declarative_frontend/jsview/js_image.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_video_controller.h"
-#include "bridge/declarative_frontend/jsview/models/video_model_impl.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/pattern/video/video_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
 #ifdef SUPPORT_JSSTACK
@@ -38,8 +39,13 @@ VideoModel* VideoModel::GetInstance()
         static NG::VideoModelNG instance;
         return &instance;
     } else {
-        static Framework::VideoModelImpl instance;
-        return &instance;
+        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("video");
+        if (loader == nullptr) {
+            LOGF("Cannot find video loader");
+            abort();
+        }
+        static VideoModel* instance = loader ? reinterpret_cast<VideoModel*>(loader->CreateModel()) : nullptr;
+        return instance;
     }
 #endif
 }
@@ -274,7 +280,7 @@ void JSVideo::JsOnStop(const JSCallbackInfo& info)
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onStop = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
-                        const std::string& param) {
+                      const std::string& param) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Video.onStop");
         PipelineContext::SetCallBackNode(node);

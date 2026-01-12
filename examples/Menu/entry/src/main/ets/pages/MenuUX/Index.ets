@@ -196,6 +196,15 @@ struct Index {
                 url: 'pages/MenuUX/popupEnableHoverScale',
               })
             })
+          Button('menuKeyboardAvoid')
+            .margin(10)
+            .height(60)
+            .width(300)
+            .onClick(() => {
+              router.pushUrl({
+                url: 'pages/MenuUX/menuKeyboardAvoid',
+              })
+            })
         }
         .width('100%')
       }

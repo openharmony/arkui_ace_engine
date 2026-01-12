@@ -32,12 +32,16 @@ int32_t CheckNodeOnValidThread(ArkUINodeHandle node)
     return static_cast<int32_t>(MultiThreadBuildManager::CheckNodeOnValidThread(currentNode));
 }
 
-void ExecuteAfterAttachTasks(ArkUINodeHandle node)
+void SetNeedMarkNodeTreeFree(ArkUI_Bool needMarkNodeTreeFree)
+{
+    MultiThreadBuildManager::SetNeedMarkNodeTreeFree(needMarkNodeTreeFree);
+}
+
+void MarkNodeTreeNotFree(ArkUINodeHandle node)
 {
     UINode* currentNode = reinterpret_cast<UINode*>(node);
     if (currentNode && currentNode->IsThreadSafeNode()) {
-        currentNode->SetIsFree(false);
-        currentNode->ExecuteAfterAttachMainTreeTasks();
+        currentNode->MarkNodeTreeNotFree();
     }
 }
 
@@ -110,8 +114,9 @@ const ArkUIMultiThreadManagerAPI* GetMultiThreadManagerAPI()
         .postAsyncUITask = PostAsyncUITask,
         .postUITask = PostUITask,
         .postUITaskAndWait = PostUITaskAndWait,
-        .executeAfterAttachTasks = ExecuteAfterAttachTasks,
+        .markNodeTreeNotFree = MarkNodeTreeNotFree,
         .debugThreadSafeNodeEnabled = DebugThreadSafeNodeEnabled,
+        .setNeedMarkNodeTreeFree = SetNeedMarkNodeTreeFree,
     };
     return &multiThreadImpl;
 }

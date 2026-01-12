@@ -18,7 +18,7 @@
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { ModifierState } from './CommonModifier'
-import { AttributeModifier, extractors } from "#handwritten"
+import { AttributeModifier } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkSearchPeer, IconOptions, CancelButtonOptions, CancelButtonSymbolOptions, SearchSubmitCallback, SearchType, SearchAttribute, SearchButtonOptions } from "./component/search"
@@ -1811,6 +1811,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1822,6 +1823,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._searchIcon_0_flag = AttributeUpdaterFlag.UPDATE
             this._searchIcon_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._searchIcon_0_flag = AttributeUpdaterFlag.SKIP
@@ -1833,6 +1835,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._cancelButton_0_flag = AttributeUpdaterFlag.UPDATE
             this._cancelButton_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._cancelButton_0_flag = AttributeUpdaterFlag.SKIP
@@ -1844,6 +1847,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._textIndent_0_flag = AttributeUpdaterFlag.UPDATE
             this._textIndent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textIndent_0_flag = AttributeUpdaterFlag.SKIP
@@ -1855,6 +1859,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._onEditChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onEditChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onEditChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1866,6 +1871,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedBackgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1877,6 +1883,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._caretStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._caretStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._caretStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -1888,6 +1895,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._placeholderColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._placeholderColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._placeholderColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1899,6 +1907,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._placeholderFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._placeholderFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._placeholderFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -1910,6 +1919,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._textFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._textFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -1921,6 +1931,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._enterKeyType_0_flag = AttributeUpdaterFlag.UPDATE
             this._enterKeyType_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enterKeyType_0_flag = AttributeUpdaterFlag.SKIP
@@ -1932,6 +1943,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._onSubmit_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSubmit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSubmit_0_flag = AttributeUpdaterFlag.SKIP
@@ -1943,6 +1955,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1954,6 +1967,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onTextSelectionChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onTextSelectionChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1965,6 +1979,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._onContentScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onContentScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onContentScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1976,6 +1991,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._onCopy_0_flag = AttributeUpdaterFlag.UPDATE
             this._onCopy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onCopy_0_flag = AttributeUpdaterFlag.SKIP
@@ -1987,6 +2003,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._onCut_0_flag = AttributeUpdaterFlag.UPDATE
             this._onCut_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onCut_0_flag = AttributeUpdaterFlag.SKIP
@@ -1998,6 +2015,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._onPaste_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPaste_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPaste_0_flag = AttributeUpdaterFlag.SKIP
@@ -2009,6 +2027,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._copyOption_0_flag = AttributeUpdaterFlag.UPDATE
             this._copyOption_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._copyOption_0_flag = AttributeUpdaterFlag.SKIP
@@ -2020,6 +2039,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._maxLength_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxLength_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxLength_0_flag = AttributeUpdaterFlag.SKIP
@@ -2031,6 +2051,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._textAlign_0_flag = AttributeUpdaterFlag.UPDATE
             this._textAlign_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textAlign_0_flag = AttributeUpdaterFlag.SKIP
@@ -2042,6 +2063,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._enableKeyboardOnFocus_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableKeyboardOnFocus_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableKeyboardOnFocus_0_flag = AttributeUpdaterFlag.SKIP
@@ -2053,6 +2075,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._selectionMenuHidden_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectionMenuHidden_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectionMenuHidden_0_flag = AttributeUpdaterFlag.SKIP
@@ -2064,6 +2087,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._minFontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minFontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -2075,6 +2099,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._maxFontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxFontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxFontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -2086,6 +2111,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
             this._minFontScale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.SKIP
@@ -2097,6 +2123,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxFontScale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.SKIP
@@ -2108,6 +2135,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._decoration_0_flag = AttributeUpdaterFlag.UPDATE
             this._decoration_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._decoration_0_flag = AttributeUpdaterFlag.SKIP
@@ -2119,6 +2147,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.UPDATE
             this._letterSpacing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._letterSpacing_0_flag = AttributeUpdaterFlag.SKIP
@@ -2130,6 +2159,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._lineHeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._lineHeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._lineHeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -2141,6 +2171,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._type_0_flag = AttributeUpdaterFlag.UPDATE
             this._type_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._type_0_flag = AttributeUpdaterFlag.SKIP
@@ -2152,6 +2183,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._fontFeature_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontFeature_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontFeature_0_flag = AttributeUpdaterFlag.SKIP
@@ -2163,6 +2195,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._onWillInsert_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillInsert_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillInsert_0_flag = AttributeUpdaterFlag.SKIP
@@ -2174,6 +2207,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._onDidInsert_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidInsert_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidInsert_0_flag = AttributeUpdaterFlag.SKIP
@@ -2185,6 +2219,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._onWillDelete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillDelete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillDelete_0_flag = AttributeUpdaterFlag.SKIP
@@ -2196,6 +2231,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._onDidDelete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidDelete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidDelete_0_flag = AttributeUpdaterFlag.SKIP
@@ -2207,6 +2243,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._editMenuOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._editMenuOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._editMenuOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -2218,6 +2255,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._enablePreviewText_0_flag = AttributeUpdaterFlag.UPDATE
             this._enablePreviewText_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enablePreviewText_0_flag = AttributeUpdaterFlag.SKIP
@@ -2229,6 +2267,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableHapticFeedback_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
@@ -2240,6 +2279,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._autoCapitalizationMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._autoCapitalizationMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._autoCapitalizationMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -2251,6 +2291,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._halfLeading_0_flag = AttributeUpdaterFlag.UPDATE
             this._halfLeading_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._halfLeading_0_flag = AttributeUpdaterFlag.SKIP
@@ -2262,6 +2303,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._stopBackPress_0_flag = AttributeUpdaterFlag.UPDATE
             this._stopBackPress_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stopBackPress_0_flag = AttributeUpdaterFlag.SKIP
@@ -2273,6 +2315,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._onWillChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -2284,6 +2327,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._keyboardAppearance_0_flag = AttributeUpdaterFlag.UPDATE
             this._keyboardAppearance_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._keyboardAppearance_0_flag = AttributeUpdaterFlag.SKIP
@@ -2295,6 +2339,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._dividerColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._dividerColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._dividerColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -2306,6 +2351,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.UPDATE
             this._compressLeadingPunctuation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._compressLeadingPunctuation_0_flag = AttributeUpdaterFlag.SKIP
@@ -2317,6 +2363,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._includeFontPadding_0_flag = AttributeUpdaterFlag.UPDATE
             this._includeFontPadding_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._includeFontPadding_0_flag = AttributeUpdaterFlag.SKIP
@@ -2328,6 +2375,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.UPDATE
             this._fallbackLineSpacing_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fallbackLineSpacing_0_flag = AttributeUpdaterFlag.SKIP
@@ -2339,6 +2387,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedDragPreviewStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedDragPreviewStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -2350,6 +2399,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
         {
             this._textDirection_0_flag = AttributeUpdaterFlag.UPDATE
             this._textDirection_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textDirection_0_flag = AttributeUpdaterFlag.SKIP
@@ -2362,6 +2412,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
             this._searchButton_0_flag = AttributeUpdaterFlag.UPDATE
             this._searchButton_0_0value = value
             this._searchButton_0_1value = option
+            this._state.fireChange()
         } else
         {
             this._searchButton_0_flag = AttributeUpdaterFlag.SKIP
@@ -2374,6 +2425,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
             this._inputFilter_0_flag = AttributeUpdaterFlag.UPDATE
             this._inputFilter_0_0value = value
             this._inputFilter_0_1value = error
+            this._state.fireChange()
         } else
         {
             this._inputFilter_0_flag = AttributeUpdaterFlag.SKIP
@@ -2386,6 +2438,7 @@ export class SearchModifier extends CommonMethodModifier implements SearchAttrib
             this._customKeyboard_0_flag = AttributeUpdaterFlag.UPDATE
             this._customKeyboard_0_0value = value
             this._customKeyboard_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._customKeyboard_0_flag = AttributeUpdaterFlag.SKIP

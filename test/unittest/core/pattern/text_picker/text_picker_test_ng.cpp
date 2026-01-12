@@ -26,7 +26,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/image/image_pattern.h"

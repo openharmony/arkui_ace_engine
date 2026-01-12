@@ -994,6 +994,7 @@ public:
     RefPtr<WebAgentEventReporter> GetAgentEventReporter();
     // WebAgentEventReporter reference
     void ReportSelectedText(bool isRegister = false) override;
+    void UpdateTextSelectionHolderId();
     std::pair<int32_t, RectF> GetScrollAreaInfoFromDocument(int32_t id);
 
     // Data Detector funcs
@@ -1046,6 +1047,16 @@ public:
     void GetImagesByIDs(const std::vector<int32_t>& imageIds, int32_t windowId,
         const std::function<void(int32_t, const std::map<int32_t, std::shared_ptr<Media::PixelMap>>&,
         MultiImageQueryErrorCode)>& arkWebfinishCallback);
+
+    void GetWebInfoByRequest(
+        uint32_t windowId,
+        int32_t webId,
+        const std::string& request,
+        const std::function<
+            void(int32_t, int32_t, // window id , web id
+                const std::string&, // request
+                const std::string&, // result
+                WebRequestErrorCode)>& finishCallback);
 
     bool IsTextSelectionEnable()
     {

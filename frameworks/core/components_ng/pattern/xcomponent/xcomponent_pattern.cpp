@@ -244,6 +244,7 @@ void XComponentPattern::RegisterTransformHintCallback(PipelineContext* context)
 
 void XComponentPattern::Initialize()
 {
+    ACE_UINODE_TRACE(GetHost());
     if (type_ == XComponentType::SURFACE || type_ == XComponentType::TEXTURE) {
         InitSurface();
         InitEvent();
@@ -288,6 +289,9 @@ void XComponentPattern::OnAttachToMainTree()
     auto bundleName = pipelineContext->GetBundleName();
     PerfMonitor::GetPerfMonitor()->ReportSurface(renderSurface_->GetUniqueIdNum(), renderSurface_->GetPSurfaceName(),
         customNode->GetJSViewName(), bundleName.c_str(), getpid());
+    if (pipelineContext->GetXComponentDisplayConstraintEnabled()) {
+        host->RegisterNodeChangeListener();
+    }
 }
 
 void XComponentPattern::OnDetachFromMainTree()
@@ -310,10 +314,12 @@ void XComponentPattern::OnDetachFromMainTree()
         }
     }
     displaySync_->NotifyXComponentExpectedFrameRate(GetId(), 0);
+    host->UnregisterNodeChangeListener();
 }
 
 void XComponentPattern::InitializeRenderContext(bool isThreadSafeNode)
 {
+    ACE_UINODE_TRACE(GetHost());
     renderContextForSurface_ = RenderContext::Create();
 #ifdef RENDER_EXTRACT_SUPPORTED
     auto contextType = type_ == XComponentType::TEXTURE ? RenderContext::ContextType::HARDWARE_TEXTURE
@@ -399,6 +405,64 @@ void XComponentPattern::RequestFocus()
     focusHub->RequestFocusImmediately();
 }
 #endif
+
+void XComponentPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    if (context->GetXComponentDisplayConstraintEnabled()) {
+        AddLayoutTask();
+    }
+}
+
+void XComponentPattern::AddLayoutTask()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto displayWindowRect = pipeline->GetDisplayWindowRectInfo();
+
+    auto windowWidth = displayWindowRect.Width();
+    auto windowHeight = displayWindowRect.Height();
+
+    auto windowRelativeOffset = host->GetTransformRelativeOffset();
+
+    auto relativeOffsetX = windowRelativeOffset.GetX();
+    auto relativeOffsetY = windowRelativeOffset.GetY();
+    auto xcomponentWidth = drawSize_.Width();
+    auto xcomponentHeight = drawSize_.Height();
+
+    auto overlapWidth = fmin(windowWidth - relativeOffsetX, xcomponentWidth) - fmax(-relativeOffsetX, 0);
+    auto overlapHeight = fmin(windowHeight - relativeOffsetY, xcomponentHeight) - fmax(-relativeOffsetY, 0);
+    auto overlapOffsetX = fmax(-relativeOffsetX, 0);
+    auto overlapOffsetY = fmax(-relativeOffsetY, 0);
+
+    if (NearZero(surfaceSize_.Width()) || NearZero(surfaceSize_.Height())) {
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "xcLOG XComponent[%{public}s] surfaceSize is near zero, skip scaling.",
+            GetId().c_str());
+        return;
+    }
+
+    auto scaleX = overlapWidth / surfaceSize_.Width();
+    auto scaleY = overlapHeight / surfaceSize_.Height();
+    auto scale = std::min(scaleX, scaleY);
+
+    scale = std::max(scale, 0.0);
+
+    SizeF newSurfaceSize(surfaceSize_.Width() * scale, surfaceSize_.Height() * scale);
+    surfaceSize_ = newSurfaceSize;
+
+    surfaceOffset_.SetX((overlapWidth - surfaceSize_.Width()) / 2.0f + overlapOffsetX);
+    surfaceOffset_.SetY((overlapHeight - surfaceSize_.Height()) / 2.0f + overlapOffsetY);
+    paintRect_ = { surfaceOffset_, surfaceSize_ };
+    CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+    handlingSurfaceRenderContext_->SetBounds(
+        paintRect_.GetX(), paintRect_.GetY(), paintRect_.Width(), paintRect_.Height());
+    handlingSurfaceRenderContext_->RequestNextFrame();
+}
 
 void XComponentPattern::OnAttachToFrameNode()
 {
@@ -1375,6 +1439,7 @@ void XComponentPattern::FireExternalEvent(
     RefPtr<NG::PipelineContext> context, const std::string& componentId, const uint32_t nodeId, const bool isDestroy)
 {
     CHECK_NULL_VOID(context);
+    ACE_UINODE_TRACE(GetHost());
 #ifdef NG_BUILD
     auto frontEnd = AceType::DynamicCast<DeclarativeFrontendNG>(context->GetFrontend());
 #else

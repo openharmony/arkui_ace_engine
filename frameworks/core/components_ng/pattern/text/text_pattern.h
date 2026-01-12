@@ -71,6 +71,7 @@ class PreviewMenuController;
 enum class Status { DRAGGING, FLOATING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
+using ExternalDrawCallback = std::function<bool(float, float, float, float)>;
 struct SpanNodeInfo {
     RefPtr<UINode> node;
     RefPtr<UINode> containerSpanNode;
@@ -949,6 +950,17 @@ public:
         return true;
     }
 
+    void SetExternalDrawCallback(ExternalDrawCallback&& callback)
+    {
+        externalDrawCallback_ = std::move(callback);
+    }
+
+    const ExternalDrawCallback& GetExternalDrawCallback()
+    {
+        return externalDrawCallback_;
+    }
+    std::optional<void*> GetDrawParagraph();
+
     void UpdateStyledStringByColorMode();
     virtual void MarkContentNodeForRender() {};
     float TextContentAlignOffsetY();
@@ -966,8 +978,6 @@ public:
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) override;
     void ResetHighLightValue();
     void ReportSelectedText(bool isRegister = false) override;
-    int32_t HighlightStrIndexToPaintRectIndex(int32_t matchIndex, bool isStart);
-    std::u16string TextHighlightSelectedContent(int32_t start, int32_t end);
 
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
@@ -1261,9 +1271,11 @@ private:
     void ContentChangeByDetaching(PipelineContext*) override;
     void HighlightDisappearAnimation();
     void HighlightAppearAnimation();
-    bool HighlightTriggerScrollableParentToScroll(const RectF& hightlightRect);
+    bool HighlightTriggerScrollableParentToScroll(const RectF& highlightRect);
     const RefPtr<ScrollablePattern> FindScrollableParentWithRelativeOffset(OffsetF& offset);
     RectF GetHighlightRect(const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& paragraphsRects) const;
+    std::u16string GetContentWithPlaceholderSpaceFillter() const;
+    std::u16string TextHighlightSelectedContent(int32_t start, int32_t end) const;
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -1327,6 +1339,7 @@ private:
     bool isTryEntityDragging_ = false;
     bool isRegisteredAreaCallback_ = false;
     OffsetF gestureSelectTextPaintOffset_;
+    ExternalDrawCallback externalDrawCallback_;
 
     std::shared_ptr<AnimationUtils::Animation> highlightAppearAnimation_;
     std::shared_ptr<AnimationUtils::Animation> highlightDisappearAnimation_;
