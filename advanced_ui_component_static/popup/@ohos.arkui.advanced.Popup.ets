@@ -66,6 +66,9 @@ import I18n from '@ohos.i18n';
 const RESOURCE_TYPE_STRING = 10003;
 const RESOURCE_TYPE_FLOAT = 10002;
 const RESOURCE_TYPE_INTEGER = 10007;
+const RESOURCE_TYPE_MEDIA = 20000;
+const RESOURCE_TYPE_RAWFILE = 30000;
+const RESOURCE_TYPE_SYMBOL = 40000;
 
 interface IconTheme {
   size: SizeOptions;
@@ -610,6 +613,27 @@ export struct PopupComponent {
     };
   }
 
+  @Builder
+  closeButtonBuilderImage() {
+    Image(this.showClose as Resource)
+      .width(this.getCloseButtonWidth())
+      .height(this.getCloseButtonHeight())
+      .direction(this.popupDirection)
+      .focusable(true)
+      .draggable(false)
+  }
+
+  @Builder
+  closeButtonBuilderSymbolGlyph(symbolGlyphModifier : SymbolGlyphModifier) {
+    SymbolGlyph()
+      .fontColor([this.getCloseButtonFillColor()])
+      .fontSize(this.getCloseButtonSymbolSize())
+      .direction(this.popupDirection)
+      .attributeModifier(symbolGlyphModifier)
+      .focusable(true)
+      .draggable(false)
+  }
+
   onWillApplyTheme(theme: Theme): void {
     this.theme.title.fontColor = theme.colors.fontPrimary;
     this.theme.button.fontColor = theme.colors.fontEmphasize;
@@ -807,7 +831,8 @@ export struct PopupComponent {
     let titleAlign = TextAlign.Start;
     try {
       let systemLanguage: string = I18n.System.getSystemLanguage();
-      if (I18n.isRTL(systemLanguage) && this.popupDirection === Direction.Auto) {
+      if (I18n.isRTL(systemLanguage) &&
+        (this.popupDirection === Direction.Auto || this.popupDirection === undefined)) {
         titleAlign = TextAlign.End;
       }
     } catch (error) {
@@ -846,13 +871,16 @@ export struct PopupComponent {
               .textAlign(this.getTitleTextAlign())
             if (this.showClose || this.showClose === undefined) {
               Button() {
-                SymbolGlyph()
-                  .fontColor([this.getCloseButtonFillColor()])
-                  .fontSize(this.getCloseButtonSymbolSize())
-                  .direction(this.popupDirection)
-                  .attributeModifier(this.theme.closeButton.symbolStyle)
-                  .focusable(true)
-                  .draggable(false)
+                if (typeof this.showClose === 'object' &&
+                  ((this.showClose as Resource).type === RESOURCE_TYPE_MEDIA ||
+                    (this.showClose as Resource).type === RESOURCE_TYPE_RAWFILE)) {
+                  this.closeButtonBuilderImage()
+                } else if (typeof this.showClose === 'object' &&
+                  ((this.showClose as Resource).type === RESOURCE_TYPE_SYMBOL)) {
+                  this.closeButtonBuilderSymbolGlyph(new SymbolGlyphModifier(this.showClose as Resource));
+                } else {
+                  this.closeButtonBuilderSymbolGlyph(this.theme.closeButton.symbolStyle)
+                }
               }
               .direction(this.popupDirection)
               .width(this.getCloseButtonWidth())
@@ -884,6 +912,7 @@ export struct PopupComponent {
 
           Scroll() {
             Text(this.getMessageText())
+              .textAlign(this.getTitleTextAlign())
               .direction(this.popupDirection)
               .fontSize(this.getMessageFontSize())
               .fontColor(this.getMessageFontColor())
@@ -981,6 +1010,7 @@ export struct PopupComponent {
           Row() {
             Scroll() {
               Text(this.getMessageText())
+                .textAlign(this.getTitleTextAlign())
                 .direction(this.popupDirection)
                 .fontSize(this.getMessageFontSize())
                 .fontColor(this.getMessageFontColor())
@@ -1001,13 +1031,16 @@ export struct PopupComponent {
 
             if (this.showClose || this.showClose === undefined) {
               Button() {
-                SymbolGlyph()
-                  .fontColor([this.getCloseButtonFillColor()])
-                  .fontSize(this.getCloseButtonSymbolSize())
-                  .direction(this.popupDirection)
-                  .attributeModifier(this.theme.closeButton.symbolStyle)
-                  .focusable(true)
-                  .draggable(false)
+                if (typeof this.showClose === 'object' &&
+                  ((this.showClose as Resource).type === RESOURCE_TYPE_MEDIA ||
+                    (this.showClose as Resource).type === RESOURCE_TYPE_RAWFILE)) {
+                  this.closeButtonBuilderImage()
+                } else if (typeof this.showClose === 'object' &&
+                  ((this.showClose as Resource).type === RESOURCE_TYPE_SYMBOL)) {
+                  this.closeButtonBuilderSymbolGlyph(new SymbolGlyphModifier(this.showClose as Resource));
+                } else {
+                  this.closeButtonBuilderSymbolGlyph(this.theme.closeButton.symbolStyle)
+                }
               }
               .direction(this.popupDirection)
               .width(this.getCloseButtonWidth())
