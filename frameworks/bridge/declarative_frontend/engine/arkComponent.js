@@ -38530,7 +38530,8 @@ if (globalThis.WaterFlow === undefined) {
         params === null || params === void 0 ? void 0 : params.sections,
         params === null || params === void 0 ? void 0 : params.layoutMode,
         params === null || params === void 0 ? void 0 : params.footerContent,
-        params === null || params === void 0 ? void 0 : params.footer);
+        params === null || params === void 0 ? void 0 : params.footer,
+        'footerContent' in params);
     }
   }
 }
