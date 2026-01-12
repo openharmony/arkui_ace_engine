@@ -2750,6 +2750,18 @@ void SetCompositingFilterImpl(Ark_NativePointer node,
     }
     ViewAbstractModelStatic::SetCompositingFilter(frameNode, ptrOpt.value());
 }
+void SetMaterialFilterImpl(Ark_NativePointer node,
+                           const Opt_uiEffect_Filter* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto ptrOpt = Converter::OptConvertPtr<OHOS::Rosen::Filter*>(value);
+    if (!ptrOpt || !(ptrOpt.value())) {
+        ViewAbstract::SetMaterialFilter(frameNode, nullptr);
+        return;
+    }
+    ViewAbstract::SetMaterialFilter(frameNode, ptrOpt.value());
+}
 void SetOpacityImpl(Ark_NativePointer node,
                     const Opt_Union_F64_Resource* value)
 {
@@ -3784,6 +3796,14 @@ void SetUseEffect0Impl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     ViewAbstractModelStatic::SetUseEffect(frameNode, convValue, std::nullopt);
+}
+void SetUseUnionEffectImpl(Ark_NativePointer node,
+                           const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ViewAbstract::SetUseUnion(frameNode, convValue.value_or(false));
 }
 void SetRenderGroupImpl(Ark_NativePointer node,
                         const Opt_Boolean* value)
@@ -6539,6 +6559,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetBackgroundFilterImpl,
         CommonMethodModifier::SetForegroundFilterImpl,
         CommonMethodModifier::SetCompositingFilterImpl,
+        CommonMethodModifier::SetMaterialFilterImpl,
         CommonMethodModifier::SetOpacityImpl,
         CommonMethodModifier::SetBorderImpl,
         CommonMethodModifier::SetBorderStyleImpl,
@@ -6589,6 +6610,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetHueRotateImpl,
         CommonMethodModifier::SetUseShadowBatchingImpl,
         CommonMethodModifier::SetUseEffect0Impl,
+        CommonMethodModifier::SetUseUnionEffectImpl,
         CommonMethodModifier::SetRenderGroupImpl,
         CommonMethodModifier::SetFreezeImpl,
         CommonMethodModifier::SetTranslateImpl,

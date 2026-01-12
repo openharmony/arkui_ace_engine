@@ -23635,6 +23635,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                 const Opt_uiEffect_Filter* value);
     void (*setCompositingFilter)(Ark_NativePointer node,
                                  const Opt_uiEffect_Filter* value);
+    void (*setMaterialFilter)(Ark_NativePointer node,
+                              const Opt_uiEffect_Filter* value);
     void (*setOpacity)(Ark_NativePointer node,
                        const Opt_Union_F64_Resource* value);
     void (*setBorder)(Ark_NativePointer node,
@@ -23735,6 +23737,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                  const Opt_Boolean* value);
     void (*setUseEffect0)(Ark_NativePointer node,
                           const Opt_Boolean* value);
+    void (*setUseUnionEffect)(Ark_NativePointer node,
+                              const Opt_Boolean* value);
     void (*setRenderGroup)(Ark_NativePointer node,
                            const Opt_Boolean* value);
     void (*setFreeze)(Ark_NativePointer node,
