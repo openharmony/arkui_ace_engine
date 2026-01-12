@@ -1455,7 +1455,6 @@
       OHOS::Ace::ImageComponent::SetImageFill*;
       VTT?for?OHOS::Ace::ImageComponent;
       vtable?for?OHOS::Ace::ImageComponent;
-
       "OHOS::Ace::LayoutInspector::SupportInspector()";
       OHOS::Ace::BoxElement::PerformBuild*;
       VTT?for?OHOS::Ace::BoxElement;
@@ -1533,7 +1532,6 @@
       VTT?for?OHOS::Ace::MenuComponent;
       OHOS::Ace::SelectPopupComponent::InitTheme*;
       OHOS::Ace::SelectPopupComponent::SelectPopupComponent*;
-
       OHOS::Ace::FlexElement::Update*;
       OHOS::Ace::FlexElement::RequestNextFocus*;
       OHOS::Ace::FlexElement::AcceptFocusByRectOfLastFocus*;
