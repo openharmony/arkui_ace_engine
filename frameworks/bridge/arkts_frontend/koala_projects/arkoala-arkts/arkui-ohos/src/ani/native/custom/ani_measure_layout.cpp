@@ -171,7 +171,12 @@ ani_object GenPadding(ani_env* env,  const std::unique_ptr<NG::PaddingProperty>&
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>",
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}:", &ctor)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "Class_FindMethod failed in GenPadding.");
         return nullptr;
     }
     ani_object top;
@@ -199,7 +204,12 @@ ani_object GenMargin(ani_env* env,  const std::unique_ptr<NG::MarginProperty>& m
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>",
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}:", &ctor)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "Class_FindMethod failed in GenMargin.");
         return nullptr;
     }
 
@@ -228,7 +238,12 @@ ani_object GenEdgeWidths(ani_env* env,  const std::unique_ptr<NG::BorderWidthPro
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>",
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}" \
+        "X{C{std.core.Double}C{std.core.String}C{global.resource.Resource}}:", &ctor)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "Class_FindMethod failed in GenEdgeWidths.");
         return nullptr;
     }
 
@@ -241,7 +256,7 @@ ani_object GenEdgeWidths(ani_env* env,  const std::unique_ptr<NG::BorderWidthPro
     bottom = AniUtils::CreateDouble(env, edgeWidthsNative->bottomDimen->ConvertToVp());
     left = AniUtils::CreateDouble(env, edgeWidthsNative->leftDimen->ConvertToVp());
     if (ANI_OK != env->Object_New(cls, ctor, &edgeWidths_obj, top, right, bottom, left)) {
-        TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenEdgeWidths failed.");
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "Object_New failed in GenEdgeWidths.");
         return nullptr;
     }
     return edgeWidths_obj;
@@ -257,7 +272,8 @@ ani_object GenEdgesGlobalized(ani_env* env, const NG::PaddingPropertyT<float>& e
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dddd:", &ctor)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "Class_FindMethod failed in GenEdgesGlobalized.");
         return AniUtils::GetUndefined(env);
     }
 
@@ -297,7 +313,8 @@ ani_object GenBorderWidthGlobalized(ani_env* env, const NG::BorderWidthPropertyT
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dddd:", &ctor)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "Class_FindMethod failed in GenBorderWidthGlobalized.");
         return AniUtils::GetUndefined(env);
     }
 
@@ -332,15 +349,13 @@ ani_object GenSelfLayoutInfo(ani_env* env, RefPtr<NG::LayoutProperty> layoutProp
     ani_class cls;
     static const char *className = "arkui.ani.arkts.ArkUIAniCustomNodeModule.GeometryInfoInner";
     if (ANI_OK != env->FindClass(className, &cls)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "FindClass failed in GenSelfLayoutInfo.");
         return nullptr;
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
-        return nullptr;
-    }
-
-    if (ANI_OK != env->Object_New(cls, ctor, &selfLayoutInfo_obj)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "ddC{arkui.component.units.EdgeWidths}"\
+        "C{arkui.component.units.Padding}C{arkui.component.units.Padding}:", &ctor)) {
         TAG_LOGW(AceLogTag::ACE_LAYOUT, "GenSelfLayoutInfo failed.");
         return nullptr;
     }
@@ -350,11 +365,11 @@ ani_object GenSelfLayoutInfo(ani_env* env, RefPtr<NG::LayoutProperty> layoutProp
     const std::unique_ptr<NG::BorderWidthProperty>& defaultEdgeWidth = std::make_unique<NG::BorderWidthProperty>();
     auto pipeline = PipelineBase::GetCurrentContext();
     if (!layoutProperty || !pipeline) {
-        env->Object_SetPropertyByName_Ref(selfLayoutInfo_obj, "borderWidth", GenEdgeWidths(env, defaultEdgeWidth));
-        env->Object_SetPropertyByName_Ref(selfLayoutInfo_obj, "margin", GenMargin(env, defaultPadding));
-        env->Object_SetPropertyByName_Ref(selfLayoutInfo_obj, "padding", GenPadding(env, defaultPadding));
-        env->Object_SetPropertyByName_Double(selfLayoutInfo_obj, "width", (ani_double)0.0f);
-        env->Object_SetPropertyByName_Double(selfLayoutInfo_obj, "height", (ani_double)0.0f);
+        if (ANI_OK != env->Object_New(cls, ctor, &selfLayoutInfo_obj, (ani_double)0.0f, (ani_double)0.0f,
+            GenEdgeWidths(env, defaultEdgeWidth), GenMargin(env, defaultPadding), GenPadding(env, defaultPadding))) {
+            TAG_LOGW(AceLogTag::ACE_LAYOUT, "First Object_New failed in GenSelfLayoutInfo.");
+            return nullptr;
+        }
         return selfLayoutInfo_obj;
     }
     CHECK_NULL_RETURN(layoutProperty->GetHost(), nullptr);
@@ -378,22 +393,23 @@ ani_object GenSelfLayoutInfo(ani_env* env, RefPtr<NG::LayoutProperty> layoutProp
         : layoutProperty->GetLayoutConstraint()
             ? layoutProperty->GetLayoutConstraint()->selfIdealSize.Height().value_or(0.0) / pipeline->GetDipScale()
             : 0.0f;
-
-    env->Object_SetPropertyByName_Ref(selfLayoutInfo_obj, "borderWidth",
-        GenEdgeWidths(env, layoutProperty->GetBorderWidthProperty() ?
-            layoutProperty->GetBorderWidthProperty() : defaultEdgeWidth));
-    env->Object_SetPropertyByName_Ref(selfLayoutInfo_obj, "margin",
-        GenMargin(env, layoutProperty->GetMarginProperty() ? layoutProperty->GetMarginProperty() : defaultPadding));
-    env->Object_SetPropertyByName_Ref(selfLayoutInfo_obj, "padding",
-        GenPadding(env, layoutProperty->GetPaddingProperty() ? layoutProperty->GetPaddingProperty() : defaultPadding));
-    env->Object_SetPropertyByName_Double(selfLayoutInfo_obj, "width",
-        NearEqual(width, 0.0f)
-            ? layoutProperty->GetLayoutConstraint()->percentReference.Width() / pipeline->GetDipScale()
-            : width);
-    env->Object_SetPropertyByName_Double(selfLayoutInfo_obj, "height",
-        NearEqual(height, 0.0f)
-            ? layoutProperty->GetLayoutConstraint()->percentReference.Height() / pipeline->GetDipScale()
-            : height);
+    ani_object aniBorderWidth = GenEdgeWidths(env, layoutProperty->GetBorderWidthProperty() ?
+        layoutProperty->GetBorderWidthProperty() : defaultEdgeWidth);
+    ani_object aniMargin = GenMargin(env, layoutProperty->GetMarginProperty() ?
+        layoutProperty->GetMarginProperty() : defaultPadding);
+    ani_object aniPadding = GenPadding(env, layoutProperty->GetPaddingProperty() ?
+        layoutProperty->GetPaddingProperty() : defaultPadding);
+    ani_double aniWidth = NearEqual(width, 0.0f)
+        ? layoutProperty->GetLayoutConstraint()->percentReference.Width() / pipeline->GetDipScale()
+        : width;
+    ani_double aniHeight = NearEqual(height, 0.0f)
+        ? layoutProperty->GetLayoutConstraint()->percentReference.Height() / pipeline->GetDipScale()
+        : height;
+    if (ANI_OK != env->Object_New(cls, ctor, &selfLayoutInfo_obj, aniWidth, aniHeight,
+        aniBorderWidth, aniMargin, aniPadding)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "Second Object_New failed in GenSelfLayoutInfo.");
+        return nullptr;
+    }
     return selfLayoutInfo_obj;
 }
 
@@ -407,7 +423,8 @@ void FillPlaceSizeProperty(ani_env* env, ani_object info, const NG::SizeF& size)
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dd:", &ctor)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "Class_FindMethod failed in FillPlaceSizeProperty.");
         return;
     }
 
@@ -433,7 +450,8 @@ ani_object GenMeasureResult(ani_env* env, const NG::SizeF& size)
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dd:", &ctor)) {
+        TAG_LOGW(AceLogTag::ACE_LAYOUT, "Class_FindMethod failed in GenMeasureResult.");
         return AniUtils::GetUndefined(env);
     }
     Dimension measureWidth(size.Width(), DimensionUnit::PX);
@@ -450,7 +468,7 @@ ani_object GenMeasureResult(ani_env* env, const NG::SizeF& size)
     return measureResult_obj;
 }
 
-JSMeasureLayoutParamNG::JSMeasureLayoutParamNG(NG::LayoutWrapper* layoutWrapper, ani_env* env)
+AniMeasureLayoutParamNG::AniMeasureLayoutParamNG(NG::LayoutWrapper* layoutWrapper, ani_env* env)
     : MeasureLayoutParam(layoutWrapper)
 {
     ani_vm* vm = nullptr;
@@ -467,7 +485,7 @@ JSMeasureLayoutParamNG::JSMeasureLayoutParamNG(NG::LayoutWrapper* layoutWrapper,
     Init(env);
 }
 
-void JSMeasureLayoutParamNG::Init(ani_env* env)
+void AniMeasureLayoutParamNG::Init(ani_env* env)
 {
     int32_t count = GetTotalChildCount();
 
@@ -511,7 +529,7 @@ ani_object GenMeasurable(ani_env* env,  NG::MeasureLayoutChild* child)
         return measurable;
 }
 
-void JSMeasureLayoutParamNG::GenChildArray(ani_env* env, int32_t start, int32_t end)
+void AniMeasureLayoutParamNG::GenChildArray(ani_env* env, int32_t start, int32_t end)
 {
     for (int32_t index = start; index < end; index++) {
         auto child = GetChildByIndex(index);
@@ -531,7 +549,7 @@ void JSMeasureLayoutParamNG::GenChildArray(ani_env* env, int32_t start, int32_t 
     }
 }
 
-ani_object JSMeasureLayoutParamNG::GetConstraint(ani_env* env)
+ani_object AniMeasureLayoutParamNG::GetConstraint(ani_env* env)
 {
     auto layoutWrapper = GetLayoutWrapper();
     if (layoutWrapper && layoutWrapper->GetLayoutProperty() &&
@@ -542,7 +560,7 @@ ani_object JSMeasureLayoutParamNG::GetConstraint(ani_env* env)
     return GenConstraintNG(env, NG::LayoutConstraintF());
 }
 
-ani_object JSMeasureLayoutParamNG::GetPlaceChildrenConstraint(ani_env* env)
+ani_object AniMeasureLayoutParamNG::GetPlaceChildrenConstraint(ani_env* env)
 {
     auto layoutWrapper = GetLayoutWrapper();
     if (layoutWrapper && layoutWrapper->GetLayoutProperty() && layoutWrapper->GetGeometryNode()) {
@@ -552,14 +570,33 @@ ani_object JSMeasureLayoutParamNG::GetPlaceChildrenConstraint(ani_env* env)
     return GenPlaceChildrenConstraintNG(env, NG::SizeF(), MakeRefPtr<NG::LayoutProperty>());
 }
 
-ani_object JSMeasureLayoutParamNG::GetSelfLayoutInfo(ani_env* env)
+ani_object AniMeasureLayoutParamNG::GetSelfLayoutInfo(ani_env* env)
 {
     auto layoutWrapper = GetLayoutWrapper();
     return GenSelfLayoutInfo(env, layoutWrapper && layoutWrapper->GetLayoutProperty() ?
         layoutWrapper->GetLayoutProperty() : MakeRefPtr<NG::LayoutProperty>());
 }
 
-void JSMeasureLayoutParamNG::Update(ani_env* env,  NG::LayoutWrapper* layoutWrapper)
+void AniMeasureLayoutParamNG::CreateAndWrapChild(ani_env* env, ani_array array, int newCount)
+{
+    for (int32_t index = 0; index < newCount; index++) {
+        auto child = GetChildByIndex(index);
+        auto info = GenMeasurable(env, &Get(index));
+
+        if (child && child->GetHostNode()) {
+            auto uniqueId = child->GetHostNode()->GetId();
+            ani_object uniqueId_obj = AniUtils::CreateDouble(env, uniqueId);
+            if (ANI_OK != env->Object_SetPropertyByName_Ref(info, "uniqueId", uniqueId_obj)) {
+                return;
+            }
+        }
+        if (ANI_OK != env->Array_Set(array, index, info)) {
+            return;
+        }
+    }
+}
+
+void AniMeasureLayoutParamNG::Update(ani_env* env,  NG::LayoutWrapper* layoutWrapper)
 {
     NG::MeasureLayoutChild* addr = nullptr;
     int32_t count = GetTotalChildCount();
@@ -587,22 +624,7 @@ void JSMeasureLayoutParamNG::Update(ani_env* env,  NG::LayoutWrapper* layoutWrap
         if (ANI_OK != env->Array_New(newCount, undefinedRef, &array)) {
             return;
         }
-        
-        for (int32_t index = 0; index < newCount; index++) {
-            auto child = GetChildByIndex(index);
-            auto info = GenMeasurable(env, &Get(index));
-
-            if (child && child->GetHostNode()) {
-                auto uniqueId = child->GetHostNode()->GetId();
-                ani_object uniqueId_obj = AniUtils::CreateDouble(env, uniqueId);
-                if (ANI_OK != env->Object_SetPropertyByName_Ref(info, "uniqueId", uniqueId_obj)) {
-                    return;
-                }
-            }
-            if (ANI_OK != env->Array_Set(array, index, info)) {
-                return;
-            }
-        }
+        CreateAndWrapChild(env, array, newCount);
         ani_ref temp;
         if (ANI_OK != env->GlobalReference_Create(static_cast<ani_ref>(array), &temp)) {
             return;
@@ -806,19 +828,19 @@ ani_status BindMeasurable(ani_env* env)
     return ANI_OK;
 }
 
-RefPtr<JSMeasureLayoutParamNG> JSMeasureLayoutParamNG::GetInstance(NG::LayoutWrapper* layoutWrapper, ani_env* env)
+RefPtr<AniMeasureLayoutParamNG> AniMeasureLayoutParamNG::GetInstance(NG::LayoutWrapper* layoutWrapper, ani_env* env)
 {
     auto host = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(layoutWrapper->GetHostNode());
     CHECK_NULL_RETURN(host, nullptr);
     BindMeasurable(env);
-    auto jsParam = AceType::DynamicCast<JSMeasureLayoutParamNG>(host->GetMeasureLayoutParam());
-    if (!jsParam) {
-        jsParam = AceType::MakeRefPtr<JSMeasureLayoutParamNG>(layoutWrapper, env);
-        host->SetMeasureLayoutParam(jsParam);
+    auto aniParam = AceType::DynamicCast<AniMeasureLayoutParamNG>(host->GetMeasureLayoutParam());
+    if (!aniParam) {
+        aniParam = AceType::MakeRefPtr<AniMeasureLayoutParamNG>(layoutWrapper, env);
+        host->SetMeasureLayoutParam(aniParam);
     } else {
-        jsParam->Update(env, layoutWrapper);
+        aniParam->Update(env, layoutWrapper);
     }
-    return jsParam;
+    return aniParam;
 }
 
 } // namespace OHOS::Ace::Ani

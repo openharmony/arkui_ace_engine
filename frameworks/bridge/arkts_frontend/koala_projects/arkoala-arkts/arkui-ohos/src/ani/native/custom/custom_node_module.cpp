@@ -151,15 +151,15 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
             return;
         }
 
-        auto jsParam = JSMeasureLayoutParamNG::GetInstance(layoutWrapper, env);
-        if (!jsParam) {
+        auto aniParam = AniMeasureLayoutParamNG::GetInstance(layoutWrapper, env);
+        if (!aniParam) {
             layoutWrapper->GetGeometryNode()->SetFrameSize({ -1.0f, -1.0f });
             TAG_LOGW(AceLogTag::ACE_LAYOUT, "GetInstance return val in onMeasureSize API is null");
             return;
         }
-        auto selfLayoutInfo = jsParam->GetSelfLayoutInfo(env);
-        auto constraint = jsParam->GetConstraint(env);
-        auto childArray = jsParam->GetChildArray(env);
+        auto selfLayoutInfo = aniParam->GetSelfLayoutInfo(env);
+        auto constraint = aniParam->GetConstraint(env);
+        auto childArray = aniParam->GetChildArray(env);
 
         ani_boolean released;
         ani_ref localRef;
@@ -225,11 +225,11 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
             return;
         }
 
-        auto jsParam = JSMeasureLayoutParamNG::GetInstance(layoutWrapper, env);
+        auto aniParam = AniMeasureLayoutParamNG::GetInstance(layoutWrapper, env);
 
-        auto selfLayoutInfo = jsParam->GetSelfLayoutInfo(env);
-        auto constraint = jsParam->GetPlaceChildrenConstraint(env);
-        auto childArray = jsParam->GetChildArray(env);
+        auto selfLayoutInfo = aniParam->GetSelfLayoutInfo(env);
+        auto constraint = aniParam->GetPlaceChildrenConstraint(env);
+        auto childArray = aniParam->GetChildArray(env);
 
         ani_boolean released;
         ani_ref localRef;
@@ -255,7 +255,7 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
 }
 
 void NativeCustomComponent::CustomNodeAddChild(ani_env* env, [[maybe_unused]] ani_object obj,
-    ani_long parent, ani_long child)
+    ani_long parent, ani_long child) 
 {
     Ark_NodeHandle parentNode = reinterpret_cast<Ark_NodeHandle>(parent);
     Ark_NodeHandle childNode = reinterpret_cast<Ark_NodeHandle>(child);
