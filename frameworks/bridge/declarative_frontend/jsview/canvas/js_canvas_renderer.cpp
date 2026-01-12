@@ -40,6 +40,8 @@
 namespace OHOS::Ace {
 constexpr uint32_t PIXEL_SIZE = 4;
 constexpr int32_t ALPHA_INDEX = 3;
+constexpr uint32_t GRADIENT_TYPE = 0;
+constexpr uint32_t PATTERN_TYPE = 1;
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
@@ -195,7 +197,7 @@ JSCanvasRenderer::~JSCanvasRenderer()
 JSRef<JSObject> JSCanvasRenderer::createGradientObj(const std::shared_ptr<Gradient>& gradient)
 {
     JSRef<JSObject> pasteObj = JSClass<JSCanvasGradient>::NewInstance();
-    pasteObj->SetProperty("__type", "gradient");
+    pasteObj->SetProperty("__type", GRADIENT_TYPE);
     auto pasteData = Referenced::Claim(pasteObj->Unwrap<JSCanvasGradient>());
     if (pasteData) {
         pasteData->SetGradient(gradient);
@@ -407,16 +409,16 @@ void JSCanvasRenderer::JsSetFillStyle(const JSCallbackInfo& info)
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> typeValue = obj->GetProperty("__type");
-    std::string type;
-    JSViewAbstract::ParseJsString(typeValue, type);
-    if (type == "gradient") {
-        auto* jSCanvasGradient = info.UnwrapArg<JSCanvasGradient>(0);
+    CHECK_EQUAL_VOID(typeValue->IsNumber(), false);
+    auto type = typeValue->ToNumber<uint32_t>();
+    if (type == GRADIENT_TYPE) {
+        auto* jSCanvasGradient = obj->Unwrap<JSCanvasGradient>();
         CHECK_NULL_VOID(jSCanvasGradient);
         auto gradient = jSCanvasGradient->GetGradient();
         CHECK_NULL_VOID(gradient);
         renderingContext2DModel_->SetFillGradient(gradient);
-    } else if (type == "pattern") {
-        auto* jSCanvasPattern = info.UnwrapArg<JSCanvasPattern>(0);
+    } else if (type == PATTERN_TYPE) {
+        auto* jSCanvasPattern = obj->Unwrap<JSCanvasPattern>();
         CHECK_NULL_VOID(jSCanvasPattern);
         renderingContext2DModel_->SetFillPattern(jSCanvasPattern->GetPattern());
     }
@@ -443,16 +445,16 @@ void JSCanvasRenderer::JsSetStrokeStyle(const JSCallbackInfo& info)
     }
     JSRef<JSObject> obj = JSRef<JSObject>::Cast(info[0]);
     JSRef<JSVal> typeValue = obj->GetProperty("__type");
-    std::string type;
-    JSViewAbstract::ParseJsString(typeValue, type);
-    if (type == "gradient") {
-        auto* jSCanvasGradient = info.UnwrapArg<JSCanvasGradient>(0);
+    CHECK_EQUAL_VOID(typeValue->IsNumber(), false);
+    auto type = typeValue->ToNumber<uint32_t>();
+    if (type == GRADIENT_TYPE) {
+        auto* jSCanvasGradient = obj->Unwrap<JSCanvasGradient>();
         CHECK_NULL_VOID(jSCanvasGradient);
         auto gradient = jSCanvasGradient->GetGradient();
         CHECK_NULL_VOID(gradient);
         renderingContext2DModel_->SetStrokeGradient(gradient);
-    } else if (type == "pattern") {
-        auto* jSCanvasPattern = info.UnwrapArg<JSCanvasPattern>(0);
+    } else if (type == PATTERN_TYPE) {
+        auto* jSCanvasPattern = obj->Unwrap<JSCanvasPattern>();
         CHECK_NULL_VOID(jSCanvasPattern);
         renderingContext2DModel_->SetStrokePattern(jSCanvasPattern->GetPattern());
     }
@@ -478,7 +480,7 @@ RefPtr<CanvasPath2D> JSCanvasRenderer::JsMakePath2D(const JSCallbackInfo& info)
     return AceType::MakeRefPtr<CanvasPath2D>();
 }
 
-JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject)
+JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject, bool isUnion)
 {
     ContainerScope scope(instanceId_);
 #if !defined(PREVIEW)
@@ -493,14 +495,16 @@ JSRenderImage* JSCanvasRenderer::UnwrapNapiImage(const JSRef<JSObject> jsObject)
     panda::Local<JsiValue> value = jsObject.Get().GetLocalHandle();
     JSValueWrapper valueWrapper = value;
     napi_value napiValue = nativeEngine->ValueToNapiValue(valueWrapper);
-    napi_value isImageBitmap = nullptr;
-    if (napi_get_named_property(env, napiValue, "isImageBitmap", &isImageBitmap) != napi_ok) {
-        return nullptr;
-    }
-    int32_t isImageBitmapValue = 0;
-    napi_get_value_int32(env, isImageBitmap, &isImageBitmapValue);
-    if (!isImageBitmapValue) {
-        return nullptr;
+    if (isUnion) {
+        napi_value isImageBitmap = nullptr;
+        if (napi_get_named_property(env, napiValue, "isImageBitmap", &isImageBitmap) != napi_ok) {
+            return nullptr;
+        }
+        int32_t isImageBitmapValue = 0;
+        napi_get_value_int32(env, isImageBitmap, &isImageBitmapValue);
+        if (!isImageBitmapValue) {
+            return nullptr;
+        }
     }
     void* native = nullptr;
     napi_unwrap(env, napiValue, &native);
@@ -570,7 +574,7 @@ void JSCanvasRenderer::JsDrawImage(const JSCallbackInfo& info)
     if (!info[0]->IsObject()) {
         return;
     }
-    auto* jsImage = UnwrapNapiImage(info[0]);
+    auto* jsImage = UnwrapNapiImage(info[0], true);
     if (jsImage) {
         if (jsImage->IsSvg()) {
             DrawSvgImage(info, jsImage);
@@ -639,7 +643,7 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
 {
     auto arg0 = info[0];
     if (arg0->IsObject()) {
-        auto* jsImage = UnwrapNapiImage(info[0]);
+        auto* jsImage = UnwrapNapiImage(arg0, false);
         CHECK_NULL_VOID(jsImage);
         std::string repeat;
         info.GetStringArg(1, repeat);
@@ -653,7 +657,7 @@ void JSCanvasRenderer::JsCreatePattern(const JSCallbackInfo& info)
         pattern->SetPixelMap(pixelMap);
 #endif
         JSRef<JSObject> obj = JSClass<JSCanvasPattern>::NewInstance();
-        obj->SetProperty("__type", "pattern");
+        obj->SetProperty("__type", PATTERN_TYPE);
         auto canvasPattern = Referenced::Claim(obj->Unwrap<JSCanvasPattern>());
         canvasPattern->SetPattern(pattern);
         info.SetReturnValue(obj);
@@ -1409,7 +1413,6 @@ void JSCanvasRenderer::JsGetTransform(const JSCallbackInfo& info)
 {
     ContainerScope scope(instanceId_);
     JSRef<JSObject> obj = JSClass<JSMatrix2d>::NewInstance();
-    obj->SetProperty("__type", "Matrix2D");
     if (Container::IsCurrentUseNewPipeline()) {
         TransformParam param = renderingContext2DModel_->GetTransform();
         auto matrix = Referenced::Claim(obj->Unwrap<JSMatrix2d>());

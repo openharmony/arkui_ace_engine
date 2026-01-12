@@ -53,17 +53,25 @@ ani_string CreateSurfaceIdAni(ani_env* env, const std::string& surfaceId)
 ani_object CreateSurfaceRectAni(ani_env* env, float width, float height, float offsetX, float offsetY)
 {
     CHECK_NULL_RETURN(env, nullptr);
-    static const char* className = "arkui.component.xcomponent.SurfaceRectAniInternal";
-    ani_class cls;
-    if (ANI_OK != env->FindClass(className, &cls)) {
-        return nullptr;
+    static ani_ref gSurfaceRect = {};
+    static ani_method gSurfaceRectCtor = {};
+    if (!gSurfaceRect) {
+        static const char* className = "arkui.component.xcomponent.SurfaceRectAniInternal";
+        ani_class cls;
+        if (ANI_OK != env->FindClass(className, &cls) ||
+            ANI_OK != env->GlobalReference_Create(static_cast<ani_ref>(cls), &gSurfaceRect)) {
+            return nullptr;
+        }
     }
-    ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "dddd:", &ctor)) {
-        return nullptr;
+    if (!gSurfaceRectCtor) {
+        if (ANI_OK !=
+            env->Class_FindMethod(static_cast<ani_class>(gSurfaceRect), "<ctor>", "dddd:", &gSurfaceRectCtor)) {
+            return nullptr;
+        }
     }
     ani_object surfaceRectRef;
-    if (ANI_OK != env->Object_New(cls, ctor, &surfaceRectRef, width, height, offsetX, offsetY)) {
+    if (ANI_OK != env->Object_New(static_cast<ani_class>(gSurfaceRect), gSurfaceRectCtor, &surfaceRectRef, width,
+        height, offsetX, offsetY)) {
         return nullptr;
     }
     return surfaceRectRef;

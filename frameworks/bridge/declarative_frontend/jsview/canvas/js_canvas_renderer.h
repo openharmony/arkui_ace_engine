@@ -194,7 +194,7 @@ protected:
     void ParseFillPattern(const JSCallbackInfo& info);
     void ParseStorkeGradient(const JSCallbackInfo& info);
     void ParseStrokePattern(const JSCallbackInfo& info);
-    JSRenderImage* UnwrapNapiImage(const JSRef<JSObject> jsObject);
+    JSRenderImage* UnwrapNapiImage(const JSRef<JSObject> jsObject, bool isUnion);
 
 protected:
     bool isJudgeSpecialValue_ = false;
