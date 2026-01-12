@@ -7245,6 +7245,7 @@ void SwiperPattern::RemoveOnHiddenChange()
 
 std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> baseNode, bool isSelfNode) const
 {
+    CHECK_NULL_RETURN(baseNode, std::nullopt);
     if (AceType::DynamicCast<LazyForEachNode>(baseNode)) {
         return baseNode;
     }
@@ -7257,7 +7258,8 @@ std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> 
     if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {
         return std::nullopt;
     }
-    for (const auto& child : baseNode->GetChildren()) {
+    auto children = baseNode->GetChildren();
+    for (const auto& child : children) {
         auto targetNode = FindLazyForEachNode(child, false);
         if (targetNode.has_value()) {
             return targetNode;
