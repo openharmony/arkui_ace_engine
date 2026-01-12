@@ -203,4 +203,21 @@ HWTEST_F(ForceSplitUtilsTest, ParseSystemForceSplitConfig008, TestSize.Level1)
     EXPECT_TRUE(ret);
     EXPECT_TRUE(config.navigationDisableDivider);
 }
+/**
+ * @tc.name: ParseSystemForceSplitConfig009
+ * @tc.desc: Branch: if (!configJson) { => false
+ *                   if (!configJson->IsObject()) { => false
+ *                   if (!configJson->Contains(NAVIGATION_OPTIONS_KEY)) { => false
+ *                   if (!navOptions || !navOptions->IsObject()) { => false
+ *                   if (navOptions->Contains(NAVIGATION_OPTIONS_DISABLE_DIVIDER_KEY)) { => true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ForceSplitUtilsTest, ParseSystemForceSplitConfig009, TestSize.Level1)
+{
+    std::string configStr = "{ \"navigationOptions\": { \"disableDivider\": true } }";
+    NG::ForceSplitConfig config;
+    auto ret = NG::ForceSplitUtils::ParseSystemForceSplitConfig(configStr, config);
+    EXPECT_TRUE(ret);
+    EXPECT_TRUE(config.isArkUIHookEnabled);
+}
 } // namespace OHOS::Ace
