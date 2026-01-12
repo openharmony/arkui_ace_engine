@@ -50,6 +50,9 @@ constexpr char ANI_TABCONTENT_WITH_OPTIONS_CLS[] =
     "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Function1}:";
 constexpr char ANI_TABCONTENT_CLS[] = "C{std.core.Function1}:";
 constexpr char ANI_SIZE_INNER_CLS[] = "@ohos.arkui.observer.uiObserver.SizeInner";
+constexpr char ANI_WINDOW_SIZE_BREAKPOINT_INFO_CLS[] = "arkui.component.enums.WindowSizeLayoutBreakpointInfo";
+constexpr char ANI_WIDTHBREAKPOINT_TYPE[] = "arkui.component.enums.WidthBreakpoint";
+constexpr char ANI_HEIGHTBREAKPOINT_TYPE[] = "arkui.component.enums.HeightBreakpoint";
 } // namespace
 namespace OHOS::Ace {
 class UiObserver {
@@ -783,6 +786,81 @@ public:
                 }
             }
         }
+    }
+
+    void RegisterWindowSizeBreakpointCallback(int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedWindowSizeBreakpointListeners_.find(uiContextInstanceId);
+        if (iter == specifiedWindowSizeBreakpointListeners_.end()) {
+            specifiedWindowSizeBreakpointListeners_.emplace(uiContextInstanceId, std::list<ani_ref>({ cb }));
+            return;
+        }
+        auto& holder = iter->second;
+        if (std::find(holder.begin(), holder.end(), cb) != holder.end()) {
+            return;
+        }
+        holder.emplace_back(cb);
+    }
+
+    void UnRegisterWindowSizeBreakpointCallback(ani_env* env, int32_t uiContextInstanceId, ani_ref& cb)
+    {
+        if (uiContextInstanceId == 0) {
+            uiContextInstanceId = Container::CurrentId();
+        }
+        auto iter = specifiedWindowSizeBreakpointListeners_.find(uiContextInstanceId);
+        if (iter == specifiedWindowSizeBreakpointListeners_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        if (cb == nullptr) {
+            holder.clear();
+            return;
+        }
+        holder.erase(std::remove_if(
+            holder.begin(), holder.end(), [env, cb, this](ani_ref cb1) { return AniEqual(env, cb, cb1); }),
+            holder.end());
+    }
+
+    void HandleWindowSizeBreakpointChange(ani_env* env, int32_t instanceId, const WindowSizeBreakpoint& breakpoint)
+    {
+        auto iter = specifiedWindowSizeBreakpointListeners_.find(instanceId);
+        if (iter == specifiedWindowSizeBreakpointListeners_.end()) {
+            return;
+        }
+        auto& holder = iter->second;
+        std::vector<ani_ref> callbackParams;
+        ani_ref fnReturnVal;
+        ani_object res;
+        CreateWindowSizeBreakpointInfo(env, breakpoint, res);
+        callbackParams.emplace_back(res);
+        for (auto& cb : holder) {
+            env->FunctionalObject_Call(
+                reinterpret_cast<ani_fn_object>(cb), callbackParams.size(), callbackParams.data(), &fnReturnVal);
+        }
+    }
+
+    void CreateWindowSizeBreakpointInfo(ani_env* env, const WindowSizeBreakpoint& breakpoint, ani_object& res)
+    {
+        ani_class cls;
+        env->FindClass(ANI_WINDOW_SIZE_BREAKPOINT_INFO_CLS, &cls);
+        ani_method windowSizeBreakpointInfoCtor;
+        env->Class_FindMethod(cls, "<ctor>", nullptr, &windowSizeBreakpointInfoCtor);
+        env->Object_New(cls, windowSizeBreakpointInfoCtor, &res);
+        ani_enum widthBreakpointEnum;
+        env->FindEnum(ANI_WIDTHBREAKPOINT_TYPE, &widthBreakpointEnum);
+        ani_enum_item widthBreakpointItem;
+        env->Enum_GetEnumItemByIndex(
+            widthBreakpointEnum, static_cast<ani_size>(breakpoint.widthBreakpoint), &widthBreakpointItem);
+        env->Object_SetPropertyByName_Ref(res, "widthBreakpoint", widthBreakpointItem);
+        ani_enum heightBreakpointEnum;
+        env->FindEnum(ANI_HEIGHTBREAKPOINT_TYPE, &heightBreakpointEnum);
+        ani_enum_item heightBreakpointItem;
+        env->Enum_GetEnumItemByIndex(
+            heightBreakpointEnum, static_cast<ani_size>(breakpoint.heightBreakpoint), &heightBreakpointItem);
+        env->Object_SetPropertyByName_Ref(res, "heightBreakpoint", heightBreakpointItem);
     }
 
     void HandleDensityChange(ani_env* env, double density)
@@ -1531,6 +1609,7 @@ private:
     static std::list<ani_ref> routerPageSizeChangeListeners_;
     static std::list<ani_ref> unspecifiedNavDestinationSizeChangeListeners_;
     static std::unordered_map<int32_t, std::list<ani_ref>> specifiedNavDestinationSizeChangeListeners_;
+    static std::unordered_map<int32_t, std::list<ani_ref>> specifiedWindowSizeBreakpointListeners_;
 };
 
 std::list<ani_ref> UiObserver::unspecifiedNavigationListeners_;
@@ -1541,6 +1620,7 @@ std::unordered_map<int32_t, NavIdAndListenersMap> UiObserver::uiContextNavDesSwi
 std::list<ani_ref> UiObserver::routerPageSizeChangeListeners_;
 std::list<ani_ref> UiObserver::unspecifiedNavDestinationSizeChangeListeners_;
 std::unordered_map<int32_t, std::list<ani_ref>> UiObserver::specifiedNavDestinationSizeChangeListeners_;
+std::unordered_map<int32_t, std::list<ani_ref>> UiObserver::specifiedWindowSizeBreakpointListeners_;
 
 static UiObserver* Unwrapp(ani_env* env, ani_object object)
 {
@@ -2184,6 +2264,71 @@ static void offNavDestinationSwitchWithIdContext([[maybe_unused]] ani_env* env, 
     UiObserver::UnRegisterNavDestinationSwitchCallback(env, idMs, navigationId, fnObjGlobalRef);
 }
 
+static void OnWindowSizeLayoutBreakpointChange([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    int32_t idMs = Container::CurrentId();
+    observer->RegisterWindowSizeBreakpointCallback(idMs, fnObjGlobalRef);
+}
+
+static void OffWindowSizeLayoutBreakpointChange([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_fn_object fnObj)
+{
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+    int32_t idMs = Container::CurrentId();
+    observer->UnRegisterWindowSizeBreakpointCallback(env, idMs, fnObjGlobalRef);
+}
+static void onWindowSizeLayoutBreakpointChangeContext([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    ani_fn_object fnObj)
+{
+    if (fnObj == nullptr) {
+        return;
+    }
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        LOGE("observer-ani context is null.");
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    int32_t idMs = Container::CurrentId();
+    observer->RegisterWindowSizeBreakpointCallback(idMs, fnObjGlobalRef);
+}
+
+static void offWindowSizeLayoutBreakpointChangeContext([[maybe_unused]] ani_env* env,
+                                                       [[maybe_unused]] ani_object object, ani_object fnObj)
+{
+    auto* observer = Unwrapp(env, object);
+    if (observer == nullptr) {
+        return;
+    }
+    ani_ref fnObjGlobalRef = nullptr;
+    ani_boolean isUndef = ANI_FALSE;
+    env->Reference_IsUndefined(fnObj, &isUndef);
+    if (isUndef != ANI_TRUE) {
+        env->GlobalReference_Create(reinterpret_cast<ani_ref>(fnObj), &fnObjGlobalRef);
+    }
+    int32_t idMs = Container::CurrentId();
+    observer->UnRegisterWindowSizeBreakpointCallback(env, idMs, fnObjGlobalRef);
+}
 static void OnTabChange([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object, ani_fn_object fnObj)
 {
     if (fnObj == nullptr) {
@@ -2499,6 +2644,11 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
                                             NG::AbilityContextInfo& context, const NG::RouterPageInfoNG& info) {
         observer->HandleRouterPageStateChange(env, context, info);
     };
+    auto windowSizeBreakpointChangeCallback = [observer, env](
+        int32_t instanceId, const WindowSizeBreakpoint& breakpoint) {
+        observer->HandleWindowSizeBreakpointChange(env, instanceId, breakpoint);
+    };
+    NG::UIObserverHandler::GetInstance().SetWinSizeLayoutBreakpointChangeFuncAni(windowSizeBreakpointChangeCallback);
     NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFuncForAni(routerPageInfoChangeCallback);
     auto tabContentCallback = [observer, env](const NG::TabContentInfo& info) {
         observer->HandleTabContentUpdate(env, info);
@@ -2569,6 +2719,10 @@ bool ANI_ConstructorForAni(ani_env* env)
             "offNavDestinationSwitch",
             "C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Function1}:",
             reinterpret_cast<void*>(OHOS::Ace::offNavDestinationSwitchWithIdContext) },
+        ani_native_function { "onWindowSizeLayoutBreakpointChange",
+            "C{std.core.Function1}:", reinterpret_cast<void*>(OHOS::Ace::onWindowSizeLayoutBreakpointChangeContext) },
+        ani_native_function { "offWindowSizeLayoutBreakpointChange",
+            "C{std.core.Function1}:", reinterpret_cast<void*>(OHOS::Ace::offWindowSizeLayoutBreakpointChangeContext) },
     };
 
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
@@ -2636,6 +2790,11 @@ bool ANI_ConstructorForAni(ani_env* env)
         ani_native_function { "offWillDraw", nullptr, reinterpret_cast<void*>(OHOS::Ace::OffWillDraw) },
         ani_native_function { "onDidLayout", nullptr, reinterpret_cast<void*>(OHOS::Ace::OnDidLayout) },
         ani_native_function { "offDidLayout", nullptr, reinterpret_cast<void*>(OHOS::Ace::OffDidLayout) },
+
+        ani_native_function { "onWindowSizeLayoutBreakpointChange",
+            "C{std.core.Function1}:", reinterpret_cast<void*>(OHOS::Ace::OnWindowSizeLayoutBreakpointChange) },
+        ani_native_function { "offWindowSizeLayoutBreakpointChange",
+            "C{std.core.Function1}:", reinterpret_cast<void*>(OHOS::Ace::OffWindowSizeLayoutBreakpointChange) },
 
         ani_native_function{ "onScrollEvent",
             "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Function1}:",
