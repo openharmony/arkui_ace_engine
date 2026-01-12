@@ -255,7 +255,7 @@ ani_long NativeCustomComponent::ConstructCustomNode(ani_env* env, [[maybe_unused
 }
 
 void NativeCustomComponent::CustomNodeAddChild(ani_env* env, [[maybe_unused]] ani_object obj,
-    ani_long parent, ani_long child) 
+    ani_long parent, ani_long child)
 {
     Ark_NodeHandle parentNode = reinterpret_cast<Ark_NodeHandle>(parent);
     Ark_NodeHandle childNode = reinterpret_cast<Ark_NodeHandle>(child);
