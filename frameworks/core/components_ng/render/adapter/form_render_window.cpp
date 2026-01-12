@@ -287,4 +287,11 @@ void FormRenderWindow::InitOnVsyncCallback()
 #endif
 }
 
+void FormRenderWindow::SetUiDvsyncSwitch(bool dvsyncSwitch)
+{
+    if (receiver_ && (uiContentType_ == UIContentType::DYNAMIC_COMPONENT)) {
+        receiver_->SetUiDvsyncSwitch(dvsyncSwitch)
+    }
+}
+
 } // namespace OHOS::Ace
