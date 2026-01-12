@@ -498,6 +498,7 @@
       OHOS::Ace::RatingComponent::*;
       "OHOS::Ace::Component::Component()";
       "OHOS::Ace::NG::CreateProxyNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
+      OHOS::Ace::Framework::JSThemeScope::*;
 
       "OHOS::Ace::NG::ViewStackProcessor::Pop()";
       "OHOS::Ace::MultiModalScene::UnSubscribeVoiceEvent(OHOS::Ace::VoiceEvent const&)";
