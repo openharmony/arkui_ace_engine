@@ -756,7 +756,6 @@ namespace Converter {
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
     template<> ACE_FORCE_EXPORT double Convert(const Ark_Float64& src);
     template<> float Convert(const Ark_Float32& src);
-    template<> size_t Convert(const Ark_Float64& src);
     template<> ACE_FORCE_EXPORT float Convert(const Ark_Float64& src);
     template<> int Convert(const Ark_Float64& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_F64& src);

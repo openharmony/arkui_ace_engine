@@ -15586,8 +15586,8 @@ typedef struct Ark_LeadingMarginSpanDrawInfo {
     Ark_Float64 bottom;
     Ark_Float64 baseline;
     Ark_TextDirection direction;
-    Ark_Float64 start;
-    Ark_Float64 end;
+    Ark_Int32 start;
+    Ark_Int32 end;
     Ark_Boolean first;
 } Ark_LeadingMarginSpanDrawInfo;
 typedef struct Opt_LeadingMarginSpanDrawInfo {

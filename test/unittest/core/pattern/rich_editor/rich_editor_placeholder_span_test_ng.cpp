@@ -218,18 +218,33 @@ HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan003, TestSize.Level0
  */
 HWTEST_F(RichEditorPlaceholderSpanTestNg, AddPlaceholderSpan004, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. Get richEditorPattern and create a builderNode
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     auto builderNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
+
+    /**
+     * @tc.steps: step2. Create span options and verify host is not null
+     */
     SpanOptionBase options = {};
     auto host = richEditorPattern->GetHost();
     EXPECT_NE(host, nullptr);
+
+    /**
+     * @tc.steps: step3. Add a test span and populate spans_ with PlaceholderSpanItems
+     */
     AddSpan("test");
     OHOS::Ace::RefPtr<OHOS::Ace::NG::SpanItem> spanItem = AceType::MakeRefPtr<PlaceholderSpanItem>();
     richEditorPattern->spans_.emplace_back(spanItem);
     richEditorPattern->spans_.emplace_back(spanItem);
     richEditorPattern->spans_.emplace_back(spanItem);
+
+    /**
+     * @tc.steps: step4. Call AddPlaceholderSpan function
+     */
     auto ret = richEditorPattern->AddPlaceholderSpan(builderNode, {});
     EXPECT_NE(ret, host->GetChildren().size());
 }

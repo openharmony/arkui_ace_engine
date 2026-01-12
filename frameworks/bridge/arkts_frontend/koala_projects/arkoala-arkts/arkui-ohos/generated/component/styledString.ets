@@ -1363,8 +1363,8 @@ export interface LeadingMarginSpanDrawInfo {
     bottom: double;
     baseline: double;
     direction: TextDirection;
-    start: double;
-    end: double;
+    start: int32;
+    end: int32;
     first: boolean;
 }
 export class GestureStyle_serializer {
@@ -1630,9 +1630,9 @@ export class LeadingMarginSpanDrawInfo_serializer {
         const valueHolderForDirection  = value.direction
         valueSerializer.writeInt32(valueHolderForDirection.valueOf())
         const valueHolderForStart  = value.start
-        valueSerializer.writeFloat64(valueHolderForStart)
+        valueSerializer.writeInt32(valueHolderForStart)
         const valueHolderForEnd  = value.end
-        valueSerializer.writeFloat64(valueHolderForEnd)
+        valueSerializer.writeInt32(valueHolderForEnd)
         const valueHolderForFirst  = value.first
         valueSerializer.writeBoolean(valueHolderForFirst)
     }
@@ -1643,8 +1643,8 @@ export class LeadingMarginSpanDrawInfo_serializer {
         const bottomTmpResult : double = valueDeserializer.readFloat64()
         const baselineTmpResult : double = valueDeserializer.readFloat64()
         const directionTmpResult : TextDirection = TextDirection.fromValue(valueDeserializer.readInt32())
-        const startTmpResult : double = valueDeserializer.readFloat64()
-        const endTmpResult : double = valueDeserializer.readFloat64()
+        const startTmpResult : int32 = valueDeserializer.readInt32()
+        const endTmpResult : int32 = valueDeserializer.readInt32()
         const firstTmpResult : boolean = valueDeserializer.readBoolean()
         let value : LeadingMarginSpanDrawInfo = ({x: xTmpResult, top: topTmpResult, bottom: bottomTmpResult, baseline: baselineTmpResult, direction: directionTmpResult, start: startTmpResult, end: endTmpResult, first: firstTmpResult} as LeadingMarginSpanDrawInfo)
         return value
