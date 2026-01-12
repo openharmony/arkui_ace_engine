@@ -108,7 +108,7 @@ import { FrameNode, ExpandMode, LayoutConstraint, CrossLanguageOptions } from "a
 import { OnFoldStatusChangeInfo, FolderStackOptions, HoverEventParam } from "./../../component/folderStack"
 import { PasteButtonOnClickResult, PasteDescription, PasteIconStyle } from "./../../component/pasteButton"
 import { PatternLockChallengeResult, PatternLockController, CircleStyleOptions } from "./../../component/patternLock"
-import { PickerIndicatorType, PickerAttribute, PickerOptions, PickerIndicatorStyle } from "./../../component/picker"
+import { PickerIndicatorType, UIPickerComponentOptions, PickerIndicatorStyle } from "./../../component/uiPickerComponent"
 import { default as pointer } from "@ohos.multimodalInput.pointer"
 import { ProgressConfiguration, ProgressStatus, ProgressStyle, ProgressType, ProgressOptions, LinearStyleOptions, ScanEffectOptions, CommonProgressStyleOptions, ProgressStyleOptions, RingStyleOptions, CapsuleStyleOptions } from "./../../component/progress"
 import { RadioIndicatorType, RadioConfiguration, RadioOptions, RadioStyle } from "./../../component/radio"
@@ -2364,9 +2364,6 @@ export class TypeChecker {
     static isPickerIndicatorType(value: Object | string | number | undefined): boolean {
         return value instanceof PickerIndicatorType
     }
-    static isPickerOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
-        return value instanceof PickerOptions
-    }
     static isPickerTextStyle(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof PickerTextStyle
     }
@@ -3587,6 +3584,9 @@ export class TypeChecker {
     }
     static isuiObserver_RouterPageState(value: Object | string | number | undefined): boolean {
         return value instanceof uiObserver.RouterPageState
+    }
+    static isUIPickerComponentOptions(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof UIPickerComponentOptions
     }
     static isUIScrollableCommonEvent(value: Object | string | number | undefined): boolean {
         return value instanceof UIScrollableCommonEvent

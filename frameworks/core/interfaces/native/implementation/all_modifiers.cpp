@@ -141,7 +141,6 @@ const GENERATED_ArkUINodeContainerModifier* GetNodeContainerModifier();
 const GENERATED_ArkUIPasteButtonModifier* GetPasteButtonModifier();
 const GENERATED_ArkUIPathModifier* GetPathModifier();
 const GENERATED_ArkUIPatternLockModifier* GetPatternLockModifier();
-const GENERATED_ArkUIPickerModifier* GetPickerModifier();
 const GENERATED_ArkUIPluginComponentModifier* GetPluginComponentModifier();
 const GENERATED_ArkUIPolygonModifier* GetPolygonModifier();
 const GENERATED_ArkUIPolylineModifier* GetPolylineModifier();
@@ -189,6 +188,7 @@ const GENERATED_ArkUITimePickerModifier* GetTimePickerModifier();
 const GENERATED_ArkUIToggleModifier* GetToggleModifier();
 const GENERATED_ArkUIToolBarItemModifier* GetToolBarItemModifier();
 const GENERATED_ArkUIUIExtensionComponentModifier* GetUIExtensionComponentModifier();
+const GENERATED_ArkUIUIPickerComponentModifier* GetUIPickerComponentModifier();
 const GENERATED_ArkUIVideoModifier* GetVideoModifier();
 const GENERATED_ArkUIWaterFlowModifier* GetWaterFlowModifier();
 const GENERATED_ArkUIWebModifier* GetWebModifier();
@@ -324,7 +324,6 @@ const GENERATED_ArkUIPath2DAccessor* GetPath2DAccessor();
 const GENERATED_ArkUIPatternLockControllerAccessor* GetPatternLockControllerAccessor();
 const GENERATED_ArkUIPermissionRequestAccessor* GetPermissionRequestAccessor();
 const GENERATED_ArkUIPersistentStorageBackendAccessor* GetPersistentStorageBackendAccessor();
-const GENERATED_ArkUIPickerModifierAccessor* GetPickerModifierAccessor();
 const GENERATED_ArkUIPinchGestureEventAccessor* GetPinchGestureEventAccessor();
 const GENERATED_ArkUIPinchRecognizerAccessor* GetPinchRecognizerAccessor();
 const GENERATED_ArkUIPixelMapMockAccessor* GetPixelMapMockAccessor();
@@ -474,7 +473,6 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetPasteButtonModifier,
         GetPathModifier,
         GetPatternLockModifier,
-        GetPickerModifier,
         GetPluginComponentModifier,
         GetPolygonModifier,
         GetPolylineModifier,
@@ -522,6 +520,7 @@ const GENERATED_ArkUINodeModifiers* GENERATED_GetArkUINodeModifiers()
         GetToggleModifier,
         GetToolBarItemModifier,
         GetUIExtensionComponentModifier,
+        GetUIPickerComponentModifier,
         GetVideoModifier,
         GetWaterFlowModifier,
         GetWebModifier,
@@ -663,7 +662,6 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetPatternLockControllerAccessor,
         GetPermissionRequestAccessor,
         GetPersistentStorageBackendAccessor,
-        GetPickerModifierAccessor,
         GetPinchGestureEventAccessor,
         GetPinchRecognizerAccessor,
         GetPixelMapMockAccessor,

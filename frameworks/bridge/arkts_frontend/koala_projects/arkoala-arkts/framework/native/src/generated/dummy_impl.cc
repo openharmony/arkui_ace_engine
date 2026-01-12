@@ -10468,100 +10468,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // PatternLockAttributeModifier
-    namespace PickerModifier {
-    Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                    Ark_Int32 flags)
-    {
-        if (!needGroupedLog(1))
-        {
-            return new TreeNode("Picker", id, flags);;
-        }
-        string out("construct(");
-        WriteToString(&out, id);
-        out.append(", ");
-        WriteToString(&out, flags);
-        out.append(") \n");
-        out.append("[return nullptr] \n");
-        appendGroupedLog(1, out);
-        return new TreeNode("Picker", id, flags);;
-    }
-    } // PickerModifier
-    namespace PickerInterfaceModifier {
-    void SetPickerOptionsImpl(Ark_NativePointer node,
-                              const Opt_PickerOptions* options)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setPickerOptions(");
-        WriteToString(&out, options);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    } // PickerInterfaceModifier
-    namespace PickerAttributeModifier {
-    void SetOnChangeImpl(Ark_NativePointer node,
-                         const Opt_OnPickerCallback* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setOnChange(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void SetOnScrollStopImpl(Ark_NativePointer node,
-                             const Opt_OnPickerCallback* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setOnScrollStop(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void SetCanLoopImpl(Ark_NativePointer node,
-                        const Opt_Boolean* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setCanLoop(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
-                                     const Opt_Boolean* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setEnableHapticFeedback(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    void SetSelectionIndicatorImpl(Ark_NativePointer node,
-                                   const Opt_PickerIndicatorStyle* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setSelectionIndicator(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    } // PickerAttributeModifier
     namespace PluginComponentModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -20099,6 +20005,100 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // UIExtensionComponentAttributeModifier
+    namespace UIPickerComponentModifier {
+    Ark_NativePointer ConstructImpl(Ark_Int32 id,
+                                    Ark_Int32 flags)
+    {
+        if (!needGroupedLog(1))
+        {
+            return new TreeNode("UIPickerComponent", id, flags);;
+        }
+        string out("construct(");
+        WriteToString(&out, id);
+        out.append(", ");
+        WriteToString(&out, flags);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return new TreeNode("UIPickerComponent", id, flags);;
+    }
+    } // UIPickerComponentModifier
+    namespace UIPickerComponentInterfaceModifier {
+    void SetUIPickerComponentOptionsImpl(Ark_NativePointer node,
+                                         const Opt_UIPickerComponentOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setUIPickerComponentOptions(");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // UIPickerComponentInterfaceModifier
+    namespace UIPickerComponentAttributeModifier {
+    void SetOnChangeImpl(Ark_NativePointer node,
+                         const Opt_OnUIPickerComponentCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnChange(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetOnScrollStopImpl(Ark_NativePointer node,
+                             const Opt_OnUIPickerComponentCallback* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnScrollStop(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetCanLoopImpl(Ark_NativePointer node,
+                        const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setCanLoop(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
+                                     const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setEnableHapticFeedback(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetSelectionIndicatorImpl(Ark_NativePointer node,
+                                   const Opt_PickerIndicatorStyle* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setSelectionIndicator(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // UIPickerComponentAttributeModifier
     namespace VideoModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                     Ark_Int32 flags)
@@ -23648,20 +23648,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &ArkUIPatternLockModifierImpl;
     }
 
-    const GENERATED_ArkUIPickerModifier* GetPickerModifier()
-    {
-        static const GENERATED_ArkUIPickerModifier ArkUIPickerModifierImpl {
-            PickerModifier::ConstructImpl,
-            PickerInterfaceModifier::SetPickerOptionsImpl,
-            PickerAttributeModifier::SetOnChangeImpl,
-            PickerAttributeModifier::SetOnScrollStopImpl,
-            PickerAttributeModifier::SetCanLoopImpl,
-            PickerAttributeModifier::SetEnableHapticFeedbackImpl,
-            PickerAttributeModifier::SetSelectionIndicatorImpl,
-        };
-        return &ArkUIPickerModifierImpl;
-    }
-
     const GENERATED_ArkUIPluginComponentModifier* GetPluginComponentModifier()
     {
         static const GENERATED_ArkUIPluginComponentModifier ArkUIPluginComponentModifierImpl {
@@ -24738,6 +24724,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &ArkUIUIExtensionComponentModifierImpl;
     }
 
+    const GENERATED_ArkUIUIPickerComponentModifier* GetUIPickerComponentModifier()
+    {
+        static const GENERATED_ArkUIUIPickerComponentModifier ArkUIUIPickerComponentModifierImpl {
+            UIPickerComponentModifier::ConstructImpl,
+            UIPickerComponentInterfaceModifier::SetUIPickerComponentOptionsImpl,
+            UIPickerComponentAttributeModifier::SetOnChangeImpl,
+            UIPickerComponentAttributeModifier::SetOnScrollStopImpl,
+            UIPickerComponentAttributeModifier::SetCanLoopImpl,
+            UIPickerComponentAttributeModifier::SetEnableHapticFeedbackImpl,
+            UIPickerComponentAttributeModifier::SetSelectionIndicatorImpl,
+        };
+        return &ArkUIUIPickerComponentModifierImpl;
+    }
+
     const GENERATED_ArkUIVideoModifier* GetVideoModifier()
     {
         static const GENERATED_ArkUIVideoModifier ArkUIVideoModifierImpl {
@@ -25037,7 +25037,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPasteButtonModifier,
             GetPathModifier,
             GetPatternLockModifier,
-            GetPickerModifier,
             GetPluginComponentModifier,
             GetPolygonModifier,
             GetPolylineModifier,
@@ -25085,6 +25084,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetToggleModifier,
             GetToolBarItemModifier,
             GetUIExtensionComponentModifier,
+            GetUIPickerComponentModifier,
             GetVideoModifier,
             GetWaterFlowModifier,
             GetWebModifier,
@@ -40132,42 +40132,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // PersistentStorageBackendAccessor
-    namespace PickerModifierAccessor {
-    void DestroyPeerImpl(Ark_PickerModifier peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("destroyPeer(");
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Ark_PickerModifier ConstructImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return reinterpret_cast<Ark_PickerModifier>(100);
-        }
-        string out("new PickerModifier(");
-        out.append(") \n");
-        out.append("[return reinterpret_cast<Ark_PickerModifier>(100)] \n");
-        appendGroupedLog(1, out);
-        return reinterpret_cast<Ark_PickerModifier>(100);
-    }
-    Ark_NativePointer GetFinalizerImpl()
-    {
-        if (!needGroupedLog(1))
-        {
-            return fnPtr<KNativePointer>(dummyClassFinalizer);
-        }
-        string out("getFinalizer(");
-        out.append(") \n");
-        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
-        appendGroupedLog(1, out);
-        return fnPtr<KNativePointer>(dummyClassFinalizer);
-    }
-    } // PickerModifierAccessor
     namespace PinchGestureEventAccessor {
     void DestroyPeerImpl(Ark_PinchGestureEvent peer)
     {
@@ -51258,19 +51222,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &PersistentStorageBackendAccessorImpl;
     }
 
-    const GENERATED_ArkUIPickerModifierAccessor* GetPickerModifierAccessor()
-    {
-        static const GENERATED_ArkUIPickerModifierAccessor PickerModifierAccessorImpl {
-            PickerModifierAccessor::DestroyPeerImpl,
-            PickerModifierAccessor::ConstructImpl,
-            PickerModifierAccessor::GetFinalizerImpl,
-        };
-        return &PickerModifierAccessorImpl;
-    }
-
-    struct PickerModifierPeer {
-        virtual ~PickerModifierPeer() = default;
-    };
     const GENERATED_ArkUIPinchGestureEventAccessor* GetPinchGestureEventAccessor()
     {
         static const GENERATED_ArkUIPinchGestureEventAccessor PinchGestureEventAccessorImpl {
@@ -52880,7 +52831,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetPatternLockControllerAccessor,
             GetPermissionRequestAccessor,
             GetPersistentStorageBackendAccessor,
-            GetPickerModifierAccessor,
             GetPinchGestureEventAccessor,
             GetPinchRecognizerAccessor,
             GetPixelMapMockAccessor,
