@@ -2830,10 +2830,6 @@ void NavigationPattern::AddDividerHotZoneRect()
     CHECK_NULL_VOID(geometryNode);
     OffsetF hotZoneOffset;
     hotZoneOffset.SetX(-DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
-    auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
-    CHECK_NULL_VOID(layoutProperty);
-    auto dividerStart = layoutProperty->GetDividerStartMargin().value_or(DEFAULT_DIVIDER_START_MARGIN).ConvertToPx();
-    hotZoneOffset.SetY(dividerStart);
     SizeF hotZoneSize;
     hotZoneSize.SetWidth(realDividerWidth_ + DIVIDER_HOT_ZONE_HORIZONTAL_PADDING_NUM *
                                                  DEFAULT_DIVIDER_HOT_ZONE_HORIZONTAL_PADDING.ConvertToPx());
