@@ -31,7 +31,7 @@ class PointerEvent;
 
 namespace OHOS::Ace {
 
-struct AxisEvent final : public PointerEvent {
+struct ACE_FORCE_EXPORT AxisEvent final : public PointerEvent {
     ~AxisEvent() = default;
     int32_t id = 0;
 

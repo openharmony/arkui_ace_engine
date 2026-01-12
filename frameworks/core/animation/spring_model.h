@@ -26,7 +26,7 @@ enum class SpringModelType {
     OVER_DAMPED,     // over damping calculation model
 };
 
-class SpringProperty : public AceType {
+class ACE_FORCE_EXPORT SpringProperty : public AceType {
     DECLARE_ACE_TYPE(SpringProperty, AceType);
 
 public:
@@ -50,7 +50,7 @@ public:
 
     double Damping() const;
 
-    bool IsValid() const;
+    ACE_FORCE_EXPORT bool IsValid() const;
 
 private:
     // Default stiffness of spring.

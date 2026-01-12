@@ -49,7 +49,7 @@ public:
 
     bool IsAllEqual() const;
     bool HasValue() const;
-    bool HasRadius() const;
+    ACE_FORCE_EXPORT bool HasRadius() const;
     Offset GetOffset(double dipScale) const;
     double HorizontalWidth(double dipScale) const;
     double VerticalWidth(double dipScale) const;

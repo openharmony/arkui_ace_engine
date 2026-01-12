@@ -26,6 +26,9 @@
 #include "compatible/components/grid_container/grid_container_loader.h"
 #include "compatible/components/grid_row/grid_row_loader.h"
 #include "compatible/components/image-animator/image_animator_loader.h"
+#include "compatible/components/list/list_item_group_loader.h"
+#include "compatible/components/list/list_item_loader.h"
+#include "compatible/components/list/list_loader.h"
 #include "compatible/components/marquee/marquee_loader.h"
 #include "compatible/components/picker-view/picker_view_loader.h"
 #include "compatible/components/picker/picker_loader.h"
@@ -63,6 +66,9 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "grid-col", []() -> ComponentLoader* { return new GridColLoader(); } },
         { "grid-container", []() -> ComponentLoader* { return new GridContainerLoader(); } },
         { "grid-row", []() -> ComponentLoader* { return new GridRowLoader(); } },
+        { "list", []() -> ComponentLoader* { return new ListLoader(); } },
+        { "list-item", []() -> ComponentLoader* { return new ListItemLoader(); } },
+        { "list-item-group", []() -> ComponentLoader* { return new ListItemGroupLoader(); } },
         { "marquee", []() -> ComponentLoader* { return new MarqueeLoader(); } },
         { "label", []() -> ComponentLoader* { return new LabelLoader(); } },
         { "navigation-menu", []() -> ComponentLoader* { return new NavigationMenuLoader(); } },

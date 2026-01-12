@@ -30,7 +30,7 @@
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/tabs/tabs_model.h"
 #include "core/components_ng/pattern/text/span/span_object.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 #include "ace_engine_types.h"
 #include "arkoala_api_generated.h"

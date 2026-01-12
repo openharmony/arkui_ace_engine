@@ -16,7 +16,8 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_list_bridge.h"
 
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
-#include "frameworks/bridge/common/dom/dom_list.h"
+#include "frameworks/compatible/components/list/dom_list.h"
+#include "frameworks/core/components/list/list_compatible_modifier_helper.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -49,7 +50,9 @@ shared_ptr<JsValue> JsiListBridge::JsGetCurrentOffset(const shared_ptr<JsRuntime
         if (!domList) {
             return;
         }
-        auto offset = domList->GetCurrentOffset();
+        auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+        CHECK_NULL_VOID(modifier);
+        auto offset = modifier->getCurrentOffset(domList);
         offsetX = offset.GetX();
         offsetY = offset.GetY();
     };

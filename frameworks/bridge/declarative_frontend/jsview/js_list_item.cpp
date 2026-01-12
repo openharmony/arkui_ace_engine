@@ -24,8 +24,8 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
-#include "bridge/declarative_frontend/jsview/models/list_item_model_impl.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
@@ -49,7 +49,10 @@ ListItemModel* ListItemModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::ListItemModelNG());
             } else {
-                instance_.reset(new Framework::ListItemModelImpl());
+                static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("list-item");
+                static ListItemModel* instance =
+                    loader ? reinterpret_cast<ListItemModel*>(loader->CreateModel()) : nullptr;
+                return instance;
             }
 #endif
         }

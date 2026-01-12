@@ -18,8 +18,9 @@
 #include "base/log/event_report.h"
 #include "core/components/box/box_component_helper.h"
 #include "core/components/container_modal/container_modal_constants.h"
+#include "core/components/list/list_compatible_modifier_helper.h"
 #include "compatible/components/text_field/render_text_field.h"
-#include "core/components_v2/list/render_list.h"
+#include "compatible/components/list_v2/render_list.h"
 #include "core/gestures/parallel_recognizer.h"
 
 namespace OHOS::Ace {
@@ -490,7 +491,9 @@ void RenderBox::SetSelectedIndex(const GestureEvent& info)
 {
     auto renderList = FindTargetRenderNode<V2::RenderList>(context_.Upgrade(), info);
     if (renderList) {
-        selectedIndex_ = renderList->CalculateSelectedIndex(renderList, info, selectedItemSize_);
+        auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+        CHECK_NULL_VOID(modifier);
+        selectedIndex_ = modifier->calculateSelectedIndex(renderList, info, selectedItemSize_);
         initialDragDropNode_ = FindDragDropNode(context_.Upgrade(), info);
     }
 }
@@ -504,7 +507,9 @@ void RenderBox::SetInsertIndex(const RefPtr<DragDropEvent>& targetDragDropNode, 
     }
     auto renderList = renderNode->FindTargetRenderNode<V2::RenderList>(context_.Upgrade(), info);
     if (renderList) {
-        insertIndex_ = renderList->CalculateInsertIndex(renderList, info, selectedItemSize_);
+        auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+        CHECK_NULL_VOID(modifier);
+        insertIndex_ = modifier->calculateInsertIndex(renderList, info, selectedItemSize_);
     }
 }
 

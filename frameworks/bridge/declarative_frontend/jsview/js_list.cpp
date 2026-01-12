@@ -24,8 +24,8 @@
 #include "bridge/declarative_frontend/jsview/js_scrollable.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_list_children_main_size.h"
-#include "bridge/declarative_frontend/jsview/models/list_model_impl.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
@@ -49,7 +49,9 @@ ListModel* ListModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::ListModelNG());
             } else {
-                instance_.reset(new Framework::ListModelImpl());
+                static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("list");
+                static ListModel* instance = loader ? reinterpret_cast<ListModel*>(loader->CreateModel()) : nullptr;
+                return instance;
             }
 #endif
         }

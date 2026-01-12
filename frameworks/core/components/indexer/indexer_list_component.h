@@ -16,13 +16,13 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_INDEXER_INDEXER_LIST_COMPONENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_INDEXER_INDEXER_LIST_COMPONENT_H
 
+#include "compatible/components/list/list_component.h"
 #include "core/components/indexer/indexer_component.h"
-#include "core/components/list/list_component.h"
 #include "core/components/stack/stack_component.h"
 
 namespace OHOS::Ace {
 
-class IndexerListComponent : public SoleChildComponent {
+class ACE_FORCE_EXPORT IndexerListComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(IndexerListComponent, SoleChildComponent);
 
 public:
@@ -61,11 +61,11 @@ public:
     RefPtr<Element> CreateElement() override;
     RefPtr<RenderNode> CreateRenderNode() override;
 
-    void AppendChild(const RefPtr<Component>& child);
-    void InsertChild(uint32_t position, const RefPtr<Component>& child);
+    ACE_FORCE_EXPORT void AppendChild(const RefPtr<Component>& child);
+    ACE_FORCE_EXPORT void InsertChild(uint32_t position, const RefPtr<Component>& child);
     void RemoveChild(const RefPtr<Component>& child);
 
-    void BuildChildren();
+    ACE_FORCE_EXPORT void BuildChildren();
 
     void SetIndexerChangeEvent(const EventMarker& indexChange)
     {

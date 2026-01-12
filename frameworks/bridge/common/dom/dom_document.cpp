@@ -27,8 +27,6 @@
 #include "frameworks/bridge/common/dom/dom_form.h"
 #include "frameworks/bridge/common/dom/dom_image.h"
 #include "frameworks/compatible/components/label/modifier/label_modifier.h"
-#include "frameworks/bridge/common/dom/dom_list.h"
-#include "frameworks/bridge/common/dom/dom_list_item_group.h"
 #include "frameworks/bridge/common/dom/dom_navigation_bar.h"
 #include "frameworks/bridge/common/dom/dom_panel.h"
 #include "frameworks/bridge/common/dom/dom_progress.h"
@@ -107,9 +105,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_DIVIDER, &DOMNodeCreator<DOMDivider> },
         { DOM_NODE_TAG_FORM, &DOMNodeCreator<DOMForm> },
         { DOM_NODE_TAG_IMAGE, &DOMNodeCreator<DOMImage> },
-        { DOM_NODE_TAG_LIST, &DOMNodeCreator<DOMList> },
-        { DOM_NODE_TAG_LIST_ITEM, &DOMListItemCreator<DOMListItem> },
-        { DOM_NODE_TAG_LIST_ITEM_GROUP, &DOMListItemCreator<DOMListItemGroup> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_MENU, &DOMNodeCreator<DOMMenu> },
 #endif
@@ -173,6 +168,9 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         if (loader) {
             LOGI("DynamicModuleHelper getLoaderByName success, tag = %{public}s", tag.c_str());
             domNode = loader->CreateDomNode(nodeId, tag);
+            if (!domNode) {
+                domNode = loader->CreateDomNodeWithItemIndex(nodeId, tag, itemIndex);
+            }
         }
         if (!domNode) {
 #if defined(PREVIEW)

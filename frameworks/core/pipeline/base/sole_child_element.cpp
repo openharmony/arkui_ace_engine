@@ -15,7 +15,8 @@
 
 #include "core/pipeline/base/sole_child_element.h"
 
-#include "core/components_v2/list/list_item_component.h"
+#include "compatible/components/list_v2/list_item_component.h"
+#include "core/components/list/list_compatible_modifier_helper.h"
 
 namespace OHOS::Ace {
 
@@ -40,7 +41,9 @@ void SoleChildElement::PerformBuild()
 void SoleChildElement::LocalizedUpdateWithItemComponent(
     const RefPtr<Component>& innerMostWrappingComponent, const RefPtr<Component>& mainComponent)
 {
-    ACE_DCHECK(((AceType::DynamicCast<V2::ListItemComponent>(mainComponent) != nullptr) ||
+    auto* modifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+    CHECK_NULL_VOID(modifier);
+    ACE_DCHECK(((modifier->getV2ListItemComponent(mainComponent) != nullptr) ||
                    (AceType::DynamicCast<GridLayoutItemComponent>(mainComponent) != nullptr)) &&
                CanUpdate(mainComponent));
 

@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-class RosenScrollBarPainter : public virtual AceType {
+class ACE_FORCE_EXPORT RosenScrollBarPainter : public virtual AceType {
     DECLARE_ACE_TYPE(RosenScrollBarPainter, AceType);
 
 public:
