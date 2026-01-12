@@ -296,12 +296,12 @@ LayoutConstraintF NavDestinationNodeBase::AdjustLayoutConstarintIfNeeded(const L
     }
     auto layoutConstraint = viewportConfig_->CreateRootLayoutConstraint();
     auto ctx = GetContext();
-    bool isWindowFullScreen = false;
+    bool isIgnoreSafeArea = false;
     if (ctx) {
         auto mgr = ctx->GetSafeAreaManager();
-        isWindowFullScreen = mgr && mgr->IsFullScreen();
+        isIgnoreSafeArea = mgr && mgr->IsIgnoreSafeArea();
     }
-    if (!isWindowFullScreen) {
+    if (!isIgnoreSafeArea) {
         ApplySafeArea(safeAreaInsets_, layoutConstraint);
     }
     return layoutConstraint;
