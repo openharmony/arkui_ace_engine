@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_ROSEN_RENDER_SWIPER_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_ROSEN_RENDER_SWIPER_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_ROSEN_RENDER_SWIPER_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_ROSEN_RENDER_SWIPER_H
 
-#include "core/components/swiper/render_swiper.h"
+#include "compatible/components/swiper/render_swiper.h"
 #include "core/components_ng/render/drawing.h"
 
 namespace OHOS::Ace {
@@ -56,4 +56,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SWIPER_ROSEN_RENDER_SWIPER_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_ROSEN_RENDER_SWIPER_H

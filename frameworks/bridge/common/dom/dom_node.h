@@ -40,7 +40,6 @@
 #include "core/components/positioned/positioned_component.h"
 #include "core/components/shared_transition/shared_transition_component.h"
 #include "core/components/stack/stack_component.h"
-#include "core/components/swiper/swiper_component.h"
 #include "core/components/theme/theme_utils.h"
 #include "core/components/touch_listener/touch_listener_component.h"
 #include "core/components/transform/transform_component.h"

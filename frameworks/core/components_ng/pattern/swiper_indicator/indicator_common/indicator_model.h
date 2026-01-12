@@ -17,7 +17,6 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_INDICATOR_MODEL_H
 
 #include "base/geometry/axis.h"
-#include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_controller.h"
 
 namespace OHOS::Ace {

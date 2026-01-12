@@ -138,12 +138,6 @@ const std::shared_ptr<RegionEvent> DeclarationConstants::DEFAULT_REGION_EVENT = 
 const std::shared_ptr<SpanAttribute> DeclarationConstants::DEFAULT_SPAN_ATTR = std::make_shared<SpanAttribute>();
 const std::shared_ptr<SpanStyle> DeclarationConstants::DEFAULT_SPAN_STYLE = std::make_shared<SpanStyle>();
 
-// default value of swiper
-const std::shared_ptr<SwiperAttribute> DeclarationConstants::DEFAULT_SWIPER_ATTR = std::make_shared<SwiperAttribute>();
-const std::shared_ptr<SwiperStyle> DeclarationConstants::DEFAULT_SWIPER_STYLE = std::make_shared<SwiperStyle>();
-const std::shared_ptr<SwiperEvent> DeclarationConstants::DEFAULT_SWIPER_EVENT = std::make_shared<SwiperEvent>();
-const std::shared_ptr<SwiperMethod> DeclarationConstants::DEFAULT_SWIPER_METHOD = std::make_shared<SwiperMethod>();
-
 // default value of text
 const std::shared_ptr<TextSpecializedAttribute> DeclarationConstants::DEFAULT_TEXT_ATTR =
     std::make_shared<TextSpecializedAttribute>();

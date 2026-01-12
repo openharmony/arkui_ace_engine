@@ -129,7 +129,7 @@ ACE_EXPORT extern const char DOM_MARGIN_END[];
 ACE_EXPORT extern const char DOM_LAYOUT_IN_BOX[];
 ACE_EXPORT extern const char DOM_BACKGROUND_COLOR[];
 ACE_EXPORT extern const char DOM_BACKGROUND_IMAGE[];
-ACE_EXPORT extern const char DOM_FADE_COLOR[];
+ACE_FORCE_EXPORT extern const char DOM_FADE_COLOR[];
 ACE_EXPORT extern const char DOM_BOX_SHADOW_H[];
 ACE_EXPORT extern const char DOM_BOX_SHADOW_V[];
 ACE_EXPORT extern const char DOM_BOX_SHADOW_BLUR[];
@@ -455,9 +455,9 @@ ACE_EXPORT extern const char DOM_LIST_DIVIDER_LENGTH[];
 ACE_EXPORT extern const char DOM_LIST_DIVIDER_ORIGIN[];
 ACE_EXPORT extern const char DOM_LIST_ATTR_SELECTED[];
 ACE_EXPORT extern const char DOM_LIST_ACCESSIBILITY_DISABLED[];
-ACE_EXPORT extern const char DOM_SCROLL_EFFECT[];
-ACE_EXPORT extern const char DOM_SCROLL_EFFECT_SPRING[];
-ACE_EXPORT extern const char DOM_SCROLL_EFFECT_FADE[];
+ACE_FORCE_EXPORT extern const char DOM_SCROLL_EFFECT[];
+ACE_FORCE_EXPORT extern const char DOM_SCROLL_EFFECT_SPRING[];
+ACE_FORCE_EXPORT extern const char DOM_SCROLL_EFFECT_FADE[];
 ACE_EXPORT extern const char DOM_SCROLL_EFFECT_NONE[];
 ACE_EXPORT extern const char DOM_SCROLL_SCROLLBAR[];
 ACE_EXPORT extern const char DOM_SCROLL_SCROLLBAR_OFF[];
@@ -654,36 +654,7 @@ ACE_EXPORT extern const char DOM_STEPPER_SET_RIGHT_BUTTON_STATUS[];
 // stepper-item attribute style and event constants
 ACE_EXPORT extern const char DOM_STEPPER_ITEM_EVENT_APPEAR[];
 ACE_EXPORT extern const char DOM_STEPPER_ITEM_EVENT_DISAPPEAR[];
-
-// swiper attribute and style constants
-ACE_EXPORT extern const char DOM_INDEX[];
-ACE_EXPORT extern const char DOM_SWIPER_ANIMATION_OPACITY[];
-ACE_EXPORT extern const char DOM_AUTOPLAY[];
-ACE_EXPORT extern const char DOM_CACHED_SIZE[];
-ACE_EXPORT extern const char DOM_DISPLAY_MODE[];
-ACE_EXPORT extern const char DOM_DISPLAY_MODE_AUTO_LINEAR[];
-ACE_EXPORT extern const char DOM_INTERVAL[];
-ACE_EXPORT extern const char DOM_INDICATOR[];
-ACE_EXPORT extern const char DOM_LOOP[];
-ACE_EXPORT extern const char DOM_DURATION[];
-ACE_EXPORT extern const char DOM_VERTICAL[];
-ACE_EXPORT extern const char DOM_ANIMATION_CURVE[];
-ACE_EXPORT extern const char DOM_INDICATOR_COLOR[];
-ACE_EXPORT extern const char DOM_INDICATOR_MASK[];
-ACE_EXPORT extern const char DOM_INDICATOR_DISABLED[];
-ACE_EXPORT extern const char DOM_INDICATOR_SELECTEDCOLOR[];
-ACE_EXPORT extern const char DOM_INDICATOR_SIZE[];
-ACE_EXPORT extern const char DOM_INDICATOR_TOP[];
-ACE_EXPORT extern const char DOM_INDICATOR_LEFT[];
-ACE_EXPORT extern const char DOM_INDICATOR_RIGHT[];
-ACE_EXPORT extern const char DOM_INDICATOR_BOTTOM[];
-ACE_EXPORT extern const char DOM_METHOD_SWIPE_TO[];
-ACE_EXPORT extern const char DOM_METHOD_APPEND[];
-ACE_EXPORT extern const char DOM_METHOD_SHOW_PREVIOUS[];
-ACE_EXPORT extern const char DOM_METHOD_SHOW_NEXT[];
-ACE_EXPORT extern const char DOM_DIGITAL_INDICATOR[];
-ACE_EXPORT extern const char DOM_PREVIOUS_MARGIN[];
-ACE_EXPORT extern const char DOM_NEXT_MARGIN[];
+ACE_FORCE_EXPORT extern const char DOM_DURATION[];
 
 // switch attribute and style constants
 ACE_EXPORT extern const char DOM_CHECKED[];
@@ -781,8 +752,8 @@ ACE_EXPORT extern const char DOM_MOUSE[];
 ACE_EXPORT extern const char DOM_HOVER[];
 ACE_EXPORT extern const char DOM_SWIPE[];
 ACE_EXPORT extern const char DOM_CATCH_BUBBLE_SWIPE[];
-ACE_EXPORT extern const char DOM_ROTATION[];
-ACE_EXPORT extern const char DOM_ANIMATION_FINISH[];
+ACE_FORCE_EXPORT extern const char DOM_ROTATION[];
+ACE_FORCE_EXPORT extern const char DOM_ANIMATION_FINISH[];
 
 // video constants
 ACE_EXPORT extern const char DOM_VIDEO_POSITION_LEFT[];

@@ -23,7 +23,6 @@
 #include "core/interfaces/native/utility/peer_utils.h"
 
 #include "core/components/common/layout/constants.h"
-#include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
@@ -40,6 +39,10 @@ const Ark_Int32 AINT32_POS(1234);
 const Ark_Int32 AINT32_NEG(INT_MIN);
 const Ark_Float32 AFLT32_POS(1.234f);
 const Ark_Float32 AFLT32_NEG(-5.6789f);
+const double DEFAULT_SWIPER_ANIMATION_DURATION = 500.0;
+const double DEFAULT_SWIPER_AUTOPLAY_INTERVAL = 3000.0;
+const int32_t DEFAULT_SWIPER_CACHED_SIZE = -1;
+const int32_t DEFAULT_SWIPER_DISPLAY_COUNT = 1;
 
 const auto ANUM_INT_POS = ArkValue<Ark_Number>(AINT32_POS);
 const auto ANUM_INT_NEG = ArkValue<Ark_Number>(AINT32_NEG);

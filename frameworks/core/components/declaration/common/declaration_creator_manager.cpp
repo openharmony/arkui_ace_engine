@@ -40,7 +40,6 @@
 #include "core/components/declaration/piece/piece_declaration.h"
 #include "core/components/declaration/richtext/rich_text_declaration.h"
 #include "core/components/declaration/span/span_declaration.h"
-#include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components/declaration/text/text_declaration.h"
 #include "core/components/declaration/web/web_declaration.h"
 #include "core/components/declaration/xcomponent/xcomponent_declaration.h"
@@ -66,7 +65,6 @@ const RefPtr<Declaration> DeclarationCreatorManager::CreateDeclaration(const std
         { DOM_NODE_TAG_PIECE, DeclarationCreator<PieceDeclaration> },
         { DOM_NODE_TAG_RICH_TEXT, DeclarationCreator<RichTextDeclaration> },
         { DOM_NODE_TAG_SPAN, DeclarationCreator<SpanDeclaration> },
-        { DOM_NODE_TAG_SWIPER, DeclarationCreator<SwiperDeclaration> },
         { DOM_NODE_TAG_TEXT, DeclarationCreator<TextDeclaration> },
         { DOM_NODE_TAG_WEB, DeclarationCreator<WebDeclaration> },
         { DOM_NODE_TAG_XCOMPONENT, DeclarationCreator<XComponentDeclaration> },

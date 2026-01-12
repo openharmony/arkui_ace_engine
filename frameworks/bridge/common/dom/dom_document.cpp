@@ -35,7 +35,6 @@
 #endif
 #include "frameworks/bridge/common/dom/dom_slider.h"
 #include "frameworks/bridge/common/dom/dom_stack.h"
-#include "frameworks/bridge/common/dom/dom_swiper.h"
 #if defined(XCOMPONENT_SUPPORTED)
 #include "frameworks/bridge/common/dom/dom_xcomponent.h"
 #endif
@@ -130,7 +129,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_STEPPER, &DOMNodeCreator<DOMStepper> },
         { DOM_NODE_TAG_STEPPER_ITEM, &DOMListItemCreator<DOMStepperItem> },
 #endif
-        { DOM_NODE_TAG_SWIPER, &DOMNodeCreator<DOMSwiper> },
         { DOM_NODE_TAG_TEXT, &DOMNodeCreator<DOMText> },
 #ifndef WEARABLE_PRODUCT
 #ifdef WEB_SUPPORTED

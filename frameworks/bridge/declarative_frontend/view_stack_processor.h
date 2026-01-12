@@ -188,7 +188,7 @@ public:
     std::shared_ptr<JsPageCheckboxGroups> GetCheckboxGroupComponent();
 
     RefPtr<Component> GetNewComponent();
-    RefPtr<V2::InspectorComposedComponent> GetInspectorComposedComponent() const;
+    ACE_FORCE_EXPORT RefPtr<V2::InspectorComposedComponent> GetInspectorComposedComponent() const;
 
     void SetVisualState(VisualState state)
     {

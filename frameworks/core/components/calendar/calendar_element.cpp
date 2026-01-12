@@ -19,13 +19,26 @@
 #include "core/components/calendar/calendar_component_v2.h"
 #include "core/components/calendar/render_calendar.h"
 #include "core/components/display/render_display.h"
-#include "core/components/swiper/swiper_element.h"
+#include "core/common/dynamic_module_helper.h"
+#include "compatible/components/swiper/swiper_modifier.h"
 
 namespace OHOS::Ace {
 namespace {
 
 constexpr int REGISTER_CHANGE_LISTENER_ID = 1003;
 
+}
+
+const ArkUISwiperModifierCompatible* GetSwiperElementModifier()
+{
+    static const ArkUISwiperModifierCompatible* swiperModifier_ = nullptr;
+    if (swiperModifier_) {
+        return swiperModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("swiper");
+    CHECK_NULL_RETURN(loader, nullptr);
+    swiperModifier_ = reinterpret_cast<const ArkUISwiperModifierCompatible*>(loader->GetCustomModifier());
+    return swiperModifier_;
 }
 
 void CalendarElement::PerformBuild()
@@ -70,9 +83,6 @@ void CalendarElement::PerformBuild()
         BuildCardCalendar(calendar, childElement);
         element = childElement->GetChildren().back();
     }
-
-    auto swiperElement = AceType::DynamicCast<SwiperElement>(element);
-
     calendarController_->SetRequestFocusImpl([weak = WeakClaim(this)]() {
         auto element = weak.Upgrade();
         if (!element) {
@@ -80,8 +90,10 @@ void CalendarElement::PerformBuild()
         }
         element->RequestFocus();
     });
+    auto* modifier = GetSwiperElementModifier();
+    auto swiperElement = modifier->createSwiperElement(element);
     if (swiperElement) {
-        renderSwiper_ = AceType::DynamicCast<RenderSwiper>(swiperElement->GetRenderNode());
+        renderSwiper_ = swiperElement->GetRenderNode();
         if (renderSwiper_) {
             calendarController_->SetRenderSwiper(renderSwiper_);
         }
@@ -134,7 +146,8 @@ void CalendarElement::RegisterChangeEndListener(
         renderText->Update(textComponent);
         renderText->MarkNeedLayout();
     };
-    renderSwiper_->RegisterChangeEndListener(REGISTER_CHANGE_LISTENER_ID, onChanged);
+    auto* modifier = GetSwiperElementModifier();
+    modifier->createSwiperRender(renderSwiper_, REGISTER_CHANGE_LISTENER_ID, onChanged);
 }
 
 void CalendarElement::BuildCardCalendar(const RefPtr<CalendarComponent>& calendar, const RefPtr<Element>& element)
@@ -173,13 +186,14 @@ void CalendarElement::BuildCardCalendar(const RefPtr<CalendarComponent>& calenda
             return;
         }
         auto swiper = controller->GetRenderSwiper();
+        auto* modifier = GetSwiperElementModifier();
         if (!swiper) {
             return;
         }
-        if (swiper->GetMoveStatus()) {
+        if (modifier->getMoveStatus(swiper)) {
             return;
         }
-        if (controller->GetCurrentIndex() != swiper->GetCurrentIndex()) {
+        if (controller->GetCurrentIndex() != modifier->getCurrentIndex(swiper)) {
             return;
         }
         pre ? controller->GoToPrevMonth(1) : controller->GoToNextMonth(1);

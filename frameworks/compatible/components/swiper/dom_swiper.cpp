@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,9 +13,36 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/common/dom/dom_swiper.h"
+#include "compatible/components/swiper/dom_swiper.h"
 
 namespace OHOS::Ace::Framework {
+// swiper attribute and style constants
+const char DOM_INDEX[] = "index";
+const char DOM_SWIPER_ANIMATION_OPACITY[] = "animationopacity";
+const char DOM_AUTOPLAY[] = "autoplay";
+const char DOM_CACHED_SIZE[] = "cachedSize";
+const char DOM_DISPLAY_MODE[] = "displaymode";
+const char DOM_DISPLAY_MODE_AUTO_LINEAR[] = "autoLinear";
+const char DOM_INTERVAL[] = "interval";
+const char DOM_INDICATOR[] = "indicator";
+const char DOM_LOOP[] = "loop";
+const char DOM_VERTICAL[] = "vertical";
+const char DOM_ANIMATION_CURVE[] = "animationCurve";
+const char DOM_INDICATOR_MASK[] = "indicatormask";
+const char DOM_INDICATOR_DISABLED[] = "indicatordisabled";
+const char DOM_INDICATOR_SELECTEDCOLOR[] = "indicatorSelectedColor";
+const char DOM_INDICATOR_SIZE[] = "indicatorSize";
+const char DOM_INDICATOR_TOP[] = "indicatorTop";
+const char DOM_INDICATOR_LEFT[] = "indicatorLeft";
+const char DOM_INDICATOR_RIGHT[] = "indicatorRight";
+const char DOM_INDICATOR_BOTTOM[] = "indicatorBottom";
+const char DOM_METHOD_SWIPE_TO[] = "swipeTo";
+const char DOM_METHOD_APPEND[] = "append";
+const char DOM_METHOD_SHOW_PREVIOUS[] = "showPrevious";
+const char DOM_METHOD_SHOW_NEXT[] = "showNext";
+const char DOM_DIGITAL_INDICATOR[] = "digital";
+const char DOM_PREVIOUS_MARGIN[] = "previousMargin";
+const char DOM_NEXT_MARGIN[] = "nextMargin";
 namespace {
 
 constexpr double MAX_OPACITY = 255.0;

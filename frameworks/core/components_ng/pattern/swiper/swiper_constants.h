@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,19 +13,25 @@
  * limitations under the License.
  */
 
-#include "rosen_render_swiper.h"
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_ENUM_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_ENUM_H
 
 namespace OHOS::Ace {
-RefPtr<RenderNode> RenderSwiper::Create()
-{
-    if (SystemProperties::GetRosenBackendEnabled()) {
-#ifdef ENABLE_ROSEN_BACKEND
-        return AceType::MakeRefPtr<RosenRenderSwiper>();
-#else
-        return nullptr;
-#endif
-    } else {
-        return nullptr;
-    }
+enum class SwiperDisplayMode {
+    STRETCH = 0,
+    AUTO_LINEAR,
+};
+
+enum class SwiperIndicatorType {
+    DOT = 0,
+    DIGIT,
+    ARC_DOT,
+};
+
+enum class SwiperArcDirection {
+    THREE_CLOCK_DIRECTION = 0,
+    SIX_CLOCK_DIRECTION,
+    NINE_CLOCK_DIRECTION,
+};
 }
-} // namespace OHOS::Ace
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_ENUM_H

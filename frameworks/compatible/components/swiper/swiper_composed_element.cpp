@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components_v2/inspector/swiper_composed_element.h"
+#include "compatible/components/swiper/swiper_composed_element.h"
 
 #include "base/log/dump_log.h"
 #include "core/components_v2/inspector/utils.h"

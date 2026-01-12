@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,18 @@
  * limitations under the License.
  */
 
-#include "core/components/declaration/swiper/swiper_declaration.h"
+#include "compatible/components/swiper/swiper_declaration.h"
 
-#include "core/components/declaration/common/declaration_constants.h"
 #include "frameworks/bridge/common/utils/utils.h"
+#include <memory>
+#include "compatible/components/swiper/dom_swiper.h"
+#include "compatible/components/tab_bar/dom/dom_tab_constants.h"
 
 namespace OHOS::Ace {
+const std::shared_ptr<SwiperAttribute> DEFAULT_SWIPER_ATTR = std::make_shared<SwiperAttribute>();
+const std::shared_ptr<SwiperStyle> DEFAULT_SWIPER_STYLE = std::make_shared<SwiperStyle>();
+const std::shared_ptr<SwiperEvent> DEFAULT_SWIPER_EVENT = std::make_shared<SwiperEvent>();
+const std::shared_ptr<SwiperMethod> DEFAULT_SWIPER_METHOD = std::make_shared<SwiperMethod>();
 namespace {
 
 constexpr uint32_t METHOD_SWIPE_TO_ARGS_SIZE = 1;
@@ -47,11 +53,11 @@ void SwiperDeclaration::InitializeStyle()
 }
 void SwiperDeclaration::InitSpecialized()
 {
-    AddSpecializedAttribute(DeclarationConstants::DEFAULT_SWIPER_ATTR);
-    AddSpecializedStyle(DeclarationConstants::DEFAULT_SWIPER_STYLE);
-    AddSpecializedEvent(DeclarationConstants::DEFAULT_SWIPER_EVENT);
-    AddSpecializedMethod(DeclarationConstants::DEFAULT_SWIPER_METHOD);
-    AddSpecializedRemoteMessageEvent(DeclarationConstants::DEFAULT_SWIPER_EVENT);
+    AddSpecializedAttribute(DEFAULT_SWIPER_ATTR);
+    AddSpecializedStyle(DEFAULT_SWIPER_STYLE);
+    AddSpecializedEvent(DEFAULT_SWIPER_EVENT);
+    AddSpecializedMethod(DEFAULT_SWIPER_METHOD);
+    AddSpecializedRemoteMessageEvent(DEFAULT_SWIPER_EVENT);
 }
 
 bool SwiperDeclaration::SetSpecializedAttr(const std::pair<std::string, std::string>& attr)

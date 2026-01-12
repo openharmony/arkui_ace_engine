@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_SWIPER_SWIPER_DECLARATION_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_SWIPER_SWIPER_DECLARATION_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_SWIPER_DECLARATION_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_SWIPER_DECLARATION_H
 
 #include "core/components/common/properties/swiper_indicator.h"
 #include "core/components/declaration/common/declaration.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "frameworks/core/components/common/rotation/rotation_controller.h"
+#include "core/components_ng/pattern/swiper/swiper_constants.h"
 
 namespace OHOS::Ace {
 
@@ -28,23 +29,6 @@ inline constexpr double DEFAULT_SWIPER_ANIMATION_DURATION = 500.0;
 inline constexpr double DEFAULT_SWIPER_AUTOPLAY_INTERVAL = 3000.0;
 inline constexpr int32_t DEFAULT_SWIPER_CACHED_SIZE = -1;
 inline constexpr int32_t DEFAULT_SWIPER_DISPLAY_COUNT = 1;
-
-enum class SwiperDisplayMode {
-    STRETCH = 0,
-    AUTO_LINEAR,
-};
-
-enum class SwiperIndicatorType {
-    DOT = 0,
-    DIGIT,
-    ARC_DOT,
-};
-
-enum class SwiperArcDirection {
-    THREE_CLOCK_DIRECTION = 0,
-    SIX_CLOCK_DIRECTION,
-    NINE_CLOCK_DIRECTION,
-};
 
 struct SwiperAttribute : Attribute {
     uint32_t index = DEFAULT_SWIPER_CURRENT_INDEX;
@@ -428,4 +412,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_SWIPER_SWIPER_DECLARATION_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_SWIPER_SWIPER_DECLARATION_H
