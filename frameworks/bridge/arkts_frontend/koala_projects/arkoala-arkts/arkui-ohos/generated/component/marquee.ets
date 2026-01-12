@@ -406,8 +406,6 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements Mar
 export function MarqueeImpl(
     @memo
     style: ((attributes: MarqueeAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkMarqueeComponent>((): ArkMarqueeComponent => {
         return new ArkMarqueeComponent()
@@ -416,7 +414,6 @@ export function MarqueeImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

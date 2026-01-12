@@ -795,8 +795,6 @@ export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
 export function SpanImpl(
     @memo
     style: ((attributes: SpanAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkSpanComponent>((): ArkSpanComponent => {
         return new ArkSpanComponent()
@@ -805,7 +803,6 @@ export function SpanImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

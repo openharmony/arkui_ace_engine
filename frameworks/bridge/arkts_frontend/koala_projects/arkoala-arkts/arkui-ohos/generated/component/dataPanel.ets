@@ -365,8 +365,6 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements D
 export function DataPanelImpl(
     @memo
     style: ((attributes: DataPanelAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkDataPanelComponent>((): ArkDataPanelComponent => {
         return new ArkDataPanelComponent()
@@ -375,7 +373,6 @@ export function DataPanelImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

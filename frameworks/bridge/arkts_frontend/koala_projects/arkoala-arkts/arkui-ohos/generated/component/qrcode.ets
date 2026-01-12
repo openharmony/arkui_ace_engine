@@ -235,8 +235,6 @@ export class ArkQRCodeComponent extends ArkCommonMethodComponent implements QRCo
 export function QRCodeImpl(
     @memo
     style: ((attributes: QRCodeAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkQRCodeComponent>((): ArkQRCodeComponent => {
         return new ArkQRCodeComponent()
@@ -245,7 +243,6 @@ export function QRCodeImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
