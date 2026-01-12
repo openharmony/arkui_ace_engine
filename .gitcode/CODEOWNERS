@@ -3173,7 +3173,7 @@ interfaces/inner_api/BUILD.gn @arkui_architecture
 interfaces/inner_api/drawable_descriptor/ @arkui001
 interfaces/inner_api/form_render/ @form_framework
 interfaces/inner_api/ui_service_manager/ @ArkUI_ability_group
-interfaces/inner_api/ui_session/ @arkui_framework_resource
+interfaces/inner_api/ui_session/ @arkui_framework_xnode
 interfaces/inner_api/xcomponent_controller/ @ArkUI_ability_group
 interfaces/inner_api/ace_kit/include/ @arkui_architecture
 interfaces/inner_api/ace_kit/src/ @arkui_framework_resource
@@ -3755,6 +3755,8 @@ frameworks/core/interfaces/native/implementation/rich_editor_styled_string_contr
 frameworks/core/interfaces/native/implementation/rich_editor_base_controller_peer_impl.h @arkui_rich_editor
 frameworks/core/interfaces/native/implementation/rich_editor_controller_peer_impl.h @arkui_rich_editor
 frameworks/core/interfaces/native/implementation/rich_editor_styled_string_controller_peer_impl.h @arkui_rich_editor
+frameworks/core/interfaces/native/implementation/leading_margin_span_accessor.cpp @arkui_rich_editor
+frameworks/core/interfaces/native/implementation/leading_margin_span_peer.h @arkui_rich_editor
 frameworks/core/interfaces/native/implementation/copy_event_accessor.cpp @arkui_rich_editor
 frameworks/core/interfaces/native/implementation/copy_event_peer.h @arkui_rich_editor
 frameworks/core/interfaces/native/implementation/cut_event_accessor.cpp @arkui_rich_editor
@@ -3829,3 +3831,19 @@ frameworks/core/interfaces/native/ani/shape_ani_modifier.cpp @arkuieco3
 frameworks/core/interfaces/native/ani/shape_ani_modifier.h @arkuieco3
 frameworks/core/interfaces/native/ani/video_ani_modifier.cpp @arkuieco3
 frameworks/core/interfaces/native/ani/video_ani_modifier.h @arkuieco3
+
+[Scroll ArkTS1.2]
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/listItem.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/waterFlow.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/grid.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/gridItem.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/list.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/listItem.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/listItemGroup.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/refresh.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/scroll.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/scrollBar.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/waterFlow.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/generated/component/flowItem.ets @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/list/ @arkuiscroll
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/water_flow/ @arkuiscroll

@@ -23,7 +23,7 @@
 #include "base/utils/utils.h"
 #include "core/components/common/properties/placement.h"
 #include "core/components_ng/render/node_paint_method.h"
-#include "core/components_v2/list/list_component.h"
+#include "compatible/components/list_v2/list_component.h"
 
 // @deprecated
 namespace OHOS::Ace::NG {

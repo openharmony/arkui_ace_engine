@@ -50,11 +50,6 @@ ohos_shared_library("ui_sa") {
     "$ace_root/interfaces/inner_api/ui_session/ui_session_sample/ui_sa_service.cpp",
   ]
 
-  sources += [
-    "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
-    "$ace_root/frameworks/core/common/container_scope.cpp",
-  ]
-
   configs = [ "$ace_root:ace_config" ]
 
   public_configs = [ ":ui_sa_config" ]

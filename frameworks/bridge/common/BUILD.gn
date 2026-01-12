@@ -36,9 +36,6 @@ template("bridge_common") {
       "dom/dom_document.cpp",
       "dom/dom_form.cpp",
       "dom/dom_image.cpp",
-      "dom/dom_list.cpp",
-      "dom/dom_list_item.cpp",
-      "dom/dom_list_item_group.cpp",
       "dom/dom_navigation_bar.cpp",
       "dom/dom_node.cpp",
       "dom/dom_panel.cpp",
@@ -47,7 +44,6 @@ template("bridge_common") {
       "dom/dom_slider.cpp",
       "dom/dom_span.cpp",
       "dom/dom_stack.cpp",
-      "dom/dom_swiper.cpp",
       "dom/dom_text.cpp",
       "dom/dom_type.cpp",
 
@@ -84,8 +80,6 @@ template("bridge_common") {
         "dom/dom_select.cpp",
         "dom/dom_stepper.cpp",
         "dom/dom_stepper_item.cpp",
-        "dom/dom_tool_bar.cpp",
-        "dom/dom_tool_bar_item.cpp",
       ]
     }
 

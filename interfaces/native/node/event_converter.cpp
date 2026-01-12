@@ -231,13 +231,13 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
         case NODE_ON_PRE_DRAG:
             return ON_PRE_DRAG;
         case NODE_ON_KEY_EVENT:
-            return ON_KEY_EVENT;
+            return ArkUIEventSubKind::ON_KEY_EVENT;
         case NODE_ON_KEY_PRE_IME:
             return ON_KEY_PREIME;
         case NODE_DISPATCH_KEY_EVENT:
             return ON_KEY_DISPATCH;
         case NODE_ON_CLICK_EVENT:
-            return ON_CLICK_EVENT;
+            return ArkUIEventSubKind::ON_CLICK_EVENT;
         case NODE_ON_HOVER_EVENT:
             return ON_HOVER_EVENT;
         case NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT:
@@ -510,7 +510,7 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_DRAG_END;
         case ON_PRE_DRAG:
             return NODE_ON_PRE_DRAG;
-        case ON_KEY_EVENT:
+        case ArkUIEventSubKind::ON_KEY_EVENT:
             return NODE_ON_KEY_EVENT;
         case ON_KEY_PREIME:
             return NODE_ON_KEY_PRE_IME;
@@ -518,7 +518,7 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_VISIBLE_AREA_APPROXIMATE_CHANGE_EVENT;
         case ON_KEY_DISPATCH:
             return NODE_DISPATCH_KEY_EVENT;
-        case ON_CLICK_EVENT:
+        case ArkUIEventSubKind::ON_CLICK_EVENT:
             return NODE_ON_CLICK_EVENT;
         case ON_HOVER_EVENT:
             return NODE_ON_HOVER_EVENT;

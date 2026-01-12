@@ -53,8 +53,13 @@ class Size;
 class RosenDecorationPainter : public virtual NG::SkiaDecorationPainter {
     DECLARE_ACE_TYPE(RosenDecorationPainter, NG::SkiaDecorationPainter);
 #else
+#ifdef NG_BUILD
 class RosenDecorationPainter : public virtual NG::DrawingDecorationPainter {
     DECLARE_ACE_TYPE(RosenDecorationPainter, NG::DrawingDecorationPainter);
+#else
+class ACE_FORCE_EXPORT RosenDecorationPainter : public virtual NG::DrawingDecorationPainter {
+    DECLARE_ACE_TYPE(RosenDecorationPainter, NG::DrawingDecorationPainter);
+#endif
 #endif
 
 public:

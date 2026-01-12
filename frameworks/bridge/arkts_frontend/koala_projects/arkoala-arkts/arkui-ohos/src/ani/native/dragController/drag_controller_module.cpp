@@ -928,6 +928,16 @@ void ANIDragActionNotifyDragStartReques(
     modifier->getDragControllerAniModifier()->aniDragActionNotifyDragStartReques(static_cast<int>(requestStatus));
 }
 
+void ANIDragActionEnableDropDisallowedBadge(
+    [[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, bool enabled)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
+        return;
+    }
+    modifier->getDragControllerAniModifier()->aniDragActionEnableDropDisallowedBadge(enabled);
+}
+
 void ANICleanDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass, ani_long dragActionPtr)
 {
     if (dragActionPtr == 0) {

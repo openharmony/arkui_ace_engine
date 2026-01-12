@@ -129,6 +129,11 @@ void ListItemModelStatic::SetDeleteArea(FrameNode* frameNode, UINode* buildNode,
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, length.value(), frameNode);
         } else {
             ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, StartDeleteAreaDistance, frameNode);
+            auto listItemTheme = GetListItemTheme(frameNode);
+            if (listItemTheme) {
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                    ListItemLayoutProperty, StartDeleteAreaDistance, listItemTheme->GetDeleteDistance(), frameNode);
+            }
         }
     } else {
         const auto endNode = AceType::Claim<UINode>(buildNode);
@@ -142,9 +147,24 @@ void ListItemModelStatic::SetDeleteArea(FrameNode* frameNode, UINode* buildNode,
             ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, length.value(), frameNode);
         } else {
             ACE_RESET_NODE_LAYOUT_PROPERTY(ListItemLayoutProperty, EndDeleteAreaDistance, frameNode);
+            auto listItemTheme = GetListItemTheme(frameNode);
+            if (listItemTheme) {
+                ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+                    ListItemLayoutProperty, EndDeleteAreaDistance, listItemTheme->GetDeleteDistance(), frameNode);
+            }
         }
     }
     pattern->SetDeleteArea();
+}
+
+RefPtr<ListItemTheme> ListItemModelStatic::GetListItemTheme(FrameNode* frameNode)
+{
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto pipelineContext = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    return themeManager->GetTheme<ListItemTheme>();
 }
 
 void ListItemModelStatic::SetSwiperAction(FrameNode* frameNode, std::function<void()>&& startAction,

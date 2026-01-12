@@ -21,9 +21,9 @@
 
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
-#include "core/components/swiper/swiper_component.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "core/components_ng/pattern/swiper/swiper_change_event.h"
 
 extern const char _binary_arkui_arcswiper_abc_start[];
 extern const char _binary_arkui_arcswiper_abc_end[];

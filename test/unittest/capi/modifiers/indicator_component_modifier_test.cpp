@@ -29,7 +29,6 @@
 #include "core/interfaces/native/implementation/indicator_component_controller_peer.h"
 
 #include "core/components/common/layout/constants.h"
-#include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_ng.h"

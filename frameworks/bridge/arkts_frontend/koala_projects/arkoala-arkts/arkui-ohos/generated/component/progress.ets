@@ -347,8 +347,6 @@ export class ArkProgressComponent extends ArkCommonMethodComponent implements Pr
 export function ProgressImpl(
     @memo
     style: ((attributes: ProgressAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkProgressComponent>((): ArkProgressComponent => {
         return new ArkProgressComponent()
@@ -357,7 +355,6 @@ export function ProgressImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

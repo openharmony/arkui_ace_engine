@@ -21,11 +21,12 @@
 #include "base/geometry/dimension.h"
 #include "base/utils/macros.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/declaration/swiper/swiper_declaration.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_v2/inspector/inspector_composed_component.h"
+#include "core/components/swiper/swiper_controller.h"
+#include "core/components_ng/pattern/swiper/swiper_constants.h"
 #ifdef SUPPORT_DIGITAL_CROWN
 #include "core/event/crown_event.h"
 #endif

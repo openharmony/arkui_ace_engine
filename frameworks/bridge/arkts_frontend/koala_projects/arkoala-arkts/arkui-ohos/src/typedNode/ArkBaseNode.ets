@@ -45,7 +45,7 @@ import { ComponentContent } from 'arkui/ComponentContent'
 import { BlendMode } from "../component/common"
 import { InteropNativeModule } from '@koalaui/interop';
 import { ArkUIAniModule } from 'arkui.ani';
-import { hookCustomPropertyImpl } from '#handwritten';
+import { hookCustomPropertyImpl, hookAllowDrop } from '#handwritten';
 import { CustomProperty } from '#generated';
 
 export class ArkBaseNode extends ComponentBase implements CommonAttribute {
@@ -415,33 +415,43 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public onDragStart(value: ((event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
+        this.getPeer()?.setOnDragStartAttribute(value);
         return this
     }
     public onDragEnter(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this {
+        this.getPeer()?.setOnDragEnterAttribute(value);
         return this
     }
     public onDragMove(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this {
+        this.getPeer()?.setOnDragMoveAttribute(value);
         return this
     }
     public onDragLeave(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this {
+        this.getPeer()?.setOnDragLeaveAttribute(value);
         return this
     }
     public onDrop(eventCallback: ((event: DragEvent, extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
+        this.getPeer()?.setOnDrop1Attribute(eventCallback, dropOptions);
         return this
     }
     public onDragEnd(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this {
+        this.getPeer()?.setOnDragEndAttribute(value);
         return this
     }
     public allowDrop(value: Array<UniformDataType> | null | Array<string> | undefined): this {
+        hookAllowDrop(this, value);
         return this
     }
     public draggable(value: boolean | undefined): this {
+        this.getPeer()?.setDraggableAttribute(value);
         return this
     }
     public dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
+        this.getPeer()?.setDragPreview1Attribute(preview, config);
         return this
     }
     public onPreDrag(value: ((parameter: PreDragStatus) => void) | undefined): this {
+        this.getPeer()?.setOnPreDragAttribute(value);
         return this
     }
     public linearGradient(value: LinearGradientOptions | undefined): this {
@@ -598,7 +608,15 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
         return this
     }
-    public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat?: ImageRepeat | undefined): this {
+    public backgroundImage(value: ResourceStr | PixelMap | undefined): this {
+        this.getPeer().setBackgroundImage0Attribute(value);
+        return this
+    }
+    public backgroundImage(src: ResourceStr | PixelMap | undefined, options: BackgroundImageOptions | undefined): this {
+        this.getPeer().setBackgroundImage1Attribute(src, options);
+        return this
+    }
+    public backgroundImage(src: ResourceStr | PixelMap | undefined, repeat: ImageRepeat | undefined): this {
         this.getPeer().setBackgroundImage2Attribute(src, repeat);
         return this
     }

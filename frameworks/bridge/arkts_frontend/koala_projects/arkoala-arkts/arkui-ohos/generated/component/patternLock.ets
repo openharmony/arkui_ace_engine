@@ -626,8 +626,6 @@ export class ArkPatternLockComponent extends ArkCommonMethodComponent implements
 export function PatternLockImpl(
     @memo
     style: ((attributes: PatternLockAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkPatternLockComponent>((): ArkPatternLockComponent => {
         return new ArkPatternLockComponent()
@@ -636,7 +634,6 @@ export function PatternLockImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

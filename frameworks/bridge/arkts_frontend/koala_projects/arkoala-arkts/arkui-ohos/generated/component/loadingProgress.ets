@@ -198,8 +198,6 @@ export class ArkLoadingProgressComponent extends ArkCommonMethodComponent implem
 export function LoadingProgressImpl(
     @memo
     style: ((attributes: LoadingProgressAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkLoadingProgressComponent>((): ArkLoadingProgressComponent => {
         return new ArkLoadingProgressComponent()
@@ -208,7 +206,6 @@ export function LoadingProgressImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

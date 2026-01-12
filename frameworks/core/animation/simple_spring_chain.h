@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace {
 
-class SpringChainProperty {
+class ACE_FORCE_EXPORT SpringChainProperty {
 public:
     void SetControlStiffness(double stiffness)
     {
@@ -147,7 +147,7 @@ private:
     int32_t frameDelay_ { 1 };
 };
 
-class SimpleSpringChain : public SpringAdapter::AdapterObserve {
+class ACE_FORCE_EXPORT SimpleSpringChain : public SpringAdapter::AdapterObserve {
     DECLARE_ACE_TYPE(SimpleSpringChain, SpringAdapter::AdapterObserve);
 
 public:

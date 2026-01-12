@@ -54,10 +54,12 @@ enum class LineJoinStyle;
 enum class NavigationType;
 enum class ParticleDisturbanceShapeType : uint32_t;
 enum class TabsCacheMode;
+enum class UndoStyle;
 struct PickerIndicatorStyle;
 struct TextDetectConfig;
 struct TextMetrics;
 struct RenderingContextOptions;
+struct UpdateParagraphStyle;
 
 namespace NG {
 // SORTED_SECTION
@@ -650,6 +652,8 @@ namespace Converter {
     template<> ImageSpanSize Convert(const Ark_SizeOptions& value);
     template<> ItemDragInfo Convert(const Ark_ItemDragInfo& src);
     template<> KeyboardOptions Convert(const Ark_KeyboardOptions& src);
+    template<> NG::LeadingMarginSpanOptions Convert(const Ark_LeadingMarginSpanDrawInfo& src);
+    template<> NG::DrawableLeadingMargin Convert(const Ark_LeadingMarginSpan& src);
     template<> LightSource Convert(const Ark_LightSource& src);
     template<> ListItemGroupIndex Convert(const Ark_VisibleListContentInfo& src);
     template<> ListItemIndex Convert(const Ark_VisibleListContentInfo& src);
@@ -741,15 +745,18 @@ namespace Converter {
     template<> SysOptions Convert(const Ark_SystemAdaptiveOptions& src);
     template<> TextBackgroundStyle Convert(const Ark_TextBackgroundStyle& src);
     template<> TextCascadePickerOptions Convert(const Ark_TextCascadePickerRangeContent& src);
+    template<> TextDirection Convert(const Ark_TextDirection& src);
     template<> TextDecorationOptions Convert(const Ark_TextDecorationOptions& src);
     template<> TextDetectConfig Convert(const Ark_TextDataDetectorConfig& src);
     template<> TextRange Convert(const Ark_TextRange& src);
     template<> TouchLocationInfo Convert(const Ark_TouchObject& src);
     template<> TranslateOptions Convert(const Ark_TranslateOptions& src);
+    template<> UpdateParagraphStyle Convert(const Ark_RichEditorParagraphStyle& src);
     template<> TwoDimensionScrollResult Convert(const Ark_OffsetResult& src);
     template<> bool Convert(const Ark_EdgeEffectOptions& src);
     template<> ACE_FORCE_EXPORT double Convert(const Ark_Float64& src);
     template<> float Convert(const Ark_Float32& src);
+    template<> size_t Convert(const Ark_Float64& src);
     template<> ACE_FORCE_EXPORT float Convert(const Ark_Float64& src);
     template<> int Convert(const Ark_Float64& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_F64& src);
@@ -960,6 +967,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<TabBarMode>& dst, const Ark_BarMode& src);
     template<> void AssignCast(std::optional<TabsCacheMode>& dst, const Ark_TabsCacheMode& src);
     template<> void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src);
+    template<> void AssignCast(std::optional<TextVerticalAlign>& dst, const Ark_TextVerticalAlign& src);
     template<> void AssignCast(std::optional<TextCase>& dst, const Ark_TextCase& src);
     template<> void AssignCast(std::optional<TextContentType>& dst, const Ark_ContentType& src);
     template<> void AssignCast(std::optional<TextDecoration>& dst, const Ark_TextDecorationType& src);
@@ -983,6 +991,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<ToggleType>& dst, const Ark_ToggleType& src);
     template<> void AssignCast(std::optional<TouchType>& dst, const Ark_TouchType& src);
     template<> void AssignCast(std::optional<TransitionEdge>& dst, const Ark_TransitionEdge& src);
+    template<> void AssignCast(std::optional<UndoStyle>& dst, const Ark_UndoStyle& src);
     template<> void AssignCast(std::optional<UiMaterial*>& dst, const Ark_uiMaterial_Material& src);
     template<> void AssignCast(std::optional<UpdaterType>& dst, const Ark_ParticleUpdater& src);
     template<> void AssignCast(std::optional<UserUnderlineColor>& dst, const Ark_UnderlineColor& src);

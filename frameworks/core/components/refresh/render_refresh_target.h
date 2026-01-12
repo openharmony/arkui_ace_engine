@@ -28,7 +28,7 @@ struct ArkUIRefreshModifierCompatible {
     void (*handleDragCancel)(RefPtr<RenderNode> refresh);
 };
 
-class RenderRefreshTarget : public virtual AceType {
+class ACE_FORCE_EXPORT RenderRefreshTarget : public virtual AceType {
     DECLARE_ACE_TYPE(RenderRefreshTarget, AceType);
 
 public:

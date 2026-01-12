@@ -15,8 +15,6 @@
 
 #include "base/utils/string_utils.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/declaration/swiper/swiper_declaration.h"
-#include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/pattern/swiper/swiper_model_static.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -29,6 +27,7 @@
 #include "core/interfaces/native/implementation/swiper_content_transition_proxy_peer.h"
 #include "core/interfaces/native/implementation/swiper_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/implementation/indicator_component_controller_peer.h"
+#include "core/components_ng/pattern/swiper/swiper_change_event.h"
 
 namespace OHOS::Ace::NG {
 using ArrowStyleVariantType = std::variant<SwiperArrowParameters, bool>;
@@ -36,6 +35,7 @@ using DisplayCountVariantType = std::variant<int32_t, std::string, Ark_SwiperAut
 const static int32_t DEFAULT_DURATION = 400;
 const static int32_t DEFAULT_DISPLAY_COUNT = 1;
 const static int32_t DEFAULT_CACHED_COUNT = 1;
+const static uint32_t DEFAULT_SWIPER_CURRENT_INDEX = 0;
 const auto DEFAULT_CURVE = AceType::MakeRefPtr<InterpolatingSpring>(-1, 1, 328, 34);
 
 namespace {
@@ -245,7 +245,7 @@ void SetIndexImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = ProcessBindableIndex(frameNode, value);
     Validator::ValidateNonNegative(convValue);
-    SwiperModelStatic::SetIndex(frameNode, convValue.value_or(OHOS::Ace::DEFAULT_SWIPER_CURRENT_INDEX));
+    SwiperModelStatic::SetIndex(frameNode, convValue.value_or(DEFAULT_SWIPER_CURRENT_INDEX));
 }
 void SetAutoPlay0Impl(Ark_NativePointer node,
                      const Opt_Boolean* autoPlay)

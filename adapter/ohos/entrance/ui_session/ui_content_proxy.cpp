@@ -1102,4 +1102,16 @@ int32_t UIContentServiceProxy::GetWebInfoByRequest(
     }
     return NO_ERROR;
 }
+
+void UiContentProxyRecipient::OnRemoteDied(const wptr<IRemoteObject>& remote)
+{
+    LOGI("uicontentproxy death notice");
+    if (remote == nullptr) {
+        LOGW("weak remote is null");
+        return;
+    }
+    if (handler_) {
+        handler_();
+    }
+}
 } // namespace OHOS::Ace

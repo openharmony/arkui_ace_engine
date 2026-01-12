@@ -32,7 +32,7 @@ struct ScrollableNodeInfo {
 };
 
 class RenderScrollBar;
-class ACE_EXPORT ScrollBarProxy : public ScrollProxy {
+class ACE_FORCE_EXPORT ScrollBarProxy : public ScrollProxy {
     DECLARE_ACE_TYPE(ScrollBarProxy, ScrollProxy);
 
 public:

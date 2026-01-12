@@ -23,7 +23,7 @@
 #include "frameworks/core/components/list/list_theme.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "frameworks/core/components_ng/pattern/scrollable/scrollable_model_static.h"
-#include "frameworks/core/components_v2/list/list_properties.h"
+#include "frameworks/core/components_ng/pattern/list/list_properties.h"
 #include "core/common/container.h"
 #include "core/components_ng/pattern/scroll_bar/proxy/scroll_bar_proxy.h"
 #include "list_scroller_peer_impl.h"

@@ -18,6 +18,8 @@
 #include "base/i18n/localization.h"
 #include "base/log/event_report.h"
 #include "core/common/font_manager.h"
+#include "compatible/components/swiper/swiper_modifier.h"
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -317,13 +319,26 @@ void RenderCalendar::OnTouchTestHit(
     result.emplace_back(clickDetector_);
 }
 
+const ArkUISwiperModifierCompatible* GetModifier()
+{
+    static const ArkUISwiperModifierCompatible* swiperModifier_ = nullptr;
+    if (swiperModifier_) {
+        return swiperModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("swiper");
+    CHECK_NULL_RETURN(loader, nullptr);
+    swiperModifier_ = reinterpret_cast<const ArkUISwiperModifierCompatible*>(loader->GetCustomModifier());
+    return swiperModifier_;
+}
+
 void RenderCalendar::HandleClick(const Offset& offset)
 {
     if (SystemProperties::GetDeviceType() == DeviceType::TV) {
         return;
     }
+    auto* modifier = GetModifier();
     auto swiper = calendarController_->GetRenderSwiper();
-    if (swiper && swiper->GetMoveStatus()) {
+    if (swiper && modifier->getMoveStatus(swiper)) {
         return;
     }
     auto index = JudgeArea(offset);

@@ -48,7 +48,7 @@
 
 namespace OHOS::Ace {
 
-extern const Dimension FOCUS_BOUNDARY;
+ACE_FORCE_EXPORT extern const Dimension FOCUS_BOUNDARY;
 
 class Component;
 

@@ -15,11 +15,11 @@
 
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_ng.h"
 
-#include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_pattern.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/swiper_indicator_layout_property.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/swiper/swiper_change_event.h"
 
 namespace OHOS::Ace::NG {
 RefPtr<IndicatorController> IndicatorModelNG::Create()

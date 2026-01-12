@@ -21,8 +21,7 @@
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/flex/flex_component.h"
 #include "core/components/image/image_component.h"
-#include "core/components/swiper/render_swiper.h"
-#include "core/components/swiper/swiper_component.h"
+#include "compatible/components/swiper/render_swiper.h"
 #include "core/pipeline/base/composed_component.h"
 #include "core/pipeline/base/render_component.h"
 
@@ -102,12 +101,12 @@ public:
         }
     }
 
-    void SetRenderSwiper(const RefPtr<RenderSwiper>& renderSwiper)
+    void SetRenderSwiper(const RefPtr<RenderNode>& renderSwiper)
     {
         renderSwiper_ = renderSwiper;
     }
 
-    const RefPtr<RenderSwiper>& GetRenderSwiper() const
+    const RefPtr<RenderNode>& GetRenderSwiper() const
     {
         return renderSwiper_;
     }
@@ -222,7 +221,7 @@ private:
     void SetButtonClickColor(const RefPtr<RenderNode>& node, const Color& clickColor) const;
 
     RefPtr<SwiperController> swiperController_;
-    RefPtr<RenderSwiper> renderSwiper_;
+    RefPtr<RenderNode> renderSwiper_;
     RefPtr<CalendarDataAdapter> dataAdapter_;
     CalendarMonth currentCalendarMonth_;
     CalendarDay crossMonthDay_;
@@ -468,7 +467,7 @@ private:
     EventMarker dateClickId_;
     CalendarDataAdapterAction dataAdapterAction_;
     RefPtr<CalendarController> calendarController_;
-    RefPtr<SwiperComponent> swiperContainer_;
+    RefPtr<Component> swiperContainer_;
 };
 
 class CalendarMonthComponent : public RenderComponent {

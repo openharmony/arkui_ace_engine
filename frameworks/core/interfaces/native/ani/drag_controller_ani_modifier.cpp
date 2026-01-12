@@ -883,7 +883,17 @@ void UpdatePreviewOptionDefaultAttr(
     } else {
         dragAsyncContext->dragPreviewOption.isShowBadge = asyncCtx.dragPreviewOption.isShowBadge;
     }
-    NG::DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(dragAsyncContext->dragPreviewOption);
+    DragPreviewOption& option = dragAsyncContext->dragPreviewOption;
+    if (option.isDefaultShadowEnabled) {
+        option.options.shadow = NG::DragDropFuncWrapper::GetDefaultShadow();
+    } else {
+        option.options.shadow = std::nullopt;
+    }
+    if (option.isDefaultRadiusEnabled) {
+        option.options.borderRadius = NG::DragDropFuncWrapper::GetDefaultBorderRadius();
+    } else {
+        option.options.borderRadius = std::nullopt;
+    }
 }
 
 void UpdateDragPreviewOptionsFromModifier(std::shared_ptr<DragControllerAsyncCtx> dragAsyncContext,
@@ -1105,6 +1115,11 @@ void ANIDragActionNotifyDragStartReques(int requestStatus)
     ViewAbstractModel::GetInstance()->NotifyDragStartRequest(static_cast<Ace::DragStartRequestStatus>(requestStatus));
 }
 
+void ANIDragActionEnableDropDisallowedBadge(bool enabled)
+{
+    ViewAbstractModel::GetInstance()->EnableDropDisallowedBadge(enabled);
+}
+
 const ArkUIAniDragControllerModifier* GetDragControllerAniModifier()
 {
     static const ArkUIAniDragControllerModifier impl = {
@@ -1117,6 +1132,7 @@ const ArkUIAniDragControllerModifier* GetDragControllerAniModifier()
         .aniDragActionSetDragEventStrictReportingEnabled = NG::ANIDragActionSetDragEventStrictReportingEnabled,
         .aniDragActionCancelDataLoading = NG::ANIDragActionCancelDataLoading,
         .aniDragActionNotifyDragStartReques = NG::ANIDragActionNotifyDragStartReques,
+        .aniDragActionEnableDropDisallowedBadge = NG::ANIDragActionEnableDropDisallowedBadge,
     };
     return &impl;
 }

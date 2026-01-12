@@ -19,14 +19,14 @@ interface IDisposable {
 }
 
 class Disposable implements IDisposable {
-    protected _isDisposed: boolean;
+    protected isDisposed_: boolean;
     constructor() {
-        this._isDisposed = false;
+        this.isDisposed_ = false;
     }
     public dispose() : void {
-        this._isDisposed = true;
+        this.isDisposed_ = true;
     }
     public isDisposed(): boolean {
-        return this._isDisposed;
+        return this.isDisposed_;
     }
 }

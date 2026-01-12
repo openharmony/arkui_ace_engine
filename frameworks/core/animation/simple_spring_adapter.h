@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class SimpleSpringAdapter : public SpringAdapter {
+class ACE_FORCE_EXPORT SimpleSpringAdapter : public SpringAdapter {
     DECLARE_ACE_TYPE(SimpleSpringAdapter, SpringAdapter);
 
 public:

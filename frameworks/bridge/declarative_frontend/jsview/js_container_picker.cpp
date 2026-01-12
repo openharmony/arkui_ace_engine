@@ -248,7 +248,7 @@ void JSContainerPicker::SetSelectedBackground(const JSRef<JSObject>& paramObj, N
 
 void JSContainerPicker::JSBind(BindingTarget globalObj)
 {
-    JSClass<JSContainerPicker>::Declare("Picker");
+    JSClass<JSContainerPicker>::Declare("UIPickerComponent");
 
     MethodOptions opt = MethodOptions::NONE;
     JSClass<JSContainerPicker>::StaticMethod("create", &JSContainerPicker::Create, opt);

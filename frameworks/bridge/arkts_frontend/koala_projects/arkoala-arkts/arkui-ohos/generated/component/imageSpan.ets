@@ -312,8 +312,6 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
 export function ImageSpanImpl(
     @memo
     style: ((attributes: ImageSpanAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkImageSpanComponent>((): ArkImageSpanComponent => {
         return new ArkImageSpanComponent()
@@ -322,7 +320,6 @@ export function ImageSpanImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

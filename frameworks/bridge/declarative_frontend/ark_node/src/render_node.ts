@@ -427,7 +427,8 @@ class ShapeMask extends BaseShape {
   }
 }
 
-class RenderNode extends Disposable {
+class RenderNode {
+  private _isDisposed: boolean;
   private childrenList: Array<RenderNode>;
   private nodePtr: NodePtr;
   private type: string; // use for transfer
@@ -461,7 +462,7 @@ class RenderNode extends Disposable {
   private apiTargetVersion: number;
 
   constructor(type: string, cptrVal: number = 0) {
-    super();
+    this._isDisposed = false;
     this.nodePtr = null;
     this.type = type; // use for transfer
     this.childrenList = [];
@@ -837,7 +838,7 @@ class RenderNode extends Disposable {
     if (this.isDisposed()) {
       return;
     }
-    super.dispose();
+    this._isDisposed = true;
     if (this.nodePtr) {
       getUINativeModule().renderNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
           'RenderNode', this.getNodeType() || 'RenderNode', this.nodePtr);
@@ -849,7 +850,7 @@ class RenderNode extends Disposable {
     this.nodePtr = null;
   }
   isDisposed(): boolean {
-    return super.isDisposed() && (this._nativeRef === undefined || this._nativeRef === null);
+    return this._isDisposed && (this._nativeRef === undefined || this._nativeRef === null);
   }
   getNodePtr(): NodePtr {
     return this.nodePtr;

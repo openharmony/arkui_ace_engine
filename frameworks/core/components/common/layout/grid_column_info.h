@@ -100,8 +100,8 @@ public:
 
     ~GridColumnInfo() override = default;
     double GetWidth() const;
-    double GetWidth(uint32_t columns) const;
-    double GetMaxWidth() const;
+    ACE_FORCE_EXPORT double GetWidth(uint32_t columns) const;
+    ACE_FORCE_EXPORT double GetMaxWidth() const;
     Dimension GetOffset() const;
     const RefPtr<GridContainerInfo>& GetParent() const
     {

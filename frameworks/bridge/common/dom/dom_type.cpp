@@ -649,36 +649,7 @@ const char DOM_STEPPER_SET_RIGHT_BUTTON_STATUS[] = "setNextButtonStatus";
 // stepper-item attribute style and event constants
 const char DOM_STEPPER_ITEM_EVENT_APPEAR[] = "appear";
 const char DOM_STEPPER_ITEM_EVENT_DISAPPEAR[] = "disappear";
-
-// swiper attribute and style constants
-const char DOM_INDEX[] = "index";
-const char DOM_SWIPER_ANIMATION_OPACITY[] = "animationopacity";
-const char DOM_AUTOPLAY[] = "autoplay";
-const char DOM_CACHED_SIZE[] = "cachedSize";
-const char DOM_DISPLAY_MODE[] = "displaymode";
-const char DOM_DISPLAY_MODE_AUTO_LINEAR[] = "autoLinear";
-const char DOM_INTERVAL[] = "interval";
-const char DOM_INDICATOR[] = "indicator";
-const char DOM_LOOP[] = "loop";
 const char DOM_DURATION[] = "duration";
-const char DOM_VERTICAL[] = "vertical";
-const char DOM_ANIMATION_CURVE[] = "animationCurve";
-const char DOM_INDICATOR_COLOR[] = "indicatorColor";
-const char DOM_INDICATOR_MASK[] = "indicatormask";
-const char DOM_INDICATOR_DISABLED[] = "indicatordisabled";
-const char DOM_INDICATOR_SELECTEDCOLOR[] = "indicatorSelectedColor";
-const char DOM_INDICATOR_SIZE[] = "indicatorSize";
-const char DOM_INDICATOR_TOP[] = "indicatorTop";
-const char DOM_INDICATOR_LEFT[] = "indicatorLeft";
-const char DOM_INDICATOR_RIGHT[] = "indicatorRight";
-const char DOM_INDICATOR_BOTTOM[] = "indicatorBottom";
-const char DOM_METHOD_SWIPE_TO[] = "swipeTo";
-const char DOM_METHOD_APPEND[] = "append";
-const char DOM_METHOD_SHOW_PREVIOUS[] = "showPrevious";
-const char DOM_METHOD_SHOW_NEXT[] = "showNext";
-const char DOM_DIGITAL_INDICATOR[] = "digital";
-const char DOM_PREVIOUS_MARGIN[] = "previousMargin";
-const char DOM_NEXT_MARGIN[] = "nextMargin";
 
 // switch attribute and style constants
 const char DOM_CHECKED[] = "checked";
@@ -936,18 +907,6 @@ const char DOM_PANEL_ATTR_MIN_HEIGHT[] = "miniheight";
 const char DOM_PANEL_ATTR_HALF_HEIGHT[] = "halfheight";
 const char DOM_PANEL_ATTR_FULL_HEIGHT[] = "fullheight";
 const char DOM_PANEL_EVENT_SIZE_CHANGED[] = "sizechange";
-
-// tool-bar-item constants
-const char DOM_TOOL_BAR_ITEM_ICON[] = "icon";
-const char DOM_TOOL_BAR_ITEM_VALUE[] = "value";
-const char DOM_TOOL_BAR_ITEM_TEXT_COLOR[] = "textColor";
-const char DOM_TOOL_BAR_ITEM_COLOR[] = "color";
-const char DOM_TOOL_BAR_ITEM_FONT_SIZE[] = "fontSize";
-const char DOM_TOOL_BAR_ITEM_FONT_STYLE[] = "fontStyle";
-const char DOM_TOOL_BAR_ITEM_FONT_WEIGHT[] = "fontWeight";
-const char DOM_TOOL_BAR_ITEM_TEXT_DECORATION[] = "textDecoration";
-const char DOM_TOOL_BAR_ITEM_FONT_FAMILY[] = "fontFamily";
-const char DOM_TOOL_BAR_ITEM_ALLOW_SCALE[] = "allowScale";
 
 // card transition
 const char DOM_TRANSITION_EFFECT[] = "transitionEffect";

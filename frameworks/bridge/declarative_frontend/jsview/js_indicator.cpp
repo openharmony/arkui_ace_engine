@@ -21,6 +21,7 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model.h"
 #include "core/components_ng/pattern/swiper_indicator/indicator_common/indicator_model_ng.h"
+#include "core/components_ng/pattern/swiper/swiper_change_event.h"
 
 namespace OHOS::Ace {
 namespace {

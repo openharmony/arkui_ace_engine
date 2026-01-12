@@ -452,7 +452,9 @@ RefPtr<NodePaintMethod> ListPattern::CreateNodePaintMethod()
     paint->SetItemsPosition(itemPosition_, cachedItemPosition_, noDividerItems_, showCached, clip);
     paint->SetLaneIdx(laneIdx4Divider_);
     paint->SetContentModifier(listContentModifier_);
-    paint->SetAdjustOffset(geometryNode->GetParentAdjust().GetOffset().GetY());
+    auto parentAdjust = geometryNode->GetParentAdjust().GetOffset().GetY();
+    auto selfAdjust = geometryNode->GetSelfAdjust().GetOffset().GetY();
+    paint->SetAdjustOffset(parentAdjust - selfAdjust);
     paint->UpdateBoundsRect(frameRect, clip);
     UpdateFadingEdge(paint);
     return paint;

@@ -27,8 +27,6 @@
 #include "frameworks/bridge/common/dom/dom_form.h"
 #include "frameworks/bridge/common/dom/dom_image.h"
 #include "frameworks/compatible/components/label/modifier/label_modifier.h"
-#include "frameworks/bridge/common/dom/dom_list.h"
-#include "frameworks/bridge/common/dom/dom_list_item_group.h"
 #include "frameworks/bridge/common/dom/dom_navigation_bar.h"
 #include "frameworks/bridge/common/dom/dom_panel.h"
 #include "frameworks/bridge/common/dom/dom_progress.h"
@@ -37,7 +35,6 @@
 #endif
 #include "frameworks/bridge/common/dom/dom_slider.h"
 #include "frameworks/bridge/common/dom/dom_stack.h"
-#include "frameworks/bridge/common/dom/dom_swiper.h"
 #if defined(XCOMPONENT_SUPPORTED)
 #include "frameworks/bridge/common/dom/dom_xcomponent.h"
 #endif
@@ -47,7 +44,6 @@
 #include "frameworks/bridge/common/dom/dom_piece.h"
 #include "frameworks/bridge/common/dom/dom_popup.h"
 #include "frameworks/bridge/common/dom/dom_select.h"
-#include "frameworks/bridge/common/dom/dom_tool_bar.h"
 #if !defined(PREVIEW)
 #ifdef WEB_SUPPORTED
 #include "frameworks/bridge/common/dom/dom_web.h"
@@ -108,9 +104,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_DIVIDER, &DOMNodeCreator<DOMDivider> },
         { DOM_NODE_TAG_FORM, &DOMNodeCreator<DOMForm> },
         { DOM_NODE_TAG_IMAGE, &DOMNodeCreator<DOMImage> },
-        { DOM_NODE_TAG_LIST, &DOMNodeCreator<DOMList> },
-        { DOM_NODE_TAG_LIST_ITEM, &DOMListItemCreator<DOMListItem> },
-        { DOM_NODE_TAG_LIST_ITEM_GROUP, &DOMListItemCreator<DOMListItemGroup> },
 #ifndef WEARABLE_PRODUCT
         { DOM_NODE_TAG_MENU, &DOMNodeCreator<DOMMenu> },
 #endif
@@ -136,12 +129,7 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_STEPPER, &DOMNodeCreator<DOMStepper> },
         { DOM_NODE_TAG_STEPPER_ITEM, &DOMListItemCreator<DOMStepperItem> },
 #endif
-        { DOM_NODE_TAG_SWIPER, &DOMNodeCreator<DOMSwiper> },
         { DOM_NODE_TAG_TEXT, &DOMNodeCreator<DOMText> },
-#ifndef WEARABLE_PRODUCT
-        { DOM_NODE_TAG_TOOL_BAR, &DOMNodeCreator<DOMToolBar> },
-        { DOM_NODE_TAG_TOOL_BAR_ITEM, &DOMNodeCreator<DOMToolBarItem> },
-#endif
 #ifndef WEARABLE_PRODUCT
 #ifdef WEB_SUPPORTED
         { DOM_NODE_TAG_WEB, &DOMNodeCreator<DOMWeb> },
@@ -178,6 +166,9 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         if (loader) {
             LOGI("DynamicModuleHelper getLoaderByName success, tag = %{public}s", tag.c_str());
             domNode = loader->CreateDomNode(nodeId, tag);
+            if (!domNode) {
+                domNode = loader->CreateDomNodeWithItemIndex(nodeId, tag, itemIndex);
+            }
         }
         if (!domNode) {
 #if defined(PREVIEW)

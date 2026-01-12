@@ -35,27 +35,28 @@ public:
     int32_t Dump(int32_t fd, const std::vector<std::u16string>& args) override;
 
     sptr<Ace::IUiContentService> getArkUIService(int32_t windowId);
-    std::map<int32_t, std::pair<sptr<IRemoteObject>, sptr<Ace::IUiContentService>>> uiContentRemoteObjMap;
+
+    void HandleConnect(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleGetVisibleInspectorTree(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleGetCurrentPageName(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleSendCommand(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleSendCommandAsync(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleRegisterContentChangeCallback(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleUnregisterContentChangeCallback(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleGetCurrentImagesShowing(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleGetImagesById(sptr<IUiContentService> service, std::vector<std::string> params);
 
 private:
     DECLEAR_SYSTEM_ABILITY(UiSaService);
 
     UiSaService();
+
+    using DumpHandler = void(UiSaService::*)(sptr<IUiContentService>, std::vector<std::string>);
+    static const std::map<std::string, DumpHandler> DUMP_MAP;
+
+    std::mutex uiContentRemoteObjMapMtx_;
+    std::map<int32_t, std::pair<sptr<IRemoteObject>, sptr<Ace::IUiContentService>>> uiContentRemoteObjMap_;
+    std::string visibleInspectorTreeInfo_ = "";
 };
-
-class ACE_FORCE_EXPORT UiSaServiceRecipient : public IRemoteObject::DeathRecipient {
-public:
-    using RemoteDiedHandler = std::function<void()>;
-    explicit UiSaServiceRecipient(RemoteDiedHandler handler) : handler_(std::move(handler)) {}
-
-    ~UiSaServiceRecipient() override = default;
-
-    void OnRemoteDied(const wptr<IRemoteObject>& remote) override;
-
-private:
-    RemoteDiedHandler handler_;
-};
-
 } // namespace OHOS::Ace
-
 #endif // UI_SA_SERVICE_H

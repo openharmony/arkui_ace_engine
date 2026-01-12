@@ -207,14 +207,14 @@ extern const char GRID_LAYOUT_NAME[];
 extern const char GRID_LAYOUT_ITEM_NAME[];
 extern const int32_t DEFAULT_DIRECTION; // FlexDirection::COLUMN
 extern const int32_t DEFAULT_ALIGN;     // FlexAlign::STRETCH
-ACE_EXPORT extern const int32_t DEFAULT_COLUMN_COUNT;
-ACE_EXPORT extern const int32_t DEFAULT_COLUMN_EXTENT;
+extern const int32_t DEFAULT_COLUMN_COUNT;
+extern const int32_t DEFAULT_COLUMN_EXTENT;
 extern const int32_t DEFAULT_COLUMN_SPAN;
 extern const int32_t DEFAULT_ITEM_COUNT;
 extern const int32_t DEFAULT_INITIAL_ITEM;
 extern const int32_t DEFAULT_CACHED_COUNT;
-ACE_EXPORT extern const double DEFAULT_GRID_WIDTH;
-ACE_EXPORT extern const double DEFAULT_GRID_HEIGHT;
+extern const double DEFAULT_GRID_WIDTH;
+extern const double DEFAULT_GRID_HEIGHT;
 // scrollBar
 extern const char SCROLL_BAR_DISPLAY_MODE[];
 extern const char SCROLL_BAR_SHAPE_MODE[];
@@ -560,7 +560,7 @@ extern const char SELECT_OPTION_VALUE[];
 extern const char SELECT_OPTION_TEXT[];
 extern const char SELECT_OPTION_SELECTED[];
 extern const uint32_t SELECT_DEFAULT_OPTION_SIZE;
-ACE_EXPORT extern const uint32_t SELECT_INVALID_INDEX;
+ACE_FORCE_EXPORT extern const uint32_t SELECT_INVALID_INDEX;
 
 // clip constants
 extern const char CLIP_NAME[];

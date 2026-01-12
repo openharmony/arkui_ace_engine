@@ -2582,8 +2582,6 @@ export class ArkTextInputComponent extends ArkCommonMethodComponent implements T
 export function TextInputImpl(
     @memo
     style: ((attributes: TextInputAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkTextInputComponent>((): ArkTextInputComponent => {
         return new ArkTextInputComponent()
@@ -2592,7 +2590,6 @@ export function TextInputImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

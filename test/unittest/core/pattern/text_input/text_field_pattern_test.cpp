@@ -1747,8 +1747,14 @@ HWTEST_F(TextFieldPatternTest, TextPattern076, TestSize.Level0)
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
+    /**
+     * @tc.steps: step2. GetPattern.
+     */
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
+    /**
+     * @tc.steps: step3. CreateTextField.
+     */
     CreateTextField(DEFAULT_TEXT, DEFAULT_PLACE_HOLDER);
     pattern = pattern_;
     pattern->textRect_.width_ = 10;
@@ -2970,6 +2976,12 @@ HWTEST_F(TextFieldPatternTest, TextFieldShiftMultipleSelection001, TestSize.Leve
     ASSERT_NE(pattern, nullptr);
     pattern->frameRect_ = RectF(0, 0, 10, 50);
 
+    /**
+      *
+      * @tc.step:
+      * create a key event
+      *
+      */
     KeyEvent keyEvent;
     keyEvent.code = KeyCode::KEY_SHIFT_LEFT;
     keyEvent.action = KeyAction::DOWN;
@@ -2985,12 +2997,6 @@ HWTEST_F(TextFieldPatternTest, TextFieldShiftMultipleSelection001, TestSize.Leve
     pattern->HandleMouseEvent(info);
     pattern->UpdateCaretByClick(offset);
 
-    /**
-     * 
-     * @tc.step:
-     * check if pattern->IsSelected is false
-     *
-     */
     EXPECT_EQ(pattern->IsSelected(), false);
 }
 

@@ -19,7 +19,7 @@
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { SelectionOptions_serializer, SelectionOptions, ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { StyledString, StyledStringInternal, DecorationStyleInterface_serializer, DecorationStyleInterface } from "./styledString"
-import { LayoutManager_serializer, LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, FontSettingOptions_serializer, TextDataDetectorConfig, EditMenuOptions, TextDirection, FontSettingOptions, MenuType, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
+import { LayoutManager_serializer, LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, FontSettingOptions_serializer, TextVerticalAlign, TextDataDetectorConfig, EditMenuOptions, TextDirection, FontSettingOptions, MenuType, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -342,6 +342,18 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._TextAttribute_setTextAlign(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setTextVerticalAlignAttribute(value: TextVerticalAlign | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as TextVerticalAlign)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setTextVerticalAlign(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setLineHeightAttribute(value: double | string | Resource | undefined): void {
@@ -993,6 +1005,9 @@ export interface TextAttribute extends CommonMethod {
     textAlign(value: TextAlign | undefined): this {
         throw new Error("Unimplemented method textAlign")
     }
+    textVerticalAlign(value: TextVerticalAlign | undefined): this {
+        throw new Error("Unimplemented method textVerticalAlign")
+    }
     lineHeight(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method lineHeight")
     }
@@ -1122,6 +1137,7 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     fontStyle_value?: FontStyle | undefined
     lineSpacing_value?: LengthMetrics | undefined
     textAlign_value?: TextAlign | undefined
+    textVerticalAlign_value?: TextVerticalAlign | undefined
     lineHeight_value?: double | string | Resource | undefined
     textOverflow_value?: TextOverflowOptions | undefined
     fontFamily_value?: string | Resource | undefined
@@ -1186,6 +1202,9 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
         return this
     }
     textAlign(value: TextAlign | undefined): this {
+        return this
+    }
+    textVerticalAlign(value: TextVerticalAlign | undefined): this {
         return this
     }
     lineHeight(value: double | string | Resource | undefined): this {
@@ -1434,6 +1453,14 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         if (this.checkPriority("textAlign")) {
             const value_casted = value as (TextAlign | undefined)
             this.getPeer()?.setTextAlignAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public textVerticalAlign(value: TextVerticalAlign | undefined): this {
+        if (this.checkPriority("textVerticalAlign")) {
+            const value_casted = value as (TextVerticalAlign | undefined)
+            this.getPeer()?.setTextVerticalAlignAttribute(value_casted)
             return this
         }
         return this

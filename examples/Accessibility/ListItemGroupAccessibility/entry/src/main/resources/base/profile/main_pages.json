@@ -1,0 +1,16 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/itemHead",
+    "pages/itemHeadwight",
+    "pages/Card",
+    "pages/ComponentContent",
+    "pages/lanes",
+    "pages/notFocused",
+    "pages/notFocusedHeight",
+    "pages/notStickyAndNotFocused",
+    "pages/notStickyAndFoucused",
+    "pages/UecPage",
+    "pages/fontScale"
+  ]
+}

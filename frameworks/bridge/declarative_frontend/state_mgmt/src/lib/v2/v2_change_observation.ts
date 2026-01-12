@@ -85,8 +85,11 @@ class ObserveV2 {
   // bindId: UINode elmtId or watchId, depending on what is being observed
   private stackOfRenderedComponents_: StackOfRenderedComponents = new StackOfRenderedComponents();
 
-  // Map bindId to WeakRef<ViewBuildNodeBase>
+  // Map bindId to WeakRef<ViewBuildNodeBase>, bindId -> owning View instance
   public id2cmp_: { number: WeakRef<ViewBuildNodeBase> } = {} as { number: WeakRef<ViewBuildNodeBase> };
+
+  // Map ViewV2 elmtId -> ViewV2 instance
+  public id2ViewV2_: { number: WeakRef<ViewV2> } = {} as { number: WeakRef<ViewV2> };
 
   // Map bindId to WeakRef<MonitorV2 | ComputedV2 | PersistenceV2Impl>
   public id2Others_: { number: WeakRef<MonitorV2 | ComputedV2 | PersistenceV2Impl> } = {} as { number: WeakRef<MonitorV2 | ComputedV2 | PersistenceV2Impl> };

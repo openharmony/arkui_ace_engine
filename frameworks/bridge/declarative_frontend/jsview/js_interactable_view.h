@@ -27,7 +27,7 @@ namespace OHOS::Ace::Framework {
 
 using RemoteCallback = std::function<void(const BaseEventInfo* info)>;
 
-class JSInteractableView {
+class ACE_FORCE_EXPORT JSInteractableView {
 public:
     static void JsOnTouch(const JSCallbackInfo& args);
     static void JsOnPan(const JSCallbackInfo& args);

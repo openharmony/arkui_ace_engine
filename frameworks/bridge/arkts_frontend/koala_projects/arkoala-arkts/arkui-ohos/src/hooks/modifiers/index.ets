@@ -129,8 +129,8 @@ import { ArkPathComponent, PathAttribute, PathOptions, ArkPathPeer } from "./../
 import { PathModifier } from "./../../PathModifier"
 import { ArkPatternLockComponent, PatternLockAttribute } from "./../../component/patternLock"
 import { PatternLockModifier } from "./../../PatternLockModifier"
-import { ArkPickerComponent, PickerAttribute, PickerOptions, ArkPickerPeer } from "./../../component/picker"
-import { PickerModifier } from "./../../PickerModifier"
+import { ArkUIPickerComponentComponent, UIPickerComponentAttribute, UIPickerComponentOptions, ArkUIPickerComponentPeer } from "./../../component/uiPickerComponent"
+import { UIPickerComponentModifier } from "./../../UIPickerComponentModifier"
 import { ArkPluginComponentComponent, PluginComponentAttribute } from "./../../component/pluginComponent"
 import { PluginComponentModifier } from "./../../PluginComponentModifier"
 import { ArkPolygonComponent, PolygonAttribute, ArkPolygonPeer, PolygonOptions } from './../../component/polygon';
@@ -618,7 +618,7 @@ export function hookPathAttributeModifier(component: ArkPathComponent, modifier:
     applyAttributeModifierBase(modifier as Object as AttributeModifier<PathAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
-export function hookPickerAttributeModifier(component: ArkPickerComponent, modifier: AttributeModifier<PickerAttribute> | AttributeModifier<CommonMethod> | undefined):void {
+export function hookUIPickerComponentAttributeModifier(component: ArkUIPickerComponentComponent, modifier: AttributeModifier<UIPickerComponentAttribute> | AttributeModifier<CommonMethod> | undefined):void {
     if (modifier === undefined) {
         return;
     }
@@ -627,12 +627,12 @@ export function hookPickerAttributeModifier(component: ArkPickerComponent, modif
         applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
         return;
     }
-    let attributeSet = (): PickerModifier => {
-        let isPickerModifier: boolean = modifier instanceof PickerModifier;
-        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new PickerModifier();
-        if (isPickerModifier) {
-            let pickerModifier = modifier as object as PickerModifier;
-            initModifier.mergeModifier(pickerModifier);
+    let attributeSet = (): UIPickerComponentModifier => {
+        let isUIPickerComponentModifier: boolean = modifier instanceof UIPickerComponentModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new UIPickerComponentModifier();
+        if (isUIPickerComponentModifier) {
+            let uiPickerComponentModifier = modifier as object as UIPickerComponentModifier;
+            initModifier.mergeModifier(uiPickerComponentModifier);
             component.getPeer().attributeSet = initModifier;
             return initModifier;
         } else {
@@ -644,20 +644,20 @@ export function hookPickerAttributeModifier(component: ArkPickerComponent, modif
         if (params.length > 1) {
             throw new Error('more than 1 parameters');
         }
-        let options_casted: PickerOptions | undefined = undefined;
+        let options_casted: UIPickerComponentOptions | undefined = undefined;
         const param1_type = runtimeType(params[0]);
         if (RuntimeType.OBJECT == param1_type) {
-            options_casted = params[0] as PickerOptions;
+            options_casted = params[0] as UIPickerComponentOptions;
         }
-        let peer: ArkPickerPeer = component.getPeer() as Object as ArkPickerPeer;
-        peer?.setPickerOptionsAttribute(options_casted);
+        let peer: ArkUIPickerComponentPeer = component.getPeer() as Object as ArkUIPickerComponentPeer;
+        peer?.setUIPickerComponentOptionsAttribute(options_casted);
     };
-    let updaterReceiver = (): ArkPickerComponent => {
-        let componentNew: ArkPickerComponent = new ArkPickerComponent();
+    let updaterReceiver = (): ArkUIPickerComponentComponent => {
+        let componentNew: ArkUIPickerComponentComponent = new ArkUIPickerComponentComponent();
         componentNew.setPeer(component.getPeer());
         return componentNew;
     };
-    applyAttributeModifierBase(modifier as Object as AttributeModifier<PickerAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<UIPickerComponentAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
 export function hookPluginComponentAttributeModifier(componenet: ArkPluginComponentComponent, value: AttributeModifier<PluginComponentAttribute> | AttributeModifier<CommonMethod> | undefined):void {}
