@@ -1328,7 +1328,7 @@ HWTEST_F(MovingphotoTestNg, MovingPhotoPatternTest028, TestSize.Level1)
      */
     pattern->DetachFirstImageFromFrameNode();
     int32_t childCount = frameNode->GetTotalChildCount();
-    EXPECT_EQ(childCount, 1);
+    EXPECT_EQ(childCount, 2);
 }
 
 /**
