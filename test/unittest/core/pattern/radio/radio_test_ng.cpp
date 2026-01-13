@@ -1531,4 +1531,64 @@ HWTEST_F(RadioTestNg, CreateWithColorResourceObj002, TestSize.Level1)
     auto colorRet = paintProperty->GetRadioIndicatorColor();
     EXPECT_FALSE(colorRet.has_value());
 }
+
+/**
+ * @tc.name: RadioSetCheckedBackgroundColorSetByUser001
+ * @tc.desc: Test SetCheckedBackgroundColorSetByUser.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioSetCheckedBackgroundColorSetByUser001, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    radioModelNG.SetCheckedBackgroundColor(NORMAL_COLOR);
+    radioModelNG.SetCheckedBackgroundColorSetByUser(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    EXPECT_EQ(radioPaintProperty->GetRadioCheckedBackgroundColorValue(), NORMAL_COLOR);
+    EXPECT_EQ(radioPaintProperty->GetRadioCheckedBackgroundColorSetByUserValue(), true);
+}
+
+/**
+ * @tc.name: RadioSetUncheckedBorderColorSetByUser001
+ * @tc.desc: Test SetUncheckedBorderColorSetByUser.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioSetUncheckedBorderColorSetByUser001, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(false);
+    radioModelNG.SetUncheckedBorderColor(NORMAL_COLOR);
+    radioModelNG.SetUncheckedBorderColorSetByUser(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    EXPECT_EQ(radioPaintProperty->GetRadioUncheckedBorderColorValue(), NORMAL_COLOR);
+    EXPECT_EQ(radioPaintProperty->GetRadioUncheckedBorderColorSetByUserValue(), true);
+}
+
+/**
+ * @tc.name: RadioSetIndicatorColorSetByUser001
+ * @tc.desc: Test SetIndicatorColorSetByUser.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioSetIndicatorColorSetByUser001, TestSize.Level1)
+{
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    radioModelNG.SetChecked(true);
+    radioModelNG.SetIndicatorColor(NORMAL_COLOR);
+    radioModelNG.SetIndicatorColorSetByUser(true);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+    EXPECT_EQ(radioPaintProperty->GetRadioIndicatorColorValue(), NORMAL_COLOR);
+    EXPECT_EQ(radioPaintProperty->GetRadioIndicatorColorSetByUserValue(), true);
+}
 } // namespace OHOS::Ace::NG
