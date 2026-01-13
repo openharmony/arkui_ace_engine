@@ -968,7 +968,7 @@ void WindowScene::OnPreLoadStartingWindowFinished()
         CHECK_NULL_VOID(imageLayoutProperty);
         const auto& sessionInfo = self->session_->GetSessionInfo();
         std::shared_ptr<Media::PixelMap> preloadPixelMap = nullptr;
-        std::pair<std::shared_ptr<Media::PixelMap>, int32_t> preloadBufferInfo = {nullptr, 0};
+        std::pair<std::shared_ptr<uint8_t[]>, size_t> preloadBufferInfo = {nullptr, 0};
         self->session_->GetPreloadStartingWindow(preloadPixelMap, preloadBufferInfo);
         ImageSourceInfo sourceInfo;
         if (preloadPixelMap != nullptr) {
