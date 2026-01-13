@@ -978,6 +978,7 @@ protected:
 
 private:
     void RequestNextFrameMultiThread(bool isOffScreenNode) const;
+    void ToJsonValuePart1(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;
     friend class ViewAbstract;
     friend class ViewAbstractModelStatic;
     std::function<void(bool)> requestFrame_;
