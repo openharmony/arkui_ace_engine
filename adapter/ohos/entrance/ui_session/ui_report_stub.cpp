@@ -17,6 +17,7 @@
 
 #include "pixel_map.h"
 
+#include "adapter/ohos/entrance/ui_session/include/large_string_ashmem.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 
 namespace {
@@ -92,7 +93,16 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             break;
         }
         case REPORT_INSPECTOR_VALUE: {
-            std::string result = data.ReadString();
+            sptr<LargeStringAshmem> largeStringAshmem = data.ReadParcelable<LargeStringAshmem>();
+            if (!largeStringAshmem) {
+                LOGW("ReportInspectorTreeValue read LargeStringAshmem failed");
+                break;
+            }
+            std::string result = "";
+            if (!largeStringAshmem->ReadFromAshmem(result)) {
+                LOGW("ReportInspectorTreeValue read data failed");
+                break;
+            }
             int32_t partNum = data.ReadInt32();
             bool isLastPart = data.ReadBool();
             ReportInspectorTreeValue(result, partNum, isLastPart);
@@ -235,7 +245,16 @@ void UiReportStub::OnGetWebInfoByRequestInner(MessageParcel& data)
 {
     uint32_t windowId = data.ReadUint32();
     int32_t webId = data.ReadInt32();
-    std::string request = data.ReadString();
+    sptr<LargeStringAshmem> largeStringAshmem = data.ReadParcelable<LargeStringAshmem>();
+    if (!largeStringAshmem) {
+        LOGW("OnGetWebInfoByRequestInner read LargeStringAshmem failed");
+        return;
+    }
+    std::string request = "";
+    if (!largeStringAshmem->ReadFromAshmem(request)) {
+        LOGW("OnGetWebInfoByRequestInner read request failed");
+        return;
+    }
     std::string result = data.ReadString();
     WebRequestErrorCode errorCode = static_cast<WebRequestErrorCode>(data.ReadInt32());
     SendWebInfoRequestResult(windowId, webId, request, result, errorCode);

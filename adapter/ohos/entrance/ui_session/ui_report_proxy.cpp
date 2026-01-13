@@ -17,6 +17,7 @@
 
 #include "pixel_map.h"
 
+#include "adapter/ohos/entrance/ui_session/include/large_string_ashmem.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
@@ -153,7 +154,16 @@ void UiReportProxy::ReportInspectorTreeValue(const std::string& data, int32_t pa
         LOGW("ReportInspectorTreeValue write interface token failed");
         return;
     }
-    if (!messageData.WriteString(data)) {
+    sptr<LargeStringAshmem> largeStringAshmem = new (std::nothrow) LargeStringAshmem();
+    if (largeStringAshmem == nullptr) {
+        LOGW("ReportInspectorTreeValue alloc shmem failed");
+        return;
+    }
+    if (!largeStringAshmem->WriteToAshmem(std::to_string(REPORT_INSPECTOR_VALUE), data, data.length())) {
+        LOGW("ReportInspectorTreeValue write to shmem failed");
+        return;
+    }
+    if (!messageData.WriteParcelable(largeStringAshmem)) {
         LOGW("ReportInspectorTreeValue write data  failed");
         return;
     }
@@ -577,7 +587,16 @@ void UiReportProxy::SendWebInfoRequestResult(
         LOGW("SendWebInfoRequestResult write webId failed");
         return;
     }
-    if (!data.WriteString(request)) {
+    sptr<LargeStringAshmem> largeStringAshmem = new (std::nothrow) LargeStringAshmem();
+    if (largeStringAshmem == nullptr) {
+        LOGW("SendWebInfoRequestResult alloc shmem failed");
+        return;
+    }
+    if (!largeStringAshmem->WriteToAshmem(std::to_string(SEND_WEB_INFO_BY_REQUEST), request, request.length())) {
+        LOGW("SendWebInfoRequestResult write to shmem failed");
+        return;
+    }
+    if (!data.WriteParcelable(largeStringAshmem)) {
         LOGW("SendWebInfoRequestResult write request failed");
         return;
     }
