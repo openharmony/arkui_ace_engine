@@ -183,10 +183,16 @@ ohos_shared_library("libace_compatible") {
 }
 
 ohos_shared_library("libace_compatible_components") {
-  deps = [
-    ":libace_compatible",
-    "$ace_root/frameworks/compatible:ace_compatible_source",
-  ]
+  deps = [ ":libace_compatible" ]
+  if (is_ohos) {
+    deps += [ "$ace_root/frameworks/compatible:ace_compatible_source_ohos" ]
+  } else if (use_mingw_win) {
+    deps += [ "$ace_root/frameworks/compatible:ace_compatible_source_windows" ]
+  } else if (use_mac) {
+    deps += [ "$ace_root/frameworks/compatible:ace_compatible_source_mac" ]
+  } else if (use_linux) {
+    deps += [ "$ace_root/frameworks/compatible:ace_compatible_source_linux" ]
+  }
   part_name = ace_engine_part
   subsystem_name = ace_engine_subsystem
 }
