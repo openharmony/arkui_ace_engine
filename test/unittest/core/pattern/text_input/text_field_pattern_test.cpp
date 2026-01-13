@@ -1949,9 +1949,14 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
     TouchLocationInfo touchLocationInfo(0);
     touchLocationInfo.touchType_ = TouchType::MOVE;
     touchLocationInfo.localLocation_ = Offset(0.0f, 0.0f);
+    /**
+     * @tc.steps: step3. AddTouchLocationInfo
+     */
     touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
     touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
-
+    /**
+     * @tc.steps: step4. HandleTouchEvent
+     */
     pattern->isMoveCaretAnywhere_ = true;
     pattern->HandleTouchEvent(touchEventInfo);
     
