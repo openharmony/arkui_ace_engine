@@ -15,7 +15,7 @@
 #ifndef CAPI_STUBS_MOCK_TEXT_PICKER_DIALOG_H
 #define CAPI_STUBS_MOCK_TEXT_PICKER_DIALOG_H
 
-#include "core/components/picker/picker_base_component.h"
+#include "compatible/components/picker/picker_base_component.h"
 
 namespace OHOS::Ace::NG {
 class MockTextPickerDialogView {

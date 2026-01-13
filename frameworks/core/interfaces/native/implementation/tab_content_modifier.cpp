@@ -71,16 +71,34 @@ void ValidatePaddingProperty(std::optional<PaddingProperty>& opt)
     }
     Validator::ValidateNonNegative(opt->left);
     Validator::ValidateNonPercent(opt->left);
+    if (opt->left && !opt->left.value().IsValid()) {
+        opt->left.reset();
+    }
     Validator::ValidateNonNegative(opt->top);
     Validator::ValidateNonPercent(opt->top);
+    if (opt->top && !opt->top.value().IsValid()) {
+        opt->top.reset();
+    }
     Validator::ValidateNonNegative(opt->right);
     Validator::ValidateNonPercent(opt->right);
+    if (opt->right && !opt->right.value().IsValid()) {
+        opt->right.reset();
+    }
     Validator::ValidateNonNegative(opt->bottom);
     Validator::ValidateNonPercent(opt->bottom);
+    if (opt->bottom && !opt->bottom.value().IsValid()) {
+        opt->bottom.reset();
+    }
     Validator::ValidateNonNegative(opt->start);
     Validator::ValidateNonPercent(opt->start);
+    if (opt->start && !opt->start.value().IsValid()) {
+        opt->start.reset();
+    }
     Validator::ValidateNonNegative(opt->end);
     Validator::ValidateNonPercent(opt->end);
+    if (opt->end && !opt->end.value().IsValid()) {
+        opt->end.reset();
+    }
 }
 } // namespace Validator
 
@@ -94,8 +112,8 @@ auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& st
         [&content](const Ark_Resource& arkContent) {
             content = Converter::OptConvert<std::string>(arkContent);
         },
-        [](const Ark_ComponentContent& arkContent) {
-            LOGE("TabContentAttributeModifier.TabBar1Impl content (type Ark_ComponentContent) is not supported yet.");
+        [](const Ark_ComponentContentBase& arkContent) {
+            LOGE("TabContentAttributeModifier.TabBar1Impl content (type Ark_ComponentContentBase) is not supported yet.");
         },
         []() {}
     );
@@ -107,7 +125,7 @@ auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& st
     // board
     TabContentModelStatic::SetBoard(frameNode, Converter::OptConvert<BoardStyle>(style._board));
     // labelStyle
-    TabContentModelStatic::SetLabelStyle(frameNode, Converter::OptConvert<LabelStyle>(style._labelStyle));
+    TabContentModelStatic::SetLabelStyle(frameNode, Converter::OptConvert<LabelStyle>(style._labelStyle), true);
     // padding
     std::optional<PaddingProperty> optPadding;
     bool useLocalizedPadding = false;
@@ -122,7 +140,7 @@ auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& st
         []() {}
     );
     Validator::ValidatePaddingProperty(optPadding);
-    TabContentModelStatic::SetPadding(frameNode, optPadding);
+    TabContentModelStatic::SetPadding(frameNode, optPadding, true);
     TabContentModelStatic::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
     // id
     auto id = Converter::OptConvert<std::string>(style._id);
@@ -166,14 +184,14 @@ auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarSty
         []() {}
     );
     Validator::ValidatePaddingProperty(optPadding);
-    TabContentModelStatic::SetPadding(frameNode, optPadding);
+    TabContentModelStatic::SetPadding(frameNode, optPadding, false);
     TabContentModelStatic::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
     // verticalAlign
     TabContentModelStatic::SetVerticalAlign(frameNode, Converter::OptConvert<FlexAlign>(style._verticalAlign));
     // symmetricExtensible
     TabContentModelStatic::SetSymmetricExtensible(frameNode, Converter::OptConvert<bool>(style._symmetricExtensible));
     // labelStyle
-    TabContentModelStatic::SetLabelStyle(frameNode, Converter::OptConvert<LabelStyle>(style._labelStyle));
+    TabContentModelStatic::SetLabelStyle(frameNode, Converter::OptConvert<LabelStyle>(style._labelStyle), false);
     // iconStyle
     TabContentModelStatic::SetIconStyle(frameNode, Converter::OptConvert<IconStyle>(style._iconStyle));
     // id
@@ -338,14 +356,14 @@ void SetTabContentOptionsImpl(Ark_NativePointer node)
 } // TabContentInterfaceModifier
 namespace TabContentAttributeModifier {
 void SetTabBarImpl(Ark_NativePointer node,
-                   const Opt_Union_ComponentContent_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions* value)
+                   const Opt_Union_ComponentContentBase_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     Converter::VisitUnion(
         *value,
-        [](const Ark_ComponentContent& arkContent) {
-            LOGE("TabContentAttributeModifier.TabBar2Impl type Ark_ComponentContent is not supported yet.");
+        [](const Ark_ComponentContentBase& arkContent) {
+            LOGE("TabContentAttributeModifier.TabBar2Impl type Ark_ComponentContentBase is not supported yet.");
         },
         [frameNode](const Ark_SubTabBarStyle& style) { g_setSubTabBarStyle(frameNode, style); },
         [frameNode](const Ark_BottomTabBarStyle& style) { g_setBottomTabBarStyle(frameNode, style); },

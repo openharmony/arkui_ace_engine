@@ -1045,4 +1045,389 @@ HWTEST_F(FocusHubTestNg, GetUnfocusableParentFocusNode001, TestSize.Level1)
     WeakPtr<FocusHub> FocusHub2 = nullptr;
     EXPECT_EQ(res, FocusHub2);
 }
+
+/**
+ * @tc.name: RemoveSelfMultiThread001
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, RemoveSelfMultiThread001, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
+        AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps2: check isFocusingByTab_ is false.
+     */
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    auto res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_TRUE(res);
+
+    /**
+     * @tc.steps3: set tabIndex_ to 0.
+     */
+    context->isFocusingByTab_ = true;
+    focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub->focusCallbackEvents_->tabIndex_ = 0;
+    auto isFocusableByTab = focusHub->IsFocusableByTab();
+    EXPECT_TRUE(isFocusableByTab);
+    res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_TRUE(res);
+
+    /**
+     * @tc.steps4: set tabIndex_ to -1.
+     */
+    focusHub->focusCallbackEvents_->tabIndex_ = -1;
+    isFocusableByTab = focusHub->IsFocusableByTab();
+    EXPECT_FALSE(isFocusableByTab);
+    focusHub->RemoveFocusScopeIdAndPriorityMultiThread();
+    focusHub->RemoveSelfMultiThread(BlurReason::FOCUS_SWITCH);
+    res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: RemoveSelfMultiThread002
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, RemoveSelfMultiThread002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
+        AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps2: check isFocusingByTab_ is false.
+     */
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    auto res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_TRUE(res);
+
+    /**
+     * @tc.steps3: set tabIndex_ to 0.
+     */
+    context->isFocusingByTab_ = true;
+    focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub->focusCallbackEvents_->tabIndex_ = 0;
+    auto isFocusableByTab = focusHub->IsFocusableByTab();
+    EXPECT_TRUE(isFocusableByTab);
+    res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_TRUE(res);
+
+    /**
+     * @tc.steps4: set tabIndex_ to -1.
+     */
+    focusHub->focusCallbackEvents_->tabIndex_ = -1;
+    isFocusableByTab = focusHub->IsFocusableByTab();
+    EXPECT_FALSE(isFocusableByTab);
+    focusHub->RemoveFocusScopeIdAndPriorityMultiThread();
+    focusHub->RemoveSelfExecuteFunction(BlurReason::FOCUS_SWITCH);
+    res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: RemoveSelfMultiThread003
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, RemoveSelfMultiThread003, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
+        AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps2: check isFocusingByTab_ is false.
+     */
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    auto res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_TRUE(res);
+
+    /**
+     * @tc.steps3: set tabIndex_ to 0.
+     */
+    context->isFocusingByTab_ = true;
+    focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub->focusCallbackEvents_->tabIndex_ = 0;
+    auto isFocusableByTab = focusHub->IsFocusableByTab();
+    EXPECT_TRUE(isFocusableByTab);
+    res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_TRUE(res);
+
+    /**
+     * @tc.steps4: set tabIndex_ to -1.
+     */
+    focusHub->focusCallbackEvents_->tabIndex_ = -1;
+    isFocusableByTab = focusHub->IsFocusableByTab();
+    EXPECT_FALSE(isFocusableByTab);
+    focusHub->RemoveFocusScopeIdAndPriorityMultiThread();
+    focusHub->SetFocusScopeIdMultiThread("", false, false);
+    res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: RemoveSelfMultiThread004
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, RemoveSelfMultiThread004, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
+        AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps2: check isFocusingByTab_ is false.
+     */
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    auto res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_TRUE(res);
+
+    /**
+     * @tc.steps3: set tabIndex_ to 0.
+     */
+    context->isFocusingByTab_ = true;
+    focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub->focusCallbackEvents_->tabIndex_ = 0;
+    auto isFocusableByTab = focusHub->IsFocusableByTab();
+    EXPECT_TRUE(isFocusableByTab);
+    res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_TRUE(res);
+
+    /**
+     * @tc.steps4: set tabIndex_ to -1.
+     */
+    focusHub->focusCallbackEvents_->tabIndex_ = -1;
+    isFocusableByTab = focusHub->IsFocusableByTab();
+    EXPECT_FALSE(isFocusableByTab);
+    focusHub->RemoveFocusScopeIdAndPriorityMultiThread();
+    res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: RemoveSelfMultiThread005
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, RemoveSelfMultiThread005, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
+        AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    /**
+     * @tc.steps2: check isFocusingByTab_ is false.
+     */
+    auto context = NG::PipelineContext::GetCurrentContextSafely();
+    ASSERT_NE(context, nullptr);
+    auto res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_TRUE(res);
+
+    /**
+     * @tc.steps3: set tabIndex_ to 0.
+     */
+    context->isFocusingByTab_ = true;
+    focusHub->focusCallbackEvents_ = AceType::MakeRefPtr<FocusCallbackEvents>();
+    focusHub->focusCallbackEvents_->tabIndex_ = 0;
+    auto isFocusableByTab = focusHub->IsFocusableByTab();
+    EXPECT_TRUE(isFocusableByTab);
+    res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_TRUE(res);
+
+    /**
+     * @tc.steps4: set tabIndex_ to -1.
+     */
+    focusHub->focusCallbackEvents_->tabIndex_ = -1;
+    isFocusableByTab = focusHub->IsFocusableByTab();
+    EXPECT_FALSE(isFocusableByTab);
+    focusHub->SetFocusScopePriorityMultiThread("", 0);
+    res = focusHub->FocusToHeadOrTailChild(true);
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: RemoveSelfMultiThread006
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, RemoveSelfMultiThread006, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: create focusHub and construct allNodes.
+     */
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
+        AceType::MakeRefPtr<ButtonPattern>());
+    frameNode->GetOrCreateFocusHub();
+    auto focusHub = frameNode->GetFocusHub();
+    ASSERT_NE(focusHub, nullptr);
+
+    auto frameNode1 = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
+        AceType::MakeRefPtr<ButtonPattern>());
+    frameNode1->GetOrCreateFocusHub();
+    auto focusHub1 = frameNode1->GetFocusHub();
+
+    auto frameNode2 = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
+        AceType::MakeRefPtr<ButtonPattern>());
+    frameNode2->GetOrCreateFocusHub();
+    auto focusHub2 = frameNode2->GetFocusHub();
+
+    auto frameNode3 = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
+        AceType::MakeRefPtr<ButtonPattern>());
+    frameNode3->GetOrCreateFocusHub();
+    auto focusHub3 = frameNode3->GetFocusHub();
+
+    auto frameNode4 = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
+        AceType::MakeRefPtr<ButtonPattern>());
+    frameNode4->GetOrCreateFocusHub();
+    auto focusHub4 = frameNode4->GetFocusHub();
+
+    focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub4));
+    frameNode->children_.push_back(frameNode1);
+    frameNode->children_.push_back(frameNode2);
+    frameNode->children_.push_back(frameNode3);
+    frameNode->children_.push_back(frameNode4);
+
+    focusHub3->focusable_ = false;
+
+    auto res = focusHub->GoToNextFocusLinear(FocusStep::SHIFT_TAB, RectF());
+    EXPECT_TRUE(res);
+    focusHub2->focusable_ = false;
+    res = focusHub->GoToNextFocusLinear(FocusStep::SHIFT_TAB, RectF());
+    EXPECT_TRUE(res);
+    focusHub1->focusable_ = false;
+    res = focusHub->GoToNextFocusLinear(FocusStep::SHIFT_TAB, RectF());
+    EXPECT_FALSE(res);
+    focusHub->lastWeakFocusNode_ = AceType::WeakClaim<FocusHub>(nullptr);
+    focusHub4->focusable_ = false;
+    res = focusHub->GoToNextFocusLinear(FocusStep::TAB, RectF());
+    EXPECT_FALSE(res);
+}
+
+/**
+ * @tc.name: RemoveSelfMultiThread007
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, RemoveSelfMultiThread007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create frameNode.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    auto frameNode1 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1,
+        AceType::MakeRefPtr<Pattern>());
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    RefPtr<EventHub> eventHub1 = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    eventHub1->AttachHost(frameNode1);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    auto focusHub1 = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub1)));
+    KeyEvent keyEvent;
+    std::list<RefPtr<FocusHub>> focusNodes;
+    auto itNewFocusNode = focusHub->FlushChildrenFocusHub(focusNodes);
+    EXPECT_EQ(itNewFocusNode, focusNodes.end());
+    focusHub->lastWeakFocusNode_ = AceType::WeakClaim(AceType::RawPtr(focusHub1));
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    focusHub->currentFocus_ = false;
+    auto focusManager = pipeline->GetOrCreateFocusManager();
+    ASSERT_NE(focusManager, nullptr);
+    focusManager->isFocusActive_ = true;
+    keyEvent.action = KeyAction::DOWN;
+    keyEvent.code = KeyCode::KEY_TAB;
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_HOME);
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+    pipeline->eventManager_->isTabJustTriggerOnKeyEvent_ = true;
+    focusHub->currentFocus_ = true;
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_SHIFT_LEFT);
+    keyEvent.pressedCodes.emplace_back(KeyCode::KEY_TAB);
+    EXPECT_FALSE(focusHub->HandleEvent(keyEvent));
+}
+
+/**
+ * @tc.name: FocusHubTestNg015
+ * @tc.desc:
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, RemoveSelfMultiThread008, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: initialize parameters.
+     */
+    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101,
+        AceType::MakeRefPtr<ButtonPattern>());
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+
+    /**
+     * @tc.steps2: call the function OnBlur with FocusType::NODE.
+     * @tc.expected: The flagCbk1 and flagCbk2 are changed to true.
+     */
+    focusHub->SetFocusType(FocusType::NODE);
+    focusHub->OnBlur();
+    bool flagCbk1 = false;
+    bool flagCbk2 = false;
+    BlurReason flagReason = BlurReason::WINDOW_BLUR;
+    focusHub->onBlurInternal_ = [&flagCbk1]() { flagCbk1 = !flagCbk1; };
+    focusHub->onBlurReasonInternal_ = [&flagReason](BlurReason reason) { flagReason = reason; };
+    focusHub->SetOnBlurCallback([&flagCbk2]() { flagCbk2 = !flagCbk2; });
+    focusHub->OnBlur();
+    EXPECT_TRUE(flagCbk1);
+    EXPECT_TRUE(flagCbk2);
+    EXPECT_EQ(flagReason, BlurReason::FOCUS_SWITCH);
+
+    /**
+     * @tc.steps3: call the function OnBlur with FocusType::SCOPE.
+     * @tc.expected: The flagCbk1 and flagCbk2 are changed to true.
+     */
+    focusHub->SetFocusType(FocusType::SCOPE);
+    focusHub->OnFocus();
+    flagCbk1 = false;
+    flagCbk2 = false;
+    flagReason = BlurReason::WINDOW_BLUR;
+    focusHub->onBlurInternal_ = [&flagCbk1]() { flagCbk1 = !flagCbk1; };
+    focusHub->onBlurReasonInternal_ = [&flagReason](BlurReason reason) { flagReason = reason; };
+    focusHub->SetOnBlurCallback([&flagCbk2]() { flagCbk2 = !flagCbk2; });
+    focusHub->OnBlur();
+    EXPECT_TRUE(flagCbk1);
+    EXPECT_TRUE(flagCbk2);
+    EXPECT_EQ(flagReason, BlurReason::FOCUS_SWITCH);
+}
 } // namespace OHOS::Ace::NG

@@ -48,6 +48,8 @@ class ACE_FORCE_EXPORT ResourceParseUtils final : public AceType {
 public:
     static void CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
         Color& color, const std::string& nodeTag);
+    static void CompleteResObjFromColorWithAllowForceDark(
+        RefPtr<ResourceObject>& resObj, Color& color, const std::string& nodeTag, bool allowForceDark);
     static RefPtr<ThemeConstants> GetThemeConstants(const RefPtr<ResourceObject>& resObj);
     static bool ParseResString(const RefPtr<ResourceObject>& resObj, std::string& result);
     static bool ParseResString(const RefPtr<ResourceObject>& resObj, std::u16string& result);

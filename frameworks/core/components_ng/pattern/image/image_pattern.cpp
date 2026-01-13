@@ -1413,10 +1413,8 @@ bool ImagePattern::RecycleImageData()
     if (!enableImageRecycle) {
         return false;
     }
-    // when image component is from network and download by network is enabled,
-    // do not recycle image data to avoid re-download
-    bool isUrlDataNoCache = (!loadingCtx_ || loadingCtx_->IsNetworkImageCached());
-    if (isUrlDataNoCache) {
+    // For network images, only recycle image data when cache is available to avoid re-download.
+    if (loadingCtx_ && !loadingCtx_->IsNetworkImageSafeToRecycle()) {
         return false;
     }
     loadingCtx_ = nullptr;
@@ -1502,9 +1500,7 @@ void ImagePattern::OnWindowHide()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
-    if (!isRecycledImage_ && !renderContext->IsOnRenderTree()) {
+    if (!isRecycledImage_ && !host->IsPendingOnMainRenderTree()) {
         TAG_LOGD(AceLogTag::ACE_IMAGE, "OnWindowHide recycle ImageData: %{public}s-%{private}s",
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         RecycleImageData();
@@ -1824,6 +1820,8 @@ void ImagePattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspector
         json->PutExtAttr("imageWidth", std::to_string(loadingCtx_->GetOriginImageSize().Width()).c_str(), filter);
         json->PutExtAttr("imageHeight", std::to_string(loadingCtx_->GetOriginImageSize().Height()).c_str(), filter);
     }
+    bool antiAlias = renderProp->GetAntiAliasValue(false);
+    json->PutExtAttr("antialiased", antiAlias ? "true" : "false", filter);
 }
 
 void ImagePattern::DumpLayoutInfo()
@@ -2056,7 +2054,7 @@ void ImagePattern::DumpOtherInfo()
     DumpLog::GetInstance().AddDesc(std::string("SystemRecycleImageEnabled:")
                                        .append(SystemProperties::GetRecycleImageEnabled() ? "true" : "false"));
     DumpLog::GetInstance().AddDesc(
-        std::string("UserRecycleImageEnabled:").append(SystemProperties::GetRecycleImageEnabled() ? "true" : "false"));
+        std::string("UserRecycleImageEnabled:").append(GetIsRecycleInvisibleImageMemory() ? "true" : "false"));
     isRecycledImage_ ? DumpLog::GetInstance().AddDesc("isRecycled:true")
                      : DumpLog::GetInstance().AddDesc("isRecycled:false");
 
@@ -2303,7 +2301,7 @@ std::string ImagePattern::GetSrcTypeToString(SrcType srcType)
         { SrcType::MEMORY, "memory" }, { SrcType::BASE64, "base64" }, { SrcType::INTERNAL, "internal" },
         { SrcType::RESOURCE, "resource" }, { SrcType::DATA_ABILITY, "dataAbility" },
         { SrcType::DATA_ABILITY_DECODED, "dataAbilityDecoded" }, { SrcType::RESOURCE_ID, "resourceId" },
-        { SrcType::PIXMAP, "pixmap" }, { SrcType::ASTC, "astc" } };
+        { SrcType::PIXMAP, "pixmap" }, { SrcType::ASTC, "astc" }, { SrcType::STREAM, "stream" } };
 
     auto iter = typeMap.find(srcType);
     if (iter != typeMap.end()) {

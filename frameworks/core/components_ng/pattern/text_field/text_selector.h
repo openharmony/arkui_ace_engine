@@ -262,6 +262,7 @@ struct TextSelector {
     OffsetF secondHandleOffset_;
     OnAccessibilityCallback onAccessibilityCallback_;
     int32_t lastValidStart = 0;
+    std::string lastReportContent_;
 };
 
 enum class TextSpanType : int32_t {

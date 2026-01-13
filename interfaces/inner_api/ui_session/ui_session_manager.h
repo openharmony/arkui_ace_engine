@@ -49,6 +49,8 @@ public:
         const std::string& componentName, const std::string& propertyName, const std::string& jsonPath)>;
     using GetImagesByIdFunction =
         std::function<void(const std::vector<int32_t>&, const std::map<int32_t, std::vector<int32_t>>&)>;
+
+    using GetWebInfoByRequestFunction = std::function<void(int32_t, const std::string&)>;
     /**
      * @description: Get ui_manager instance,this object process singleton
      * @return The return value is ui_manager singleton
@@ -201,6 +203,11 @@ public:
     virtual void SendCommand(const std::string& command) {};
     virtual void SaveSendCommandFunction(SendCommandFunction&& function) {};
     virtual void SaveGetStateMgmtInfoFunction(GetStateMgmtInfoFunction&& callback) {};
+
+    virtual void SaveGetWebInfoByRequestFunction(GetWebInfoByRequestFunction&& callback) {};
+    virtual void GetWebInfoByRequest(int32_t webId, const std::string& request) {};
+    virtual void SendWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request,
+        const std::string& result, WebRequestErrorCode errorCode) {};
     virtual void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) {};
     virtual void SendArkUIImagesById(int32_t windowId,
         const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>& componentImages,
@@ -269,6 +276,7 @@ protected:
     std::function<uint32_t(const std::string& funcName, const std::string& params)> pipelineExeAppAIFunctionCallback_;
     std::function<void(ContentChangeConfig)> startContentChangeDetectCallback_;
     std::function<void()> stopContentChangeDetectCallback_;
+    GetWebInfoByRequestFunction getWebInfoByRequestCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_SESSION_MANAGER_H

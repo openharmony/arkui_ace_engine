@@ -161,6 +161,14 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     CHECK_NULL_VOID(!pattern->spans_.empty());
     auto contentHost = pattern->GetContentHost();
     CHECK_NULL_VOID(contentHost);
+
+    auto localOffset = handleRect.GetOffset();
+    if (IsOverlayMode()) {
+        auto parentGlobalOffset = hasTransform_ ? GetPaintOffsetWithoutTransform() : pattern->GetParentGlobalOffset();
+        localOffset = localOffset - parentGlobalOffset; // original offset
+    }
+    SetMagnifierOffset(localOffset, handleRect);
+
     // the handle position is calculated based on the middle of the handle height.
     auto handleOffset = GetHandleReferenceOffset(handleRect);
     UpdateSelectorOnHandleMove(handleOffset, isFirst);
@@ -168,12 +176,6 @@ void RichEditorSelectOverlay::OnHandleMove(const RectF& handleRect, bool isFirst
     auto overlayManager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(overlayManager);
     overlayManager->MarkInfoChange(DIRTY_SELECT_TEXT);
-    auto localOffset = handleRect.GetOffset();
-    if (IsOverlayMode()) {
-        auto parentGlobalOffset = hasTransform_ ? GetPaintOffsetWithoutTransform() : pattern->GetParentGlobalOffset();
-        localOffset = localOffset - parentGlobalOffset; // original offset
-    }
-    SetMagnifierOffset(localOffset, handleRect);
 
     bool isChangeSecondHandle = isFirst ? pattern->textSelector_.StartGreaterDest() :
         (!pattern->textSelector_.StartGreaterDest());
@@ -420,7 +422,7 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             break;
         case OptionMenuActionId::PASTE:
             pattern->HandleOnPaste();
-            CloseOverlay(true, CloseReason::CLOSE_REASON_NORMAL);
+            CloseOverlay(true, CloseReason::CLOSE_REASON_PASTE);
             break;
         case OptionMenuActionId::SELECT_ALL:
             pattern->HandleMenuCallbackOnSelectAll();
@@ -515,7 +517,8 @@ void RichEditorSelectOverlay::OnCloseOverlay(OptionMenuType menuType, CloseReaso
         pattern->floatingCaretState_.Reset();
         pattern->isCursorAlwaysDisplayed_ = false;
     }
-    auto needResetSelection = pattern->GetTextDetectEnable() && !pattern->HasFocus() &&
+    auto isAIEnable = pattern->GetTextDetectEnable() && !pattern->HasFocus();
+    auto needResetSelection = isAIEnable && reason != CloseReason::CLOSE_REASON_PASTE &&
         reason != CloseReason::CLOSE_REASON_DRAG_FLOATING;
     auto isBackPressed = reason == CloseReason::CLOSE_REASON_BACK_PRESSED;
     auto isHoldByOther = reason == CloseReason::CLOSE_REASON_HOLD_BY_OTHER;
@@ -597,6 +600,7 @@ void RichEditorSelectOverlay::OnAncestorNodeChanged(FrameNodeChangeInfoFlag flag
     auto pattern = GetPattern<RichEditorPattern>();
     if (IsAncestorNodeGeometryChange(flag)) {
         IF_PRESENT(pattern, CalculateHandleOffsetAndShowOverlay());
+        UpdateViewPort();
         UpdateAllHandlesOffset();
     }
     CHECK_NULL_VOID(pattern);
@@ -623,7 +627,7 @@ void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool 
     auto pattern = GetPattern<RichEditorPattern>();
     CHECK_NULL_VOID(pattern);
     initSelector_ = { pattern->textSelector_.GetTextStart(), pattern->textSelector_.GetTextEnd() };
-    IF_TRUE(!IsSingleHandle(), pattern->ChangeHandleHeight(event, isFirst, IsOverlayMode()));
+    IF_TRUE(!IsSingleHandle(), ChangeHandleHeight(event, isFirst));
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(isFirst ? DIRTY_FIRST_HANDLE : DIRTY_SECOND_HANDLE);
@@ -631,6 +635,29 @@ void RichEditorSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool 
     if (IsSingleHandle()) {
         pattern->ShowCaretWithoutTwinkling();
         manager->SetIsHandleLineShow(false);
+    }
+}
+
+void RichEditorSelectOverlay::ChangeHandleHeight(const GestureEvent& event, bool isFirst)
+{
+    auto pattern = GetPattern<RichEditorPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto touchOffset = event.GetGlobalLocation();
+    if (hasTransform_) {
+        auto transformOffset = OffsetF(touchOffset.GetX(), touchOffset.GetY());
+        RevertLocalPointWithTransform(transformOffset);
+        transformOffset += GetPaintOffsetWithoutTransform();
+        touchOffset = Offset(transformOffset.GetX(), transformOffset.GetY());
+    }
+    auto& textSelector = pattern->textSelector_;
+    auto& currentHandle = isFirst ? textSelector.firstHandle : textSelector.secondHandle;
+    bool isChangeFirstHandle = isFirst ? (!textSelector.StartGreaterDest()) : textSelector.StartGreaterDest();
+    if (isChangeFirstHandle) {
+        pattern->ChangeFirstHandleHeight(touchOffset, currentHandle);
+    } else {
+        if (!TextSelectOverlay::ChangeSecondHandleHeight(event, IsOverlayMode())) {
+            pattern->ChangeSecondHandleHeight(touchOffset, currentHandle);
+        }
     }
 }
 

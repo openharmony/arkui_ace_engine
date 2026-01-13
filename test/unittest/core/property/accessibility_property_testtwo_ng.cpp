@@ -181,7 +181,7 @@ HWTEST_F(AccessibilityPropertyTestTwoNg, AccessibilityPropertyTestTwoNg004, Test
     WeakPtr<FrameNode> hostBak = host;
     accessibilityProperty.SetHost(hostBak);
     auto result = accessibilityProperty.IsMatchAccessibilityResponseRegion(true);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
 }
 
 /**

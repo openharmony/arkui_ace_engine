@@ -30,7 +30,33 @@ import { ExtendableComponent } from '../component/extendableComponent'
 
 export type NavDestinationBuilder =
 /** @memo */
-() => void
+(name: string, params: Object | null | undefined) => void
+
+interface BuildNavDestinationParam {
+    currentRenderingComponent: int;
+    currentExtendableComponent: Object | undefined;
+    name: string;
+    param: Object | null | undefined;
+}
+
+function BuildNavDestination(builder: NavDestinationBuilder, param: BuildNavDestinationParam): PeerNode {
+    return createUiDetachedRoot(
+        () => {
+            return ArkComponentRootPeer.create(undefined);
+        },
+        () => {
+            const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
+            const lastExtendableComponent = ExtendableComponent.current;
+            ObserveSingleton.instance.renderingComponent = param.currentRenderingComponent;
+            ExtendableComponent.current = param.currentExtendableComponent;
+            try {
+                builder(param.name, param.param);
+            } finally {
+                ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
+                ExtendableComponent.current = lastExtendableComponent;
+            }
+        });
+}
 
 export class NavigationRouterMap {
     private static routerMap: Map<string, WrappedBuilder<NavDestinationBuilder>> = new Map<string, WrappedBuilder<NavDestinationBuilder>>()
@@ -39,17 +65,13 @@ export class NavigationRouterMap {
         NavigationRouterMap.routerMap.set(name, builder);
     }
 
-    static CreateNavDestinationFromRouterMap(name: string, param: object|null|undefined): PeerNode | undefined {
-        if (!NavigationRouterMap.routerMap.has(name)) {
-            InteropNativeModule._NativeLog(`AceNavigation: NavDestination builder for ${name} does't exist`)
+    static CreateNavDestinationFromRouterMap(param: BuildNavDestinationParam): PeerNode | undefined {
+        if (!NavigationRouterMap.routerMap.has(param.name)) {
+            InteropNativeModule._NativeLog(`AceNavigation: NavDestination builder for ${param.name} does't exist`)
             return undefined;
         }
-        let builder = NavigationRouterMap.routerMap.get(name)!;
-        return createUiDetachedRoot((): PeerNode => ArkStackPeer.create(new ArkStackComponent()), () => {
-            setNeedCreate(true)
-            builder.builder();
-            setNeedCreate(false)
-        })
+        let builder = NavigationRouterMap.routerMap.get(param.name)!;
+        return BuildNavDestination(builder.builder, param);
     }
 }
 
@@ -80,28 +102,49 @@ export class NavigationOpsHandWritten {
         let peerPtr = component.getPeer().peer.ptr
         ArkUIGeneratedNativeModule._NavigationInterface_setNavigationOptions(peerPtr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
+        if (info == undefined || info == null) {
+            console.log(`AceNavigation: NavPathStack is empty!`)
+            return;
+        }
+        const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
+        const currentExtendableComponent = ExtendableComponent.current;
+        NavExtender.setCreateNavDestinationCallback(info!, (index: int32): KPointer => {
+            let names: Array<string> = info!.getAllPathName()
+            if (index < 0 || index >= names.length) {
+                InteropNativeModule._NativeLog(`AceNavigation: Invalid index:${index} names.length:${names.length}`);
+                return 0;
+            }
+            let param = info!.getParamByIndex(index)
+            let name = names[index];
+            InteropNativeModule._NativeLog(`AceNavigation: create new node: name: ${name}, index: ${index} from router map`);
+            let buildParam = {
+                currentRenderingComponent: currentRenderingComponent,
+                currentExtendableComponent: currentExtendableComponent,
+                name: name,
+                param: param
+            } as BuildNavDestinationParam;
+            let node = NavigationRouterMap.CreateNavDestinationFromRouterMap(buildParam);
+            if (!node) {
+                InteropNativeModule._NativeLog(`AceNavigation: failed to create NavDestination from router map`);
+                return 0;
+            }
+            return node.peer.ptr;
+        })
     }
     static hookSetNavDestinationImpl(component: ArkNavigationComponent, value: PageMapBuilder | undefined) {
         if (value === undefined) {
             return
         }
+        const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
+        const currentExtendableComponent = ExtendableComponent.current;
         NavExtender.setNavDestinationBuilderCallback(component.getPeer().peer.ptr, (name: string, param?: Object) => {
-            const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
-            const currentExtendableComponent = ExtendableComponent.current;
-            const peer = createUiDetachedRoot(() => {
-                return ArkComponentRootPeer.create(undefined);
-            },
-            () => {
-                const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
-                const lastExtendableComponent = ExtendableComponent.current;
-                ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
-                ExtendableComponent.current = currentExtendableComponent;
-                /** @memo */
-                let builder: (name: string, param: Object | undefined | null) => void = value!;
-                builder(name, param)
-                ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
-                ExtendableComponent.current = lastExtendableComponent;
-            });
+            let buildParam = {
+                currentRenderingComponent: currentRenderingComponent,
+                currentExtendableComponent: currentExtendableComponent,
+                name: name,
+                param: param
+            } as BuildNavDestinationParam;
+            const peer = BuildNavDestination(value!, buildParam);
             return peer.peer.ptr;
         });
     }

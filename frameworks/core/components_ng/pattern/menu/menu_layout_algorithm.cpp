@@ -406,6 +406,7 @@ void MenuLayoutAlgorithm::Initialize(LayoutWrapper* layoutWrapper)
     InitializeParam(menuPattern);
     auto needModify = !menuPattern->IsSelectMenu() && !menuPattern->IsSelectOverlayDefaultModeRightClickMenu();
     if (needModify && canExpandCurrentWindow_) {
+        TAG_LOGI(AceLogTag::ACE_MENU, "original position is : %{public}s", position_.ToString().c_str());
         ModifyOffset(position_, menuPattern);
     }
     dumpInfo_.originPlacement =
@@ -671,9 +672,13 @@ uint32_t MenuLayoutAlgorithm::GetBottomBySafeAreaManager(const RefPtr<SafeAreaMa
     auto bottom = safeAreaInsets.bottom_.Length();
     CHECK_NULL_RETURN(safeAreaManager, 0);
     auto keyboardHeight = safeAreaManager->GetKeyboardInsetImpl().Length();
-    if ((menuPattern->IsSelectOverlayExtensionMenu() || menuPattern->IsSelectOverlayRightClickMenu()) &&
-        GreatNotEqual(keyboardHeight, 0)) {
-        bottom = keyboardHeight;
+    if (menuPattern->IsSelectOverlayExtensionMenu() || menuPattern->IsSelectOverlayRightClickMenu()) {
+        if (NearEqual(keyboardHeight, 0.0f)) {
+            keyboardHeight = safeAreaManager->GetRawKeyboardHeight();
+        }
+        if (GreatNotEqual(keyboardHeight, 0)) {
+            bottom = keyboardHeight;
+        }
     }
 
     CHECK_NULL_RETURN(props, 0);
@@ -807,7 +812,6 @@ void MenuLayoutAlgorithm::ModifyPositionToWrapper(LayoutWrapper* layoutWrapper, 
 // Called to perform layout render node and child.
 void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
 {
-    // initialize screen size and menu position
     CHECK_NULL_VOID(layoutWrapper);
     MenuDumpInfo dumpInfo;
     auto menuNode = layoutWrapper->GetHostNode();
@@ -818,6 +822,7 @@ void MenuLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     CHECK_NULL_VOID(menuLayoutProperty);
     auto isContextMenu = menuPattern->IsContextMenu();
     InitCanExpandCurrentWindow(isContextMenu, menuLayoutProperty);
+    dumpInfo_.canExpandCurrentWindow = canExpandCurrentWindow_;
     Initialize(layoutWrapper);
     if (!targetTag_.empty()) {
         InitTargetSizeAndPosition(layoutWrapper, isContextMenu, menuPattern);
@@ -2982,6 +2987,7 @@ void MenuLayoutAlgorithm::InitTargetSizeAndPosition(
     CHECK_NULL_VOID(pipelineContext);
     if (canExpandCurrentWindow_ && !menuPattern->IsSelectMenu()) {
         if (!holdTargetOffset) {
+            TAG_LOGI(AceLogTag::ACE_MENU, "original targetOffset is : %{public}s", targetOffset_.ToString().c_str());
             ModifyOffset(targetOffset_, menuPattern);
             menuPattern->SetTargetOffset(targetOffset_);
         }
@@ -3544,12 +3550,15 @@ void MenuLayoutAlgorithm::InitCanExpandCurrentWindow(
     bool isContextMenu, const RefPtr<MenuLayoutProperty>& menuLayoutProperty)
 {
     CHECK_NULL_VOID(menuLayoutProperty);
+    showInSubWindow_ = menuLayoutProperty->GetShowInSubWindowValue(false) || isContextMenu;
+    dumpInfo_.showInSubWindow = showInSubWindow_;
+    if (!showInSubWindow_) {
+        canExpandCurrentWindow_ = false;
+        return;
+    }
     // subwindow on phone has the same size as the main window
     // so menu showed in subwindow can not expand the current window on phone
-    auto showInSubWindow = menuLayoutProperty->GetShowInSubWindowValue(false);
-    dumpInfo_.showInSubWindow = showInSubWindow;
-    canExpandCurrentWindow_ = IsExpandDisplay() && (showInSubWindow || isContextMenu);
-    dumpInfo_.canExpandCurrentWindow = canExpandCurrentWindow_;
+    canExpandCurrentWindow_ = IsExpandDisplay();
     auto containerId = Container::CurrentId();
     auto container = AceEngine::Get().GetContainer(containerId);
     if (containerId >= MIN_SUBCONTAINER_ID) {
@@ -3624,7 +3633,6 @@ Rect MenuLayoutAlgorithm::GetMenuWindowRectInfo(const RefPtr<MenuPattern>& menuP
 
 void MenuLayoutAlgorithm::ModifyOffset(OffsetF& offset, const RefPtr<MenuPattern>& menuPattern)
 {
-    TAG_LOGI(AceLogTag::ACE_MENU, "original targetOffset is : %{public}s", offset.ToString().c_str());
     if (isExpandDisplay_) {
         auto host = menuPattern->GetHost();
         CHECK_NULL_VOID(host);
@@ -3990,10 +3998,12 @@ void MenuLayoutAlgorithm::MenuAvoidKeyboard(const RefPtr<FrameNode>& menuNode,
     if (GreatNotEqual(wrapperRect_.Top(), keyboardTopPosition)) {
         return;
     }
-    auto minKeyboardAvoidDistanceValue =
-        minKeyboardAvoidDistance.value_or(MIN_KEYBOARD_AVOID_DISTANCE).ConvertToPx();
+    auto minKeyboardAvoidDistanceValue = minKeyboardAvoidDistance.value_or(MIN_KEYBOARD_AVOID_DISTANCE);
+    if (minKeyboardAvoidDistanceValue.Unit() == DimensionUnit::PERCENT) {
+        minKeyboardAvoidDistanceValue = MIN_KEYBOARD_AVOID_DISTANCE;
+    }
     auto isPreview = menuPattern->GetPreviewMode() != MenuPreviewMode::NONE;
-    auto newRectBottom = keyboardTopPosition - minKeyboardAvoidDistanceValue;
+    auto newRectBottom = keyboardTopPosition - minKeyboardAvoidDistanceValue.ConvertToPx();
     // In the preview menu, the bottom of the layout area of the menu is equal to the layout area of the menu
     // minus the bottom security area. When the top of the soft keyboard position is larger than the bottom of the
     // layout area of the preview menu, the menu does not need to avoid the soft keyboard.

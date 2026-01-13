@@ -1152,7 +1152,7 @@ public:
         } else {
             ani_string toNavBar {};
             env->String_NewUTF8(navBar.c_str(), navBar.size(), &toNavBar);
-            env->Object_SetPropertyByName_Ref(res, "from", toNavBar);
+            env->Object_SetPropertyByName_Ref(res, "to", toNavBar);
         }
 
         ani_enum operation;
@@ -1167,7 +1167,7 @@ public:
         ani_class cls;
         env->FindClass(ANI_SCROLL_EVENT_INFO_CLS, &cls);
         ani_method ctor;
-        env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor);
+        env->Class_FindMethod(cls, "<ctor>", ":", &ctor);
         env->Object_New(cls, ctor, &res);
 
         ani_string id {};
@@ -1810,7 +1810,7 @@ static void OffTabContentUpdateWithOptions([[maybe_unused]] ani_env* env, [[mayb
 }
 
 static void OnNavDestinationUpdateWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    ani_string type, ani_object options, ani_fn_object fnObj)
+    ani_object options, ani_fn_object fnObj)
 {
     if (!fnObj) {
         return;
@@ -1828,7 +1828,7 @@ static void OnNavDestinationUpdateWithId([[maybe_unused]] ani_env* env, [[maybe_
 }
 
 static void OffNavDestinationUpdateWithId([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
-    ani_string type, ani_object options, ani_fn_object fnObj)
+    ani_object options, ani_fn_object fnObj)
 {
     if (!fnObj) {
         return;
@@ -1846,7 +1846,7 @@ static void OffNavDestinationUpdateWithId([[maybe_unused]] ani_env* env, [[maybe
 }
 
 static void OnNavDestinationUpdateWithIdContext([[maybe_unused]] ani_env* env,
-    ani_string type, ani_object options, ani_fn_object fnObj)
+    ani_object options, ani_fn_object fnObj)
 {
     if (!fnObj) {
         return;
@@ -1869,7 +1869,7 @@ static void OnNavDestinationUpdateWithIdContext([[maybe_unused]] ani_env* env,
 }
 
 static void OffNavDestinationUpdateWithIdContext([[maybe_unused]] ani_env* env,
-    ani_string type, ani_object options, ani_fn_object fnObj)
+    ani_object options, ani_fn_object fnObj)
 {
     if (!fnObj) {
         return;

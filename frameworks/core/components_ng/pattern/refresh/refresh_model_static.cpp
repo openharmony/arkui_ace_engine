@@ -143,4 +143,13 @@ void RefreshModelStatic::SetChangeEvent(FrameNode* frameNode, RefreshChangeEvent
     CHECK_NULL_VOID(eventHub);
     eventHub->SetChangeEvent(std::move(changeEvent));
 }
+
+void RefreshModelStatic::SetMaxPullDownDistance(FrameNode* frameNode, const std::optional<float>& maxDistance)
+{
+    if (maxDistance.has_value()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxPullDownDistance, maxDistance.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(RefreshLayoutProperty, MaxPullDownDistance, frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG

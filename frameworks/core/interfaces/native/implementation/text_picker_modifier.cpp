@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
+#include "compatible/components/picker/picker_text_component.h"
 #include "core/components_ng/base/frame_node.h"
-#include "core/components/picker/picker_text_component.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_ng.h"
 #include "core/components_ng/pattern/text_picker/textpicker_model_static.h"
 #include "core/components_ng/pattern/text_picker/textpicker_event_hub.h"

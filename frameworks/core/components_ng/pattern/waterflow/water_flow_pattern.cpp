@@ -56,7 +56,7 @@ bool WaterFlowPattern::UpdateCurrentOffset(float delta, int32_t source)
     if (GetScrollEdgeEffect()) {
         // over scroll in drag update from normal to over scroll.
         float overScroll = layoutInfo_->CalcOverScroll(GetMainContentSize(), delta);
-        if (source == SCROLL_FROM_UPDATE) {
+        if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_BAR_OVER_DRAG) {
             auto friction = CalculateFriction(std::abs(overScroll) / GetMainContentSize());
             delta *= friction;
         }

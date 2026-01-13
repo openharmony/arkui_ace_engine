@@ -43,7 +43,7 @@ private:
     double trailing_ = 0.0;
 };
 
-class ACE_EXPORT ScrollMotion : public Motion {
+class ACE_FORCE_EXPORT ScrollMotion : public Motion {
 public:
     ScrollMotion(double position, double velocity, const ExtentPair& extent, const ExtentPair& initExtent,
         const RefPtr<SpringProperty>& spring);

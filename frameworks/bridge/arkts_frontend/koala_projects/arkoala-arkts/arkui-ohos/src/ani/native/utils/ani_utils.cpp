@@ -510,4 +510,14 @@ ani_env* AniUtils::GetAniEnv(ani_vm* vm)
     }
     return env;
 }
+
+ani_ref AniUtils::CreateNull(ani_env* env)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref nullObj;
+    if (ANI_OK != env->GetNull(&nullObj)) {
+        return nullptr;
+    }
+    return nullObj;
+}
 }

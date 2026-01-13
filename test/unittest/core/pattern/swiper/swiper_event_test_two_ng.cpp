@@ -16,7 +16,7 @@
 #include "swiper_test_ng.h"
 #include "test/mock/core/pattern/mock_nestable_scroll_container.h"
 
-#include "core/components/swiper/swiper_component.h"
+#include "core/components_ng/pattern/swiper/swiper_change_event.h"
 
 namespace OHOS::Ace::NG {
 namespace {

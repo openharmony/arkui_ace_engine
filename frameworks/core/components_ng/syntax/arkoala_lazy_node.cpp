@@ -43,6 +43,7 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
         "TRACE DoSetActiveChildRange(%{public}d, %{public}d, %{public}d, %{public}d, %{public}d)",
         start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
+    SetNeedBuildAll(false);
     activeRangeParam_ = newParam;
     if (updateRange_) {
         // trigger TS-side
@@ -574,7 +575,8 @@ void ArkoalaLazyNode::ForEachL1Node(
         const auto index = it->first;
         const RefPtr<UINode> node = it->second;
         CHECK_NULL_CONTINUE(node);
-        if (isRepeat_ || IsInActiveRange(index, activeRangeParam_)) { // LazyForEach only return active nodes
+        if (needBuildAll_ || isRepeat_ || IsInActiveRange(index, activeRangeParam_)) {
+            // LazyForEach only return nodes in container
             cbFunc(index, node);
         }
     }
@@ -586,7 +588,8 @@ void ArkoalaLazyNode::ForEachL1NodeWithOnMove(const std::function<void(const Ref
     for (auto it = node4Index_.begin(); it != node4Index_.end(); ++it) {
         const auto index = it->first;
         const auto mappedIndex = ConvertFromToIndexRevert(index);
-        if (isRepeat_ || IsInActiveRange(mappedIndex, activeRangeParam_)) { // LazyForEach only return active nodes
+        if (needBuildAll_ || isRepeat_ || IsInActiveRange(mappedIndex, activeRangeParam_)) {
+            // LazyForEach only return nodes in container
             mappedNode4Index.emplace(mappedIndex, index);
         }
     }

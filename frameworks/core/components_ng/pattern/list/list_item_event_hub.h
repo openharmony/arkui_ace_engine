@@ -18,7 +18,7 @@
 
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_event_hub.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 class ListItemEventHub : public SelectableItemEventHub {

@@ -1218,4 +1218,34 @@ HWTEST_F(EventManagerTestNg, EventManagerTest101, TestSize.Level1)
     EXPECT_EQ(eventManager->lastTouchEvent_.sourceType, SourceType::TOUCH);
     EXPECT_EQ(eventManager->lastTouchEvent_.sourceTool, SourceTool::MOUSE);
 }
+
+
+/**
+ * @tc.name: EventManagerTest102
+ * @tc.desc: Test SetResponseLinkRecognizers
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest102, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    int32_t nodeId = 16;
+    auto parentNode = CreateFrameNodeGroup(nodeId, 3);
+    auto recognizerGroup = CreateRecognizerGroup(parentNode);
+    auto panHorizontal = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+    auto targetLinkHorizontal = AceType::MakeRefPtr<PanRecognizer>(
+        DEFAULT_PAN_FINGER, PanDirection { PanDirection::HORIZONTAL }, DEFAULT_PAN_DISTANCE.ConvertToPx());
+
+    TouchTestResult resultList;
+    ResponseLinkResult responseLinkRecognizers;
+    resultList.emplace_back(recognizerGroup);
+    resultList.emplace_back(panHorizontal);
+    responseLinkRecognizers.emplace_back(targetLinkHorizontal);
+    eventManager->SetResponseLinkRecognizers(resultList, responseLinkRecognizers, true);
+    EXPECT_TRUE(responseLinkRecognizers.size() == 1);
+    EXPECT_TRUE(recognizerGroup->IsPostEventResult());
+    EXPECT_TRUE(panHorizontal->IsPostEventResult());
+}
 } // namespace OHOS::Ace::NG

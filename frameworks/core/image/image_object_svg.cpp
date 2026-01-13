@@ -15,11 +15,21 @@
 
 #include "core/image/image_object.h"
 
+#include "compatible/components/svg/svg_compatible_modifier.h"
+#include "core/common/dynamic_module_helper.h"
+
 namespace OHOS::Ace {
-RefPtr<ImageObject> GetImageSvgDomObj(ImageSourceInfo source, const std::unique_ptr<SkMemoryStream >& svgStream,
+RefPtr<ImageObject> GetImageSvgDomObj(ImageSourceInfo source, const std::unique_ptr<SkMemoryStream>& svgStream,
     const RefPtr<PipelineBase>& context, std::optional<Color>& color)
 {
-    auto svgDom = SvgDom::CreateSvgDom(*svgStream, AceType::DynamicCast<PipelineContext>(context), color);
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("svg");
+    CHECK_NULL_RETURN(loader, nullptr);
+    auto* modifier = reinterpret_cast<const ArkUISvgCompatibleModifier*>(loader->GetCustomModifier());
+    CHECK_NULL_RETURN(modifier, nullptr);
+    const Color* themeColor = color.has_value() ? &color.value() : nullptr;
+    auto svgDom = modifier->createSvgDom(
+        svgStream.get(), reinterpret_cast<PipelineContext*>(AceType::RawPtr(context)), themeColor);
+    CHECK_NULL_RETURN(svgDom, nullptr);
     return svgDom ? AceType::MakeRefPtr<SvgImageObject>(source, Size(), 1, svgDom) : nullptr;
 }
-}
+} // namespace OHOS::Ace

@@ -134,7 +134,7 @@ void LongPressRecognizer::HandleTouchDownEvent(const TouchEvent& event)
 
     int32_t curDuration = duration_;
 #if defined(OHOS_STANDARD_SYSTEM) && !defined(PREVIEW)
-    if (!IsPostEventResult()) {
+    if (!IsPostEventResult() || event.passThrough) {
         int64_t currentTimeStamp = GetSysTimestamp();
         int64_t eventTimeStamp = static_cast<int64_t>(event.time.time_since_epoch().count());
         if (currentTimeStamp > eventTimeStamp) {
@@ -299,7 +299,8 @@ void LongPressRecognizer::HandleOverdueDeadline(bool isCatchMode)
     }
     auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
     if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
-        TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press reject as judge result is reject");
+        auto node = GetAttachedNode().Upgrade();
+        TAG_LOGI(AceLogTag::ACE_GESTURE, "Long press judge reject, %{public}s", node ? node->GetTag().c_str() : "");
         extraInfo_ += "Reject: judge reject.";
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         if (gestureInfo_ && gestureInfo_->GetType() == GestureTypeName::DRAG) {
@@ -651,4 +652,21 @@ OnAccessibilityEventFunc LongPressRecognizer::GetOnAccessibilityEventFunc()
     return callback;
 }
 
+std::string LongPressRecognizer::GetGestureInfoString() const
+{
+    std::string gestureInfoStr = MultiFingersRecognizer::GetGestureInfoString();
+    gestureInfoStr.append(",UCM:");
+    gestureInfoStr.append(std::to_string(useCatchMode_));
+    gestureInfoStr.append(",FD:");
+    gestureInfoStr.append(std::to_string(isForDrag_));
+    gestureInfoStr.append(",DML:");
+    gestureInfoStr.append(std::to_string(isDisableMouseLeft_));
+    gestureInfoStr.append(",LFCFS:");
+    gestureInfoStr.append(std::to_string(longPressFingerCountForSequence_));
+    gestureInfoStr.append(",OAT:");
+    gestureInfoStr.append(std::to_string(isOnActionTriggered_));
+    gestureInfoStr.append(",LA:");
+    gestureInfoStr.append(std::to_string(lastAction_));
+    return gestureInfoStr;
+}
 } // namespace OHOS::Ace::NG

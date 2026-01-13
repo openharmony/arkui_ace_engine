@@ -19,7 +19,7 @@
 #include "base/geometry/size.h"
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/components/video/video_controller_v2.h"
+#include "core/components_ng/pattern/video/video_controller_v2.h"
 #include "core/components_ng/image_provider/image_loading_context.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/video/video_accessibility_property.h"
@@ -110,6 +110,8 @@ public:
     {
         return loop_;
     }
+
+    void UpdateControllerBar();
 
     void SetSurfaceBackgroundColor(Color color);
 
@@ -366,7 +368,6 @@ private:
     void OnSliderChange(float posTime, int32_t mode);
 
     void UpdatePreviewImage();
-    void UpdateControllerBar();
     void UpdateVideoProperty();
 
     RefPtr<FrameNode> CreateSVG();

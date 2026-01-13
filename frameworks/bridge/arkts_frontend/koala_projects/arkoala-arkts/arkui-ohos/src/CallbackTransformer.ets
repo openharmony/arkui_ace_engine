@@ -14,9 +14,10 @@
  */
 
 import { memo, memo_intrinsic, memo_entry, memo_stable, memo_skip } from "@koalaui/runtime/annotations"
-import { KPointer, nullptr } from '@koalaui/interop';
-import { IncrementalNode } from '@koalaui/runtime';
+import { KPointer, nullptr, pointer, int32 } from '@koalaui/interop';
+import { IncrementalNode, GlobalStateManager } from '@koalaui/runtime';
 import { PeerNode } from "./PeerNode"
+import { ArkUIAniModule } from "arkui.ani"
 import { CustomBuilder, CustomBuilderT } from "./component/builder"
 import { CustomNodeBuilder, ArkComponentRootPeer, CustomBuilderT_Arkui_Component_Enums_ResponseType } from "#generated"
 import { UIContextUtil } from './base/UIContextUtil';
@@ -49,8 +50,23 @@ function componentRootPeerFactory(): PeerNode {
     return ArkComponentRootPeer.create(undefined)
 }
 
+class FreeRootNode extends PeerNode {
+    protected constructor(peerPtr: pointer, id: int32, name: string = '', flags: int32 = 0) {
+        super(peerPtr, id, name, flags)
+    }
+
+    public static create(): FreeRootNode {
+        const peerId = PeerNode.nextId()
+        const peerPtr = ArkUIAniModule._DetachedFreeRoot_Construct(peerId);
+        if (!peerPtr) {
+            throw new Error('create FreeRootNode fail')
+        }
+        return new FreeRootNode(peerPtr, peerId, 'FreeRootNode')
+    }
+}
+
 function componentFreeRootFactory(): IncrementalNode {
-    return new IncrementalNode();
+    return FreeRootNode.create();
 }
 
 export class CallbackTransformer {
@@ -58,21 +74,30 @@ export class CallbackTransformer {
         const context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
         const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
         const currentExtendableComponent = ExtendableComponent.current;
+        const currentStateManager = GlobalStateManager.instance;
         return (parentNodeId: KPointer): KPointer => {
             /** @memo */
             const cb = () => {
                 const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
                 const lastExtendableComponent = ExtendableComponent.current;
+                const latestStateManager = GlobalStateManager.instance;
                 ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
                 ExtendableComponent.current = currentExtendableComponent;
+                // set StateManager which is the customComponent created before invoking build function
+                GlobalStateManager.SetLocalManager(currentStateManager);
                 try {
                     value();
                 } finally {
                     ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
                     ExtendableComponent.current = lastExtendableComponent;
+                    // revert stateManager is using mow
+                    GlobalStateManager.SetLocalManager(latestStateManager);
                 }
             };
+            const latestStateManager = GlobalStateManager.instance;
+            GlobalStateManager.SetLocalManager(currentStateManager);
             const peer = context.getDetachedRootEntryManager().createUiDetachedFreeRoot(componentFreeRootFactory, cb);
+            GlobalStateManager.SetLocalManager(latestStateManager);
             return peer ? peer.peer.ptr : nullptr;
         }
     }

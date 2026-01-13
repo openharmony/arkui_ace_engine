@@ -23,7 +23,7 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_item_group_model.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -34,8 +34,8 @@ public:
     static void SetDividerMultiThread(
         FrameNode* frameNode, const std::optional<V2::ItemDivider>& divider, bool needGetThemeColor = false);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetHeader(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
-    static void SetFooter(FrameNode* frameNode, std::function<RefPtr<UINode>()>&& builder);
+    static void SetHeader(FrameNode* frameNode, const RefPtr<NG::UINode>& node, bool isContent = false);
+    static void SetFooter(FrameNode* frameNode, const RefPtr<NG::UINode>& node, bool isContent = false);
     static void SetSpace(FrameNode* frameNode, const std::optional<Dimension>& space);
     static void SetStyle(FrameNode* frameNode, const std::optional<V2::ListItemGroupStyle>& style);
     static RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* frameNode);

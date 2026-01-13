@@ -32,8 +32,8 @@ import { drawing_ColorFilter_serializer } from "./../framework/ohos.graphics.dra
 import { default as image } from "@ohos.multimedia.image"
 import { default as drawing } from "@ohos.graphics.drawing"
 import { LeadingMarginPlaceholder_serializer, LeadingMarginPlaceholder } from "./richEditor"
-import { TextDirection } from "./textCommon"
-import { ShadowOptions_serializer, ShadowOptions, ClickEvent, ClickEvent_serializer } from "./common"
+import { TextVerticalAlign, TextDirection } from "./textCommon"
+import { ShadowOptions_serializer, ShadowOptions, ClickEvent, TouchEvent, ClickEvent_serializer, TouchEvent_serializer } from "./common"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { GestureEvent, GestureEvent_serializer } from "./gesture"
@@ -324,6 +324,7 @@ export class ImageAttachment implements MaterializedBase {
         return this.peer
     }
     readonly value: image.PixelMap
+    readonly resourceValue?: string | undefined
     readonly size?: SizeOptions | undefined
     readonly verticalAlign?: ImageSpanAlignment | undefined
     readonly objectFit?: ImageFit | undefined
@@ -332,6 +333,7 @@ export class ImageAttachment implements MaterializedBase {
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ImageAttachment.getFinalizer())
         this.value = this.getValue()
+        this.resourceValue = this.getResourceValue()
         this.size = this.getSize()
         this.verticalAlign = this.getVerticalAlign()
         this.objectFit = this.getObjectFit()
@@ -368,6 +370,9 @@ export class ImageAttachment implements MaterializedBase {
     private getValue(): image.PixelMap {
         return this.getValue_serialize()
     }
+    private getResourceValue(): string | undefined {
+        return this.getResourceValue_serialize()
+    }
     private getSize(): SizeOptions | undefined {
         return this.getSize_serialize()
     }
@@ -387,6 +392,17 @@ export class ImageAttachment implements MaterializedBase {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getValue(this.peer!.ptr)
         const obj : image.PixelMap = extractors.fromImagePixelMapPtr(retval)
         return obj
+    }
+    private getResourceValue_serialize(): string | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getResourceValue(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : string | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (retvalDeserializer.readString() as string)
+        }
+        const returnResult : string | undefined = buffer
+        return returnResult
     }
     private getSize_serialize(): SizeOptions | undefined {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getSize(this.peer!.ptr)
@@ -451,6 +467,86 @@ export class ImageAttachment implements MaterializedBase {
         }
         const returnResult : ColorFilterType | undefined = buffer
         return returnResult
+    }
+}
+export class LeadingMarginSpanInternal {
+    public static fromPtr(ptr: KPointer): LeadingMarginSpan {
+        return new LeadingMarginSpan(ptr)
+    }
+}
+export class LeadingMarginSpan implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    onDraw(context: DrawContext, drawInfo: LeadingMarginSpanDrawInfo): void {
+        throw new Error("Not implemented!")
+    }
+    get onDraw_callback(): ((context: DrawContext,drawInfo: LeadingMarginSpanDrawInfo) => void) {
+        return this.getOnDraw_callback()
+    }
+    set onDraw_callback(onDraw_callback: ((context: DrawContext,drawInfo: LeadingMarginSpanDrawInfo) => void)) {
+        this.setOnDraw_callback(onDraw_callback)
+    }
+    getLeadingMargin(): LengthMetrics {
+        throw new Error("Not implemented!")
+    }
+    get getLeadingMargin_callback(): (() => LengthMetrics) {
+        return this.getGetLeadingMargin_callback()
+    }
+    set getLeadingMargin_callback(getLeadingMargin_callback: (() => LengthMetrics)) {
+        this.setGetLeadingMargin_callback(getLeadingMargin_callback)
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, LeadingMarginSpan.getFinalizer())
+    }
+    constructor() {
+        this(LeadingMarginSpan.construct())
+        this.onDraw_callback = this.onDraw
+        this.getLeadingMargin_callback = this.getLeadingMargin
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._LeadingMarginSpan_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._LeadingMarginSpan_getFinalizer()
+    }
+    private getOnDraw_callback(): ((context: DrawContext,drawInfo: LeadingMarginSpanDrawInfo) => void) {
+        return this.getOnDraw_callback_serialize()
+    }
+    private setOnDraw_callback(onDraw_callback: ((context: DrawContext,drawInfo: LeadingMarginSpanDrawInfo) => void)): void {
+        const onDraw_callback_casted = onDraw_callback as (((context: DrawContext,drawInfo: LeadingMarginSpanDrawInfo) => void))
+        this.setOnDraw_callback_serialize(onDraw_callback_casted)
+        return
+    }
+    private getGetLeadingMargin_callback(): (() => LengthMetrics) {
+        return this.getGetLeadingMargin_callback_serialize()
+    }
+    private setGetLeadingMargin_callback(getLeadingMargin_callback: (() => LengthMetrics)): void {
+        const getLeadingMargin_callback_casted = getLeadingMargin_callback as ((() => LengthMetrics))
+        this.setGetLeadingMargin_callback_serialize(getLeadingMargin_callback_casted)
+        return
+    }
+    private getOnDraw_callback_serialize(): ((context: DrawContext,drawInfo: LeadingMarginSpanDrawInfo) => void) {
+        const retval  = ArkUIGeneratedNativeModule._LeadingMarginSpan_getOnDraw_callback(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+    private setOnDraw_callback_serialize(onDraw_callback: ((context: DrawContext,drawInfo: LeadingMarginSpanDrawInfo) => void)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(onDraw_callback)
+        ArkUIGeneratedNativeModule._LeadingMarginSpan_setOnDraw_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getGetLeadingMargin_callback_serialize(): (() => LengthMetrics) {
+        const retval  = ArkUIGeneratedNativeModule._LeadingMarginSpan_getGetLeadingMargin_callback(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+    private setGetLeadingMargin_callback_serialize(getLeadingMargin_callback: (() => LengthMetrics)): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(getLeadingMargin_callback)
+        ArkUIGeneratedNativeModule._LeadingMarginSpan_setGetLeadingMargin_callback(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export class LetterSpacingStyleInternal {
@@ -536,22 +632,26 @@ export class ParagraphStyle implements MaterializedBase {
         return this.peer
     }
     readonly textAlign?: TextAlign | undefined
+    readonly textVerticalAlign?: TextVerticalAlign | undefined
     readonly textIndent?: double | undefined
     readonly maxLines?: int32 | undefined
     readonly overflow?: TextOverflow | undefined
     readonly wordBreak?: WordBreak | undefined
     readonly leadingMargin?: double | LeadingMarginPlaceholder | undefined
     readonly paragraphSpacing?: double | undefined
+    readonly leadingMarginSpan?: LeadingMarginSpan | undefined
     readonly textDirection?: TextDirection | undefined
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ParagraphStyle.getFinalizer())
         this.textAlign = this.getTextAlign()
+        this.textVerticalAlign = this.getTextVerticalAlign()
         this.textIndent = this.getTextIndent()
         this.maxLines = this.getMaxLines()
         this.overflow = this.getOverflow()
         this.wordBreak = this.getWordBreak()
         this.leadingMargin = this.getLeadingMargin()
         this.paragraphSpacing = this.getParagraphSpacing()
+        this.leadingMarginSpan = this.getLeadingMarginSpan()
         this.textDirection = this.getTextDirection()
     }
     constructor(value?: ParagraphStyleInterface) {
@@ -576,6 +676,9 @@ export class ParagraphStyle implements MaterializedBase {
     private getTextAlign(): TextAlign | undefined {
         return this.getTextAlign_serialize()
     }
+    private getTextVerticalAlign(): TextVerticalAlign | undefined {
+        return this.getTextVerticalAlign_serialize()
+    }
     private getTextIndent(): double | undefined {
         return this.getTextIndent_serialize()
     }
@@ -594,6 +697,9 @@ export class ParagraphStyle implements MaterializedBase {
     private getParagraphSpacing(): double | undefined {
         return this.getParagraphSpacing_serialize()
     }
+    private getLeadingMarginSpan(): LeadingMarginSpan | undefined {
+        return this.getLeadingMarginSpan_serialize()
+    }
     private getTextDirection(): TextDirection | undefined {
         return this.getTextDirection_serialize()
     }
@@ -606,6 +712,17 @@ export class ParagraphStyle implements MaterializedBase {
             buffer = TextAlign.fromValue(retvalDeserializer.readInt32())
         }
         const returnResult : TextAlign | undefined = buffer
+        return returnResult
+    }
+    private getTextVerticalAlign_serialize(): TextVerticalAlign | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getTextVerticalAlign(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : TextVerticalAlign | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = TextVerticalAlign.fromValue(retvalDeserializer.readInt32())
+        }
+        const returnResult : TextVerticalAlign | undefined = buffer
         return returnResult
     }
     private getTextIndent_serialize(): double | undefined {
@@ -681,6 +798,17 @@ export class ParagraphStyle implements MaterializedBase {
             buffer = retvalDeserializer.readFloat64()
         }
         const returnResult : double | undefined = buffer
+        return returnResult
+    }
+    private getLeadingMarginSpan_serialize(): LeadingMarginSpan | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ParagraphStyle_getLeadingMarginSpan(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : LeadingMarginSpan | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (LeadingMarginSpan_serializer.read(retvalDeserializer) as LeadingMarginSpan)
+        }
+        const returnResult : LeadingMarginSpan | undefined = buffer
         return returnResult
     }
     private getTextDirection_serialize(): TextDirection | undefined {
@@ -1160,15 +1288,18 @@ export interface DecorationStyleInterface {
 export interface GestureStyleInterface {
     onClick?: ((value0: ClickEvent) => void);
     onLongPress?: ((value0: GestureEvent) => void);
+    onTouch?: ((value0: TouchEvent) => void);
 }
 export interface ParagraphStyleInterface {
     textAlign?: TextAlign;
+    textVerticalAlign?: TextVerticalAlign;
     textIndent?: LengthMetrics;
     maxLines?: int32;
     overflow?: TextOverflow;
     wordBreak?: WordBreak;
     leadingMargin?: LengthMetrics | LeadingMarginPlaceholder;
     paragraphSpacing?: LengthMetrics;
+    leadingMarginSpan?: LeadingMarginSpan;
     textDirection?: TextDirection;
 }
 export type StyledStringValue = TextStyle | DecorationStyle | BaselineOffsetStyle | LetterSpacingStyle | TextShadowStyle | GestureStyle | ImageAttachment | ParagraphStyle | LineHeightStyle | UrlStyle | CustomSpan | UserDataSpan | BackgroundColorStyle;
@@ -1225,6 +1356,16 @@ export interface CustomSpanMeasureInfo {
     fontSize: double;
 }
 export abstract class UserDataSpan {
+}
+export interface LeadingMarginSpanDrawInfo {
+    x: double;
+    top: double;
+    bottom: double;
+    baseline: double;
+    direction: TextDirection;
+    start: double;
+    end: double;
+    first: boolean;
 }
 export class GestureStyle_serializer {
     public static write(buffer: SerializerBase, value: GestureStyle): void {
@@ -1395,6 +1536,14 @@ export class GestureStyleInterface_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForOnTouch  = value.onTouch
+        if (valueHolderForOnTouch !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnTouchTmpValue  = valueHolderForOnTouch!
+            valueSerializer.holdAndWriteCallback(valueHolderForOnTouchTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): GestureStyleInterface {
         let valueDeserializer : DeserializerBase = buffer
@@ -1434,7 +1583,70 @@ export class GestureStyleInterface_serializer {
             }
         }
         const onLongPressTmpResult : ((value0: GestureEvent) => void) | undefined = onLongPressTmpBuf
-        let value : GestureStyleInterface = ({onClick: onClickTmpResult, onLongPress: onLongPressTmpResult} as GestureStyleInterface)
+        const onTouchTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onTouchTmpBuf : ((value0: TouchEvent) => void) | undefined = undefined
+        if ((onTouchTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const onTouchTmpBuf_BufResource : CallbackResource = valueDeserializer.readCallbackResource()
+            const onTouchTmpBuf_BufCall : KPointer = valueDeserializer.readPointer()
+            const onTouchTmpBuf_BufCallSync : KPointer = valueDeserializer.readPointer()
+            onTouchTmpBuf = (value0: TouchEvent):void => {
+                const onTouchTmpBuf_BufArgsSerializer : SerializerBase = SerializerBase.hold();
+                onTouchTmpBuf_BufArgsSerializer.writeInt32(onTouchTmpBuf_BufResource.resourceId);
+                onTouchTmpBuf_BufArgsSerializer.writePointer(onTouchTmpBuf_BufCall);
+                onTouchTmpBuf_BufArgsSerializer.writePointer(onTouchTmpBuf_BufCallSync);
+                TouchEvent_serializer.write(onTouchTmpBuf_BufArgsSerializer, value0);
+                InteropNativeModule._CallCallbackSync(10, -1676021850, onTouchTmpBuf_BufArgsSerializer.asBuffer(), onTouchTmpBuf_BufArgsSerializer.length());
+                onTouchTmpBuf_BufArgsSerializer.release();
+                return;
+            }
+        }
+        const onTouchTmpResult : ((value0: TouchEvent) => void) | undefined = onTouchTmpBuf
+        let value : GestureStyleInterface = ({onClick: onClickTmpResult, onLongPress: onLongPressTmpResult, onTouch: onTouchTmpResult} as GestureStyleInterface)
+        return value
+    }
+}
+export class LeadingMarginSpan_serializer {
+    public static write(buffer: SerializerBase, value: LeadingMarginSpan): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): LeadingMarginSpan {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return LeadingMarginSpanInternal.fromPtr(ptr)
+    }
+}
+export class LeadingMarginSpanDrawInfo_serializer {
+    public static write(buffer: SerializerBase, value: LeadingMarginSpanDrawInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        valueSerializer.writeFloat64(valueHolderForX)
+        const valueHolderForTop  = value.top
+        valueSerializer.writeFloat64(valueHolderForTop)
+        const valueHolderForBottom  = value.bottom
+        valueSerializer.writeFloat64(valueHolderForBottom)
+        const valueHolderForBaseline  = value.baseline
+        valueSerializer.writeFloat64(valueHolderForBaseline)
+        const valueHolderForDirection  = value.direction
+        valueSerializer.writeInt32(valueHolderForDirection.valueOf())
+        const valueHolderForStart  = value.start
+        valueSerializer.writeFloat64(valueHolderForStart)
+        const valueHolderForEnd  = value.end
+        valueSerializer.writeFloat64(valueHolderForEnd)
+        const valueHolderForFirst  = value.first
+        valueSerializer.writeBoolean(valueHolderForFirst)
+    }
+    public static read(buffer: DeserializerBase): LeadingMarginSpanDrawInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const topTmpResult : double = valueDeserializer.readFloat64()
+        const bottomTmpResult : double = valueDeserializer.readFloat64()
+        const baselineTmpResult : double = valueDeserializer.readFloat64()
+        const directionTmpResult : TextDirection = TextDirection.fromValue(valueDeserializer.readInt32())
+        const startTmpResult : double = valueDeserializer.readFloat64()
+        const endTmpResult : double = valueDeserializer.readFloat64()
+        const firstTmpResult : boolean = valueDeserializer.readBoolean()
+        let value : LeadingMarginSpanDrawInfo = ({x: xTmpResult, top: topTmpResult, bottom: bottomTmpResult, baseline: baselineTmpResult, direction: directionTmpResult, start: startTmpResult, end: endTmpResult, first: firstTmpResult} as LeadingMarginSpanDrawInfo)
         return value
     }
 }
@@ -1826,6 +2038,14 @@ export class ParagraphStyleInterface_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForTextVerticalAlign  = value.textVerticalAlign
+        if (valueHolderForTextVerticalAlign !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForTextVerticalAlignTmpValue  = (valueHolderForTextVerticalAlign as TextVerticalAlign)
+            valueSerializer.writeInt32(valueHolderForTextVerticalAlignTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForTextIndent  = value.textIndent
         if (valueHolderForTextIndent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1882,6 +2102,14 @@ export class ParagraphStyleInterface_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForLeadingMarginSpan  = value.leadingMarginSpan
+        if (valueHolderForLeadingMarginSpan !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForLeadingMarginSpanTmpValue  = valueHolderForLeadingMarginSpan!
+            LeadingMarginSpan_serializer.write(valueSerializer, valueHolderForLeadingMarginSpanTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForTextDirection  = value.textDirection
         if (valueHolderForTextDirection !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -1899,6 +2127,12 @@ export class ParagraphStyleInterface_serializer {
             textAlignTmpBuf = TextAlign.fromValue(valueDeserializer.readInt32())
         }
         const textAlignTmpResult : TextAlign | undefined = textAlignTmpBuf
+        const textVerticalAlignTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let textVerticalAlignTmpBuf : TextVerticalAlign | undefined = undefined
+        if ((textVerticalAlignTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            textVerticalAlignTmpBuf = TextVerticalAlign.fromValue(valueDeserializer.readInt32())
+        }
+        const textVerticalAlignTmpResult : TextVerticalAlign | undefined = textVerticalAlignTmpBuf
         const textIndentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let textIndentTmpBuf : LengthMetrics | undefined = undefined
         if ((textIndentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -1944,13 +2178,19 @@ export class ParagraphStyleInterface_serializer {
             paragraphSpacingTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const paragraphSpacingTmpResult : LengthMetrics | undefined = paragraphSpacingTmpBuf
+        const leadingMarginSpanTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let leadingMarginSpanTmpBuf : LeadingMarginSpan | undefined = undefined
+        if ((leadingMarginSpanTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            leadingMarginSpanTmpBuf = (LeadingMarginSpan_serializer.read(valueDeserializer) as LeadingMarginSpan)
+        }
+        const leadingMarginSpanTmpResult : LeadingMarginSpan | undefined = leadingMarginSpanTmpBuf
         const textDirectionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let textDirectionTmpBuf : TextDirection | undefined = undefined
         if ((textDirectionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             textDirectionTmpBuf = TextDirection.fromValue(valueDeserializer.readInt32())
         }
         const textDirectionTmpResult : TextDirection | undefined = textDirectionTmpBuf
-        let value : ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult, textDirection: textDirectionTmpResult} as ParagraphStyleInterface)
+        let value : ParagraphStyleInterface = ({textAlign: textAlignTmpResult, textIndent: textIndentTmpResult, maxLines: maxLinesTmpResult, overflow: overflowTmpResult, wordBreak: wordBreakTmpResult, leadingMargin: leadingMarginTmpResult, paragraphSpacing: paragraphSpacingTmpResult, leadingMarginSpan: leadingMarginSpanTmpResult, textDirection: textDirectionTmpResult} as ParagraphStyleInterface)
         return value
     }
 }

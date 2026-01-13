@@ -207,6 +207,22 @@ void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
                                      const Ark_String* configuration)
 {
 }
+Ark_Float64 GetGlobalDisplayXImpl(Ark_DragEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(peer->dragInfo, errValue);
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(peer->dragInfo->GetGlobalDisplayX());
+    return Converter::ArkValue<Ark_Float64>(value);
+}
+Ark_Float64 GetGlobalDisplayYImpl(Ark_DragEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(peer->dragInfo, errValue);
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(peer->dragInfo->GetGlobalDisplayY());
+    return Converter::ArkValue<Ark_Float64>(value);
+}
 Ark_DragBehavior GetDragBehaviorImpl(Ark_DragEvent peer)
 {
     auto defaultReturn = ArkValue<Ark_DragBehavior>(DragBehavior::MOVE);
@@ -285,6 +301,8 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
         DragEventAccessor::GetDisplayIdImpl,
         DragEventAccessor::ExecuteDropAnimationImpl,
         DragEventAccessor::EnableInternalDropAnimationImpl,
+        DragEventAccessor::GetGlobalDisplayXImpl,
+        DragEventAccessor::GetGlobalDisplayYImpl,
         DragEventAccessor::GetDragBehaviorImpl,
         DragEventAccessor::SetDragBehaviorImpl,
         DragEventAccessor::GetUseCustomDropAnimationImpl,

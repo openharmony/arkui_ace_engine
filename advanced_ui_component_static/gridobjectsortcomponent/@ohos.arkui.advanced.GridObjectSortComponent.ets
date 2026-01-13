@@ -80,7 +80,7 @@ const EDIT_BLOCK_TEXT_ITEM_SAFE_MARGIN: number = 16;
 
 // Animation Parameters
 const ENTER_EXIT_ICON_DURATION: Int = 200;
-const SEND_EVENT_DURATION: number = 100;
+const SEND_EVENT_DURATION: Int = 100;
 const COMMON_BEZIER = curves.cubicBezierCurve(0.33, 0, 0.67, 1); // Curve of entering and exiting the editing state
 const DRAG_SPRING = curves.interpolatingSpring(0, 1, 400, 38); // Drag to move and fill curves
 const REMOVE_ADD_SPRING = curves.interpolatingSpring(0, 1, 150, 24); // Delete Add Curve
@@ -212,8 +212,8 @@ export struct GridObjectSortComponent {
   @State scaleAddIcon: number = 0;
   // whether to start dragging
   @State isStartDrag: boolean = false;
-  @State insertIndex: number = -1;
-  @State itemIndex: number = 0;
+  @State insertIndex: int = -1;
+  @State itemIndex: int = 0;
   @State editGridDataLength: number = -1;
   @State isTouchDown: boolean = false;
   @State addItemMoveX: number = 0;
@@ -465,9 +465,9 @@ export struct GridObjectSortComponent {
         accessibility.sendAccessibilityEvent(eventInfo).then(() => {
           setTimeout(() => {
             this.isPointToEditTitleBarSaveButton = false;
-          }, 200);
+          }, ENTER_EXIT_ICON_DURATION);
         });
-      }, 100);
+      }, SEND_EVENT_DURATION);
     }
   }
 
@@ -499,7 +499,7 @@ export struct GridObjectSortComponent {
     });
     setTimeout(() => {
       this.saveClick = false;
-    }, 200);
+    }, ENTER_EXIT_ICON_DURATION);
     this.menuSwitch = false;
     this.isPointToAddTitleBarEditButton = true;
   }
@@ -514,17 +514,17 @@ export struct GridObjectSortComponent {
       accessibility.sendAccessibilityEvent(eventInfo).then(() => {
         setTimeout(() => {
           this.isPointToAddTitleBarEditButton = false;
-        }, 200);
+        }, ENTER_EXIT_ICON_DURATION);
       });
     }
   }
 
   // Drag and move triggering event
-  onDragMoveEvent(event: ItemDragInfo, itemIndex: number, insertIndex: number): void {
+  onDragMoveEvent(event: ItemDragInfo, itemIndex: int, insertIndex: int): void {
     if (this.gridComState === null || (event.x < this.blockWidth / 3 && event.y < this.blockHeight / 3)) {
       return;
     }
-    let targetIndex: number = insertIndex as number;
+    let targetIndex: int = insertIndex as int;
     if (targetIndex < 0) {
       targetIndex = this.selected.length - 1;
     } else {
@@ -561,7 +561,7 @@ export struct GridObjectSortComponent {
     this.clickRemoveBtn = true;
     this.scaleIcon = 0;
     this.arraySelectIsChange = 1;
-    let currentIndex: number = this.selected.findIndex(val => val.id === content.id);
+    let currentIndex: int = this.selected.findIndex(val => val.id === content.id);
     this.content = content;
     this.selectedIndex = currentIndex;
     this.calcGridHeight();
@@ -599,7 +599,7 @@ export struct GridObjectSortComponent {
       setTimeout(() => {
         this.readFlag = true;
         this.readIndex4AddArea = -1;
-      }, 200
+      }, ENTER_EXIT_ICON_DURATION
       );
     });
   }
@@ -734,8 +734,7 @@ export struct GridObjectSortComponent {
     const removeNumY: number = totalRows - currentLine;
     const minusLine: number = len % col;
     const line: number = minusLine === 1 ? removeNumY : removeNumY + 1;
-    const scale = Number(this.fontSizeScale);
-    if (!isNaN(scale) && scale > 1) {
+    if (this.fontSizeScale) {
       subTitleHeight = this.subTitleHeight;
     }
     yNew = line * this.blockHeight + subTitleHeight;
@@ -826,7 +825,7 @@ export struct GridObjectSortComponent {
   }
 
   // Display area movement function
-  getShowAreaItemTranslate(index: number): PositionXY {
+  getShowAreaItemTranslate(index: int): TranslateOptions {
     // Position when dragging
     if (this.isStartDrag) {
       let coodXY = this.getCoodXY(index);
@@ -834,6 +833,10 @@ export struct GridObjectSortComponent {
         x: coodXY.x,
         y: coodXY.y
       };
+      return {
+        x: this.editItemMoveX,
+        y: this.editItemMoveY
+      }
     }
 
     // Position when remove item
@@ -909,8 +912,8 @@ export struct GridObjectSortComponent {
           } else {
             Image(url as ResourceStr)
               .draggable(false)
-              .height(`${this.options.imageSize || IMAGE_DEFAULT}vp`)
-              .width(`${this.options.imageSize || IMAGE_DEFAULT}vp`)
+              .height(this.options.imageSize + '' || IMAGE_DEFAULT)
+              .width(this.options.imageSize + ''  || IMAGE_DEFAULT)
           }
           Text(text as ResourceStr)
             .textAlign(TextAlign.Center)
@@ -1157,7 +1160,7 @@ export struct GridObjectSortComponent {
     }
     this.scaleIcon = 0;
     this.content = content;
-    const index: number = this.unSelected.findIndex(i => i.id === content.id);
+    const index: int = this.unSelected.findIndex(i => i.id === content.id);
     this.editGridDataLength = this.selected.length + 1;
     const endPosition = this.getEditItemGridPosition(this.selected, index);
     this.unSelectedIndex = index;
@@ -1417,7 +1420,7 @@ export struct GridObjectSortComponent {
                   this.menuSwitch = true;
                   setTimeout(() => {
                     this.pointToRepeat(ADD);
-                  }, 200);
+                  }, ENTER_EXIT_ICON_DURATION);
                 } else {
                   this.getUIContext()?.animateTo({
                     duration: ENTER_EXIT_ICON_DURATION,
@@ -1455,6 +1458,7 @@ export struct GridObjectSortComponent {
           )
         }
         .clip(false)
+        .translate(this.getAddAreaItemTranslate(index))
         .animation({
           curve: this.clickRemoveBtn ? DRAG_SPRING as ICurve :
             index === this.unSelectedIndex ? REMOVE_ADD_SPRING as ICurve : DRAG_SPRING as ICurve
@@ -1511,7 +1515,7 @@ export struct GridObjectSortComponent {
         this.scaleAddIcon = 1;
       }
       this.scaleIcon = 0;
-      const index: number = this.unSelected.findIndex(i => i.id === item.id);
+      const index: int = this.unSelected.findIndex(i => i.id === item.id);
       this.editGridDataLength = this.selected.length + 1;
       const endPosition = this.getEditItemGridPosition(this.selected, index);
       this.content = item;
@@ -1578,7 +1582,7 @@ export struct GridObjectSortComponent {
       this.scaleAddIcon = 1;
     }
     this.scaleIcon = 0;
-    const index: number = this.unSelected.findIndex(i => i.id === item.id);
+    const index: int = this.unSelected.findIndex(i => i.id === item.id);
     this.editGridDataLength = this.selected.length + 1;
     const endPosition = this.getEditItemGridPosition(this.selected, index);
     this.content = item;
@@ -1711,7 +1715,7 @@ export struct GridObjectSortComponent {
               this.menuSwitch = true;
               setTimeout(() => {
                 this.pointToRepeat(EDIT);
-              }, 200);
+              }, ENTER_EXIT_ICON_DURATION);
             } else {
               this.getUIContext()?.animateTo({
                 duration: ENTER_EXIT_ICON_DURATION,
@@ -1832,11 +1836,11 @@ export struct GridObjectSortComponent {
         this.readIndex4EditArea = -1;
         this.readIndex4AddArea = -1;
         this.textAnnouncedForAccessibility = '';
-      }, 200)
+      }, ENTER_EXIT_ICON_DURATION)
     });
   }
 
-  insertItem(itemIndex: number, insertIndex: number): void {
+  insertItem(itemIndex: int, insertIndex: int): void {
     if (!this.gridComState) {
       return;
     }
@@ -1883,7 +1887,7 @@ export struct GridObjectSortComponent {
         this.readIndex4EditArea = -1;
         this.readIndex4AddArea = -1;
         this.textAnnouncedForAccessibility = '';
-      }, 200);
+      }, ENTER_EXIT_ICON_DURATION);
     });
   }
 
@@ -1972,7 +1976,7 @@ export struct GridObjectSortComponent {
       if (typeof resource === 'string') {
         resourceString = resource as string;
       } else {
-        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        let uiContent: common.Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
          if (uiContent) {
           resourceString =
             (uiContent as common.UIAbilityContext).resourceManager.getStringSync((resource as Resource).id as Long)

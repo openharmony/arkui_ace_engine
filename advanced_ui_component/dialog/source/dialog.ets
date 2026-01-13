@@ -2024,6 +2024,18 @@ export struct PopoverDialog {
     if (this.targetBuilder === undefined || this.targetBuilder === null) {
       this.targetBuilder = this.emptyBuilder;
     }
+    if (this.popover) {
+      this.popover.placement = this.popover?.placement ?? Placement.Bottom;
+      this.popover.enableArrow = this.popover?.enableArrow ?? true;
+      this.popover.onStateChange = this.popover?.onStateChange ?? ((e) => {
+        if (!e.isVisible) {
+          this.visible = false
+        }
+      });
+      this.popover.radius = this.popover?.radius ?? $r('sys.float.corner_radius_level16');
+      this.popover.shadow = this.popover?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD;
+      this.popover.backgroundBlurStyle = this.popover?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK;
+    }
   }
 
   build() {
@@ -2046,33 +2058,7 @@ export struct PopoverDialog {
         hilog.error(0x3900, 'Ace', `dialog popup error, code: ${code}, message: ${message}`);
       }
     })
-    .bindPopup(this.visible, {
-      builder: this.popover?.builder,
-      placement: this.popover?.placement ?? Placement.Bottom,
-      popupColor: this.popover?.popupColor,
-      enableArrow: this.popover?.enableArrow ?? true,
-      autoCancel: this.popover?.autoCancel,
-      onStateChange: this.popover?.onStateChange ?? ((e) => {
-        if (!e.isVisible) {
-          this.visible = false
-        }
-      }),
-      arrowOffset: this.popover?.arrowOffset,
-      showInSubWindow: this.popover?.showInSubWindow,
-      mask: this.popover?.mask,
-      targetSpace: this.popover?.targetSpace,
-      offset: this.popover?.offset,
-      width: this.popover?.width,
-      arrowPointPosition: this.popover?.arrowPointPosition,
-      arrowWidth: this.popover?.arrowWidth,
-      arrowHeight: this.popover?.arrowHeight,
-      radius: this.popover?.radius ?? $r('sys.float.corner_radius_level16'),
-      shadow: this.popover?.shadow ?? ShadowStyle.OUTER_DEFAULT_MD,
-      backgroundBlurStyle: this.popover?.backgroundBlurStyle ?? BlurStyle.COMPONENT_ULTRA_THICK,
-      focusable: this.popover?.focusable,
-      transition: this.popover?.transition,
-      onWillDismiss: this.popover?.onWillDismiss
-    })
+    .bindPopup(this.visible, this.popover)
   }
 }
 

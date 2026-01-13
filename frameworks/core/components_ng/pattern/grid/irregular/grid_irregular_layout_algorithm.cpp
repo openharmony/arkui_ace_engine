@@ -205,13 +205,15 @@ inline void ResetLayoutRange(GridLayoutInfo& info)
 
 void GridIrregularLayoutAlgorithm::CheckForReset()
 {
-    if (info_.IsResetted()) {
+    if (info_.IsResetted() ||
+        (info_.gridMatrix_.empty() && info_.startIndex_ == 0 && !NearZero(info_.currentOffset_))) {
         // reset layout info_ and perform jump to current startIndex
         postJumpOffset_ = info_.currentOffset_;
         PrepareJumpOnReset(info_);
         ResetMaps(info_);
         ResetLayoutRange(info_);
         ResetFocusedIndex(wrapper_);
+        wrapper_->GetHostNode()->ChildrenUpdatedFrom(-1);
         return;
     }
 
@@ -592,7 +594,8 @@ void GridIrregularLayoutAlgorithm::PrepareLineHeight(float mainSize, int32_t& ju
             float len = filler.Fill(params, mainSize, jumpLineIdx).length;
             // condition [jumpLineIdx > 0] guarantees a finite call stack
             // Over scroll at bottom dose not need ScrollAlign::END
-            if (LessNotEqual(len, mainSize) && jumpLineIdx > 0 && NonPositive(overscrollOffsetBeforeJump_)) {
+            if (LessNotEqual(len, mainSize) && jumpLineIdx > 0 && NonPositive(overscrollOffsetBeforeJump_) &&
+                !canOverScrollEnd_) {
                 mainSize = mainSize + info_.contentStartOffset_;
                 jumpLineIdx = info_.lineHeightMap_.rbegin()->first;
                 info_.scrollAlign_ = ScrollAlign::END;

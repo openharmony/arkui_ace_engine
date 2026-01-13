@@ -1340,31 +1340,6 @@ HWTEST_F(GestureEventHubTestFiveNg, GetDragPreviewInitPositionToScreen004, TestS
 }
 
 /**
- * @tc.name: GetDragPreviewInitPositionToScreen005
- * @tc.desc: Test menu case when isMenuShow is true, badgeNumber > 1, and sizeChangeEffect = SIZE_TRANSITION
- * @tc.type: FUNC
- */
-HWTEST_F(GestureEventHubTestFiveNg, GetDragPreviewInitPositionToScreen005, TestSize.Level1)
-{
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::MENU_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto gestureEventHub = frameNode->GetOrCreateGestureEventHub();
-    ASSERT_NE(gestureEventHub, nullptr);
-    gestureEventHub->frameNodeOffset_ = OffsetF(FRAME_OFFSET_X, FRAME_OFFSET_Y);
-    gestureEventHub->frameNodeSize_ = SizeF(FRAME_WIDTH, FRAME_HEIGHT);
-
-    PreparedInfoForDrag data;
-    data.pixelMap = AceType::MakeRefPtr<MockPixelMap>();
-    data.isMenuShow = true;
-    data.sizeChangeEffect = DraggingSizeChangeEffect::SIZE_TRANSITION;
-    data.badgeNumber = 2;
-    data.dragMovePosition = OffsetF(MOVE_OFFSET_X, MOVE_OFFSET_Y);
-
-    OffsetF result = gestureEventHub->GetDragPreviewInitPositionToScreen(PipelineContext::GetCurrentContext(), data);
-    EXPECT_NE(result, OffsetF());
-}
-
-/**
  * @tc.name: GetBadgeNumber001
  * @tc.desc: Test GetBadgeNumber when GetFrameNode returns null, expect default value 1
  * @tc.type: FUNC

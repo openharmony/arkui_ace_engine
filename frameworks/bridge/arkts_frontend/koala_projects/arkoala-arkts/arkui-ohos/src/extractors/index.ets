@@ -236,6 +236,13 @@ export namespace extractors {
     throw new Error("fromUiEffectFilterPtr is not implemented.")
   }
 
+  export function toUiEffectBrightnessBlenderPtr(value: uiEffect.BrightnessBlender): KPointer {
+    return ArkUIAniModule._Extractors_ToUiEffectBrightnessBlenderPtr(value);
+  }
+  export function fromUiEffectBrightnessBlenderPtr(ptr: KPointer): uiEffect.BrightnessBlender {
+    throw new Error("fromUiEffectBrightnessBlenderPtr is not implemented.")
+  }
+
   export function toUiMaterialMaterialPtr(value: uiMaterial.Material): KPointer {
     return ArkUIAniModule._Extractors_ToUiMaterialMaterialPtr(value);
   }

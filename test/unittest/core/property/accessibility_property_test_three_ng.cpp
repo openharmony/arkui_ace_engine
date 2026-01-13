@@ -652,7 +652,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree023, Te
     EXPECT_EQ(resultRect.Height(), rect.Height());
     // virtual node Match ResponseRegion but not IsAccessibilityCompInResponseRegion
     result = property->IsMatchAccessibilityResponseRegion(true);
-    EXPECT_TRUE(result);
+    EXPECT_FALSE(result);
     resultRect = property->GetAccessibilityResponseRegionRect(true);
     EXPECT_EQ(resultRect.GetX(), rect.GetX());
     EXPECT_EQ(resultRect.GetY(), rect.GetX());

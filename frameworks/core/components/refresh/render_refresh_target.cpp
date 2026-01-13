@@ -15,6 +15,8 @@
 
 #include "core/components/refresh/render_refresh_target.h"
 
+#include "core/common/dynamic_module_helper.h"
+
 namespace OHOS::Ace {
 
 void RenderRefreshTarget::FindRefreshParent(const WeakPtr<RenderNode>& node)
@@ -34,6 +36,17 @@ void RenderRefreshTarget::FindRefreshParent(const WeakPtr<RenderNode>& node)
     }
 }
 
+const ArkUIRefreshModifierCompatible* RenderRefreshTarget::GetRefreshModifier()
+{
+    static const ArkUIRefreshModifierCompatible* modifier = nullptr;
+    if (!modifier) {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("refresh");
+        CHECK_NULL_RETURN(loader, nullptr);
+        modifier = reinterpret_cast<const ArkUIRefreshModifierCompatible*>(loader->GetCustomModifier());
+    }
+    return modifier;
+}
+
 bool RenderRefreshTarget::HandleRefreshEffect(double delta, int32_t source, double currentOffset)
 {
     auto refresh = refreshParent_.Upgrade();
@@ -42,7 +55,9 @@ bool RenderRefreshTarget::HandleRefreshEffect(double delta, int32_t source, doub
     }
     refresh->SetHasScrollableChild(true);
     if ((LessOrEqual(currentOffset, 0.0) && source == SCROLL_FROM_UPDATE) || inLinkRefresh_) {
-        refresh->UpdateScrollableOffset(delta);
+        auto* modifier = RenderRefreshTarget::GetRefreshModifier();
+        CHECK_NULL_RETURN(modifier, false);
+        modifier->updateScrollableOffset(refresh, delta);
         inLinkRefresh_ = true;
     }
     if (refresh->GetStatus() != RefreshStatus::INACTIVE) {
@@ -61,7 +76,9 @@ void RenderRefreshTarget::InitializeScrollable(const RefPtr<Scrollable>& scrolla
         if (refreshBase) {
             auto refresh = refreshBase->refreshParent_.Upgrade();
             if (refresh && refreshBase->inLinkRefresh_) {
-                refresh->HandleDragEnd();
+                auto* modifier = RenderRefreshTarget::GetRefreshModifier();
+                CHECK_NULL_VOID(modifier);
+                modifier->handleDragEnd(refresh);
                 refreshBase->inLinkRefresh_ = false;
             }
         }
@@ -71,7 +88,9 @@ void RenderRefreshTarget::InitializeScrollable(const RefPtr<Scrollable>& scrolla
         if (refreshBase) {
             auto refresh = refreshBase->refreshParent_.Upgrade();
             if (refresh && refreshBase->inLinkRefresh_) {
-                refresh->HandleDragCancel();
+                auto* modifier = RenderRefreshTarget::GetRefreshModifier();
+                CHECK_NULL_VOID(modifier);
+                modifier->handleDragCancel(refresh);
                 refreshBase->inLinkRefresh_ = false;
             }
         }

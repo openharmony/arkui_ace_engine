@@ -22,7 +22,7 @@ namespace OHOS::Ace {
 
 class PageElement;
 
-class BoxElement : public BoxBaseElement {
+class ACE_FORCE_EXPORT BoxElement : public BoxBaseElement {
     DECLARE_ACE_TYPE(BoxElement, BoxBaseElement);
 
 public:

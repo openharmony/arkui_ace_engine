@@ -515,6 +515,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             this._type_0_flag = AttributeUpdaterFlag.UPDATE
             this._type_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._type_0_flag = AttributeUpdaterFlag.SKIP
@@ -526,6 +527,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             this._stateEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._stateEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stateEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -537,6 +539,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             this._buttonStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._buttonStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._buttonStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -548,6 +551,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             this._controlSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._controlSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._controlSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -559,6 +563,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             this._role_0_flag = AttributeUpdaterFlag.UPDATE
             this._role_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._role_0_flag = AttributeUpdaterFlag.SKIP
@@ -570,6 +575,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -581,6 +587,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -592,6 +599,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontWeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -603,6 +611,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -614,6 +623,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontFamily_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.SKIP
@@ -625,6 +635,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             this._labelStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._labelStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._labelStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -636,6 +647,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.UPDATE
             this._minFontScale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minFontScale_0_flag = AttributeUpdaterFlag.SKIP
@@ -647,6 +659,7 @@ export class ButtonModifier extends CommonMethodModifier implements ButtonAttrib
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.UPDATE
             this._maxFontScale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._maxFontScale_0_flag = AttributeUpdaterFlag.SKIP

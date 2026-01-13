@@ -3061,7 +3061,7 @@ void WebDelegate::InitWebViewWithWindow()
                 std::make_shared<OHOS::NWeb::NWebEngineInitArgsImpl>();
             std::string app_path = GetDataPath();
             if (!app_path.empty()) {
-                initArgs->AddArg(std::string("--user-data-dir=").append(app_path));
+                initArgs->AddArg(std::string("--arkweb-app-data-dir=").append(app_path));
             }
 
             delegate->window_ = delegate->CreateWindow();
@@ -3540,7 +3540,7 @@ void WebDelegate::InitWebViewWithSurface()
             CHECK_NULL_VOID(delegate);
             std::shared_ptr<OHOS::NWeb::NWebEngineInitArgsImpl> initArgs =
                 std::make_shared<OHOS::NWeb::NWebEngineInitArgsImpl>();
-            initArgs->AddArg(std::string("--user-data-dir=").append(delegate->bundleDataPath_));
+            initArgs->AddArg(std::string("--arkweb-app-data-dir=").append(delegate->bundleDataPath_));
             initArgs->AddArg(std::string("--bundle-installation-dir=").append(delegate->bundlePath_));
             initArgs->AddArg(std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
                     "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
@@ -9567,18 +9567,23 @@ std::string WebDelegate::GetLastSelectionText() const
     return lastSelectionText_;
 }
 
-void WebDelegate::OnTextSelectionChange(const std::string& selectionText, bool isFromOverlay)
+void WebDelegate::OnTextSelectionChange(const std::string& selectionText)
 {
     CHECK_NULL_VOID(taskExecutor_);
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
-    if (lastSelectionText_ == selectionText && !isFromOverlay) {
+    lastSelectionText_ = selectionText;
+    bool selectionChanged = (lastPostSelectionText_ != selectionText);
+    if (!selectionChanged) {
         return;
     }
-    lastSelectionText_ = selectionText;
     if (webPattern->IsTextSelectionEnable()) {
         return;
     }
+    if (!selectionText.empty() && selectionChanged) {
+        webPattern->UpdateTextSelectionHolderId();
+    }
+    lastPostSelectionText_ = selectionText;
     taskExecutor_->PostTask(
         [weak = WeakClaim(this), selectionText]() {
             TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnTextSelectionChange, fire event task");
@@ -9727,6 +9732,17 @@ void WebDelegate::OnPdfLoadEvent(int32_t result, const std::string& url)
             webEventHub->FireOnPdfLoadEvent(std::make_shared<PdfLoadEvent>(result, url));
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPdfLoadEvent");
+}
+
+void WebDelegate::OnMediaCastEnter()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnMediaCastEnter");
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto onMediaCastEnterCallback = webPattern->GetOnMediaCastEnterCallback();
+    if (onMediaCastEnterCallback) {
+        onMediaCastEnterCallback();
+    }
 }
 
 void WebDelegate::SetForceEnableZoom(bool isEnabled)

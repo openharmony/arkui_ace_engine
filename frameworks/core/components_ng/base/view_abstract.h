@@ -1110,6 +1110,8 @@ public:
     static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter);
     static void SetMaterialFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* materialFilter);
     static void SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material);
+    // set systemMaterial for inner use, use SetSystemMaterial normally.
+    static void SetSystemMaterialImmediate(FrameNode* frameNode, const UiMaterial* material);
     static int32_t GetWindowWidthBreakpoint();
     static int32_t GetWindowHeightBreakpoint();
 

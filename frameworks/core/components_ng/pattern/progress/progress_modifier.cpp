@@ -297,6 +297,13 @@ void ProgressModifier::SetVisible(bool isVisible)
     }
 }
 
+void ProgressModifier::StopAllLoopAnimation()
+{
+    StopRingLoadingHeadAnimation();
+    StopRingLoadingTailAnimation();
+    StopSweepingAnimation();
+}
+
 void ProgressModifier::SetSmoothEffect(bool value)
 {
     CHECK_NULL_VOID(smoothEffect_);

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "core/interfaces/native/node/data_panel_modifier.h"
 #include "core/interfaces/native/node/divider_modifier.h"
 #include "core/interfaces/native/node/flex_modifier.h"
+#include "core/interfaces/native/node/flow_item_modifier.h"
 #include "core/interfaces/native/node/frame_node_modifier.h"
 #include "core/interfaces/native/node/gauge_modifier.h"
 #include "core/interfaces/native/node/grid_col_modifier.h"
@@ -213,6 +214,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getMenuModifier = NodeModifier::GetMenuModifier,
         .getDatePickerModifier = NodeModifier::GetDatePickerModifier,
         .getWaterFlowModifier = NodeModifier::GetWaterFlowModifier,
+        .getWaterFlowItemModifier = NodeModifier::GetWaterFlowItemModifier,
         .getAlphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier,
         .getDataPanelModifier = NodeModifier::GetDataPanelModifier,
         .getGaugeModifier = NodeModifier::GetGaugeModifier,

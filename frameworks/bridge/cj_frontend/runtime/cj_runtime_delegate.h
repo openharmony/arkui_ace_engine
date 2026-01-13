@@ -42,6 +42,7 @@ private:
 public:
     void RegisterCJFuncs(AtCPackage funcs);
     void RegisterCJFuncsV2(void (*callback)(AtCPackageV2* cjFuncs));
+    void RegisterCJFuncsV3(void (*callback)(AtCPackageV3* cjFuncs));
     void RegisterCJXCompCtrFuncs(AtCXComponentCallback funcs);
     const AtCPackage& GetCJFuncs() const
     {
@@ -51,6 +52,11 @@ public:
     const AtCPackageV2& GetCJFuncsV2() const
     {
         return atCPackageV2_;
+    }
+
+    const AtCPackageV3& GetCJFuncsV3() const
+    {
+        return atCPackageV3_;
     }
 
     const AtCXComponentCallback& GetCJXcompCtrFuncs() const
@@ -72,6 +78,9 @@ private:
 
     AtCPackageV2 atCPackageV2_;
     bool atCPackageLoadedV2_ = false;
+
+    AtCPackageV3 atCPackageV3_;
+    bool atCPackageLoadedV3_ = false;
 
     AtCXComponentCallback atCXcompCtr_;
     bool atCXcompCtrLoaded_ = false;

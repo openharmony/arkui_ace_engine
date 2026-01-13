@@ -512,8 +512,9 @@ import {
     }
   
     onPlaceChildren(selfLayoutInfo: GeometryInfo, children: Array<Layoutable>, constraint: ConstraintSizeOptions) {
-      children.forEach((child) => {
-        child.layout({ x: 0, y: 0 })
+      children.forEach((child: Layoutable) => {
+        const position: Position = { x: 0, y: 0 };
+        child.layout(position)
       })
     }
   
@@ -521,10 +522,12 @@ import {
       this.fontSize = this.getFontSizeScale();
       let sizeResult: SizeResult = { height: 0, width: 0 };
       if (Double.toInt(children.length) > 0) {
-        children.forEach((child) => {
-          let childMeasureResult: MeasureResult = child.measure(constraint);
-          sizeResult.width = childMeasureResult.width;
-          sizeResult.height = childMeasureResult.height;
+        children.forEach((child: Measurable) => {
+          const childMeasureResult: MeasureResult | undefined = child.measure(constraint);
+          if (childMeasureResult) {
+            sizeResult.width = childMeasureResult.width;
+            sizeResult.height = childMeasureResult.height;
+          }
         });
       }
       return sizeResult;

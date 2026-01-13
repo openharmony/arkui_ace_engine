@@ -35,10 +35,12 @@ OHOS::Ace::SpanParagraphStyle Convert(const Ark_ParagraphStyleInterface& src)
 {
     OHOS::Ace::SpanParagraphStyle ret;
     ret.align = Converter::OptConvert<OHOS::Ace::TextAlign>(src.textAlign);
+    ret.textVerticalAlign = Converter::OptConvert<OHOS::Ace::TextVerticalAlign>(src.textVerticalAlign);
     ret.maxLines = Converter::OptConvert<int32_t>(src.maxLines);
     ret.wordBreak = Converter::OptConvert<OHOS::Ace::WordBreak>(src.wordBreak);
     ret.textOverflow = Converter::OptConvert<OHOS::Ace::TextOverflow>(src.overflow);
     ret.textIndent = Converter::OptConvert<OHOS::Ace::Dimension>(src.textIndent);
+    ret.drawableLeadingMargin = Converter::OptConvert<OHOS::Ace::NG::DrawableLeadingMargin>(src.leadingMarginSpan);
     ret.textDirection = Converter::OptConvert<OHOS::Ace::TextDirection>(src.textDirection);
     ret.paragraphSpacing = Converter::OptConvert<OHOS::Ace::Dimension>(src.paragraphSpacing);
     if (!ret.paragraphSpacing || ret.paragraphSpacing.value().Value() < 0) {
@@ -88,6 +90,13 @@ Opt_TextAlign GetTextAlignImpl(Ark_ParagraphStyle peer)
     CHECK_NULL_RETURN(peer, invalid);
     CHECK_NULL_RETURN(peer->span, invalid);
     return Converter::ArkValue<Opt_TextAlign>(peer->span->GetParagraphStyle().align);
+}
+Opt_TextVerticalAlign GetTextVerticalAlignImpl(Ark_ParagraphStyle peer)
+{
+    auto invalid = Converter::ArkValue<Opt_TextVerticalAlign>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
+    return Converter::ArkValue<Opt_TextVerticalAlign>(peer->span->GetParagraphStyle().textVerticalAlign);
 }
 Opt_Float64 GetTextIndentImpl(Ark_ParagraphStyle peer)
 {
@@ -146,6 +155,15 @@ Opt_Float64 GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
     auto style = peer->span->GetParagraphStyle();
     return Converter::ArkValue<Opt_Float64>(style.paragraphSpacing);
 }
+Opt_LeadingMarginSpan GetLeadingMarginSpanImpl(Ark_ParagraphStyle peer)
+{
+    auto invalid = Converter::ArkValue<Opt_LeadingMarginSpan>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
+    auto style = peer->span->GetParagraphStyle();
+    auto result = Converter::ArkValue<Opt_LeadingMarginSpan>(style.drawableLeadingMargin);
+    return result;
+}
 Opt_TextDirection GetTextDirectionImpl(Ark_ParagraphStyle peer)
 {
     auto invalid = Converter::ArkValue<Opt_TextDirection>();
@@ -162,12 +180,14 @@ const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()
         ParagraphStyleAccessor::ConstructImpl,
         ParagraphStyleAccessor::GetFinalizerImpl,
         ParagraphStyleAccessor::GetTextAlignImpl,
+        ParagraphStyleAccessor::GetTextVerticalAlignImpl,
         ParagraphStyleAccessor::GetTextIndentImpl,
         ParagraphStyleAccessor::GetMaxLinesImpl,
         ParagraphStyleAccessor::GetOverflowImpl,
         ParagraphStyleAccessor::GetWordBreakImpl,
         ParagraphStyleAccessor::GetLeadingMarginImpl,
         ParagraphStyleAccessor::GetParagraphSpacingImpl,
+        ParagraphStyleAccessor::GetLeadingMarginSpanImpl,
         ParagraphStyleAccessor::GetTextDirectionImpl,
     };
     return &ParagraphStyleAccessorImpl;

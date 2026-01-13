@@ -135,6 +135,7 @@ public:
     static void SetOnDetectedBlankScreen(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetBlankScreenDetectionConfig(FrameNode* frameNode, const BlankScreenDetectionConfig& detectConfig);
+    static void SetOnFirstScreenPaint(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetResourceLoadId(FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
     static void SetOnFullScreenExit(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);
@@ -167,6 +168,8 @@ public:
     static void SetOnSslSelectCertRequest(
         FrameNode* frameNode, std::function<bool(const BaseEventInfo* info)>&& callback);
     static void SetWindowNewEvent(
+        FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& callback);
+    static void SetWindowNewExtEvent(
         FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& callback);
     static void SetWindowExitEventId(
         FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback);

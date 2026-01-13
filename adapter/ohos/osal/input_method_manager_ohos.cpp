@@ -245,7 +245,9 @@ void InputMethodManager::CloseKeyboard(bool disableNeedToRequestKeyboard)
     CHECK_NULL_VOID(pipeline);
     auto textFieldManager = pipeline->GetTextFieldManager();
     CHECK_NULL_VOID(textFieldManager);
-    CloseCustomKeyboard();
+    if (currentFocusNode->GetTag() != V2::WEB_ETS_TAG) {
+        CloseCustomKeyboard();
+    }
     if (!textFieldManager->GetImeShow() && !textFieldManager->GetIsImeAttached()) {
         return;
     }

@@ -96,9 +96,10 @@ void DataPanelPattern::FireBuilder()
         host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
         return;
     }
+    auto node = BuildContentModifierNode();
+    CHECK_EQUAL_VOID(contentModifierNode_, node);
     host->RemoveChildAtIndex(0);
-    CHECK_NULL_VOID(makeFunc_);
-    contentModifierNode_ = BuildContentModifierNode();
+    contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
@@ -106,6 +107,7 @@ void DataPanelPattern::FireBuilder()
 
 RefPtr<FrameNode> DataPanelPattern::BuildContentModifierNode()
 {
+    CHECK_NULL_RETURN(makeFunc_, nullptr);
     auto host = GetHost();
     CHECK_NULL_RETURN(host, nullptr);
     auto paintProperty = host->GetPaintProperty<DataPanelPaintProperty>();

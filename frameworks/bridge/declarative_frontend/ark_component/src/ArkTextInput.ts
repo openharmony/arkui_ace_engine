@@ -1038,7 +1038,9 @@ class TextInputBorderModifier extends ModifierWithKey<ArkBorder> {
     }
   }
   checkObjectDiff(): boolean {
-    return this.value.checkObjectDiff(this.stageValue);
+    let emptyColor = new ArkBorderColor();
+    let hasBorderColor = !this.stageValue.arkColor.isEqual(emptyColor) || !this.value.arkColor.isEqual(emptyColor);
+    return hasBorderColor || this.value.checkObjectDiff(this.stageValue);
   }
 }
 
@@ -1096,6 +1098,16 @@ class TextInputBorderColorModifier extends ModifierWithKey<ResourceColor | EdgeC
     super(value);
   }
   static identity: Symbol = Symbol('textInputBorderColor');
+  applyStage(node: KNode, component?: ArkComponent): boolean {
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.value = this.stageValue;
+      this.applyPeer(node, true, component);
+      return true;
+    }
+    this.value = this.stageValue;
+    this.applyPeer(node, false, component);
+    return false;
+  }
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().textInput.resetBorderColor(node);

@@ -1892,4 +1892,75 @@ HWTEST_F(ListPatternTestNg, CustomizeSafeAreaPadding002, TestSize.Level1)
     EXPECT_EQ(padding.left, std::nullopt);
     EXPECT_EQ(padding.right, std::nullopt);
 }
+
+/**
+ * @tc.name: GetStartIndexExcludeStartOffset001
+ * @tc.desc: Test ListPattern GetStartIndexExcludeStartOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, GetStartIndexExcludeStartOffset001, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    int32_t returnIndex = listPattern->GetStartIndexExcludeStartOffset();
+    EXPECT_EQ(listPattern->GetStartIndex(), returnIndex);
+}
+
+/**
+ * @tc.name: GetStartIndexExcludeStartOffset002
+ * @tc.desc: Test ListPattern GetStartIndexExcludeStartOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, GetStartIndexExcludeStartOffset002, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    listPattern->contentStartOffset_ = 10.0f;
+    listPattern->itemPosition_[0] = { 2, 20.0f, 40.0f, true };
+    int32_t returnIndex = listPattern->GetStartIndexExcludeStartOffset();
+    EXPECT_EQ(returnIndex, 0);
+}
+
+/**
+ * @tc.name: GetEndIndexExcludeEndOffset001
+ * @tc.desc: Test ListPattern GetEndIndexExcludeEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, GetEndIndexExcludeEndOffset001, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    int32_t returnIndex = listPattern->GetEndIndexExcludeEndOffset();
+    EXPECT_EQ(listPattern->GetEndIndex(), returnIndex);
+}
+
+/**
+ * @tc.name: GetEndIndexExcludeEndOffset002
+ * @tc.desc: Test ListPattern GetEndIndexExcludeEndOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, GetEndIndexExcludeEndOffset002, TestSize.Level1)
+{
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    listPattern->contentMainSize_ = 100.0f;
+    listPattern->itemPosition_[0] = { 2, 2.0f, 4.0f, true };
+    int32_t returnIndex = listPattern->GetEndIndexExcludeEndOffset();
+    EXPECT_EQ(returnIndex, 0);
+}
+
+/**
+ * @tc.name: IsFreeScrollTest001
+ * @tc.desc: Test IsFreeScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPatternTestNg, IsFreeScrollTest001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    RefPtr<ListPattern> listPattern = AceType::MakeRefPtr<ListPattern>();
+    ASSERT_NE(listPattern, nullptr);
+    auto listNode = FrameNode::CreateFrameNode(V2::LIST_ETS_TAG, 2, listPattern);
+    ASSERT_NE(listNode, nullptr);
+    model.SetListDirection(Axis::FREE);
+    auto scrollBarProxy = listPattern->GetScrollBarProxy();
+    CHECK_NULL_VOID(scrollBarProxy);
+
+    EXPECT_FALSE(scrollBarProxy->IsFreeScroll());
+}
 } // namespace OHOS::Ace::NG

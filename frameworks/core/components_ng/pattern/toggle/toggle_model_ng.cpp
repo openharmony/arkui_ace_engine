@@ -14,19 +14,24 @@
  */
 
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components/toggle/toggle_theme.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_pattern.h"
-#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
-#include "core/components_ng/pattern/checkbox/toggle_checkbox_pattern.h"
 #include "core/components_ng/pattern/toggle/switch_pattern.h"
-
+#include "core/interfaces/native/node/node_checkbox_modifier.h"
 namespace OHOS::Ace::NG {
-
+namespace {
 constexpr uint32_t DEFAULT_COLOR = 0xffffffff;
+bool IsToggleCheckboxPattern(FrameNode* frameNode)
+{
+    auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+    CHECK_NULL_RETURN(checkboxModifier, false);
+    auto node = reinterpret_cast<ArkUINodeHandle>(frameNode);
+    return checkboxModifier->isToggleCheckboxPattern(node);
+}
+} // namespace
 
 void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
 {
@@ -43,7 +48,7 @@ void ToggleModelNG::Create(NG::ToggleType toggleType, bool isOn)
     if (AceType::InstanceOf<SwitchPattern>(pattern) && toggleType == ToggleType::SWITCH) {
         UpdateSwitchIsOn(childFrameNode, isOn);
         stack->Push(childFrameNode);
-    } else if (AceType::InstanceOf<ToggleCheckBoxPattern>(pattern) && toggleType == ToggleType::CHECKBOX) {
+    } else if (IsToggleCheckboxPattern(AceType::RawPtr(childFrameNode)) && toggleType == ToggleType::CHECKBOX) {
         UpdateCheckboxIsOn(childFrameNode, isOn);
         stack->Push(childFrameNode);
     } else if (AceType::InstanceOf<ToggleButtonPattern>(pattern) && toggleType == ToggleType::BUTTON) {
@@ -105,12 +110,13 @@ void ToggleModelNG::SetSelectedColor(const std::optional<Color>& selectedColor)
         color = selectedColor.value();
     }
 
-    auto checkboxPattern = frameNode->GetPattern<ToggleCheckBoxPattern>();
-    if (checkboxPattern) {
+    if (IsToggleCheckboxPattern(frameNode)) {
+        auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+        CHECK_NULL_VOID(checkboxModifier);
         if (!selectedColor.has_value()) {
-            CheckBoxModelNG::ResetSelectedColor(frameNode);
+            checkboxModifier->resetSelectedColor(reinterpret_cast<ArkUINodeHandle>(frameNode));
         } else {
-            CheckBoxModelNG::SetSelectedColor(frameNode, color);
+            checkboxModifier->setSelectedColor(reinterpret_cast<ArkUINodeHandle>(frameNode), color.GetValue());
         }
         return;
     }
@@ -163,11 +169,11 @@ void ToggleModelNG::OnChange(ChangeEvent&& onChange)
     CHECK_NULL_VOID(stack);
     auto frameNode = stack->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto checkboxPattern = frameNode->GetPattern<ToggleCheckBoxPattern>();
-    if (checkboxPattern) {
-        auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->SetOnChange(std::move(onChange));
+    if (IsToggleCheckboxPattern(frameNode)) {
+        auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+        CHECK_NULL_VOID(checkboxModifier);
+        checkboxModifier->setCheckboxOnChange(
+            reinterpret_cast<ArkUINodeHandle>(frameNode), reinterpret_cast<void*>(&onChange));
         return;
     }
     auto buttonPattern = frameNode->GetPattern<ToggleButtonPattern>();
@@ -185,11 +191,11 @@ void ToggleModelNG::OnChange(ChangeEvent&& onChange)
 void ToggleModelNG::OnChange(FrameNode* frameNode, ChangeEvent&& onChange)
 {
     CHECK_NULL_VOID(frameNode);
-    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
-    if (checkboxPattern) {
-        auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->SetOnChange(std::move(onChange));
+    if (IsToggleCheckboxPattern(frameNode)) {
+        auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+        CHECK_NULL_VOID(checkboxModifier);
+        checkboxModifier->setCheckboxOnChange(
+            reinterpret_cast<ArkUINodeHandle>(frameNode), reinterpret_cast<void*>(&onChange));
         return;
     }
     auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
@@ -207,9 +213,11 @@ void ToggleModelNG::OnChange(FrameNode* frameNode, ChangeEvent&& onChange)
 void ToggleModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SwitchMakeCallback&& makeFunc)
 {
     CHECK_NULL_VOID(frameNode);
-    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
-    if (checkboxPattern) {
-        checkboxPattern->SetToggleBuilderFunc(std::move(makeFunc));
+    if (IsToggleCheckboxPattern(frameNode)) {
+        auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+        CHECK_NULL_VOID(checkboxModifier);
+        checkboxModifier->setToggleBuilderFunc(
+            reinterpret_cast<ArkUINodeHandle>(frameNode), reinterpret_cast<void*>(&makeFunc));
         return;
     }
     auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
@@ -225,9 +233,10 @@ void ToggleModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SwitchMakeCallback&
 void ToggleModelNG::SetChangeValue(FrameNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);
-    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
-    if (checkboxPattern) {
-        checkboxPattern->SetCheckBoxSelect(std::move(value));
+    if (IsToggleCheckboxPattern(frameNode)) {
+        auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+        CHECK_NULL_VOID(checkboxModifier);
+        checkboxModifier->setChangeValue(reinterpret_cast<ArkUINodeHandle>(frameNode), value);
         return;
     }
     auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
@@ -266,8 +275,11 @@ void ToggleModelNG::SetPadding(const NG::PaddingPropertyF& /*args*/, const NG::P
 }
 RefPtr<FrameNode> ToggleModelNG::CreateCheckboxFrameNode(int32_t nodeId, bool isOn)
 {
-    auto frameNode =
-        FrameNode::CreateFrameNode(V2::CHECKBOX_ETS_TAG, nodeId, AceType::MakeRefPtr<ToggleCheckBoxPattern>());
+    auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+    CHECK_NULL_RETURN(checkboxModifier, nullptr);
+    auto rawFrameNode = reinterpret_cast<FrameNode*>(checkboxModifier->createToggleCheckboxFrameNode(nodeId));
+    CHECK_NULL_RETURN(rawFrameNode, nullptr);
+    auto frameNode = AceType::Claim(rawFrameNode);
     UpdateCheckboxIsOn(frameNode, isOn);
     return frameNode;
 }
@@ -292,7 +304,6 @@ void ToggleModelNG::ReplaceAllChild(const RefPtr<FrameNode>& oldFrameNode)
     CHECK_NULL_VOID(currentNode);
     auto children = oldFrameNode->GetChildren();
     auto switchPattern = oldFrameNode->GetPattern<SwitchPattern>();
-    auto checkboxPattern = oldFrameNode->GetPattern<CheckBoxPattern>();
     auto toggleButtonPattern = oldFrameNode->GetPattern<ToggleButtonPattern>();
     auto currentFrameNode = AceType::DynamicCast<FrameNode>(currentNode);
     auto currentHolderNode = currentFrameNode->GetPattern<ToggleBasePattern>();
@@ -307,9 +318,10 @@ void ToggleModelNG::ReplaceAllChild(const RefPtr<FrameNode>& oldFrameNode)
         if (switchPattern && switchPattern->UseContentModifier() && switchPattern->GetBuilderId() == child->GetId()) {
             continue;
         }
-        if (checkboxPattern && checkboxPattern->UseContentModifier()) {
-            auto modifierNode = checkboxPattern->GetContentModifierNode();
-            if (modifierNode && modifierNode->GetId() == child->GetId()) {
+        if (IsToggleCheckboxPattern(AceType::RawPtr(oldFrameNode))) {
+            auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+            auto node = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(oldFrameNode));
+            if (checkboxModifier && checkboxModifier->isCheckboxContentModifierNodeId(node, child->GetId())) {
                 continue;
             }
         }
@@ -364,11 +376,11 @@ void ToggleModelNG::OnChangeEvent(ChangeEvent&& onChangeEvent)
     CHECK_NULL_VOID(stack);
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    auto checkboxPattern = stack->GetMainFrameNodePattern<ToggleCheckBoxPattern>();
-    if (checkboxPattern) {
-        auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
-        CHECK_NULL_VOID(eventHub);
-        eventHub->SetChangeEvent(std::move(onChangeEvent));
+    if (IsToggleCheckboxPattern(frameNode)) {
+        auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+        CHECK_NULL_VOID(checkboxModifier);
+        checkboxModifier->setCheckboxChangeEvent(
+            reinterpret_cast<ArkUINodeHandle>(frameNode), reinterpret_cast<void*>(&onChangeEvent));
         return;
     }
     auto buttonPattern = stack->GetMainFrameNodePattern<ToggleButtonPattern>();
@@ -538,22 +550,20 @@ void ToggleModelNG::SetSelectedColor(FrameNode* frameNode, const std::optional<C
     if (selectedColor.has_value()) {
         color = selectedColor.value();
     }
-
-    auto checkboxPattern = AceType::DynamicCast<ToggleCheckBoxPattern>(frameNode->GetPattern());
-    if (checkboxPattern) {
+    if (IsToggleCheckboxPattern(frameNode)) {
         if (!selectedColor.has_value()) {
             auto theme = pipeline->GetTheme<CheckboxTheme>(frameNode->GetThemeScopeId());
             CHECK_NULL_VOID(theme);
             color = theme->GetActiveColor();
         }
-        CheckBoxModelNG checkBoxModelNG;
-        checkBoxModelNG.SetSelectedColor(frameNode, color);
+        auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+        CHECK_NULL_VOID(checkboxModifier);
+        checkboxModifier->setSelectedColor(reinterpret_cast<ArkUINodeHandle>(frameNode), color.GetValue());
         if (SystemProperties::ConfigChangePerform() && !selectedColor.has_value()) {
-            checkBoxModelNG.SetSelectedColorFlagByUser(frameNode, false);
+            checkboxModifier->setSelectedColorFlagByUser(reinterpret_cast<ArkUINodeHandle>(frameNode), false);
         }
         return;
     }
-
     auto buttonPattern = AceType::DynamicCast<ToggleButtonPattern>(frameNode->GetPattern());
     if (buttonPattern) {
         if (!selectedColor.has_value()) {
@@ -656,7 +666,7 @@ void ToggleModelNG::SetToggleState(FrameNode* frameNode, bool isOn)
     CHECK_NULL_VOID(pattern);
     if (AceType::InstanceOf<SwitchPattern>(pattern)) {
         UpdateSwitchIsOn(refNode, isOn);
-    } else if (AceType::InstanceOf<CheckBoxPattern>(pattern)) {
+    } else if (IsToggleCheckboxPattern(frameNode)) {
         UpdateCheckboxIsOn(refNode, isOn);
     } else if (AceType::InstanceOf<ButtonPattern>(pattern)) {
         UpdateToggleButtonIsOn(refNode, isOn);
@@ -671,7 +681,7 @@ bool ToggleModelNG::GetToggleState(FrameNode* frameNode)
     bool result = false;
     if (AceType::InstanceOf<SwitchPattern>(pattern)) {
         result = GetSwitchIsOn(frameNode);
-    } else if (AceType::InstanceOf<CheckBoxPattern>(pattern)) {
+    } else if (IsToggleCheckboxPattern(frameNode)) {
         result = GetCheckboxIsOn(frameNode);
     } else if (AceType::InstanceOf<ButtonPattern>(pattern)) {
         result = GetToggleButtonIsOn(frameNode);
@@ -819,7 +829,8 @@ void ToggleModelNG::CreateWithCheckBoxResourceObj(FrameNode* node, const ToggleC
     const RefPtr<ResourceObject>& resObj, const std::string& key)
 {
     CHECK_NULL_VOID(node);
-    auto pattern = node->GetPattern<ToggleCheckBoxPattern>();
+    CHECK_NULL_VOID(IsToggleCheckboxPattern(node));
+    auto pattern = node->GetPattern();
     CHECK_NULL_VOID(pattern);
     if (!resObj) {
         pattern->RemoveResObj(key);
@@ -1001,10 +1012,11 @@ void ToggleModelNG::UpdateSwitchIsOn(const RefPtr<FrameNode>& frameNode, bool is
 void ToggleModelNG::UpdateCheckboxIsOn(const RefPtr<FrameNode>& frameNode, bool isOn)
 {
     CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isOn);
-    ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxPaintProperty, CheckBoxSelect, isOn, frameNode);
+    auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+    CHECK_NULL_VOID(checkboxModifier);
+    auto rawPtr = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
+    CHECK_NULL_VOID(rawPtr);
+    checkboxModifier->setSelect(rawPtr, isOn);
 }
 
 void ToggleModelNG::UpdateToggleButtonIsOn(const RefPtr<FrameNode>& frameNode, bool isOn)
@@ -1037,8 +1049,9 @@ bool ToggleModelNG::GetCheckboxIsOn(FrameNode* frameNode)
 {
     bool value = false;
     CHECK_NULL_RETURN(frameNode, value);
-    ACE_GET_NODE_PAINT_PROPERTY_WITH_DEFAULT_VALUE(CheckBoxPaintProperty, CheckBoxSelect, value, frameNode, value);
-    return value;
+    auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+    CHECK_NULL_RETURN(checkboxModifier, value);
+    return checkboxModifier->getSelect(reinterpret_cast<ArkUINodeHandle>(frameNode));
 }
 
 Color ToggleModelNG::GetUnselectedColor(FrameNode* frameNode)
@@ -1066,10 +1079,10 @@ void ToggleModelNG::SetIsUserSetMargin(FrameNode* frameNode, bool isUserSet)
         auto switchPattern = AceType::DynamicCast<SwitchPattern>(pattern);
         CHECK_NULL_VOID(switchPattern);
         switchPattern->SetIsUserSetMargin(isUserSet);
-    } else if (AceType::InstanceOf<CheckBoxPattern>(pattern)) {
-        auto checkboxPattern = AceType::DynamicCast<CheckBoxPattern>(pattern);
-        CHECK_NULL_VOID(checkboxPattern);
-        checkboxPattern->SetIsUserSetMargin(isUserSet);
+    } else if (IsToggleCheckboxPattern(frameNode)) {
+        auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+        CHECK_NULL_VOID(checkboxModifier);
+        checkboxModifier->setIsUserSetMargin(reinterpret_cast<ArkUINodeHandle>(frameNode), isUserSet);
     }
 }
 } // namespace OHOS::Ace::NG

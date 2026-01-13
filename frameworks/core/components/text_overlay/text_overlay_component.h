@@ -22,8 +22,8 @@
 #include "core/components/menu/menu_component.h"
 #include "core/components/option/option_component.h"
 #include "core/components/select_popup/select_popup_component.h"
-#include "core/components/text_field/render_text_field.h"
-#include "core/components/text_field/text_field_component.h"
+#include "compatible/components/text_field/render_text_field.h"
+#include "compatible/components/text_field/text_field_component.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/tween/tween_component.h"
 #include "core/pipeline/base/component.h"
@@ -44,7 +44,7 @@ using EndHandleMoveCallback =
     std::function<void(int32_t start, const Offset&, const std::function<void(const Offset&)>&)>;
 using CopyAllCallback = std::function<void(const std::function<void(const Offset&, const Offset&)>&)>;
 
-class TextOverlayComponent : public SoleChildComponent {
+class ACE_FORCE_EXPORT TextOverlayComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(TextOverlayComponent, SoleChildComponent);
 
 public:

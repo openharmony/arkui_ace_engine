@@ -18,7 +18,6 @@
 #include <dlfcn.h>
 
 namespace OHOS::Ace {
-namespace {
 
 constexpr char BACKEND_ENGINE_ENTRY[] = "OHOS_ACE_GetJsBackendEngineLoader";
 
@@ -35,6 +34,7 @@ public:
 
 DummyJsBackendEngineLoader::DummyJsBackendEngineLoader() = default;
 DummyJsBackendEngineLoader::~DummyJsBackendEngineLoader() = default;
+SINGLETON_INSTANCE_IMPL(DummyJsBackendEngineLoader);
 
 JsBackendEngineLoader& GetJsBackendEngineLoader(const char* sharedLibrary)
 {
@@ -61,8 +61,6 @@ JsBackendEngineLoader& GetJsBackendEngineLoader(const char* sharedLibrary)
 
     return *loader;
 }
-
-} // namespace
 
 JsBackendEngineLoader& JsBackendEngineLoader::Get(const char* sharedLibrary)
 {

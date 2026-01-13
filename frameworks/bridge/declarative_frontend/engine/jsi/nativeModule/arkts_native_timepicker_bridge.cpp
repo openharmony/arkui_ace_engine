@@ -16,7 +16,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/base/i18n/time_format.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
-#include "core/components/picker/picker_base_component.h"
 
 namespace OHOS::Ace::NG {
 namespace {

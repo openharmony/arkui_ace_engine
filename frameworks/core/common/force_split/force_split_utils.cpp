@@ -380,7 +380,7 @@ bool ForceSplitUtils::ParseSystemForceSplitConfig(const std::string& configJsonS
         TAG_LOGE(AceLogTag::ACE_NAVIGATION, "Error, arkUIOptions is an invalid json object!");
         return false;
     }
-    config.isArkUIHookEnabled = configJson->GetBool(ENABLE_HOOK_KEY, false);
+    config.isArkUIHookEnabled = configJson->GetBool(ENABLE_HOOK_KEY, true);
     if (configJson->Contains(NAVIGATION_OPTIONS_KEY)) {
         if (!ParseNavigationOptions(configJson->GetValue(NAVIGATION_OPTIONS_KEY), config)) {
             return false;

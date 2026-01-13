@@ -16,8 +16,12 @@ declare namespace inspector {
         onDrawChildren(callback: VoidCallback): void;
 
         offDrawChildren(callback?: VoidCallback): void;
+        
+        onLayoutChildren(callback: VoidCallback): void;
+
+        offLayoutChildren(callback?: VoidCallback): void;
     }
-    export function createComponentObserver(id: string): ComponentObserver | undefined;
+    export function createComponentObserver(id: string | int): ComponentObserver;
     export function getFilteredInspectorTree(filters?: Array<string>): string;
     export function getFilteredInspectorTreeById(id: string, depth: int, filters?: Array<string>): string;
 }

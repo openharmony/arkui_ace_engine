@@ -31,6 +31,7 @@
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -2959,6 +2960,33 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg096, TestSize.Level1)
      */
     auto focusedWindowId = context_->GetFocusWindowId();
     EXPECT_EQ(focusedWindowId, 0);
+}
+/**
+ * @tc.name: PipelineContextTestNg_FirstFrameSetupRootElement_Test
+ * @tc.desc: Test FlushVsync without creating rootNode_
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, PipelineContextTestNg_FirstFrameSetupRootElement_Test, TestSize.Level1)
+{
+    /**
+     * @tc.steps: Test context_ is available.
+     * @tc.expected: context is available.
+     */
+    ASSERT_NE(context_, nullptr);
+
+    /**
+     * @tc.steps: Creat ContentChangeManager
+     * @tc.expected: contentChangeManager is available.
+     */
+    context_->contentChangeMgr_ = AceType::MakeRefPtr<ContentChangeManager>();
+    ASSERT_NE(context_->contentChangeMgr_, nullptr);
+
+
+    /**
+     * @tc.steps: Text flushvsync without creating rootNode_.
+     * @tc.expected: No crash
+     */
+    context_->FlushVsync(NANO_TIME_STAMP, FRAME_COUNT);
 }
 } // namespace NG
 } // namespace OHOS::Ace

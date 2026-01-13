@@ -133,7 +133,4 @@ void EventReport::ReportGeneralInteractionError(const GeneralInteractionErrorInf
 void EventReport::ReportWebBlanklessSnapshotTouchEvent(uint64_t startTime, const std::string& touchInfo,
     uint64_t endTime)
 {}
-
-void EventReport::ReportTextDrawCmdListErrorEvent(const TextErrorInfo& textInfo)
-{}
 } // namespace OHOS::Ace

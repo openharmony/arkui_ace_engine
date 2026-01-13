@@ -201,5 +201,13 @@ public:
 private:
     static std::string GetThumbnailOrientation(const ImageSourceInfo& src);
 };
+
+class StreamImageLoader : public ImageLoader {
+public:
+    StreamImageLoader() = default;
+    ~StreamImageLoader() override = default;
+    std::shared_ptr<RSData> LoadImageData(const ImageSourceInfo& imageSourceInfo, NG::ImageLoadResultInfo& errorInfo,
+        const WeakPtr<PipelineBase>& context = nullptr) override;
+};
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_IMAGE_IMAGE_LOADER_H

@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BASE_UTILS_SINGLETON_H
 
 #include "base/utils/noncopyable.h"
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
 
@@ -28,20 +29,19 @@ private:                                         \
     MyClass();                                   \
     ~MyClass();
 
+#define SINGLETON_INSTANCE_IMPL(MyClass)         \
+template<>                                       \
+ACE_FORCE_EXPORT                                 \
+MyClass& Singleton<MyClass>::GetInstance() {     \
+   static MyClass instance;                      \
+   return instance;                              \
+}
+
 template<typename T>
 class Singleton : public NonCopyable {
 public:
-    static T& GetInstance()
-    {
-        return instance_;
-    }
-
-private:
-    static T instance_;
+    static ACE_FORCE_EXPORT T& GetInstance();
 };
-
-template<typename T>
-T Singleton<T>::instance_;
 
 } // namespace OHOS::Ace
 

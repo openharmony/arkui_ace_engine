@@ -16,9 +16,11 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
 
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "bridge/declarative_frontend/jsview/models/qrcode_model_impl.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_qrcode_theme.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
+#include "compatible/components/component_loader.h"
+#include "compatible/components/qrcode/qrcode_model_impl.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/qrcode/qrcode_theme.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/qrcode/qrcode_model.h"
@@ -40,7 +42,13 @@ QRCodeModel* QRCodeModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::QRCodeModelNG());
             } else {
-                instance_.reset(new Framework::QRCodeModelImpl());
+                auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("qrcode");
+                if (loader == nullptr) {
+                    LOGF("Can't find qrcode dynamic module");
+                    abort();
+                }
+                static QRCodeModel* instance = reinterpret_cast<QRCodeModel*>(loader->CreateModel());
+                return instance;
             }
 #endif
         }

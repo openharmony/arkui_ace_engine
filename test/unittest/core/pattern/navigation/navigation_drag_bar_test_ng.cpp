@@ -569,4 +569,125 @@ HWTEST_F(NavigationDragBarTestNg, NavigationDragBarTest012, TestSize.Level1)
     EXPECT_EQ(dragBarRenderContext->GetBackgroundColor().value_or(Color()), defaultDragBarActiveColor);
     EXPECT_EQ(dragBarItemRenderContext->GetBackgroundColor().value_or(Color()), barItemDefaultActiveColor);
 }
+
+/**
+ * @tc.name: NavigationDividerTest001
+ * @tc.desc: Test NavigationDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationDragBarTestNg, NavigationDividerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation
+     */
+    CreateNavigationModel();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigation, nullptr);
+    auto navigationPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navigationPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. update divider color and color defined
+     */
+    auto layoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    Color color = Color::RED;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DividerColor, color, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DefinedDividerColor, true, frameNode);
+
+    /**
+     * @tc.steps: step3. mark navigation modify done
+     * @tc.expected: step3.check divider color
+     */
+    navigation->MarkModifyDone();
+    auto dividerNode = AceType::DynamicCast<FrameNode>(navigation->GetDividerNode());
+    ASSERT_NE(dividerNode, nullptr);
+    auto renderContext = dividerNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    ASSERT_EQ(renderContext->GetBackgroundColor(), Color::RED);
+}
+
+/**
+ * @tc.name: NavigationDividerTest002
+ * @tc.desc: Test Navigation Divider StartMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationDragBarTestNg, NavigationDividerTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation
+     */
+    CreateNavigationModel();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigation, nullptr);
+
+    /**
+     * @tc.steps: step2. update divider startMargin 10
+     */
+    auto layoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto startMargin = 10.0f;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DividerStartMargin,
+        CalcDimension(startMargin), frameNode);
+
+    /**
+     * @tc.steps: step3. measure navigation
+     * @tc.expected: step3.divider start margin is 10, divider length is 790
+     */
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    NavigationDragBarTestNg::RunMeasureAndLayout(layoutWrapper);
+    double targetHeight = 790.0f;
+    auto dividerNode = AceType::DynamicCast<FrameNode>(navigation->GetDividerNode());
+    ASSERT_NE(dividerNode, nullptr);
+    auto geometryNode = dividerNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto frameSize = geometryNode->GetFrameSize();
+    ASSERT_EQ(frameSize.height_, targetHeight);
+}
+
+/**
+ * @tc.name: NavigationDividerTest003
+ * @tc.desc: Test Navigation Divider EndMargin
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationDragBarTestNg, NavigationDividerTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create navigation
+     */
+    CreateNavigationModel();
+    auto frameNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto navigation = AceType::DynamicCast<NavigationGroupNode>(frameNode);
+    ASSERT_NE(navigation, nullptr);
+
+    /**
+     * @tc.steps: step2. update divider endMargin 10
+     */
+    auto layoutProperty = navigation->GetLayoutProperty<NavigationLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto endMargin = 10.0f;
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DividerEndMargin,
+        CalcDimension(endMargin), frameNode);
+
+    /**
+     * @tc.steps: step3. measure navigation
+     * @tc.expected: step3.divider start margin is 10, divider length is 790
+     */
+    auto layoutWrapper = frameNode->CreateLayoutWrapper();
+    ASSERT_NE(layoutWrapper, nullptr);
+    NavigationDragBarTestNg::RunMeasureAndLayout(layoutWrapper);
+    double targetHeight = 790.0f;
+    auto dividerNode = AceType::DynamicCast<FrameNode>(navigation->GetDividerNode());
+    ASSERT_NE(dividerNode, nullptr);
+    auto geometryNode = dividerNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto frameSize = geometryNode->GetFrameSize();
+    ASSERT_EQ(frameSize.height_, targetHeight);
+}
 } // namespace OHOS::Ace::NG

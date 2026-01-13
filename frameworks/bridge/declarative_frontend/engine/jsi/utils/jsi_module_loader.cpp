@@ -65,7 +65,7 @@ panda::Local<panda::JSValueRef> JsRequireHspModuleForAdvancedUIComponent(panda::
         TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "ExecuteModuleBuffer failed");
     } else {
         exports = panda::JSNApi::GetExportObject(ecmaVM, request, key);
-        if (exports->IsUndefined()) {
+        if (exports->IsNull() || exports->IsUndefined()) {
             TAG_LOGE(AceLogTag::ACE_DEFAULT_DOMAIN, "get export object of %{private}s failed", key.c_str());
         }
     }

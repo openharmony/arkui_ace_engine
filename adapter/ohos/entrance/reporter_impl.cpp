@@ -76,9 +76,6 @@ void ReporterImpl::HandleInspectorReporting(const JsonReport& report) const
     if (value->IsNull()) {
         return;
     }
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "Inspector JsonString %{public}s", value->ToString().c_str());
-    }
     LayoutInspector::SendMessage(value->ToString());
 }
 
@@ -110,6 +107,9 @@ void ReporterImpl::HandleInputEventInspectorReporting(const TouchEvent& event) c
 void ReporterImpl::HandleInputEventInspectorReporting(const MouseEvent& event) const
 {
     if (!LayoutInspector::GetInteractionEventStatus()) {
+        return;
+    }
+    if (event.isFalsifyCancel) {
         return;
     }
     if (event.sourceType != SourceType::MOUSE || (event.convertInfo.first != event.convertInfo.second)) {
@@ -171,7 +171,6 @@ void ReporterImpl::HandleInputEventInspectorReporting(const KeyEvent& event) con
     }
     // Block invalid keyCode 65535 (KEYCODE_INVALID) in certain scenarios to avoid subsequent exceptions
     if (static_cast<int32_t>(event.code) == KEYCODE_INVALID) {
-        TAG_LOGE(AceLogTag::ACE_UIEVENT, "Report insepector message error, keyCode is %{public}d", KEYCODE_INVALID);
         return;
     }
     NG::KeyJsonReport keyReport;

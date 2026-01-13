@@ -134,6 +134,7 @@ public:
     void NotifyRotationAnimationEnd() override;
     void RegisterExeAppAIFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& taskExecutor);
+    void SaveGetWebInfoByRequestFunction(const WeakPtr<TaskExecutor>& taskExecutor);
     void ChangeSensitiveNodes(bool isSensitive) override;
 
     // Window color
@@ -480,6 +481,7 @@ public:
         OHOS::Rosen::Window* window, const std::string& name, ani_object storage, uint32_t focusWindowId) override;
 
     void SetContentChangeDetectCallback(const WeakPtr<TaskExecutor>& taskExecutor);
+    void SetXComponentDisplayConstraintEnabled(bool isEnable) override;
 
 protected:
     void RunIntentPageIfNeeded();

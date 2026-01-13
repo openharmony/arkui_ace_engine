@@ -221,7 +221,7 @@ bool SecurityComponentHandler::CheckParentBorder(const RefPtr<FrameNode>& parent
         return false;
     }
     for (const auto& rect : borderRects) {
-        if (!rect.IsInnerIntersectWithRound(scRect)) {
+        if (!rect.IsInnerIntersectForSeccompBorder(scRect)) {
             continue;
         }
         SC_LOG_ERROR("SecurityComponentCheckFail: security component is covered by the border of parent" \
@@ -905,9 +905,9 @@ bool InitSCTextInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
         auto theme = pipeline->GetTheme<SecurityComponentTheme>();
         CHECK_NULL_RETURN(theme, false);
         if (textProp->GetFontSize().has_value()) {
-            buttonInfo.fontSize_ = textProp->GetFontSize()->Value();
+            buttonInfo.fontSize_ = textProp->GetFontSize()->ConvertToFp();
         } else {
-            buttonInfo.fontSize_ = theme->GetFontSize().Value();
+            buttonInfo.fontSize_ = theme->GetFontSize().ConvertToFp();
         }
         if (textProp->GetTextColor().has_value()) {
             buttonInfo.fontColor_.value = textProp->GetTextColor().value().GetValue();

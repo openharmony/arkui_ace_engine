@@ -806,7 +806,10 @@ public:
     void SetOverlayNode(const RefPtr<FrameNode>& overlayNode)
     {
         overlayNode_ = overlayNode;
+        SetOverlayNodeIsFree(IsFree());
     }
+
+    void SetOverlayNodeIsFree(bool isFree);
 
     RefPtr<FrameNode> GetOverlayNode() const
     {
@@ -1424,7 +1427,7 @@ public:
         return GetTag() == V2::SCREEN_ETS_TAG;
     }
 
-    bool CheckVisibleOrActive() override;
+    bool CheckVisibleAndActive() override;
 
     void SetPaintNode(const RefPtr<FrameNode>& paintNode)
     {
@@ -1463,7 +1466,7 @@ public:
     std::vector<std::pair<float, float>> GetSpecifiedContentOffsets(const std::string& content);
     void HighlightSpecifiedContent(
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs);
-    void ReportSelectedText();
+    void ReportSelectedText(bool isRegister);
 
     void ResetLastFrameNodeRect()
     {
@@ -1496,7 +1499,13 @@ public:
 
     void OnContentChangeRegister(const ContentChangeConfig& config);
     void OnContentChangeUnregister();
+    void SetIsFree(bool isFree) override;
+    bool IsPendingOnMainRenderTree() const
+    {
+        return isPendingState_;
+    }
 
+    void UpdateBackground();
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1542,6 +1551,7 @@ private:
     bool RemoveImmediately() const override;
     void ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChildren,
         const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& oldChildren);
+    void CleanRenderTreeLifeCycle();
     void DetachFromRenderTree(bool isOnMainTree, bool recursive = true);
     void AttachToRenderTree(bool isOnMainTree, bool recursive = true);
     void OnDetachFromMainRenderTree();
@@ -1678,7 +1688,6 @@ private:
     void MarkDirtyNodeMultiThread(PropertyChangeFlag extraFlag);
     void RebuildRenderContextTreeMultiThread();
     void MarkNeedRenderMultiThread(bool isRenderBoundary);
-    void UpdateBackground();
     void DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult);
     PipelineContext* GetOffMainTreeNodeContext();
     RefPtr<AccessibilityProperty>& GetOrCreateAccessibilityProperty();
@@ -1788,6 +1797,8 @@ private:
     bool hasPositionZ_ = false;
     bool hasBindTips_ = false;
     bool isAncestorScrollable_ = false;
+    // Marks whether this FrameNode has been attached to the main RenderTree and is awaiting a matching detach.
+    bool isPendingState_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

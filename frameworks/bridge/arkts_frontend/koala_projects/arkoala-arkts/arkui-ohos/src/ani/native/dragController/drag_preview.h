@@ -35,7 +35,7 @@ public:
     ~DragPreview() = default;
 
     static void SetForegroundColor([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
-        Ark_ResourceColor color, ani_long dragPreviewPtr)
+        ani_long colorValue, ani_long dragPreviewPtr)
     {
         CHECK_NULL_VOID(env);
         if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
@@ -52,7 +52,8 @@ public:
             env->DestroyLocalScope();
             return;
         }
-        modifier->getDragControllerAniModifier()->aniDragPreviewSetForegroundColor(color, dragPreview->previewAsync_);
+        modifier->getDragControllerAniModifier()->aniDragPreviewSetForegroundColor(
+            colorValue, dragPreview->previewAsync_);
         env->DestroyLocalScope();
     }
 

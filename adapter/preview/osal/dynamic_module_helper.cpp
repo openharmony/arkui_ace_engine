@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -53,8 +53,8 @@ DynamicModuleHelper& DynamicModuleHelper::GetInstance()
 
 std::unique_ptr<ComponentLoader> DynamicModuleHelper::GetLoaderByName(const char* name)
 {
-    if (compatibleLib_) {
-        return std::move(compatibleLib_);
+    if (compatibleLoaderFunc_) {
+        return std::unique_ptr<ComponentLoader>(compatibleLoaderFunc_(name));
     }
     LIBHANDLE handle = LOADLIB(COMPATIABLE_LIB.c_str());
 #if defined(WINDOWS_PLATFORM) && defined(UNICODE)
@@ -62,13 +62,10 @@ std::unique_ptr<ComponentLoader> DynamicModuleHelper::GetLoaderByName(const char
 #else
     LOGI("Load compatible lib %{public}s", COMPATIABLE_LIB.c_str());
 #endif
-
     auto* createSym = reinterpret_cast<ComponentLoaderFunc>(LOADSYM(handle, COMPATIABLE_COMPONENT_LOADER));
     CHECK_NULL_RETURN(createSym, nullptr);
-    ComponentLoader* module = createSym(name);
-    CHECK_NULL_RETURN(module, nullptr);
-    compatibleLib_ = std::unique_ptr<ComponentLoader>(module);
-    return std::move(compatibleLib_);
+    compatibleLoaderFunc_ = createSym;
+    return std::unique_ptr<ComponentLoader>(compatibleLoaderFunc_(name));
 }
 
 DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
@@ -81,17 +78,30 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
             return iter->second.get();
         }
     }
-
+    static const std::unordered_map<std::string, std::string> soMap = {
+        {"Checkbox", "checkbox"},
+        {"CheckboxGroup", "checkbox"},
+        {"Gauge", "gauge"},
+        {"Rating", "rating"},
+        { "FlowItem", "waterflow" },
+        { "WaterFlow", "waterflow" },
+    };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
+    auto it = soMap.find(name);
+    if (it == soMap.end()) {
+        LOGI("No shared library mapping found for nativeModule: %{public}s", name.c_str());
+        return nullptr;
+    }
 #ifdef WINDOWS_PLATFORM
-    std::wstring nameW = std::wstring(name.begin(), name.end());
+    std::wstring nameW = std::wstring(it->second.begin(), it->second.end());
     auto libName = DYNAMIC_MODULE_LIB_PREFIX + nameW + DYNAMIC_MODULE_LIB_POSTFIX;
 #else
-    auto libName = DYNAMIC_MODULE_LIB_PREFIX + name + DYNAMIC_MODULE_LIB_POSTFIX;
+    auto libName = DYNAMIC_MODULE_LIB_PREFIX + it->second + DYNAMIC_MODULE_LIB_POSTFIX;
 #endif
     LIBHANDLE handle = LOADLIB(libName.c_str());
     CHECK_NULL_RETURN(handle, nullptr);
-    auto* createSym = reinterpret_cast<DynamicModuleCreateFunc>(LOADSYM(handle, DYNAMIC_MODULE_CREATE));
+    auto* createSym =
+        reinterpret_cast<DynamicModuleCreateFunc>(LOADSYM(handle, (DYNAMIC_MODULE_CREATE + name).c_str()));
     CHECK_NULL_RETURN(createSym, nullptr);
     DynamicModule* module = createSym();
     CHECK_NULL_RETURN(module, nullptr);

@@ -31,7 +31,7 @@
 
 namespace OHOS::Ace::NG {
 
-constexpr Dimension SHEET_MINIMIZE_BORDER_RADIUS = 11.69_vp;
+constexpr Dimension SHEET_MINIMIZE_BORDER_RADIUS = 12.0_vp;
 
 NG::BorderWidthProperty SheetMinimizeObject::PostProcessBorderWidth(const NG::BorderWidthProperty& borderWidth)
 {

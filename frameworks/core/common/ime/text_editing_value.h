@@ -18,6 +18,7 @@
 
 #include <functional>
 #include <string>
+#include "base/utils/macros.h"
 
 #include "core/common/ime/text_selection.h"
 
@@ -31,7 +32,7 @@ class JsonValue;
 
 using TextManipulation = std::function<void(std::wstring&)>;
 
-struct TextEditingValue {
+struct ACE_FORCE_EXPORT TextEditingValue {
     void ParseFromJson(const JsonValue& json);
     std::string ToJsonString() const;
 

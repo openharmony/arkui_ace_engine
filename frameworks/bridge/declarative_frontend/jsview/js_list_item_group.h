@@ -19,7 +19,7 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_mouse_function.h"
 #include "bridge/declarative_frontend/jsview/js_container_base.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -30,7 +30,7 @@ public:
     static void SetDivider(const JSCallbackInfo& args);
     static void SetAspectRatio(const JSCallbackInfo& args);
     static void SetChildrenMainSize(const JSCallbackInfo& args);
-    static void SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj);
+    static void SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj, NG::FrameNode* node = nullptr);
     static bool ParseHeaderAndFooterContent(const JSRef<JSVal>& contentParam, bool isHeader);
     static bool SetHeaderBuilder(const JSRef<JSObject>& obj);
     static bool SetFooterBuilder(const JSRef<JSObject>& obj);

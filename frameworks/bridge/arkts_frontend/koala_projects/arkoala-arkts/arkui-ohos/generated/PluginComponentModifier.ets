@@ -117,6 +117,7 @@ export class PluginComponentModifier extends CommonMethodModifier implements Plu
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onComplete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.SKIP
@@ -128,6 +129,7 @@ export class PluginComponentModifier extends CommonMethodModifier implements Plu
         {
             this._onError_0_flag = AttributeUpdaterFlag.UPDATE
             this._onError_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onError_0_flag = AttributeUpdaterFlag.SKIP

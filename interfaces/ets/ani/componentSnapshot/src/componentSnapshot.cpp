@@ -110,6 +110,17 @@ void AniThrowError(ani_env* env, ani_int code, const std::string& msg)
     }
 }
 
+ani_object CreateNull(ani_env* env)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref nullObj;
+    if (ANI_OK != env->GetNull(&nullObj)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT,  "Get null object failed!");
+        return nullptr;
+    }
+    return static_cast<ani_object>(nullObj);
+}
+
 std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
 {
     ani_size strSize;
@@ -157,7 +168,11 @@ void TriggerJsCallback(SnapshotAsyncCtx* asyncCtx)
 #endif
     }
     ani_status status = ANI_OK;
-    resultRef[0] = CreateStsError(ctx->env, ctx->errCode, "");
+    if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        resultRef[0] = CreateNull(ctx->env);
+    } else {
+        resultRef[0] = CreateStsError(ctx->env, ctx->errCode, "");
+    }
     if (ctx->deferred) {
         // promise
         if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
@@ -671,7 +686,7 @@ void GetSnapshotByUniqueId(int32_t uniqueId,
 #endif
 }
 
-static ani_object ANI_GetWithUniqueId([[maybe_unused]] ani_env* env, ani_double id, ani_object options)
+static ani_object ANI_GetWithUniqueId([[maybe_unused]] ani_env* env, ani_int id, ani_object options)
 {
     int32_t uniqueId = static_cast<int32_t>(id);
     OHOS::Ace::NG::SnapshotOptions snapshotOptions;
@@ -691,7 +706,7 @@ std::pair<int32_t, std::shared_ptr<OHOS::Media::PixelMap>> GetSyncSnapshotByUniq
     return { OHOS::Ace::ERROR_CODE_INTERNAL_ERROR, nullptr };
 }
 
-static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_double id, ani_object options)
+static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_int id, ani_object options)
 {
     int32_t uniqueId = static_cast<int32_t>(id);
     OHOS::Ace::NG::SnapshotOptions snapshotOptions;

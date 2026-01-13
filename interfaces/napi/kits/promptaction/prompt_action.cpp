@@ -359,8 +359,7 @@ void GetToastShadow(napi_env env, napi_value shadowNApi, std::optional<Shadow>& 
         if (ParseResourceParam(env, offsetXApi, recv)) {
             CalcDimension offsetX;
             if (ParseResource(recv, offsetX)) {
-                double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
-                shadowProps.SetOffsetX(xValue);
+                shadowProps.SetOffsetX(offsetX.Value());
             }
         } else {
             CalcDimension offsetX;
@@ -1278,18 +1277,15 @@ std::optional<Shadow> GetShadowProps(napi_env env, const std::shared_ptr<PromptA
         napi_get_named_property(env, asyncContext->shadowApi, "offsetX", &offsetXApi);
         napi_get_named_property(env, asyncContext->shadowApi, "offsetY", &offsetYApi);
         ResourceInfo recv;
-        bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
         if (ParseResourceParam(env, offsetXApi, recv)) {
             auto resourceWrapper = CreateResourceWrapper(recv);
             CHECK_NULL_RETURN(resourceWrapper, std::nullopt);
             auto offsetX = resourceWrapper->GetDimension(recv.resId);
-            double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
-            shadow.SetOffsetX(xValue);
+            shadow.SetOffsetX(offsetX.Value());
         } else {
             CalcDimension offsetX;
             if (ParseNapiDimension(env, offsetX, offsetXApi, DimensionUnit::VP)) {
-                double xValue = isRtl ? offsetX.Value() * (-1) : offsetX.Value();
-                shadow.SetOffsetX(xValue);
+                shadow.SetOffsetX(offsetX.Value());
             }
         }
         if (ParseResourceParam(env, offsetYApi, recv)) {
@@ -1790,12 +1786,6 @@ napi_value JSPromptShowDialog(napi_env env, napi_callback_info info)
     auto onLanguageChange = [shadowProps, alignment, offset, maskRect,
         updateAlignment = UpdatePromptAlignment](DialogProperties& dialogProps) {
         bool isRtl = AceApplicationInfo::GetInstance().IsRightToLeft();
-        if (shadowProps.has_value()) {
-            std::optional<Shadow> shadow = shadowProps.value();
-            double offsetX = isRtl ? shadow->GetOffset().GetX() * (-1) : shadow->GetOffset().GetX();
-            shadow->SetOffsetX(offsetX);
-            dialogProps.shadow = shadow.value();
-        }
         if (alignment.has_value()) {
             std::optional<DialogAlignment> pmAlign = alignment.value();
             updateAlignment(pmAlign.value());

@@ -29,7 +29,7 @@ import { Color, FontWeight, MarqueeUpdateStrategy } from "./component/enums"
 import { Resource } from "global.resource"
 export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttribute,AttributeModifier<MarqueeAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -350,6 +350,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -361,6 +362,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -372,6 +374,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         {
             this._allowScale_0_flag = AttributeUpdaterFlag.UPDATE
             this._allowScale_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._allowScale_0_flag = AttributeUpdaterFlag.SKIP
@@ -383,6 +386,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontWeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -394,6 +398,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontFamily_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.SKIP
@@ -405,6 +410,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         {
             this._marqueeUpdateStrategy_0_flag = AttributeUpdaterFlag.UPDATE
             this._marqueeUpdateStrategy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._marqueeUpdateStrategy_0_flag = AttributeUpdaterFlag.SKIP
@@ -416,6 +422,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         {
             this._onStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -427,6 +434,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         {
             this._onBounce_0_flag = AttributeUpdaterFlag.UPDATE
             this._onBounce_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onBounce_0_flag = AttributeUpdaterFlag.SKIP
@@ -438,6 +446,7 @@ export class MarqueeModifier extends CommonMethodModifier implements MarqueeAttr
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.UPDATE
             this._onFinish_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onFinish_0_flag = AttributeUpdaterFlag.SKIP

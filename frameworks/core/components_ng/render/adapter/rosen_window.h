@@ -155,6 +155,8 @@ public:
 
     void ForceFlushVsync(uint64_t nanoTimestamp, uint64_t frameCount) override;
 
+    void FlushVsync() override;
+
 private:
     class RecoverExecutor : public std::enable_shared_from_this<RecoverExecutor> {
     public:
@@ -205,7 +207,6 @@ private:
     };
     void RemoveVsyncTimeoutDFXTask(uint64_t frameCount);
     void PostVsyncTimeoutDFXTask(const RefPtr<TaskExecutor>& taskExecutor);
-    void ReportFirstVsync();
 
     OHOS::sptr<OHOS::Rosen::Window> rsWindow_;
     WeakPtr<TaskExecutor> taskExecutor_;

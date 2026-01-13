@@ -643,6 +643,7 @@ public:
         return UIContentErrorCode::NO_ERRORS;
     }
 
+    virtual void SetXComponentDisplayConstraintEnabled(bool isEnable) {};
 };
 
 } // namespace OHOS::Ace

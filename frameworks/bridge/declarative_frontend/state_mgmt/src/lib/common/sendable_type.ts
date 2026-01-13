@@ -25,6 +25,7 @@ declare class SendableSet<T> {
     [Symbol.iterator](): IterableIterator<T>;
     add(value: T): this;
     values(): IterableIterator<T>;
+    delete(value: T): boolean;
 };
 declare class SendableArray<T> {
     constructor(...items: T[]);

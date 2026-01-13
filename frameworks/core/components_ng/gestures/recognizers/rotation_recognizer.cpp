@@ -65,8 +65,10 @@ void RotationRecognizer::OnAccepted()
     if (!touchPoints_.empty()) {
         touchPoint = touchPoints_.begin()->second;
     }
+    auto postEventNodeId =
+        inputEventType_ == InputEventType::AXIS ? lastAxisEvent_.postEventNodeId : touchPoint.postEventNodeId;
     localMatrix_ = NGGestureRecognizer::GetTransformMatrix(
-        GetAttachedNode(), false, isPostEventResult_ || touchPoint.passThrough, touchPoint.postEventNodeId);
+        GetAttachedNode(), false, isPostEventResult_ || touchPoint.passThrough, postEventNodeId);
     SendCallbackMsg(onActionStart_, GestureCallbackType::START);
     isNeedResetVoluntarily_ = false;
 }
@@ -235,6 +237,9 @@ void RotationRecognizer::HandleTouchMoveEvent(const TouchEvent& event)
             }
             auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
             if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+                auto node = GetAttachedNode().Upgrade();
+                TAG_LOGI(AceLogTag::ACE_GESTURE,
+                    "Rotation judge reject, %{public}s", node ? node->GetTag().c_str() : "");
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
                 return;
             }
@@ -265,6 +270,9 @@ void RotationRecognizer::HandleTouchMoveEvent(const AxisEvent& event)
             resultAngle_ = ChangeValueRange(currentAngle_ - initialAngle_);
             auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
             if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+                auto node = GetAttachedNode().Upgrade();
+                TAG_LOGI(AceLogTag::ACE_GESTURE,
+                    "Rotation judge reject, %{public}s", node ? node->GetTag().c_str() : "");
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
                 return;
             }
@@ -518,4 +526,19 @@ RefPtr<GestureSnapshot> RotationRecognizer::Dump() const
     return info;
 }
 
+std::string RotationRecognizer::GetGestureInfoString() const
+{
+    std::string gestureInfoStr = MultiFingersRecognizer::GetGestureInfoString();
+    gestureInfoStr.append(",INAG:");
+    gestureInfoStr.append(std::to_string(initialAngle_));
+    gestureInfoStr.append(",CUAG:");
+    gestureInfoStr.append(std::to_string(currentAngle_));
+    gestureInfoStr.append(",REAG:");
+    gestureInfoStr.append(std::to_string(resultAngle_));
+    gestureInfoStr.append(",LAG:");
+    gestureInfoStr.append(std::to_string(lastAngle_));
+    gestureInfoStr.append(",CULAG:");
+    gestureInfoStr.append(std::to_string(cumulativeAngle_));
+    return gestureInfoStr;
+}
 } // namespace OHOS::Ace::NG

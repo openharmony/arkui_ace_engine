@@ -1004,6 +1004,12 @@ class UIContext {
         }
         return this.magnifier_;
     }
+    
+    setCustomKeyboardContinueFeature(feature) {
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        Context.setCustomKeyboardContinueFeature(feature);
+        __JSScopeUtil__.restoreInstanceId();
+    }
 }
 
 class ResolvedUIContext extends UIContext {

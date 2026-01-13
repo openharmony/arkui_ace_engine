@@ -260,6 +260,18 @@ HWTEST_F(RichEditorDoubleClickOrLongPressTestNg, HandleDoubleClickOrLongPress006
     ASSERT_NE(richEditorPattern, nullptr);
     GestureEvent info;
     info.SetSourceTool(SourceTool::FINGER);
+
+    richEditorPattern->caretUpdateType_ = CaretUpdateType::LONG_PRESSED;
+    richEditorPattern->isEditing_ = false;
+    richEditorPattern->HandleDoubleClickOrLongPress(info, richEditorNode_);
+    EXPECT_TRUE(richEditorPattern->previewLongPress_);
+    EXPECT_FALSE(richEditorPattern->editingLongPress_);
+    richEditorPattern->isEditing_ = true;
+    richEditorPattern->HandleDoubleClickOrLongPress(info, richEditorNode_);
+    EXPECT_FALSE(richEditorPattern->previewLongPress_);
+    EXPECT_TRUE(richEditorPattern->editingLongPress_);
+
+    richEditorPattern->isEditing_ = false;
     richEditorPattern->caretUpdateType_ = CaretUpdateType::DOUBLE_CLICK;
     richEditorPattern->selectOverlay_->hasTransform_ = true;
     auto localOffset = info.GetLocalLocation();

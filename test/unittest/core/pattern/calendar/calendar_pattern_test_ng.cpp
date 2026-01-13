@@ -31,7 +31,7 @@
 #include "core/components/calendar/calendar_data_adapter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"

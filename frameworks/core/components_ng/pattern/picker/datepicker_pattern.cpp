@@ -25,7 +25,6 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
-#include "core/components/picker/picker_base_component.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/inspector_filter.h"
@@ -117,11 +116,11 @@ bool DatePickerPattern::UpdateFocusStyles(const RefPtr<PickerTheme>& pickerTheme
 {
     auto height = pickerTheme->GetDividerSpacing();
     auto buttonSpace = pickerTheme->GetSelectorItemSpace();
-    auto columnNode = DynamicCast<FrameNode>(child->GetLastChild()->GetLastChild());
-    CHECK_NULL_RETURN(columnNode, false);
-    auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
     auto datePickerColumnNode = DynamicCast<FrameNode>(child->GetLastChild());
     CHECK_NULL_RETURN(datePickerColumnNode, false);
+    auto columnNode = DynamicCast<FrameNode>(datePickerColumnNode->GetLastChild());
+    CHECK_NULL_RETURN(columnNode, false);
+    auto width = columnNode->GetGeometryNode()->GetFrameSize().Width();
     auto buttonNode = DynamicCast<FrameNode>(child->GetFirstChild());
     CHECK_NULL_RETURN(buttonNode, false);
     auto buttonConfirmLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();

@@ -30,16 +30,16 @@
 namespace OHOS::Ace::NG {
 
 void WaterFlowModelNG::SetScrollToIndexMultiThread(
-    FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment)
+    FrameNode* frameNode, int32_t index, int32_t animation, int32_t alignment, std::optional<float> extraOffset)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<WaterFlowPattern>();
     CHECK_NULL_VOID(pattern);
     frameNode->PostAfterAttachMainTreeTask(
-        [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), index, animation, alignment]() {
+        [weak = AceType::WeakClaim(AceType::RawPtr(pattern)), index, animation, alignment, extraOffset]() {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
-            pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment));
+            pattern->ScrollToIndex(index, animation, static_cast<ScrollAlign>(alignment), extraOffset);
         });
 }
 } // namespace OHOS::Ace::NG

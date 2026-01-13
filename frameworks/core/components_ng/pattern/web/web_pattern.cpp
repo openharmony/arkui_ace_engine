@@ -63,7 +63,7 @@
 #include "core/common/udmf/unified_data.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/web/resource/web_delegate.h"
@@ -375,7 +375,7 @@ bool IsSnapshotPathValid(const std::string& snapshotPath)
         TAG_LOGE(AceLogTag::ACE_WEB, "blankless canonical failed:%{public}s", ec.message().c_str());
         return false;
     }
-    
+
     if (snapshotPath.rfind(WEB_SNAPSHOT_PATH_PREFIX, 0) != 0 ||
         // 4为后缀".png"的长度
         snapshotPath.length() <= 4 ||
@@ -2045,6 +2045,7 @@ void WebPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 
     if (changedPoint.GetTouchType() == TouchType::DOWN) {
+        SetTextSelectionEnable(true);
         HandleTouchDown(info, false);
         return;
     }
@@ -2053,10 +2054,12 @@ void WebPattern::HandleTouchEvent(const TouchEventInfo& info)
         return;
     }
     if (changedPoint.GetTouchType() == TouchType::UP) {
+        SetTextSelectionEnable(false);
         HandleTouchUp(info, false);
         return;
     }
     if (changedPoint.GetTouchType() == TouchType::CANCEL) {
+        SetTextSelectionEnable(false);
         HandleTouchCancel(info);
         return;
     }
@@ -2232,7 +2235,7 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 
     if (info.GetAction() == MouseAction::RELEASE) {
         isTextSelectionEnable_ = false;
-        delegate_->OnTextSelectionChange(delegate_->GetLastSelectionText(), true);
+        delegate_->OnTextSelectionChange(delegate_->GetLastSelectionText());
     }
     // set touchup false when using mouse
     isTouchUpEvent_ = false;
@@ -4626,7 +4629,7 @@ void WebPattern::RegisterWebDomNativeInterface()
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 if (param.size() != WEB_NATIVE_PARAM_SIZE) {
-                    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern dom scroll size error"); 
+                    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern dom scroll size error");
                     return;
                 }
                 pattern->webDomDocument_->UpdateScrollInfoFromJsonString(param[WEB_NATIVE_PARAM_INDEX]);
@@ -5076,6 +5079,7 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
         } else {
             delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
         }
+        delegate_->OnTextSelectionChange(delegate_->GetLastSelectionText());
         UpdateImageOverlayStatus(ImageOverlayEvent::TOUCH_RELEASE);
         if (overlayCreating_) {
             if (imageAnalyzerManager_) {
@@ -5177,6 +5181,7 @@ void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
         HandleTouchUp(info, false);
     }
     CHECK_NULL_VOID(delegate_);
+    delegate_->OnTextSelectionChange(delegate_->GetLastSelectionText());
     delegate_->HandleTouchCancel();
     touchEventInfoList_.clear();
     UpdateImageOverlayStatus(ImageOverlayEvent::TOUCH_RELEASE);
@@ -5462,7 +5467,6 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
 
 void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY, bool isMove)
 {
-    SetTextSelectionEnable(true);
     showMagnifierFingerId_ =
         isMove ? showMagnifierFingerId_ : touchEventInfo_.GetChangedTouches().front().GetFingerId();
     if (magnifierController_) {
@@ -5474,7 +5478,6 @@ void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY, bool isMove
 void WebPattern::HideMagnifier()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "HideMagnifier");
-    SetTextSelectionEnable(false);
     showMagnifierFingerId_ = -1;
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
@@ -6471,7 +6474,7 @@ void WebPattern::HandleShowTooltip(const std::string& tooltip, int64_t tooltipTi
     textRenderContext->UpdateBorderColor(borderColor);
     overlayManager->ShowIndexerPopup(tooltipId_, tooltipNode);
 }
- 
+
 bool WebPattern::GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow)
 {
     if (shadowStyle == ShadowStyle::None) {
@@ -9319,6 +9322,13 @@ void WebPattern::GetImagesByIDs(const std::vector<int32_t>& imageIds, int32_t wi
     return;
 }
 
+void WebPattern::GetWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request, const std::function<
+    void(int32_t, int32_t, const std::string&, const std::string&, WebRequestErrorCode)>& finishCallback)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "GetWebInfoByRequest WebId:%{public}d, request:%{public}s", webId, request.c_str());
+    return;
+}
+
 void WebPattern::SendTranslateResult(std::vector<std::string> results, std::vector<int32_t> ids)
 {
     return;
@@ -9502,7 +9512,7 @@ RefPtr<WebAgentEventReporter> WebPattern::GetAgentEventReporter()
     return webAgentEventReporter_;
 }
 
-void WebPattern::ReportSelectedText()
+void WebPattern::ReportSelectedText(bool isRegister)
 {
     if (UiSessionManager::GetInstance()->GetSelectTextEventRegistered()) {
         CHECK_NULL_VOID(delegate_);
@@ -9510,6 +9520,18 @@ void WebPattern::ReportSelectedText()
         TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::ReportSelectedText %{public}zu", text.size());
         UiSessionManager::GetInstance()->ReportSelectTextEvent(text);
     }
+}
+
+void WebPattern::UpdateTextSelectionHolderId()
+{
+    if (!isFocus_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::UpdateTextSelectionHolderId not focus, do not update");
+        return;
+    }
+    if (!webSelectOverlay_) {
+        webSelectOverlay_ = AceType::MakeRefPtr<WebSelectOverlay>(WeakClaim(this));
+    }
+    webSelectOverlay_->UpdateTextSelectionHolderId();
 }
 
 std::pair<int32_t, RectF> WebPattern::GetScrollAreaInfoFromDocument(int32_t id)
@@ -10116,5 +10138,79 @@ void SnapshotTouchReporter::OnPan()
     item->Put("time", static_cast<int64_t>(GetMilliseconds()));
     item->Put("type", static_cast<uint8_t>(GestureType::PAN));
     infos_->Put(item);
+}
+
+namespace {
+bool IsNumber(const std::string &str)
+{
+    // 检查字符串是否为空
+    if (str.empty()) {
+        return false;
+    }
+
+    // 使用all_of检查所有字符是否为数字
+    return std::all_of(str.begin(), str.end(), [](char c) { return std::isdigit(static_cast<unsigned char>(c)); });
+}
+
+std::string EncodeURIComponent(const std::string &value)
+{
+    std::ostringstream escaped;
+    escaped.fill('0');
+    escaped << std::hex;
+
+    for (auto i = value.begin(), n = value.end(); i != n; ++i) {
+        std::string::value_type c = (*i);
+
+        // 检查是否为 RFC 3986 定义的未保留字符
+        if (std::isalnum(static_cast<unsigned char>(c)) || c == '-' || c == '_' || c == '.' || c == '~') {
+            escaped << c;
+            continue;
+        }
+
+        // 其他字符转换为 %XY 格式
+        escaped << std::uppercase;
+        escaped << '%' << std::setw(2) << static_cast<int>(static_cast<unsigned char>(c));
+        escaped << std::nouppercase;
+    }
+
+    return escaped.str();
+}
+} // namespace
+
+void WebPattern::HighlightSpecifiedContent(
+    const std::string &content, const std::vector<std::string> &nodeIds, const std::string &configs)
+{
+    CHECK_NULL_VOID(delegate_);
+    CHECK_NULL_VOID(webDomDocument_);
+    if (IS_CALLING_FROM_M114()) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "HighlightSpecifiedContent not available.");
+        return;
+    }
+    auto agentManager = delegate_->GetNWebAgentManager();
+    if (!agentManager || !agentManager->IsAgentEnabled()) {
+        TAG_LOGE(AceLogTag::ACE_WEB, "EnableAgentManager GetNWebAgentManager failed, WebId: %{public}d", GetWebId());
+        return;
+    }
+
+    auto parsedConfigs = JsonUtil::ParseJsonString(configs);
+    agentManager->SetAgentNeedHighlight(parsedConfigs->GetBool("NeedHighlight", true));
+
+    std::unique_ptr<JsonValue> jsonArray = JsonUtil::CreateArray(true);
+    for (const std::string& nodeId : nodeIds) {
+        std::unique_ptr<JsonValue> jsonNode = JsonUtil::Create(true);
+        if (IsNumber(nodeId)) {
+            std::string Xpath = webDomDocument_->GetXpathById(std::atoi(nodeId.c_str()));
+            jsonNode->Put("value", Xpath.c_str());
+        } else {
+            jsonNode->Put("value", nodeId.c_str());
+        }
+        jsonArray->PutRef(std::move(jsonNode));
+    }
+    std::string jsonString = jsonArray->ToString();
+    RunJavascriptAsync("window.AgentHighlightUtils.HighlightTargetContent(\"" + EncodeURIComponent(jsonString) +
+                           "\",\"" + EncodeURIComponent(content) + "\")",
+        [](std::string result) {
+            TAG_LOGD(AceLogTag::ACE_WEB, "HighlightSpecifiedContent result = %{public}s ", result.c_str());
+        });
 }
 } // namespace OHOS::Ace::NG

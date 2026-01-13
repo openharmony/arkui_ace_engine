@@ -2556,7 +2556,7 @@ void JSRichEditorBaseController::ParseTextDirection(const JSRef<JSObject>& style
     }
 
     int32_t index = textDirectionObj->ToNumber<int32_t>();
-    auto isNormalValue = index >= 0 && index < TEXT_DIRECTIONS.size();
+    auto isNormalValue = index >= 0 && index < static_cast<int32_t>(TEXT_DIRECTIONS.size());
     if (!isNormalValue) {
         style.textDirection = TEXT_DIRECTIONS[INHERIT_INDEX];
         return;
@@ -3059,11 +3059,16 @@ void JSRichEditorBaseController::ParseJsStrokeWidthTextStyle(const JSRef<JSObjec
         return;
     }
     JSRef<JSVal> strokeWidthObject = styleObject->GetProperty("strokeWidth");
-    if (!strokeWidthObject->IsNull()) {
-        CalcDimension length = JSRichEditor::ParseLengthMetrics(strokeWidthObject, false);
-        style.SetStrokeWidth(length);
-        updateSpanStyle.updateStrokeWidth = length;
+    CHECK_NULL_VOID(!strokeWidthObject->IsNull() && !strokeWidthObject->IsUndefined());
+    CalcDimension length;
+    if (strokeWidthObject->IsNumber()) {
+        length.SetUnit(DimensionUnit::VP);
+        length.SetValue(strokeWidthObject->ToNumber<double>());
+    } else if (strokeWidthObject->IsObject()) {
+        length = JSRichEditor::ParseLengthMetrics(strokeWidthObject, false);
     }
+    style.SetStrokeWidth(length);
+    updateSpanStyle.updateStrokeWidth = length;
 }
  
 void JSRichEditorBaseController::ParseJsStrokeColorTextStyle(const JSRef<JSObject>& styleObject,

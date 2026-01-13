@@ -117,6 +117,7 @@ export class ListItemGroupModifier extends CommonMethodModifier implements ListI
         {
             this._divider_0_flag = AttributeUpdaterFlag.UPDATE
             this._divider_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._divider_0_flag = AttributeUpdaterFlag.SKIP
@@ -128,6 +129,7 @@ export class ListItemGroupModifier extends CommonMethodModifier implements ListI
         {
             this._childrenMainSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._childrenMainSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._childrenMainSize_0_flag = AttributeUpdaterFlag.SKIP

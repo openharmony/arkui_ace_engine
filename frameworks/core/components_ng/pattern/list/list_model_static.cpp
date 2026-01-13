@@ -201,6 +201,43 @@ void ListModelStatic::SetCachedCount(
     }
 }
 
+void ListModelStatic::SetCacheRange(FrameNode* frameNode, NG::CacheRange cacheRange, bool show)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, cacheRange, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ShowCachedItems, show, frameNode);
+}
+
+void ListModelStatic::SetItemFillPolicy(FrameNode* frameNode, PresetFillType fillType)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, ItemFillPolicy, fillType, frameNode);
+}
+
+void ListModelStatic::ResetItemFillPolicy(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY_WITH_FLAG(ListLayoutProperty, ItemFillPolicy, PROPERTY_UPDATE_MEASURE, frameNode);
+}
+
+void ListModelStatic::SetFocusWrapMode(FrameNode* frameNode, FocusWrapMode focusWrapMode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetFocusWrapMode(focusWrapMode);
+}
+
+void ListModelStatic::SetSyncLoad(FrameNode* frameNode, bool enabled)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, SyncLoad, enabled, frameNode);
+}
+
+void ListModelStatic::SetScrollSnapAnimationSpeed(FrameNode* frameNode, ScrollSnapAnimationSpeed speed)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSnapSpeed(speed);
+}
+
 void ListModelStatic::SetListNestedScroll(FrameNode* frameNode, const std::optional<NestedScrollMode>& forward,
     const std::optional<NestedScrollMode>& backward)
 {

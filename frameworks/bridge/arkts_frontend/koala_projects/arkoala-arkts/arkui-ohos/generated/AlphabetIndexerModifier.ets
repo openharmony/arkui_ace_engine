@@ -912,6 +912,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._color_0_flag = AttributeUpdaterFlag.UPDATE
             this._color_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._color_0_flag = AttributeUpdaterFlag.SKIP
@@ -923,6 +924,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._selectedColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -934,6 +936,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._popupColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._popupColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._popupColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -945,6 +948,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedBackgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -956,6 +960,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._popupBackground_0_flag = AttributeUpdaterFlag.UPDATE
             this._popupBackground_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._popupBackground_0_flag = AttributeUpdaterFlag.SKIP
@@ -967,6 +972,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._popupSelectedColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._popupSelectedColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._popupSelectedColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -978,6 +984,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._popupUnselectedColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._popupUnselectedColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._popupUnselectedColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -989,6 +996,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._popupItemBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._popupItemBackgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._popupItemBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -1000,6 +1008,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._usingPopup_0_flag = AttributeUpdaterFlag.UPDATE
             this._usingPopup_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._usingPopup_0_flag = AttributeUpdaterFlag.SKIP
@@ -1011,6 +1020,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._selectedFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -1022,6 +1032,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._popupFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._popupFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._popupFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -1033,6 +1044,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._popupItemFont_0_flag = AttributeUpdaterFlag.UPDATE
             this._popupItemFont_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._popupItemFont_0_flag = AttributeUpdaterFlag.SKIP
@@ -1044,6 +1056,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._itemSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._itemSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._itemSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -1055,6 +1068,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._font_0_flag = AttributeUpdaterFlag.UPDATE
             this._font_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._font_0_flag = AttributeUpdaterFlag.SKIP
@@ -1066,6 +1080,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._onSelect_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSelect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSelect_0_flag = AttributeUpdaterFlag.SKIP
@@ -1077,6 +1092,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._onRequestPopupData_0_flag = AttributeUpdaterFlag.UPDATE
             this._onRequestPopupData_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onRequestPopupData_0_flag = AttributeUpdaterFlag.SKIP
@@ -1088,6 +1104,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._onPopupSelect_0_flag = AttributeUpdaterFlag.UPDATE
             this._onPopupSelect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onPopupSelect_0_flag = AttributeUpdaterFlag.SKIP
@@ -1099,6 +1116,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._selected_0_flag = AttributeUpdaterFlag.UPDATE
             this._selected_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selected_0_flag = AttributeUpdaterFlag.SKIP
@@ -1110,6 +1128,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._popupPosition_0_flag = AttributeUpdaterFlag.UPDATE
             this._popupPosition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._popupPosition_0_flag = AttributeUpdaterFlag.SKIP
@@ -1121,6 +1140,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._autoCollapse_0_flag = AttributeUpdaterFlag.UPDATE
             this._autoCollapse_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._autoCollapse_0_flag = AttributeUpdaterFlag.SKIP
@@ -1132,6 +1152,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._popupItemBorderRadius_0_flag = AttributeUpdaterFlag.UPDATE
             this._popupItemBorderRadius_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._popupItemBorderRadius_0_flag = AttributeUpdaterFlag.SKIP
@@ -1143,6 +1164,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._itemBorderRadius_0_flag = AttributeUpdaterFlag.UPDATE
             this._itemBorderRadius_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._itemBorderRadius_0_flag = AttributeUpdaterFlag.SKIP
@@ -1154,6 +1176,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._popupBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._popupBackgroundBlurStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._popupBackgroundBlurStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -1165,6 +1188,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._popupTitleBackground_0_flag = AttributeUpdaterFlag.UPDATE
             this._popupTitleBackground_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._popupTitleBackground_0_flag = AttributeUpdaterFlag.SKIP
@@ -1176,6 +1200,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableHapticFeedback_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableHapticFeedback_0_flag = AttributeUpdaterFlag.SKIP
@@ -1188,6 +1213,7 @@ export class AlphabetIndexerModifier extends CommonMethodModifier implements Alp
             this._alignStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._alignStyle_0_0value = value
             this._alignStyle_0_1value = offset
+            this._state.fireChange()
         } else
         {
             this._alignStyle_0_flag = AttributeUpdaterFlag.SKIP

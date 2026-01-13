@@ -114,8 +114,6 @@ export class ArkEllipseComponent extends ArkCommonShapeMethodComponent implement
 export function EllipseImpl(
     @memo
     style: ((attributes: EllipseAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkEllipseComponent>((): ArkEllipseComponent => {
         return new ArkEllipseComponent()
@@ -124,7 +122,6 @@ export function EllipseImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

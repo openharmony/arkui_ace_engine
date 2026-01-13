@@ -15,8 +15,8 @@
 
 import { RuntimeType, runtimeType } from '@koalaui/interop';
 import { ArkScrollableNode } from './ArkScrollableNode';
-import { Length } from '../component/units';
-import { Color, BarState, EdgeEffect } from '../component/enums';
+import { ItemFillPolicy, Length } from '../component/units';
+import { Color, BarState, FocusWrapMode, EdgeEffect } from '../component/enums';
 import { CustomBuilder } from '../component/builder';
 import { int32 } from '@koalaui/common';
 import {
@@ -64,8 +64,8 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
     allowChildTypes(): string[] {
         return ['GridItem'];
     }
-    columnsTemplate(value: string | undefined): this {
-        const value_casted = value as (string | undefined)
+    columnsTemplate(value: string | ItemFillPolicy | undefined): this {
+        const value_casted = value as (string | ItemFillPolicy | undefined)
         this.getPeer()?.setColumnsTemplateAttribute(value_casted)
         this.markDirty()
         return this
@@ -94,8 +94,8 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
         this.markDirty()
         return this
     }
-    scrollBarColor(value: Color | int32 | string | undefined): this {
-        const value_casted = value as (Color | int32 | string | undefined)
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
+        const value_casted = value as (Color | int32 | string | Resource | undefined)
         this.getPeer()?.setScrollBarColorAttribute(value_casted)
         this.markDirty()
         return this
@@ -235,6 +235,18 @@ export class ArkGridNode extends ArkScrollableNode implements GridAttribute {
     alignItems(value: GridItemAlignment | undefined): this {
         const value_casted = value as (GridItemAlignment | undefined)
         this.getPeer()?.setAlignItemsAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    focusWrapMode(value: FocusWrapMode | undefined): this {
+        const value_casted = value as (FocusWrapMode | undefined)
+        this.getPeer()?.setFocusWrapModeAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    syncLoad(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setSyncLoadAttribute(value_casted)
         this.markDirty()
         return this
     }

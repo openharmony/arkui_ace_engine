@@ -24,6 +24,7 @@
 #include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "core/components_ng/base/symbol_modifier.h"
+#include "core/components/select/select_theme.h"
 #include "core/components_ng/pattern/menu/menu_accessibility_property.h"
 #include "core/components_ng/pattern/menu/menu_layout_algorithm.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
@@ -748,7 +749,7 @@ protected:
     {
         isNeedDivider_ = false;
     }
-    virtual void InitTheme(const RefPtr<FrameNode>& host);
+    virtual void InitTheme(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme);
     virtual void UpdateBorderRadius(const RefPtr<FrameNode>& menuNode, const BorderRadiusProperty& borderRadius);
 
 private:
@@ -806,7 +807,6 @@ private:
     void HandleNextPressed(const RefPtr<UINode>& parent, int32_t index, bool press, bool hover);
     void HandlePrevPressed(const RefPtr<UINode>& parent, int32_t index, bool press);
     void SetMenuBackGroundStyle(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam);
-    void UpdateMenuBorderAndBackgroundBlur();
 
     RefPtr<FrameNode> BuildContentModifierNode(int index);
     bool IsMenuScrollable() const;
@@ -911,7 +911,7 @@ public:
     }
 
 private:
-    void InitTheme(const RefPtr<FrameNode>& host) override;
+    void InitTheme(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme) override;
     void UpdateBorderRadius(const RefPtr<FrameNode>& menuNode, const BorderRadiusProperty& borderRadius) override;
     uint32_t FindSiblingMenuCount();
     void ApplyDesktopMenuTheme();

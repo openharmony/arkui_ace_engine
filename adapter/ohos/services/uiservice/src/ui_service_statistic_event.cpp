@@ -44,15 +44,20 @@ AppInfoParcel *AppInfoParcel::Unmarshalling(Parcel& parcel)
     return appInfoParcel;
 }
 
-StatisticEventInfoParcel::StatisticEventInfoParcel(const std::string& eventName, int32_t eventCount)
+StatisticEventInfoParcel::StatisticEventInfoParcel(const std::string& eventName,
+    const std::string& subEventName, int32_t eventCount)
 {
     eventName_ = eventName;
+    subEventName_ = subEventName;
     eventCount_ = eventCount;
 }
 
 bool StatisticEventInfoParcel::Marshalling(Parcel& parcel) const
 {
     if (!parcel.WriteString(eventName_)) {
+        return false;
+    }
+    if (!parcel.WriteString(subEventName_)) {
         return false;
     }
     if (!parcel.WriteInt32(eventCount_)) {
@@ -67,11 +72,15 @@ StatisticEventInfoParcel *StatisticEventInfoParcel::Unmarshalling(Parcel& parcel
     if (!parcel.ReadString(eventName)) {
         return nullptr;
     }
+    std::string subEventName;
+    if (!parcel.ReadString(subEventName)) {
+        return nullptr;
+    }
     int32_t eventCount;
     if (!parcel.ReadInt32(eventCount)) {
         return nullptr;
     }
-    StatisticEventInfoParcel* statisticEventParcel = new StatisticEventInfoParcel(eventName, eventCount);
+    StatisticEventInfoParcel* statisticEventParcel = new StatisticEventInfoParcel(eventName, subEventName, eventCount);
     return statisticEventParcel;
 }
 
@@ -80,13 +89,13 @@ const std::string& StatisticEventInfoParcel::GetEventName() const
     return eventName_;
 }
 
+const std::string& StatisticEventInfoParcel::GetSubEventName() const
+{
+    return subEventName_;
+}
+
 int32_t StatisticEventInfoParcel::GetEventCount() const
 {
     return eventCount_;
-}
-
-void StatisticEventInfoParcel::SetEventCount(int32_t count)
-{
-    eventCount_ = count;
 }
 }

@@ -47,6 +47,8 @@ constexpr float RACE_MOVE_PERCENT_MAX = 100.0f;
 constexpr float RACE_SPACE_WIDTH = 48.0f;
 constexpr float ROUND_VALUE = 0.5f;
 constexpr uint32_t POINT_COUNT = 4;
+constexpr uint32_t REPORTER_PRECISION = 3;
+constexpr uint32_t NODE_TYPE = 0;
 constexpr float OBSCURED_ALPHA = 0.2f;
 } // namespace
 
@@ -511,6 +513,14 @@ float TextContentModifier::AdjustParagraphX(const ParagraphManager::ParagraphInf
     return contentRect.GetX() + contentRect.Width() - leadingMarginWidth;
 }
 
+void TextContentModifier::RemoveWhitespaceCharacters(std::u16string& reportParagraph)
+{
+    reportParagraph.erase(
+        std::remove_if(reportParagraph.begin(), reportParagraph.end(),
+            [](char16_t c) { return c == u' ' || c == u'\t' || c == u'\n' || c == u'\r' || c == u'\v' || c == u'\f'; }),
+        reportParagraph.end());
+}
+
 void TextContentModifier::ReportFaultEvent(RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager,
     const RefPtr<TextPattern>& textPattern, const std::u16string& paragraphContent)
 {
@@ -521,23 +531,53 @@ void TextContentModifier::ReportFaultEvent(RSCanvas& canvas, const RefPtr<Paragr
     auto lineCount = pManager->GetLineCount();
     auto paragraphs = pManager->GetParagraphs();
     auto paragraphsSize = paragraphs.size();
+    std::u16string reportParagraph = paragraphContent;
     RSRecordingCanvas* recordingCanvas = static_cast<RSRecordingCanvas*>(&canvas);
     if (host->GetHostTag() == V2::TEXT_ETS_TAG && recordingCanvas != nullptr &&
         recordingCanvas->GetDrawCmdList() != nullptr && recordingCanvas->GetDrawCmdList()->IsEmpty()) {
-        if (paragraphContent.length() != 0 && (paragraphContent.find(u'\n') == std::u16string::npos &&
-                                                  paragraphContent.find(u'\t') == std::u16string::npos &&
-                                                  paragraphContent.find(u' ') == std::u16string::npos)) {
-            TextErrorInfo errorInfo { host->GetId(), pManager->GetLongestLineWithIndent(),
-                pManager->GetMaxIntrinsicWidth(), pManager->GetMaxWidth(), pManager->GetHeight(), lineCount,
-                paragraphsSize };
-            EventReport::ReportTextDrawCmdListErrorEvent(errorInfo);
+        RemoveWhitespaceCharacters(reportParagraph);
+        if (reportParagraph.length() != 0) {
+            std::stringstream errorInfo;
+            errorInfo << std::fixed << std::setprecision(REPORTER_PRECISION);
+            errorInfo << "LongestLineWithIndent:" << pManager->GetLongestLineWithIndent()
+                      << " MaxIntrinsicWidth:" << pManager->GetMaxIntrinsicWidth()
+                      << " MaxWidth:" << pManager->GetMaxWidth() << " height:" << pManager->GetHeight()
+                      << " lineCount:" << lineCount << " size:" << paragraphsSize;
+            EventReport::SendComponentExceptionNG(
+                ComponentExcepTypeNG::TEXT_DRAW_CMD_LIST_ERR, NODE_TYPE, host->GetId(), errorInfo.str());
         }
     }
+}
+
+bool TextContentModifier::HandleDrawCallback(
+    const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern)
+{
+    CHECK_NULL_RETURN(pManager, false);
+    CHECK_NULL_RETURN(textPattern, false);
+    auto drawCallback = textPattern->GetExternalDrawCallback();
+    CHECK_NULL_RETURN(drawCallback, false);
+    auto paragraphs = pManager->GetParagraphs();
+    if (paragraphs.size() == 1) {
+        auto paintOffsetY = paintOffset_.GetY();
+        SetTextContentAlingOffsetY(paintOffsetY);
+        auto contentRect = textPattern->GetTextContentRect();
+        float paintOffsetX = AdjustParagraphX(paragraphs.front(), contentRect);
+        auto host = textPattern->GetHost();
+        CHECK_NULL_RETURN(host, false);
+        auto geometryNode = host->GetGeometryNode();
+        CHECK_NULL_RETURN(geometryNode, false);
+        return drawCallback(
+            paintOffsetX, paintOffsetY, geometryNode->GetFrameSize().Width(), geometryNode->GetFrameSize().Height());
+    }
+    return false;
 }
 
 void TextContentModifier::DrawText(
     RSCanvas& canvas, const RefPtr<ParagraphManager>& pManager, const RefPtr<TextPattern>& textPattern)
 {
+    if (HandleDrawCallback(pManager, textPattern)) {
+        return;
+    }
     auto paintOffsetY = paintOffset_.GetY();
     SetTextContentAlingOffsetY(paintOffsetY);
     auto paragraphs = pManager->GetParagraphs();

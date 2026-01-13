@@ -27,12 +27,13 @@ ohos_shared_library("inspector_ani") {
   shlib_type = "ani"
   deps = [
     "$ace_root/build:libace_compatible",
+    "$ace_root/frameworks/bridge/arkts_frontend:arkts_frontend",
     "$ace_root/frameworks/core:ace_container_scope",
   ]
   include_dirs = [ "$ace_root/frameworks" ]
   sources = [
     "./src/inspector.cpp",
-    "./src/inspector_util.cpp",
+    "./src/inspector_util.cpp"
   ]
   external_deps = [
     "napi:ace_napi",

@@ -179,7 +179,7 @@ public:
 
     RefPtr<AccessibilitySessionAdapter> GetAccessibilitySessionAdapter() override;
 
-    void OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
+    bool OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId, int64_t accessibilityId);
 
     void OnAccessibilityChildTreeDeregister();
 

@@ -284,6 +284,7 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
         {
             this._environment_0_flag = AttributeUpdaterFlag.UPDATE
             this._environment_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._environment_0_flag = AttributeUpdaterFlag.SKIP
@@ -295,6 +296,7 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
         {
             this._shader_0_flag = AttributeUpdaterFlag.UPDATE
             this._shader_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._shader_0_flag = AttributeUpdaterFlag.SKIP
@@ -306,6 +308,7 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
         {
             this._shaderImageTexture_0_flag = AttributeUpdaterFlag.UPDATE
             this._shaderImageTexture_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._shaderImageTexture_0_flag = AttributeUpdaterFlag.SKIP
@@ -317,6 +320,7 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
         {
             this._shaderInputBuffer_0_flag = AttributeUpdaterFlag.UPDATE
             this._shaderInputBuffer_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._shaderInputBuffer_0_flag = AttributeUpdaterFlag.SKIP
@@ -328,6 +332,7 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
         {
             this._renderWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._renderWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._renderWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -339,6 +344,7 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
         {
             this._renderHeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._renderHeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._renderHeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -351,6 +357,7 @@ export class Component3DModifier extends CommonMethodModifier implements Compone
             this._customRender_0_flag = AttributeUpdaterFlag.UPDATE
             this._customRender_0_0value = uri
             this._customRender_0_1value = selfRenderUpdate
+            this._state.fireChange()
         } else
         {
             this._customRender_0_flag = AttributeUpdaterFlag.SKIP

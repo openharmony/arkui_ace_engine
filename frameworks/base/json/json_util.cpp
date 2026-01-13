@@ -637,7 +637,7 @@ std::unique_ptr<JsonValue> JsonValue::Duplicate()
     if (jsonObject == nullptr) {
         return std::make_unique<JsonValue>(nullptr);
     }
-    return std::make_unique<JsonValue>(jsonObject);
+    return std::make_unique<JsonValue>(jsonObject, true);
 }
 
 std::unique_ptr<JsonValue> JsonUtil::ParseJsonData(const char* data, const char** parseEnd)

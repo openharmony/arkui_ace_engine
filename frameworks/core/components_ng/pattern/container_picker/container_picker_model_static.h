@@ -29,12 +29,13 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT ContainerPickerModelStatic {
 public:
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
-    static void SetIndicatorStyle(FrameNode* frameNode, const PickerIndicatorStyle& style);
+    static void SetIndicatorStyle(FrameNode* frameNode, const std::optional<PickerIndicatorStyle>& style);
     static void SetSelectedIndex(FrameNode* frameNode, int32_t index);
     static void SetCanLoop(FrameNode* frameNode, bool isLoop);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnableHapticFeedback);
     static void SetOnChange(FrameNode* frameNode, ContainerPickerChangeEvent&& onChange);
     static void SetOnScrollStop(FrameNode* frameNode, ContainerPickerChangeEvent&& onScrollStop);
+    static void SetChangeEvent(FrameNode* frameNode, ContainerPickerChangeEvent&& onChange);
 };
 } // namespace OHOS::Ace::NG
 

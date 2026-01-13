@@ -29,7 +29,6 @@
 #include "core/components_ng/pattern/overlay/sheet_manager.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_style.h"
-#include "core/components_ng/pattern/scrollable/selectable_utils.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #ifdef WINDOW_SCENE_SUPPORTED
 #include "core/components_ng/pattern/ui_extension/ui_extension_manager.h"
@@ -529,8 +528,7 @@ void ViewAbstractModelNG::BindContextMenuWithLongPress(const RefPtr<FrameNode>& 
     });
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, IsBindOverlay, true, targetNode);
     auto longPressDuration = menuParam.isShowHoverImage ? HOVER_IMAGE_LONG_PRESS_DURATION : LONG_PRESS_DURATION;
-    gestureHub->SetLongPressEvent(
-        longPress, false, true, longPressDuration, SelectableUtils::IsSelectableItem(targetNode));
+    gestureHub->SetLongPressEvent(longPress, false, true, longPressDuration);
     gestureHub->SetLongPressEventType(GestureTypeName::CONTEXT_MENU_HOVER);
 
     BindGestureForContextMenu(targetNode, menuParam, contextMenuShow, needDirty);
@@ -732,6 +730,38 @@ void ViewAbstractModelNG::SetBackground(std::function<void()>&& buildFunc)
     auto targetNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(targetNode);
     targetNode->SetBackgroundFunction(std::move(buildNodeFunc));
+}
+
+void ViewAbstractModelNG::SetBackgroundWithResourceObj(
+    std::function<void()>&& buildFunc, const RefPtr<ResourceObject>& resObj)
+{
+    auto buildFuncCopy = buildFunc;
+    SetBackground(std::move(buildFunc));
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->RemoveResObj("backgroundWithBuilder");
+    auto &&updateFunc = [weak = AceType::WeakClaim(frameNode), buildFunc = std::move(buildFuncCopy)](
+        const RefPtr<ResourceObject> &resObj) {
+        CHECK_NULL_VOID(resObj);
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::function<RefPtr<UINode>()> buildNodeFunc;
+        if (buildFunc) {
+            buildNodeFunc = [buildFunc = std::move(buildFunc)]() -> RefPtr<UINode> {
+                NG::ScopedViewStackProcessor builderViewStackProcessor;
+                buildFunc();
+                auto customNode = NG::ViewStackProcessor::GetInstance()->Finish();
+                return customNode;
+            };
+        }
+        frameNode->SetBackgroundFunction(std::move(buildNodeFunc));
+        frameNode->UpdateBackground();
+    };
+    pattern->AddResObj("backgroundWithBuilder", resObj, std::move(updateFunc));
 }
 
 void ViewAbstractModelNG::SetCustomBackgroundColor(const Color& color)

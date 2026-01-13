@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 #include "core/components_ng/pattern/blank/blank_paint_method.h"
+#ifdef ENABLE_ROSEN_BACKEND
+#include "core/components_ng/render/adapter/rosen_render_context.h"
+#endif
 
 #include "frameworks/core/components_ng/pattern/blank/blank_paint_property.h"
 
@@ -36,5 +39,19 @@ void BlankPaintMethod::PaintRect(RSCanvas& canvas, PaintWrapper* paintWrapper)
         layoutSize.Height() + offset.GetY() + 1));
     canvas.DetachBrush();
     canvas.Restore();
+    #ifdef ENABLE_ROSEN_BACKEND
+    auto renderContext = paintWrapper->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto geometryNode = paintWrapper->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto frameRect = geometryNode->GetFrameRect();
+    std::shared_ptr<Rosen::RectF> drawRect = std::make_shared<Rosen::RectF>(frameRect.GetX(), frameRect.GetY(),
+        frameRect.Width() + 1, frameRect.Height() + 1);
+    auto rosenRenderContext = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
+    CHECK_NULL_VOID(rosenRenderContext);
+    auto rsNode = rosenRenderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    rsNode->SetDrawRegion(drawRect);
+    #endif
 }
 } // namespace OHOS::Ace::NG

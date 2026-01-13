@@ -56,6 +56,14 @@ void CJRuntimeDelegate::RegisterCJFuncsV2(void (*callback)(AtCPackageV2* cjFuncs
     }
 }
 
+void CJRuntimeDelegate::RegisterCJFuncsV3(void (*callback)(AtCPackageV3* cjFuncs))
+{
+    if (!atCPackageLoadedV3_) {
+        callback(&atCPackageV3_);
+        atCPackageLoadedV3_ = true;
+    }
+}
+
 void CJRuntimeDelegate::RegisterCJXCompCtrFuncs(AtCXComponentCallback funcs)
 {
     if (!atCXcompCtrLoaded_) {

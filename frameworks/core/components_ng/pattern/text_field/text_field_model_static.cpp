@@ -755,7 +755,7 @@ void TextFieldModelStatic::SetEllipsisMode(FrameNode* frameNode, const std::opti
 void TextFieldModelStatic::SetMinFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
     if (optValue) {
-        TextFieldModelNG::SetMinFontScale(frameNode, optValue.value());
+        TextFieldModelNG::SetMinFontScale(frameNode, std::clamp(optValue.value(), 0.0f, 1.0f));
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MinFontScale, frameNode);
     }
@@ -764,7 +764,7 @@ void TextFieldModelStatic::SetMinFontScale(FrameNode* frameNode, const std::opti
 void TextFieldModelStatic::SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& optValue)
 {
     if (optValue) {
-        TextFieldModelNG::SetMaxFontScale(frameNode, optValue.value());
+        TextFieldModelNG::SetMaxFontScale(frameNode, std::max(optValue.value(), 1.0f));
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, MaxFontScale, frameNode);
     }

@@ -424,8 +424,10 @@ const char REFRESH_ETS_TAG[] = "Refresh";
 // datePicker
 const char DATE_PICKER_COMPONENT_TAG[] = "PickerDateComponent";
 const char DATE_PICKER_ETS_TAG[] = "DatePicker";
+const char DATE_PICKER_COMPONENT_LOADER_TAG[] = "datePicker";
 const char TIME_PICKER_COMPONENT_TAG[] = "PickerTimeComponent";
 const char TIME_PICKER_ETS_TAG[] = "TimePicker";
+const char TIME_PICKER_COMPONENT_LOADER_TAG[] = "timePicker";
 
 // Radio
 const char RADIO_COMPONENT_TAG[] = "RadioComponent<VALUE_TYPE>";
@@ -497,10 +499,12 @@ const char TEXTCLOCK_ETS_TAG[] = "TextClock";
 // textpicker
 const char TEXT_PICKER_COMPONENT_TAG[] = "PickerTextComponent";
 const char TEXT_PICKER_ETS_TAG[] = "TextPicker";
+const char TEXT_PICKER_COMPONENT_LOADER_TAG[] = "textPicker";
 
 // pickertextdialog
 const char PICKER_TEXT_DIALOG_COMPONENT_TAG[] = "pickerTextDialog";
 const char PICKER_TEXT_DIALOG_ETS_TAG[] = "pickerTextDialog";
+const char PICKER_TEXT_DIALOG_COMPONENT_LOADER_TAG[] = "textPickerDialog";
 
 // canvas
 const char CANVAS_COMPONENT_TAG[] = "CustomPaintComponent";
@@ -521,6 +525,7 @@ const char CUSTOM_DIALOG_ETS_TAG[] = "CustomDialog";
 // datePickerdialog
 const char DATE_PICKER_DIALOG_COMPONENT_TAG[] = "DatePickerDialog";
 const char DATE_PICKER_DIALOG_ETS_TAG[] = "DatePickerDialog";
+const char DATE_PICKER_DIALOG_COMPONENT_LOADER_TAG[] = "datePickerDialog";
 
 // Normal dialog
 const char DIALOG_COMPONENT_TAG[] = "Dialog";
@@ -541,6 +546,7 @@ const char CHECKBOXGROUP_ETS_TAG[] = "CheckboxGroup";
 // timePickerdialog
 const char TIME_PICKER_DIALOG_COMPONENT_TAG[] = "TimePickerDialog";
 const char TIME_PICKER_DIALOG_ETS_TAG[] = "TimePickerDialog";
+const char TIME_PICKER_DIALOG_COMPONENT_LOADER_TAG[] = "timePickerDialog";
 
 // web
 const char WEB_COMPONENT_TAG[] = "WebComponent";
@@ -666,12 +672,12 @@ const char ACCESSIBILITY_FOCUS_PAINT_NODE_TAG[] = "Accessibility_focus_paint_nod
 // LazyVGridLayout
 const char LAZY_V_GRID_LAYOUT_ETS_TAG[] = "LazyVGridLayout";
 
-//Picker
-const char CONTAINER_PICKER_ETS_TAG[] = "Picker";
+// UIPickerComponent
+const char CONTAINER_PICKER_ETS_TAG[] = "UIPickerComponent";
 
 // UndefinedNode
 const char UNDEFINED_NODE_ETS_TAG[] = "";
 
-// UnionContainer
-const char UNION_CONTAINER_ETS_TAG[] = "UnionContainer";
+// UnionEffectContainer
+const char UNION_EFFECT_CONTAINER_ETS_TAG[] = "UnionEffectContainer";
 } // namespace OHOS::Ace::V2

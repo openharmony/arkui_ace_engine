@@ -655,9 +655,28 @@ static napi_value JSRouterGetLength(napi_env env, napi_callback_info info)
     return result;
 }
 
+static bool TryGetStackSizeFromDynamicIfNeeded(napi_env env, napi_callback_info info, napi_value& result)
+{
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_RETURN(container, false);
+    auto frontend = container->GetFrontend();
+    CHECK_NULL_RETURN(frontend, false);
+    auto type = frontend->GetType();
+    if (type != FrontendType::ARK_TS) {
+        return false;
+    }
+    int32_t len = frontend->GetStackSizeFromDynamicExtender();
+    TAG_LOGI(AceLogTag::ACE_ROUTER, "get stack size from dynamic: %{public}d", len);
+    napi_create_int32(env, len, &result);
+    return true;
+}
+
 static napi_value JSRouterGetStackSize(napi_env env, napi_callback_info info)
 {
     napi_value result = nullptr;
+    if (TryGetStackSizeFromDynamicIfNeeded(env, info, result)) {
+        return result;
+    }
     auto delegate = EngineHelper::GetCurrentDelegateSafely();
     if (!delegate) {
         TAG_LOGI(AceLogTag::ACE_ROUTER, "UI execution context not found.");

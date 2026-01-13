@@ -803,6 +803,68 @@ HWTEST_F(SheetPresentationTestFiveNg, GetTitleBuilderHeight002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetTitleBuilderHeight003
+ * @tc.desc: Test ChangeScrollHeight function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFiveNg, GetTitleBuilderHeight003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create sheet page.
+     */
+    SheetPresentationTestFiveNg::SetUpTestCase();
+    auto rootNode = FrameNode::CreateFrameNode("Root", 121, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 232,
+        AceType::MakeRefPtr<SheetPresentationPattern>(343, "SheetPresentation", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    sheetNode->MountToParent(rootNode);
+    auto operationColumn =
+        FrameNode::CreateFrameNode("Column", 454, AceType::MakeRefPtr<LinearLayoutPattern>(true));
+    ASSERT_NE(operationColumn, nullptr);
+    operationColumn->MountToParent(sheetNode);
+    auto dragBarNode =
+        FrameNode::CreateFrameNode("SheetDragBar", 565, AceType::MakeRefPtr<SheetDragBarPattern>());
+    ASSERT_NE(dragBarNode, nullptr);
+    dragBarNode->MountToParent(operationColumn);
+    auto scrollNode =
+        FrameNode::CreateFrameNode("Scroll", 676, AceType::MakeRefPtr<ScrollPattern>());
+    ASSERT_NE(scrollNode, nullptr);
+    auto contentNode = FrameNode::GetOrCreateFrameNode("SheetContent", 787,
+        []() { return AceType::MakeRefPtr<LinearLayoutPattern>(true); });
+    ASSERT_NE(contentNode, nullptr);
+    contentNode->MountToParent(scrollNode);
+    scrollNode->MountToParent(sheetNode);
+    
+    /**
+     * @tc.steps: step2. get sheetPattern and layoutProperty.
+     */
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. init SheetStyle and set sheetHeight.
+     */
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = NG::SheetType::SHEET_MINIMIZE;
+    sheetStyle.sheetTitle = "Title";
+    layoutProperty->propSheetStyle_ = sheetStyle;
+
+    /**
+     * @tc.steps: step4. test "GetTitleBuilderHeight", when isTitleBuilder is false.
+     */
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    auto firstChildGeometryNode = operationColumn->GetGeometryNode();
+    ASSERT_NE(firstChildGeometryNode, nullptr);
+    firstChildGeometryNode->SetFrameSize(SizeF(0, 0));
+    sheetPattern->UpdateSheetTitle();
+    EXPECT_EQ(sheetPattern->GetTitleBuilderHeight(), 0.0f);
+    SheetPresentationTestFiveNg::TearDownTestCase();
+}
+
+/**
  * @tc.name: ModifyFireSheetTransition001
  * @tc.desc: Test SheetPresentationPattern::ModifyFireSheetTransition().
  * @tc.type: FUNC

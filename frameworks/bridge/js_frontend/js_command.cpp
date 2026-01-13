@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,9 @@
 #include "frameworks/bridge/js_frontend/js_command.h"
 
 #include "base/log/event_report.h"
+#include "compatible/components/search/dom_search.h"
+#include "compatible/components/text_field/dom_textarea.h"
 #include "core/common/dynamic_module_helper.h"
-#include "frameworks/bridge/common/dom/dom_search.h"
-#include "frameworks/bridge/common/dom/dom_textarea.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
@@ -96,9 +96,9 @@ void JsCommandDomElementOperator::UpdateForChart(const RefPtr<DOMNode>& node) co
 void JsCommandDomElementOperator::UpdateForImageAnimator(const RefPtr<DOMNode>& node) const
 {
     if (images_) {
-        auto imageAnimator = AceType::DynamicCast<DOMImageAnimator>(node);
-        if (imageAnimator) {
-            imageAnimator->SetImagesAttr(*images_);
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("image-animator");
+        if (loader) {
+            loader->UpdateDomConfig(node, images_.get());
         }
     }
 }
@@ -106,9 +106,9 @@ void JsCommandDomElementOperator::UpdateForImageAnimator(const RefPtr<DOMNode>& 
 void JsCommandDomElementOperator::UpdateForClock(const RefPtr<DOMNode>& node) const
 {
     if (clockConfig_) {
-        auto domClock = AceType::DynamicCast<DOMClock>(node);
-        if (domClock) {
-            domClock->SetClockConfig(*clockConfig_);
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("clock");
+        if (loader) {
+            loader->UpdateDomConfig(node, clockConfig_.get());
         }
     }
 }
@@ -139,19 +139,19 @@ void JsCommandDomElementOperator::UpdateForInput(const RefPtr<DOMNode>& node) co
         return;
     }
 
-    auto input = AceType::DynamicCast<DOMInput>(node);
-    if (input) {
-        input->SetInputOptions(*inputOptions_);
+    auto inputLoader = DynamicModuleHelper::GetInstance().GetLoaderByName("input");
+    if (AceType::DynamicCast<DOMInput>(node) && inputLoader) {
+        inputLoader->UpdateDomConfig(node, inputOptions_.get());
         return;
     }
-    auto textarea = AceType::DynamicCast<DOMTextarea>(node);
-    if (textarea) {
-        textarea->SetInputOptions(*inputOptions_);
+    auto areaLoader = DynamicModuleHelper::GetInstance().GetLoaderByName("textarea");
+    if (AceType::DynamicCast<DOMTextarea>(node) && areaLoader) {
+        areaLoader->UpdateDomConfig(node, inputOptions_.get());
         return;
     }
-    auto search = AceType::DynamicCast<DOMSearch>(node);
-    if (search) {
-        search->SetInputOptions(*inputOptions_);
+    auto searchloader = DynamicModuleHelper::GetInstance().GetLoaderByName("search");
+    if (AceType::DynamicCast<DOMSearch>(node) && searchloader) {
+        searchloader->UpdateDomConfig(node, inputOptions_.get());
     }
 }
 

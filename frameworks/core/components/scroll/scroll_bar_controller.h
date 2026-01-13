@@ -35,7 +35,7 @@ using ScrollBarEndCallback = std::function<void(int32_t)>;
 using ScrollBarEventCallback = std::function<void()>;
 using ScrollBarTouchEventCallback = std::function<void(double)>;
 
-class ScrollBarController : public TouchEventTarget {
+class ACE_FORCE_EXPORT ScrollBarController : public TouchEventTarget {
     DECLARE_ACE_TYPE(ScrollBarController, TouchEventTarget);
 
 public:

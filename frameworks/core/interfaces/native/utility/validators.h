@@ -21,7 +21,7 @@
 #include "base/geometry/calc_dimension.h"
 #include "base/geometry/dimension.h"
 #include "core/components/common/properties/animation_option.h"
-#include "core/components/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components_ng/property/calc_length.h"
 #include "core/components_v2/grid_layout/grid_container_util_class.h"
 
@@ -33,8 +33,8 @@ ACE_FORCE_EXPORT void ValidateNonPercent(std::optional<Dimension>& opt);
 void ValidatePositive(std::optional<Dimension>& opt);
 void ValidateOpacity(std::optional<float>& opt);
 ACE_FORCE_EXPORT void ValidatePositive(std::optional<float>& value);
-void ValidateNonNegative(std::optional<float>& value);
-void ValidateGreatOrEqual(std::optional<float>& opt, const float& right);
+ACE_FORCE_EXPORT void ValidateNonNegative(std::optional<float>& value);
+ACE_FORCE_EXPORT void ValidateGreatOrEqual(std::optional<float>& opt, const float& right);
 void ValidateLessOrEqual(std::optional<float>& opt, const float& right);
 ACE_FORCE_EXPORT void ValidateByRange(std::optional<float>& opt, const float& left, const float& right);
 void ValidateNonNegative(std::optional<CalcDimension>& opt);
@@ -48,7 +48,7 @@ template<class T> void ValidateNonEmpty(std::optional<T>& opt)
         opt.reset();
     }
 }
-void ValidateNonNegative(std::optional<int>& value);
+ACE_FORCE_EXPORT void ValidateNonNegative(std::optional<int>& value);
 void ValidateGreatOrEqual(std::optional<int32_t>& opt, const int32_t& right);
 void ValidatePositive(std::optional<int>& value);
 void ValidateNonNegative(std::optional<V2::GridContainerSize>& value);

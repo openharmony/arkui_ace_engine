@@ -22,12 +22,30 @@
 #include "core/components/text_overlay/text_overlay_component.h"
 #include "core/event/ace_event_helper.h"
 #include "core/event/ace_events.h"
+#include "core/common/dynamic_module_helper.h"
+#include "compatible/components/text_field/modifier/text_field_modifier.h"
 
 namespace OHOS::Ace {
 
 namespace {
 constexpr Dimension CURSOR_WIDTH = 1.5_vp;
 constexpr double HANDLE_HOT_ZONE = 10.0;
+
+#if !defined(PREVIEW)
+const ArkUITextFieldModifierCompatible* GetTextFieldInnerModifier()
+{
+    static const ArkUITextFieldModifierCompatible* textFieldModifier_ = nullptr;
+    if (textFieldModifier_) {
+        return textFieldModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("textarea");
+    if (loader) {
+        textFieldModifier_ = reinterpret_cast<const ArkUITextFieldModifierCompatible*>(loader->GetCustomModifier());
+        return textFieldModifier_;
+    }
+    return nullptr;
+}
+#endif
 } // namespace
 
 RenderText::~RenderText()
@@ -1133,10 +1151,9 @@ void RenderText::PanOnActionEnd(const GestureEvent& info)
         }
 
         auto textfield = FindTargetRenderNode<RenderTextField>(context_.Upgrade(), info);
-        if (textfield) {
-            auto value = textfield->GetEditingValue();
-            value.Append(textValue_.GetSelectedText());
-            textfield->SetEditingValue(std::move(value));
+        auto* modifier = GetTextFieldInnerModifier();
+        if (textfield && modifier) {
+            modifier->setEditingValue(textfield, textValue_.GetSelectedText());
         }
         if (info.GetSourceDevice() == SourceType::TOUCH) {
             textValue_.UpdateSelection(0, 0);

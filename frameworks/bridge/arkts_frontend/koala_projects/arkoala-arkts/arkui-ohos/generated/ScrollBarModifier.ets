@@ -24,6 +24,7 @@ import { PeerNode } from "./PeerNode"
 import { ArkScrollBarPeer, ScrollBarAttribute } from "./component/scrollBar"
 import { int32 } from "@koalaui/common"
 import { CommonMethod } from "./component/common"
+import { ColorMetrics } from "arkui.Graphics"
 export class ScrollBarModifier extends CommonMethodModifier implements ScrollBarAttribute,AttributeModifier<ScrollBarAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState	
@@ -38,6 +39,8 @@ export class ScrollBarModifier extends CommonMethodModifier implements ScrollBar
     applySelectedAttribute(instance: ScrollBarAttribute): void { }
     _enableNestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _enableNestedScroll_0_0value?: boolean | undefined
+    _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _scrollBarColor_0_0value?: ColorMetrics | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
         super.applyModifierPatch(node)
@@ -60,6 +63,24 @@ export class ScrollBarModifier extends CommonMethodModifier implements ScrollBar
                 }
             }
         }
+        if (this._scrollBarColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._scrollBarColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as ColorMetrics | undefined));
+                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setScrollBarColorAttribute((undefined as ColorMetrics | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: ScrollBarModifier): void {
         super.mergeModifier(modifier)
@@ -77,15 +98,40 @@ export class ScrollBarModifier extends CommonMethodModifier implements ScrollBar
                 }
             }
         }
+        if (modifier._scrollBarColor_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._scrollBarColor_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.scrollBarColor(modifier._scrollBarColor_0_0value);
+                    break;
+                }
+                default: {
+                    this.scrollBarColor((undefined as ColorMetrics | undefined));
+                }
+            }
+        }
     }
     enableNestedScroll(value: boolean | undefined): this {
         if (((this._enableNestedScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableNestedScroll_0_0value) !== (value)))
         {
             this._enableNestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableNestedScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableNestedScroll_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    scrollBarColor(value: ColorMetrics | undefined): this {
+        if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
+            this._scrollBarColor_0_0value = value
+        } else
+        {
+            this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

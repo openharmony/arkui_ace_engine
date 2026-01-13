@@ -19,6 +19,7 @@
 
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/property/measure_utils.h"
 
 namespace OHOS::Ace::NG {
 
@@ -362,5 +363,56 @@ HWTEST_F(BlankNewTestNg, LayoutPolicyTest006, TestSize.Level0)
     auto offset1 = geometryNode1->GetFrameOffset();
     EXPECT_EQ(size1, SizeF(200.0f, 200.0f));
     EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+}
+
+/**
+ * @tc.name: BlankColorFullfillBorder
+ * @tc.desc: test the contentSize add border equal frameSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(BlankNewTestNg, BlankColorFullfillBorder001, TestSize.Level0)
+{
+    AceApplicationInfo::GetInstance().SetApiTargetVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefPtr<FrameNode> blank;
+    auto flex = CreateFlexRow([this, &blank](FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(300.0f));
+        ViewAbstract::SetHeight(CalcLength(300.0f));
+        blank = CreateBlank([this](BlankModelNG model) {
+            ViewAbstractModelNG model1;
+            ViewAbstract::SetBorderWidth(Dimension(6.5f));
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, true);
+            model1.UpdateLayoutPolicyProperty(LayoutCalPolicy::MATCH_PARENT, false);
+        });
+    });
+    ASSERT_NE(flex, nullptr);
+    ASSERT_EQ(flex->GetChildren().size(), 1);
+    CreateLayoutTask(flex);
+
+    /* corresponding ets code:
+        Flex() {
+          Blank()
+            .width(LayoutPolicy.matchParent)
+            .height(LayoutPolicy.matchParent)
+            .borderWidth("6.5px")
+        }
+        .width("300px")
+        .height("300px")
+    */
+
+    // Expect flex's width is 300, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = flex->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(300.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect blank's size is matchParent, size is 300 - floor(6.5) * 2 = 288 and offset is [6.0, 6.0].
+    auto blankGeometryNode = blank->GetGeometryNode();
+    ASSERT_NE(blankGeometryNode, nullptr);
+    auto blankSize = blankGeometryNode->GetFrameSize();
+    auto blankOffset = blankGeometryNode->GetFrameOffset();
+    EXPECT_EQ(blankSize, SizeF(300.0f, 300.0f));
+    EXPECT_EQ(blankOffset, OffsetF(0.0f, 0.0f));
 }
 } // namespace OHOS::Ace::NG

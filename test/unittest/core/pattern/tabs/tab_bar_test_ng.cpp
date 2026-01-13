@@ -1810,7 +1810,7 @@ HWTEST_F(TabBarTestNg, TabContentModelAddTabBarItem001, TestSize.Level1)
     auto tabContentFrameNode = AceType::DynamicCast<TabContentNode>(ViewStackProcessor::GetInstance()->Finish());
     auto tabContentPattern = tabContentFrameNode->GetPattern<TabContentPattern>();
     TabsModelNG tabsModel;
-    tabsModel.Create(BarPosition::START, 1, nullptr, nullptr);
+    tabsModel.Create(BarPosition::START, 1, nullptr);
     tabContentFrameNode->GetTabBarItemId();
     tabContentFrameNode->MountToParent(swiperNode_);
     tabContentPattern->SetTabBar(text_test, "", std::nullopt, nullptr);

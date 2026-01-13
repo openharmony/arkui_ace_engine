@@ -213,12 +213,45 @@ int32_t UiReportStub::OnRemoteRequest(uint32_t code, MessageParcel& data, Messag
             ReportGetStateMgmtInfo(results);
             break;
         }
+        case SEND_WEB_INFO_BY_REQUEST: {
+            OnGetWebInfoByRequestInner(data);
+            break;
+        }
+
         default: {
             LOGI("ui_session unknown transaction code %{public}d", code);
             return IPCObjectStub::OnRemoteRequest(code, data, reply, option);
         }
     }
     return 0;
+}
+
+void UiReportStub::RegisterGetWebInfoByRequestCallback(const GetWebInfoByRequestCallback& finishCallback)
+{
+    getWebInfoByRequestCallback_ = std::move(finishCallback);
+}
+
+void UiReportStub::OnGetWebInfoByRequestInner(MessageParcel& data)
+{
+    uint32_t windowId = data.ReadUint32();
+    int32_t webId = data.ReadInt32();
+    std::string request = data.ReadString();
+    std::string result = data.ReadString();
+    WebRequestErrorCode errorCode = static_cast<WebRequestErrorCode>(data.ReadInt32());
+    SendWebInfoRequestResult(windowId, webId, request, result, errorCode);
+}
+
+void UiReportStub::SendWebInfoRequestResult(
+    uint32_t windowId,
+    int32_t webId,
+    const std::string& request,
+    const std::string& result, WebRequestErrorCode errorCode)
+{
+    if (!getWebInfoByRequestCallback_) {
+        LOGW("getWebInfoByRequestCallback null");
+        return;
+    }
+    getWebInfoByRequestCallback_(windowId, webId, request, result, errorCode);
 }
 
 void UiReportStub::ReportClickEvent(const std::string& data)

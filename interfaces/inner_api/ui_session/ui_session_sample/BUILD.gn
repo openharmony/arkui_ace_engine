@@ -1,0 +1,73 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//build/ohos.gni")
+import("//foundation/arkui/ace_engine/ace_config.gni")
+
+ohos_sa_profile("ui_sa_profile") {
+  sources = [ "16666.json" ]
+
+  part_name = "ui_sa"
+}
+
+ohos_prebuilt_etc("ui_sa.cfg") {
+  relative_install_dir = "init"
+  source = "ui_sa.cfg"
+  part_name = "ui_sa"
+  subsystem_name = "arkui"
+}
+
+config("ui_sa_config") {
+  visibility = [ ":*" ]
+  if (current_os == "ohos") {
+    defines = [ "OHOS_PLATFORM" ]
+  }
+  cflags = []
+  if (target_cpu == "arm") {
+    cflags += [ "-DBINDER_IPC_32BIT" ]
+  }
+}
+
+ohos_shared_library("ui_sa") {
+  if (current_os == "ohos") {
+    sanitize = {
+      integer_overflow = true
+      boundary_sanitize = true
+      debug = ace_sanitize_debug
+    }
+  }
+  sources = [
+    "$ace_root/interfaces/inner_api/ui_session/ui_session_sample/ui_sa_service.cpp",
+  ]
+
+  configs = [ "$ace_root:ace_config" ]
+
+  public_configs = [ ":ui_sa_config" ]
+
+  external_deps = [
+    "c_utils:utils",
+    "hilog:libhilog",
+    "image_framework:image_native",
+    "ipc:ipc_core",
+    "safwk:system_ability_fwk",
+    "window_manager:libwm",
+  ]
+  deps = [ "$ace_root/interfaces/inner_api/ui_session:ui_session" ]
+  deps += [
+    ":ui_sa.cfg",
+    ":ui_sa_profile",
+  ]
+  subsystem_name = ace_engine_subsystem
+  innerapi_tags = [ "platformsdk_indirect" ]
+  part_name = ace_engine_part
+}

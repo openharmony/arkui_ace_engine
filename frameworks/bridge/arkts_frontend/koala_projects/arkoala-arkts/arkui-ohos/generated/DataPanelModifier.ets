@@ -159,7 +159,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
                 }
                 default: {
                     this._contentModifier_0_flag = AttributeUpdaterFlag.INITIAL;
-                    hookDataPanelContentModifier(peer, (this._contentModifier_0_0value as ContentModifier<DataPanelConfiguration> | undefined));
+                    hookDataPanelContentModifier(peer, (undefined as ContentModifier<DataPanelConfiguration> | undefined));
                 }
             }
         }
@@ -251,6 +251,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         {
             this._closeEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._closeEffect_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._closeEffect_0_flag = AttributeUpdaterFlag.SKIP
@@ -262,6 +263,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         {
             this._valueColors_0_flag = AttributeUpdaterFlag.UPDATE
             this._valueColors_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._valueColors_0_flag = AttributeUpdaterFlag.SKIP
@@ -273,6 +275,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         {
             this._trackBackgroundColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._trackBackgroundColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._trackBackgroundColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -284,6 +287,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -295,6 +299,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         {
             this._trackShadow_0_flag = AttributeUpdaterFlag.UPDATE
             this._trackShadow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._trackShadow_0_flag = AttributeUpdaterFlag.SKIP
@@ -302,10 +307,11 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         return this
     }
     contentModifier(value: ContentModifier<DataPanelConfiguration> | undefined): this {
-        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentModifier_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP

@@ -34,7 +34,7 @@ public:
     ~RsNodeAdapter() = default;
     static std::shared_ptr<Rosen::RSNode> CreateRootNode();
     static std::shared_ptr<Rosen::RSNode> CreateCanvasNode();
-    static std::shared_ptr<Rosen::RSNode> CreateSurfaceNode(
+    ACE_FORCE_EXPORT static std::shared_ptr<Rosen::RSNode> CreateSurfaceNode(
         const Rosen::RSSurfaceNodeConfig& surfaceNodeConfig);
 private:
     static std::shared_ptr<Rosen::RSUIContext> GetRSUIContext();

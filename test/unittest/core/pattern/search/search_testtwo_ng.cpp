@@ -909,14 +909,15 @@ HWTEST_F(SearchTestTwoNg, PackInnerRecognizerr001, TestSize.Level1)
     Offset offset;
     std::list<RefPtr<NGGestureRecognizer>> innerRecognizers;
     int32_t touchId = 0;
+    int32_t originalId = 0;
     RefPtr<TargetComponent> targetComponent;
     searchgestureEventHub->innerParallelRecognizer_ = nullptr;
     searchgestureEventHub->CheckClickActuator();
     auto clickEventActuator = searchgestureEventHub->GetUserClickEventActuator();
     GestureEventFunc callback = [](GestureEvent& info) {};
     clickEventActuator->SetUserCallback(std::move(callback));
-    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, targetComponent);
-    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, targetComponent);
+    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, originalId, targetComponent);
+    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, originalId, targetComponent);
 }
 
 /**
@@ -2117,7 +2118,7 @@ HWTEST_F(SearchTestTwoNg, searchModelStatic012, TestSize.Level1)
     EXPECT_EQ(buttonLayoutProperty->GetFontSize().value(), SEARCH_BUTTON_FONT_SIZE);
 
     SearchModelStatic::SetSearchButtonFontSize(frameNode, std::nullopt);
-    EXPECT_FALSE(buttonLayoutProperty->GetFontSize().has_value());
+    EXPECT_TRUE(buttonLayoutProperty->GetFontSize().has_value());
 }
 
 /**

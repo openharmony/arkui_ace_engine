@@ -19,7 +19,7 @@
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components/common/layout/constants.h"
 #include "core/interfaces/native/utility/converter.h"

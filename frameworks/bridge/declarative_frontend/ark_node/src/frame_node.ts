@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,7 +12,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference path="./disposable.ts" />
 interface LayoutConstraint {
   maxSize: Size;
   minSize: Size;
@@ -69,12 +68,13 @@ function getFrameNodeRawPtr(frameNode: FrameNode): number {
   return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
 }
 
-class FrameNode extends Disposable {
+class FrameNode {
   public _nodeId: number;
   protected _commonAttribute: ArkComponent;
   protected _commonEvent: UICommonEvent;
   public _componentAttribute: ArkComponent;
   public _scrollableEvent: UIScrollableCommonEvent;
+  protected _isDisposed: boolean;
   protected _gestureEvent: UIGestureEvent;
   protected _childList: Map<number, FrameNode>;
   protected _nativeRef: NativeStrongRef | NativeWeakRef;
@@ -88,7 +88,6 @@ class FrameNode extends Disposable {
   protected statesChangeHandler_: UIStatesChangeHandlerCallback | undefined;
   protected supportedStates_: number;
   constructor(uiContext: UIContext, type: string, options?: object) {
-    super();
     if (uiContext === undefined) {
       throw Error('Node constructor error, param uiContext error');
     } else {
@@ -101,6 +100,7 @@ class FrameNode extends Disposable {
     this.instanceId_ = uiContext.instanceId_;
     this.uiContext_ = uiContext;
     this._nodeId = -1;
+    this._isDisposed = false;
     this._childList = new Map();
     if (type === 'BuilderRootFrameNode') {
       this.renderNode_ = new RenderNode(type);
@@ -201,7 +201,7 @@ class FrameNode extends Disposable {
     if (this.isDisposed()) {
       return;
     }
-    super.dispose();
+    this._isDisposed = true;
     if (this.nodePtr_) {
       getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
         'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
@@ -215,7 +215,7 @@ class FrameNode extends Disposable {
 
   isDisposed(): boolean {
     let node = this.getNodePtr();
-    return super.isDisposed() && (node === undefined || node === null);
+    return this._isDisposed && (node === undefined || node === null);
   }
 
   static disposeTreeRecursively(node: FrameNode | null): void {
@@ -586,6 +586,9 @@ class FrameNode extends Disposable {
   }
 
   isOnMainTree(): boolean {
+    if (this.isDisposed()) {
+      throw { message: 'The current node has been disposed.', code: 100026 };
+    }
     return getUINativeModule().frameNode.isOnMainTree(this.getNodePtr());
   }
 
@@ -809,7 +812,7 @@ class FrameNode extends Disposable {
       throw { message: "The parameter 'positionByLocal' is invalid: it cannot be null. Provide a non-null position object.", code: 401 };
     }
     if (this.isDisposed()) {
-      throw { message: 'The current FrameNode has been disposed.', code: 10026 };
+      throw { message: 'The current FrameNode has been disposed.', code: 100026 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const offsetPosition = getUINativeModule().frameNode.convertPositionToWindow(
@@ -819,7 +822,7 @@ class FrameNode extends Disposable {
       throw { message: "The param 'x' or 'y' of the parameter 'positionByLocal' is invalid.", code: 401 };
     }
     if (offsetPosition[0] === 0) {
-      throw { message: 'The current FrameNode is not on the main tree.', code: 10028 };
+      throw { message: 'The current FrameNode is not on the main tree.', code: 100028 };
     }
     return { x: offsetPosition[1], y: offsetPosition[2] };
   }
@@ -831,7 +834,7 @@ class FrameNode extends Disposable {
       throw { message: "The parameter 'positionByWindow' is invalid: it cannot be null. Provide a non-null position object.", code: 401 };
     }
     if (this.isDisposed()) {
-      throw { message: 'The current FrameNode has been disposed.', code: 10026 };
+      throw { message: 'The current FrameNode has been disposed.', code: 100026 };
     }
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     const offsetPosition = getUINativeModule().frameNode.convertPositionFromWindow(
@@ -841,7 +844,7 @@ class FrameNode extends Disposable {
       throw { message: "The param 'x' or 'y' of the parameter 'positionByWindow' is invalid.", code: 401 };
     }
     if (offsetPosition[0] === 0) {
-      throw { message: 'The current FrameNode is not on the main tree.', code: 10028 };
+      throw { message: 'The current FrameNode is not on the main tree.', code: 100028 };
     }
     return { x: offsetPosition[1], y: offsetPosition[2] };
   }
@@ -1015,7 +1018,7 @@ class TypedFrameNode<T extends ArkComponent> extends FrameNode {
   }
 
   dispose() {
-    this.isDisposed_ = true;
+    this._isDisposed = true;
     if (this.nodePtr_) {
       getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this), 'FrameNode', this.getNodeType() || 'FrameNode', this.nodePtr_);
     }
@@ -1184,7 +1187,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['WaterFlow', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'WaterFlow', (node: NodePtr, type: ModifierType): ArkWaterFlowComponent => {
-        return new ArkWaterFlowComponent(node, type);
+        getUINativeModule().loadNativeModule('WaterFlow');
+        let module = globalThis.requireNapi('arkui.components.arkwaterflow');
+        return module.createComponent(node, type);
       })
     }],
     ['SymbolGlyph', (context: UIContext): FrameNode => {
@@ -1194,7 +1199,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['FlowItem', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'FlowItem', (node: NodePtr, type: ModifierType): ArkFlowItemComponent => {
-        return new ArkFlowItemComponent(node, type);
+        getUINativeModule().loadNativeModule('FlowItem');
+        let module = globalThis.requireNapi('arkui.components.arkflowitem');
+        return module.createComponent(node, type);
       })
     }],
     ['QRCode', (context: UIContext): FrameNode => {
@@ -1239,12 +1246,16 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Checkbox', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Checkbox', (node: NodePtr, type: ModifierType): ArkCheckboxComponent => {
-        return new ArkCheckboxComponent(node, type);
+        getUINativeModule().loadNativeModule('Checkbox');
+        let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+        return module.createComponent(node, type);
       });
     }],
     ['CheckboxGroup', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'CheckboxGroup', (node: NodePtr, type: ModifierType): ArkCheckboxGroupComponent => {
-        return new ArkCheckboxGroupComponent(node, type);
+        getUINativeModule().loadNativeModule('CheckboxGroup');
+        let module = globalThis.requireNapi('arkui.components.arkcheckboxgroup');
+        return module.createComponent(node, type);
       });
     }],
     ['Radio', (context: UIContext): FrameNode => {
@@ -1254,7 +1265,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Rating', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Rating', (node: NodePtr, type: ModifierType): ArkRatingComponent => {
-        return new ArkRatingComponent(node, type);
+        getUINativeModule().loadNativeModule('Rating');
+        let module = globalThis.requireNapi('arkui.components.arkrating');
+        return module.createComponent(node, type);
       });
     }],
     ['Slider', (context: UIContext): FrameNode => {
@@ -1334,7 +1347,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkWaterFlowComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('WaterFlow');
+      let module = globalThis.requireNapi('arkui.components.arkwaterflow');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['FlowItem', (node: FrameNode): ArkFlowItemComponent => {
@@ -1344,7 +1359,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkFlowItemComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('FlowItem');
+      let module = globalThis.requireNapi('arkui.components.arkflowitem');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Grid', (node: FrameNode): ArkGridComponent => {
@@ -1414,7 +1431,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkCheckboxComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('Checkbox');
+      let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Radio', (node: FrameNode): ArkRadioComponent => {

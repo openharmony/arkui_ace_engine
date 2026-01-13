@@ -113,6 +113,11 @@ public:
      * Get ani env from ani vm.
      */
     static ani_env* GetAniEnv(ani_vm* vm);
+
+    /**
+     * Provides a null reference
+     */
+    static ani_ref CreateNull(ani_env* env);
 };
 } // namespace OHOS::Ace::Ani
 

@@ -112,8 +112,8 @@ public:
     virtual void PanOnActionCancel(const GestureEvent& info) = 0;
     virtual DragItemInfo GenerateDragItemInfo(const RefPtr<PipelineContext>& context, const GestureEvent& info) = 0;
     RefPtr<DragDropEvent> FindDragDropNode(const RefPtr<PipelineContext>& context, const GestureEvent& info);
-    virtual void AddDataToClipboard(const RefPtr<PipelineContext>& context, const std::string& extraInfo,
-        const std::string& selectedText, const std::string& imageSrc);
+    ACE_FORCE_EXPORT virtual void AddDataToClipboard(const RefPtr<PipelineContext>& context,
+        const std::string& extraInfo, const std::string& selectedText, const std::string& imageSrc);
     void MergeClipboardData(const RefPtr<PipelineContext>& context, const std::string& newData);
     void RestoreCilpboardData(const RefPtr<PipelineContext>& context);
     Point UpdatePoint(const RefPtr<PipelineContext>& context, const Point& prePoint);

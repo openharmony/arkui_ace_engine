@@ -28,7 +28,7 @@ namespace OHOS::Ace {
 
 class ACE_EXPORT RosenFontCollection : public FontCollection {
 public:
-    static RosenFontCollection& GetInstance();
+    ACE_FORCE_EXPORT static RosenFontCollection& GetInstance();
 
     std::shared_ptr<Rosen::FontCollection> GetFontCollection() override;
 

@@ -120,10 +120,6 @@ class UpdateFuncsByElmtId {
     public get(elmtId: number): UpdateFuncRecord | undefined {
       return this.map_.get(elmtId);
     }
-
-    public getElementNameById(elmtId: number): string {
-      return this.map_.get(elmtId)?.getComponentName() ?? '';
-    }
   
     public has(elmtId: number): boolean {
       return this.map_.has(elmtId);

@@ -242,6 +242,9 @@ Opt_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
     CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_text_LineMetrics>(Ark_Empty()));
     auto handler = peer->handler.Upgrade();
     CHECK_NULL_RETURN(handler, Converter::ArkValue<Opt_text_LineMetrics>(Ark_Empty()));
+    int32_t lineCount = handler->GetLineCount();
+    bool isValid = (lineNumber >= 0 && lineNumber < lineCount);
+    CHECK_NULL_RETURN(isValid, Converter::ArkValue<Opt_text_LineMetrics>(Ark_Empty()));
     TextLineMetrics lineMetrics = handler->GetLineMetrics(Converter::Convert<int>(lineNumber));
     return Converter::ArkValue<Opt_text_LineMetrics>(lineMetrics, Converter::FC);
 }

@@ -34,19 +34,18 @@
 #include "bridge/declarative_frontend/jsview/js_indicator.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-#include "bridge/declarative_frontend/jsview/models/swiper_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "bridge/js_frontend/engine/jsi/js_value.h"
 #include "core/animation/curve.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/scroll_bar.h"
-#include "core/components/swiper/swiper_component.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/scrollable/scrollable_properties.h"
 #include "core/components_ng/pattern/swiper/swiper_content_transition_proxy.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -69,7 +68,9 @@ SwiperModel* SwiperModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::SwiperModelNG());
             } else {
-                instance_.reset(new Framework::SwiperModelImpl());
+                static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("swiper");
+                static SwiperModel* instance = loader ? reinterpret_cast<SwiperModel*>(loader->CreateModel()) : nullptr;
+                return instance;
             }
 #endif
         }

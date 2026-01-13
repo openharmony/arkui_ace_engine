@@ -21,6 +21,7 @@ import { NullableObject } from './types';
 import { MonitorFunctionDecorator, MonitorValueInternal } from '../decoratorImpl/decoratorMonitor';
 import { ComputedDecoratedVariable, IComputedDecoratorRef } from '../decoratorImpl/decoratorComputed';
 import { PersistenceV2Impl } from '../storage/persistenceV2';
+import { GlobalStateManager } from '@koalaui/runtime';
 
 type TaskType<T> = () => T;
 
@@ -33,6 +34,7 @@ enum NotifyMutableStateMode {
 export class ObserveSingleton implements IObserve {
     public static readonly instance: ObserveSingleton = new ObserveSingleton();
     public static readonly InvalidRenderId: RenderIdType | undefined = undefined;
+    public static readonly RenderingPause: int = -1;
     public static readonly RenderingComponent: int = 0;
     public static readonly RenderingComponentV1: int = 1;
     public static readonly RenderingComponentV2: int = 2;
@@ -64,7 +66,7 @@ export class ObserveSingleton implements IObserve {
 
     get renderingId(): RenderIdType | undefined {
         const id =
-            StateMgmtTool.getGlobalStateManager().currentScope?.id ?? ObserveSingleton.InvalidRenderId;
+            GlobalStateManager.instance.currentScope?.id ?? ObserveSingleton.InvalidRenderId;
         return id;
     }
     set renderingId(value: RenderIdType | undefined) {

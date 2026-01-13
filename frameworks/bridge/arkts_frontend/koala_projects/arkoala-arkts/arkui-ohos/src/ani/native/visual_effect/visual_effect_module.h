@@ -30,6 +30,7 @@ ani_object ExtractorsFromPathShapePtr(ani_env* env, ani_object aniClass, ani_lon
 ani_long ExtractorsToICurvePtr(ani_env* env, ani_object aniClass, ani_object obj);
 ani_long ExtractorsToMatrix4TransitPtr(ani_env* env, ani_object aniClass, ani_object obj);
 ani_long ExtractorsToUiEffectFilterPtr(ani_env* env, ani_object aniClass, ani_object obj);
+ani_long ExtractorsToUiEffectBrightnessBlenderPtr(ani_env* env, ani_object aniClass, ani_object obj);
 ani_long ExtractorsToUiEffectVisualEffectPtr(ani_env* env, ani_object aniClass, ani_object obj);
 ani_long ExtractorsToUiMaterialMaterialPtr(ani_env* env, ani_object aniClass, ani_object obj);
 ani_long UiMaterialConstructMaterial(ani_env* env, ani_object aniClass, ani_object obj);

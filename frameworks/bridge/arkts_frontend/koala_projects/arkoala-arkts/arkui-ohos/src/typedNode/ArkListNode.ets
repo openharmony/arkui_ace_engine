@@ -22,6 +22,7 @@ import {
   ListOptions,
   ListItemAlign,
   Axis,
+  FocusWrapMode,
   BarState,
   ListDividerOptions,
   ChainAnimationOptions,
@@ -41,7 +42,10 @@ import {
   EdgeEffectOptions,
   AttributeModifier,
   ScrollableCommonMethod,
-  CommonMethod
+  CommonMethod,
+  ItemFillPolicy,
+  CacheCountInfo,
+  ScrollSnapAnimationSpeed
 } from '../framework';
 import { Resource } from 'global.resource'
 export class ArkListNode extends ArkScrollableNode implements ListAttribute {
@@ -87,14 +91,14 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
 }
-    contentStartOffset(value: double | undefined): this {
-        const value_casted = value as (double | undefined)
+    contentStartOffset(value: double | Resource | undefined): this {
+        const value_casted = value as (double | Resource | undefined)
         this.getPeer()?.setContentStartOffsetAttribute(value_casted)
         this.markDirty()
         return this
     }
-    contentEndOffset(value: double | undefined): this {
-        const value_casted = value as (double | undefined)
+    contentEndOffset(value: double | Resource | undefined): this {
+        const value_casted = value as (double | Resource | undefined)
         this.getPeer()?.setContentEndOffsetAttribute(value_casted)
         this.markDirty()
         return this
@@ -111,19 +115,13 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
-    cachedCount(count: int32 | undefined, show: boolean | undefined): this {
+    cachedCount(count: int32 | CacheCountInfo | undefined, show: boolean | undefined): this {
         const count_type = runtimeType(count)
         const show_type = runtimeType(show)
-        if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) &&
-            (RuntimeType.UNDEFINED == show_type)) {
-            const value_casted = count as (int32 | undefined)
-            this.getPeer()?.setCachedCount0Attribute(value_casted)
-            this.markDirty()
-            return this
-        }
-        if (((RuntimeType.NUMBER == count_type) || (RuntimeType.UNDEFINED == count_type)) &&
+        if (((RuntimeType.NUMBER == count_type) || (RuntimeType.OBJECT == count_type) ||
+            (RuntimeType.UNDEFINED == count_type)) &&
             ((RuntimeType.BOOLEAN == show_type) || (RuntimeType.UNDEFINED == show_type))) {
-            const count_casted = count as (int32 | undefined)
+            const count_casted = count as (int32 | CacheCountInfo | undefined)
             const show_casted = show as (boolean | undefined)
             this.getPeer()?.setCachedCount1Attribute(count_casted, show_casted)
             this.markDirty()
@@ -198,6 +196,24 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
     stackFromEnd(value: boolean | undefined): this {
         const value_casted = value as (boolean | undefined)
         this.getPeer()?.setStackFromEndAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    focusWrapMode(value: FocusWrapMode | undefined): this {
+        const value_casted = value as (FocusWrapMode | undefined)
+        this.getPeer()?.setFocusWrapModeAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    syncLoad(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setSyncLoadAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    scrollSnapAnimationSpeed(value: ScrollSnapAnimationSpeed | undefined): this {
+        const value_casted = value as (ScrollSnapAnimationSpeed | undefined)
+        this.getPeer()?.setScrollSnapAnimationSpeedAttribute(value_casted)
         this.markDirty()
         return this
     }
@@ -291,8 +307,8 @@ export class ArkListNode extends ArkScrollableNode implements ListAttribute {
         this.markDirty()
         return this
     }
-    lanes(value: int32 | LengthConstrain | undefined, gutter?: Dimension): this {
-        const value_casted = value as (int32 | LengthConstrain | undefined)
+    lanes(value: int32 | LengthConstrain | ItemFillPolicy | undefined, gutter?: Dimension): this {
+        const value_casted = value as (int32 | LengthConstrain | ItemFillPolicy | undefined)
         const gutter_casted = gutter as (Dimension | undefined)
         this.getPeer()?.setLanesAttribute(value_casted, gutter_casted)
         this.markDirty()

@@ -13,9 +13,10 @@
  * limitations under the License.
  */
 
-import { finalizerRegister, finalizerUnregister, Thunk } from "@koalaui/common"
-import { InteropNativeModule } from "./InteropNativeModule"
-import { pointer, nullptr } from "./InteropTypes"
+import { finalizerRegister, finalizerUnregister, Thunk, int32 } from '@koalaui/common';
+import { InteropNativeModule } from './InteropNativeModule';
+import { CallbackResource } from './SerializerBase'
+import { pointer, nullptr } from './InteropTypes';
 
 export class NativeThunk implements Thunk {
     finalizer: pointer
@@ -37,6 +38,38 @@ export class NativeThunk implements Thunk {
 
     destroyNative(ptr: pointer, finalizer: pointer): void {
         InteropNativeModule._InvokeFinalizer(ptr, finalizer)
+    }
+}
+
+class ResourceThunk implements Thunk {
+    resourceId: int32;
+    releaser: pointer;
+
+    constructor(resourceId: int32, releaser: pointer) {
+        this.resourceId = resourceId;
+        this.releaser = releaser;
+    }
+
+    clean(): void {
+        try {
+            InteropNativeModule._CallCallbackResourceReleaser(this.releaser, this.resourceId);
+        } catch (error) {
+            console.error('Failed to release callback resource:', error);
+        }
+    }
+}
+
+export function resourceFinalizerRegister(value: object, resource: CallbackResource) {
+    if (resource.hold === nullptr || resource.release === nullptr) {
+        throw new Error('Invalid CallbackResource: hold and release must not be null');
+    }
+
+    finalizerRegister(value, new ResourceThunk(resource.resourceId, resource.release));
+
+    try {
+        InteropNativeModule._CallCallbackResourceHolder(resource.hold, resource.resourceId);
+    } catch (error) {
+        console.error('Failed to hold callback resource:', error);
     }
 }
 

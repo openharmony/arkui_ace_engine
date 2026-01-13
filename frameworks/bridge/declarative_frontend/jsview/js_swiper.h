@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
+#include "core/components_ng/pattern/swiper/swiper_change_event.h"
 
 namespace OHOS::Ace::Framework {
 

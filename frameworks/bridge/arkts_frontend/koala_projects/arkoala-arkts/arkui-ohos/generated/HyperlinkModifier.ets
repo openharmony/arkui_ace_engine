@@ -28,7 +28,7 @@ import { Color } from "./component/enums"
 import { Resource } from "global.resource"
 export class HyperlinkModifier extends CommonMethodModifier implements HyperlinkAttribute,AttributeModifier<HyperlinkAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -85,6 +85,7 @@ export class HyperlinkModifier extends CommonMethodModifier implements Hyperlink
         {
             this._color_0_flag = AttributeUpdaterFlag.UPDATE
             this._color_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._color_0_flag = AttributeUpdaterFlag.SKIP

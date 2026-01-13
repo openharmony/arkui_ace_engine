@@ -893,6 +893,13 @@ void OH_ArkUI_StyledString_Destroy(ArkUI_StyledString* storage)
         OH_Drawing_DestroyTextStyle(style);
         storage->styles.pop();
     }
+    while (!storage->poppedStyles.empty()) {
+        if (storage->poppedStyles.top()) {
+            auto style = reinterpret_cast<OH_Drawing_TextStyle*>(storage->poppedStyles.top());
+            OH_Drawing_DestroyTextStyle(style);
+            storage->poppedStyles.pop();
+        }
+    }
     storage->styles = std::stack<void*>();
     storage->items.clear();
     OH_Drawing_TypographyStyle* paragraphStyle =
@@ -937,6 +944,7 @@ void OH_ArkUI_StyledString_PopTextStyle(ArkUI_StyledString* storage)
     if (storage->styles.empty()) {
         return;
     }
+    storage->poppedStyles.push(storage->styles.top());
     storage->styles.pop();
 }
 

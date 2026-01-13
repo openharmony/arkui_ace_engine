@@ -21,8 +21,6 @@
 #include "adapter/ohos/entrance/picker/picker_haptic_interface.h"
 #include "base/i18n/localization.h"
 #include "core/components/common/properties/color.h"
-#include "core/components/picker/picker_base_component.h"
-#include "core/components/picker/picker_date_component.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/picker_utils/picker_column_pattern.h"

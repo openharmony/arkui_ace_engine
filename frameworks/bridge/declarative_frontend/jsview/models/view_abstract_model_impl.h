@@ -29,7 +29,7 @@ class CalcDimensionRect;
 
 namespace OHOS::Ace::Framework {
 
-class ViewAbstractModelImpl : public ViewAbstractModel {
+class ACE_FORCE_EXPORT ViewAbstractModelImpl : public ViewAbstractModel {
 public:
     ~ViewAbstractModelImpl() override = default;
 
@@ -302,6 +302,8 @@ public:
 
     void BindBackground(std::function<void()>&& buildFunc, const Alignment& align) override;
     void SetBackground(std::function<void()>&& buildFunc) override {};
+    void SetBackgroundWithResourceObj(
+        std::function<void()>&& buildFunc, const RefPtr<ResourceObject>& resObj) override {};
     void SetBackgroundAlign(const Alignment& align) override {};
     void SetCustomBackgroundColor(const Color& color) override {};
     void SetCustomBackgroundColorWithResourceObj(const Color& color, const RefPtr<ResourceObject>& resObj) override {};

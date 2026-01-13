@@ -228,6 +228,14 @@ public:
             MultiImageQueryErrorCode)>& arkWebfinishCallback);
     void RegisterGetWebViewCurrentLanguage(const EventCallback& eventCallback);
     void RegisterGetCurrentPageName(const EventCallback& eventCallback);
+
+    void RegisterGetWebInfoByRequestCallback(const GetWebInfoByRequestCallback& finishCallback);
+    void SendWebInfoRequestResult(
+        uint32_t windowId,
+        int32_t webId,
+        const std::string& request,
+        const std::string& result, WebRequestErrorCode errorCode) override;
+
     void RegisterGetTranslateTextCallback(const std::function<void(int32_t, std::string)>& eventCallback);
     void SendCurrentLanguage(const std::string& data) override;
     void SendCurrentPageName(const std::string& result) override;
@@ -248,6 +256,8 @@ public:
     void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
 
 private:
+    void OnGetWebInfoByRequestInner(MessageParcel& data);
+
     EventCallback clickEventCallback_;
     EventCallback searchEventCallback_;
     EventCallback textChangeEventCallback_;
@@ -272,6 +282,8 @@ private:
     std::function<void(uint32_t)> exeAppAIFunctionCallback_;
     std::function<void(ChangeType type, const std::string& simpleTree)> contentChangeCallback_;
     std::function<void(std::vector<std::string>)> getStateMgmtInfoCallback_;
+
+    GetWebInfoByRequestCallback getWebInfoByRequestCallback_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_REPORT_STUB_H

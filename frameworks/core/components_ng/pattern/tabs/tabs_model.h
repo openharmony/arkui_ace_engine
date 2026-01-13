@@ -25,22 +25,21 @@
 #include "core/components/common/layout/constants.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/swiper/swiper_controller.h"
-#include "core/components/tab_bar/tab_controller.h"
 #include "core/components/tab_bar/tab_theme.h"
 #include "core/components/tab_bar/tabs_event.h"
 #include "core/components_ng/pattern/swiper/swiper_model.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline/pipeline_context.h"
-#include "ui/view/components/tabs/tabs_data.h"
-#include "core/common/resource/resource_object.h"
+ #include "ui/view/components/tabs/tabs_data.h" 
+ #include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
-enum class TabsCacheMode {
-    CACHE_BOTH_SIDE = 0,
-    CACHE_LATEST_SWITCHED
-};
+enum class TabsCacheMode {	 
+     CACHE_BOTH_SIDE = 0, 
+     CACHE_LATEST_SWITCHED 
+ };
 
 namespace {
 enum class TabJsResType {
@@ -120,8 +119,8 @@ public:
     static TabsModel* GetInstance();
     virtual ~TabsModel() = default;
 
-    virtual void Create(BarPosition barPosition, int32_t index, const RefPtr<TabController>& tabController,
-        const RefPtr<SwiperController>& swiperController) = 0;
+    virtual void Create(BarPosition barPosition, int32_t index, const RefPtr<SwiperController>& swiperController) {};
+    virtual void Create(BarPosition barPosition, const RefPtr<AceType>& tabController) {};
     virtual void Pop() = 0;
     virtual void SetIndex(int32_t index) = 0;
     virtual void SetTabBarPosition(BarPosition tabBarPosition) = 0;

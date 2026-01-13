@@ -382,6 +382,9 @@ void ViewAbstractModelStatic::BindContextMenuStatic(const RefPtr<FrameNode>& tar
         auto inputHub = targetNode->GetOrCreateInputEventHub();
         CHECK_NULL_VOID(inputHub);
         inputHub->BindContextMenu(nullptr);
+        auto gestureHub = targetNode->GetOrCreateGestureEventHub();
+        CHECK_NULL_VOID(gestureHub);
+        gestureHub->SetLongPressEvent(nullptr);
         return;
     }
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindow(Container::CurrentId());
@@ -1480,6 +1483,11 @@ void ViewAbstractModelStatic::SetForegroundEffect(FrameNode* frameNode, const st
 void ViewAbstractModelStatic::SetBlendMode(FrameNode* frameNode, const std::optional<BlendMode>& blendMode)
 {
     ViewAbstract::SetBlendMode(frameNode, blendMode.value_or(BlendMode::NONE));
+}
+
+void ViewAbstractModelStatic::SetBlender(FrameNode* frameNode, const OHOS::Rosen::Blender* blender)
+{
+    ViewAbstract::SetBlender(frameNode, blender);
 }
 
 void ViewAbstractModelStatic::SetFocusBoxStyle(FrameNode* frameNode, const std::optional<NG::FocusBoxStyle>& style)

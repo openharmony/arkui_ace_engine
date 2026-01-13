@@ -16,7 +16,7 @@
 #include "core/components_ng/pattern/text_picker/textpicker_paint_method.h"
 
 #include "core/components/common/properties/color.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/text_picker/textpicker_layout_property.h"
 #include "core/components_ng/pattern/text_picker/textpicker_pattern.h"

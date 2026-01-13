@@ -29,6 +29,8 @@ namespace OHOS::Ace {
         #cls, std::make_shared<cls>() \
     }
 
+SINGLETON_INSTANCE_IMPL(FeatureParamManager);
+
 const std::unordered_map<std::string, std::shared_ptr<ConfigParserBase>> FeatureParamManager::featureParamMap_ = {
     ADD_PARSER_MODEL(UINodeGcParamParser),
     ADD_PARSER_MODEL(SyncLoadParser),

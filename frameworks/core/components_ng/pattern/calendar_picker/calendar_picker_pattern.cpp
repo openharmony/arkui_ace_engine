@@ -1283,9 +1283,6 @@ void CalendarPickerPattern::OnColorConfigurationUpdate()
         BorderColorProperty borderColor;
         borderColor.SetColor(calendarTheme->GetEntryBorderColor());
         renderContext->UpdateBorderColor(borderColor);
-        BorderRadiusProperty borderRadius;
-        borderRadius.SetRadius(calendarTheme->GetEntryBorderRadius());
-        renderContext->UpdateBorderRadius(borderRadius);
     }
 
     if (IsDialogShow()) {

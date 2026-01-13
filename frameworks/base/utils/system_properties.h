@@ -19,6 +19,7 @@
 #include <atomic>
 #include <cstdint>
 #include <memory>
+#include <mutex>
 #include <optional>
 #include <string>
 
@@ -558,16 +559,6 @@ public:
         return isDeviceAccess_;
     }
 
-    static void SetConfigDeviceType(const std::string& type)
-    {
-        configDeviceType_ = type;
-    }
-
-    static const std::string& GetConfigDeviceType()
-    {
-        return configDeviceType_;
-    }
-
     static float GetScrollCoefficients();
 
     static bool GetTransformEnabled();
@@ -593,12 +584,12 @@ public:
 
     static void SetUnZipHap(bool unZipHap = true)
     {
-        unZipHap_ = unZipHap;
+        unZipHap_.store(unZipHap);
     }
 
     static bool GetUnZipHap()
     {
-        return unZipHap_;
+        return unZipHap_.load();
     }
 
     static bool GetAsmInterpreterEnabled();
@@ -708,9 +699,8 @@ public:
     static void EnableSystemParameterTraceInputEventCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterSecurityDevelopermodeCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterDebugStatemgrCallback(const char* key, const char* value, void* context);
-    static void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context);
     static void EnableSystemParameterPerformanceMonitorCallback(const char* key, const char* value, void* context);
-    static void OnFocusActiveChanged(const char* key, const char* value, void* context);
+
     static float GetDefaultResolution();
 
     static void SetLayoutTraceEnabled(bool layoutTraceEnable);
@@ -851,6 +841,8 @@ public:
         return isOpenYuvDecode_;
     }
 
+    static void ReadSystemParametersCallOnce();
+
 private:
     static bool opincEnabled_;
     static bool developerModeOn_;
@@ -892,13 +884,12 @@ private:
     static int32_t mcc_;
     static int32_t mnc_;
     static ScreenShape screenShape_;
-    static LongScreenType LongScreen_;
-    static bool unZipHap_;
+
+    static std::atomic<bool> unZipHap_;
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
     static std::string configDeviceType_;
-    static bool transformEnabled_;
     static bool compatibleInputTransEnabled_;
     static float scrollCoefficients_;
     static DebugFlags debugFlags_;
@@ -965,6 +956,8 @@ private:
     static bool isPCMode_;
     static bool isAutoFillSupport_;
     static bool isOpenYuvDecode_;
+
+    static std::once_flag getSysPropertiesFlag_;
 };
 
 } // namespace OHOS::Ace

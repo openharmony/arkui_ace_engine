@@ -187,6 +187,7 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     if (props->GetIsCustomAnimation().value_or(false)) {
         algo->SetUseCustomAnimation(true);
         algo->SetCustomAnimationToIndex(customAnimationToIndex_);
+        algo->SetCustomAnimationPrevIndex(customAnimationPrevIndex_);
         algo->SetIndexsInAnimation(indexsInAnimation_);
         algo->SetNeedUnmountIndexs(needUnmountIndexs_);
         return algo;
@@ -231,12 +232,18 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
     return algo;
 }
 
-RefPtr<FrameNode> SwiperPattern::GetKeyFrameNodeWhenContentChanged()
+std::list<RefPtr<FrameNode>> SwiperPattern::GetKeyFrameNodeWhenContentChanged()
 {
+    std::list<RefPtr<FrameNode>> keyChildren;
     auto host = GetHost();
-    CHECK_NULL_RETURN(host, nullptr);
-    auto currIndex = GetLoopIndex(currentIndex_);
-    return DynamicCast<FrameNode>(host->GetChildByIndex(currIndex));
+    CHECK_NULL_RETURN(host, keyChildren);
+
+    for (auto item : itemPosition_) {
+        auto swiperItemNode = item.second.node;
+        CHECK_NULL_CONTINUE(swiperItemNode);
+        keyChildren.push_back(swiperItemNode);
+    }
+    return keyChildren;
 }
 
 void SwiperPattern::OnIndexChange(bool isInLayout)
@@ -1305,13 +1312,13 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         ResetAnimationParam();
         auto pipeline = GetContext();
         if (pipeline) {
-            pipeline->AddAfterRenderTask([weak = WeakClaim(this)]() {
+            pipeline->AddAfterRenderTask([weak = WeakClaim(this), isInit, jumpIndex = jumpIndex_]() {
                 auto swiper = weak.Upgrade();
                 CHECK_NULL_VOID(swiper);
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
                 AceAsyncTraceEndCommercial(
                     0, swiper->hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
-                swiper->LoadCompleteManagerStopCollect();
+                swiper->LoadCompleteManagerStopCollect(isInit ? std::nullopt : jumpIndex);
             });
         }
         UpdateCurrentIndex(algo->GetCurrentIndex());
@@ -3284,6 +3291,9 @@ float SwiperPattern::CalculateGroupTurnPageRate(float additionalOffset)
     }
 
     if (IsHorizontalAndRightToLeft()) {
+        if (NearZero(groupTurnPageRate)) {
+            return 0.0f;
+        }
         groupTurnPageRate = std::abs(groupTurnPageRate) <= 1.0f ? std::abs(groupTurnPageRate) - 1.0f : 0.0f;
     }
 
@@ -6502,6 +6512,7 @@ void SwiperPattern::TriggerCustomContentTransitionEvent(int32_t fromIndex, int32
     FireSelectedEvent(fromIndex, toIndex);
     FireUnselectedEvent(fromIndex, toIndex);
     FireAnimationStartEvent(fromIndex, toIndex, info);
+    customAnimationPrevIndex_ = fromIndex;
 
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -6523,6 +6534,7 @@ void SwiperPattern::OnCustomAnimationFinish(int32_t fromIndex, int32_t toIndex, 
     customAnimationToIndex_.reset();
     needUnmountIndexs_.insert(fromIndex);
     indexsInAnimation_.erase(toIndex);
+    customAnimationPrevIndex_ = toIndex;
 
     if (!hasOnChanged) {
         const auto props = GetLayoutProperty<SwiperLayoutProperty>();
@@ -8090,15 +8102,22 @@ void SwiperPattern::LoadCompleteManagerStartCollect()
     }
 }
 
-void SwiperPattern::LoadCompleteManagerStopCollect()
+void SwiperPattern::LoadCompleteManagerStopCollect(std::optional<int32_t> jumpIndex)
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     pipeline->GetLoadCompleteManager()->StopCollect();
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
-    if (!IsAutoPlay()) {
-        mgr->OnSwiperChangeEnd(GetHost(), hasTabsAncestor_);
+    if (IsAutoPlay()) {
+        return;
     }
+    if (jumpIndex.has_value() && jumpIndex.value() == currentIndex_) {
+        return;
+    }
+    if (targetIndex_.has_value() && targetIndex_.value() == currentIndex_) {
+        return;
+    }
+    mgr->OnSwiperChangeEnd(GetHost(), hasTabsAncestor_);
 }
 } // namespace OHOS::Ace::NG

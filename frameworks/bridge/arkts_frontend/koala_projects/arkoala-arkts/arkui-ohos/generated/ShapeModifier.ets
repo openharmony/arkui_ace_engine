@@ -484,6 +484,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             this._viewPort_0_flag = AttributeUpdaterFlag.UPDATE
             this._viewPort_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._viewPort_0_flag = AttributeUpdaterFlag.SKIP
@@ -495,6 +496,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             this._stroke_0_flag = AttributeUpdaterFlag.UPDATE
             this._stroke_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stroke_0_flag = AttributeUpdaterFlag.SKIP
@@ -506,6 +508,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             this._fill_0_flag = AttributeUpdaterFlag.UPDATE
             this._fill_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fill_0_flag = AttributeUpdaterFlag.SKIP
@@ -517,6 +520,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             this._strokeDashOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeDashOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeDashOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -528,6 +532,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             this._strokeDashArray_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeDashArray_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeDashArray_0_flag = AttributeUpdaterFlag.SKIP
@@ -539,6 +544,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             this._strokeLineCap_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeLineCap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeLineCap_0_flag = AttributeUpdaterFlag.SKIP
@@ -550,6 +556,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             this._strokeLineJoin_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeLineJoin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeLineJoin_0_flag = AttributeUpdaterFlag.SKIP
@@ -561,6 +568,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeMiterLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.SKIP
@@ -572,6 +580,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             this._strokeOpacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeOpacity_0_flag = AttributeUpdaterFlag.SKIP
@@ -583,6 +592,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             this._fillOpacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._fillOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fillOpacity_0_flag = AttributeUpdaterFlag.SKIP
@@ -594,6 +604,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -605,6 +616,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
         {
             this._antiAlias_0_flag = AttributeUpdaterFlag.UPDATE
             this._antiAlias_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._antiAlias_0_flag = AttributeUpdaterFlag.SKIP
@@ -618,6 +630,7 @@ export class ShapeModifier extends CommonMethodModifier implements ShapeAttribut
             this._mesh_0_0value = value
             this._mesh_0_1value = column
             this._mesh_0_2value = row
+            this._state.fireChange()
         } else
         {
             this._mesh_0_flag = AttributeUpdaterFlag.SKIP

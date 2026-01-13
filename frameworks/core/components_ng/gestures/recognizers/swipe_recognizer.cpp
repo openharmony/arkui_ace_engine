@@ -200,6 +200,9 @@ void SwipeRecognizer::HandleTouchUpEvent(const TouchEvent& event)
         }
         auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
         if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+            auto node = GetAttachedNode().Upgrade();
+            TAG_LOGI(AceLogTag::ACE_GESTURE,
+                "Swipe judge reject, %{public}s", node ? node->GetTag().c_str() : "");
             Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
             return;
         }
@@ -228,6 +231,9 @@ void SwipeRecognizer::HandleTouchUpEvent(const AxisEvent& event)
             resultSpeed_ = 0.0;
             auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
             if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+                auto node = GetAttachedNode().Upgrade();
+                TAG_LOGI(AceLogTag::ACE_GESTURE,
+                    "Swipe judge reject, %{public}s", node ? node->GetTag().c_str() : "");
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
                 return;
             }
@@ -246,6 +252,9 @@ void SwipeRecognizer::HandleTouchUpEvent(const AxisEvent& event)
         } else {
             auto onGestureJudgeBeginResult = TriggerGestureJudgeCallback();
             if (onGestureJudgeBeginResult == GestureJudgeResult::REJECT) {
+                auto node = GetAttachedNode().Upgrade();
+                TAG_LOGI(AceLogTag::ACE_GESTURE,
+                    "Swipe judge reject, %{public}s", node ? node->GetTag().c_str() : "");
                 Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
                 return;
             }
@@ -558,4 +567,31 @@ RefPtr<GestureSnapshot> SwipeRecognizer::Dump() const
     return info;
 }
 
+std::string SwipeRecognizer::GetGestureInfoString() const
+{
+    auto gestureInfoStr = MultiFingersRecognizer::GetGestureInfoString();
+    if (prevAngle_.has_value()) {
+        gestureInfoStr.append(",PAG:");
+        gestureInfoStr.append(std::to_string(prevAngle_.value()));
+    }
+    gestureInfoStr.append(",RESPD:");
+    gestureInfoStr.append(std::to_string(resultSpeed_));
+    gestureInfoStr.append(",DE:[");
+    for (const auto& item : downEvents_) {
+        gestureInfoStr.push_back(',');
+        gestureInfoStr.append(std::to_string(item.first));
+        gestureInfoStr.append("->(").append(std::to_string(item.second.id));
+        gestureInfoStr.append(",").append(std::to_string(item.second.originalId));
+        gestureInfoStr.append(")");
+    }
+    gestureInfoStr.append("],MT:[");
+    if (!matchedTouch_.empty()) {
+        for (const auto& item : matchedTouch_) {
+            gestureInfoStr.push_back(',');
+            gestureInfoStr.append(std::to_string(item));
+        }
+    }
+    gestureInfoStr.push_back(']');
+    return gestureInfoStr;
+}
 } // namespace OHOS::Ace::NG

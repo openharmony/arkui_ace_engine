@@ -38,7 +38,7 @@ public:
     void SetKeyboardStatus(bool status) override;
     void SendKeyEventFromInputMethod(const MiscServices::KeyEvent& event) override;
     void SendKeyboardStatus(const MiscServices::KeyboardStatus& keyboardStatus) override;
-    void NotifyKeyboardHeight(uint32_t height) override;
+    ACE_FORCE_EXPORT void NotifyKeyboardHeight(uint32_t height) override;
     void SendFunctionKey(const MiscServices::FunctionKey& functionKey) override;
     void MoveCursor(MiscServices::Direction direction) override;
     void HandleSetSelection(int32_t start, int32_t end) override;

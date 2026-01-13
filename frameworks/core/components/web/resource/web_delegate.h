@@ -1506,7 +1506,7 @@ public:
 
     void SetViewportScaleState();
     std::string GetLastSelectionText() const;
-    void OnTextSelectionChange(const std::string& selectionText, bool isFromOverlay = false);
+    void OnTextSelectionChange(const std::string& selectionText);
     void OnDetectedBlankScreen(const std::string& url, int32_t blankScreenReason, int32_t detectedContentfulNodesCount);
     void UpdateBlankScreenDetectionConfig(bool enable, const std::vector<double>& detectionTiming,
         const std::vector<int32_t>& detectionMethods, int32_t contentfulNodesCountThreshold);
@@ -1514,6 +1514,7 @@ public:
     void UpdateEnableImageAnalyzer(bool enable);
     void OnPdfScrollAtBottom(const std::string& url);
     void OnPdfLoadEvent(int32_t result, const std::string& url);
+    void OnMediaCastEnter();
     void SetImeShow(bool visible);
     void OnRequestAutofill(int32_t menuType);
 
@@ -1789,7 +1790,10 @@ private:
 
     uint32_t blanklessFrameWidth_ = 0;
     uint32_t blanklessFrameHeight_ = 0;
+    // update when chromium reports to arkui.
     std::string lastSelectionText_ = "";
+    // update when arkui reports to the application side.
+    std::string lastPostSelectionText_ = "";
 #endif
 };
 

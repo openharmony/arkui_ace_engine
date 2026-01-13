@@ -19,6 +19,7 @@
 
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
+#include "core/components_ng/pattern/scrollable/selectable_container_pattern.h"
 #include "core/components_ng/pattern/scrollable/selectable_item_pattern.h"
 #include "core/components_ng/pattern/scrollable/selectable_utils.h"
 
@@ -113,6 +114,39 @@ HWTEST_F(SelectableItemUtilsTestNG, IsGatherSelectedItemsAnimationEnabled, TestS
 }
 
 /**
+ * @tc.name: GetBadgeNumber
+ * @tc.desc: Test GetBadgeNumber function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SelectableItemUtilsTestNG, GetBadgeNumber, TestSize.Level1)
+{
+    CreateGrid();
+    CreateFixedItems(10);
+    CreateDone();
+
+    // Grid item is not selected.
+    auto gridItemNode = GetChildFrameNode(frameNode_, 0);
+    EXPECT_FALSE(SelectableUtils::GetBadgeNumber(gridItemNode).has_value());
+
+    // Grid item is selected but animation is disabled.
+    auto selectableItemPattern = gridItemNode->GetPattern<SelectableItemPattern>();
+    selectableItemPattern->SetSelected(true);
+    EXPECT_FALSE(SelectableUtils::GetBadgeNumber(gridItemNode).has_value());
+
+    // Grid item is selected and animation is enabled.
+    EditModeOptions options;
+    options.enableGatherSelectedItemsAnimation = true;
+    options.getPreviewBadge = []() { return PreviewBadge { PreviewBadgeMode::USER_SET, 5 }; };
+    GridModelNG::SetEditModeOptions(AceType::RawPtr(frameNode_), options);
+    EXPECT_EQ(SelectableUtils::GetBadgeNumber(gridItemNode).value(), 5);
+
+    // Grid item is selected and animation is enabled, badge mode is NO_BADGE.
+    options.getPreviewBadge = []() { return PreviewBadge { PreviewBadgeMode::NO_BADGE, 5 }; };
+    GridModelNG::SetEditModeOptions(AceType::RawPtr(frameNode_), options);
+    EXPECT_EQ(SelectableUtils::GetBadgeNumber(gridItemNode).value(), 1);
+}
+
+/**
  * @tc.name: BindContextMenu
  * @tc.desc: Test BindContextMenu function.
  * @tc.type: FUNC
@@ -143,7 +177,8 @@ HWTEST_F(SelectableItemUtilsTestNG, BindContextMenu, TestSize.Level1)
 
     // GridItem with LongPress
     SelectableUtils::BindContextMenu(AceType::RawPtr(gridItemNode));
-    auto actuator = AceType::DynamicCast<LongPressEventActuatorWithMultiSelect>(longPressEventActuator);
+    auto newActuator = gestureHub->GetLongPressEventActuator();
+    auto actuator = AceType::DynamicCast<LongPressEventActuatorWithMultiSelect>(newActuator);
     EXPECT_NE(actuator->multiSelectHandler_, nullptr);
 
     /**

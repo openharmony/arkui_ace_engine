@@ -27,5 +27,4 @@ ark_x_node_files_to_watch = [
     "src/component_content.ts",
     "src/node_content.ts",
     "src/common.ts",
-    "src/disposable.ts",
 ]

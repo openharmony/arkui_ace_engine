@@ -299,6 +299,12 @@ public:
         cancelIconNodeCreated_ = hasNodeCreated;
     }
 
+    void OnConfigurationUpdate(const ConfigurationChange& configurationChange) override
+    {
+        SetNeedCallChildrenUpdate(true);
+        GroupNode::OnConfigurationUpdate(configurationChange);
+    }
+
 private:
     std::optional<int32_t> textFieldId_;
     std::optional<int32_t> buttonId_;

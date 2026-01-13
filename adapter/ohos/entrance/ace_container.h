@@ -23,7 +23,7 @@
 #include <optional>
 
 #include "display_manager.h"
-#include "dm_common.h"
+
 #include "interfaces/inner_api/ace/arkui_rect.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "native_engine/native_reference.h"
@@ -896,7 +896,7 @@ public:
     bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
 
     Rect GetDisplayAvailableRect() const override;
-    
+
     // Get the available rect of the full screen.
     Rect GetFoldExpandAvailableRect() const override;
 

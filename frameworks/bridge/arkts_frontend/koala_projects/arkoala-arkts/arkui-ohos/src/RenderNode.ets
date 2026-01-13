@@ -48,7 +48,8 @@ export class RenderNode implements MaterializedBase {
     private lengthMetricsUnitValue: LengthMetricsUnit = LengthMetricsUnit.DEFAULT
     private borderStyleValue: NodeEdges<BorderStyle> | undefined = undefined
     private borderWidthValue: NodeEdges<double> = { left: 0, top: 0, right: 0, bottom: 0 }
-    private borderColorValue: NodeEdges<int32> = { left: 0XFF000000, top: 0XFF000000, right: 0XFF000000, bottom: 0XFF000000 }
+    private borderColorValue: NodeEdges<int32> = { left: 0XFF000000.toInt(), top: 0XFF000000.toInt(),
+        right: 0XFF000000.toInt(), bottom: 0XFF000000.toInt() }
     private borderRadiusValue: Corners<number> | undefined = undefined;
     private shapeMaskValue: ShapeMask | undefined = undefined;
     private shapeClipValue: ShapeClip | undefined = undefined;
@@ -273,7 +274,8 @@ export class RenderNode implements MaterializedBase {
     }
     set borderColor(borderColor: NodeEdges<int32>) {
         if (borderColor === undefined || borderColor === null) {
-            this.borderColorValue = { left: 0XFF000000, top: 0XFF000000, right: 0XFF000000, bottom: 0XFF000000 };
+            this.borderColorValue = { left: 0XFF000000.toInt(), top: 0XFF000000.toInt(),
+                                      right: 0XFF000000.toInt(), bottom: 0XFF000000.toInt() };
         } else {
             this.borderColorValue = borderColor;
         }
@@ -532,10 +534,10 @@ export class RenderNode implements MaterializedBase {
         return
     }
     private setBorderColor(borderColor: NodeEdges<int32>): void {
-        const top = ((borderColor.top === null || undefined) ? 0xFF000000 : borderColor.top) as int32;
-        const left = ((borderColor.left === null || undefined) ? 0xFF000000 : borderColor.left) as int32;
-        const bottom = ((borderColor.bottom === null || undefined) ? 0xFF000000 : borderColor.bottom) as int32;
-        const right = ((borderColor.right === null || undefined) ? 0xFF000000 : borderColor.right) as int32;
+        const top = ((borderColor.top === null || undefined) ? (0xFF000000.toInt()) : borderColor.top) as int32;
+        const left = ((borderColor.left === null || undefined) ? (0xFF000000.toInt()) : borderColor.left) as int32;
+        const bottom = ((borderColor.bottom === null || undefined) ? (0xFF000000.toInt()) : borderColor.bottom) as int32;
+        const right = ((borderColor.right === null || undefined) ? (0xFF000000.toInt()) : borderColor.right) as int32;
         const edgesBorderColor = { top: top!, left: left!, bottom: bottom!, right: right! } as EdgeI32;
         RenderNodeExtender.setBorderColor(this, edgesBorderColor);
         return

@@ -402,7 +402,7 @@ public:
         imageRepeat_ = imageRepeat;
     }
 
-    void SetSrc(const std::string& src, const RefPtr<ThemeConstants>& themeConstants);
+    ACE_FORCE_EXPORT void SetSrc(const std::string& src, const RefPtr<ThemeConstants>& themeConstants);
 
     void SetParsedSrc(const std::string& src)
     {

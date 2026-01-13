@@ -5636,43 +5636,51 @@ void ViewAbstract::SetSystemMaterial(FrameNode* frameNode, const UiMaterial* mat
     CHECK_NULL_VOID(renderContext);
     renderContext->SetSystemMaterial(material ? material->Copy() : nullptr);
     if (!MaterialUtils::CallSetMaterial(frameNode, material)) {
-        auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(material);
-        auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
-        auto updateFunc = [materialType, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
-            auto frameNode = weak.Upgrade();
-            CHECK_NULL_VOID(frameNode);
-            auto pipeline = frameNode->GetContextWithCheck();
-            CHECK_NULL_VOID(pipeline);
-            auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
-            if (!materialTheme) {
-                TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
-                return;
-            }
-            auto params = materialTheme->GetUiMaterialParam(materialType, pipeline);
-            if (!params) {
-                TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "GetUiMaterialParam failed, type:%{public}d", materialType);
-                return;
-            }
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
-            ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, params->borderWidth, frameNode);
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, params->borderColor, frameNode);
-            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, params->shadow, frameNode);
-        };
-        if (SystemProperties::ConfigChangePerform()) {
-            auto pattern = frameNode->GetPattern();
-            CHECK_NULL_VOID(pattern);
-            updateFunc(nullptr);
-            if (materialType != MaterialType::NONE) {
-                RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
-                pattern->AddResObj("viewAbstract.uiMaterial", resObj, std::move(updateFunc));
-            } else {
-                pattern->RemoveResObj("viewAbstract.uiMaterial");
-            }
+        ViewAbstract::SetSystemMaterialImmediate(frameNode, material);
+    }
+}
+
+void ViewAbstract::SetSystemMaterialImmediate(FrameNode* frameNode, const UiMaterial* material)
+{
+    auto materialTypeOpt = MaterialUtils::GetTypeFromMaterial(material);
+    auto materialType = materialTypeOpt.value_or(MaterialType::NONE);
+    auto updateFunc = [materialType, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        auto pipeline = frameNode->GetContextWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto materialTheme = pipeline->GetTheme<UiMaterialTheme>();
+        if (!materialTheme) {
+            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "uiMaterial theme not found");
             return;
         }
+        auto params = materialTheme->GetUiMaterialParam(materialType, pipeline);
+        if (!params) {
+            TAG_LOGW(AceLogTag::ACE_VISUAL_EFFECT, "GetUiMaterialParam failed, type:%{public}d", materialType);
+            return;
+        }
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackgroundColor, params->backgroundColor, frameNode);
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, params->borderWidth, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, params->borderWidth, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, params->borderColor, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, params->shadow, frameNode);
+        pattern->OnUiMaterialParamUpdate(params.value());
+    };
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
         updateFunc(nullptr);
+        if (materialType != MaterialType::NONE) {
+            RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+            pattern->AddResObj("viewAbstract.uiMaterial", resObj, std::move(updateFunc));
+        } else {
+            pattern->RemoveResObj("viewAbstract.uiMaterial");
+        }
+        return;
     }
+    updateFunc(nullptr);
 }
 
 void ViewAbstract::SetOverlay(const OverlayOptions& overlay)
@@ -6923,7 +6931,7 @@ void ViewAbstract::SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType
 
 void ViewAbstract::SetUseUnion(FrameNode* frameNode, bool useUnion)
 {
-    ACE_UPDATE_NODE_RENDER_CONTEXT(UseUnion, useUnion, frameNode);
+    ACE_UPDATE_NODE_RENDER_CONTEXT(UseUnionEffect, useUnion, frameNode);
 }
 
 void ViewAbstract::SetForegroundColor(FrameNode* frameNode, const Color& color)

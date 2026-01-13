@@ -97,9 +97,6 @@ bool WebSelectOverlay::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuPar
     auto host = pattern->GetHost();
     CHECK_NULL_RETURN(host, false);
     StartListenSelectOverlayParentScroll(host);
-    auto delegate = pattern->delegate_;
-    CHECK_NULL_RETURN(delegate, false);
-    delegate->OnTextSelectionChange(delegate->GetLastSelectionText(), true);
     ProcessOverlay({ .animation = true });
     SetTouchHandleExistState(true);
     return true;
@@ -608,15 +605,22 @@ void WebSelectOverlay::QuickMenuIsNeedNewAvoid(
         } else {
             selectInfo.selectArea =
                 ComputeClippedSelectionBounds(params, startHandle, endHandle, selectInfo.isNewAvoid);
+            selectInfo.selectArea =
+                ComputeClippedSelectionBounds(params);
         }
     } else {
-        float selectX = params->GetSelectX();
-        float selectY = params->GetSelectY();
-        float selectWidth = params->GetSelectWidth();
-        float selectHeight = params->GetSelectXHeight();
-        selectInfo.selectArea = RectF(selectX, selectY, selectWidth, selectHeight);
-        selectInfo.selectArea = ComputeSelectAreaRect(selectInfo.selectArea);
+        selectInfo.selectArea = ComputeClippedSelectionBounds(params);
     }
+}
+
+RectF WebSelectOverlay::ComputeClippedSelectionBounds(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> params)
+{
+    float selectX = params->GetSelectX();
+    float selectY = params->GetSelectY();
+    float selectWidth = params->GetSelectWidth();
+    float selectHeight = params->GetSelectXHeight();
+    RectF selectArea(selectX, selectY, selectWidth, selectHeight);
+    return ComputeSelectAreaRect(selectArea);
 }
 
 RectF WebSelectOverlay::ComputeClippedSelectionBounds(
@@ -764,8 +768,9 @@ RectF WebSelectOverlay::ComputeSelectAreaRect(RectF& selectArea)
     RectF selectAreaRect;
     auto offset = pattern->GetCoordinatePoint().value_or(OffsetF());
     auto size = pattern->GetHostFrameSize().value_or(SizeF());
-    float x = selectArea.GetX();
-    float y = selectArea.GetY();
+    auto viewPort = GetViewPortFromHandle();
+    float x = selectArea.GetX() + viewPort.Left();
+    float y = selectArea.GetY() + viewPort.Top();
 
     if (x > size.Width()) {
         x = offset.GetX() + size.Width();
@@ -784,6 +789,20 @@ RectF WebSelectOverlay::ComputeSelectAreaRect(RectF& selectArea)
     selectAreaRect.SetOffset({ x, y });
     selectAreaRect.SetSize({ selectArea.Width(), selectArea.Height()});
     return selectAreaRect;
+}
+
+RectF WebSelectOverlay::GetViewPortFromHandle()
+{
+    int32_t x = 0;
+    int32_t y = 0;
+    if (startSelectionHandle_) {
+        x = startSelectionHandle_->GetViewPortX();
+        y = startSelectionHandle_->GetViewPortY();
+    } else if (endSelectionHandle_) {
+        x = endSelectionHandle_->GetViewPortX();
+        y = endSelectionHandle_->GetViewPortY();
+    }
+    return RectF(x, y, 0, 0);
 }
 
 WebOverlayType WebSelectOverlay::GetTouchHandleOverlayType(
@@ -1051,6 +1070,7 @@ void WebSelectOverlay::OnHandleMoveStart(const GestureEvent& event, bool isFirst
     CHECK_NULL_VOID(pattern);
     auto delegate = pattern->delegate_;
     CHECK_NULL_VOID(delegate);
+    pattern->SetTextSelectionEnable(true);
     RectF handleRect = ChangeHandleHeight(event, isFirst);
     TouchInfo touchPoint;
     touchPoint.id = 0;
@@ -1076,6 +1096,8 @@ void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
     CHECK_NULL_VOID(pattern);
     auto delegate = pattern->delegate_;
     CHECK_NULL_VOID(delegate);
+    pattern->SetTextSelectionEnable(false);
+    delegate->OnTextSelectionChange(delegate->GetLastSelectionText());
     DetectSelectedText(GetSelectedText());
     TouchInfo touchPoint;
     touchPoint.id = 0;
@@ -1089,7 +1111,6 @@ void WebSelectOverlay::OnHandleMoveDone(const RectF& rect, bool isFirst)
         pattern->SetOverlayCreating(false);
         delegate->HandleTouchCancel();
     }
-    delegate->OnTextSelectionChange(delegate->GetLastSelectionText(), true);
     UpdateTouchHandleForOverlay(true);
     if (!IsShowMenu()) {
         ChangeVisibilityOfQuickMenu();
@@ -1412,6 +1433,22 @@ void WebSelectOverlay::UpdateAISelectMenu(TextDataDetectType type, const std::st
     manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM);
 }
 
+void WebSelectOverlay::UpdateTextSelectionHolderId()
+{
+    auto pattern = GetPattern<WebPattern>();
+    CHECK_NULL_VOID(pattern);
+    auto host = pattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
+    CHECK_NULL_VOID(context);
+    auto selectOverlayManager = context->GetSelectOverlayManager();
+    CHECK_NULL_VOID(selectOverlayManager);
+    auto manager = selectOverlayManager->GetSelectContentOverlayManager();
+    CHECK_NULL_VOID(manager);
+    TAG_LOGD(AceLogTag::ACE_WEB, "UpdateTextSelectionHolderId id %{public}d", host->GetId());
+    manager->SetTextSelectionHolderId(host->GetId());
+}
+
 void WebSelectOverlay::UpdateIsSelectAll()
 {
     if (isSelectAll_) {
@@ -1549,10 +1586,11 @@ void WebSelectOverlay::InitMenuAvoidStrategyAboutTop(MenuAvoidStrategyMember& me
 {
     auto& info = member.info;
     SelectHandleInfo upHandle = info->handleReverse ? info->secondHandle : info->firstHandle;
+    auto virtualPaint = upHandle.isShow ? upHandle.GetPaintRect() : info->selectArea;
     auto topArea = static_cast<double>(tools.safeAreaManager->GetSystemSafeArea().top_.Length());
     auto rootTop = static_cast<double>(tools.pipeline->GetRootRect().Top());
 
-    member.upPaint = upHandle.GetPaintRect() - tools.geometryNode->GetFrameOffset() + member.windowOffset;
+    member.upPaint = virtualPaint - tools.geometryNode->GetFrameOffset() + member.windowOffset;
     member.topArea = GreatNotEqual(rootTop, topArea) ? rootTop : topArea;
     bool verticalInLimit = GreatNotEqual(member.upPaint.Top(), member.topArea);
     member.selectionTop = verticalInLimit ? member.upPaint.Top() : member.topArea;
@@ -1562,7 +1600,8 @@ void WebSelectOverlay::InitMenuAvoidStrategyAboutBottom(MenuAvoidStrategyMember&
 {
     auto info = member.info;
     SelectHandleInfo downHandle = info->handleReverse ? info->firstHandle : info->secondHandle;
-    auto downPaint = downHandle.GetPaintRect() - tools.geometryNode->GetFrameOffset() + member.windowOffset;
+    auto virtualPaint = downHandle.isShow ? downHandle.GetPaintRect() : info->selectArea;
+    auto downPaint = virtualPaint - tools.geometryNode->GetFrameOffset() + member.windowOffset;
     auto handleBottom = static_cast<double>(downPaint.Bottom());
     bool hasKeyboard = member.hasKeyboard;
     auto frameHeight = tools.geometryNode->GetFrameRect().Height();
@@ -1615,7 +1654,6 @@ void WebSelectOverlay::SingleHandlePosition(OffsetF& menuOffset, MenuAvoidStrate
 
 void WebSelectOverlay::MenuAvoidStrategy(OffsetF& menuOffset, MenuAvoidStrategyMember& member)
 {
-    SetDefaultDownPaint(member);
     if (member.needReset) {
         double fixY = member.upPaint.Top() - member.avoidFromText - member.menuHeight;
         if (GreatNotEqual(fixY, member.topArea)) {

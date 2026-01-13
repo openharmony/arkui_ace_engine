@@ -555,9 +555,14 @@ HWTEST_F(RichEditorDragTestNg, HandleOnDragDropTextOperation001, TestSize.Level2
     EXPECT_EQ(richEditorPattern->contentMod_, nullptr);
     EXPECT_NE(richEditorPattern->overlayMod_, nullptr);
 
-    auto temp = richEditorPattern->caretPosition_;
+    auto caretPosition = richEditorPattern->caretPosition_;
+    auto lastCaretPosition = richEditorPattern->lastCaretPosition_;
     richEditorPattern->HandleOnDragDropTextOperation(INIT_VALUE_1, false);
-    EXPECT_NE(richEditorPattern->caretPosition_, temp);
+
+    auto newCaretPosition = richEditorPattern->caretPosition_;
+    auto newLastCaretPosition = richEditorPattern->lastCaretPosition_;
+    EXPECT_NE(newCaretPosition, caretPosition);
+    EXPECT_EQ(newLastCaretPosition, lastCaretPosition);
 }
 
 /**

@@ -38,6 +38,7 @@ public:
     MOCK_METHOD0(GetLoopCount, int32_t());
     MOCK_METHOD0(GetDelayTime, std::vector<int32_t>());
     MOCK_METHOD0(IsHeifWithoutAlpha, bool());
+    MOCK_METHOD0(GetImageOrientation, ImageRotateOrientation());
 
     static RefPtr<MockImageSource> mockImageSource_;
 };

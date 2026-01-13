@@ -417,6 +417,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         {
             this._format_0_flag = AttributeUpdaterFlag.UPDATE
             this._format_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._format_0_flag = AttributeUpdaterFlag.SKIP
@@ -428,6 +429,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         {
             this._onDateChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDateChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDateChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -439,6 +441,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -450,6 +453,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontSize_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontSize_0_flag = AttributeUpdaterFlag.SKIP
@@ -461,6 +465,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -472,6 +477,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontWeight_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.SKIP
@@ -483,6 +489,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontFamily_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontFamily_0_flag = AttributeUpdaterFlag.SKIP
@@ -494,6 +501,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         {
             this._textShadow_0_flag = AttributeUpdaterFlag.UPDATE
             this._textShadow_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textShadow_0_flag = AttributeUpdaterFlag.SKIP
@@ -505,6 +513,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         {
             this._fontFeature_0_flag = AttributeUpdaterFlag.UPDATE
             this._fontFeature_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fontFeature_0_flag = AttributeUpdaterFlag.SKIP
@@ -516,6 +525,7 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         {
             this._dateTimeOptions_0_flag = AttributeUpdaterFlag.UPDATE
             this._dateTimeOptions_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._dateTimeOptions_0_flag = AttributeUpdaterFlag.SKIP
@@ -523,10 +533,11 @@ export class TextClockModifier extends CommonMethodModifier implements TextClock
         return this
     }
     contentModifier(value: ContentModifier<TextClockConfiguration> | undefined): this {
-        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._contentModifier_0_0value) !== (value)))
+        if (((this._contentModifier_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.UPDATE
             this._contentModifier_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._contentModifier_0_flag = AttributeUpdaterFlag.SKIP

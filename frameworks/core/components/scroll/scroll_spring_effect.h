@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT ScrollSpringEffect final : public ScrollEdgeEffect {
+class ACE_FORCE_EXPORT ScrollSpringEffect final : public ScrollEdgeEffect {
     DECLARE_ACE_TYPE(ScrollSpringEffect, ScrollEdgeEffect);
 
 public:

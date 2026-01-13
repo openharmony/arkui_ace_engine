@@ -108,6 +108,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   private elmtIdsDelayedUpdate_: Set<number> = new Set();
 
   protected __lifecycle__Internal: CustomComponentLifecycle;
+  protected __isReuseNodeNeedAttach__Internal: boolean = false;
 
   protected static prebuildPhase_: PrebuildPhase = PrebuildPhase.None;
   protected isPrebuilding_: boolean = false;
@@ -168,12 +169,12 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.__lifecycle__Internal;
   }
 
+  public __setIsReuseNodeNeedAttach__Internal(isReuseNodeNeedAttach: boolean): void {
+    this.__isReuseNodeNeedAttach__Internal = isReuseNodeNeedAttach;
+  }
+
   public static create(view: PUV2ViewBase): void {
     return NativeViewPartialUpdate.create(view.nativeViewPartialUpdate);
-  }
-  
-  public getElementNameById(elmntId: number): string {
-    return this.updateFuncByElmtId.getElementNameById(elmntId);
   }
 
   static createRecycle(componentCall: object, isRecycling: boolean, reuseId: string, callback: () => void): void {
@@ -953,7 +954,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
         !child.hasBeenRecycled_ &&
         !child.__isBlockRecycleOrReuse__
       ) {
+        child.__setIsReuseNodeNeedAttach__Internal(true);
         recyleOrReuse ? child.aboutToRecycleInternal() : child.aboutToReuseInternal();
+        child.__setIsReuseNodeNeedAttach__Internal(false);
       } // if child
     });
   }
@@ -1050,7 +1053,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   public abstract __getPathValueFromJson__Internal(propertyName: string, jsonPath: string): string | undefined;
 
-  protected __findPathValueInJson__Internal(jsonValue: Object, jsonPath: string): string | undefined {
+  protected __findPathValueInJson__Internal(jsonValue: any, jsonPath: string): string | undefined {
     const paths = jsonPath.split('/').filter(path => path.length > 0);
     let current = jsonValue;
     for (const path of paths) {
@@ -1062,6 +1065,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       }
       current = current[path];
     }
-    return typeof current === 'string' ? current : undefined;
+    return typeof current === 'string' ? current : JSON.stringify(current);
   }
 } // class PUV2ViewBase

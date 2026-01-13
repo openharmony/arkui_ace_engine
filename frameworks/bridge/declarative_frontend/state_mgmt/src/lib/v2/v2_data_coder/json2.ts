@@ -31,7 +31,8 @@ class JSON2 {
     const serializeSendable = (value: unknown): string => {
       // Sendables can only be deserialized via JSON.parseSendable, which skips the
       // reviver, so encoding types and using Meta aliases is useless.
-      return (JSON as any)?.stringifySendable(value)?? '';
+      JSON2.throwIfNotJSONSafe(value);
+      return (JSON as any).stringifySendable(value);
     };
 
     const replace = function (key: string, val: any, root: any): any {
@@ -57,7 +58,6 @@ class JSON2 {
       if (value instanceof Date) { return `Da${refId}${value.toISOString()}`; }
       if (value instanceof Number) { return `Nu${refId}${value.toString()}`; }
       if (value instanceof String) { return `St${refId}${value}`; }
-      if (value instanceof Map) { return `Ma${refId}${serialize([...value])}`; }
       if (value instanceof Set) { return `Se${refId}${serialize([...value])}`; }
       if (value instanceof SendableArray) { return `SA${refId}${serializeSendable([...value])}`; }
       if (value instanceof SendableMap) { return `SM${refId}${serializeSendable([...value])}`; }
@@ -65,10 +65,17 @@ class JSON2 {
       if (globalThis.isSendable(value)) { return `SO${refId}${serializeSendable(value)}`; }
 
       if (value instanceof Array) {
-        // serialize each item, then put them back together
+        // serialize each item separately, then put them back together
         const items = value.map(item => JSON.parse(serialize(item)));
         // and stringify
         return `Ar${refId}${JSON.stringify(items)}`;
+      }
+
+      if (value instanceof Map) {
+        // serialize each item separately, keep keys unchanged
+        const items = [...value].map(([key, val]) => [key, serialize(val)]);
+        // and stringify
+        return `Ma${refId}${JSON.stringify(items)}`;
       }
 
       // replace property names with their aliases if any, skip disabled ones
@@ -106,19 +113,19 @@ class JSON2 {
           return;
         }
 
-        if (typeof value !== 'string') { return; }
+        if (typeof value !== 'string') {
+          return;
+        }
+
         const { type, refId, payload } = JSON2.parseTRP(value);
 
         if (type === 're') {
-          if (obj instanceof Array || obj instanceof SendableArray) {
-            obj[key] = objects.get(refId);
-            return;
-          }
           if (obj instanceof Map || obj instanceof SendableMap) {
             obj.set(key, objects.get(refId));
             return;
           }
           if (obj instanceof Set || obj instanceof SendableSet) {
+            obj.delete(key);
             obj.add(objects.get(refId));
             return;
           }
@@ -126,8 +133,16 @@ class JSON2 {
         }
 
         if (type === 'st') {
+          if (obj instanceof Map) {
+            obj.set(key, payload);
+            return;
+          }
+          if (obj instanceof Set) {
+            obj.delete(key);
+            obj.add(payload);
+            return;
+          }
           obj[key] = payload;
-          return;
         }
 
       })
@@ -160,6 +175,9 @@ class JSON2 {
     const parse = (str: string): any =>
       JSON.parse(str, reviver)
 
+    const parseMap = (str: string): Map<string|number, string> =>
+      new Map(JSON.parse(str).map(([key, val]: [string|number, string]) => [key, parse(val)]))
+
     const parseSendable = (str: string): any =>
       // reviver is not supported by parseSendable()
       (JSON as any)?.parseSendable(str)?? ''
@@ -173,7 +191,7 @@ class JSON2 {
       if (type === 'Nu') { result = new Number(payload); }
       if (type === 'St') { result = new String(payload); }
       if (type === 'Ar') { result = parse(payload); }
-      if (type === 'Ma') { result = new Map(parse(payload)); }
+      if (type === 'Ma') { result = parseMap(payload); }
       if (type === 'Se') { result = new Set(parse(payload)); }
       if (type === 'SO') { result = parseSendable(payload); }
       if (type === 'SA') { result = new SendableArray(...parseSendable(payload)); }
@@ -250,4 +268,24 @@ class JSON2 {
       }
     }
   }
+
+  // Ensure value contains only JSON safe props
+  private static throwIfNotJSONSafe(value: unknown): void {
+    // allow plain types
+    if (typeof value !== 'object' || value === null) {
+      return;
+    }
+
+    // allow collections
+    if ([Array, Map, Set, SendableArray, SendableMap, SendableSet].some(clazz => value instanceof clazz)) {
+      return;
+    }
+
+    for (const [key, val] of Object.entries(value)) {
+      if (typeof val === 'object' && val !== null) {
+        throw new Error(`PersistenceV2: @Sendable only allows plain property types. Invalid key: ${key}`);
+      }
+    }
+  }
+
 }

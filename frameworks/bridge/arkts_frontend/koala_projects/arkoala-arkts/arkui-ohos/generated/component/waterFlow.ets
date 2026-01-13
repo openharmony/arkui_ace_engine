@@ -21,11 +21,11 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { ArkThemeScopeManager } from "#arktheme"
-import { ConstraintSizeOptions_serializer, ConstraintSizeOptions, Length, Dimension, Padding, Padding_serializer } from "./units"
+import { ConstraintSizeOptions_serializer, ConstraintSizeOptions, Length, Dimension, Padding, Padding_serializer, ItemFillPolicy_serializer, ItemFillPolicy } from "./units"
 import { Resource_serializer } from "./../framework/resource"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnWillScrollCallback, OnScrollCallback, CommonMethod, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkScrollableCommonMethodPeer, ScrollableCommonMethod, OnWillScrollCallback, OnScrollCallback, CommonMethod, ArkScrollableCommonMethodComponent, ArkScrollableCommonMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle, UIScrollableCommonEvent, UIScrollableCommonEventInternal } from "./common"
 import { Resource } from "global.resource"
 import { FlexDirection, ScrollSource } from "./enums"
 import { OnScrollFrameBeginCallback, Scroller, Scroller_serializer } from "./scroll"
@@ -64,12 +64,20 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._WaterFlowInterface_setWaterFlowOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setColumnsTemplateAttribute(value: string | undefined): void {
+    setColumnsTemplateAttribute(value: string | ItemFillPolicy | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeString(valueTmpValue)
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof ItemFillPolicy) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as ItemFillPolicy
+                ItemFillPolicy_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -172,6 +180,18 @@ export class ArkWaterFlowPeer extends ArkScrollableCommonMethodPeer {
         ArkUIGeneratedNativeModule._WaterFlowAttribute_setCachedCount0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSyncLoadAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._WaterFlowAttribute_setSyncLoad(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnScrollFrameBeginAttribute(value: OnScrollFrameBeginCallback | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -260,11 +280,12 @@ export interface WaterFlowOptions {
     sections?: WaterFlowSections;
     layoutMode?: WaterFlowLayoutMode;
 }
+export type OnWaterFlowScrollIndexCallback = (first: int32, last: int32) => void;
 export interface WaterFlowAttribute extends ScrollableCommonMethod {
     setWaterFlowOptions(options?: WaterFlowOptions): this {
         throw new Error("Unimplemented method setWaterFlowOptions")
     }
-    columnsTemplate(value: string | undefined): this {
+    columnsTemplate(value: string | ItemFillPolicy | undefined): this {
         throw new Error("Unimplemented method columnsTemplate")
     }
     itemConstraintSize(value: ConstraintSizeOptions | undefined): this {
@@ -284,6 +305,9 @@ export interface WaterFlowAttribute extends ScrollableCommonMethod {
     }
     cachedCount(value: int32 | undefined): this {
         throw new Error("Unimplemented method cachedCount")
+    }
+    syncLoad(value: boolean | undefined): this {
+        throw new Error("Unimplemented method syncLoad")
     }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
         throw new Error("Unimplemented method onScrollFrameBegin")
@@ -305,13 +329,14 @@ export interface WaterFlowAttribute extends ScrollableCommonMethod {
     }
 }
 export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements WaterFlowAttribute {
-    columnsTemplate_value?: string | undefined
+    columnsTemplate_value?: string | ItemFillPolicy | undefined
     itemConstraintSize_value?: ConstraintSizeOptions | undefined
     rowsTemplate_value?: string | undefined
     columnsGap_value?: Length | undefined
     rowsGap_value?: Length | undefined
     layoutDirection_value?: FlexDirection | undefined
     cachedCount_value?: int32 | undefined
+    syncLoad_value?: boolean | undefined
     onScrollFrameBegin_value?: OnScrollFrameBeginCallback | undefined
     onScrollIndex_value?: ((first: int32,last: int32) => void) | undefined
     onWillScroll_value?: OnWillScrollCallback | undefined
@@ -320,7 +345,7 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
     setWaterFlowOptions(options?: WaterFlowOptions): this {
         return this
     }
-    columnsTemplate(value: string | undefined): this {
+    columnsTemplate(value: string | ItemFillPolicy | undefined): this {
         return this
     }
     itemConstraintSize(value: ConstraintSizeOptions | undefined): this {
@@ -339,6 +364,9 @@ export class ArkWaterFlowStyle extends ArkScrollableCommonMethodStyle implements
         return this
     }
     cachedCount(value: int32 | undefined): this {
+        return this
+    }
+    syncLoad(value: boolean | undefined): this {
         return this
     }
     onScrollFrameBegin(value: OnScrollFrameBeginCallback | undefined): this {
@@ -377,9 +405,9 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         }
         return this
     }
-    public columnsTemplate(value: string | undefined): this {
+    public columnsTemplate(value: string | ItemFillPolicy | undefined): this {
         if (this.checkPriority("columnsTemplate")) {
-            const value_casted = value as (string | undefined)
+            const value_casted = value as (string | ItemFillPolicy | undefined)
             this.getPeer()?.setColumnsTemplateAttribute(value_casted)
             return this
         }
@@ -429,6 +457,14 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
         if (this.checkPriority("cachedCount")) {
             const value_casted = value as (int32 | undefined)
             this.getPeer()?.setCachedCount0Attribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public syncLoad(value: boolean | undefined): this {
+        if (this.checkPriority("syncLoad")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setSyncLoadAttribute(value_casted)
             return this
         }
         return this
@@ -516,6 +552,17 @@ export class WaterFlowSections_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return WaterFlowSectionsInternal.fromPtr(ptr)
+    }
+}
+export class UIWaterFlowEvent_serializer {
+    public static write(buffer: SerializerBase, value: UIWaterFlowEvent): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): UIWaterFlowEvent {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return UIWaterFlowEventInternal.fromPtr(ptr)
     }
 }
 export class WaterFlowOptions_serializer {
@@ -793,5 +840,76 @@ export class SectionOptions_serializer {
         const marginTmpResult : Padding | Dimension | undefined = marginTmpBuf
         let value : SectionOptions = ({itemsCount: itemsCountTmpResult, crossCount: crossCountTmpResult, onGetItemMainSizeByIndex: onGetItemMainSizeByIndexTmpResult, columnsGap: columnsGapTmpResult, rowsGap: rowsGapTmpResult, margin: marginTmpResult} as SectionOptions)
         return value
+    }
+}
+export interface UIWaterFlowEvent extends UIScrollableCommonEvent {
+    setOnWillScroll(callback_: OnWillScrollCallback | undefined): void
+    setOnDidScroll(callback_: OnScrollCallback | undefined): void
+    setOnScrollIndex(callback_: OnWaterFlowScrollIndexCallback | undefined): void
+}
+export class UIWaterFlowEventInternal extends UIScrollableCommonEventInternal implements MaterializedBase,UIWaterFlowEvent {
+    constructor(peerPtr: KPointer) {
+        super(peerPtr)
+    }
+    static construct(ptr: KPointer): UIWaterFlowEventInternal {
+        const retval  = ArkUIGeneratedNativeModule._UIWaterFlowEvent_construct(ptr)
+        return new UIWaterFlowEventInternal(retval)
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._UIWaterFlowEvent_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): UIWaterFlowEventInternal {
+        return new UIWaterFlowEventInternal(ptr)
+    }
+    public setOnWillScroll(callback_: OnWillScrollCallback | undefined): void {
+        const callback__casted = callback_ as (OnWillScrollCallback | undefined)
+        this.setOnWillScroll_serialize(callback__casted)
+        return
+    }
+    public setOnDidScroll(callback_: OnScrollCallback | undefined): void {
+        const callback__casted = callback_ as (OnScrollCallback | undefined)
+        this.setOnDidScroll_serialize(callback__casted)
+        return
+    }
+    public setOnScrollIndex(callback_: OnWaterFlowScrollIndexCallback | undefined): void {
+        const callback__casted = callback_ as (OnWaterFlowScrollIndexCallback | undefined)
+        this.setOnScrollIndex_serialize(callback__casted)
+        return
+    }
+    setOnWillScroll_serialize(callback_: OnWillScrollCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIWaterFlowEvent_setOnWillScroll(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnDidScroll_serialize(callback_: OnScrollCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIWaterFlowEvent_setOnDidScroll(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setOnScrollIndex_serialize(callback_: OnWaterFlowScrollIndexCallback | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._UIWaterFlowEvent_setOnScrollIndex(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }

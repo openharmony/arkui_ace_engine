@@ -29,16 +29,25 @@ class JSThemeUtils {
 public:
     static constexpr int32_t DEFAULT_ALPHA = 255;
     static constexpr double DEFAULT_OPACITY = 0.2;
+    inline static std::shared_mutex themeMutex_;
     
     static std::optional<JSTheme> GetTheme()
     {
+        std::shared_lock<std::shared_mutex> lock(themeMutex_);
         return JSThemeScope::jsCurrentTheme;
     }
 
     static std::optional<JSThemeColors> GetThemeColors()
     {
+        std::shared_lock<std::shared_mutex> lock(themeMutex_);
         return (JSThemeScope::jsCurrentTheme) ?
             std::make_optional(JSThemeScope::jsCurrentTheme->Colors()) : std::nullopt;
+    }
+
+    static void SwapCurrentTheme(std::optional<JSTheme>& themeOpt)
+    {
+        std::unique_lock<std::shared_mutex> lock(themeMutex_);
+        JSThemeScope::jsCurrentTheme.swap(themeOpt);
     }
 };
 }

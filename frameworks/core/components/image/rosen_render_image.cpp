@@ -31,6 +31,7 @@
 #else
 #include "core/components_ng/render/adapter/drawing_image.h"
 #endif
+#include "core/common/dynamic_module_helper.h"
 #include "core/image/image_object.h"
 #include "core/pipeline/base/rosen_render_context.h"
 
@@ -55,6 +56,21 @@ const float GRAY_COLOR_MATRIX[20] = { 0.30f, 0.59f, 0.11f, 0, 0, // red
 #ifdef USE_ROSEN_DRAWING
 constexpr float FLOAT_HALF = 0.5f;
 #endif
+
+const ArkUISvgCompatibleModifier* GetSvgCompatibleModifier()
+{
+    static const ArkUISvgCompatibleModifier* svgCompatibleModifier_ = nullptr;
+
+    if (svgCompatibleModifier_) {
+        return svgCompatibleModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("svg");
+    if (loader) {
+        svgCompatibleModifier_ = reinterpret_cast<const ArkUISvgCompatibleModifier*>(loader->GetCustomModifier());
+        return svgCompatibleModifier_;
+    }
+    return nullptr;
+}
 } // namespace
 
 #ifndef USE_ROSEN_DRAWING
@@ -440,13 +456,15 @@ void RosenRenderImage::ProcessPixmapForPaint()
 
 void RosenRenderImage::PerformLayoutSvgImage()
 {
-    if (svgRenderTree_.root) {
+    if (svgRenderTree_ && svgRenderTree_->root) {
         ACE_SVG_SCOPED_TRACE("RosenRenderImage::PerformLayoutSvgImage");
         SvgRadius svgRadius = { topLeftRadius_, topRightRadius_, bottomLeftRadius_, bottomRightRadius_ };
-        svgRenderTree_.containerSize = GetLayoutSize();
-        SvgDom svgDom(context_);
-        svgDom.SetSvgRenderTree(svgRenderTree_);
-        svgDom.UpdateLayout(imageFit_, svgRadius, !directPaint_);
+        svgRenderTree_->containerSize = GetLayoutSize();
+        const auto* modifier = GetSvgCompatibleModifier();
+        CHECK_NULL_VOID(modifier);
+        auto refContext = context_.Upgrade();
+        modifier->setSvgRenderTreeAndUpdateLayout(
+            AceType::RawPtr(refContext), svgRenderTree_.get(), imageFit_, &svgRadius, !directPaint_);
     }
 }
 
@@ -484,9 +502,17 @@ void RosenRenderImage::CreateSvgNodes()
     svgDom_->SetFinishEvent(svgAnimatorFinishEvent_);
     svgDom_->SetContainerSize(GetLayoutSize());
     SvgRadius svgRadius = { topLeftRadius_, topRightRadius_, bottomLeftRadius_, bottomRightRadius_ };
-    auto svgRenderTree = svgDom_->CreateRenderTree(imageFit_, svgRadius, !directPaint_);
-    if (svgRenderTree.root == nullptr) {
+    const auto* modifier = GetSvgCompatibleModifier();
+    CHECK_NULL_VOID(modifier);
+    auto svgRenderTreePtr = modifier->createRenderTree(svgDom_, imageFit_, &svgRadius, !directPaint_);
+    if (svgRenderTreePtr == nullptr) {
         svgDom_ = nullptr;
+        return;
+    }
+    auto svgRenderTree = std::unique_ptr<SvgRenderTree>(reinterpret_cast<SvgRenderTree*>(svgRenderTreePtr));
+    if (!svgRenderTree || !svgRenderTree->root) {
+        svgDom_ = nullptr;
+        svgRenderTree.reset();
         return;
     }
     if (!directPaint_) {
@@ -494,11 +520,11 @@ void RosenRenderImage::CreateSvgNodes()
     }
 }
 
-void RosenRenderImage::RebuildSvgRenderTree(const SvgRenderTree& svgRenderTree, const RefPtr<SvgDom>& svgDom)
+void RosenRenderImage::RebuildSvgRenderTree(std::unique_ptr<SvgRenderTree>& svgRenderTree, const RefPtr<SvgDom>& svgDom)
 {
-    svgRenderTree_ = svgRenderTree;
+    svgRenderTree_ = std::move(svgRenderTree);
     ClearChildren();
-    AddChild(svgRenderTree_.root);
+    AddChild(svgRenderTree_->root);
     MarkNeedRender();
 }
 
@@ -633,7 +659,10 @@ void RosenRenderImage::Paint(RenderContext& context, const Offset& offset)
 #else
             canvas->Translate(static_cast<float>(offset.GetX()), static_cast<float>(offset.GetY()));
 #endif
-            svgDom_->PaintDirectly(context, offset, imageFit_, GetLayoutSize());
+            const auto* modifier = GetSvgCompatibleModifier();
+            CHECK_NULL_VOID(modifier);
+            auto size = GetLayoutSize();
+            modifier->paintDirectly(svgDom_, &context, &offset, imageFit_, &size);
             return;
         }
         DrawSVGImage(offset, canvas);
@@ -1354,8 +1383,8 @@ void RosenRenderImage::DrawSVGImage(const Offset& offset, RSCanvas* canvas)
 
 void RosenRenderImage::DrawSVGImageCustom(RenderContext& context, const Offset& offset)
 {
-    if (svgRenderTree_.root) {
-        PaintChild(svgRenderTree_.root, context, offset);
+    if (svgRenderTree_->root) {
+        PaintChild(svgRenderTree_->root, context, offset);
     }
 }
 
@@ -1441,7 +1470,9 @@ void RosenRenderImage::ClearRenderObject()
     imageObj_ = nullptr;
     skiaDom_ = nullptr;
     svgDom_ = nullptr;
-    svgRenderTree_.ClearRenderObject();
+    if (svgRenderTree_) {
+        svgRenderTree_->ClearRenderObject();
+    }
 }
 
 bool RosenRenderImage::IsSourceWideGamut() const

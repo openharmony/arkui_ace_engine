@@ -4100,6 +4100,22 @@ class OnVisibleAreaChangeModifier extends ModifierWithKey<ArkOnVisibleAreaChange
   }
 }
 
+class OnVisibleAreaApproximateChangeModifier extends ModifierWithKey<ArkOnVisibleAreaApproximateChange> {
+  constructor(value: ArkOnVisibleAreaApproximateChange) {
+      super(value);
+  }
+  static identity: Symbol = Symbol('onVisibleAreaApproximateChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnVisibleAreaApproximateChange(node);
+    } else {
+      getUINativeModule().common.setOnVisibleAreaApproximateChange(node, this.value.event, this.value.ratios,
+        this.value.expectedUpdateInterval ? this.value.expectedUpdateInterval : 1000,
+        this.value.measureFromViewport ? this.value.measureFromViewport : false);
+    }
+  }
+}
+
 declare type TouchInterceptCallback = Callback<TouchEvent, HitTestMode>;
 class OnTouchInterceptModifier extends ModifierWithKey<TouchInterceptCallback> {
   constructor(value: TouchInterceptCallback) {
@@ -5753,15 +5769,32 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  onVisibleAreaChange(ratios: Array<number>, event: (isVisible: boolean, currentRatio: number) => void): this {
+  onVisibleAreaChange(ratios: Array<number>, event: (isVisible: boolean, currentRatio: number) => void, measureFromViewport?: boolean): this {
     let onVisibleAreaChange = new ArkOnVisibleAreaChange();
     onVisibleAreaChange.ratios = ratios;
     onVisibleAreaChange.event = event;
+    onVisibleAreaChange.measureFromViewport = measureFromViewport;
     this._onVisibleAreaChange = onVisibleAreaChange;
     if (typeof ratios === 'undefined' || typeof event === 'undefined') {
       modifierWithKey(this._modifiersWithKeys, OnVisibleAreaChangeModifier.identity, OnVisibleAreaChangeModifier, undefined);
     } else {
       modifierWithKey(this._modifiersWithKeys, OnVisibleAreaChangeModifier.identity, OnVisibleAreaChangeModifier, onVisibleAreaChange);
+    }
+    return this;
+  }
+
+  onVisibleAreaApproximateChange(options: VisibleAreaEventOptions, event: (isVisible: boolean, currentRatio: number) => void) {
+    let onVisibleAreaApproximateChange = new ArkOnVisibleAreaApproximateChange();
+    onVisibleAreaApproximateChange.ratios = options.ratios;
+    onVisibleAreaApproximateChange.event = event;
+    onVisibleAreaApproximateChange.expectedUpdateInterval = options.expectedUpdateInterval;
+    onVisibleAreaApproximateChange.measureFromViewport = options.measureFromViewport;
+    this._onVisibleAreaApproximateChange = onVisibleAreaApproximateChange;
+    if (typeof options.ratios === 'undefined' || typeof event === 'undefined') {
+      modifierWithKey(this._modifiersWithKeys, OnVisibleAreaApproximateChangeModifier.identity, OnVisibleAreaApproximateChangeModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, OnVisibleAreaApproximateChangeModifier.identity, OnVisibleAreaApproximateChangeModifier,
+        onVisibleAreaApproximateChange);
     }
     return this;
   }

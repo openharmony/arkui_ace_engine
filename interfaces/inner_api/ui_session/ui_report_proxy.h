@@ -104,6 +104,11 @@ public:
     void SendExeAppAIFunctionResult(uint32_t result) override;
     void SendContentChange(ChangeType type, const std::string& simpleTree) override;
     void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
+    void SendWebInfoRequestResult(
+        uint32_t windowId,
+        int32_t webId,
+        const std::string& request,
+        const std::string& result, WebRequestErrorCode errorCode) override;
 
 private:
     static inline BrokerDelegator<UiReportProxy> delegator_;

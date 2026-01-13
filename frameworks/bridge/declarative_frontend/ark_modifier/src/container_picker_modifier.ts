@@ -14,15 +14,15 @@
  */
 
 /// <reference path='./import.ts' />
-class ContainerPickerModifier extends ArkContainerPickerComponent implements AttributeModifier<PickerAttribute> {
+class ContainerPickerModifier extends ArkContainerPickerComponent implements AttributeModifier<UIPickerComponentAttribute> {
 
   constructor(nativePtr: KNode, classType: ModifierType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
   }
 
-  applyNormalAttribute(instance: PickerAttribute): void {
+  applyNormalAttribute(instance: UIPickerComponentAttribute): void {
     ModifierUtils.applySetOnChange(this);
-    ModifierUtils.applyAndMergeModifier<PickerAttribute, ArkContainerPickerComponent, ArkComponent>(instance, this);
+    ModifierUtils.applyAndMergeModifier<UIPickerComponentAttribute, ArkContainerPickerComponent, ArkComponent>(instance, this);
   }
 }

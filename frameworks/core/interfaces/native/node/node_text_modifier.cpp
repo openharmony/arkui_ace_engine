@@ -1673,8 +1673,10 @@ void SetMarqueeOptions(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* val
     marqueeOptions.UpdateTextMarqueeFadeout(value->fadeout);
     marqueeOptions.UpdateTextMarqueeStartPolicy(static_cast<MarqueeStartPolicy>(value->marqueeStartPolicy));
     marqueeOptions.UpdateTextMarqueeUpdatePolicy(static_cast<MarqueeUpdatePolicy>(value->marqueeUpdatePolicy));
-    CalcDimension spacing(value->spacing.value, static_cast<DimensionUnit>(value->spacing.units));
-    if (spacing.IsNegative()) {
+    auto unitEnum = static_cast<OHOS::Ace::DimensionUnit>(value->spacing.units);
+    CalcDimension spacing(value->spacing.value, unitEnum);
+
+    if (spacing.IsNegative() || unitEnum == OHOS::Ace::DimensionUnit::PERCENT) {
         spacing = DEFAULT_MARQUEE_SPACING_WIDTH;
     }
     marqueeOptions.UpdateTextMarqueeSpacing(spacing);
@@ -1726,6 +1728,39 @@ ArkUITextMarqueeOptions GetMarqueeOptions(ArkUINodeHandle node)
     option.spacing.value = spacingVal.ConvertToVp();
     option.spacing.units = static_cast<int32_t>(DimensionUnit::VP);
     return option;
+}
+
+void SetMarqueeOptionsByNode(ArkUINodeHandle node, struct ArkUITextMarqueeOptions* value,
+    void* spacingRawPtr)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+
+    TextMarqueeOptions marqueeOptions;
+    marqueeOptions.UpdateTextMarqueeStart(value->start);
+    marqueeOptions.UpdateTextMarqueeStep(GreatNotEqual(value->step, 0.0f) ?
+        Dimension(value->step, DimensionUnit::VP).ConvertToPx() : DEFAULT_MARQUEE_STEP_VALUE.ConvertToPx());
+    marqueeOptions.UpdateTextMarqueeLoop(value->loop);
+    marqueeOptions.UpdateTextMarqueeDirection(value->fromStart ?
+        MarqueeDirection::DEFAULT : MarqueeDirection::DEFAULT_REVERSE);
+    marqueeOptions.UpdateTextMarqueeDelay(value->delay);
+    marqueeOptions.UpdateTextMarqueeFadeout(value->fadeout);
+    marqueeOptions.UpdateTextMarqueeStartPolicy(static_cast<MarqueeStartPolicy>(value->marqueeStartPolicy));
+    marqueeOptions.UpdateTextMarqueeUpdatePolicy(static_cast<MarqueeUpdatePolicy>(value->marqueeUpdatePolicy));
+    CalcDimension spacing(value->spacing.value, static_cast<DimensionUnit>(value->spacing.units));
+    if (spacing.IsNegative()) {
+        spacing = DEFAULT_MARQUEE_SPACING_WIDTH;
+    }
+    marqueeOptions.UpdateTextMarqueeSpacing(spacing);
+
+    TextModelNG::SetMarqueeOptions(frameNode, marqueeOptions);
+    if (SystemProperties::ConfigChangePerform() && spacingRawPtr) {
+        auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(spacingRawPtr));
+        CHECK_NULL_VOID(resObj);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->RegisterResource<CalcDimension>("MarqueeSpacing", resObj, spacing);
+    }
 }
 
 void SetOnMarqueeStateChange(ArkUINodeHandle node, void* callback)
@@ -2696,6 +2731,15 @@ ArkUI_Uint32 GetTextSelectedDragPreviewStyle(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
     return TextModelNG::GetSelectedDragPreviewStyle(frameNode).GetValue();
 }
+
+void SetFontColorWithPlaceholder(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint32 colorPlaceholder)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    Color result = Color(color);
+    result.SetPlaceholder(static_cast<ColorPlaceholder>(colorPlaceholder));
+    TextModelNG::SetTextColor(frameNode, result);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2853,6 +2897,7 @@ const ArkUITextModifier* GetTextModifier()
         .setTextMarqueeOptions = SetMarqueeOptions,
         .resetTextMarqueeOptions = ResetMarqueeOptions,
         .getTextMarqueeOptions = GetMarqueeOptions,
+        .setTextMarqueeOptionsByNode = SetMarqueeOptionsByNode,
         .setOnMarqueeStateChange = SetOnMarqueeStateChange,
         .resetOnMarqueeStateChange = ResetOnMarqueeStateChange,
         .getLineCount = GetLineCount,
@@ -2895,6 +2940,7 @@ const ArkUITextModifier* GetTextModifier()
         .setTextSelectedDragPreviewStyle = SetTextSelectedDragPreviewStyle,
         .resetTextSelectedDragPreviewStyle = ResetTextSelectedDragPreviewStyle,
         .getTextSelectedDragPreviewStyle = GetTextSelectedDragPreviewStyle,
+        .setFontColorWithPlaceholder = SetFontColorWithPlaceholder,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

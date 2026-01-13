@@ -49,7 +49,7 @@ group("advanced_ui_component_static") {
       "toolbar:toolBar",
       "filter:Filter",
       "arcbutton:arcButton",
-      "formmenu:formMenu",
+      #"formmenu:formMenu",
       "arcslider:arcSlider",
     ]
   }

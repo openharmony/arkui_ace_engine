@@ -1693,7 +1693,7 @@ void UIExtensionPattern::InitializeAccessibility()
     focusWindowId_ = ngPipeline->GetFocusWindowId();
     if (accessibilityManager->IsRegister()) {
         accessibilityChildTreeCallback_->OnRegister(
-            realHostWindowId, accessibilityManager->GetTreeId());
+            realHostWindowId, accessibilityManager->GetTreeId(instanceId));
     }
     UIEXT_LOGI("UIExtension: %{public}" PRId64 " register child tree, realHostWindowId: %{public}u",
         accessibilityId, realHostWindowId);

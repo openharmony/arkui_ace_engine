@@ -23,7 +23,6 @@
 #include "core/common/ace_application_info.h"
 
 namespace OHOS::Ace::Framework {
-namespace {
 
 constexpr char JS_ENGINE_ENTRY[] = "OHOS_ACE_GetJsEngineLoader";
 
@@ -54,6 +53,7 @@ public:
     }
 };
 
+SINGLETON_INSTANCE_IMPL(DummyJsEngineLoader);
 DummyJsEngineLoader::DummyJsEngineLoader() = default;
 DummyJsEngineLoader::~DummyJsEngineLoader() = default;
 
@@ -86,8 +86,6 @@ JsEngineLoader& GetJsEngineLoader(const char* sharedLibrary)
 
     return *loader;
 }
-
-} // namespace
 
 JsEngineLoader& JsEngineLoader::Get(const char* sharedLibrary)
 {

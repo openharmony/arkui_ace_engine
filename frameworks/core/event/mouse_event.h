@@ -103,6 +103,7 @@ struct MouseEvent final : public PointerEvent {
     bool isMockWindowTransFlag = false;
     TimeStamp pressedTime;
     bool isRightButtonEventFromDoulbeTap = false;
+    bool isFalsifyCancel = false;
 
     int32_t GetEventIdentity() const
     {
@@ -380,7 +381,7 @@ public:
     {
         return pressedButtonsArray_;
     }
-
+    MouseEvent ConvertToMouseEvent() const;
     void SetIsRightButtonEventFromDoulbeTap(bool isRightButtonEventFromDoulbeTap)
     {
         isRightButtonEventFromDoulbeTap_ = isRightButtonEventFromDoulbeTap;

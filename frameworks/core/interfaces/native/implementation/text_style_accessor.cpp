@@ -64,7 +64,7 @@ Ark_TextStyle ConstructImpl(const Opt_TextStyleInterface* value)
             fontFamilies = theme->GetTextStyle().GetFontFamilies();
         }
         font.fontFamiliesNG = fontFamilies;
-        font.fontStyle = Converter::OptConvert<Ace::FontStyle>(options->fontStyle).value_or(Ace::FontStyle::NORMAL);
+        font.fontStyle = Converter::OptConvert<Ace::FontStyle>(options->fontStyle);
     }
     peer->span = Referenced::MakeRefPtr<FontSpan>(font);
 

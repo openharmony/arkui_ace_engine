@@ -15,10 +15,11 @@
 
 #include "core/components/dialog/action_sheet/action_sheet_component.h"
 
+#include "compatible/components/list_v2/list_component.h"
+#include "compatible/components/list_v2/list_item_component.h"
 #include "core/components/image/image_component.h"
+#include "core/components/list/list_compatible_modifier_helper.h"
 #include "core/components/scroll/scroll_component.h"
-#include "core/components_v2/list/list_component.h"
-#include "core/components_v2/list/list_item_component.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -71,13 +72,16 @@ void ActionSheetComponent::BuildMenu(const RefPtr<ColumnComponent>& column)
     if (sheetsInfo.empty()) {
         return;
     }
-
-    auto list = AceType::MakeRefPtr<V2::ListComponent>();
+    auto* listModifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+    CHECK_NULL_VOID(listModifier);
+    auto list = listModifier->makeV2ListComponent();
     for (const auto& sheetInfo : sheetsInfo) {
         if (!sheetInfo.IsValid()) {
             continue;
         }
-        auto listItem = AceType::MakeRefPtr<V2::ListItemComponent>();
+        auto* listItemModifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+        CHECK_NULL_VOID(listItemModifier);
+        auto listItem = listItemModifier->makeV2ListItemComponent();
         std::list<RefPtr<Component>> rowChildren;
         auto row = AceType::MakeRefPtr<RowComponent>(FlexAlign::FLEX_START, FlexAlign::CENTER, rowChildren);
         if (!sheetInfo.icon.empty()) {

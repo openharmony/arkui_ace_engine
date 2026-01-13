@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,6 +25,7 @@ class ACE_EXPORT WaterFlowItemModelNG : public OHOS::Ace::WaterFlowItemModel {
 public:
     void Create() override;
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static void CreateFrameNode();
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WATERFLOW_WATER_FLOW_ITEM_MODEL_NG_H

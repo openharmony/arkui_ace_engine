@@ -577,7 +577,8 @@ export enum ImageSpanAlignment {
     BASELINE = 4,
     BOTTOM = 3,
     CENTER = 2,
-    TOP = 1
+    TOP = 1,
+    FOLLOW_PARAGRAPH = 5
 }
 export enum ObscuredReasons {
     PLACEHOLDER = 0
@@ -779,4 +780,13 @@ export enum AxisType {
     VERTICAL_AXIS = 0,
     HORIZONTAL_AXIS = 1,
     PINCH_AXIS = 2
+}
+export enum FocusWrapMode {
+    DEFAULT = 0,
+    WRAP_WITH_ARROW = 1
+}
+export enum PresetFillType {
+    BREAKPOINT_DEFAULT = 0,
+    BREAKPOINT_SM1MD2LG3 = 1,
+    BREAKPOINT_SM2MD3LG5 = 2
 }

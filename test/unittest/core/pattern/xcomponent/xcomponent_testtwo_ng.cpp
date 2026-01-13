@@ -264,8 +264,7 @@ HWTEST_F(XComponentTestTwoNg, BeforeSyncGeometryPropertiesTest, TestSize.Level1)
     frameNode->geometryNode_ = geometryNode;
     pattern->hasXComponentInit_ = false;
     pattern->isEnableAnalyzer_ = true;
-    auto imageAnalyzerManager =
-        std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::XCOMPONENT);
+    auto imageAnalyzerManager = std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::XCOMPONENT);
     bool extSurfaceEnabled = SystemProperties::extSurfaceEnabled_;
     SystemProperties::extSurfaceEnabled_ = true;
     imageAnalyzerManager->SetSupportImageAnalyzerFeature(true);
@@ -481,8 +480,7 @@ HWTEST_F(XComponentTestTwoNg, StartImageAnalyzerTest, TestSize.Level1)
     std::optional<std::function<void(ImageAnalyzerState)>> callback;
     callback = processImage;
     pattern->isEnableAnalyzer_ = true;
-    auto imageAnalyzerManager =
-        std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::XCOMPONENT);
+    auto imageAnalyzerManager = std::make_shared<MockImageAnalyzerManager>(frameNode, ImageAnalyzerHolder::XCOMPONENT);
     bool extSurfaceEnabled = SystemProperties::extSurfaceEnabled_;
     SystemProperties::extSurfaceEnabled_ = true;
     imageAnalyzerManager->SetSupportImageAnalyzerFeature(true);
@@ -593,20 +591,20 @@ HWTEST_F(XComponentTestTwoNg, EnableSecureTest, TestSize.Level1)
     auto pattern = frameNode->GetPattern<XComponentPattern>();
     ASSERT_TRUE(pattern);
 
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
-                SetSecurityLayer(true)).WillOnce(Return());
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_), SetSecurityLayer(true))
+        .WillOnce(Return());
     pattern->EnableSecure(true);
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
-                SetSecurityLayer(false)).WillOnce(Return());
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_), SetSecurityLayer(false))
+        .WillOnce(Return());
     pattern->EnableSecure(false);
 
     pattern->type_ = XCOMPONENT_TEXTURE_TYPE_VALUE;
 
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
-                SetSecurityLayer(true)).Times(0);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_), SetSecurityLayer(true))
+        .Times(0);
     pattern->EnableSecure(true);
-    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_),
-                SetSecurityLayer(false)).Times(0);
+    EXPECT_CALL(*AceType::DynamicCast<MockRenderContext>(pattern->renderContextForSurface_), SetSecurityLayer(false))
+        .Times(0);
     pattern->EnableSecure(false);
 }
 

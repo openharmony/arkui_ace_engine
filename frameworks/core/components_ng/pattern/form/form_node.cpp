@@ -149,7 +149,9 @@ public:
         if (isReg_) {
             return true;
         }
-        formNode->OnAccessibilityChildTreeRegister(windowId, treeId);
+        if (!(formNode->OnAccessibilityChildTreeRegister(windowId, treeId))) {
+            return false;
+        }
         isReg_ = true;
         return true;
     }
@@ -401,15 +403,15 @@ void FormNode::NotifyAccessibilityChildTreeRegister()
     }
 }
 
-void FormNode::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId)
+bool FormNode::OnAccessibilityChildTreeRegister(uint32_t windowId, int32_t treeId)
 {
     auto accessibilityId = GetAccessibilityId();
     auto pattern = GetPattern<FormPattern>();
     if (pattern == nullptr) {
         TAG_LOGE(AceLogTag::ACE_FORM, "pattern is null");
-        return;
+        return false;
     }
-    pattern->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
+    return pattern->OnAccessibilityChildTreeRegister(windowId, treeId, accessibilityId);
 }
 
 void FormNode::OnAccessibilityChildTreeDeregister()

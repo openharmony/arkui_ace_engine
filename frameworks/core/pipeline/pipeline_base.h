@@ -1676,6 +1676,17 @@ public:
     {
         return statisticEventReporter_;
     }
+    virtual void UpdateDrawLayoutChildObserver(
+        int32_t uniqueId, bool isClearLayoutObserver, bool isClearDrawObserver) {};
+    virtual void UpdateDrawLayoutChildObserver(
+        const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver) {};
+    virtual void SetXComponentDisplayConstraintEnabled(bool isEnable) {}
+
+    virtual bool GetXComponentDisplayConstraintEnabled()
+    {
+        return false;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1891,7 +1902,6 @@ private:
     std::shared_ptr<ArkUIPerfMonitor> perfMonitor_;
     ConfigurationChange configurationChange_;
     std::shared_ptr<StatisticEventReporter> statisticEventReporter_;
-
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };
 

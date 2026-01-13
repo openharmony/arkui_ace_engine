@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "bridge/declarative_frontend/jsview/js_water_flow_sections.h"
 
+#include "bridge/declarative_frontend/jsview/js_water_flow_sections_binding.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components_ng/pattern/waterflow/water_flow_sections.h"
 
@@ -112,7 +113,7 @@ void ParseGaps(const JSRef<JSObject>& obj, NG::WaterFlowSections::Section& secti
 }
 } // namespace
 
-bool JSWaterFlowSections::ParseSectionOptions(
+bool JSWaterFlowSectionsBinding::ParseSectionOptions(
     const JSCallbackInfo& args, const JSRef<JSVal>& jsValue, NG::WaterFlowSections::Section& section)
 {
     if (!jsValue->IsObject()) {
@@ -167,46 +168,49 @@ bool JSWaterFlowSections::ParseSectionOptions(
     return true;
 }
 
-void JSWaterFlowSections::JSBind(BindingTarget globalObj)
+void JSWaterFlowSectionsBinding::JSBind(BindingTarget globalObj)
 {
     JSClass<JSWaterFlowSections>::Declare("NativeWaterFlowSection");
-    JSClass<JSWaterFlowSections>::CustomMethod("onSectionChanged", &JSWaterFlowSections::OnSectionChanged);
-    JSClass<JSWaterFlowSections>::Bind(globalObj, &JSWaterFlowSections::Constructor, &JSWaterFlowSections::Destructor);
+    JSClass<JSWaterFlowSections>::CustomMethod("onSectionChanged", &JSWaterFlowSectionsBinding::OnSectionChanged);
+    JSClass<JSWaterFlowSections>::Bind(
+        globalObj, &JSWaterFlowSectionsBinding::Constructor, &JSWaterFlowSectionsBinding::Destructor);
 }
 
-void JSWaterFlowSections::SetNativeWaterFlowSection(JSRef<JSObject> jsSection, JSRef<JSObject> nativeSection)
+void JSWaterFlowSectionsBinding::SetNativeWaterFlowSection(JSRef<JSObject> jsSection, JSRef<JSObject> nativeSection)
 {
     if (jsSection->IsEmpty() || nativeSection->IsEmpty()) {
         return;
     }
-
     auto property = jsSection->GetProperty("setNativeSection");
     if (!property->IsFunction()) {
         return;
     }
-
     auto setNativeSectionFunc = JSRef<JSFunc>::Cast(property);
     JSRef<JSVal> params[1];
     params[0] = JSRef<JSVal>::Cast(nativeSection);
     setNativeSectionFunc->Call(jsSection, 1, params);
 }
 
-void JSWaterFlowSections::Constructor(const JSCallbackInfo& info)
+void JSWaterFlowSectionsBinding::Constructor(const JSCallbackInfo& info)
 {
     auto section = Referenced::MakeRefPtr<JSWaterFlowSections>();
     section->IncRefCount();
     info.SetReturnValue(Referenced::RawPtr(section));
 }
 
-void JSWaterFlowSections::Destructor(JSWaterFlowSections* section)
+void JSWaterFlowSectionsBinding::Destructor(JSWaterFlowSections* section)
 {
     if (section != nullptr) {
         section->DecRefCount();
     }
 }
 
-void JSWaterFlowSections::OnSectionChanged(const JSCallbackInfo& info)
+void JSWaterFlowSectionsBinding::OnSectionChanged(const JSCallbackInfo& info)
 {
+    JSWaterFlowSections* jsWaterFlowSections = JSRef<JSObject>::Cast(info.This())->Unwrap<JSWaterFlowSections>();
+    if (jsWaterFlowSections == nullptr) {
+        return;
+    }
     if (!info[0]->IsObject()) {
         return;
     }
@@ -221,7 +225,7 @@ void JSWaterFlowSections::OnSectionChanged(const JSCallbackInfo& info)
     for (size_t j = 0; j < sectionsCount; ++j) {
         NG::WaterFlowSections::Section section;
         auto newSection = sectionArray->GetValueAt(j);
-        if (JSWaterFlowSections::ParseSectionOptions(info, newSection, section)) {
+        if (JSWaterFlowSectionsBinding::ParseSectionOptions(info, newSection, section)) {
             newSections.emplace_back(section);
         }
     }
@@ -236,7 +240,7 @@ void JSWaterFlowSections::OnSectionChanged(const JSCallbackInfo& info)
     for (size_t j = 0; j < allSectionsCount; ++j) {
         NG::WaterFlowSections::Section section;
         auto newSection = allSectionArray->GetValueAt(j);
-        if (JSWaterFlowSections::ParseSectionOptions(info, newSection, section)) {
+        if (JSWaterFlowSectionsBinding::ParseSectionOptions(info, newSection, section)) {
             allSections.emplace_back(section);
         }
     }
@@ -246,9 +250,10 @@ void JSWaterFlowSections::OnSectionChanged(const JSCallbackInfo& info)
     if (!start->IsNumber() || !deleteCount->IsNumber()) {
         return;
     }
-    for (auto it = callbacks_.begin(); it != callbacks_.end();) {
+    auto& callbacks = jsWaterFlowSections->callbacks_;
+    for (auto it = callbacks.begin(); it != callbacks.end();) {
         if (!it->first.Upgrade()) {
-            it = callbacks_.erase(it);
+            it = callbacks.erase(it);
         } else {
             if (it->second) {
                 it->second(start->ToNumber<int32_t>(), deleteCount->ToNumber<int32_t>(), newSections, allSections);
@@ -256,5 +261,10 @@ void JSWaterFlowSections::OnSectionChanged(const JSCallbackInfo& info)
             ++it;
         }
     }
+}
+
+panda::Local<panda::ObjectRef> JSWaterFlowSections::NewInstance()
+{
+    return JSClass<JSWaterFlowSections>::NewInstance()->GetLocalHandle();
 }
 } // namespace OHOS::Ace::Framework

@@ -96,6 +96,7 @@ public:
     static ArkUINativeModuleValue GetConfigMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetConfigSize(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetId(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue GetNodeInstanceId(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetNodeType(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue GetOpacity(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue IsVisible(ArkUIRuntimeCallInfo* runtimeCallInfo);

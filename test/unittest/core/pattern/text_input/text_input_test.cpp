@@ -1555,6 +1555,74 @@ HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo003, TestSize.Lev
 }
 
 /**
+ * @tc.name: TextSelectOverlayTestOnUpdateMenuInfo004
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+        model.SetCopyOption(CopyOptions::InApp);
+    });
+    frameNode_->MarkModifyDone();
+
+    GetFocus();
+    auto textFieldTheme = pattern_->GetTheme();
+    ASSERT_NE(textFieldTheme, nullptr);
+    pattern_->textSelector_.Update(0, 0);
+    textFieldTheme->aiWriteBundleName_ = "BundleName";
+    textFieldTheme->aiWriteAbilityName_ = "AbilityName";
+    textFieldTheme->aiWriteIsSupport_ = "true";
+    auto textSelectOverlay = pattern_->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step2. Do OnUpdateMenuInfo
+     */
+    SelectMenuInfo menuInfo;
+    textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+    ASSERT_EQ(menuInfo.showAIWrite, true);
+}
+
+/**
+ * @tc.name: TextSelectOverlayTestOnUpdateMenuInfo005
+ * @tc.desc: Verify OnUpdateMenuInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldUXTest, TextSelectOverlayTestOnUpdateMenuInfo005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize text input and get focus
+     */
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) {
+        model.SetType(TextInputType::TEXT);
+        model.SetInputStyle(InputStyle::INLINE);
+    });
+    frameNode_->MarkModifyDone();
+
+    GetFocus();
+    auto textFieldTheme = pattern_->GetTheme();
+    ASSERT_NE(textFieldTheme, nullptr);
+    pattern_->textSelector_.Update(0, 0);
+    textFieldTheme->aiWriteBundleName_ = "BundleName";
+    textFieldTheme->aiWriteAbilityName_ = "AbilityName";
+    textFieldTheme->aiWriteIsSupport_ = "true";
+    auto textSelectOverlay = pattern_->selectOverlay_;
+    ASSERT_NE(textSelectOverlay, nullptr);
+
+    /**
+     * @tc.steps: step2. Do OnUpdateMenuInfo
+     */
+    SelectMenuInfo menuInfo;
+    textSelectOverlay->OnUpdateMenuInfo(menuInfo, DIRTY_ALL_MENU_ITEM);
+    ASSERT_EQ(menuInfo.showAIWrite, true);
+}
+
+/**
  * @tc.name: SetPlaceholderColorInfo001
  * @tc.desc: Verify OnUpdateMenuInfo
  * @tc.type: FUNC

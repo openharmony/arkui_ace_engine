@@ -25,7 +25,7 @@ import { TextBackgroundStyle } from "./component/span"
 import { ModifierState } from "./CommonModifier"
 export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeModifier<ContainerSpanAttribute> {
     _instanceId: number = -1;
-    _state: ModifierState = new ModifierState	
+    _state: ModifierState = new ModifierState
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -80,6 +80,7 @@ export class ContainerSpanModifier implements ContainerSpanAttribute,AttributeMo
         {
             this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._textBackgroundStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textBackgroundStyle_0_flag = AttributeUpdaterFlag.SKIP

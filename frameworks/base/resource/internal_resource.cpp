@@ -48,6 +48,8 @@ struct ResourceData final {
 
 } // namespace
 
+SINGLETON_INSTANCE_IMPL(InternalResource);
+
 InternalResource::InternalResource() = default;
 
 InternalResource::~InternalResource() = default;

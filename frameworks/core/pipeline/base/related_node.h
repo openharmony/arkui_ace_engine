@@ -31,7 +31,7 @@ public:
     virtual void OnRelatedEnd() {}
 };
 
-class RelatedChild {
+class ACE_FORCE_EXPORT RelatedChild {
 public:
     void InitRelatedParent(const WeakPtr<RenderNode>& weakParent);
     bool IsRelatedEventEnable()

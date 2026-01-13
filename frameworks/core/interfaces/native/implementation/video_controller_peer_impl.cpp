@@ -14,7 +14,7 @@
  */
 
 #include "core/common/container_scope.h"
-#include "core/components/video/video_utils.h"
+#include "core/components_ng/pattern/video/video_utils.h"
 #include "core/interfaces/native/implementation/video_controller_peer_impl.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {

@@ -24,6 +24,7 @@
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
+const int32_t DEFAULT_RATING_STAR_NUMBER = 5;
 struct RatingPropertyGroup {
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Indicator, bool);
     ACE_DEFINE_PROPERTY_GROUP_ITEM(Stars, int32_t);
@@ -39,7 +40,7 @@ struct RatingPropertyGroup {
             return;
         }
         json->PutExtAttr("indicator", GetIndicator().value_or(false) ? "true" : "false", filter);
-        json->PutExtAttr("stars", std::to_string(GetStars().value_or(DEFAULT_RATING_STAR_NUM)).c_str(), filter);
+        json->PutExtAttr("stars", std::to_string(GetStars().value_or(DEFAULT_RATING_STAR_NUMBER)).c_str(), filter);
         auto jsonStarStyle = JsonUtil::Create(true);
         jsonStarStyle->Put("backgroundUri", propBackgroundImageSourceInfo.value_or(ImageSourceInfo()).GetSrc().c_str());
         jsonStarStyle->Put("foregroundUri", propForegroundImageSourceInfo.value_or(ImageSourceInfo()).GetSrc().c_str());

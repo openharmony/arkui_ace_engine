@@ -1801,7 +1801,7 @@ HWTEST_F(TextFieldUXTest, TextAreaScrollBarColorTest001, TestSize.Level1)
     ASSERT_NE(layoutProperty_, nullptr);
 
     TextFieldModelNG model;
-    Color colorValue = Color(0xffc0c0c0);
+    Color colorValue = Color::BLUE;
     model.SetTextAreaScrollBarColor(colorValue);
     model.SetTextAreaScrollBarColor(AceType::RawPtr(frameNode_), colorValue);
     /**
@@ -1828,18 +1828,18 @@ HWTEST_F(TextFieldUXTest, TextAreaScrollBarColorTest002, TestSize.Level1)
     ASSERT_NE(layoutProperty_, nullptr);
 
     TextFieldModelNG model;
-    Color colorValue = Color(0xffc0c0c0);
-    model.SetTextAreaScrollBarColor(colorValue);
+    Color value = Color::BLUE;
+    model.SetTextAreaScrollBarColor(value);
     model.ResetTextAreaScrollBarColor();
-    model.SetTextAreaScrollBarColor(AceType::RawPtr(frameNode_), colorValue);
+    model.SetTextAreaScrollBarColor(AceType::RawPtr(frameNode_), value);
     model.ResetTextAreaScrollBarColor(AceType::RawPtr(frameNode_));
     /**
      * @tc.expected: Get TextAreaScrollBarColor Value
      */
-    Color defaultColor = Color::BLACK;
-    auto result = layoutProperty_->GetScrollBarColorValue(defaultColor);
-    EXPECT_EQ(TextFieldModelNG::GetTextAreaScrollBarColor(AceType::RawPtr(frameNode_)), defaultColor);
-    EXPECT_EQ(result, defaultColor);
+    Color defaultValue = Color::BLACK;
+    auto result = layoutProperty_->GetScrollBarColorValue(defaultValue);
+    EXPECT_EQ(TextFieldModelNG::GetTextAreaScrollBarColor(AceType::RawPtr(frameNode_)), defaultValue);
+    EXPECT_EQ(result, defaultValue);
 }
 
 /**
@@ -1860,7 +1860,7 @@ HWTEST_F(TextFieldUXTest, TextAreaScrollBarColorTest003, TestSize.Level1)
     auto valueBase = AceType::MakeRefPtr<PropertyValueBase>();
     ASSERT_NE(valueBase, nullptr);
 
-    Color colorValue = Color(0xffc0c0c0);
+    Color colorValue = Color::BLUE;
     valueBase->SetValue(colorValue);
     pattern_->UpdatePropertyImpl("scrollBarColor", valueBase);
     /**

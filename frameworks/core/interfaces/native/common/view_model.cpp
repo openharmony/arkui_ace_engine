@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,6 +14,7 @@
  */
 
 #include "base/memory/ace_type.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
@@ -83,8 +84,6 @@
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/patternlock/patternlock_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
-#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/navigator/navigator_model_ng.h"
@@ -128,7 +127,11 @@
 #include "core/components_ng/pattern/window_scene/screen/screen_model.h"
 #endif // WINDOW_SCENE_SUPPORTED
 #include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/node_checkbox_modifier.h"
+#include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "core/interfaces/native/node/extension_companion_node.h"
+#include "core/interfaces/native/node/flow_item_modifier.h"
+#include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/components_ng/pattern/plugin/plugin_model_static.h"
@@ -261,10 +264,9 @@ void* createProgressNode(ArkUI_Int32 nodeId)
 
 void* createCheckboxNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = CheckBoxModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+    CHECK_NULL_RETURN(checkboxModifier, nullptr);
+    return checkboxModifier->createCheckboxFrameNode(nodeId);
 }
 
 void* createColumnNode(ArkUI_Int32 nodeId)
@@ -416,7 +418,9 @@ void* createNavigationNode(ArkUI_Int32 nodeId)
 
 void* createWaterFlowNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = WaterFlowModelNG::CreateFrameNode(nodeId);
+    auto* modifier = NG::NodeModifier::GetWaterFlowModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->createWaterFlow(nodeId)));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -424,7 +428,9 @@ void* createWaterFlowNode(ArkUI_Int32 nodeId)
 
 void* createFlowItemNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = WaterFlowItemModelNG::CreateFrameNode(nodeId);
+    auto* modifier = NG::NodeModifier::GetWaterFlowItemModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->createFlowItem(nodeId)));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -597,18 +603,22 @@ void* createMarqueeNode(ArkUI_Int32 nodeId)
 
 void* createCheckboxGroupNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto checkboxGroupModifier = NodeModifier::GetCheckboxGroupCustomModifier();
+    CHECK_NULL_RETURN(checkboxGroupModifier, nullptr);
+    return checkboxGroupModifier->createCheckboxGroupFrameNode(nodeId);
 }
 
 void* createRatingNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = RatingModelNG::CreateFrameNode(nodeId);
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Rating");
+    CHECK_NULL_RETURN(module, nullptr);
+    auto arkUIRatingModifier = reinterpret_cast<const ArkUIRatingModifier*>(module->GetDynamicModifier());
+    CHECK_NULL_RETURN(arkUIRatingModifier, nullptr);
+    auto arkUINodeHandle = arkUIRatingModifier->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createAbilityComponentNode(ArkUI_Int32 nodeId)

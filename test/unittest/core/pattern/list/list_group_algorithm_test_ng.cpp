@@ -1892,4 +1892,57 @@ HWTEST_F(ListGroupAlgTestNg, LayoutPolicyTest001, TestSize.Level1)
     ASSERT_NE(geometryNode, nullptr);
     EXPECT_EQ(geometryNode->GetFrameSize().Width(), 300.0f);
 }
+
+/**
+ * @tc.name: SupportLazyEmptryBranch001
+ * @tc.desc: test when ListItemGroup support lazy empty branch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, SupportLazyEmptryBranch001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    RefPtr<FrameNode> listItemGroupNode = AceType::DynamicCast<FrameNode>(
+        ViewStackProcessor::GetInstance()->GetMainElementNode());
+
+    // list layout property
+    auto layoutProperty = frameNode_->GetLayoutProperty<ListLayoutProperty>();
+    EXPECT_NE(layoutProperty, nullptr);
+    auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(listItemGroupNode->GetLayoutAlgorithm());
+    ASSERT_TRUE(layoutAlgorithmWrapper);
+    auto layoutAlgorithm =
+        AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
+
+    layoutAlgorithm->listLayoutProperty_ = layoutProperty;
+    auto wrapper = layoutAlgorithm->GetListItem(AceType::RawPtr(listItemGroupNode), 0);
+    EXPECT_EQ(wrapper, nullptr);
+
+    layoutProperty->UpdateSupportLazyLoadingEmptyBranch(true);
+    EXPECT_EQ(layoutAlgorithm->listLayoutProperty_->GetSupportLazyLoadingEmptyBranch().value_or(false), true);
+
+    auto wrapper1 = layoutAlgorithm->GetListItem(AceType::RawPtr(listItemGroupNode), 0);
+    EXPECT_NE(wrapper1, nullptr);
+}
+
+/**
+ * @tc.name: OnDirtyLayoutWrapperSwap001
+ * @tc.desc: Test OnDirtyLayoutWrapperSwap can clear lanesItemRange when change stackFromEnd.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    model.SetLanes(2);
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    ViewStackProcessor::GetInstance()->Pop();
+    ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    CreateListItems(2, V2::ListItemStyle::NONE);
+    CreateDone();
+    EXPECT_FALSE(pattern_->lanesItemRange_.empty());
+
+    ListModelNG::SetListStackFromEnd(AceType::RawPtr(frameNode_), false);
+    FlushUITasks();
+    EXPECT_TRUE(pattern_->lanesItemRange_.empty());
+}
 } // namespace OHOS::Ace::NG

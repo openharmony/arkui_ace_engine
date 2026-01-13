@@ -555,4 +555,42 @@ void UiReportProxy::ReportGetStateMgmtInfo(std::vector<std::string> results)
         LOGW("ReportGetStateMgmtInfo send request failed");
     }
 }
+
+void UiReportProxy::SendWebInfoRequestResult(
+    uint32_t windowId,
+    int32_t webId,
+    const std::string& request,
+    const std::string& result, WebRequestErrorCode errorCode)
+{
+    MessageParcel data;
+    MessageParcel reply;
+    MessageOption option(MessageOption::TF_ASYNC);
+    if (!data.WriteInterfaceToken(GetDescriptor())) {
+        LOGW("SendWebInfoRequestResult write interface token failed");
+        return;
+    }
+    if (!data.WriteUint32(windowId)) {
+        LOGW("SendWebInfoRequestResult write windowId failed");
+        return;
+    }
+    if (!data.WriteInt32(webId)) {
+        LOGW("SendWebInfoRequestResult write webId failed");
+        return;
+    }
+    if (!data.WriteString(request)) {
+        LOGW("SendWebInfoRequestResult write request failed");
+        return;
+    }
+    if (!data.WriteString(result)) {
+        LOGW("SendWebInfoRequestResult write result failed");
+        return;
+    }
+    if (!data.WriteInt32(static_cast<int32_t>(errorCode))) {
+        LOGW("SendWebInfoRequestResult write errorCode failed");
+        return;
+    }
+    if (Remote()->SendRequest(SEND_WEB_INFO_BY_REQUEST, data, reply, option) != ERR_NONE) {
+        LOGW("SendWebInfoRequestResult send request failed");
+    }
+}
 } // namespace OHOS::Ace

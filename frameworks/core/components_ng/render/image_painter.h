@@ -21,6 +21,7 @@
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
+#include "ui/base/macros.h"
 
 namespace OHOS::Ace::NG {
 

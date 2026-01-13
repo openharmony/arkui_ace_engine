@@ -84,14 +84,6 @@ constexpr float MENU_SIZE_HEIGHT = 150.0f;
 constexpr float WIDTH = 10.0f;
 constexpr float HEIGHT = 20.0f;
 const SizeF FULL_SCREEN_SIZE(FULL_SCREEN_WIDTH, FULL_SCREEN_HEIGHT);
-constexpr float TARGET_OFFSET_FIRST = 10.0f;
-constexpr float TARGET_OFFSET_SECOND = 10.0f;
-constexpr float RECT_FIRST = 10.0f;
-constexpr float RECT_SECOND = 10.0f;
-constexpr float RECT_THIRD = 10.0f;
-constexpr float RECT_FORTH = 10.0f;
-constexpr float RECT_THIRD_NEW = 20.0f;
-constexpr float RECT_FORTH_NEW = 20.0f;
 constexpr float TWENTY = 20.0f;
 constexpr float ZERO = 0.0f;
 constexpr float ONE = 1.0f;
@@ -731,35 +723,6 @@ HWTEST_F(MenuLayout3TwoTestNg, LayoutOtherDeviceLeftPreviewRightMenu001, TestSiz
     layoutAlgorithm->LayoutOtherDeviceLeftPreviewRightMenu(previewGeometryNode, menuGeometryNode, totalSize, TWENTY);
     EXPECT_EQ(previewGeometryNode->frame_.rect_.width_, ZERO);
 }
-
-/**
- * @tc.name: MenuLayoutAlgorithmTestNg065
- * @tc.desc: Verify GetMenuWindowRectInfo.
- * @tc.type: FUNC
- */
- 
-HWTEST_F(MenuLayout3TwoTestNg, MenuLayoutAlgorithmTestNg065, TestSize.Level1)
-{
-    MenuLayoutAlgorithm menuLayoutAlgorithm;
-    RefPtr<MenuPattern> menuPattern = AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "", MenuType::MENU);
-    menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
-    menuLayoutAlgorithm.isExpandDisplay_ = false;
-    menuLayoutAlgorithm.isUIExtensionSubWindow_ = true;
-    menuLayoutAlgorithm.targetOffset_ = { TARGET_OFFSET_FIRST, TARGET_OFFSET_SECOND };
-    menuLayoutAlgorithm.displayWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD_NEW, RECT_FORTH_NEW);
-    menuLayoutAlgorithm.UIExtensionHostWindowRect_ = RectT(RECT_FIRST, RECT_SECOND, RECT_THIRD, RECT_FORTH);
-    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_, menuPattern);
-    auto menuNode = GetOrCreateMenu(MenuType::SELECT_OVERLAY_EXTENSION_MENU);
-    ASSERT_NE(menuNode, nullptr);
-    menuPattern->AttachToFrameNode(menuNode);
-    EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TEN);
-    EXPECT_EQ(menuLayoutAlgorithm.GetMenuWindowRectInfo(menuPattern).width_, TEN);
- 
-    menuLayoutAlgorithm.canExpandCurrentWindow_ = true;
-    menuLayoutAlgorithm.isExpandDisplay_ = true;
-    menuLayoutAlgorithm.ModifyOffset(menuLayoutAlgorithm.targetOffset_, menuPattern);
-    EXPECT_EQ(menuLayoutAlgorithm.targetOffset_.x_, TEN);
-}
  
 /**
  * @tc.name: MenuLayoutAlgorithmTestNg065
@@ -1124,6 +1087,16 @@ HWTEST_F(MenuLayout3TwoTestNg, MenuKeyboardAvoidMode002, TestSize.Level1)
     minKeyboardAvoidDistance = Dimension();
     layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION);
     EXPECT_EQ(layoutAlgorithm->wrapperRect_, Rect(0.0f, 0.0f, 0.0f, KEY_BOARD_TOP_POSITION));
+    /**
+     * @tc.steps: step6. The test minKeyboardAvoidDistance not support percentage
+     * @tc.expected: The minKeyboardAvoidDistance will use default
+     */
+    wrapperRect = Rect(0.0f, 0.0f, 0.0f, WRAPPER_RECT_HEIGHT_LARGE);
+    layoutAlgorithm->wrapperRect_ = wrapperRect;
+    minKeyboardAvoidDistance = Dimension(1.0f, DimensionUnit::PERCENT);
+    layoutAlgorithm->MenuAvoidKeyboard(menuNode, minKeyboardAvoidDistance, KEY_BOARD_TOP_POSITION);
+    EXPECT_EQ(layoutAlgorithm->wrapperRect_,
+        Rect(0.0f, 0.0f, 0.0f, KEY_BOARD_TOP_POSITION - MIN_KEYBOARD_AVOID_DISTANCE.ConvertToPx()));
 }
 
 /**
