@@ -63,6 +63,10 @@ const float BUTTON_SIZE = 20.00;
 const float MIN_SCALE_VALUE = 0.5f;
 const float MAX_SCALE_VALUE = 3.2f;
 const uint32_t MAX_LINE_VALUE = 10;
+const Dimension BORDER_RADIUS_TOP_LEFT = 6.0_vp;
+const Dimension BORDER_RADIUS_TOP_RIGHT = 7.0_vp;
+const Dimension BORDER_RADIUS_BOTTOM_LEFT = 8.0_vp;
+const Dimension BORDER_RADIUS_BOTTOM_RIGHT = 9.0_vp;
 } // namespace
 
 class ButtonStaticTestNg : public testing::Test {
@@ -521,11 +525,14 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg013, TestSize.Level1)
      * @tc.steps: step3. test SetStateEffect.
      * @tc.expected: step3. the property value meet expectations.
      */
-    std::optional<bool> stateEffectValue = true;
+    std::optional<bool> stateEffectValue = std::nullopt;
     ButtonModelStatic::SetStateEffect(frameNode, stateEffectValue);
     auto buttonEventHub = frameNode->GetEventHub<ButtonEventHub>();
     CHECK_NULL_VOID(buttonEventHub);
     EXPECT_EQ(buttonEventHub->GetStateEffect(), true);
+    stateEffectValue = false;
+    ButtonModelStatic::SetStateEffect(frameNode, stateEffectValue);
+    EXPECT_EQ(buttonEventHub->GetStateEffect(), false);
 }
 
 /**
@@ -553,6 +560,19 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg014, TestSize.Level1)
      */
     ButtonModelStatic::SetLabel(frameNode, BUTTON_LABEL);
     ButtonParameters buttonParameters;
+    ButtonModelStatic::SetLabelStyle(frameNode, buttonParameters);
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextOverflowValue(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetMaxLinesValue(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetMinFontSizeValue(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetMaxFontSizeValue(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetFontSizeValue(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetHeightAdaptivePolicyValue(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetFontWeightValue(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetFontFamilyValue(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetFontStyleValue(), std::nullopt);
+    EXPECT_EQ(layoutProperty->GetTextAlignValue(), std::nullopt);
+
     buttonParameters.textOverflow = std::make_optional(TextOverflow::NONE);
     buttonParameters.maxLines = std::make_optional(MAX_LINE_VALUE);
     buttonParameters.minFontSize = std::make_optional(BUTTON_FONT_SIZE_VALUE);
@@ -822,5 +842,339 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg021, TestSize.Level1)
     ASSERT_NE(buttonTheme, nullptr);
     Dimension expectedFontSize = buttonTheme->GetTextButtonFontSize();
     EXPECT_EQ(textLayoutProperty->GetFontSizeValue(Dimension(0)), expectedFontSize);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg022
+ * @tc.desc: test button SetButtonSize with ButtonStyleMode::TEXT && ControlSize::SMALL.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg022, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create button layoutProperty.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. test SetButtonStyle.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    std::optional<ButtonStyleMode> buttonStyle = ButtonStyleMode::TEXT;
+    ButtonModelStatic::SetButtonStyle(frameNode, buttonStyle);
+    EXPECT_EQ(layoutProperty->GetButtonStyleValue(), ButtonStyleMode::TEXT);
+    std::optional<ControlSize> buttonControlSize = ControlSize::SMALL;
+    ButtonModelStatic::SetControlSize(frameNode, buttonControlSize);
+    EXPECT_EQ(layoutProperty->GetControlSizeValue(), ControlSize::SMALL);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg023
+ * @tc.desc: test button SetBorderRadius2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create button layoutProperty.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. test SetBorderRadius2.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    std::optional<Dimension> borderRadiusTopLeft = std::make_optional(BORDER_RADIUS_TOP_LEFT);
+    std::optional<Dimension> borderRadiusTopRight = std::make_optional(BORDER_RADIUS_TOP_RIGHT);
+    std::optional<Dimension> borderRadiusBottomLeft = std::make_optional(BORDER_RADIUS_BOTTOM_LEFT);
+    std::optional<Dimension> borderRadiusBottomRight = std::make_optional(BORDER_RADIUS_BOTTOM_RIGHT);
+    ButtonModelStatic::SetBorderRadius(frameNode, borderRadiusTopLeft, borderRadiusTopRight,
+                                       borderRadiusBottomLeft, borderRadiusBottomRight);
+    EXPECT_EQ(layoutProperty->GetBorderRadius()->radiusTopLeft.value(), BORDER_RADIUS_TOP_LEFT);
+    EXPECT_EQ(layoutProperty->GetBorderRadius()->radiusTopRight.value(), BORDER_RADIUS_TOP_RIGHT);
+    EXPECT_EQ(layoutProperty->GetBorderRadius()->radiusBottomLeft.value(), BORDER_RADIUS_BOTTOM_LEFT);
+    EXPECT_EQ(layoutProperty->GetBorderRadius()->radiusBottomRight.value(), BORDER_RADIUS_BOTTOM_RIGHT);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg024
+ * @tc.desc: test button SetType with label.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create button layoutProperty.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. test SetType with label.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    ButtonModelStatic::SetLabel(frameNode, BUTTON_LABEL);
+    EXPECT_EQ(layoutProperty->GetLabelValue(), BUTTON_LABEL);
+    std::optional<ButtonType> buttonType = std::make_optional(BUTTON_TYPE_CAPSULE_VALUE);
+    ButtonModelStatic::SetType(frameNode, static_cast<int32_t>(buttonType.value()));
+    EXPECT_EQ(static_cast<int32_t>(layoutProperty->GetTypeValue()), static_cast<int32_t>(BUTTON_TYPE_CAPSULE_VALUE));
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg025
+ * @tc.desc: test button GetLabel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create button layoutProperty.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. test GetLabel.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    ButtonModelStatic::SetLabel(frameNode, BUTTON_LABEL);
+    EXPECT_EQ(ButtonModelStatic::GetLabel(frameNode), BUTTON_LABEL);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg026
+ * @tc.desc: test button GetFontSize.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create button layoutProperty.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. test GetFontSize.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    ButtonModelStatic::SetLabel(frameNode, BUTTON_LABEL);
+    std::optional<Dimension> fontSize = std::make_optional(BUTTON_FONT_SIZE_VALUE);
+    ButtonModelStatic::SetFontSize(frameNode, fontSize);
+    EXPECT_EQ(ButtonModelStatic::GetFontSize(frameNode), BUTTON_FONT_SIZE_VALUE);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg027
+ * @tc.desc: test button GetFontWeight.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create button layoutProperty.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. test GetFontWeight.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    ButtonModelStatic::SetLabel(frameNode, BUTTON_LABEL);
+    std::optional<Ace::FontWeight> fontWeight = std::make_optional(BUTTON_BOLD_FONT_WEIGHT_VALUE);
+    ButtonModelStatic::SetFontWeight(frameNode, fontWeight);
+    EXPECT_EQ(ButtonModelStatic::GetFontWeight(frameNode), BUTTON_BOLD_FONT_WEIGHT_VALUE);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg028
+ * @tc.desc: test button GetFontColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg028, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create button layoutProperty.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. test GetFontColor.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    ButtonModelStatic::SetLabel(frameNode, BUTTON_LABEL);
+    std::optional<Color> fontColorValue = std::make_optional(BUTTON_TEXT_COLOR_VALUE);
+    ButtonModelStatic::SetFontColor(frameNode, fontColorValue);
+    EXPECT_EQ(ButtonModelStatic::GetFontColor(frameNode), BUTTON_TEXT_COLOR_VALUE);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg029
+ * @tc.desc: test button GetType.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg029, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create button layoutProperty.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. test GetType.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    std::optional<ButtonType> buttonType = std::make_optional(BUTTON_TYPE_CAPSULE_VALUE);
+    ButtonModelStatic::SetType(frameNode, static_cast<int32_t>(buttonType.value()));
+    EXPECT_EQ(ButtonModelStatic::GetType(frameNode), BUTTON_TYPE_CAPSULE_VALUE);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg030
+ * @tc.desc: test button SetLabelWithCheck.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg030, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create button layoutProperty.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. test SetLabelWithCheck.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    ButtonModelStatic::SetLabelWithCheck(frameNode, BUTTON_LABEL);
+    EXPECT_EQ(layoutProperty->GetLabelValue(), BUTTON_LABEL);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg031
+ * @tc.desc: test button GetMinFontScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg031, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create button layoutProperty.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. test GetMinFontScale.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    ButtonModelStatic::SetLabel(frameNode, BUTTON_LABEL);
+    std::optional<float> minFontScaleValue = std::make_optional(MIN_SCALE_VALUE);
+    ButtonModelStatic::SetMinFontScale(frameNode, minFontScaleValue);
+    EXPECT_EQ(ButtonModelStatic::GetMinFontScale(frameNode), MIN_SCALE_VALUE);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg032
+ * @tc.desc: test button GetMaxFontScale.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg032, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create button layoutProperty.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. test GetMaxFontScale.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    ButtonModelStatic::SetLabel(frameNode, BUTTON_LABEL);
+    std::optional<float> maxFontScaleValue = std::make_optional(MAX_SCALE_VALUE);
+    ButtonModelStatic::SetMaxFontScale(frameNode, maxFontScaleValue);
+    EXPECT_EQ(ButtonModelStatic::GetMaxFontScale(frameNode), MAX_SCALE_VALUE);
 }
 } // namespace OHOS::Ace::NG

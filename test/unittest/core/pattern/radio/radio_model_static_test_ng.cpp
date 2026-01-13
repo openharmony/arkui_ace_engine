@@ -246,4 +246,78 @@ HWTEST_F(RadioStaticTestNg, RadioStaticTestNg005, TestSize.Level1)
     RadioModelStatic::SetRadioIndicatorType(frameNode, radioIndicatorType);
     EXPECT_EQ(radioPaintProperty->GetRadioIndicatorValue(), static_cast<int32_t>(RadioIndicatorType::DOT));
 }
+
+RadioBuilderFunc RadioStaticTestNg::RadioBuilder()
+{
+    return []() {
+        ColumnModelNG colModel;
+        colModel.Create(Dimension(0), nullptr, "");
+        ViewAbstract::SetWidth(CalcLength(10.f));
+        ViewAbstract::SetHeight(CalcLength(10.f));
+    };
+}
+
+/**
+ * @tc.name: RadiotaticTestNg006
+ * @tc.desc: test radio SetBuilder.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioStaticTestNg, RadiotaticTestNg006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create radio frameNode.
+     */
+    auto node = RadioModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::RADIO_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create radio paintProperty.
+     */
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test SetBuilder.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    auto radioFunc = RadioBuilder();
+    RadioModelStatic::SetBuilder(std::move(buildFunc));
+    auto pattern = frameNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_NE(pattern->builder_, nullptr);
+}
+
+/**
+ * @tc.name: RadiotaticTestNg007
+ * @tc.desc: test radio SetOnChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioStaticTestNg, RadiotaticTestNg007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create radio frameNode.
+     */
+    auto node = RadioModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::RADIO_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create radio paintProperty.
+     */
+    auto radioPaintProperty = frameNode->GetPaintProperty<RadioPaintProperty>();
+    ASSERT_NE(radioPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test SetOnChangeEvent.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    auto onChange = [](const bool check) { EXPECT_TRUE(check); };
+    RadioModelStatic::SetOnChangeEvent(frameNode, onChange);
+    auto eventHub = frameNode->GetEventHub<RadioEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_NE(eventHub->onChangeEvent_, nullptr);
+}
 } // namespace OHOS::Ace::NG

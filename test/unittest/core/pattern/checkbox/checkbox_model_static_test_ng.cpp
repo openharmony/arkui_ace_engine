@@ -43,6 +43,7 @@
 using namespace testing;
 using namespace testing::ext;
 using CheckboxBuilderFunc = std::optional<std::function<void()>>;
+using CheckboxBuilderFuncion = std::function<void()>;
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -59,6 +60,7 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     CheckboxBuilderFunc CheckboxBuilder();
+    CheckboxBuilderFuncion CheckboxBuilder();
 };
 
 void CheckboxStaticTestNg::SetUpTestSuite()
@@ -80,6 +82,16 @@ void CheckboxStaticTestNg::TearDownTestSuite()
 }
 
 CheckboxBuilderFunc CheckboxStaticTestNg::CheckboxBuilder()
+{
+    return []() {
+        ColumnModelNG colModel;
+        colModel.Create(Dimension(0), nullptr, "");
+        ViewAbstract::SetWidth(CalcLength(10.f));
+        ViewAbstract::SetHeight(CalcLength(10.f));
+    };
+}
+
+CheckboxBuilderFuncion CheckboxStaticTestNg::CheckboxBuilder()
 {
     return []() {
         ColumnModelNG colModel;
@@ -325,5 +337,165 @@ HWTEST_F(CheckboxStaticTestNg, CheckboxStaticTestNg007, TestSize.Level1)
     checkboxStyle = std::make_optional(CheckBoxStyle::SQUARE_STYLE);
     CheckBoxModelStatic::SetCheckboxStyle(frameNode, checkboxStyle);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelectedStyleValue(), CheckBoxStyle::SQUARE_STYLE);
+}
+
+/**
+ * @tc.name: CheckboxStaticTestNgt008
+ * @tc.desc: test checkbox SetBuilder1.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxStaticTestNg, CheckboxStaticTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create checkbox frameNode.
+     */
+    auto node = CheckBoxModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::CHECK_BOX_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create checkbox paintProperty.
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test SetBuilder.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    CheckboxBuilderFunc checkBoxFunc = CheckboxBuilder();
+    CheckBoxModelStatic::SetBuilder(frameNode, checkBoxFunc);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_NE(pattern->builder_, nullptr);
+}
+
+/**
+ * @tc.name: CheckboxStaticTestNgt009
+ * @tc.desc: test checkbox SetBuilder2.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxStaticTestNg, CheckboxStaticTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create checkbox frameNode.
+     */
+    auto node = CheckBoxModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::CHECK_BOX_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create checkbox paintProperty.
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test SetBuilder.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    CheckboxBuilderFuncion checkBoxFunc = CheckboxBuilder();
+    CheckBoxModelStatic::SetBuilder(frameNode, checkBoxFunc);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+    EXPECT_NE(pattern->builder_, nullptr);
+}
+
+/**
+ * @tc.name: CheckboxStaticTestNgt010
+ * @tc.desc: test checkbox SetChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxStaticTestNg, CheckboxStaticTestNgt010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create checkbox frameNode.
+     */
+    auto node = CheckBoxModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::CHECK_BOX_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create checkbox paintProperty.
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test SetChangeEvent.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    bool isSelected = false;
+    auto changeEvent = [&isSelected](bool select) { isSelected = select; };
+    CheckBoxModelStatic::SetChangeEvent(frameNode, changeEvent);
+    auto eventHub = frameNode->GetEventHub<NG::CheckBoxEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    eventHub->UpdateChangeEvent(true);
+    EXPECT_EQ(isSelected, true);
+}
+
+/**
+ * @tc.name: CheckboxStaticTestNgt011
+ * @tc.desc: test checkbox ResetCheckMarkColor.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxStaticTestNg, CheckboxStaticTestNgt011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create checkbox frameNode.
+     */
+    auto node = CheckBoxModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::CHECK_BOX_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create checkbox paintProperty.
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test ResetCheckMarkColor.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    std::optional<Color> markColor = CHECK_MARK_COLOR;
+    CheckBoxModelStatic::SetCheckMarkColor(frameNode, markColor);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxCheckMarkColor(), CHECK_MARK_COLOR);
+    CheckBoxModelStatic::ResetCheckMarkColor(frameNode, markColor);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxCheckMarkColor(), std::nullopt);
+}
+
+/**
+ * @tc.name: CheckboxStaticTestNgt012
+ * @tc.desc: test checkbox TriggerChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CheckboxStaticTestNg, CheckboxStaticTestNgt012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create checkbox frameNode.
+     */
+    auto node = CheckBoxModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::CHECK_BOX_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create checkbox paintProperty.
+     */
+    auto checkBoxPaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(checkBoxPaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test TriggerChange.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    std::optional<bool> selectValue = SELECTED;
+    CheckBoxModelStatic::TriggerChange(frameNode, selectValue);
+    EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelect(), SELECTED);
 }
 } // namespace OHOS::Ace::NG

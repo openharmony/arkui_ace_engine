@@ -54,6 +54,10 @@ namespace {
 constexpr float VALUE = 50.0f;
 constexpr float MIN_LABEL = 0.0f;
 constexpr float MAX_LABEL = 100.0f;
+constexpr float SLIDER_DISTANCE = 5.0f;
+constexpr float SLIDER_STEP = 5.0f;
+constexpr float MIN_RANGE = 40.0f;
+constexpr float MAX_RANGE = 70.0f;
 constexpr bool IS_REVERSE = true;
 constexpr Color TEST_COLOR = Color(0XFFFF0000);
 constexpr double SLIDER_WIDTH = 20.0;
@@ -62,6 +66,7 @@ constexpr Dimension SLIDER_TRACK_THICKNESS = Dimension(10.0);
 constexpr Dimension SLIDER_STEP_SIZE = Dimension(0.5);
 constexpr Dimension SLIDER_TRACK_BORDER_RADIUS = Dimension(10.0);
 constexpr Dimension SLIDER_BLOCK_BORDER_WIDTH = Dimension(5.0);
+constexpr Dimension SLIDER_SELECTED_BORDER_RADIUS = Dimension(10.0);
 } // namespace
 class SliderStaticTestNg : public testing::Test {
 public:
@@ -999,5 +1004,184 @@ HWTEST_F(SliderStaticTestNg, ResetTrackBackgroundColorTest001, TestSize.Level1)
     Gradient expectedGradient = SliderModelNG::CreateSolidGradient(testColor);
     EXPECT_EQ(gradientOpt.value(), expectedGradient);
     EXPECT_TRUE(paintProperty->GetTrackBackgroundIsResourceColor());
+}
+
+/**
+ * @tc.name: SliderStaticTestNg023
+ * @tc.desc: test Slider SetMinResponsiveDistance
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SliderStaticTestNg023, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider frameNode.
+     */
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::SLIDER_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps: step2. create slider paintProperty and layoutProperty.
+     */
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+    auto layoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test SetMinResponsiveDistance.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    std::optional<float> distance = std::nullopt;
+    SliderModelStatic::SetMinResponsiveDistance(frameNode, distance);
+    EXPECT_EQ(paintProperty->GetMinResponsiveDistance(), std::nullopt);
+
+    distance = SLIDER_DISTANCE;
+    SliderModelStatic::SetMinResponsiveDistance(frameNode, distance);
+    ASSERT_NE(paintProperty->GetMinResponsiveDistance(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetMinResponsiveDistance().value(), SLIDER_DISTANCE);
+}
+
+/**
+ * @tc.name: SliderStaticTestNg024
+ * @tc.desc: test Slider SetStep
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SliderStaticTestNg024, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider frameNode.
+     */
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::SLIDER_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps: step2. create slider paintProperty.
+     */
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test SetStep.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    std::optional<float> step = std::nullopt;
+    SliderModelStatic::SetStep(frameNode, step);
+    EXPECT_EQ(paintProperty->GetStep(), std::nullopt);
+
+    step = SLIDER_STEP;
+    SliderModelStatic::SetStep(frameNode, step);
+    ASSERT_NE(paintProperty->GetStep(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetStep().value(), TEST_COLOR);
+}
+
+/**
+ * @tc.name: SliderStaticTestNg025
+ * @tc.desc: test Slider SetValidSlideRange
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SliderStaticTestNg025, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider frameNode.
+     */
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::SLIDER_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps: step2. create slider paintProperty.
+     */
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test SetValidSlideRange.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    std::optional<float> min_range = std::nullopt;
+    std::optional<float> max_range = std::nullopt;
+    SliderModelStatic::SetValidSlideRange(frameNode, min_range, max_range);
+    EXPECT_EQ(paintProperty->GetValidSlideRange(), std::nullopt);
+
+    min_range = MIN_RANGE;
+    max_range = MAX_RANGE;
+    SliderModelStatic::SetValidSlideRange(frameNode, min_range, max_range);
+    ASSERT_NE(paintProperty->GetValidSlideRange(), std::nullopt);
+    auto validRange = paintProperty->GetValidSlideRange().value()
+    EXPECT_TRUE(validRange && validRange->HasValidValues());
+    EXPECT_EQ(validRange->GetFromValue(), MIN_RANGE);
+    EXPECT_EQ(validRange->GetToValue(), MAX_RANGE);
+}
+
+/**
+ * @tc.name: SliderStaticTestNg026
+ * @tc.desc: test Slider SetSelectedBorderRadius
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SliderStaticTestNg026, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider frameNode.
+     */
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::SLIDER_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps: step2. create slider paintProperty.
+     */
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test SetSelectedBorderRadius.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    std::optional<float> radius = std::nullopt;
+    SliderModelStatic::SetSelectedBorderRadius(frameNode, radius);
+    EXPECT_EQ(paintProperty->GetSelectedBorderRadius(), std::nullopt);
+
+    radius = SLIDER_SELECTED_BORDER_RADIUS;
+    SliderModelStatic::SetSelectedBorderRadius(frameNode, radius);
+    ASSERT_NE(paintProperty->GetSelectedBorderRadius(), std::nullopt);
+    EXPECT_EQ(paintProperty->GetSelectedBorderRadius().value(), SLIDER_SELECTED_BORDER_RADIUS);
+}
+
+/**
+ * @tc.name: SliderStaticTestNg027
+ * @tc.desc: test Slider SetOnChangeEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(SliderStaticTestNg, SliderStaticTestNg027, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create slider frameNode.
+     */
+    auto node = SliderModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::SLIDER_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(node, nullptr);
+    /**
+     * @tc.steps: step2. create slider paintProperty.
+     */
+    auto paintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
+    ASSERT_NE(paintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test SetOnChangeEvent.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    std::function<void(float)> eventOnChange = [](float floatValue) { EXPECT_EQ(floatValue, 1.0); };
+    SliderModelStatic::SetOnChangeEvent(frameNode, eventOnChange);
+    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_NE(eventHub->onChangeEvent_, nullptr);
 }
 } // namespace OHOS::Ace::NG
