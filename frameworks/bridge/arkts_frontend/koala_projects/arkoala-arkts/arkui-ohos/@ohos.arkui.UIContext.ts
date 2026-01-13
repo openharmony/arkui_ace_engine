@@ -26,7 +26,7 @@ import { Context, PointerStyle, PixelMap } from '#external';
 import { UIAbilityContext, ExtensionContext } from "#external"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { componentUtils } from '@ohos/arkui/componentUtils';
-import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
+import { componentSnapshot, NodeIdentity } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';
 import { focusController } from '@ohos/arkui/focusController';
 import { Frame } from 'arkui/Graphics';
@@ -299,6 +299,11 @@ export class ComponentSnapshot {
     public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: int32, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
+    }
+
+    public getWithRange(start: NodeIdentity, end: NodeIdentity, isStartRect: boolean,
+        options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
+        throw Error('getWithRange not implemented in ComponentSnapshot!')
     }
 }
 
