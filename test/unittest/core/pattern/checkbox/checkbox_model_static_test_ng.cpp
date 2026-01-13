@@ -43,7 +43,6 @@
 using namespace testing;
 using namespace testing::ext;
 using CheckboxBuilderFunc = std::optional<std::function<void()>>;
-using CheckboxBuilderFuncion = std::function<void()>;
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -82,16 +81,6 @@ void CheckboxStaticTestNg::TearDownTestSuite()
 }
 
 CheckboxBuilderFunc CheckboxStaticTestNg::CheckboxBuilder()
-{
-    return []() {
-        ColumnModelNG colModel;
-        colModel.Create(Dimension(0), nullptr, "");
-        ViewAbstract::SetWidth(CalcLength(10.f));
-        ViewAbstract::SetHeight(CalcLength(10.f));
-    };
-}
-
-CheckboxBuilderFuncion CheckboxStaticTestNg::CheckboxBuilder()
 {
     return []() {
         ColumnModelNG colModel;
@@ -396,8 +385,8 @@ HWTEST_F(CheckboxStaticTestNg, CheckboxStaticTestNg009, TestSize.Level1)
      * @tc.steps: step3. test SetBuilder.
      * @tc.expected: step3. the property value meet expectations.
      */
-    CheckboxBuilderFuncion checkBoxFunc = CheckboxBuilder();
-    CheckBoxModelStatic::SetBuilder(frameNode, checkBoxFunc);
+    CheckboxBuilderFunc checkBoxFunc = CheckboxBuilder();
+    CheckBoxModelStatic::SetBuilder(frameNode, checkBoxFunc.value());
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     EXPECT_NE(pattern->builder_, nullptr);

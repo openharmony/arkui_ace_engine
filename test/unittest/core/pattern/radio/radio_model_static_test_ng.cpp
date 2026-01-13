@@ -215,7 +215,7 @@ HWTEST_F(RadioStaticTestNg, RadioStaticTestNg004, TestSize.Level1)
 }
 
 /**
- * @tc.name: RadiotaticTestNg005
+ * @tc.name: RadioStaticTestNg005
  * @tc.desc: test radio SetIndicatorColor.
  * @tc.type: FUNC
  */
@@ -258,11 +258,11 @@ RadioBuilderFunc RadioStaticTestNg::RadioBuilder()
 }
 
 /**
- * @tc.name: RadiotaticTestNg006
+ * @tc.name: RadioStaticTestNg006
  * @tc.desc: test radio SetBuilder.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioStaticTestNg, RadiotaticTestNg006, TestSize.Level1)
+HWTEST_F(RadioStaticTestNg, RadioStaticTestNg006, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create radio frameNode.
@@ -283,18 +283,18 @@ HWTEST_F(RadioStaticTestNg, RadiotaticTestNg006, TestSize.Level1)
      * @tc.expected: step3. the property value meet expectations.
      */
     auto radioFunc = RadioBuilder();
-    RadioModelStatic::SetBuilder(std::move(buildFunc));
+    RadioModelStatic::SetBuilder(std::move(radioFunc));
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
     EXPECT_NE(pattern->builder_, nullptr);
 }
 
 /**
- * @tc.name: RadiotaticTestNg007
+ * @tc.name: RadioStaticTestNg007
  * @tc.desc: test radio SetOnChangeEvent.
  * @tc.type: FUNC
  */
-HWTEST_F(RadioStaticTestNg, RadiotaticTestNg007, TestSize.Level1)
+HWTEST_F(RadioStaticTestNg, RadioStaticTestNg007, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. create radio frameNode.

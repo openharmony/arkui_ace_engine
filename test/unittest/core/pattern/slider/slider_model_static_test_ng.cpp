@@ -1075,7 +1075,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg024, TestSize.Level1)
     step = SLIDER_STEP;
     SliderModelStatic::SetStep(frameNode, step);
     ASSERT_NE(paintProperty->GetStep(), std::nullopt);
-    EXPECT_EQ(paintProperty->GetStep().value(), TEST_COLOR);
+    EXPECT_EQ(paintProperty->GetStep().value(), SLIDER_STEP);
 }
 
 /**
@@ -1112,7 +1112,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg025, TestSize.Level1)
     max_range = MAX_RANGE;
     SliderModelStatic::SetValidSlideRange(frameNode, min_range, max_range);
     ASSERT_NE(paintProperty->GetValidSlideRange(), std::nullopt);
-    auto validRange = paintProperty->GetValidSlideRange().value()
+    auto validRange = paintProperty->GetValidSlideRange().value();
     EXPECT_TRUE(validRange && validRange->HasValidValues());
     EXPECT_EQ(validRange->GetFromValue(), MIN_RANGE);
     EXPECT_EQ(validRange->GetToValue(), MAX_RANGE);
@@ -1179,7 +1179,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg027, TestSize.Level1)
      * @tc.expected: step3. the property value meet expectations.
      */
     std::function<void(float)> eventOnChange = [](float floatValue) { EXPECT_EQ(floatValue, 1.0); };
-    SliderModelStatic::SetOnChangeEvent(frameNode, eventOnChange);
+    SliderModelStatic::SetOnChangeEvent(frameNode, std::move(eventOnChange));
     auto eventHub = frameNode->GetEventHub<SliderEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->onChangeEvent_, nullptr);
