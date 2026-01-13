@@ -70,7 +70,7 @@ Ark_Boolean FocusControl_requestFocusImpl(const Ark_String* value)
     bool result = false;
     CHECK_NULL_RETURN(value, Converter::ArkValue<Ark_Boolean>(result));
     std::string inspectorKey = Converter::Convert<std::string>(*value);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
     CHECK_NULL_RETURN(pipelineContext, Converter::ArkValue<Ark_Boolean>(result));
     if (!pipelineContext->GetTaskExecutor()) {
         return Converter::ArkValue<Ark_Boolean>(result);
