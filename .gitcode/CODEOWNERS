@@ -3789,6 +3789,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/hoo
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/canvas/ @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/shape/ @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/video/ @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/node_adapter/ @arkuieco3
 frameworks/core/interfaces/native/implementation/canvas_gradient_accessor.cpp @arkuieco3
 frameworks/core/interfaces/native/implementation/canvas_gradient_peer.h @arkuieco3
 frameworks/core/interfaces/native/implementation/canvas_modifier.cpp @arkuieco3
@@ -3822,6 +3823,25 @@ frameworks/core/interfaces/native/ani/shape_ani_modifier.cpp @arkuieco3
 frameworks/core/interfaces/native/ani/shape_ani_modifier.h @arkuieco3
 frameworks/core/interfaces/native/ani/video_ani_modifier.cpp @arkuieco3
 frameworks/core/interfaces/native/ani/video_ani_modifier.h @arkuieco3
+frameworks/core/interfaces/native/implementation/builder_node_ops_peer.h @arkuieco3
+frameworks/core/interfaces/native/implementation/builder_node_ops_peer.cpp @arkuieco3
+frameworks/core/interfaces/native/implementation/frame_node_extender_accessor.cpp @arkuieco3
+frameworks/core/interfaces/native/implementation/render_node_extender_accessor.cpp @arkuieco3
+frameworks/core/interfaces/native/implementation/node_container_modifier.cpp @arkuieco3
+frameworks/core/interfaces/native/implementation/node_container_ops_accessor.cpp @arkuieco3
+frameworks/core/interfaces/native/implementation/node_content_extender_accessor.cpp @arkuieco3
+frameworks/core/interfaces/native/ani/component_content_ani_modifier.h @arkuieco3
+frameworks/core/interfaces/native/ani/component_content_ani_modifier.cpp @arkuieco3
+frameworks/core/interfaces/native/ani/content_slot_ani_modifier.h @arkuieco3
+frameworks/core/interfaces/native/ani/content_slot_ani_modifier.cpp @arkuieco3
+frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.h @arkuieco3
+frameworks/core/interfaces/native/ani/node_adapter_ani_modifier.cpp @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/AttributeUpdater.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ComponentContent.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/NodeContent.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/contentSlot.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/nodeContainer.ets @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/canvas.ets @arkuieco3
 
 [Scroll ArkTS1.2]
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/component/listItem.ets @arkuiscroll
