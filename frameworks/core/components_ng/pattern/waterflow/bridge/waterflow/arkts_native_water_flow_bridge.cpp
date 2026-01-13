@@ -426,7 +426,8 @@ std::optional<PresetFillType> ParsePresetFillType(const EcmaVM* vm, const Local<
 std::string ParseBarWidth(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
     CalcDimension scrollBarWidth;
-    if (!ArkTSUtils::ParseJsDimensionVp(vm, jsValue, scrollBarWidth) || jsValue->IsNull() || jsValue->IsUndefined() ||
+    if (!ArkTSUtils::ParseJsDimension(vm, jsValue, scrollBarWidth, DimensionUnit::VP, false, false) ||
+        jsValue->IsNull() || jsValue->IsUndefined() ||
         (jsValue->IsString(vm) && jsValue->ToString(vm)->ToString(vm).empty()) ||
         LessNotEqual(scrollBarWidth.Value(), 0.0) || scrollBarWidth.Unit() == DimensionUnit::PERCENT) {
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -442,9 +443,12 @@ void SetWaterFlowFooterOrSection(
     const EcmaVM* vm, ArkUIRuntimeCallInfo* runtimeCallInfo, const ArkUINodeHandle& nativeNode)
 {
     CHECK_NULL_VOID(vm);
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> sectionsArgs = runtimeCallInfo->GetCallArgRef(NUM_2);
     Local<JSValueRef> footerContentArgs = runtimeCallInfo->GetCallArgRef(NUM_4);
     Local<JSValueRef> footerArgs = runtimeCallInfo->GetCallArgRef(NUM_5);
+    Local<JSValueRef> hasFooterContentArgs = runtimeCallInfo->GetCallArgRef(6); // 6: hasFooterContent index
+    bool isJSView = nodeArg->IsBoolean() && nodeArg->ToBoolean(vm)->Value();
     if (!sectionsArgs->IsNull() && sectionsArgs->IsObject(vm)) {
         // set sections only when sections exist
         SetWaterFlowSections(runtimeCallInfo);
@@ -452,7 +456,11 @@ void SetWaterFlowFooterOrSection(
         // reset sections and set footer when no sections exist
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowSections(nativeNode);
         // check footerContent first
-        if (!footerContentArgs->IsNull() && footerContentArgs->IsObject(vm)) {
+        if (!isJSView && !footerContentArgs->IsNull() && footerContentArgs->IsObject(vm)) {
+            SetWaterFlowFooterContent(runtimeCallInfo);
+            return;
+        }
+        if (isJSView && hasFooterContentArgs->IsBoolean() && hasFooterContentArgs->BooleaValue(vm)) {
             SetWaterFlowFooterContent(runtimeCallInfo);
             return;
         }
@@ -1681,7 +1689,7 @@ ArkUINativeModuleValue WaterFlowBridge::SetJSScrollBarColor(ArkUIRuntimeCallInfo
     Color color;
     RefPtr<ResourceObject> resObj;
     NodeInfo nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (ArkTSUtils::ParseJsColor(vm, colorArg, color, resObj, nodeInfo)) {
+    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resObj, nodeInfo)) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->setWaterFlowScrollBarColor(
             nativeNode, color.ColorToString().c_str());
     } else {
