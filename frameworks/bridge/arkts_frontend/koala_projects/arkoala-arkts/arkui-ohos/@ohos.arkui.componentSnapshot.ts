@@ -18,6 +18,8 @@ import { PixelMap } from "#external";
 import { DynamicRangeMode } from 'arkui/component/image';
 import colorSpaceManager from '@ohos.graphics.colorSpaceManager';
 
+export type NodeIdentity = string | int;
+
 export declare namespace componentSnapshot {
     export interface SnapshotRegion {
         left: double;
@@ -52,4 +54,6 @@ export declare namespace componentSnapshot {
     export function getSync(value: string, options?: SnapshotOptions): PixelMap | null;
     export function getWithUniqueId(uniqueIdValue: int, options?: SnapshotOptions): Promise<PixelMap> | null;
     export function getSyncWithUniqueId(uniqueIdValue: int, options?: SnapshotOptions): PixelMap;
+    export function getWithRange(start: NodeIdentity, end: NodeIdentity, isStartRect: boolean,
+        options?: SnapshotOptions): Promise<PixelMap> | null;
 }

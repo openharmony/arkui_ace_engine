@@ -5147,6 +5147,26 @@ void impl_CommonMethod_setOnDrop1(Ark_NativePointer thisPtr, KSerializerBuffer t
         GetNodeModifiers()->getCommonMethodModifier()->setOnDrop1(self, static_cast<Opt_OnDragEventCallback*>(&eventCallbackValueTemp), static_cast<Opt_DropOptions*>(&dropOptionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setOnDrop1, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CommonMethod_setOnDragSpringLoading(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto callback_ValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Callback_SpringLoadingContext_Void callback_ValueTempTmpBuf = {};
+        callback_ValueTempTmpBuf.tag = callback_ValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((callback_ValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            callback_ValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_dragController_SpringLoadingContext value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_SpringLoadingContext_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_dragController_SpringLoadingContext value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_SpringLoadingContext_Void))))};
+        }
+        Opt_Callback_SpringLoadingContext_Void callback_ValueTemp = callback_ValueTempTmpBuf;;
+        const auto configurationValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_dragController_DragSpringLoadingConfiguration configurationValueTempTmpBuf = {};
+        configurationValueTempTmpBuf.tag = configurationValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((configurationValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            configurationValueTempTmpBuf.value = dragController_DragSpringLoadingConfiguration_serializer::read(thisDeserializer);
+        }
+        Opt_dragController_DragSpringLoadingConfiguration configurationValueTemp = configurationValueTempTmpBuf;;
+        GetNodeModifiers()->getCommonMethodModifier()->setOnDragSpringLoading(self, static_cast<Opt_Callback_SpringLoadingContext_Void*>(&callback_ValueTemp), static_cast<Opt_dragController_DragSpringLoadingConfiguration*>(&configurationValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setOnDragSpringLoading, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setDragPreview1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -33623,6 +33643,11 @@ Ark_Int32 impl_KeyEvent_getType(Ark_NativePointer thisPtr) {
         return GetAccessors()->getKeyEventAccessor()->getType(self);
 }
 KOALA_INTEROP_DIRECT_1(KeyEvent_getType, Ark_Int32, Ark_NativePointer)
+void impl_KeyEvent_stopPropagation(Ark_NativePointer thisPtr) {
+        Ark_KeyEvent self = reinterpret_cast<Ark_KeyEvent>(thisPtr);
+        GetAccessors()->getKeyEventAccessor()->stopPropagation(self);
+}
+KOALA_INTEROP_DIRECT_V1(KeyEvent_stopPropagation, Ark_NativePointer)
 void impl_KeyEvent_setType(Ark_NativePointer thisPtr, Ark_Int32 type) {
         Ark_KeyEvent self = reinterpret_cast<Ark_KeyEvent>(thisPtr);
         GetAccessors()->getKeyEventAccessor()->setType(self, static_cast<Ark_KeyType>(type));
@@ -33688,28 +33713,6 @@ void impl_KeyEvent_setTimestamp(Ark_NativePointer thisPtr, KLong timestamp) {
         GetAccessors()->getKeyEventAccessor()->setTimestamp(self, timestamp);
 }
 KOALA_INTEROP_DIRECT_V2(KeyEvent_setTimestamp, Ark_NativePointer, KLong)
-KInteropReturnBuffer impl_KeyEvent_getStopPropagation(Ark_NativePointer thisPtr) {
-        Ark_KeyEvent self = reinterpret_cast<Ark_KeyEvent>(thisPtr);
-        const auto &retValue = GetAccessors()->getKeyEventAccessor()->getStopPropagation(self);
-        SerializerBase _retSerializer {};
-        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
-            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
-            _retSerializer.writeCallbackResource(retValue.resource);
-            _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
-            _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
-        } else {
-            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
-        }
-        return _retSerializer.toReturnBuffer();
-}
-KOALA_INTEROP_1(KeyEvent_getStopPropagation, KInteropReturnBuffer, Ark_NativePointer)
-void impl_KeyEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_KeyEvent self = reinterpret_cast<Ark_KeyEvent>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_Void stopPropagationValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
-        GetAccessors()->getKeyEventAccessor()->setStopPropagation(self, static_cast<Callback_Void*>(&stopPropagationValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(KeyEvent_setStopPropagation, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_Int32 impl_KeyEvent_getIntentionCode(Ark_NativePointer thisPtr) {
         Ark_KeyEvent self = reinterpret_cast<Ark_KeyEvent>(thisPtr);
         return GetAccessors()->getKeyEventAccessor()->getIntentionCode(self);
@@ -34789,6 +34792,11 @@ Ark_NativePointer impl_MouseEvent_getFinalizer() {
         return GetAccessors()->getMouseEventAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(MouseEvent_getFinalizer, Ark_NativePointer)
+void impl_MouseEvent_stopPropagation(Ark_NativePointer thisPtr) {
+        Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
+        GetAccessors()->getMouseEventAccessor()->stopPropagation(self);
+}
+KOALA_INTEROP_DIRECT_V1(MouseEvent_stopPropagation, Ark_NativePointer)
 Ark_Int32 impl_MouseEvent_getButton(Ark_NativePointer thisPtr) {
         Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
         return GetAccessors()->getMouseEventAccessor()->getButton(self);
@@ -34869,28 +34877,6 @@ void impl_MouseEvent_setY(Ark_NativePointer thisPtr, KDouble y) {
         GetAccessors()->getMouseEventAccessor()->setY(self, y);
 }
 KOALA_INTEROP_DIRECT_V2(MouseEvent_setY, Ark_NativePointer, KDouble)
-KInteropReturnBuffer impl_MouseEvent_getStopPropagation(Ark_NativePointer thisPtr) {
-        Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
-        const auto &retValue = GetAccessors()->getMouseEventAccessor()->getStopPropagation(self);
-        SerializerBase _retSerializer {};
-        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
-            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
-            _retSerializer.writeCallbackResource(retValue.resource);
-            _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.call));
-            _retSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(retValue.callSync));
-        } else {
-            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
-        }
-        return _retSerializer.toReturnBuffer();
-}
-KOALA_INTEROP_1(MouseEvent_getStopPropagation, KInteropReturnBuffer, Ark_NativePointer)
-void impl_MouseEvent_setStopPropagation(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
-        Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Callback_Void stopPropagationValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Void))))};;
-        GetAccessors()->getMouseEventAccessor()->setStopPropagation(self, static_cast<Callback_Void*>(&stopPropagationValueTemp));
-}
-KOALA_INTEROP_DIRECT_V3(MouseEvent_setStopPropagation, Ark_NativePointer, KSerializerBuffer, int32_t)
 KInteropReturnBuffer impl_MouseEvent_getRawDeltaX(Ark_NativePointer thisPtr) {
         Ark_MouseEvent self = reinterpret_cast<Ark_MouseEvent>(thisPtr);
         const auto &retValue = GetAccessors()->getMouseEventAccessor()->getRawDeltaX(self);

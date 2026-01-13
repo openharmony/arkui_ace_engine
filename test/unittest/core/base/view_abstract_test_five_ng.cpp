@@ -327,4 +327,22 @@ HWTEST_F(ViewAbstractTestFiveNg, CreateWithDimensionResourceObj004, TestSize.Lev
     auto defaultStr = viewAbstractModelNG.PopupOptionTypeStr(type);
     EXPECT_EQ(defaultStr, "");
 }
+
+/**
+ * @tc.name: ViewAbstractModelNg_SetClipEdge
+ * @tc.desc: Test SetClipEdge of View_Abstract_Model_NG
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestFiveNg, ViewAbstractModelNg_SetClipEdge, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    ASSERT_NE(pattern, nullptr);
+    g_isConfigChangePerform = true;
+    ViewAbstractModelNG::SetClipEdge(frameNode, true);
+    std::string shapeStr = pattern->GetResCacheMapByKey("clipShape");
+    EXPECT_EQ(shapeStr, "");
+    g_isConfigChangePerform = false;
+}
 } // namespace OHOS::Ace::NG

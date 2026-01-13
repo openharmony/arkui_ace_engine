@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_JSI_CHART_BRIDGE_H
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_JS_FRONTEND_ENGINE_JSI_CHART_BRIDGE_H
 
-#include "frameworks/bridge/common/dom/dom_chart.h"
+#include "compatible/components/chart/dom_chart.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
 
 namespace OHOS::Ace::Framework {

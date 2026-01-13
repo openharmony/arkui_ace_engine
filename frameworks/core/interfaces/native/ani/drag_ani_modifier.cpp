@@ -56,14 +56,14 @@ ani_ref GetDragData(ani_ref event)
     return reinterpret_cast<ani_ref>(unifiedDataPtr);
 }
 
-void GetDragSummary(ani_ref event, ani_ref summaryPtr)
+void GetDragSummary(ani_ref event, SharedPointerWrapper& summaryPtr)
 {
     auto peer = reinterpret_cast<Ark_DragEvent>(event);
     CHECK_NULL_VOID(peer);
     auto dragEvent = peer->dragInfo;
     CHECK_NULL_VOID(dragEvent);
     auto summary = dragEvent->GetSummary();
-    UdmfClient::GetInstance()->TransformSummaryANI(summary, reinterpret_cast<void*>(summaryPtr));
+    UdmfClient::GetInstance()->TransformSummaryANI(summary, summaryPtr.GetSharedPtr());
 }
 
 void SetDragDropInfoPixelMap(ani_ref event, ani_ref pixelMapPtr)

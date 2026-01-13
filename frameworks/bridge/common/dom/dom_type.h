@@ -127,7 +127,7 @@ ACE_EXPORT extern const char DOM_MARGIN_LEFT[];
 ACE_EXPORT extern const char DOM_MARGIN_START[];
 ACE_EXPORT extern const char DOM_MARGIN_END[];
 ACE_EXPORT extern const char DOM_LAYOUT_IN_BOX[];
-ACE_EXPORT extern const char DOM_BACKGROUND_COLOR[];
+ACE_FORCE_EXPORT extern const char DOM_BACKGROUND_COLOR[];
 ACE_EXPORT extern const char DOM_BACKGROUND_IMAGE[];
 ACE_FORCE_EXPORT extern const char DOM_FADE_COLOR[];
 ACE_EXPORT extern const char DOM_BOX_SHADOW_H[];
@@ -602,18 +602,8 @@ ACE_EXPORT extern const char DOM_DIRECTION[];
 ACE_EXPORT extern const char DOM_START_TO_END[];
 
 // chart attribute and style constants
-ACE_EXPORT extern const char DOM_CHART_TYPE[];
-ACE_EXPORT extern const char DOM_CHART_TYPE_BAR[];
-ACE_EXPORT extern const char DOM_CHART_TYPE_LINE[];
-ACE_EXPORT extern const char DOM_CHART_TYPE_GAUGE[];
-ACE_EXPORT extern const char DOM_CHART_TYPE_PROGRESS[];
-ACE_EXPORT extern const char DOM_CHART_TYPE_LOADING[];
-ACE_EXPORT extern const char DOM_CHART_TYPE_RAINBOW[];
-ACE_EXPORT extern const char DOM_COLORS_ARRAY[];
-ACE_EXPORT extern const char DOM_WEIGHTS_ARRAY[];
-ACE_EXPORT extern const char DOM_EFFECTS_ON[];
-ACE_EXPORT extern const char DOM_AUTO_SCALE[];
-ACE_EXPORT extern const char DOM_CHART_ANIMATION_DURATION[];
+ACE_FORCE_EXPORT extern const char DOM_EFFECTS_ON[];
+ACE_FORCE_EXPORT extern const char DOM_METHOD_APPEND[];
 
 // slider attribute and style constants
 ACE_EXPORT extern const char DOM_MIN[];
@@ -633,27 +623,10 @@ ACE_EXPORT extern const char DOM_OUTSET[];
 ACE_EXPORT extern const char DOM_INSET[];
 
 // stepper attribute style  event and method constants
-ACE_EXPORT extern const char DOM_STEPPER_INDEX[];
 ACE_EXPORT extern const char DOM_STEPPER_LABEL[];
 ACE_EXPORT extern const char DOM_STEPPER_LEFT_LABEL[];
 ACE_EXPORT extern const char DOM_STEPPER_RIGHT_LABEL[];
 ACE_EXPORT extern const char DOM_STEPPER_INITIAL_STATUS[];
-ACE_EXPORT extern const char DOM_STEPPER_TEXT_COLOR[];
-ACE_EXPORT extern const char DOM_STEPPER_FONT_SIZE[];
-ACE_EXPORT extern const char DOM_STEPPER_FONT_STYLE[];
-ACE_EXPORT extern const char DOM_STEPPER_FONT_WEIGHT[];
-ACE_EXPORT extern const char DOM_STEPPER_FONT_FAMILY[];
-ACE_EXPORT extern const char DOM_STEPPER_TEXT_DECORATION[];
-ACE_EXPORT extern const char DOM_STEPPER_EVENT_FINISH[];
-ACE_EXPORT extern const char DOM_STEPPER_EVENT_SKIP[];
-ACE_EXPORT extern const char DOM_STEPPER_EVENT_CHANGE[];
-ACE_EXPORT extern const char DOM_STEPPER_EVENT_NEXT[];
-ACE_EXPORT extern const char DOM_STEPPER_EVENT_BACK[];
-ACE_EXPORT extern const char DOM_STEPPER_SET_RIGHT_BUTTON_STATUS[];
-
-// stepper-item attribute style and event constants
-ACE_EXPORT extern const char DOM_STEPPER_ITEM_EVENT_APPEAR[];
-ACE_EXPORT extern const char DOM_STEPPER_ITEM_EVENT_DISAPPEAR[];
 ACE_FORCE_EXPORT extern const char DOM_DURATION[];
 
 // switch attribute and style constants
@@ -885,12 +858,6 @@ ACE_EXPORT extern const char DOM_SECOND_HAND_SOURCE[];
 ACE_EXPORT extern const char DOM_SECOND_HAND_SOURCE_NIGHT[];
 ACE_EXPORT extern const char DOM_DIGIT_RADIUS_RATIO[];
 ACE_EXPORT extern const char DOM_DIGIT_SIZE_RATIO[];
-
-// piece attribute and style constants
-ACE_EXPORT extern const char DOM_PIECE_CONTENT[];
-ACE_EXPORT extern const char DOM_PIECE_ICON[];
-ACE_EXPORT extern const char DOM_PIECE_CLOSABLE[];
-ACE_EXPORT extern const char DOM_PIECE_EVENT_CLOSE[];
 
 // badge constants
 ACE_EXPORT extern const char DOM_BADGE_COLOR[];

@@ -2045,6 +2045,7 @@ void WebPattern::HandleTouchEvent(const TouchEventInfo& info)
     }
 
     if (changedPoint.GetTouchType() == TouchType::DOWN) {
+        SetTextSelectionEnable(true);
         HandleTouchDown(info, false);
         return;
     }
@@ -2053,10 +2054,12 @@ void WebPattern::HandleTouchEvent(const TouchEventInfo& info)
         return;
     }
     if (changedPoint.GetTouchType() == TouchType::UP) {
+        SetTextSelectionEnable(false);
         HandleTouchUp(info, false);
         return;
     }
     if (changedPoint.GetTouchType() == TouchType::CANCEL) {
+        SetTextSelectionEnable(false);
         HandleTouchCancel(info);
         return;
     }
@@ -2232,7 +2235,7 @@ void WebPattern::WebOnMouseEvent(const MouseInfo& info)
 
     if (info.GetAction() == MouseAction::RELEASE) {
         isTextSelectionEnable_ = false;
-        delegate_->OnTextSelectionChange(delegate_->GetLastSelectionText(), true);
+        delegate_->OnTextSelectionChange(delegate_->GetLastSelectionText());
     }
     // set touchup false when using mouse
     isTouchUpEvent_ = false;
@@ -5076,6 +5079,7 @@ void WebPattern::HandleTouchUp(const TouchEventInfo& info, bool fromOverlay)
         } else {
             delegate_->HandleTouchUp(touchPoint.id, touchPoint.x, touchPoint.y, fromOverlay);
         }
+        delegate_->OnTextSelectionChange(delegate_->GetLastSelectionText());
         UpdateImageOverlayStatus(ImageOverlayEvent::TOUCH_RELEASE);
         if (overlayCreating_) {
             if (imageAnalyzerManager_) {
@@ -5177,6 +5181,7 @@ void WebPattern::HandleTouchCancel(const TouchEventInfo& info)
         HandleTouchUp(info, false);
     }
     CHECK_NULL_VOID(delegate_);
+    delegate_->OnTextSelectionChange(delegate_->GetLastSelectionText());
     delegate_->HandleTouchCancel();
     touchEventInfoList_.clear();
     UpdateImageOverlayStatus(ImageOverlayEvent::TOUCH_RELEASE);
@@ -5462,7 +5467,6 @@ bool WebPattern::RunQuickMenu(std::shared_ptr<OHOS::NWeb::NWebQuickMenuParams> p
 
 void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY, bool isMove)
 {
-    SetTextSelectionEnable(true);
     showMagnifierFingerId_ =
         isMove ? showMagnifierFingerId_ : touchEventInfo_.GetChangedTouches().front().GetFingerId();
     if (magnifierController_) {
@@ -5474,7 +5478,6 @@ void WebPattern::ShowMagnifier(int centerOffsetX, int centerOffsetY, bool isMove
 void WebPattern::HideMagnifier()
 {
     TAG_LOGD(AceLogTag::ACE_WEB, "HideMagnifier");
-    SetTextSelectionEnable(false);
     showMagnifierFingerId_ = -1;
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();

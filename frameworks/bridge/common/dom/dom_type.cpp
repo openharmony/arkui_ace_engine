@@ -597,18 +597,8 @@ const char DOM_DIRECTION[] = "direction";
 const char DOM_START_TO_END[] = "startToEnd";
 
 // chart attribute and style constants
-const char DOM_CHART_TYPE[] = "type";
-const char DOM_CHART_TYPE_BAR[] = "bar";
-const char DOM_CHART_TYPE_LINE[] = "line";
-const char DOM_CHART_TYPE_GAUGE[] = "gauge";
-const char DOM_CHART_TYPE_LOADING[] = "loading";
-const char DOM_CHART_TYPE_PROGRESS[] = "progress";
-const char DOM_CHART_TYPE_RAINBOW[] = "rainbow";
-const char DOM_COLORS_ARRAY[] = "colors";
-const char DOM_WEIGHTS_ARRAY[] = "weights";
 const char DOM_EFFECTS_ON[] = "effects";
-const char DOM_AUTO_SCALE[] = "autoscale";
-const char DOM_CHART_ANIMATION_DURATION[] = "animationduration";
+const char DOM_METHOD_APPEND[] = "append";
 
 // slider attribute and style constants
 const char DOM_MIN[] = "min";
@@ -628,27 +618,10 @@ const char DOM_OUTSET[] = "outset";
 const char DOM_INSET[] = "inset";
 
 // stepper attribute style and event constants
-const char DOM_STEPPER_INDEX[] = "index";
 const char DOM_STEPPER_LABEL[] = "label";
 const char DOM_STEPPER_LEFT_LABEL[] = "prevLabel";
 const char DOM_STEPPER_RIGHT_LABEL[] = "nextLabel";
 const char DOM_STEPPER_INITIAL_STATUS[] = "status";
-const char DOM_STEPPER_TEXT_COLOR[] = "color";
-const char DOM_STEPPER_FONT_SIZE[] = "fontSize";
-const char DOM_STEPPER_FONT_STYLE[] = "fontStyle";
-const char DOM_STEPPER_FONT_WEIGHT[] = "fontWeight";
-const char DOM_STEPPER_FONT_FAMILY[] = "fontFamily";
-const char DOM_STEPPER_TEXT_DECORATION[] = "textDecoration";
-const char DOM_STEPPER_EVENT_FINISH[] = "finish";
-const char DOM_STEPPER_EVENT_SKIP[] = "skip";
-const char DOM_STEPPER_EVENT_CHANGE[] = "change";
-const char DOM_STEPPER_EVENT_NEXT[] = "next";
-const char DOM_STEPPER_EVENT_BACK[] = "back";
-const char DOM_STEPPER_SET_RIGHT_BUTTON_STATUS[] = "setNextButtonStatus";
-
-// stepper-item attribute style and event constants
-const char DOM_STEPPER_ITEM_EVENT_APPEAR[] = "appear";
-const char DOM_STEPPER_ITEM_EVENT_DISAPPEAR[] = "disappear";
 const char DOM_DURATION[] = "duration";
 
 // switch attribute and style constants
@@ -880,12 +853,6 @@ const char DOM_MINUTE_HAND_SOURCE[] = "minuteHand";
 const char DOM_MINUTE_HAND_SOURCE_NIGHT[] = "minuteHandNight";
 const char DOM_SECOND_HAND_SOURCE[] = "secondHand";
 const char DOM_SECOND_HAND_SOURCE_NIGHT[] = "secondHandNight";
-
-// piece constants
-const char DOM_PIECE_CONTENT[] = "content";
-const char DOM_PIECE_ICON[] = "icon";
-const char DOM_PIECE_CLOSABLE[] = "closable";
-const char DOM_PIECE_EVENT_CLOSE[] = "close";
 
 // badge constants
 const char DOM_BADGE_COLOR[] = "badgeColor";

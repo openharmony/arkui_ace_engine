@@ -4040,6 +4040,28 @@ void callManagedCallback_SpringBackAction_VoidSync(Ark_VMContext vmContext, Ark_
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedCallback_SpringLoadingContext_Void(Ark_Int32 resourceId, Ark_dragController_SpringLoadingContext value0)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_Callback_SpringLoadingContext_Void);
+    argsSerializer.writeInt32(resourceId);
+    dragController_SpringLoadingContext_serializer::write(argsSerializer, value0);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedCallback_SpringLoadingContext_VoidSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_dragController_SpringLoadingContext value0)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_Callback_SpringLoadingContext_Void);
+    argsSerializer.writeInt32(resourceId);
+    dragController_SpringLoadingContext_serializer::write(argsSerializer, value0);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedCallback_StateStylesChange(Ark_Int32 resourceId, Ark_Int32 currentState)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -9168,6 +9190,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Callback_Size_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Size_Void);
         case Kind_Callback_SizeResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SizeResult_Void);
         case Kind_Callback_SpringBackAction_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SpringBackAction_Void);
+        case Kind_Callback_SpringLoadingContext_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SpringLoadingContext_Void);
         case Kind_Callback_StateStylesChange: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_StateStylesChange);
         case Kind_Callback_String_PasteEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_String_PasteEvent_Void);
         case Kind_Callback_String_SurfaceRect_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_String_SurfaceRect_Void);
@@ -9516,6 +9539,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Callback_Size_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_Size_VoidSync);
         case Kind_Callback_SizeResult_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SizeResult_VoidSync);
         case Kind_Callback_SpringBackAction_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SpringBackAction_VoidSync);
+        case Kind_Callback_SpringLoadingContext_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_SpringLoadingContext_VoidSync);
         case Kind_Callback_StateStylesChange: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_StateStylesChangeSync);
         case Kind_Callback_String_PasteEvent_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_String_PasteEvent_VoidSync);
         case Kind_Callback_String_SurfaceRect_Void: return reinterpret_cast<Ark_NativePointer>(callManagedCallback_String_SurfaceRect_VoidSync);

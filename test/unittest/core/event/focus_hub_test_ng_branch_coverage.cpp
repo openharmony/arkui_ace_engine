@@ -493,31 +493,6 @@ HWTEST_F(FocusHubTestNg, DumpFocusUie001, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetEnabledAndSetShow002
- * @tc.desc: Test the function SetEnabled and SetShow.
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, SetEnabledAndSetShow002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create focusHub.
-     */
-    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
-    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
-    eventHub->AttachHost(frameNode);
-    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-
-    /**
-     * @tc.steps: step2. Set the corresponding variables to ensure entry into the target branch.
-     */
-    bool show = false;
-    SystemProperties::debugEnabled_ = true;
-    focusHub->SetEnabled(show);
-    focusHub->SetShow(show);
-    EXPECT_TRUE(SystemProperties::GetDebugEnabled());
-}
-
-/**
  * @tc.name: RequestNextFocusOfKeyEscTest002
  * @tc.desc: Test the function RequestNextFocusOfKeyEsc
  * @tc.type: FUNC
@@ -550,6 +525,31 @@ HWTEST_F(FocusHubTestNg, RequestNextFocusOfKeyEscTest002, TestSize.Level1)
     auto* context = framenode->GetContext();
     EXPECT_NE(context, nullptr);
     EXPECT_EQ(context->IsWindowFocused(), true);
+}
+
+/**
+ * @tc.name: SetEnabledAndSetShow002
+ * @tc.desc: Test the function SetEnabled and SetShow.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FocusHubTestNg, SetEnabledAndSetShow002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create focusHub.
+     */
+    auto frameNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::ROW_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    RefPtr<EventHub> eventHub = AceType::MakeRefPtr<EventHub>();
+    eventHub->AttachHost(frameNode);
+    auto focusHub = AceType::MakeRefPtr<FocusHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+
+    /**
+     * @tc.steps: step2. Set the corresponding variables to ensure entry into the target branch.
+     */
+    bool show = false;
+    SystemProperties::debugEnabled_ = true;
+    focusHub->SetEnabled(show);
+    focusHub->SetShow(show);
+    EXPECT_TRUE(SystemProperties::GetDebugEnabled());
 }
 
 /**

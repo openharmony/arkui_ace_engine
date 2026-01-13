@@ -181,7 +181,6 @@ template("ace_core_source_set") {
       "components/declaration/common/declaration_creator_manager.cpp",
       "components/declaration/common/event.cpp",
       "components/declaration/div/div_declaration.cpp",
-      "components/declaration/piece/piece_declaration.cpp",
       "components/declaration/richtext/rich_text_declaration.cpp",
       "components/declaration/side_bar/side_bar_declaration.cpp",
       "components/declaration/span/span_declaration.cpp",
@@ -359,7 +358,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/bubble:ace_core_components_bubble_$platform",
       "$ace_root/frameworks/core/components/button:ace_core_components_button_$platform",
       "$ace_root/frameworks/core/components/calendar:ace_core_components_calendar_$platform",
-      "$ace_root/frameworks/core/components/chart:ace_core_components_chart_$platform",
       "$ace_root/frameworks/core/components/checkable:ace_core_components_checkable_$platform",
       "$ace_root/frameworks/core/components/clip:ace_core_components_clip_$platform",
       "$ace_root/frameworks/core/components/common:ace_core_components_common_$platform",
@@ -418,7 +416,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/split_container:ace_core_components_split_container_$platform",
       "$ace_root/frameworks/core/components/stack:ace_core_components_stack_$platform",
       "$ace_root/frameworks/core/components/stage:ace_core_components_stage_$platform",
-      "$ace_root/frameworks/core/components/stepper:ace_core_components_stepper_$platform",
       "$ace_root/frameworks/core/components/text:ace_core_components_text_$platform",
       "$ace_root/frameworks/core/components/text_clock:ace_core_components_text_clock_$platform",
       "$ace_root/frameworks/core/components/text_span:ace_core_components_text_span_$platform",
@@ -618,7 +615,6 @@ template("ace_core_source_set") {
     if (!is_wearable_product) {
       deps += [
         "$ace_root/frameworks/core/components/multimodal:ace_core_components_multimodal_$platform",
-        "$ace_root/frameworks/core/components/piece:ace_core_components_piece_$platform",
         "$ace_root/frameworks/core/components/popup:ace_core_components_popup_$platform",
         "$ace_root/frameworks/core/components/select:ace_core_components_select_$platform",
       ]

@@ -651,6 +651,7 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
 RefPtr<FrameNode> FrameNode::CreateCommonNode(
     const std::string& tag, int32_t nodeId, bool isLayoutNode, const RefPtr<Pattern>& pattern, bool isRoot)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot, isLayoutNode);
     ElementRegister::GetInstance()->AddUINode(frameNode);
     frameNode->InitializePatternAndContext();
@@ -6185,6 +6186,7 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheS
 
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
+    FREE_NODE_CHECK(this, OnInspectorIdUpdate, id);
     renderContext_->UpdateNodeName(id);
     ElementRegister::GetInstance()->AddFrameNodeByInspectorId(id, AceType::WeakClaim(this), this->GetId());
     auto parent = GetAncestorNodeOfFrame(true);

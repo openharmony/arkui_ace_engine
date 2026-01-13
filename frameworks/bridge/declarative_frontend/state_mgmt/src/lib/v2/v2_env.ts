@@ -161,7 +161,8 @@ class EnvV2 {
     if (!factory) {
       const message = `${key} has not been registered in factory envFactoryMap, internal error.`;
       stateMgmtConsole.error(message);
-      throw new Error(message);
+      // toolchain can check
+      throw new BusinessError(UNSUPPORTED_KEY_IN_ENV, message);
     }
     const uiContext = newInstanceId ? getUIContextUsingInstanceId(newInstanceId): view.getUIContext();
     stateMgmtConsole.debug(`registerEnv: view ${view.debugInfo__()} 3. cannot find @Env(${key}) ${varName} in parent/global, create new one`);

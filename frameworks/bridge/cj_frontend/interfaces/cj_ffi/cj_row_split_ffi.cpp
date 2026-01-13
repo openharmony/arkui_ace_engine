@@ -15,23 +15,42 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_row_split_ffi.h"
 
-#include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/pattern/linear_split/linear_split_model.h"
+#include "base/log/log_wrapper.h"
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
 
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::LinearSplitModelNG* GetRowSplitModel()
+{
+    static NG::LinearSplitModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("RowSplit");
+        if (module == nullptr) {
+            LOGF("Can't find row split dynamic module");
+            abort();
+        }
+        return reinterpret_cast<NG::LinearSplitModelNG*>(module->GetModel());
+    }
+    return model;
+}
+} // namespace OHOS::Ace
+
 extern "C" {
 void FfiOHOSAceFrameworkRowSplitCreate()
 {
-    LinearSplitModel::GetInstance()->Create(NG::SplitType::ROW_SPLIT);
+    GetRowSplitModel()->Create(NG::SplitType::ROW_SPLIT);
 }
 
 void FfiOHOSAceFrameworkRowSplitResizeable(bool resizeable)
 {
-    LinearSplitModel::GetInstance()->SetResizable(NG::SplitType::ROW_SPLIT, resizeable);
+    GetRowSplitModel()->SetResizable(NG::SplitType::ROW_SPLIT, resizeable);
 }
 
 void FfiOHOSAceFrameworkRowSplitClip(bool isClip)

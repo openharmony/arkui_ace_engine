@@ -21,6 +21,7 @@
 
 #include "compatible/components/badge/badge_loader.h"
 #include "compatible/components/canvas/canvas_loader.h"
+#include "compatible/components/chart/chart_loader.h"
 #include "compatible/components/clock/clock_loader.h"
 #include "compatible/components/grid_column/grid_col_loader.h"
 #include "compatible/components/grid_container/grid_container_loader.h"
@@ -36,6 +37,7 @@
 #include "compatible/components/navigation_menu/navigation_menu_loader.h"
 #include "compatible/components/svg/svg_loader.h"
 #include "compatible/components/tab_bar/tab_loader.h"
+#include "compatible/components/piece/piece_loader.h"
 #include "compatible/components/qrcode/qrcode_loader.h"
 #include "compatible/components/rating/rating_loader.h"
 #include "compatible/components/refresh/refresh_loader.h"
@@ -49,6 +51,8 @@
 #include "compatible/components/toolbaritem/tool_bar_item_loader.h"
 #include "compatible/components/swiper/swiper_loader.h"
 
+#include "compatible/components/stepper/stepper_loader.h"
+#include "compatible/components/stepper/stepper_item_loader.h"
 #include "compatible/components/video/video_loader.h"
 
 extern "C" ACE_FORCE_EXPORT void* OHOS_ACE_Compatible_GetLoader(const char* name)
@@ -64,6 +68,7 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
     static std::unordered_map<std::string, std::function<ComponentLoader*()>> sLoaderMap = {
         { "badge", []() -> ComponentLoader* { return new BadgeLoader(); } },
         { "clock", []() -> ComponentLoader* { return new ClockLoader(); } },
+        { "chart", []() -> ComponentLoader* { return new ChartLoader(); } },
         { "grid-col", []() -> ComponentLoader* { return new GridColLoader(); } },
         { "grid-container", []() -> ComponentLoader* { return new GridContainerLoader(); } },
         { "grid-row", []() -> ComponentLoader* { return new GridRowLoader(); } },
@@ -102,7 +107,10 @@ ComponentLoader* ComponentLoader::GetLoaderByName(const char* name)
         { "stop", []() -> ComponentLoader* { return new SvgStopLoader(); } },
         { "refresh", []() -> ComponentLoader* { return new RefreshLoader(); } },
         { "video", []() -> ComponentLoader* { return new VideoLoader(); } },
+        { "piece", []() -> ComponentLoader* { return new PieceLoader(); } },
         { "qrcode", []() -> ComponentLoader* { return new QRCodeLoader(); } },
+        { "stepper", []() -> ComponentLoader* { return new StepperLoader(); } },
+        { "stepper-item", []() -> ComponentLoader* { return new StepperItemLoader(); } },
         { "picker", []() -> ComponentLoader* { return new PickerLoader(); } },
         { "picker-view", []() -> ComponentLoader* { return new PickerViewLoader(); } },
         { "datePicker", []() -> ComponentLoader* { return new DatePickerLoader(); } },

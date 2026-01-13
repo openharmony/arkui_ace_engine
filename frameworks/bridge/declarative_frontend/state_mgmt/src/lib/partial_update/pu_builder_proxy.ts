@@ -49,7 +49,7 @@ function makeBuilderParameterProxy(builderName: string, source: Object): Object 
                 staticHook!.addRef = val;
                 return true;
             }
-            throw Error(`@Builder '${builderName}': Invalid attempt to set(write to) parameter '${prop.toString()}' error!`);
+            throw new BusinessError(INVALID_SET_IN_BUILDER, `@Builder '${builderName}': Invalid attempt to set(write to) parameter '${prop.toString()}' error!`);
         },
         get(target, prop) {
             if (InteropConfigureStateMgmt.needsInterop() && prop === '__builder_param_get_target') {

@@ -213,6 +213,15 @@ export class ArkUIAniModule {
     native static _createDragEventAccessorWithPointer(input: KPointer) : KPointer
     native static _getDragEventPointer(input: KPointer): KPointer
 
+    //for dragSpringLoading
+    native static _Extractors_fromPtrToDragSpringLoadingContext(ptr: KPointer) : dragController.SpringLoadingContext
+    native static _DragSpringLoadingContext_get_state(ptr: KPointer) : dragController.DragSpringLoadingState
+    native static _DragSpringLoadingContext_get_currentNotifySequence(ptr: KPointer) : int
+    native static _DragSpringLoadingContext_get_dragInfos(ptr: KPointer) : dragController.SpringLoadingDragInfos | undefined
+    native static _DragSpringLoadingContext_get_currentConfig(ptr: KPointer) : dragController.DragSpringLoadingConfiguration | undefined
+    native static _DragSpringLoadingContext_abort(ptr: KPointer) : void
+    native static _DragSpringLoadingContext_updateConfiguration(ptr: KPointer, config: dragController.DragSpringLoadingConfiguration) : void
+
     // for componentSnapshot
     native static _ComponentSnapshot_createFromBuilderWithCallback(ptr: KPointer, destroyCallback: () => void,
         callback: AsyncCallback<image.PixelMap>, delay?: int32, checkImageStatus?: boolean,
@@ -247,6 +256,7 @@ export class ArkUIAniModule {
         dragPreviewPtr: KPointer): void
     native static _DragController_cleanDragAction(dragActionptr: KPointer): void
     native static _DragController_cleanDragPreview(dragPreviewptr: KPointer): void
+    native static _DragController_cleanSpringLoadingContext(springLoadingContextPtr: KPointer) : void
 
     native static _Animation_SetOrCreateAnimatableProperty<T>(ptr: KPointer, propertyName: string, property: number | AnimatableArithmetic<T>,
         callback: (value: number | AnimatableArithmetic<T>) => void): void

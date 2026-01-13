@@ -25,6 +25,15 @@ enum class DataPanelType {
     CIRCLE = 0,
     LINE = 1
 };
+
+enum class ChartType {
+    LINE,
+    BAR,
+    GAUGE,
+    PROGRESS,
+    RAINBOW,
+    LOADING,
+};
 class DataPanelConfiguration : public CommonConfiguration {
     public:
         DataPanelConfiguration(std::vector<double>& values, double maxValue, bool enabled)

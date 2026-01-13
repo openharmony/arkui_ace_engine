@@ -87,7 +87,7 @@ HWTEST_F(CommonMethodModifierTest5, setLinearGradientBlurTestValidValues, TestSi
                 .direction = Ark_GradientDirection::ARK_GRADIENT_DIRECTION_BOTTOM,
                 .fractionStops = frac.ArkValue()
             }),
-            "{\"value\":\"12.00vp\",\"options\":{\"direction\":\"BOTTOM\","
+            "{\"value\":\"12.00px\",\"options\":{\"direction\":\"BOTTOM\","
             "\"fractionStops\":[\"1.100000,2.200000\",\"3.300000,4.400000\",\"5.500000,6.600000\"]}}"
         },
     };

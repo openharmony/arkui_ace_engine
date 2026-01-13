@@ -469,7 +469,6 @@ class JSCheckbox extends JSViewAbstract {
   }
   static margin(value) {
     getUINativeModule().checkbox.setMargin(true, value);
-
   }
   static onChange(callback) {
     getUINativeModule().checkbox.setCheckboxOnChange(true, callback);
@@ -527,4 +526,5 @@ function exportView() {
   globalThis.Checkbox = JSCheckbox;
 }
 
-export default { ArkCheckboxComponent, createComponent, exportComponent, exportView };
+export default { ArkCheckboxComponent, CheckboxHeightModifier, CheckboxWidthModifier,
+  createComponent, exportComponent, exportView };

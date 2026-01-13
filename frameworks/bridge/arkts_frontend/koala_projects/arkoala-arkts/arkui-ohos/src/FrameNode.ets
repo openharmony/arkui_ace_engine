@@ -1498,6 +1498,18 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getColumnAttribute(node: FrameNode): ColumnAttribute | undefined {
+        if (node.getType() !== 'Column') {
+            return undefined
+        }
+        let columnNode = node as ColumnFrameNode
+        if (columnNode !== undefined) {
+            return columnNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     export function createRowNode(context: UIContext): RowFrameNode {
         return new RowFrameNode(context, 'Row', (node: FrameNode, type: ModifierType): ArkRowNode => {
             let arknode = new ArkRowNode();
@@ -1506,6 +1518,18 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    export function getRowAttribute(node: FrameNode): RowAttribute | undefined {
+        if (node.getType() !== 'Row') {
+            return undefined
+        }
+        let rowNode = node as RowFrameNode
+        if (rowNode !== undefined) {
+            return rowNode.attribute
+        }
+        return undefined
     }
 
     // @ts-ignore
@@ -1520,6 +1544,18 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getStackAttribute(node: FrameNode): StackAttribute | undefined {
+        if (node.getType() !== 'Stack') {
+            return undefined
+        }
+        let stackNode = node as StackFrameNode
+        if (stackNode !== undefined) {
+            return stackNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     export function createFlexNode(context: UIContext): FlexFrameNode {
         return new FlexFrameNode(context, 'Flex', (node: FrameNode, type: ModifierType): ArkFlexNode => {
             let arknode = new ArkFlexNode();
@@ -1528,6 +1564,18 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    export function getFlexAttribute(node: FrameNode): FlexAttribute | undefined {
+        if (node.getType() !== 'Flex') {
+            return undefined
+        }
+        let flexNode = node as FlexFrameNode
+        if (flexNode !== undefined) {
+            return flexNode.attribute
+        }
+        return undefined
     }
 
     // @ts-ignore
@@ -1583,6 +1631,18 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    export function getRelativeContainerAttribute(node: FrameNode): RelativeContainerAttribute | undefined {
+        if (node.getType() !== 'RelativeContainer') {
+            return undefined
+        }
+        let relativeContainerNode = node as RelativeContainerFrameNode
+        if (relativeContainerNode !== undefined) {
+            return relativeContainerNode.attribute
+        }
+        return undefined
     }
 
     // @ts-ignore

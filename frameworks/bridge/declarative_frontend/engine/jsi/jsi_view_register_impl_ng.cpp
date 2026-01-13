@@ -44,7 +44,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_column_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_common_view.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
@@ -111,7 +110,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_repeat_virtual_scroll_2.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_row.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_row_split.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scope_util.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroll.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_scroller_binding.h"
@@ -483,8 +481,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSTextPickerDialog::JSBind(globalObj);
     JSTimePickerDialog::JSBind(globalObj);
     JSDatePickerDialog::JSBind(globalObj);
-    JSRowSplit::JSBind(globalObj);
-    JSColumnSplit::JSBind(globalObj);
 #endif
     JSIndexer::JSBind(globalObj);
     JSActionSheet::JSBind(globalObj);

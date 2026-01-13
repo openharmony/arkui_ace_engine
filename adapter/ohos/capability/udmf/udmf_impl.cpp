@@ -707,9 +707,9 @@ RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataFromANI(void* rawData)
 }
 
 
-void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr)
+void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, std::shared_ptr<void> summaryPtr)
 {
-    auto udmfSummary = reinterpret_cast<UDMF::Summary*>(summaryPtr);
+    std::shared_ptr<OHOS::UDMF::Summary> udmfSummary = std::static_pointer_cast<OHOS::UDMF::Summary>(summaryPtr);
     CHECK_NULL_VOID(udmfSummary);
     udmfSummary->totalSize = 0;
     for (auto element : summary) {

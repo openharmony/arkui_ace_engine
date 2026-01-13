@@ -15,6 +15,19 @@
 
 const overrideMap = new Map();
 overrideMap.set(
+  'ArkCheckboxComponent',
+  new Map([
+    ['Symbol(width)', (()=>{
+      let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+      return module.CheckboxWidthModifier;
+    })()],
+    ['Symbol(height)', (()=>{
+      let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+      return module.CheckboxHeightModifier;
+    })()],
+  ])
+);
+overrideMap.set(
   'ArkTextComponent',
   new Map([
     ['Symbol(foregroundColor)', TextForegroundColorModifier]
@@ -462,10 +475,36 @@ class ColumnModifier extends ArkColumnComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class ColumnSplitModifier extends ArkColumnSplitComponent {
+class LazyArkColumnSplitComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkColumnSplitComponent.module === undefined) {
+      LazyArkColumnSplitComponent.module = globalThis.requireNapi('arkui.components.arkcolumnsplit');
+    }
+    this.lazyComponent = LazyArkColumnSplitComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  resizeable(value) {
+    this.lazyComponent.resizeable(value);
+    return this;
+  }
+  divider(value) {
+    this.lazyComponent.divider(value);
+    return this;
+  }
+  clip(value) {
+    this.lazyComponent.clip(value);
+    return this;
+  }
+}
+class ColumnSplitModifier extends LazyArkColumnSplitComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
@@ -1040,10 +1079,32 @@ class RowModifier extends ArkRowComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class RowSplitModifier extends ArkRowSplitComponent {
+class LazyArkRowSplitComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkRowSplitComponent.module === undefined) {
+      LazyArkRowSplitComponent.module = globalThis.requireNapi('arkui.components.arkrowsplit');
+    }
+    this.lazyComponent = LazyArkRowSplitComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  resizeable(value) {
+    this.lazyComponent.resizeable(value);
+    return this;
+  }
+  clip(value) {
+    this.lazyComponent.clip(value);
+    return this;
+  }
+}
+class RowSplitModifier extends LazyArkRowSplitComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

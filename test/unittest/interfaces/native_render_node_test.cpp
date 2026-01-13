@@ -1013,7 +1013,7 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest140, TestSize.Level1)
 
     int userData = 123;
     auto result = OH_ArkUI_RenderNodeUtils_SetContentModifierOnDraw(nullptr, &userData, drawCallback);
-    ASSERT_EQ(result, ARKUI_ERROR_CODE_PARAM_INVALID);
+    ASSERT_EQ(result, ERROR_CODE_CAPI_INIT_ERROR);
 }
 
 /**

@@ -139,6 +139,8 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkboxgroup",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:rating",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:waterflow",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:columnsplit",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:rowsplit",
     ]
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
@@ -151,6 +153,8 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arkcheckboxgroup.abc",
       "${out_path}/arkui/ace_engine/arkrating.abc",
       "${out_path}/arkui/ace_engine/arkwaterflow.abc",
+      "${out_path}/arkui/ace_engine/arkcolumnsplit.abc",
+      "${out_path}/arkui/ace_engine/arkrowsplit.abc",
     ]
 
     # Output path description: 

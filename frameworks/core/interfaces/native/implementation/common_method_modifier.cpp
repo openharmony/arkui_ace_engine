@@ -5663,6 +5663,45 @@ void SetOnDrop1Impl(Ark_NativePointer node,
     auto disableDataPrefetch = Converter::OptConvert<bool>(optValueDropOption->disableDataPrefetch).value_or(false);
     eventHub->SetDisableDataPrefetch(disableDataPrefetch);
 }
+void SetOnDragSpringLoadingImpl(Ark_NativePointer node,
+                                const Opt_Callback_SpringLoadingContext_Void* callback_,
+                                const Opt_dragController_DragSpringLoadingConfiguration* configuration)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(callback_);
+    if (!optValue) {
+        return;
+    }
+    auto onDragSpringLoading = [callback = CallbackHelper(*optValue)](const RefPtr<DragSpringLoadingContext>& info) {
+        CHECK_NULL_VOID(info);
+        Ark_dragController_SpringLoadingContext springLoadingContext =
+            Converter::ArkValue<Ark_dragController_SpringLoadingContext>(info);
+        callback.InvokeSync(springLoadingContext);
+    };
+    ViewAbstract::SetOnDragSpringLoading(frameNode, std::move(onDragSpringLoading));
+    auto configValue = Converter::GetOptPtr(configuration);
+    CHECK_NULL_VOID(configValue);
+    auto config = AceType::MakeRefPtr<NG::DragSpringLoadingConfiguration>();
+    CHECK_NULL_VOID(config);
+    auto stillTimeLimit = Converter::OptConvert<int32_t>(configValue->stillTimeLimit);
+    if (stillTimeLimit.has_value()) {
+        config->stillTimeLimit = stillTimeLimit.value();
+    }
+    auto updateInterval = Converter::OptConvert<int32_t>(configValue->updateInterval);
+    if (updateInterval.has_value()) {
+        config->updateInterval = updateInterval.value();
+    }
+    auto updateNotifyCount = Converter::OptConvert<int32_t>(configValue->updateNotifyCount);
+    if (updateNotifyCount.has_value()) {
+        config->updateNotifyCount = updateNotifyCount.value();
+    }
+    auto updateToFinishInterval = Converter::OptConvert<int32_t>(configValue->updateToFinishInterval);
+    if (updateToFinishInterval.has_value()) {
+        config->updateToFinishInterval = updateToFinishInterval.value();
+    }
+    ViewAbstract::SetOnDragSpringLoadingConfiguration(frameNode, std::move(config));
+}
 void SetDragPreview1Impl(Ark_NativePointer node,
                          const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
                          const Opt_PreviewConfiguration* config)
@@ -6720,6 +6759,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetSharedTransitionImpl,
         CommonMethodModifier::SetChainModeImpl,
         CommonMethodModifier::SetOnDrop1Impl,
+        CommonMethodModifier::SetOnDragSpringLoadingImpl,
         CommonMethodModifier::SetDragPreview1Impl,
         CommonMethodModifier::SetOverlayImpl,
         CommonMethodModifier::SetBlendModeImpl,

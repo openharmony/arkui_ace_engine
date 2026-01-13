@@ -44,7 +44,7 @@
 #include "surface.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
-#include "core/components/video/rosen_render_texture.h"
+#include "compatible/components/video/rosen_render_texture.h"
 #endif
 
 #endif

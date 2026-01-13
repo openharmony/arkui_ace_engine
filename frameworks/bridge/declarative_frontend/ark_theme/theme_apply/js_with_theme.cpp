@@ -22,6 +22,8 @@
 namespace OHOS::Ace::Framework {
 
 std::map<int32_t, JSTheme> JSThemeScope::jsThemes = {};
+std::optional<JSTheme> JSThemeScope::jsCurrentTheme = std::nullopt;
+bool JSThemeScope::isCurrentThemeDefault = true;
 
 void JSWithTheme::JSBind(BindingTarget globalObj)
 {
@@ -40,6 +42,26 @@ void JSWithTheme::RemoveThemeInNative(const JSCallbackInfo& info)
     }
     auto themeScopeId = jsThemeScopeId->ToNumber<int32_t>();
     JSThemeScope::jsThemes.erase(themeScopeId);
+}
+
+std::vector<ResourceValue> GetResourceValue(const JSRef<JSArray>& colors)
+{
+    std::vector<ResourceValue> color;
+
+    for (int i = 0; i < COLORS_NUMBER; i++) {
+        RefPtr<ResourceObject> resObj;
+        Color value;
+        JSViewAbstract::ParseJsColor(colors->GetValueAt(i), value, resObj);
+
+        if (resObj && colors->GetValueAt(i)->IsObject()) {
+            JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colors->GetValueAt(i));
+            JSViewAbstract::CompleteResourceObject(jsObj);
+            resObj = JSViewAbstract::GetResourceObject(jsObj);
+        }
+        ResourceValue resValue = { resObj, value };
+        color.push_back(resValue);
+    }
+    return color;
 }
 
 void JSWithTheme::SendThemeToNative(const JSCallbackInfo& info)
@@ -63,7 +85,7 @@ void JSWithTheme::SendThemeToNative(const JSCallbackInfo& info)
     auto darkSetStatus = jsDarkSetStatus->ToBoolean();
 
     auto colors = JSThemeColors();
-    colors.SetColors(jsLightColorsArray);
+    colors.SetColors(GetResourceValue(jsLightColorsArray));
 
     JSThemeScope::jsThemes[themeScopeId].SetColors(colors);
 
@@ -75,7 +97,7 @@ void JSWithTheme::SendThemeToNative(const JSCallbackInfo& info)
         auto jsDarkColorsArray = JSRef<JSArray>::Cast(jsDarkColors);
 
         auto darkColors = JSThemeColors();
-        darkColors.SetColors(jsDarkColorsArray);
+        darkColors.SetColors(GetResourceValue(jsDarkColorsArray));
 
         JSThemeScope::jsThemes[themeScopeId].SetDarkColors(darkColors);
     } else {

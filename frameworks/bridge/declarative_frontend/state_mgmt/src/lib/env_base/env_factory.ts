@@ -50,7 +50,8 @@ const envFactoryMap: {
   'system.arkui.breakpoint': (context: UIContext) => {
     const WindowSizeLayoutBreakpoint = requireNapi('arkui.windowsizelayoutbreakpoint').WindowSizeLayoutBreakpoint;
     if (typeof WindowSizeLayoutBreakpoint !== 'function') {
-      throw new Error('WindowSizeLayoutBreakpoint not found (requireNapi failed).');
+      // internal error
+      throw new BusinessError(REQUIRE_INTERNAL_ERROR, 'WindowSizeLayoutBreakpoint not found (requireNapi failed).');
     }
     stateMgmtConsole.debug(`create WindowSizeLayoutBreakpoint.`);
     return new WindowSizeLayoutBreakpoint(context);
@@ -58,7 +59,8 @@ const envFactoryMap: {
   'system.window.size': (context: UIContext) => {
     const WindowSizeVpEnv = requireNapi('window.windowsizeenv').WindowSizeVpEnv;
     if (typeof WindowSizeVpEnv !== 'function') {
-      throw new Error('WindowSizeVpEnv not found (requireNapi failed).');
+      // internal error
+      throw new BusinessError(REQUIRE_INTERNAL_ERROR, 'WindowSizeVpEnv not found (requireNapi failed).');
     }
     stateMgmtConsole.debug(`create WindowSizeVpEnv.`);
     return new WindowSizeVpEnv(context);
@@ -66,7 +68,8 @@ const envFactoryMap: {
   'system.window.size.px': (context: UIContext) => {
     const WindowSizePxEnv = requireNapi('window.windowsizeenv').WindowSizePxEnv;
     if (typeof WindowSizePxEnv !== 'function') {
-      throw new Error('WindowSizePxEnv not found (requireNapi failed).');
+      // internal error
+      throw new BusinessError(REQUIRE_INTERNAL_ERROR, 'WindowSizePxEnv not found (requireNapi failed).');
     }
     stateMgmtConsole.debug(`create WindowSizePxEnv.`);
     return new WindowSizePxEnv(context);
@@ -74,7 +77,8 @@ const envFactoryMap: {
   'system.window.avoidarea': (context: UIContext) => {
     const WindowAvoidAreaVpEnv = requireNapi('window.windowavoidareaenv').WindowAvoidAreaVpEnv;
     if (typeof WindowAvoidAreaVpEnv !== 'function') {
-      throw new Error('WindowAvoidAreaVpEnv not found (requireNapi failed).');
+      // internal error
+      throw new BusinessError(REQUIRE_INTERNAL_ERROR, 'WindowAvoidAreaVpEnv not found (requireNapi failed).');
     }
     stateMgmtConsole.debug(`create WindowAvoidAreaVpEnv.`);
     return new WindowAvoidAreaVpEnv(context);
@@ -82,7 +86,8 @@ const envFactoryMap: {
   'system.window.avoidarea.px': (context: UIContext) => {
     const WindowAvoidAreaPxEnv = requireNapi('window.windowavoidareaenv').WindowAvoidAreaPxEnv;
     if (typeof WindowAvoidAreaPxEnv !== 'function') {
-      throw new Error('WindowAvoidAreaPxEnv not found (requireNapi failed).');
+      // internal error
+      throw new BusinessError(REQUIRE_INTERNAL_ERROR, 'WindowAvoidAreaPxEnv not found (requireNapi failed).');
     }
     stateMgmtConsole.debug(`create WindowAvoidAreaPxEnv.`);
     return new WindowAvoidAreaPxEnv(context);

@@ -39,7 +39,6 @@
 #include "frameworks/core/components/navigation_bar/navigation_container_component.h"
 #include "frameworks/core/components/page_transition/page_transition_component.h"
 #include "frameworks/core/components/scroll/scroll_component.h"
-#include "frameworks/core/components/stepper/stepper_item_component.h"
 #ifndef WEARABLE_PRODUCT
 #include "frameworks/core/components/popup/popup_component_v2.h"
 #endif
@@ -63,9 +62,9 @@ public:
     ~ViewStackProcessor() = default;
     // possible wrapping components
     ACE_FORCE_EXPORT RefPtr<FlexItemComponent> GetFlexItemComponent();
-    RefPtr<StepperItemComponent> GetStepperItemComponent();
-    RefPtr<DisplayComponent> GetStepperDisplayComponent();
-    RefPtr<ScrollComponent> GetStepperScrollComponent();
+    ACE_FORCE_EXPORT RefPtr<Component> GetStepperItemComponent();
+    ACE_FORCE_EXPORT RefPtr<DisplayComponent> GetStepperDisplayComponent();
+    ACE_FORCE_EXPORT RefPtr<ScrollComponent> GetStepperScrollComponent();
     ACE_FORCE_EXPORT RefPtr<BoxComponent> GetBoxComponent();
     ACE_FORCE_EXPORT RefPtr<Component> GetMainComponent() const;
     RefPtr<DisplayComponent> GetDisplayComponent();

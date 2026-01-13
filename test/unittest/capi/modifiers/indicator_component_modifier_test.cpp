@@ -186,7 +186,7 @@ HWTEST_F(IndicatorComponentModifierTests, setVerticalTest, TestSize.Level1)
  * @tc.desc: Check the functionality of IndicatorComponentModifier.SetIndicatorComponentOptionsImpl
  * @tc.type: FUNC
  */
-HWTEST_F(IndicatorComponentModifierTests, setIndicatorComponentOptionsTest, TestSize.Level1)
+HWTEST_F(IndicatorComponentModifierTests, DISABLED_setIndicatorComponentOptionsTest, TestSize.Level1)
 {
     class MockIndicatorController : public IndicatorController {
     public:

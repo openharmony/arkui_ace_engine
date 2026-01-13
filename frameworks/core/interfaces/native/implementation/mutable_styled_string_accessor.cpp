@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/accessor_utils.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "arkoala_api_generated.h"
 
@@ -25,6 +26,12 @@
 namespace OHOS::Ace::NG::GeneratedModifier {
 using namespace Converter;
 namespace {
+void MutableStringThrowTSException(int32_t start, int32_t length)
+{
+    OHOS::Ace::NG::AccessorUtils::ThrowTSException(ERROR_CODE_PARAM_INVALID, "%s start:%d length:%d",
+        "CheckBoundary failed:", start, length);
+}
+
 void UpdateSpansRange(std::vector<RefPtr<SpanBase>>& styles, int32_t maxLength)
 {
     for (auto& style : styles) {
@@ -99,9 +106,7 @@ void ReplaceStringImpl(Ark_MutableStyledString peer,
         const auto string = Converter::Convert<std::u16string>(*other);
         mutableString->ReplaceString(convStart, convLength, string);
     } else {
-        // throw exception.
-        LOGE("MutableStyledStringAccessor::ReplaceStringImpl CheckBoundary failed: start:%d length:%d",
-            convStart, convLength);
+        MutableStringThrowTSException(convStart, convLength);
     }
 }
 void InsertStringImpl(Ark_MutableStyledString peer,
@@ -117,9 +122,7 @@ void InsertStringImpl(Ark_MutableStyledString peer,
         const auto string = Converter::Convert<std::u16string>(*other);
         mutableString->InsertString(convStart, string);
     } else {
-        // throw exception.
-        LOGE("MutableStyledStringAccessor::InsertStringImpl CheckBoundary failed: start:%d length:%d",
-            convStart, strLength);
+        MutableStringThrowTSException(convStart, strLength);
     }
 }
 void RemoveStringImpl(Ark_MutableStyledString peer,
@@ -134,9 +137,7 @@ void RemoveStringImpl(Ark_MutableStyledString peer,
     if (mutableString->CheckRange(convStart, convLength)) {
         mutableString->RemoveString(convStart, convLength);
     } else {
-        // throw exception.
-        LOGE("MutableStyledStringAccessor::RemoveStringImpl CheckBoundary failed: start:%d length:%d",
-            convStart, convLength);
+        MutableStringThrowTSException(convStart, convLength);
     }
 }
 void ReplaceStyleImpl(Ark_MutableStyledString peer,
@@ -152,9 +153,7 @@ void ReplaceStyleImpl(Ark_MutableStyledString peer,
         CHECK_NULL_VOID(convSpan);
         mutableString->ReplaceSpan(convStart, convLength, convSpan);
     } else {
-        // throw exception.
-        LOGE("MutableStyledStringAccessor::ReplaceStyleImpl CheckBoundary failed: start:%d length:%d",
-            convStart, convLength);
+        MutableStringThrowTSException(convStart, convLength);
     }
 }
 void SetStyleImpl(Ark_MutableStyledString peer,
@@ -175,9 +174,7 @@ void SetStyleImpl(Ark_MutableStyledString peer,
         CHECK_NULL_VOID(convSpan);
         mutableString->AddSpan(convSpan);
     } else {
-        // throw exception.
-        LOGE("MutableStyledStringAccessor::SetStyleImpl CheckBoundary failed: start:%d length:%d",
-            convStart, convLength);
+        MutableStringThrowTSException(convStart, convLength);
     }
 }
 void RemoveStyleImpl(Ark_MutableStyledString peer,
@@ -190,7 +187,10 @@ void RemoveStyleImpl(Ark_MutableStyledString peer,
     CHECK_NULL_VOID(mutableString);
     const auto convStart = Converter::Convert<int32_t>(start);
     const auto convLength = Converter::Convert<int32_t>(length);
-    CHECK_NULL_VOID(mutableString->CheckRange(convStart, convLength));
+    if (!mutableString->CheckRange(convStart, convLength)) {
+        MutableStringThrowTSException(convStart, convLength);
+        return;
+    }
     const auto type = Converter::OptConvert<Ace::SpanType>(styledKey);
     CHECK_NULL_VOID(type);
     mutableString->RemoveSpan(convStart, convLength, type.value());
@@ -204,7 +204,10 @@ void RemoveStylesImpl(Ark_MutableStyledString peer,
     CHECK_NULL_VOID(mutableString);
     const auto convStart = Converter::Convert<int32_t>(start);
     const auto convLength = Converter::Convert<int32_t>(length);
-    CHECK_NULL_VOID(mutableString->CheckRange(convStart, convLength));
+    if (!mutableString->CheckRange(convStart, convLength)) {
+        MutableStringThrowTSException(convStart, convLength);
+        return;
+    }
     mutableString->RemoveSpans(convStart, convLength);
 }
 void ClearStylesImpl(Ark_MutableStyledString peer)
@@ -229,9 +232,7 @@ void ReplaceStyledStringImpl(Ark_MutableStyledString peer,
     if (mutableString->CheckRange(convStart, convLength)) {
         mutableString->ReplaceSpanString(convStart, convLength, otherString);
     } else {
-        // throw exception.
-        LOGE("MutableStyledStringAccessor::ReplaceStyledStringImpl CheckBoundary failed: start:%d length:%d",
-            convStart, convLength);
+        MutableStringThrowTSException(convStart, convLength);
     }
 }
 void InsertStyledStringImpl(Ark_MutableStyledString peer,
@@ -248,9 +249,7 @@ void InsertStyledStringImpl(Ark_MutableStyledString peer,
         CHECK_NULL_VOID(otherString);
         mutableString->InsertSpanString(convStart, otherString);
     } else {
-        // throw exception.
-        LOGE("MutableStyledStringAccessor::InsertStyledStringImpl CheckBoundary failed: start:%d length:%d",
-            convStart, strLength);
+        MutableStringThrowTSException(convStart, strLength);
     }
 }
 void AppendStyledStringImpl(Ark_MutableStyledString peer,

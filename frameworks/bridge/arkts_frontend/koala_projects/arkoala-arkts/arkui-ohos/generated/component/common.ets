@@ -40,6 +40,7 @@ import { uiMaterial_Material_serializer } from "./../framework/ohos.arkui.uiMate
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
 import { ArkThemeScopeManager } from "#arktheme"
+import { dragController_DragSpringLoadingConfiguration_serializer } from "./../framework/ohos.arkui.dragController"
 import { ComponentContent_serializer } from "./../ComponentContent"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -50,6 +51,7 @@ import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescript
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
 import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
+import { dragController } from "@ohos.arkui.dragController"
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
 import { AsyncCallback, BusinessError } from "@ohos.base"
@@ -955,10 +957,10 @@ export interface KeyEvent {
     deviceId: int32
     metaKey: int32
     timestamp: int64
-    stopPropagation: (() => void)
     intentionCode: IntentionCode
     getModifierKeyState?: ModifierKeyStateGetter | undefined
     unicode?: int64 | undefined
+    stopPropagation(): void
 }
 export class KeyEventInternal implements MaterializedBase,KeyEvent {
     peer?: Finalizable | undefined = undefined
@@ -1007,12 +1009,6 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     set timestamp(timestamp: int64) {
         this.setTimestamp(timestamp)
     }
-    get stopPropagation(): (() => void) {
-        return this.getStopPropagation()
-    }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
-    }
     get intentionCode(): IntentionCode {
         return this.getIntentionCode()
     }
@@ -1053,6 +1049,10 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     }
     public static fromPtr(ptr: KPointer): KeyEventInternal {
         return new KeyEventInternal(ptr)
+    }
+    public stopPropagation(): void {
+        this.stopPropagation_serialize()
+        return
     }
     private getType(): KeyType {
         return this.getType_serialize()
@@ -1110,14 +1110,6 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         this.setTimestamp_serialize(timestamp_casted)
         return
     }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
-        return
-    }
     private getIntentionCode(): IntentionCode {
         return this.getIntentionCode_serialize()
     }
@@ -1141,6 +1133,9 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
         const unicode_casted = unicode as (int64 | undefined)
         this.setUnicode_serialize(unicode_casted)
         return
+    }
+    stopPropagation_serialize(): void {
+        ArkUIGeneratedNativeModule._KeyEvent_stopPropagation(this.peer!.ptr)
     }
     private getType_serialize(): KeyType {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getType(this.peer!.ptr)
@@ -1190,37 +1185,6 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     }
     private setTimestamp_serialize(timestamp: int64): void {
         ArkUIGeneratedNativeModule._KeyEvent_setTimestamp(this.peer!.ptr, timestamp)
-    }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval = ArkUIGeneratedNativeModule._KeyEvent_getStopPropagation(this.peer!.ptr)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType = retvalDeserializer.readInt8().toInt()
-        let buffer: (() => void) | undefined = undefined
-        
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_BufResource: CallbackResource = retvalDeserializer.readCallbackResource()
-            const buffer_BufCall: KPointer = retvalDeserializer.readPointer()
-            const buffer_BufCallSync: KPointer = retvalDeserializer.readPointer()
-            
-            buffer = (): void => {
-                const buffer_BufArgsSerializer: SerializerBase = SerializerBase.hold();
-                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
-                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
-                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
-                buffer_BufArgsSerializer.release();
-                return;
-            }
-        }
-        
-        const returnResult: (() => void) = (buffer || (() => {})) as (() => void);
-        return returnResult;
-    }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._KeyEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
     }
     private getIntentionCode_serialize(): IntentionCode {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getIntentionCode(this.peer!.ptr)
@@ -5410,6 +5374,25 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnDrop1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnDragSpringLoadingAttribute(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined && callback_ !== null) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (configuration !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const configurationTmpValue  = configuration!
+            dragController_DragSpringLoadingConfiguration_serializer.write(thisSerializer, configurationTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnDragSpringLoading(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setDragPreview1Attribute(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (preview !== undefined) {
@@ -7141,6 +7124,8 @@ export type UnifiedData = unifiedDataChannel.UnifiedData;
 export type Summary = unifiedDataChannel.Summary;
 export type UniformDataType = uniformTypeDescriptor.UniformDataType;
 export type DataSyncOptions = unifiedDataChannel.GetDataParams;
+export type SpringLoadingContext = dragController.SpringLoadingContext;
+export type DragSpringLoadingConfiguration = dragController.DragSpringLoadingConfiguration;
 export enum DragResult {
     UNKNOWN = -1,
     DRAG_SUCCESSFUL = 0,
@@ -8237,6 +8222,9 @@ export interface CommonMethod {
     onDrop(eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
         throw new Error("Unimplemented method onDrop")
     }
+    onDragSpringLoading(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): this {
+        throw new Error("Unimplemented method onDragSpringLoading")
+    }
     dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
         throw new Error("Unimplemented method dragPreview")
     }
@@ -9068,6 +9056,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     onDrop(eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
+        return this
+    }
+    onDragSpringLoading(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): this {
         return this
     }
     dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
@@ -11165,6 +11156,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const eventCallback_casted = eventCallback as (OnDragEventCallback | undefined)
             const dropOptions_casted = dropOptions as (DropOptions | undefined)
             this.getPeer()?.setOnDrop1Attribute(eventCallback_casted, dropOptions_casted)
+            return this
+        }
+        return this
+    }
+    public onDragSpringLoading(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): this {
+        if (this.checkPriority("onDragSpringLoading")) {
+            const callback__casted = callback_ as (((value0: dragController.SpringLoadingContext) => void) | null | undefined)
+            const configuration_casted = configuration as (dragController.DragSpringLoadingConfiguration | undefined)
+            this.getPeer()?.setOnDragSpringLoadingAttribute(callback__casted, configuration_casted)
             return this
         }
         return this
@@ -25478,12 +25478,12 @@ export interface MouseEvent extends BaseEvent {
     windowY: double
     x: double
     y: double
-    stopPropagation: (() => void)
     rawDeltaX?: double | undefined
     rawDeltaY?: double | undefined
     pressedButtons?: Array<MouseButton> | undefined
     globalDisplayX?: double | undefined
     globalDisplayY?: double | undefined
+    stopPropagation(): void
 }
 export class MouseEventInternal extends BaseEventInternal implements MaterializedBase,MouseEvent {
     get button(): MouseButton {
@@ -25533,12 +25533,6 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     }
     set y(y: double) {
         this.setY(y)
-    }
-    get stopPropagation(): (() => void) {
-        return this.getStopPropagation()
-    }
-    set stopPropagation(stopPropagation: (() => void)) {
-        this.setStopPropagation(stopPropagation)
     }
     get rawDeltaX(): double | undefined {
         return this.getRawDeltaX()
@@ -25590,6 +25584,10 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     }
     public static fromPtr(ptr: KPointer): MouseEventInternal {
         return new MouseEventInternal(ptr)
+    }
+    public stopPropagation(): void {
+        this.stopPropagation_serialize()
+        return
     }
     private getButton(): MouseButton {
         return this.getButton_serialize()
@@ -25655,14 +25653,6 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         this.setY_serialize(y_casted)
         return
     }
-    private getStopPropagation(): (() => void) {
-        return this.getStopPropagation_serialize()
-    }
-    private setStopPropagation(stopPropagation: (() => void)): void {
-        const stopPropagation_casted = stopPropagation as ((() => void))
-        this.setStopPropagation_serialize(stopPropagation_casted)
-        return
-    }
     private getRawDeltaX(): double | undefined {
         return this.getRawDeltaX_serialize()
     }
@@ -25702,6 +25692,9 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
         const globalDisplayY_casted = globalDisplayY as (double | undefined)
         this.setGlobalDisplayY_serialize(globalDisplayY_casted)
         return
+    }
+    stopPropagation_serialize(): void {
+        ArkUIGeneratedNativeModule._MouseEvent_stopPropagation(this.peer!.ptr)
     }
     private getButton_serialize(): MouseButton {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getButton(this.peer!.ptr)
@@ -25758,37 +25751,6 @@ export class MouseEventInternal extends BaseEventInternal implements Materialize
     }
     private setY_serialize(y: double): void {
         ArkUIGeneratedNativeModule._MouseEvent_setY(this.peer!.ptr, y)
-    }
-    private getStopPropagation_serialize(): (() => void) {
-        const retval = ArkUIGeneratedNativeModule._MouseEvent_getStopPropagation(this.peer!.ptr)
-        let retvalDeserializer: DeserializerBase = new DeserializerBase(retval, retval.length)
-        const buffer_runtimeType = retvalDeserializer.readInt8().toInt()
-        let buffer: (() => void) | undefined = undefined
-        
-        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            const buffer_BufResource: CallbackResource = retvalDeserializer.readCallbackResource()
-            const buffer_BufCall: KPointer = retvalDeserializer.readPointer()
-            const buffer_BufCallSync: KPointer = retvalDeserializer.readPointer()
-            
-            buffer = (): void => {
-                const buffer_BufArgsSerializer: SerializerBase = SerializerBase.hold();
-                buffer_BufArgsSerializer.writeInt32(buffer_BufResource.resourceId);
-                buffer_BufArgsSerializer.writePointer(buffer_BufCall);
-                buffer_BufArgsSerializer.writePointer(buffer_BufCallSync);
-                InteropNativeModule._CallCallbackSync(10, -1867723152, buffer_BufArgsSerializer.asBuffer(), buffer_BufArgsSerializer.length());
-                buffer_BufArgsSerializer.release();
-                return;
-            }
-        }
-        
-        const returnResult: (() => void) = (buffer || (() => {})) as (() => void);
-        return returnResult;
-    }
-    private setStopPropagation_serialize(stopPropagation: (() => void)): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        thisSerializer.holdAndWriteCallback(stopPropagation)
-        ArkUIGeneratedNativeModule._MouseEvent_setStopPropagation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
     }
     private getRawDeltaX_serialize(): double | undefined {
         const retval  = ArkUIGeneratedNativeModule._MouseEvent_getRawDeltaX(this.peer!.ptr)

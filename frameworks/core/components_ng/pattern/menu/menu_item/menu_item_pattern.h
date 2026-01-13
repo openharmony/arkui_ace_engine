@@ -462,6 +462,7 @@ public:
     void DoCloseSubMenu();
 
 protected:
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void RegisterOnKeyEvent();
     void RegisterOnTouch();
     void RegisterAccessibilityClickAction();

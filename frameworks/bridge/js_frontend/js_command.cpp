@@ -22,6 +22,8 @@
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
 
+#include "compatible/components/chart/chart_modifier_compatible.h"
+
 namespace OHOS::Ace::Framework {
 namespace {
 
@@ -75,20 +77,29 @@ std::vector<std::string> g_declarationNodes = {
 
 } // namespace
 
+static const ArkUIChartModifierCompatible* GetCachedModifier()
+{
+    static const auto* modifier = []() {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("chart");
+        CHECK_NULL_RETURN(loader, static_cast<const ArkUIChartModifierCompatible*>(nullptr));
+        return reinterpret_cast<const ArkUIChartModifierCompatible*>(loader->GetCustomModifier());
+    }();
+    return modifier;
+}
+
 void JsCommandDomElementOperator::UpdateForChart(const RefPtr<DOMNode>& node) const
 {
     if (chartDatasets_ || chartOptions_ || segments_) {
-        auto chart = AceType::DynamicCast<DOMChart>(node);
-        if (chart) {
-            if (chartDatasets_) {
-                chart->SetChartAttrDatasets(*chartDatasets_);
-            }
-            if (chartOptions_) {
-                chart->SetChartAttrOptions(*chartOptions_);
-            }
-            if (segments_) {
-                chart->SetChartAttrSegments(*segments_);
-            }
+        auto modifier = GetCachedModifier();
+        CHECK_NULL_VOID(modifier);
+        if (chartDatasets_) {
+            modifier->setChartDatasets(node, chartDatasets_.get());
+        }
+        if (chartOptions_) {
+            modifier->setChartOptions(node, chartOptions_.get());
+        }
+        if (segments_) {
+            modifier->setChartSegments(node, segments_.get());
         }
     }
 }
@@ -126,9 +137,9 @@ void JsCommandDomElementOperator::UpdateForBadge(const RefPtr<DOMNode>& node) co
 void JsCommandDomElementOperator::UpdateForStepperLabel(const RefPtr<DOMNode>& node) const
 {
     if (stepperLabel_) {
-        auto domStepperItem = AceType::DynamicCast<DOMStepperItem>(node);
-        if (domStepperItem) {
-            domStepperItem->SetLabel(*stepperLabel_);
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("stepper-item");
+        if (loader) {
+            loader->UpdateDomConfig(node, stepperLabel_.get());
         }
     }
 }

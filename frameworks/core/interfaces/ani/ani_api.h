@@ -297,6 +297,18 @@ struct ArkUIDragPreviewAsync {
     bool hasAnimation = false;
 };
 
+struct ArkUIDragSpringLoadingConfiguration {
+    int32_t stillTimeLimit { -1 };
+    int32_t updateInterval { -1 };
+    int32_t updateNotifyCount { -1 };
+    int32_t updateToFinishInterval { -1 };
+};
+
+struct ArkUIDragInfos {
+    SharedPointerWrapper summary;
+    std::string extraInfo;
+};
+
 struct ArkUILocalizedSnapshotRegion {
     double start = -1.f;
     double top = -1.f;
@@ -482,7 +494,7 @@ struct ArkUIAniWebModifier {
 struct ArkUIAniDragModifier {
     void (*setDragData)(ani_ref event, ani_ref data);
     ani_ref (*getDragData)(ani_ref event);
-    void (*getDragSummary)(ani_ref event, ani_ref summaryPtr);
+    void (*getDragSummary)(ani_ref event, SharedPointerWrapper& summaryPtr);
     void (*setDragDropInfoPixelMap)(ani_ref event, ani_ref pixelMap);
     void (*setDragDropInfoCustomNode)(ani_ref event, ArkUINodeHandle node);
     void (*setDragDropInfoExtraInfo)(ani_ref event, const char* ptr);
@@ -699,6 +711,12 @@ struct ArkUIAniDragControllerModifier {
     void (*aniDragActionCancelDataLoading)(const char* key);
     void (*aniDragActionNotifyDragStartReques)(int requestStatus);
     void (*aniDragActionEnableDropDisallowedBadge)(bool enabled);
+    int32_t (*aniSpringLoadingContextGetState)(ani_long ptr);
+    int32_t (*aniSpringLoadingContextGetCurrentNotifySequence)(ani_long ptr);
+    void (*aniSpringLoadingContextGetDragInfos)(ani_long ptr, ArkUIDragInfos& info);
+    ArkUIDragSpringLoadingConfiguration (*aniSpringLoadingContextGetCurrentConfig)(ani_long ptr);
+    void (*aniSpringLoadingContextAbort)(ani_long ptr);
+    void (*aniSpringLoadingContextUpdateConfiguration)(ani_long ptr, ArkUIDragSpringLoadingConfiguration& value);
 };
 struct ArkUIAniImageSpanModifier {
     void (*setPixelMap)(ArkUINodeHandle node, void* pixelmap);

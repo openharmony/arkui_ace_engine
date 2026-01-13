@@ -18,11 +18,23 @@
 #include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/piece/piece_component.h"
+#include "frameworks/compatible/components/piece/piece_component.h"
 
+#include "frameworks/core/common/dynamic_module_helper.h"
+#include "frameworks/compatible/components/piece/piece_modifier_compatible.h"
 namespace OHOS::Ace::Framework {
 
 const std::vector<FontStyle> FONT_STYLES = { FontStyle::NORMAL, FontStyle::ITALIC };
+
+static const ArkUIPieceModifierCompatible* GetCachedModifier()
+{
+    static const auto* modifier = []() {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("piece");
+        CHECK_NULL_RETURN(loader, static_cast<const ArkUIPieceModifierCompatible*>(nullptr));
+        return reinterpret_cast<const ArkUIPieceModifierCompatible*>(loader->GetModifier());
+    }();
+    return modifier;
+}
 
 void JSPiece::Create(const JSCallbackInfo& info)
 {
@@ -40,17 +52,20 @@ void JSPiece::Create(const JSCallbackInfo& info)
     if (getIcon->IsString()) {
         icon = getIcon->ToString();
     }
-    auto component = AceType::MakeRefPtr<PieceComponent>();
-    component->SetContent(content);
-    component->SetIcon(icon);
+    auto modifier = GetCachedModifier();
+    CHECK_NULL_VOID(modifier);
+    auto component = modifier->createPieceComponent();
+    modifier->setContent(component, content);
+    modifier->setIcon(component, icon);
     auto theme = GetTheme<PieceTheme>();
     if (!theme) {
         return;
     }
-    component->InitializeStyle(theme);
+    modifier->initializeStyle(component, theme);
     Border border;
     border.SetBorderRadius(Radius(theme->GetHeight() / 2.0));
-    component->SetBorder(border);
+    modifier->setBorder(component, border);
+
     ViewStackProcessor::GetInstance()->Push(component);
 
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
@@ -98,17 +113,19 @@ void JSPiece::SetShowDelete(const JSCallbackInfo& info)
     if (!component) {
         return;
     }
+    auto modifier = GetCachedModifier();
+    CHECK_NULL_VOID(modifier);
     if (info[0]->IsBoolean()) {
         showDelete = info[0]->ToBoolean();
-        component->SetShowDelete(showDelete);
+        modifier->setShowDelete(component, showDelete);
     } else if (info[0]->IsNumber()) {
         int32_t arg = info[0]->ToNumber<int32_t>();
         if (arg == 0 || arg == 1) {
             showDelete = static_cast<bool>(arg);
-            component->SetShowDelete(showDelete);
+            modifier->setShowDelete(component, showDelete);
         }
     } else {
-        component->SetShowDelete(showDelete);
+        modifier->setShowDelete(component, showDelete);
     }
 }
 
@@ -126,7 +143,9 @@ void JSPiece::JsOnClose(const JSCallbackInfo& info)
         auto pieceComponent =
             AceType::DynamicCast<PieceComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
         if (pieceComponent) {
-            pieceComponent->SetOnDelete(clickEventId);
+            auto modifier = GetCachedModifier();
+            CHECK_NULL_VOID(modifier);
+            modifier->setOnDelete(pieceComponent, clickEventId);
         }
     }
 }
@@ -142,9 +161,13 @@ void JSPiece::SetTextColor(const JSCallbackInfo& info)
     if (!component) {
         return;
     }
-    auto textStyle = component->GetTextStyle();
+    auto modifier = GetCachedModifier();
+    CHECK_NULL_VOID(modifier);
+
+    auto textStyle = modifier->getTextStyle(component);
+
     textStyle.SetTextColor(textColor);
-    component->SetTextStyle(std::move(textStyle));
+    modifier->setTextStyle(component, std::move(textStyle));
 }
 
 void JSPiece::SetFontSize(const JSCallbackInfo& info)
@@ -158,9 +181,14 @@ void JSPiece::SetFontSize(const JSCallbackInfo& info)
     if (!component) {
         return;
     }
-    auto textStyle = component->GetTextStyle();
+
+    auto modifier = GetCachedModifier();
+    CHECK_NULL_VOID(modifier);
+
+    auto textStyle = modifier->getTextStyle(component);
+
     textStyle.SetFontSize(fontSize);
-    component->SetTextStyle(std::move(textStyle));
+    modifier->setTextStyle(component, std::move(textStyle));
 }
 
 void JSPiece::SetFontStyle(int32_t value)
@@ -171,9 +199,11 @@ void JSPiece::SetFontStyle(int32_t value)
         return;
     }
     if (value >= 0 && value < static_cast<int32_t>(FONT_STYLES.size())) {
-        auto textStyle = component->GetTextStyle();
+        auto modifier = GetCachedModifier();
+        CHECK_NULL_VOID(modifier);
+        auto textStyle = modifier->getTextStyle(component);
         textStyle.SetFontStyle(FONT_STYLES[value]);
-        component->SetTextStyle(std::move(textStyle));
+        modifier->setTextStyle(component, std::move(textStyle));
     }
 }
 
@@ -185,9 +215,13 @@ void JSPiece::SetFontWeight(const std::string& value)
         return;
     }
 
-    auto textStyle = component->GetTextStyle();
+    auto modifier = GetCachedModifier();
+    CHECK_NULL_VOID(modifier);
+
+    auto textStyle = modifier->getTextStyle(component);
+
     textStyle.SetFontWeight(ConvertStrToFontWeight(value));
-    component->SetTextStyle(std::move(textStyle));
+    modifier->setTextStyle(component, std::move(textStyle));
 }
 
 void JSPiece::SetFontFamily(const JSCallbackInfo& info)
@@ -201,9 +235,12 @@ void JSPiece::SetFontFamily(const JSCallbackInfo& info)
     if (!component) {
         return;
     }
-    auto textStyle = component->GetTextStyle();
+    auto modifier = GetCachedModifier();
+    CHECK_NULL_VOID(modifier);
+
+    auto textStyle = modifier->getTextStyle(component);
     textStyle.SetFontFamilies(fontFamilies);
-    component->SetTextStyle(std::move(textStyle));
+    modifier->setTextStyle(component, std::move(textStyle));
 }
 
 void JSPiece::SetIconPosition(const JSCallbackInfo& info)

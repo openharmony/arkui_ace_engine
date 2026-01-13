@@ -1798,11 +1798,12 @@ void UIObserver::UnRegisterNodeRenderStateChangeCallback(
         return;
     }
     CHECK_NULL_VOID(iter->second);
+    auto id = iter->second->id;
     auto& holder = iter->second->listeners;
     if (callback == nullptr) {
         holder.clear();
-        specifiedNodeRenderStateListeners_.erase(AceType::RawPtr(frameNode));
-        monitor->UnRegisterNodeRenderStatusListener(frameNodePtr, iter->second->id);
+        specifiedNodeRenderStateListeners_.erase(iter);
+        monitor->UnRegisterNodeRenderStatusListener(frameNodePtr, id);
         return;
     }
     holder.erase(
@@ -1814,8 +1815,8 @@ void UIObserver::UnRegisterNodeRenderStateChangeCallback(
             }),
         holder.end());
     if (holder.empty()) {
-        specifiedNodeRenderStateListeners_.erase(AceType::RawPtr(frameNode));
-        monitor->UnRegisterNodeRenderStatusListener(frameNodePtr, iter->second->id);
+        specifiedNodeRenderStateListeners_.erase(iter);
+        monitor->UnRegisterNodeRenderStatusListener(frameNodePtr, id);
     }
 }
 

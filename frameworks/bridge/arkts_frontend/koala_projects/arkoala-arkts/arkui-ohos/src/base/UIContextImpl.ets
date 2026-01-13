@@ -27,7 +27,7 @@ import { AnimateParam, KeyframeAnimateParam, KeyframeState } from 'arkui/framewo
 import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from '@ohos/animator';
 import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
-    MediaQuery, ComponentSnapshot, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
+    MediaQuery, ComponentSnapshot, NodeIdentity, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
     KeyboardAvoidMode, DynamicSyncScene, SwiperDynamicSyncScene, SwiperDynamicSyncSceneType, PageInfo,
     CustomKeyboardContinueFeature } from '@ohos/arkui/UIContext';
 import { StateManager, ComputableState, GlobalStateManager, memoEntry, memoEntry1,
@@ -331,6 +331,14 @@ export class ComponentSnapshotImpl extends ComponentSnapshot {
         const destroyCallback = (): void => {}
         let pixmap = ArkUIAniModule._ComponentSnapshot_createFromComponentWithPromise(
             toPeerPtr(frameNode), destroyCallback, delay, checkImageStatus, options);
+        ArkUIAniModule._Common_Restore_InstanceId();
+        return pixmap;
+    }
+
+    public getWithRange(start: NodeIdentity, end: NodeIdentity, isStartRect: boolean,
+        options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let pixmap = componentSnapshot.getWithRange(start, end, isStartRect, options);
         ArkUIAniModule._Common_Restore_InstanceId();
         return pixmap;
     }

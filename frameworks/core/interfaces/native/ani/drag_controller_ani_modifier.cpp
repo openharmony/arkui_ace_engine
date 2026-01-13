@@ -30,6 +30,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/drag_springloadingcontext_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "bridge/common/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
@@ -1120,6 +1121,90 @@ void ANIDragActionEnableDropDisallowedBadge(bool enabled)
     ViewAbstractModel::GetInstance()->EnableDropDisallowedBadge(enabled);
 }
 
+int32_t ANISpringLoadingContextGetState(ani_long ptr)
+{
+    CHECK_NULL_RETURN(ptr, 0);
+    auto peer = reinterpret_cast<Ark_dragController_SpringLoadingContext>(ptr);
+    CHECK_NULL_RETURN(peer, 0);
+    auto context = peer->context;
+    CHECK_NULL_RETURN(context, 0);
+    return static_cast<int32_t>(context->GetState());
+}
+
+int32_t ANISpringLoadingContextGetCurrentNotifySequence(ani_long ptr)
+{
+    CHECK_NULL_RETURN(ptr, 0);
+    auto peer = reinterpret_cast<Ark_dragController_SpringLoadingContext>(ptr);
+    CHECK_NULL_RETURN(peer, 0);
+    auto context = peer->context;
+    CHECK_NULL_RETURN(context, 0);
+    return static_cast<int32_t>(context->GetCurrentNotifySequence());
+}
+
+void ANISpringLoadingContextGetDragInfos(ani_long ptr, ArkUIDragInfos& info)
+{
+    CHECK_NULL_VOID(ptr);
+    auto peer = reinterpret_cast<Ark_dragController_SpringLoadingContext>(ptr);
+    CHECK_NULL_VOID(peer);
+    auto context = peer->context;
+    CHECK_NULL_VOID(context);
+    info.extraInfo = context->GetExtraInfos();
+    auto summary = context->GetSummary();
+    auto summaryPtr = info.summary.GetSharedPtr();
+    UdmfClient::GetInstance()->TransformSummaryANI(summary, summaryPtr);
+}
+
+ArkUIDragSpringLoadingConfiguration ANISpringLoadingContextGetCurrentConfig(ani_long ptr)
+{
+    ArkUIDragSpringLoadingConfiguration arkConfig;
+    CHECK_NULL_RETURN(ptr, arkConfig);
+    auto peer = reinterpret_cast<Ark_dragController_SpringLoadingContext>(ptr);
+    CHECK_NULL_RETURN(peer, arkConfig);
+    auto context = peer->context;
+    CHECK_NULL_RETURN(context, arkConfig);
+    const auto& config = context->GetDragSpringLoadingConfiguration();
+    CHECK_NULL_RETURN(config, arkConfig);
+    arkConfig.stillTimeLimit = config->stillTimeLimit;
+    arkConfig.updateInterval = config->updateInterval;
+    arkConfig.updateNotifyCount = config->updateNotifyCount;
+    arkConfig.updateToFinishInterval = config->updateToFinishInterval;
+    return arkConfig;
+}
+
+void ANISpringLoadingContextAbort(ani_long ptr)
+{
+    CHECK_NULL_VOID(ptr);
+    auto peer = reinterpret_cast<Ark_dragController_SpringLoadingContext>(ptr);
+    CHECK_NULL_VOID(peer);
+    auto context = peer->context;
+    CHECK_NULL_VOID(context);
+    context->SetSpringLoadingAborted();
+}
+
+void ANISpringLoadingContextUpdateConfiguration(ani_long ptr, ArkUIDragSpringLoadingConfiguration& value)
+{
+    CHECK_NULL_VOID(ptr);
+    auto peer = reinterpret_cast<Ark_dragController_SpringLoadingContext>(ptr);
+    CHECK_NULL_VOID(peer);
+    auto context = peer->context;
+    CHECK_NULL_VOID(context);
+    auto config = AceType::MakeRefPtr<OHOS::Ace::NG::DragSpringLoadingConfiguration>();
+    CHECK_NULL_VOID(config);
+    if (value.stillTimeLimit >= 0) {
+        config->stillTimeLimit = value.stillTimeLimit;
+    }
+    if (value.updateInterval >= 0) {
+        config->updateInterval = value.updateInterval;
+    }
+    if (value.updateNotifyCount >= 0) {
+        config->updateNotifyCount = value.updateNotifyCount;
+    }
+    if (value.updateToFinishInterval >= 0) {
+        config->updateToFinishInterval = value.updateToFinishInterval;
+    }
+    context->SetDragSpringLoadingConfiguration(std::move(config));
+}
+
 const ArkUIAniDragControllerModifier* GetDragControllerAniModifier()
 {
     static const ArkUIAniDragControllerModifier impl = {
@@ -1133,6 +1218,12 @@ const ArkUIAniDragControllerModifier* GetDragControllerAniModifier()
         .aniDragActionCancelDataLoading = NG::ANIDragActionCancelDataLoading,
         .aniDragActionNotifyDragStartReques = NG::ANIDragActionNotifyDragStartReques,
         .aniDragActionEnableDropDisallowedBadge = NG::ANIDragActionEnableDropDisallowedBadge,
+        .aniSpringLoadingContextGetState = NG::ANISpringLoadingContextGetState,
+        .aniSpringLoadingContextGetCurrentNotifySequence = NG::ANISpringLoadingContextGetCurrentNotifySequence,
+        .aniSpringLoadingContextGetDragInfos = NG::ANISpringLoadingContextGetDragInfos,
+        .aniSpringLoadingContextGetCurrentConfig = NG::ANISpringLoadingContextGetCurrentConfig,
+        .aniSpringLoadingContextAbort = NG::ANISpringLoadingContextAbort,
+        .aniSpringLoadingContextUpdateConfiguration = NG::ANISpringLoadingContextUpdateConfiguration
     };
     return &impl;
 }

@@ -50,16 +50,14 @@ void BindTipsMultiThread(
 void SetInspectorIdMultiThread(FrameNode* frameNode, const std::string& inspectorId)
 {
     CHECK_NULL_VOID(frameNode);
-    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode), inspectorId]() {
-        auto frameNode = weak.Upgrade();
-        if (frameNode) {
-            if (frameNode->GetInspectorId().has_value() && frameNode->GetInspectorIdValue() != inspectorId) {
-                ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(
-                    frameNode->GetInspectorIdValue(), frameNode->GetId());
-            }
-            frameNode->UpdateInspectorId(inspectorId);
+    auto nodeInspectorId = frameNode->GetInspectorId();
+    auto nodeId = frameNode->GetId();
+    frameNode->PostAfterAttachMainTreeTask([nodeInspectorId, nodeId, inspectorId]() {
+        if (nodeInspectorId.has_value() && nodeInspectorId.value() != inspectorId) {
+            ElementRegister::GetInstance()->RemoveFrameNodeByInspectorId(nodeInspectorId.value(), nodeId);
         }
     });
+    frameNode->UpdateInspectorId(inspectorId);
 }
 
 void SetBackgroundBlurStyleMultiThread(FrameNode* frameNode, const BlurStyleOption& bgBlurStyle,
@@ -170,18 +168,6 @@ void ResetVisibleChangeMultiThread(FrameNode* frameNode)
     });
 }
 
-void SetFocusableMultiThread(FrameNode* frameNode, bool focusable)
-{
-    CHECK_NULL_VOID(frameNode);
-    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode), focusable]() {
-        auto frameNode = weak.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        auto focusHub = frameNode->GetOrCreateFocusHub();
-        CHECK_NULL_VOID(focusHub);
-        focusHub->SetFocusable(focusable);
-    });
-}
-
 void SetNeedFocusMultiThread(FrameNode* frameNode, bool value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -208,28 +194,6 @@ void SetNeedFocusMultiThread(FrameNode* frameNode, bool value)
             ContainerScope scope(instanceId);
             focusHub->LostFocusToViewRoot();
         }
-    });
-}
-
-void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold)
-{
-    CHECK_NULL_VOID(frameNode);
-    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode), clickEventFunc,
-        distanceThreshold]() mutable {
-        auto frameNode = weak.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        ViewAbstract::SetOnClick(frameNode.GetRawPtr(), std::move(clickEventFunc), distanceThreshold);
-    });
-}
-
-void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, Dimension distanceThreshold)
-{
-    CHECK_NULL_VOID(frameNode);
-    frameNode->PostAfterAttachMainTreeTask([weak = AceType::WeakClaim(frameNode), clickEventFunc,
-        distanceThreshold]() mutable {
-        auto frameNode = weak.Upgrade();
-        CHECK_NULL_VOID(frameNode);
-        ViewAbstract::SetOnClick(frameNode.GetRawPtr(), std::move(clickEventFunc), distanceThreshold);
     });
 }
 

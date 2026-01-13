@@ -56,6 +56,7 @@ export class ConsumeDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
         if (oldValue === newValue) {
             return;
         }
+        this.checkValueIsNotFunction(newValue);
         if (!this.checkFake) {
             this.sourceProvide_!.set(newValue);
             return;

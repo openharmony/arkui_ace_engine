@@ -1496,6 +1496,8 @@ typedef struct Callback_SizeResult_Void Callback_SizeResult_Void;
 typedef struct Opt_Callback_SizeResult_Void Opt_Callback_SizeResult_Void;
 typedef struct Callback_SpringBackAction_Void Callback_SpringBackAction_Void;
 typedef struct Opt_Callback_SpringBackAction_Void Opt_Callback_SpringBackAction_Void;
+typedef struct Callback_SpringLoadingContext_Void Callback_SpringLoadingContext_Void;
+typedef struct Opt_Callback_SpringLoadingContext_Void Opt_Callback_SpringLoadingContext_Void;
 typedef struct Callback_StateStylesChange Callback_StateStylesChange;
 typedef struct Opt_Callback_StateStylesChange Opt_Callback_StateStylesChange;
 typedef struct Callback_String_PasteEvent_Void Callback_String_PasteEvent_Void;
@@ -2068,6 +2070,8 @@ typedef struct Ark_DisturbanceFieldOptionsInner Ark_DisturbanceFieldOptionsInner
 typedef struct Opt_DisturbanceFieldOptionsInner Opt_DisturbanceFieldOptionsInner;
 typedef struct Ark_DoubleAnimationParam Ark_DoubleAnimationParam;
 typedef struct Opt_DoubleAnimationParam Opt_DoubleAnimationParam;
+typedef struct Ark_dragController_DragSpringLoadingConfiguration Ark_dragController_DragSpringLoadingConfiguration;
+typedef struct Opt_dragController_DragSpringLoadingConfiguration Opt_dragController_DragSpringLoadingConfiguration;
 typedef struct DragEventPeer DragEventPeer;
 typedef struct DragEventPeer* Ark_DragEvent;
 typedef struct Opt_DragEvent Opt_DragEvent;
@@ -2845,6 +2849,8 @@ typedef struct Ark_Dimension Ark_Dimension;
 typedef struct Opt_Dimension Opt_Dimension;
 typedef struct Ark_DividerStyleOptions Ark_DividerStyleOptions;
 typedef struct Opt_DividerStyleOptions Opt_DividerStyleOptions;
+typedef struct Ark_dragController_SpringLoadingDragInfos Ark_dragController_SpringLoadingDragInfos;
+typedef struct Opt_dragController_SpringLoadingDragInfos Opt_dragController_SpringLoadingDragInfos;
 typedef struct Ark_DragPreviewOptions Ark_DragPreviewOptions;
 typedef struct Opt_DragPreviewOptions Opt_DragPreviewOptions;
 typedef struct Ark_EdgeColors Ark_EdgeColors;
@@ -3175,6 +3181,9 @@ typedef struct Ark_DividerStyle Ark_DividerStyle;
 typedef struct Opt_DividerStyle Opt_DividerStyle;
 typedef struct Ark_DoubleLengthDetents Ark_DoubleLengthDetents;
 typedef struct Opt_DoubleLengthDetents Opt_DoubleLengthDetents;
+typedef struct DragController_SpringLoadingContextPeer DragController_SpringLoadingContextPeer;
+typedef struct DragController_SpringLoadingContextPeer* Ark_dragController_SpringLoadingContext;
+typedef struct Opt_dragController_SpringLoadingContext Opt_dragController_SpringLoadingContext;
 typedef struct Ark_EdgeOutlineWidths Ark_EdgeOutlineWidths;
 typedef struct Opt_EdgeOutlineWidths Opt_EdgeOutlineWidths;
 typedef struct Ark_Edges Ark_Edges;
@@ -4710,6 +4719,16 @@ typedef struct Opt_DragBehavior {
     Ark_Tag tag;
     Ark_DragBehavior value;
 } Opt_DragBehavior;
+typedef enum Ark_dragController_DragSpringLoadingState {
+    ARK_DRAG_CONTROLLER_DRAG_SPRING_LOADING_STATE_BEGIN = 0,
+    ARK_DRAG_CONTROLLER_DRAG_SPRING_LOADING_STATE_UPDATE = 1,
+    ARK_DRAG_CONTROLLER_DRAG_SPRING_LOADING_STATE_END = 2,
+    ARK_DRAG_CONTROLLER_DRAG_SPRING_LOADING_STATE_CANCEL = 3,
+} Ark_dragController_DragSpringLoadingState;
+typedef struct Opt_dragController_DragSpringLoadingState {
+    Ark_Tag tag;
+    Ark_dragController_DragSpringLoadingState value;
+} Opt_dragController_DragSpringLoadingState;
 typedef enum Ark_DraggingSizeChangeEffect {
     ARK_DRAGGING_SIZE_CHANGE_EFFECT_DEFAULT = 0,
     ARK_DRAGGING_SIZE_CHANGE_EFFECT_SIZE_TRANSITION = 1,
@@ -5243,12 +5262,12 @@ typedef struct Opt_ImageContent {
     Ark_ImageContent value;
 } Opt_ImageContent;
 typedef enum Ark_ImageFit {
-    ARK_IMAGE_FIT_CONTAIN = 0,
-    ARK_IMAGE_FIT_COVER = 1,
-    ARK_IMAGE_FIT_AUTO = 2,
-    ARK_IMAGE_FIT_FILL = 3,
-    ARK_IMAGE_FIT_SCALE_DOWN = 4,
+    ARK_IMAGE_FIT_FILL = 0,
+    ARK_IMAGE_FIT_CONTAIN = 1,
+    ARK_IMAGE_FIT_COVER = 2,
+    ARK_IMAGE_FIT_AUTO = 3,
     ARK_IMAGE_FIT_NONE = 5,
+    ARK_IMAGE_FIT_SCALE_DOWN = 6,
     ARK_IMAGE_FIT_TOP_START = 7,
     ARK_IMAGE_FIT_TOP = 8,
     ARK_IMAGE_FIT_TOP_END = 9,
@@ -12192,6 +12211,16 @@ typedef struct Opt_Callback_SpringBackAction_Void {
     Ark_Tag tag;
     Callback_SpringBackAction_Void value;
 } Opt_Callback_SpringBackAction_Void;
+typedef struct Callback_SpringLoadingContext_Void {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_dragController_SpringLoadingContext value0);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_dragController_SpringLoadingContext value0);
+} Callback_SpringLoadingContext_Void;
+typedef struct Opt_Callback_SpringLoadingContext_Void {
+    Ark_Tag tag;
+    Callback_SpringLoadingContext_Void value;
+} Opt_Callback_SpringLoadingContext_Void;
 typedef struct Callback_StateStylesChange {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -14866,6 +14895,17 @@ typedef struct Opt_DoubleAnimationParam {
     Ark_Tag tag;
     Ark_DoubleAnimationParam value;
 } Opt_DoubleAnimationParam;
+typedef struct Ark_dragController_DragSpringLoadingConfiguration {
+    /* kind: Interface */
+    Opt_Int32 stillTimeLimit;
+    Opt_Int32 updateInterval;
+    Opt_Int32 updateNotifyCount;
+    Opt_Int32 updateToFinishInterval;
+} Ark_dragController_DragSpringLoadingConfiguration;
+typedef struct Opt_dragController_DragSpringLoadingConfiguration {
+    Ark_Tag tag;
+    Ark_dragController_DragSpringLoadingConfiguration value;
+} Opt_dragController_DragSpringLoadingConfiguration;
 typedef struct Opt_DragEvent {
     Ark_Tag tag;
     Ark_DragEvent value;
@@ -18722,6 +18762,15 @@ typedef struct Opt_DividerStyleOptions {
     Ark_Tag tag;
     Ark_DividerStyleOptions value;
 } Opt_DividerStyleOptions;
+typedef struct Ark_dragController_SpringLoadingDragInfos {
+    /* kind: Interface */
+    Opt_unifiedDataChannel_Summary dataSummary;
+    Opt_String extraInfos;
+} Ark_dragController_SpringLoadingDragInfos;
+typedef struct Opt_dragController_SpringLoadingDragInfos {
+    Ark_Tag tag;
+    Ark_dragController_SpringLoadingDragInfos value;
+} Opt_dragController_SpringLoadingDragInfos;
 typedef struct Ark_DragPreviewOptions {
     /* kind: Interface */
     Opt_Union_DragPreviewMode_Array_DragPreviewMode mode;
@@ -20420,6 +20469,10 @@ typedef struct Opt_DoubleLengthDetents {
     Ark_Tag tag;
     Ark_DoubleLengthDetents value;
 } Opt_DoubleLengthDetents;
+typedef struct Opt_dragController_SpringLoadingContext {
+    Ark_Tag tag;
+    Ark_dragController_SpringLoadingContext value;
+} Opt_dragController_SpringLoadingContext;
 typedef struct Ark_EdgeOutlineWidths {
     /* kind: Interface */
     Opt_Dimension top;
@@ -23974,6 +24027,9 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
     void (*setOnDrop1)(Ark_NativePointer node,
                        const Opt_OnDragEventCallback* eventCallback,
                        const Opt_DropOptions* dropOptions);
+    void (*setOnDragSpringLoading)(Ark_NativePointer node,
+                                   const Opt_Callback_SpringLoadingContext_Void* callback_,
+                                   const Opt_dragController_DragSpringLoadingConfiguration* configuration);
     void (*setDragPreview1)(Ark_NativePointer node,
                             const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
                             const Opt_PreviewConfiguration* config);
@@ -28685,6 +28741,7 @@ typedef struct GENERATED_ArkUIKeyEventAccessor {
     void (*destroyPeer)(Ark_KeyEvent peer);
     Ark_KeyEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
+    void (*stopPropagation)(Ark_KeyEvent peer);
     Ark_KeyType (*getType)(Ark_KeyEvent peer);
     void (*setType)(Ark_KeyEvent peer,
                     Ark_KeyType type);
@@ -28706,9 +28763,6 @@ typedef struct GENERATED_ArkUIKeyEventAccessor {
     Ark_Int64 (*getTimestamp)(Ark_KeyEvent peer);
     void (*setTimestamp)(Ark_KeyEvent peer,
                          Ark_Int64 timestamp);
-    Callback_Void (*getStopPropagation)(Ark_KeyEvent peer);
-    void (*setStopPropagation)(Ark_KeyEvent peer,
-                               const Callback_Void* stopPropagation);
     Ark_IntentionCode (*getIntentionCode)(Ark_KeyEvent peer);
     void (*setIntentionCode)(Ark_KeyEvent peer,
                              Ark_IntentionCode intentionCode);
@@ -28981,6 +29035,7 @@ typedef struct GENERATED_ArkUIMouseEventAccessor {
     void (*destroyPeer)(Ark_MouseEvent peer);
     Ark_MouseEvent (*construct)();
     Ark_NativePointer (*getFinalizer)();
+    void (*stopPropagation)(Ark_MouseEvent peer);
     Ark_MouseButton (*getButton)(Ark_MouseEvent peer);
     void (*setButton)(Ark_MouseEvent peer,
                       Ark_MouseButton button);
@@ -29005,9 +29060,6 @@ typedef struct GENERATED_ArkUIMouseEventAccessor {
     Ark_Float64 (*getY)(Ark_MouseEvent peer);
     void (*setY)(Ark_MouseEvent peer,
                  Ark_Float64 y);
-    Callback_Void (*getStopPropagation)(Ark_MouseEvent peer);
-    void (*setStopPropagation)(Ark_MouseEvent peer,
-                               const Callback_Void* stopPropagation);
     Opt_Float64 (*getRawDeltaX)(Ark_MouseEvent peer);
     void (*setRawDeltaX)(Ark_MouseEvent peer,
                          const Opt_Float64* rawDeltaX);

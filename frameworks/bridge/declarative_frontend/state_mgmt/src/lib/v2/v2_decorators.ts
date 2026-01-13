@@ -353,7 +353,8 @@ const Env = (envKey: keyof EnvTypeMap): PropertyDecorator => {
         if (!(this instanceof ViewPU || this instanceof ViewV2)) {
           const message = `@Env can only be declared inside @Component or @ComponentV2.`;
           stateMgmtConsole.applicationError(message);
-          throw new Error(message);
+          // toolchain can check
+          throw new BusinessError(ENV_USED_NOT_IN_COMPONENT, message);
         }
         ObserveV2.getObserve().addRef(this, varName);
         if (!this[storeProp]) {
@@ -367,7 +368,8 @@ const Env = (envKey: keyof EnvTypeMap): PropertyDecorator => {
       set(_) {
           const message = `@Env(${envKey}) is read-only and cannot assign value for it.`;
           stateMgmtConsole.applicationError(message);
-          throw new Error(message);
+          // toolchain can check
+          throw new BusinessError(ENV_READ_ONLY, message);
       },
       enumerable: true
     });

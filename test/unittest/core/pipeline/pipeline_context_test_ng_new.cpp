@@ -3950,7 +3950,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg258, TestSize.Level1)
     auto rootNode = FrameNode::CreateFrameNode("root", 1, AceType::MakeRefPtr<Pattern>(), true);
     context_->rootNode_ = rootNode;
     ASSERT_NE(context_->rootNode_, nullptr);
- 
+
     /**
      * @tc.steps3: make navigationGroupNode.
      */
@@ -3978,7 +3978,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg258, TestSize.Level1)
     navPathList.emplace_back(std::make_pair("pageThree", navDestinationNode3));
     navPathList.emplace_back(std::make_pair("pageFour", navDestinationNode4));
     navigationPattern->navigationStack_->SetNavPathList(navPathList);
-    
+
     uint32_t result = context_->ExeAppAIFunctionCallback("Success", "");
     EXPECT_EQ(result, AI_CALLER_INVALID);
 }
@@ -4199,7 +4199,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName003, TestSize.Level1)
         FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
     auto secondNode =
         FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-   
+
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
     /**
      * @tc.steps: Ensure that stageManager_->GetLastPage() is not nullptr.
@@ -4257,7 +4257,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName004, TestSize.Level1)
         FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
     auto secondNode =
         FrameNode::CreateFrameNode("2", 2, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-   
+
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
     /**
      * @tc.steps: Ensure that stageManager_->GetLastPage() is not nullptr.
@@ -4270,7 +4270,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName004, TestSize.Level1)
     context_->stageManager_ = stageManager;
     std::string res = context_->GetCurrentPageName();
     auto pagePattern = secondNode->GetPattern<PagePattern>();
- 
+
     auto pageInfo = AceType::MakeRefPtr<PageInfo>(1, "testUrl", "testPath");
     /**
      * @tc.steps: Ensure that pagePattern->GetPageInfo() is not nullptr.
@@ -4313,7 +4313,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName005, TestSize.Level1)
     auto stageNode = FrameNode::CreateFrameNode("testFrameNode", 0, AceType::MakeRefPtr<StagePattern>());
     auto firstNode =
         FrameNode::CreateFrameNode("1", 1, AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()));
-    
+
     auto stageManager = AceType::MakeRefPtr<StageManager>(stageNode);
     /**
      * @tc.steps: Ensure that stageManager_->GetLastPage() is not nullptr.
@@ -4325,7 +4325,7 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName005, TestSize.Level1)
     context_->stageManager_ = stageManager;
     std::string res = context_->GetCurrentPageNameCallback();
     auto pagePattern = firstNode->GetPattern<PagePattern>();
- 
+
     auto pageInfo = AceType::MakeRefPtr<PageInfo>(1, "testUrl", "testPath");
     /**
      * @tc.steps: Ensure that pagePattern->GetPageInfo() is not nullptr.

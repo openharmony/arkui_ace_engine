@@ -15,6 +15,7 @@
 
 #include "base/log/jank_frame_report.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "mock_jank_frame_report.h"
 
 namespace OHOS::Ace {
 PerfMonitor* PerfMonitor::pMonitor = nullptr;
@@ -40,12 +41,25 @@ void JankFrameReport::RecordFrameUpdate() {}
 
 PerfMonitor* PerfMonitor::GetPerfMonitor()
 {
-    return nullptr;
+    return PerfMonitor::pMonitor;
 }
 
-void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note) {}
+void PerfMonitor::Start(const std::string& sceneId, PerfActionType type, const std::string& note)
+{
+    auto holder = PerfMonitorTestHolder::GetInstance();
+    holder->isCalled = true;
+    holder->scene = sceneId;
+    holder->actionType = type;
+    holder->note = note;
+}
 
-void PerfMonitor::End(const std::string& sceneId, bool isJsApi) {}
+void PerfMonitor::End(const std::string& sceneId, bool isJsApi)
+{
+    auto holder = PerfMonitorTestHolder::GetInstance();
+    holder->isCalled = true;
+    holder->scene = sceneId;
+    holder->isJsApi = isJsApi;
+}
 
 void PerfMonitor::StartCommercial(const std::string& sceneId, PerfActionType type, const std::string& note) {}
 
@@ -59,7 +73,14 @@ void PerfMonitor::SetSubHealthInfo(const std::string& info, const std::string& r
 
 void PerfMonitor::ReportJankFrameApp(double jank) {}
 
-void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time) {}
+void PerfMonitor::RecordInputEvent(PerfActionType type, PerfSourceType sourceType, int64_t time)
+{
+    auto holder = PerfMonitorTestHolder::GetInstance();
+    holder->isCalled = true;
+    holder->actionType = type;
+    holder->sourceType = sourceType;
+    holder->time = time;
+}
 
 int64_t PerfMonitor::GetInputTime(const std::string& sceneId, PerfActionType type, const std::string& note)
 {

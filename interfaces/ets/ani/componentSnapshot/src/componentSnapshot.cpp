@@ -110,6 +110,17 @@ void AniThrowError(ani_env* env, ani_int code, const std::string& msg)
     }
 }
 
+ani_object CreateNull(ani_env* env)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref nullObj;
+    if (ANI_OK != env->GetNull(&nullObj)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT,  "Get null object failed!");
+        return nullptr;
+    }
+    return static_cast<ani_object>(nullObj);
+}
+
 std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
 {
     ani_size strSize;
@@ -157,7 +168,11 @@ void TriggerJsCallback(SnapshotAsyncCtx* asyncCtx)
 #endif
     }
     ani_status status = ANI_OK;
-    resultRef[0] = CreateStsError(ctx->env, ctx->errCode, "");
+    if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        resultRef[0] = CreateNull(ctx->env);
+    } else {
+        resultRef[0] = CreateStsError(ctx->env, ctx->errCode, "");
+    }
     if (ctx->deferred) {
         // promise
         if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
@@ -573,6 +588,41 @@ static bool GetOptions(ani_env* env, ani_object options, OHOS::Ace::NG::Snapshot
     return true;
 }
 
+static bool GetNodeIdentity(ani_env* env, ani_object id, OHOS::Ace::NG::NodeIdentity& nodeIdentity)
+{
+    CHECK_NULL_RETURN(env, false);
+    ani_boolean isUndefined = true;
+    if (ANI_OK != env->Reference_IsUndefined(id, &isUndefined)) {
+        return false;
+    }
+    if (isUndefined) {
+        return false;
+    }
+
+    ani_class stringClass {};
+    env->FindClass("std.core.String", &stringClass);
+    ani_boolean isString = ANI_FALSE;
+    env->Object_InstanceOf(id, stringClass, &isString);
+    if (isString) {
+        auto nodeIdStr = ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(id));
+        nodeIdentity.first = nodeIdStr;
+        return true;
+    }
+
+    ani_class intClass {};
+    env->FindClass("std.core.Int", &intClass);
+    ani_boolean isInt = ANI_FALSE;
+    env->Object_InstanceOf(id, intClass, &isInt);
+    if (isInt) {
+        ani_int nodeIdInt;
+        env->Object_CallMethodByName_Int(id, "toInt", ":i", &nodeIdInt);
+        nodeIdentity.second = static_cast<int32_t>(nodeIdInt);
+        return true;
+    }
+
+    return false;
+}
+
 static void HandleSyncSnapshotResult(
     ani_env* env, const std::pair<int32_t, std::shared_ptr<OHOS::Media::PixelMap>>& pair, ani_object& pixelMap)
 {
@@ -704,6 +754,35 @@ static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_int
     return pixelMap;
 }
 
+void GetSnapshotByRange(const OHOS::Ace::NG::NodeIdentity& startID,
+    const OHOS::Ace::NG::NodeIdentity& endID, const bool& isStartRect,
+    std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    const OHOS::Ace::NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    OHOS::Ace::NG::ComponentSnapshot::GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+#endif
+}
+
+static ani_object ANI_GetWithRange([[maybe_unused]] ani_env* env, ani_object start, ani_object end,
+    ani_boolean isStartRect, ani_object options)
+{
+    OHOS::Ace::NG::NodeIdentity startID;
+    GetNodeIdentity(env, start, startID);
+
+    OHOS::Ace::NG::NodeIdentity endID;
+    GetNodeIdentity(env, end, endID);
+
+    bool isStart = static_cast<bool>(isStartRect);
+
+    OHOS::Ace::NG::SnapshotOptions snapshotOptions;
+    GetOptions(env, options, snapshotOptions);
+
+    ani_object result = {};
+    GetSnapshotByRange(startID, endID, isStart, CreateCallbackFunc(env, nullptr, result), snapshotOptions);
+    return result;
+}
+
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
 {
     ani_env* env;
@@ -735,6 +814,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         ani_native_function { "getSync", nullptr, reinterpret_cast<void*>(ANI_GetSync) },
         ani_native_function { "getWithUniqueId", nullptr, reinterpret_cast<void*>(ANI_GetWithUniqueId) },
         ani_native_function { "getSyncWithUniqueId", nullptr, reinterpret_cast<void*>(ANI_GetSyncWithUniqueId) },
+        ani_native_function { "getWithRange", nullptr, reinterpret_cast<void*>(ANI_GetWithRange) },
     };
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ANI BindNativeFunctions failed!");

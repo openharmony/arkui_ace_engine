@@ -7220,6 +7220,43 @@ HWTEST_F(WebSelectOverlayTest, ComputeSelectAreaRectTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GetViewPortFromHandleTest000
+ * @tc.desc: Test GetViewPortFromHandle.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebSelectOverlayTest, GetViewPortFromHandleTest000, TestSize.Level1)
+{
+    auto *stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto webFrameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(webFrameNode, nullptr);
+    stack->Push(webFrameNode);
+    auto webPattern = webFrameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+
+    SizeF size = {50.0, 50.0};
+    auto geometryNode = webFrameNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(size);
+
+    WebSelectOverlay overlay(webPattern);
+    auto startSelectionHandle = std::make_shared<NWebTouchHandleStateTestImpl>();
+    auto endSelectionHandle = std::make_shared<NWebTouchHandleStateTestImpl>();
+
+    overlay.endSelectionHandle_ = endSelectionHandle;
+    auto ret1 = overlay.GetViewPortFromHandle();
+    EXPECT_EQ(ret1.Left(), endSelectionHandle->GetViewPortX());
+    EXPECT_EQ(ret1.Top(), endSelectionHandle->GetViewPortY());
+
+    overlay.startSelectionHandle_ = startSelectionHandle;
+    auto ret2 = overlay.GetViewPortFromHandle();
+    EXPECT_EQ(ret2.Left(), startSelectionHandle->GetViewPortX());
+    EXPECT_EQ(ret2.Top(), startSelectionHandle->GetViewPortY());
+}
+
+/**
  * @tc.name: IsMouseInHandleRect
  * @tc.desc: Test IsMouseInHandleRect.
  * @tc.type: FUNC

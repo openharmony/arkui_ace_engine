@@ -6613,8 +6613,11 @@ struct ArkUIRatingModifier {
 };
 
 struct ArkUIRowSplitModifier {
+    void (*createRowSplit)();
     void (*setRowSplitResizable)(ArkUINodeHandle node, ArkUI_Bool resizable);
     void (*resetRowSplitResizable)(ArkUINodeHandle node);
+    void (*setRowSplitClip)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*setRowSplitClipShape)(ArkUINodeHandle node, void* clipShape);
 };
 
 struct ArkUISearchModifier {
@@ -7355,12 +7358,15 @@ struct ArkUIPatternLockModifier {
 };
 
 struct ArkUIColumnSplitModifier {
+    void (*createColumnSplit)();
     void (*setColumnSplitDivider)(
         ArkUINodeHandle node, ArkUI_Float32 stVal, ArkUI_Int32 stUnit, ArkUI_Float32 endVal, ArkUI_Int32 endUnit,
         void* startMarginRawPtr, void* endMarginRawPtr);
     void (*resetColumnSplitDivider)(ArkUINodeHandle node);
     void (*setColumnSplitResizable)(ArkUINodeHandle node, ArkUI_Bool resizable);
     void (*resetColumnSplitResizable)(ArkUINodeHandle node);
+    void (*setColumnSplitClip)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*setColumnSplitClipShape)(ArkUINodeHandle node, void* clipShape);
 };
 
 struct ArkUIRichEditorModifier {

@@ -9567,22 +9567,23 @@ std::string WebDelegate::GetLastSelectionText() const
     return lastSelectionText_;
 }
 
-void WebDelegate::OnTextSelectionChange(const std::string& selectionText, bool isFromOverlay)
+void WebDelegate::OnTextSelectionChange(const std::string& selectionText)
 {
     CHECK_NULL_VOID(taskExecutor_);
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
-    bool selectionChanged = (lastSelectionText_ != selectionText);
-    if (!selectionChanged && !isFromOverlay) {
+    lastSelectionText_ = selectionText;
+    bool selectionChanged = (lastPostSelectionText_ != selectionText);
+    if (!selectionChanged) {
         return;
     }
-    lastSelectionText_ = selectionText;
     if (webPattern->IsTextSelectionEnable()) {
         return;
     }
     if (!selectionText.empty() && selectionChanged) {
         webPattern->UpdateTextSelectionHolderId();
     }
+    lastPostSelectionText_ = selectionText;
     taskExecutor_->PostTask(
         [weak = WeakClaim(this), selectionText]() {
             TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnTextSelectionChange, fire event task");

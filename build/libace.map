@@ -111,9 +111,16 @@
       "OHOS::Ace::NG::LayoutProperty::~LayoutProperty()";
       OHOS::Ace::NG::Modifier::*;
       OHOS::Ace::NG::ModifierAdapter::*;
+      "OHOS::Ace::ColorFactory::GetInstance()";
+      OHOS::Ace::ColorFactory::GetColorTuple*;
 
       OHOS::Ace::ColumnModel::*;
       OHOS::Ace::FlexModel::*;
+      "OHOS::Ace::RenderDisplay::UpdateVisibleType(OHOS::Ace::VisibleType)";
+      "OHOS::Ace::TextStyle::SetAdaptTextSize(OHOS::Ace::Dimension const&, OHOS::Ace::Dimension const&, OHOS::Ace::Dimension const&)";
+      "OHOS::Ace::ScrollComponent::ScrollComponent(OHOS::Ace::RefPtr<OHOS::Ace::Component> const&)";
+      "OHOS::Ace::Framework::ConvertStrToFlexAlign(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)::flexMap";
+      "OHOS::Ace::Framework::ConvertStrToTextDecoration(std::__h::basic_string<char, std::__h:r_traits<char>, std::__h::allocator<char>> const&)::textDecorationTable";
       OHOS::Ace::ViewAbstractModel::*;
       OHOS::Ace::ViewStackModel::*;
       OHOS::Ace::BackgroundImageSize::*;
@@ -139,7 +146,6 @@
       OHOS::Ace::WaterFlowItemModel::*;
       OHOS::Ace::OffscreenContextModel::*;
       OHOS::Ace::CircleModel::*;
-      OHOS::Ace::LinearSplitModel::*;
       OHOS::Ace::CounterModel::*;
       OHOS::Ace::CustomDialogControllerModel::*;
       OHOS::Ace::DataPanelModel::*;
@@ -468,6 +474,7 @@
       "OHOS::Ace::AlignComponent::AlignComponent(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::Component>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::Component>>> const&, OHOS::Ace::Alignment const&)";
       "OHOS::Ace::ButtonComponent::ButtonComponent(std::__h::list<OHOS::Ace::RefPtr<OHOS::Ace::Component>, std::__h::allocator<OHOS::Ace::RefPtr<OHOS::Ace::Component>>> const&)";
       "OHOS::Ace::MultiModalScene::SubscribeVoiceEvent(OHOS::Ace::VoiceEvent const&, std::__h::function<void (OHOS::Ace::AceMultimodalEvent const&)> const&)";
+      "OHOS::Ace::FileUriHelper::GetRealPath(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>)";
       OHOS::Ace::RenderFocusAnimation::*;
       OHOS::Ace::AccessibilityNode::*;
       OHOS::Ace::DragRecognizer::*;
@@ -498,6 +505,7 @@
       OHOS::Ace::RatingComponent::*;
       "OHOS::Ace::Component::Component()";
       "OHOS::Ace::NG::CreateProxyNode(OHOS::Ace::RefPtr<OHOS::Ace::NG::UINode> const&)";
+      OHOS::Ace::Framework::JSThemeScope::*;
 
       "OHOS::Ace::NG::ViewStackProcessor::Pop()";
       "OHOS::Ace::MultiModalScene::UnSubscribeVoiceEvent(OHOS::Ace::VoiceEvent const&)";
@@ -508,12 +516,20 @@
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, uint32_t, bool)>>::GetInstance()";
       "OHOS::Ace::AnimatableColor::AnimatableColor(unsigned int, OHOS::Ace::AnimationOption const&)";
       
+      OHOS::Ace::NG::ConstrainIdealSizeByLayoutPolicy*;
+      OHOS::Ace::NG::UpdateOptionSizeByCalcLayoutConstraint*;
+      OHOS::Ace::NG::MinusPaddingToNonNegativeSize*;
+      OHOS::Ace::NG::CheckNoChanged*;
+      OHOS::Ace::NG::InputEventActuator::InputEventActuator*;
+      OHOS::Ace::ToRSColor*;
+      OHOS::Ace::RSPoint*;
 
       virtual?thunk?to?OHOS::Ace::Animator::~Animator??;
       virtual?thunk?to?OHOS::Ace::Frontend::MaybeRelease*;
       virtual?thunk?to?OHOS::Ace::Frontend::~Frontend*;
       virtual?thunk?to?OHOS::Ace::PluginFrontend::~PluginFrontend*;
       virtual?thunk?to?OHOS::Ace::Component::~Component*;
+      virtual?thunk?to?OHOS::Ace::FlexElement::AcceptFocusByRectOfLastFocus*;
 
       vtable?for?OHOS::Ace::ImageComponent;
       vtable?for?OHOS::Ace::PaddingComponent;
@@ -563,6 +579,10 @@
       vtable?for?OHOS::Ace::NG::PasteButtonModelNG;
       vtable?for?OHOS::Ace::NG::SecurityComponentModelNG;
       vtable?for?OHOS::Ace::NG::Pattern;
+      vtable?for?OHOS::Ace::LoadingProgressComponent;
+      vtable?for?OHOS::Ace::FocusNode;
+      vtable?for?OHOS::Ace::Framework::StepperModelImpl;
+      vtable?for?OHOS::Ace::Framework::StepperItemModelImpl;
       vtable?for?OHOS::Ace::NG::GaugeModelNG;
       vtable?for?OHOS::Ace::GaugeModel;
       vtable?for?OHOS::Ace::Framework::GaugeModelImpl;
@@ -572,6 +592,8 @@
       vtable?for?OHOS::Ace::Texture;
       vtable?for?OHOS::Ace::NG::RatingModelNG;
       vtable?for?OHOS::Ace::RatingComponent;
+      vtable?for?OHOS::Ace::RowSplitComponent;
+      vtable?for?OHOS::Ace::ColumnSplitComponent;
 
       VTT?for?OHOS::Ace::Player;
       VTT?for?OHOS::Ace::Texture;
@@ -615,12 +637,16 @@
       VTT?for?OHOS::Ace::PixelMapDrawableDescriptor;
       VTT?for?OHOS::Ace::AnimatedDrawableDescriptor;
       VTT?for?OHOS::Ace::FocusNode*;
+      VTT?for?OHOS::Ace::LoadingProgressComponent;
       VTT?for?OHOS::Ace::CheckableComponent;
       VTT?for?OHOS::Ace::RatingComponent;
       VTT?for?OHOS::Ace::PaddingComponent;
       VTT?for?OHOS::Ace::RawRecognizer;
       VTT?for?OHOS::Ace::RenderCheckable;
-      
+      VTT?for?OHOS::Ace::ColumnSplitComponent;
+      VTT?for?OHOS::Ace::RowSplitComponent;
+      VTT?for?OHOS::Ace::ProgressDataPanelComponent;
+      VTT?for?OHOS::Ace::PercentageDataPanelComponent;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -816,6 +842,8 @@
       vtable?for?OHOS::Ace::ImageComponent;
       vtable?for?OHOS::Ace::PaddingComponent;
       vtable?for?OHOS::Ace::RawRecognizer;
+      vtable?for?OHOS::Ace::ProgressDataPanelComponent;
+      vtable?for?OHOS::Ace::PercentageDataPanelComponent;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -1037,12 +1065,20 @@
       OHOS::Ace::Declaration::*;
       OHOS::Ace::Edge::NONE;
       OHOS::Ace::FontManager::RemoveVariationNode*;
+      OHOS::Ace::FontManager::RegisterCallback*;
       OHOS::Ace::FontManager::AddVariationNode*;
       OHOS::Ace::DebugBoundaryPainter::*;
       OHOS::Ace::Edge::IsValid*;
       OHOS::Ace::Edge::GetLayoutSizeInPx*;
       OHOS::Ace::RosenRenderContext::*;
       OHOS::Ace::TouchEventTarget::SetCoordinateOffset*;
+      OHOS::Ace::AccessibilityNode::PutChartValue*;
+      "OHOS::Ace::RosenFontCollection::GetInstance()";
+      OHOS::Ace::DOM_BACKGROUND_COLOR;
+      OHOS::Ace::DOM_EFFECTS_ON;
+      OHOS::Ace::DOM_METHOD_APPEND;
+      OHOS::Ace::DOM_TEXT_FONT_FAMILY;
+      OHOS::Ace::DOM_TEXT_FONT_SIZE;
       OHOS::Ace::DOM_CLICK;
       OHOS::Ace::DOM_CATCH_BUBBLE_CLICK;
       OHOS::Ace::ScreenSystemManager::GetInstance*;
@@ -1335,6 +1371,7 @@
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (OHOS::Ace::ClickInfo const&)>>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::shared_ptr<OHOS::Ace::BaseEventInfo> const&)>>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)>>::GetInstance()";
+      "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>>&)>>::GetInstance()";
 
       VTT?for?OHOS::Ace::NG::NavigationStack;
       VTT?for?OHOS::Ace::RawRecognizer;
@@ -1525,6 +1562,9 @@
       non-virtual?thunk?to?OHOS::Ace::RenderBox::PanOnActionCancel*;
       non-virtual?thunk?to?OHOS::Ace::RenderBox::GenerateDragItemInfo*;
       non-virtual?thunk?to?OHOS::Ace::RenderBox::AddDataToClipboard*;
+      VTT?for?OHOS::Ace::OptionComponent;
+      vtable?for?OHOS::Ace::OptionComponent;
+      OHOS::Ace::SELECT_INVALID_INDEX;
       OHOS::Ace::Edge::GetOffsetInPx*;
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (unsigned int)>>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::shared_ptr<OHOS::Ace::BaseEventInfo> const&)>>::GetInstance()";
@@ -1573,6 +1613,32 @@
       OHOS::Ace::GridContainerInfo::GetMarginLeft*;
       OHOS::Ace::GridColumnInfo::GetWidth*;
       OHOS::Ace::GridColumnInfo::GetMaxWidth*;
+
+      OHOS::Ace::FlexElement::*;
+ 	  VTT?for?OHOS::Ace::FlexElement;
+ 	  vtable?for?OHOS::Ace::FlexElement;
+ 	  non-virtual?thunk?to?OHOS::Ace::FlexElement::AcceptFocusByRectOfLastFocus*;
+ 	  non-virtual?thunk?to?OHOS::Ace::FlexElement::RequestNextFocus*;
+ 	  OHOS::Ace::FocusGroup::IsFocusable*;
+ 	  OHOS::Ace::FocusGroup::IsFocusableByTab*;
+ 	  OHOS::Ace::FocusGroup::SetShow*;
+ 	  OHOS::Ace::FocusGroup::SetEnabled*;
+ 	  OHOS::Ace::FocusGroup::DumpFocusTree*;
+ 	  OHOS::Ace::FocusGroup::RefreshParentFocusable*;
+ 	  OHOS::Ace::FocusGroup::OnKeyEvent*;
+ 	  OHOS::Ace::FocusGroup::OnFocus*;
+ 	  OHOS::Ace::FocusGroup::OnBlur*;
+ 	  OHOS::Ace::FocusGroup::AcceptFocusByRectOfLastFocus*;
+ 	  OHOS::Ace::AnimatableColor::AnimatableColor*;
+ 	  OHOS::Ace::AnimatableColor::operator*;
+ 	  OHOS::Ace::RenderFlex::Create*;
+ 	  OHOS::Ace::RenderGestureListener::Create*;
+ 	  VTT?for?OHOS::Ace::PaddingComponent;
+ 	  vtable?for?OHOS::Ace::PaddingComponent;
+ 	  VTT?for?OHOS::Ace::DisplayComponent;
+ 	  vtable?for?OHOS::Ace::DisplayComponent;
+ 	  OHOS::Ace::Edge::GetOffsetInPx*;
+ 	  OHOS::Ace::RosenRenderContext::GetRSNode*;
 
       OHOS::Ace::V2::HYPERLINK_ETS_TAG;
       OHOS::Ace::V2::SYMBOL_ETS_TAG;

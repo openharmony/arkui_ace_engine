@@ -29,7 +29,6 @@ template("bridge_common") {
       "dom/dom_button.cpp",
       "dom/dom_calendar.cpp",
       "dom/dom_canvas.cpp",
-      "dom/dom_chart.cpp",
       "dom/dom_dialog.cpp",
       "dom/dom_div.cpp",
       "dom/dom_divider.cpp",
@@ -75,11 +74,8 @@ template("bridge_common") {
       sources += [
         "dom/dom_menu.cpp",
         "dom/dom_option.cpp",
-        "dom/dom_piece.cpp",
         "dom/dom_popup.cpp",
         "dom/dom_select.cpp",
-        "dom/dom_stepper.cpp",
-        "dom/dom_stepper_item.cpp",
       ]
     }
 

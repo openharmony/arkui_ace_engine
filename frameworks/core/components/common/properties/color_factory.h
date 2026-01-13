@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class ColorFactory final {
+class ACE_FORCE_EXPORT ColorFactory final {
 public:
     ~ColorFactory() = default;
     static ColorFactory& GetInstance();

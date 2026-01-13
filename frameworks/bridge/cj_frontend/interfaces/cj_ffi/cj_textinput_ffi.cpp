@@ -80,7 +80,7 @@ CJRectResult NGNativeTextInputController::GetTextContentRect()
 
 CJCaretOffset NGNativeTextInputController::GetCaretOffset()
 {
-    CJCaretOffset result;
+    CJCaretOffset result = {};
     if (controller_) {
         NG::OffsetF caretOffset = controller_->GetCaretPosition();
         result.index = controller_->GetCaretIndex();

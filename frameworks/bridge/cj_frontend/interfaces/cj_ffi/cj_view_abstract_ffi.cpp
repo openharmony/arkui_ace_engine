@@ -3091,9 +3091,10 @@ RetDimension FFIGetResourceDimension(NativeResourceObject obj)
 
 double FFIGetResourceDouble(NativeResourceObject obj)
 {
-    double result;
+    double result = 0.0;
     if (!ViewAbstract::ParseCjDouble(obj, result)) {
         LOGE("Parse double failed.");
+        return 0.0;
     }
     return result;
 }

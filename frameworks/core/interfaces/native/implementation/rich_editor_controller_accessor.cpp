@@ -58,6 +58,16 @@ TextDecorationStruct Convert(const Ark_DecorationStyleInterface& src)
     return ret;
 }
 
+FONT_FEATURES_LIST GetDefaultFontFeature()
+{
+    FONT_FEATURES_LIST fontFeatures;
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, fontFeatures);
+    auto textTheme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, fontFeatures);
+    return textTheme->GetTextStyle().GetFontFeatures();
+}
+
 void ConversionPart2(TextStyle& ret, const Ark_RichEditorTextStyle& src)
 {
     if (auto shadowList = Converter::OptConvert<std::vector<Shadow>>(src.textShadow)) {
@@ -83,6 +93,8 @@ void ConversionPart2(TextStyle& ret, const Ark_RichEditorTextStyle& src)
 
     if (auto fontFeatureSettings = Converter::OptConvert<std::string>(src.fontFeature)) {
         ret.SetFontFeatures(ParseFontFeatureSettings(fontFeatureSettings.value()));
+    } else {
+        ret.SetFontFeatures(GetDefaultFontFeature());
     }
 
     auto textBackgroundStyle = Converter::OptConvert<TextBackgroundStyle>(src.textBackgroundStyle);
@@ -100,6 +112,16 @@ void ConversionPart2(TextStyle& ret, const Ark_RichEditorTextStyle& src)
     }
 }
 
+Dimension GetDefaultFontSizeIfInvalid(const Dimension& fontSize)
+{
+    CHECK_NULL_RETURN(fontSize.IsNonPositive(), fontSize);
+    auto pipelineContext = PipelineBase::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, fontSize);
+    auto textTheme = pipelineContext->GetTheme<TextTheme>();
+    CHECK_NULL_RETURN(textTheme, fontSize);
+    return textTheme->GetTextStyle().GetFontSize();
+}
+
 template<>
 TextStyle Convert(const Ark_RichEditorTextStyle& src)
 {
@@ -108,7 +130,7 @@ TextStyle Convert(const Ark_RichEditorTextStyle& src)
         ret.SetTextColor(color.value());
     }
     if (auto size = Converter::OptConvert<Dimension>(src.fontSize); size) {
-        ret.SetFontSize(size.value());
+        ret.SetFontSize(GetDefaultFontSizeIfInvalid(size.value()));
     }
     if (auto style = Converter::OptConvert<OHOS::Ace::FontStyle>(src.fontStyle); style) {
         ret.SetFontStyle(style.value());
@@ -250,7 +272,15 @@ MarginProperty Convert(const Ark_RichEditorLayoutStyle& src)
     CalcDimension length;
     MarginProperty ret = NG::ConvertToCalcPaddingProperty(length, length, length, length);
     auto margins = Converter::OptConvert<PaddingProperty>(src.margin);
-    return margins.value_or(ret);
+    if (auto margins = Converter::OptConvert<PaddingProperty>(src.margin)) {
+        PaddingProperty adjustedMargins;
+        adjustedMargins.left =  (margins->left && margins->left->IsValid()) ? margins->left : ret.left;
+        adjustedMargins.top = (margins->top && margins->top->IsValid()) ? margins->top : ret.top;
+        adjustedMargins.right = (margins->right && margins->right->IsValid()) ? margins->right : ret.right;
+        adjustedMargins.bottom = (margins->bottom && margins->bottom->IsValid()) ? margins->bottom : ret.bottom;
+        return adjustedMargins;
+    }
+    return ret;
 }
 
 template<>
@@ -558,7 +588,7 @@ std::vector<To> ArkSelectionConvert(const SelectionInfo& src, ConvContext *ctx)
 {
     std::vector<To> values;
     for (const ResultObject& spanObject : src.GetSelection().resultObjects) {
-        if (spanObject.type == SelectSpanType::TYPESPAN) {
+        if (spanObject.type == SelectSpanType::TYPESPAN || spanObject.type == SelectSpanType::TYPEBUILDERSPAN) {
             auto textSpanResult = ArkValue<Ark_RichEditorTextSpanResult>(spanObject, ctx);
             auto unionValue = ArkUnion<To, Ark_RichEditorTextSpanResult>(textSpanResult);
             values.push_back(unionValue);
