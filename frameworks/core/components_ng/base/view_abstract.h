@@ -1187,10 +1187,7 @@ void SetOnVisibleAreaApproximateChangeMultiThread(FrameNode* frameNode,
     int32_t expectedUpdateInterval);
 void ResetAreaChangedMultiThread(FrameNode* frameNode);
 void ResetVisibleChangeMultiThread(FrameNode* frameNode);
-void SetFocusableMultiThread(FrameNode* frameNode, bool focusable);
 void SetNeedFocusMultiThread(FrameNode* frameNode, bool value);
-void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold);
-void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, Dimension distanceThreshold);
 void SetBackgroundEffectMultiThread(FrameNode* frameNode, const EffectOption& effectOption,
     const SysOptions& sysOptions = SysOptions());
 void SetClickEffectLevelMultiThread(const ClickEffectLevel& level, float scaleValue);
