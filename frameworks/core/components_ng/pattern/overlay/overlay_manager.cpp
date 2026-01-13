@@ -6309,8 +6309,10 @@ void OverlayManager::UpdateSheetMask(const RefPtr<FrameNode>& maskNode,
             maskNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub()->SetHitTestMode(
                 HitTestMode::HTMTRANSPARENT);
             maskRenderContext->UpdateBackgroundColor(Color::TRANSPARENT);
-            eventConfirmHub->RemoveClickEvent(iter->second);
-            sheetMaskClickEventMap_.erase(maskNodeId);
+            if (iter != sheetMaskClickEventMap_.end()) {
+                eventConfirmHub->RemoveClickEvent(iter->second);
+                sheetMaskClickEventMap_.erase(maskNodeId);
+            }
             SheetManager::SetMaskInteractive(maskNode, false);
         }
     }
