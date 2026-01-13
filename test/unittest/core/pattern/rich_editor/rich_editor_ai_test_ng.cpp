@@ -97,8 +97,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite001, TestSize.Level2)
     richEditorPattern->textSelector_.Update(0, 5);
     auto mockContainer = MockContainer::Current();
     mockContainer->SetIsSceneBoardWindow(true);
-    auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_FALSE(result);
+    EXPECT_FALSE(richEditorPattern->IsShowAIWrite());
 }
 
 /**
@@ -119,8 +118,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite002, TestSize.Level2)
     richEditorController->AddTextSpan(options);
     richEditorPattern->textSelector_.Update(0, 5);
     MockContainer::TearDown();
-    auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_FALSE(result);
+    EXPECT_FALSE(richEditorPattern->IsShowAIWrite());
 }
 
 /**
@@ -146,8 +144,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite003, TestSize.Level2)
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
     auto theme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
-    auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_FALSE(result);
+    EXPECT_FALSE(richEditorPattern->IsShowAIWrite());
 }
 
 /**
@@ -174,8 +171,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite004, TestSize.Level2)
     auto theme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
     theme->aiWriteBundleName_ = "bundleName";
-    auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_FALSE(result);
+    EXPECT_FALSE(richEditorPattern->IsShowAIWrite());
 }
 
 /**
@@ -204,8 +200,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite005, TestSize.Level2)
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
     theme->aiWriteBundleName_ = "bundleName";
     theme->aiWriteAbilityName_ = "abilityName";
-    auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_FALSE(result);
+    EXPECT_FALSE(richEditorPattern->IsShowAIWrite());
 }
 
 /**
@@ -235,8 +230,7 @@ HWTEST_F(RichEditorAITestOneNg, IsShowAIWrite006, TestSize.Level2)
     theme->aiWriteBundleName_ = "bundleName";
     theme->aiWriteAbilityName_ = "abilityName";
     theme->aiWriteIsSupport_ = "true";
-    auto result = richEditorPattern->IsShowAIWrite();
-    EXPECT_TRUE(result);
+    EXPECT_TRUE(richEditorPattern->IsShowAIWrite());
 }
 
 /**
