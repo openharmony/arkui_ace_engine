@@ -23744,6 +23744,8 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                               const Opt_Boolean* value);
     void (*setRenderGroup)(Ark_NativePointer node,
                            const Opt_Boolean* value);
+    void (*setExcludeFromRenderGroup)(Ark_NativePointer node,
+                                      const Opt_Boolean* value);
     void (*setFreeze)(Ark_NativePointer node,
                       const Opt_Boolean* value);
     void (*setTranslate)(Ark_NativePointer node,

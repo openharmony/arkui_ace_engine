@@ -1871,6 +1871,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Opt_Boolean* value)
     {
     }
+    void SetExcludeFromRenderGroupImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+    }
     void SetFreezeImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
     {
@@ -8851,6 +8855,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetUseShadowBatchingImpl,
             CommonMethodModifier::SetUseEffect0Impl,
             CommonMethodModifier::SetRenderGroupImpl,
+            CommonMethodModifier::SetExcludeFromRenderGroupImpl,
             CommonMethodModifier::SetFreezeImpl,
             CommonMethodModifier::SetTranslateImpl,
             CommonMethodModifier::SetScaleImpl,
