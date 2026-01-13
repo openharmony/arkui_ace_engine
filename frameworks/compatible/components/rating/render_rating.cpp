@@ -71,20 +71,25 @@ void RenderRating::Update(const RefPtr<Component>& component)
         rtlFlip_ = rating->IsRtlFlip();
         onScoreChange_ = AceAsyncEvent<void(const std::string)>::Create(rating->GetChangeEventId(), context_);
 
-        RefPtr<ImageComponent> foregroundImage = rating->GetForegroundImage();
-        foregroundImage->SetResourceId(foregroundResourceId_);
-        UpdateRenderImage(foregroundImage, ImageFit::FILL, foregroundSrc_, renderForeground_, starColorActive_);
-
-        RefPtr<ImageComponent> secondaryImage = rating->GetSecondaryImage();
-        secondaryImage->SetResourceId(secondaryResourceId_);
-        UpdateRenderImage(secondaryImage, ImageFit::FILL, secondarySrc_, renderSecondary_, starColorInactive_);
-
-        RefPtr<ImageComponent> backgroundImage = rating->GetBackgroundImage();
-        backgroundImage->SetResourceId(backgroundResourceId_);
-        UpdateRenderImage(backgroundImage, ImageFit::FILL, backgroundSrc_, renderBackground_, starColorInactive_);
+        UpdateRatingImages(rating);
     }
     InitAccessibilityEventListener();
     MarkNeedLayout();
+}
+
+void RenderRating::UpdateRatingImages(const RefPtr<RatingComponent>& rating)
+{
+    RefPtr<ImageComponent> foregroundImage = rating->GetForegroundImage();
+    foregroundImage->SetResourceId(foregroundResourceId_);
+    UpdateRenderImage(foregroundImage, ImageFit::FILL, foregroundSrc_, renderForeground_, starColorActive_);
+
+    RefPtr<ImageComponent> secondaryImage = rating->GetSecondaryImage();
+    secondaryImage->SetResourceId(secondaryResourceId_);
+    UpdateRenderImage(secondaryImage, ImageFit::FILL, secondarySrc_, renderSecondary_, starColorInactive_);
+
+    RefPtr<ImageComponent> backgroundImage = rating->GetBackgroundImage();
+    backgroundImage->SetResourceId(backgroundResourceId_);
+    UpdateRenderImage(backgroundImage, ImageFit::FILL, backgroundSrc_, renderBackground_, starColorInactive_);
 }
 
 void RenderRating::PerformLayout()
