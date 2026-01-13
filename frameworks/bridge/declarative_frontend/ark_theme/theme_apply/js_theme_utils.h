@@ -18,11 +18,7 @@
 
 #include "base/utils/utils.h"
 #include "bridge/common/utils/utils.h"
-#include "bridge/declarative_frontend/engine/jsi/jsi_declarative_engine.h"
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme.h"
-#include "bridge/js_frontend/engine/jsi/js_value.h"
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/base/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
 class JSThemeUtils {
