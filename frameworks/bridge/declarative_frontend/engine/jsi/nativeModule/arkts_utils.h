@@ -440,6 +440,7 @@ public:
 
     template<class... Args>
     static std::vector<Local<JSValueRef>> ConvertToJSValues(const EcmaVM* vm, Args... args);
+    static RefPtr<BasicShape> GetBasicShape(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj);
 
 private:
     static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);

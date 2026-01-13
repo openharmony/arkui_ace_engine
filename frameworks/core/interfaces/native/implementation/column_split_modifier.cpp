@@ -13,92 +13,26 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
-#include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/components_ng/pattern/linear_split/linear_split_model_ng_static.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "core/common/dynamic_module_helper.h"
+#include "ui/base/utils/utils.h"
 
-namespace OHOS::Ace::NG {
-namespace {
-struct DividerOptions {
-    std::optional<Dimension> startMargin;
-    std::optional<Dimension> endMargin;
-};
-}
-}
-namespace OHOS::Ace::NG::Converter {
-template<>
-ColumnSplitDivider Convert(const Ark_ColumnSplitDividerStyle& src)
-{
-    ColumnSplitDivider divider;
-    auto margin = OptConvert<Dimension>(src.startMargin);
-    if (margin.has_value()) {
-        divider.startMargin = margin.value();
-    }
-    margin = OptConvert<Dimension>(src.endMargin);
-    if (margin.has_value()) {
-        divider.endMargin = margin.value();
-    }
-    return divider;
-}
-}
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace ColumnSplitModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    auto frameNode = LinearSplitModelNGStatic::CreateFrameNode(id, NG::SplitType::COLUMN_SPLIT);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-} // ColumnSplitModifier
-namespace ColumnSplitInterfaceModifier {
-void SetColumnSplitOptionsImpl(Ark_NativePointer node)
-{
-    // keep it empty because ColumnSplit doesn`t have any options
-}
-} // ColumnSplitInterfaceModifier
-namespace ColumnSplitAttributeModifier {
-void SetResizeableImpl(Ark_NativePointer node,
-                       const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<bool>(value);
-    if (!convValue) {
-        LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::COLUMN_SPLIT, false);
-        return;
-    }
-    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::COLUMN_SPLIT, *convValue);
-}
-void SetDividerImpl(Ark_NativePointer node,
-                    const Opt_ColumnSplitDividerStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto divider = Converter::OptConvertPtr<ColumnSplitDivider>(value);
-
-    if (!divider.has_value()) {
-        ColumnSplitDivider defaultDivider;
-
-        defaultDivider.startMargin = Dimension(0, DimensionUnit::VP);
-        defaultDivider.endMargin = Dimension(0, DimensionUnit::VP);
-        divider = defaultDivider;
-    }
-    LinearSplitModelNGStatic::SetDivider(frameNode, NG::SplitType::COLUMN_SPLIT, divider);
-}
-} // ColumnSplitAttributeModifier
+#ifdef ACE_UNITTEST
+const GENERATED_ArkUIColumnSplitModifier* GetColumnSplitStaticModifier();
+#endif
 const GENERATED_ArkUIColumnSplitModifier* GetColumnSplitModifier()
 {
-    static const GENERATED_ArkUIColumnSplitModifier ArkUIColumnSplitModifierImpl {
-        ColumnSplitModifier::ConstructImpl,
-        ColumnSplitInterfaceModifier::SetColumnSplitOptionsImpl,
-        ColumnSplitAttributeModifier::SetResizeableImpl,
-        ColumnSplitAttributeModifier::SetDividerImpl,
-    };
-    return &ArkUIColumnSplitModifierImpl;
+#ifdef ACE_UNITTEST
+ 	return GetColumnSplitStaticModifier();
+#else
+    static const GENERATED_ArkUIColumnSplitModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("ColumnSplit");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIColumnSplitModifier*>(module->GetStaticModifier());
+    }
+    return cachedModifier;
+#endif
 }
-
 }

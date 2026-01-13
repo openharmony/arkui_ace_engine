@@ -554,6 +554,8 @@ frameworks/bridge/declarative_frontend/ark_component/components/arkgauge.js @ark
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckboxgroup.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/components/arkcheckbox.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkuieco3
+frameworks/bridge/declarative_frontend/ark_component/components/arkcolumnsplit.js @arkuilayout1
+frameworks/bridge/declarative_frontend/ark_component/components/arkrowsplit.js @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/src/ArkAlphabetIndexer.ts @arkuicodepulse
 frameworks/bridge/declarative_frontend/ark_component/src/ArkBadge.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkBlank.ts @arkuilayout1
@@ -889,8 +891,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_cale
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.h @arkui001
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.h @arkuilayout1
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_split_bridge.cpp @arkuilayout1
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_split_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h @arkui_framework_xnode
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_shape_bridge.cpp @arkuilayout1
@@ -999,8 +999,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h @arkui_rich_editor
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_bridge.h @arkuilayout1
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_split_bridge.cpp @arkuilayout1
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_split_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scroll_bridge.cpp @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scroll_bridge.h @arkuiscroll
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollable_bridge.cpp @arkuiscroll
@@ -1124,8 +1122,6 @@ frameworks/bridge/declarative_frontend/jsview/js_clipboard.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_clipboard.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_column.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_column.h @arkuilayout1
-frameworks/bridge/declarative_frontend/jsview/js_column_split.cpp @arkuilayout1
-frameworks/bridge/declarative_frontend/jsview/js_column_split.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_common_view.cpp @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/js_common_view.h @ArkUI_Event
 frameworks/bridge/declarative_frontend/jsview/js_container_base.cpp @ArkUI_Event
@@ -1222,7 +1218,6 @@ frameworks/bridge/declarative_frontend/jsview/js_linear_indicator_controller.cpp
 frameworks/bridge/declarative_frontend/jsview/js_linear_indicator_controller.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_linear_indicator.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_linear_indicator.h @arkui_navigation
-frameworks/bridge/declarative_frontend/jsview/js_linear_split.h
 frameworks/bridge/declarative_frontend/jsview/js_line.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_line.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_list.cpp @arkuiscroll
@@ -1326,8 +1321,6 @@ frameworks/bridge/declarative_frontend/jsview/js_richtext.cpp @arkweb-committer-
 frameworks/bridge/declarative_frontend/jsview/js_richtext.h @arkweb-committer-group
 frameworks/bridge/declarative_frontend/jsview/js_row.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_row.h @arkuilayout1
-frameworks/bridge/declarative_frontend/jsview/js_row_split.cpp @arkuilayout1
-frameworks/bridge/declarative_frontend/jsview/js_row_split.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_save_button.cpp @harylee
 frameworks/bridge/declarative_frontend/jsview/js_save_button.h @harylee
 frameworks/bridge/declarative_frontend/jsview/js_sceneview.cpp @arkui_component3d
@@ -1517,8 +1510,6 @@ frameworks/bridge/declarative_frontend/jsview/models/indexer_model_impl.cpp @ark
 frameworks/bridge/declarative_frontend/jsview/models/indexer_model_impl.h @arkuicodepulse
 frameworks/bridge/declarative_frontend/jsview/models/lazy_for_each_model_impl.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/models/lazy_for_each_model_impl.h @arkuieco3
-frameworks/bridge/declarative_frontend/jsview/models/linear_split_model_impl.cpp @arkuilayout1
-frameworks/bridge/declarative_frontend/jsview/models/linear_split_model_impl.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/models/line_model_impl.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/models/line_model_impl.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/models/list_item_group_model_impl.cpp @arkuiscroll

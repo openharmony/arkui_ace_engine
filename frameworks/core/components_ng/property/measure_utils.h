@@ -188,7 +188,7 @@ void CreateChildrenConstraint(SizeF& size, const PaddingPropertyF& padding);
  * @param calcLayoutConstraint the calcLayoutConstraint of this node.
  * @param percentReference the percentReference of this node.
  */
-OptionalSizeF UpdateOptionSizeByCalcLayoutConstraint(const OptionalSize<float>& frameSize,
+ACE_FORCE_EXPORT OptionalSizeF UpdateOptionSizeByCalcLayoutConstraint(const OptionalSize<float>& frameSize,
     const std::unique_ptr<MeasureProperty>& calcLayoutConstraint, const SizeT<float> percentReference);
 
 WidthBreakpoint GetCommonWidthBreakpoint(double width, double density);

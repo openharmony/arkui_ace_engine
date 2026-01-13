@@ -6815,87 +6815,6 @@ if (globalThis.Column !== undefined) {
 }
 
 /// <reference path='./import.ts' />
-class ColumnSplitDividerModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().columnSplit.resetDivider(node);
-    }
-    else {
-      getUINativeModule().columnSplit.setDivider(node, this.value.startMargin, this.value.endMargin);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.startMargin, this.value.startMargin) ||
-      !isBaseOrResourceEqual(this.stageValue.endMargin, this.value.endMargin);
-  }
-}
-ColumnSplitDividerModifier.identity = Symbol('columnSplitDivider');
-class ColumnSplitResizeableModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().columnSplit.resetResizeable(node);
-    }
-    else {
-      getUINativeModule().columnSplit.setResizeable(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return this.stageValue !== this.value;
-  }
-}
-ColumnSplitResizeableModifier.identity = Symbol('columnSplitResizeable');
-class ColumnSplitClipModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().common.resetClipWithEdge(node);
-    }
-    else {
-      getUINativeModule().common.setClipWithEdge(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return true;
-  }
-}
-ColumnSplitClipModifier.identity = Symbol('columnSplitClip');
-class ArkColumnSplitComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  resizeable(value) {
-    modifierWithKey(this._modifiersWithKeys, ColumnSplitResizeableModifier.identity, ColumnSplitResizeableModifier, value);
-    return this;
-  }
-  divider(value) {
-    modifierWithKey(this._modifiersWithKeys, ColumnSplitDividerModifier.identity, ColumnSplitDividerModifier, value);
-    return this;
-  }
-  clip(value) {
-    modifierWithKey(this._modifiersWithKeys, ColumnSplitClipModifier.identity, ColumnSplitClipModifier, value);
-    return this;
-  }
-}
-// @ts-ignore
-if (globalThis.ColumnSplit !== undefined) {
-  globalThis.ColumnSplit.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkColumnSplitComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.ColumnSplitModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
 class DividerVerticalModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -11384,62 +11303,6 @@ if (globalThis.Row !== undefined) {
       return new ArkRowComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.RowModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
-class RowSplitResizeableModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().rowSplit.resetResizeable(node);
-    }
-    else {
-      getUINativeModule().rowSplit.setResizeable(node, this.value);
-    }
-  }
-}
-RowSplitResizeableModifier.identity = Symbol('rowSplitResizeable');
-class RowSplitClipModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().common.resetClipWithEdge(node);
-    }
-    else {
-      getUINativeModule().common.setClipWithEdge(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return true;
-  }
-}
-RowSplitClipModifier.identity = Symbol('rowSplitClip');
-class ArkRowSplitComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  resizeable(value) {
-    modifierWithKey(this._modifiersWithKeys, RowSplitResizeableModifier.identity, RowSplitResizeableModifier, value);
-    return this;
-  }
-  clip(value) {
-    modifierWithKey(this._modifiersWithKeys, RowSplitClipModifier.identity, RowSplitClipModifier, value);
-    return this;
-  }
-}
-// @ts-ignore
-if (globalThis.RowSplit !== undefined) {
-  globalThis.RowSplit.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkRowSplitComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.RowSplitModifier(nativePtr, classType);
     });
   };
 }
@@ -40694,6 +40557,30 @@ if (globalThis.Rating === undefined) {
       } else {
         getUINativeModule().rating.create(0, false);
       }
+    }
+  };
+}
+
+// @ts-ignore
+if (globalThis.RowSplit === undefined) {
+  globalThis.RowSplit = {
+    create: function() {
+      getUINativeModule().loadNativeModule('RowSplit');
+      let module = globalThis.requireNapi('arkui.components.arkrowsplit');
+      module.exportView();
+      getUINativeModule().rowSplit.create();
+    }
+  };
+}
+
+// @ts-ignore
+if (globalThis.ColumnSplit === undefined) {
+  globalThis.ColumnSplit = {
+    create: function() {
+      getUINativeModule().loadNativeModule('ColumnSplit');
+      let module = globalThis.requireNapi('arkui.components.arkcolumnsplit');
+      module.exportView();
+      getUINativeModule().columnSplit.create();
     }
   };
 }

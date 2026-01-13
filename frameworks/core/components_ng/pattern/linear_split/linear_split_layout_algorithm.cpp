@@ -26,6 +26,7 @@ constexpr double SPLIT_HEIGHT_RATE = 2.0;
 constexpr double DEFAULT_DRAG_REGION_RATE = 2.0;
 constexpr Dimension DEFAULT_DRAG_REGION_HALF = 10.0_vp;
 constexpr double HALF_SPLIT_HEIGHT = 2.0;
+const double DEFAULT_SPLIT_HEIGHT = 2.0;
 } // namespace
 
 bool LinearSplitLayoutAlgorithm::IsDynamicComponentEnv()

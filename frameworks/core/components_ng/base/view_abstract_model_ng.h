@@ -1006,9 +1006,19 @@ public:
         ViewAbstract::SetClipShape(basicShape);
     }
 
+    static void SetClipShape(FrameNode* frameNode, const RefPtr<BasicShape>& basicShape)
+    {
+        ViewAbstract::SetClipShape(frameNode, basicShape);
+    }
+
     void SetClipEdge(bool isClip) override
     {
         ViewAbstract::SetClipEdge(isClip);
+    }
+
+    static void SetClipEdge(FrameNode* frameNode, bool isClip)
+    {
+        ViewAbstract::SetClipEdge(frameNode, isClip);
     }
 
     void SetMask(const RefPtr<BasicShape>& shape) override

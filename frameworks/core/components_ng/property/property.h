@@ -71,7 +71,7 @@ bool CheckMeasureSelfAndChildFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckUpdateByChildRequest(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckNoChanged(PropertyChangeFlag propertyChangeFlag);
+ACE_FORCE_EXPORT bool CheckNoChanged(PropertyChangeFlag propertyChangeFlag);
 
 // For XXXProperty Class
 #define ACE_DEFINE_PROPERTY_GROUP(group, type)              \
