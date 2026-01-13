@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/piece/rosen_render_piece.h"
+#include "compatible/components/piece/rosen_render_piece.h"
 
 #ifndef USE_ROSEN_DRAWING
 #include "include/core/SkCanvas.h"

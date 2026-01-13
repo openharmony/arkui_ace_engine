@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_PIECE_PIECE_DECLARATION_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_PIECE_PIECE_DECLARATION_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_PIECE_DECLARATION_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_PIECE_DECLARATION_H
 
 #include "core/components/declaration/common/declaration.h"
-#include "frameworks/bridge/common/dom/dom_type.h"
-#include "frameworks/core/components/piece/piece_theme.h"
+#include "bridge/common/dom/dom_type.h"
+#include "compatible/components/piece/piece_theme.h"
 
 namespace OHOS::Ace {
 
@@ -215,4 +215,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_DECLARATION_PIECE_PIECE_DECLARATION_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_PIECE_DECLARATION_H

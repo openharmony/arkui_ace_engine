@@ -13,20 +13,20 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_PIECE_COMPONENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_PIECE_COMPONENT_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_PIECE_COMPONENT_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_PIECE_COMPONENT_H
 
 #include "base/resource/internal_resource.h"
 #include "core/components_v2/common/common_def.h"
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/edge.h"
 #include "core/components/flex/flex_component.h"
-#include "core/components/piece/piece_element.h"
+#include "compatible/components/piece/piece_element.h"
 #include "core/components/text/text_component.h"
 #include "core/pipeline/base/component.h"
 #include "core/pipeline/base/sole_child_component.h"
-#include "core/components/declaration/piece/piece_declaration.h"
-#include "frameworks/core/components/piece/piece_theme.h"
+#include "compatible/components/piece/piece_declaration.h"
+#include "compatible/components/piece/piece_theme.h"
 
 namespace OHOS::Ace {
 
@@ -105,4 +105,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_PIECE_COMPONENT_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_PIECE_COMPONENT_H

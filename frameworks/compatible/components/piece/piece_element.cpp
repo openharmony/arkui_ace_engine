@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 
-#include "core/components/piece/piece_element.h"
+#include "compatible/components/piece/piece_element.h"
 
-#include "core/components/piece/render_piece.h"
+#include "compatible/components/piece/render_piece.h"
 
 namespace OHOS::Ace {
 

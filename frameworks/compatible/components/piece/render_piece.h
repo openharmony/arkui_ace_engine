@@ -13,13 +13,13 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_RENDER_PIECE_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_RENDER_PIECE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_RENDER_PIECE_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_RENDER_PIECE_H
 
 #include "core/components/common/properties/border.h"
 #include "core/components/common/properties/decoration.h"
 #include "core/components/common/properties/edge.h"
-#include "core/components/piece/piece_component.h"
+#include "compatible/components/piece/piece_component.h"
 #include "core/gestures/click_recognizer.h"
 #include "core/pipeline/base/render_node.h"
 
@@ -47,4 +47,4 @@ private:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_RENDER_PIECE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PIECE_RENDER_PIECE_H

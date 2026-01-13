@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/common/dom/dom_piece.h"
+#include "compatible/components/piece/dom_piece.h"
 
 namespace OHOS::Ace::Framework {
 

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-#include "core/components/piece/render_piece.h"
+#include "compatible/components/piece/render_piece.h"
 
 #include "base/log/event_report.h"
 #include "core/components/box/render_box.h"

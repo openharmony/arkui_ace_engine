@@ -12,23 +12,12 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_PIECE_ELEMENT_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_PIECE_ELEMENT_H
 
-#include "core/focus/focus_node.h"
-#include "core/pipeline/base/render_element.h"
+#include "rosen_render_piece.h"
 
 namespace OHOS::Ace {
-
-class PieceElement : public RenderElement, public FocusNode {
-    DECLARE_ACE_TYPE(PieceElement, RenderElement, FocusNode);
-
-public:
-    void PerformBuild() override;
-    void OnFocus() override;
-    void OnBlur() override;
-};
-
+RefPtr<RenderNode> RenderPiece::Create()
+{
+    return AceType::MakeRefPtr<RosenRenderPiece>();
+}
 } // namespace OHOS::Ace
-
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_PIECE_PIECE_ELEMENT_H
