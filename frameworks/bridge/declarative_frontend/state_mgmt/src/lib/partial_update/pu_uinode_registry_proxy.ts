@@ -56,7 +56,6 @@ function uiNodeCleanUpIdleTask(maxTimeInMs: number): void {
 
 class UINodeRegisterProxy {
     public static readonly notRecordingDependencies : number = -1;
-    public static readonly monitorIllegalV1V2StateAccess : number = -2;
 
     public static obtainDeletedElmtIds(): void {
         stateMgmtConsole.debug(`UINodeRegisterProxy. static obtainDeletedElmtIds:`);

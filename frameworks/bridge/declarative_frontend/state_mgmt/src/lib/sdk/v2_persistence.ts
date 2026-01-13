@@ -70,7 +70,8 @@ const enum MapType {
 class StorageHelper {
   protected static readonly INVALID_DEFAULT_VALUE: string = 'The default creator should be function when first connect';
   protected static readonly DELETE_NOT_EXIST_KEY: string = 'The key to be deleted does not exist';
-  protected static readonly INVALID_TYPE: string = 'The type should have function constructor signature when use storage';
+  protected static readonly INVALID_TYPE: string = 'Not supported type! The type should have function constructor signature when use storage';
+  protected static readonly INVALID_KEY: string = 'The key is invalid, key must be a string type';
   protected static readonly EMPTY_STRING_KEY: string = 'Cannot use empty string as the key';
   protected static readonly INVALID_LENGTH_KEY: string = 'Cannot use the key! The length of key should be 2 to 255';
   protected static readonly INVALID_CHARACTER_KEY: string = 'Cannot use the key! The value of key can only consist of letters, digits and underscores';
@@ -107,23 +108,23 @@ class StorageHelper {
 
   protected throwIfTypeNameMismatch<T>(type: TypeConstructorWithArgs<T>, oldType?: string, key?: string): void {
     if (this.getTypeName(type) !== oldType) {
-      throw new Error(`The type mismatches when use the key '${key}' in storage`);
+      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, `The type mismatches when use the key '${key}' in storage`);
     }
   }
 
   protected throwIfNotInstanceOf<T>(value: T, type: TypeConstructorWithArgs<T>, key: string): void {
     if (typeof type !== 'function') {
-      throw new Error(StorageHelper.INVALID_TYPE);
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, StorageHelper.INVALID_TYPE);
     }
 
     if (!(value instanceof type)) {
-      throw new Error(`The type mismatches when use the key '${key}' in storage`);
+      throw new BusinessError(PERSISTENCE_V2_MISMATCH_BETWEEN_KEY_AND_TYPE, `The type mismatches when use the key '${key}' in storage`);
     }
   }
 
   protected getTypeName<T>(type: TypeConstructorWithArgs<T>): string | undefined {
     if (typeof type !== 'function') {
-      throw new Error(StorageHelper.INVALID_TYPE);
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, StorageHelper.INVALID_TYPE);
     }
 
     let name: string | undefined = type.name;
@@ -139,7 +140,7 @@ class StorageHelper {
 
   protected isKeyValid(key: string | null | undefined): boolean {
     if (typeof key !== 'string') {
-      throw new Error(StorageHelper.INVALID_TYPE);
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_INVALID_KEY, StorageHelper.INVALID_KEY);
     }
 
     // The key string is empty
@@ -201,7 +202,7 @@ class AppStorageV2Impl extends StorageHelper {
 
     if (!this.memorizedValues_.has(key)) {
       if (typeof defaultCreator !== 'function') {
-        throw new Error(AppStorageV2Impl.INVALID_DEFAULT_VALUE);
+        throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_INVALID_DEFAULT_CREATOR, AppStorageV2Impl.INVALID_DEFAULT_VALUE);
       }
 
       const defaultValue: T = defaultCreator();
@@ -282,8 +283,8 @@ class AppStorageV2Impl extends StorageHelper {
 class PersistenceV2Impl extends StorageHelper {
   public static readonly MIN_PERSISTENCE_ID = 0x1020000000000;
   public static nextPersistId_ = PersistenceV2Impl.MIN_PERSISTENCE_ID;
-
-  protected static readonly NOT_SUPPORT_TYPE_MESSAGE_: string = 'Not support! Can only use the class object in Persistence';
+  // TODO
+  protected static readonly NOT_SUPPORT_TYPE_MESSAGE_: string = 'Not supported type! Can only use the class,  in Persistence';
   protected static readonly NOT_SUPPORT_AREAMODE_MESSAGE_: string = 'AreaMode Value Error! value range can only in EL1-EL5';
   protected static readonly KEYS_DUPLICATE_: string = 'ERROR, Duplicate key used when connect';
   protected static readonly KEYS_ARR_: string = '___keys_arr';
@@ -360,7 +361,7 @@ class PersistenceV2Impl extends StorageHelper {
 
     // In memory
     if (this.globalMap_.has(key)) {
-      throw new Error(PersistenceV2Impl.KEYS_DUPLICATE_);
+      throw new BusinessError(PERSISTENCE_V2_KEYS_DUPLICATE, PersistenceV2Impl.KEYS_DUPLICATE_);
     }
 
     if (this.map_.has(key)) {
@@ -414,7 +415,7 @@ class PersistenceV2Impl extends StorageHelper {
 
     // In memory, do duplicate key check
     if (this.map_.has(key)) {
-      throw new Error(PersistenceV2Impl.KEYS_DUPLICATE_);
+      throw new BusinessError(PERSISTENCE_V2_KEYS_DUPLICATE, PersistenceV2Impl.KEYS_DUPLICATE_);
     }
     // In memory, return if globalMap_ exist
     if (this.globalMap_.has(key)) {
@@ -588,18 +589,18 @@ class PersistenceV2Impl extends StorageHelper {
 
   protected throwIfTypeIsNotSupported<T>(type: TypeConstructorWithArgs<T>): void {
     if (typeof type !== 'function') {
-      throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
     }
 
     if (PersistenceV2Impl.NOT_SUPPORT_TYPES_.includes(type as any)) {
-      throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
     }
   }
 
   protected throwIfNotSupported(value: object): void {
     const classes = PersistenceV2Impl.NOT_SUPPORT_TYPES_;
     if (classes.some(clazz => (value instanceof clazz))) {
-      throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
     }
   }
 
@@ -610,7 +611,7 @@ class PersistenceV2Impl extends StorageHelper {
     const key = this.getConnectedKey(type, keyOrDefaultCreator);
 
     if (key === undefined) {
-      throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
     }
 
     if (key === PersistenceV2Impl.KEYS_ARR_) {
@@ -626,7 +627,7 @@ class PersistenceV2Impl extends StorageHelper {
       stateMgmtConsole.applicationWarn(StorageHelper.NULL_OR_UNDEFINED_KEY + ', try to use the type name as key');
       key = this.getTypeName(type);
       if (key === undefined) {
-        throw new Error(PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
+        throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);
       }
     }
 
@@ -644,7 +645,7 @@ class PersistenceV2Impl extends StorageHelper {
     else if (areaMode >= AreaMode.EL1 && areaMode <= AreaMode.EL5) {
       return areaMode;
     } else {
-      throw new Error(PersistenceV2Impl.NOT_SUPPORT_AREAMODE_MESSAGE_);
+      throw new BusinessError(PERSISTENCE_V2_NOT_SUPPORT_AREA_MODE_MESSAGE, PersistenceV2Impl.NOT_SUPPORT_AREAMODE_MESSAGE_);
     }
   }
 
@@ -668,7 +669,7 @@ class PersistenceV2Impl extends StorageHelper {
     }
 
     if (typeof defaultCreator !== 'function') {
-      throw new Error(PersistenceV2Impl.INVALID_DEFAULT_VALUE);
+      throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_INVALID_DEFAULT_CREATOR, PersistenceV2Impl.INVALID_DEFAULT_VALUE);
     }
 
     const observedValue: T = defaultCreator();

@@ -25,50 +25,51 @@ class ViewInterop extends PUV2ViewBase implements IView {
         this.findLocalStorageInterop = findLocalStorageInterop;
     }
     purgeDeleteElmtId(rmElmtId: number): boolean {
-        throw new Error('Method not implemented.');
+        // will implement further, no error code
+        throw new BusinessError(NOT_IMPLEMENT, `purgeDeleteElmtId method does not implement in ViewInterop`);
     }
     initialRenderView(): void {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(NOT_IMPLEMENT, `initialRenderView method does not implement in ViewInterop`);
     }
     uiNodeNeedUpdateV2(elmtId: number): void {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(NOT_IMPLEMENT, `uiNodeNeedUpdateV2 method does not implement in ViewInterop`);
     }
     debugInfoDirtDescendantElementIdsInternal(
         depth: number,
         recursive: boolean,
         counter: ProfileRecursionCounter
     ): string {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(NOT_IMPLEMENT, `debugInfoDirtDescendantElementIdsInternal method does not implement in ViewInterop`);
     }
     aboutToBeDeleted(): void {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(NOT_IMPLEMENT, `aboutToBeDeleted method does not implement in ViewInterop`);
     }
     protected debugInfoStateVars(): string {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(NOT_IMPLEMENT, `debugInfoStateVars method does not implement in ViewInterop`);
     }
     protected purgeVariableDependenciesOnElmtId(removedElmtId: number): void {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(NOT_IMPLEMENT, `purgeVariableDependenciesOnElmtId method does not implement in ViewInterop`);
     }
     protected initialRender(): void {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(NOT_IMPLEMENT, `initialRender method does not implement in ViewInterop`);
     }
     protected rerender(): void {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(NOT_IMPLEMENT, `rerender method does not implement in ViewInterop`);
     }
     protected get isViewV2(): boolean {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(NOT_IMPLEMENT, `isViewV2 method does not implement in ViewInterop`);
     }
     public updateRecycleElmtId(oldElmtId: number, newElmtId: number): void {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(NOT_IMPLEMENT, `updateRecycleElmtId method does not implement in ViewInterop`);
     }
     public updateStateVars(params: Object): void {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(NOT_IMPLEMENT, `updateStateVars method does not implement in ViewInterop`);
     }
     public UpdateElement(elmtId: number): void {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(NOT_IMPLEMENT, `UpdateElement method does not implement in ViewInterop`);
     }
     public __mkRepeatAPI: <I>(arr: Array<I>) => RepeatAPI<I> = <I>(arr: Array<I>): RepeatAPI<I> => {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(NOT_IMPLEMENT, `__mkRepeatAPI method does not implement in ViewInterop`);
     };
     public get localStorage_(): LocalStorage {
         return (
@@ -79,7 +80,7 @@ class ViewInterop extends PUV2ViewBase implements IView {
         );
     }
     public __getPathValueFromJson__Internal(propertyName: string, jsonPath: string): string | undefined {
-        throw new Error('Method not implemented.');
+        throw new BusinessError(NOT_IMPLEMENT, `__getPathValueFromJson__Internal method does not implement in ViewInterop`);
     }
     public findProvidePU__: (providedPropName: string) => ObservedPropertyAbstractPU<Object> | undefined;
     public findProvideV2: (providedPropName: string) => [ViewV2, string] | undefined;

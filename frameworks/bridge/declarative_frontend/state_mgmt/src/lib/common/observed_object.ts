@@ -63,9 +63,10 @@ function Observed<T extends Constructor>(BaseClass: T): T {
 
   // prevent use of V1 @Track inside V2 @ObservedV2 class
   if (BaseClass.prototype && Reflect.has(BaseClass.prototype, ObserveV2.SYMBOL_REFS)) {
-    const error = `'@Observed class ${BaseClass?.name}': invalid use of V1 @Track decorator inside V2 @ObservedV2 class. Need to fix class definition to use @Track.`;
+    const error = `'@Observed class ${BaseClass?.name}': invalid use of V2 @Trace decorator inside V1 @Observed class. Need to fix class definition to use @Track.`;
     stateMgmtConsole.error(error);
-    throw new Error(error);
+    // toolchain can check
+    throw new BusinessError(USE_TRACE_IN_OBSERVED, error);
   }
 
   return class extends BaseClass {
