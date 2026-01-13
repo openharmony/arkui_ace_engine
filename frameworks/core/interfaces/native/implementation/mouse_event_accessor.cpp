@@ -68,6 +68,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+void StopPropagationImpl(Ark_MouseEvent peer)
+{
+    CHECK_NULL_VOID(peer);
+    MouseInfo* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetStopPropagation(true);
+}
 Ark_MouseButton GetButtonImpl(Ark_MouseEvent peer)
 {
     const auto errValue = Converter::ArkValue<Ark_MouseButton>(MouseButton::NONE_BUTTON);
@@ -240,24 +247,6 @@ void SetYImpl(Ark_MouseEvent peer, Ark_Float64 y)
     localLocation.SetY(yConvert, animation);
     info->SetLocalLocation(localLocation);
 }
-Callback_Void GetStopPropagationImpl(Ark_MouseEvent peer)
-{
-    CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::ReturnReverseCallback<Callback_Void>([peer]() {
-        MouseInfo* info = peer->GetEventInfo();
-        CHECK_NULL_VOID(info);
-        info->SetStopPropagation(true);
-    });
-    return callback;
-}
-void SetStopPropagationImpl(Ark_MouseEvent peer,
-                            const Callback_Void* stopPropagation)
-{
-    CHECK_NULL_VOID(peer);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    LOGE("Arkoala method MouseEventAccessor.SetStopPropagation doesn't have sense. Not implemented...");
-}
 Opt_Float64 GetRawDeltaXImpl(Ark_MouseEvent peer)
 {
     const auto errValue = Converter::ArkValue<Opt_Float64>();
@@ -378,6 +367,7 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::DestroyPeerImpl,
         MouseEventAccessor::ConstructImpl,
         MouseEventAccessor::GetFinalizerImpl,
+        MouseEventAccessor::StopPropagationImpl,
         MouseEventAccessor::GetButtonImpl,
         MouseEventAccessor::SetButtonImpl,
         MouseEventAccessor::GetActionImpl,
@@ -394,8 +384,6 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::SetXImpl,
         MouseEventAccessor::GetYImpl,
         MouseEventAccessor::SetYImpl,
-        MouseEventAccessor::GetStopPropagationImpl,
-        MouseEventAccessor::SetStopPropagationImpl,
         MouseEventAccessor::GetRawDeltaXImpl,
         MouseEventAccessor::SetRawDeltaXImpl,
         MouseEventAccessor::GetRawDeltaYImpl,

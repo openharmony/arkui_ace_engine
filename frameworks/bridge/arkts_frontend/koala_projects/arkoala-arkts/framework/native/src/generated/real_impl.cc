@@ -14896,6 +14896,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
+    void StopPropagationImpl(Ark_KeyEvent peer)
+    {
+    }
     Ark_KeyType GetTypeImpl(Ark_KeyEvent peer)
     {
         return {};
@@ -14950,14 +14953,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetTimestampImpl(Ark_KeyEvent peer,
                           Ark_Int64 timestamp)
-    {
-    }
-    Callback_Void GetStopPropagationImpl(Ark_KeyEvent peer)
-    {
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_KeyEvent peer,
-                                const Callback_Void* stopPropagation)
     {
     }
     Ark_IntentionCode GetIntentionCodeImpl(Ark_KeyEvent peer)
@@ -15675,6 +15670,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
+    void StopPropagationImpl(Ark_MouseEvent peer)
+    {
+    }
     Ark_MouseButton GetButtonImpl(Ark_MouseEvent peer)
     {
         return {};
@@ -15737,14 +15735,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetYImpl(Ark_MouseEvent peer,
                   Ark_Float64 y)
-    {
-    }
-    Callback_Void GetStopPropagationImpl(Ark_MouseEvent peer)
-    {
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_MouseEvent peer,
-                                const Callback_Void* stopPropagation)
     {
     }
     Opt_Float64 GetRawDeltaXImpl(Ark_MouseEvent peer)
@@ -21604,6 +21594,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             KeyEventAccessor::DestroyPeerImpl,
             KeyEventAccessor::ConstructImpl,
             KeyEventAccessor::GetFinalizerImpl,
+            KeyEventAccessor::StopPropagationImpl,
             KeyEventAccessor::GetTypeImpl,
             KeyEventAccessor::SetTypeImpl,
             KeyEventAccessor::GetKeyCodeImpl,
@@ -21618,8 +21609,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             KeyEventAccessor::SetMetaKeyImpl,
             KeyEventAccessor::GetTimestampImpl,
             KeyEventAccessor::SetTimestampImpl,
-            KeyEventAccessor::GetStopPropagationImpl,
-            KeyEventAccessor::SetStopPropagationImpl,
             KeyEventAccessor::GetIntentionCodeImpl,
             KeyEventAccessor::SetIntentionCodeImpl,
             KeyEventAccessor::GetGetModifierKeyStateImpl,
@@ -21962,6 +21951,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             MouseEventAccessor::DestroyPeerImpl,
             MouseEventAccessor::ConstructImpl,
             MouseEventAccessor::GetFinalizerImpl,
+            MouseEventAccessor::StopPropagationImpl,
             MouseEventAccessor::GetButtonImpl,
             MouseEventAccessor::SetButtonImpl,
             MouseEventAccessor::GetActionImpl,
@@ -21978,8 +21968,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             MouseEventAccessor::SetXImpl,
             MouseEventAccessor::GetYImpl,
             MouseEventAccessor::SetYImpl,
-            MouseEventAccessor::GetStopPropagationImpl,
-            MouseEventAccessor::SetStopPropagationImpl,
             MouseEventAccessor::GetRawDeltaXImpl,
             MouseEventAccessor::SetRawDeltaXImpl,
             MouseEventAccessor::GetRawDeltaYImpl,

@@ -35093,6 +35093,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
+    void StopPropagationImpl(Ark_KeyEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("stopPropagation(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     Ark_KeyType GetTypeImpl(Ark_KeyEvent peer)
     {
         if (!needGroupedLog(1))
@@ -35258,30 +35268,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         string out("setTimestamp(");
         WriteToString(&out, timestamp);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Callback_Void GetStopPropagationImpl(Ark_KeyEvent peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getStopPropagation(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_KeyEvent peer,
-                                const Callback_Void* stopPropagation)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setStopPropagation(");
-        WriteToString(&out, stopPropagation);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -37127,6 +37113,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
+    void StopPropagationImpl(Ark_MouseEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("stopPropagation(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     Ark_MouseButton GetButtonImpl(Ark_MouseEvent peer)
     {
         if (!needGroupedLog(1))
@@ -37316,30 +37312,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         string out("setY(");
         WriteToString(&out, y);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
-    Callback_Void GetStopPropagationImpl(Ark_MouseEvent peer)
-    {
-        if (!needGroupedLog(1))
-        {
-            return {};
-        }
-        string out("getStopPropagation(");
-        out.append(") \n");
-        out.append("[return {}] \n");
-        appendGroupedLog(1, out);
-        return {};
-    }
-    void SetStopPropagationImpl(Ark_MouseEvent peer,
-                                const Callback_Void* stopPropagation)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setStopPropagation(");
-        WriteToString(&out, stopPropagation);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -50453,6 +50425,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             KeyEventAccessor::DestroyPeerImpl,
             KeyEventAccessor::ConstructImpl,
             KeyEventAccessor::GetFinalizerImpl,
+            KeyEventAccessor::StopPropagationImpl,
             KeyEventAccessor::GetTypeImpl,
             KeyEventAccessor::SetTypeImpl,
             KeyEventAccessor::GetKeyCodeImpl,
@@ -50467,8 +50440,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             KeyEventAccessor::SetMetaKeyImpl,
             KeyEventAccessor::GetTimestampImpl,
             KeyEventAccessor::SetTimestampImpl,
-            KeyEventAccessor::GetStopPropagationImpl,
-            KeyEventAccessor::SetStopPropagationImpl,
             KeyEventAccessor::GetIntentionCodeImpl,
             KeyEventAccessor::SetIntentionCodeImpl,
             KeyEventAccessor::GetGetModifierKeyStateImpl,
@@ -50811,6 +50782,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             MouseEventAccessor::DestroyPeerImpl,
             MouseEventAccessor::ConstructImpl,
             MouseEventAccessor::GetFinalizerImpl,
+            MouseEventAccessor::StopPropagationImpl,
             MouseEventAccessor::GetButtonImpl,
             MouseEventAccessor::SetButtonImpl,
             MouseEventAccessor::GetActionImpl,
@@ -50827,8 +50799,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             MouseEventAccessor::SetXImpl,
             MouseEventAccessor::GetYImpl,
             MouseEventAccessor::SetYImpl,
-            MouseEventAccessor::GetStopPropagationImpl,
-            MouseEventAccessor::SetStopPropagationImpl,
             MouseEventAccessor::GetRawDeltaXImpl,
             MouseEventAccessor::SetRawDeltaXImpl,
             MouseEventAccessor::GetRawDeltaYImpl,

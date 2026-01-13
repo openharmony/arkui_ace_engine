@@ -42,6 +42,13 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
+void StopPropagationImpl(Ark_KeyEvent peer)
+{
+    CHECK_NULL_VOID(peer);
+    KeyEventInfo* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetStopPropagation(true);
+}
 Ark_KeyType GetTypeImpl(Ark_KeyEvent peer)
 {
     const auto errValue = static_cast<Ark_KeyType>(-1);
@@ -127,21 +134,6 @@ void SetTimestampImpl(Ark_KeyEvent peer, Ark_Int64 timestamp)
 {
     GetBaseEventAccessor()->setTimestamp(peer, timestamp);
 }
-Callback_Void GetStopPropagationImpl(Ark_KeyEvent peer)
-{
-    CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::ReturnReverseCallback<Callback_Void>([peer]() {
-        KeyEventInfo* info = peer->GetEventInfo();
-        CHECK_NULL_VOID(info);
-        info->SetStopPropagation(true);
-    });
-    return callback;
-}
-void SetStopPropagationImpl(Ark_KeyEvent peer,
-                            const Callback_Void* stopPropagation)
-{
-    LOGW("ARKOALA KeyEventAccessor::SetStopPropagation doesn't have sense.");
-}
 Ark_IntentionCode GetIntentionCodeImpl(Ark_KeyEvent peer)
 {
     static constexpr auto intentionCodeError = static_cast<Ark_IntentionCode>(-1);
@@ -197,6 +189,7 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
         KeyEventAccessor::DestroyPeerImpl,
         KeyEventAccessor::ConstructImpl,
         KeyEventAccessor::GetFinalizerImpl,
+        KeyEventAccessor::StopPropagationImpl,
         KeyEventAccessor::GetTypeImpl,
         KeyEventAccessor::SetTypeImpl,
         KeyEventAccessor::GetKeyCodeImpl,
@@ -211,8 +204,6 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
         KeyEventAccessor::SetMetaKeyImpl,
         KeyEventAccessor::GetTimestampImpl,
         KeyEventAccessor::SetTimestampImpl,
-        KeyEventAccessor::GetStopPropagationImpl,
-        KeyEventAccessor::SetStopPropagationImpl,
         KeyEventAccessor::GetIntentionCodeImpl,
         KeyEventAccessor::SetIntentionCodeImpl,
         KeyEventAccessor::GetGetModifierKeyStateImpl,
