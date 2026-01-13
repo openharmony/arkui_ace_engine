@@ -251,12 +251,33 @@ void SymbolModelNG::UpdateSymbolEffect(FrameNode* frameNode, const std::uint32_t
 
 void SymbolModelNG::SetSymbolShadow(const SymbolShadow& symbolShadow)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolShadow, symbolShadow);
+    auto *frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    SetSymbolShadow(frameNode, symbolShadow);
 }
 
 void SymbolModelNG::SetSymbolShadow(FrameNode* frameNode, const SymbolShadow& symbolShadow)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolShadow, symbolShadow, frameNode);
+    SetSymbolShadowResObj(frameNode, symbolShadow);
+}
+
+void SymbolModelNG::SetSymbolShadowResObj(FrameNode* frameNode, const SymbolShadow& symbolShadow)
+{
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(SystemProperties::ConfigChangePerform());
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [symbolShadow, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        if (!frameNode) {
+            return;
+        }
+        SymbolShadow& symbolShadowVal = const_cast<SymbolShadow&>(symbolShadow);
+        symbolShadowVal.ReloadResources();
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolShadow, symbolShadowVal, frameNode);
+    };
+    pattern->AddResObj("symbolShadow", resObj, std::move(updateFunc));
 }
 
 void SymbolModelNG::SetShaderStyle(const std::vector<SymbolGradient>& shaderStyle)
