@@ -28,6 +28,9 @@ import { ParticleUpdaterOptionsInner, PositionLengthMetricsInner, ParticleColorP
 import { ParticlePropertyUpdaterConfigsInner, ParticlePropertyAnimationColorInner, ParticlePropertyAnimationNumberInner } from "./idlize"
 import { PositionF64Inner, SizeF64Inner, DisturbanceFieldOptionsInner } from "./idlize"
 import { NodeAttach, remember } from "@koalaui/runtime"
+import { ParticleModifier } from "../ParticleModifier"
+import { hookParticleAttributeModifier } from "#handwritten"
+import { ModifierStateManager } from '../CommonModifier'
 
 export interface AccelerationOptions {
     speed?: ParticlePropertyOptions;
@@ -287,7 +290,7 @@ class ParticleToParticleInnerHelper {
 
 
 export class ArkParticlePeer extends ArkCommonMethodPeer {
-    //_attributeSet?: ParticleModifier
+    attributeSet?: ParticleModifier
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }
@@ -359,7 +362,9 @@ export class ArkParticleComponent extends ArkCommonMethodComponent implements Pa
     }
 
     public attributeModifier(modifier: AttributeModifier<ParticleAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        throw new Error("particle not impl attributeModifier");
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookParticleAttributeModifier(this, modifier);
+        })
         return this;
     }
     public applyAttributesFinish(): void {
