@@ -188,6 +188,7 @@ void ListModelStatic::SetCachedCount(FrameNode* frameNode, const std::optional<i
 void ListModelStatic::SetCachedCount(
         FrameNode* frameNode, const std::optional<int32_t>& count, const std::optional<bool>& show)
 {
+    ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CacheRange, frameNode);
     if (count.has_value()) {
         int32_t value = count.value() < 0 ? 1 : count.value();
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, CachedCount, value, frameNode);
