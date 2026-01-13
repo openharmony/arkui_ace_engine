@@ -323,7 +323,7 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_StartWindowType_RetainAndInvisi
 {
     ASSERT_NE(windowScene_, nullptr);
     ASSERT_NE(windowScene_->GetHost(), nullptr);
- 
+
     sceneSession_->sessionInfo_.startWindowType_ = Rosen::StartWindowType::RETAIN_AND_INVISIBLE;
     windowScene_->WindowPattern::CreateStartingWindow();
     EXPECT_EQ(sceneSession_->hidingStartWindow_, true);
