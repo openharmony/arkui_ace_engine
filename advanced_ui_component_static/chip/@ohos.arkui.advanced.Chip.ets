@@ -1020,14 +1020,14 @@ export struct ChipComponent {
     if (this.suffixIcon?.src) {
       return true;
     }
-    return false;
+    return this.isChipActivated() ? !!this.suffixSymbol?.activated : !!this.suffixSymbol?.normal;
   }
 
   private hasPrefix(): boolean {
     if (this.prefixIcon?.src) {
       return true;
     }
-    return false;
+    return this.isChipActivated() ? !!this.prefixSymbol?.activated : !!this.prefixSymbol?.normal;
   }
 
   private getLabelFontWeight(): string | int | FontWeight {
