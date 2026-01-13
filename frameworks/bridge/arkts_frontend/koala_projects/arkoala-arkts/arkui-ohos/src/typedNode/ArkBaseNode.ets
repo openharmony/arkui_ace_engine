@@ -85,6 +85,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     }
 
     public constraintSize(value: ConstraintSizeOptions | undefined): this {
+        this.getPeer().setConstraintSizeAttribute(value);
         return this
     }
     public touchable(value: boolean | undefined): this {
@@ -98,21 +99,27 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public layoutWeight(value: number | string | undefined): this {
+        this.getPeer().setLayoutWeightAttribute(value);
         return this
     }
     public chainWeight(value: ChainWeightOptions | undefined): this {
+        this.getPeer().setChainWeightAttribute(value);
         return this
     }
     public padding(value: Padding | Length | LocalizedPadding | undefined): this {
+        this.getPeer().setPaddingAttribute(value);
         return this
     }
     public safeAreaPadding(value: Padding | LengthMetrics | LocalizedPadding | undefined): this {
+        this.getPeer().setSafeAreaPaddingAttribute(value);
         return this
     }
     public margin(value: Padding | Length | LocalizedPadding | undefined): this {
+        this.getPeer().setMarginAttribute(value);
         return this
     }
     public pixelRound(value: PixelRoundPolicy | undefined): this {
+        this.getPeer().setPixelRoundAttribute(value);
         return this
     }
     public backgroundImageSize(value: SizeOptions | ImageSize | undefined): this {
@@ -152,6 +159,7 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this;
     }
     public border(value: BorderOptions | undefined): this {
+        this.getPeer().setBorderAttribute(value);
         return this
     }
     public borderStyle(value: BorderStyle | EdgeStyles | undefined): this {
@@ -164,12 +172,15 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this;
     }
     public borderColor(value: ResourceColor | EdgeColors | LocalizedEdgeColors | undefined): this {
+        this.getPeer().setBorderColorAttribute(value);
         return this
     }
     public borderRadius(value: Length | BorderRadiuses | LocalizedBorderRadiuses | undefined): this {
+        this.getPeer().setBorderRadius0Attribute(value);
         return this
     }
     public borderImage(value: BorderImageOption | undefined): this {
+        this.getPeer().setBorderImageAttribute(value);
         return this
     }
     public outline(value: OutlineOptions | undefined): this {
@@ -372,33 +383,43 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public flexGrow(value: number | undefined): this {
+        this.getPeer().setFlexGrowAttribute(value);
         return this
     }
     public flexShrink(value: number | undefined): this {
+        this.getPeer().setFlexShrinkAttribute(value);
         return this
     }
     public flexBasis(value: number | string | undefined): this {
+        this.getPeer().setFlexBasisAttribute(value);
         return this
     }
     public alignSelf(value: ItemAlign | undefined): this {
+        this.getPeer().setAlignSelfAttribute(value);
         return this
     }
     public displayPriority(value: number | undefined): this {
+        this.getPeer().setDisplayPriorityAttribute(value);
         return this
     }
     public direction(value: Direction | undefined): this {
+        this.getPeer().setDirectionAttribute(value);
         return this
     }
     public align(value: Alignment | undefined): this {
+        this.getPeer().setAlignAttribute(value);
         return this
     }
     public position(value: Position | Edges | LocalizedEdges | undefined): this {
+        this.getPeer().setPositionAttribute(value);
         return this
     }
     public markAnchor(value: Position | LocalizedPosition | undefined): this {
+        this.getPeer().setMarkAnchorAttribute(value);
         return this
     }
     public offset(value: Position | Edges | LocalizedEdges | undefined): this {
+        this.getPeer().setOffsetAttribute(value);
         return this
     }
     public enabled(value: boolean | undefined): this {
@@ -406,9 +427,11 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public alignRules(value: AlignRuleOption | undefined | LocalizedAlignRuleOptions | undefined): this {
+        this.getPeer().setAlignRulesAttribute(value);
         return this
     }
     public aspectRatio(value: number | undefined): this {
+        this.getPeer().setAspectRatioAttribute(value);
         return this
     }
     public clickEffect(value: ClickEffect | undefined): this {
