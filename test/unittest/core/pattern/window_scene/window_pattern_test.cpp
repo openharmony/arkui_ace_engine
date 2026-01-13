@@ -395,7 +395,7 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_WithValidPreloadSvgBuffer, Test
     std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;
     pixelMap = nullptr;
     bufferInfo = {nullptr, 0};
-    std::shared_ptr<uint8_t[]> validSvgBuffer(new uint8_t[10]{1,2,3});
+    std::shared_ptr<uint8_t[]> validSvgBuffer = std::make_shared<uint8_t[]>(10);
     std::pair<std::shared_ptr<uint8_t[]>, size_t> validBufferInfo = {validSvgBuffer, 10};
     sceneSession_->SetPreloadStartingWindow(validBufferInfo);
     sceneSession_->GetPreloadStartingWindow(pixelMap, bufferInfo);
