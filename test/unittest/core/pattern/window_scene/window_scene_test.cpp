@@ -453,24 +453,116 @@ HWTEST_F(WindowSceneTest, OnAppRemoveStartingWindow04, TestSize.Level1)
 }
 
 /**
- * @tc.name: OnPreLoadStartingWindowFinished
- * @tc.desc: preload starting window finished
+ * @tc.name: OnPreLoadStartingWindowFinished_WithValidPreloadPixelMap
+ * @tc.desc: Test OnPreLoadStartingWindowFinished when valid preload PixelMap is set
  * @tc.type: FUNC
+ * @tc.level: Level1
  */
-HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished, TestSize.Level1)
+HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished_WithValidPreloadPixelMap, TestSize.Level1)
 {
     Rosen::SessionInfo sessionInfo = {
         .abilityName_ = ABILITY_NAME,
         .bundleName_ = BUNDLE_NAME,
         .moduleName_ = MODULE_NAME,
     };
+    auto sceneSession_ = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(sceneSession_, nullptr);
+    
     auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
     ASSERT_NE(windowScene, nullptr);
+    
     auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
     windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
     ASSERT_NE(windowScene->GetHost(), nullptr);
-
+    sceneSession_->ResetPreloadStartingWindow();
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;
+    pixelMap = nullptr;
+    bufferInfo = {nullptr, 0};
+    std::shared_ptr<Media::PixelMap> validPixelMap = std::make_shared<Media::PixelMap>();
+    sceneSession_->SetPreloadStartingWindow(validPixelMap);
+    sceneSession_->GetPreloadStartingWindow(pixelMap, bufferInfo);
+    EXPECT_NE(pixelMap, nullptr);
+    EXPECT_EQ(bufferInfo.first, nullptr);
+    EXPECT_EQ(bufferInfo.second, 0);
+    windowScene->OnPreLoadStartingWindowFinished();
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_NE(windowScene->startingWindow_, nullptr);
+}
+ 
+/**
+ * @tc.name: OnPreLoadStartingWindowFinished_WithValidPreloadSvgBuffer
+ * @tc.desc: Test OnPreLoadStartingWindowFinished when valid preload SVG buffer is set
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished_WithValidPreloadSvgBuffer, TestSize.Level1)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto sceneSession_ = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(sceneSession_, nullptr);
+    
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
+    ASSERT_NE(windowScene, nullptr);
+    
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    sceneSession_->ResetPreloadStartingWindow();
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;
+    pixelMap = nullptr;
+    bufferInfo = {nullptr, 0};
+    std::shared_ptr<uint8_t[]> validSvgBuffer(new uint8_t[10]{1,2,3});
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> validBufferInfo = {validSvgBuffer, 10};
+    sceneSession_->SetPreloadStartingWindow(validBufferInfo);
+    sceneSession_->GetPreloadStartingWindow(pixelMap, bufferInfo);
+    EXPECT_EQ(pixelMap, nullptr);
+    EXPECT_NE(bufferInfo.first, nullptr);
+    EXPECT_NE(bufferInfo.second, 0);
+    windowScene->OnPreLoadStartingWindowFinished();
+    usleep(WAIT_SYNC_IN_NS);
+    ASSERT_NE(windowScene->startingWindow_, nullptr);
+}
+ 
+/**
+ * @tc.name: OnPreLoadStartingWindowFinished_WithNoPreloadData
+ * @tc.desc: Test OnPreLoadStartingWindowFinished when no preload data is set
+ * @tc.type: FUNC
+ * @tc.level: Level1
+ */
+HWTEST_F(WindowSceneTest, OnPreLoadStartingWindowFinished_WithNoPreloadData, TestSize.Level1)
+{
+    Rosen::SessionInfo sessionInfo = {
+        .abilityName_ = ABILITY_NAME,
+        .bundleName_ = BUNDLE_NAME,
+        .moduleName_ = MODULE_NAME,
+    };
+    auto sceneSession_ = ssm_->RequestSceneSession(sessionInfo);
+    ASSERT_NE(sceneSession_, nullptr);
+    
+    auto windowScene = CreateWindowSceneForStartingWindowTest(sessionInfo);
+    ASSERT_NE(windowScene, nullptr);
+    
+    auto frameNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
+    ASSERT_NE(windowScene->GetHost(), nullptr);
+    sceneSession_->ResetPreloadStartingWindow();
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;
+    pixelMap = nullptr;
+    bufferInfo = {nullptr, 0};
+    sceneSession_->GetPreloadStartingWindow(pixelMap, bufferInfo);
+    EXPECT_EQ(pixelMap, nullptr);
+    EXPECT_EQ(bufferInfo.first, nullptr);
+    EXPECT_EQ(bufferInfo.second, 0);
     windowScene->OnPreLoadStartingWindowFinished();
     usleep(WAIT_SYNC_IN_NS);
     ASSERT_NE(windowScene->startingWindow_, nullptr);

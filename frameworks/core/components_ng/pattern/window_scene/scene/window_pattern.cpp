@@ -661,15 +661,23 @@ void WindowPattern::CreateStartingWindow()
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     startingWindow_->SetHitTestMode(HitTestMode::HTMNONE);
     ImageSourceInfo sourceInfo;
-    auto preLoadPixelMap = Rosen::SceneSessionManager::GetInstance().GetPreLoadStartingWindow(sessionInfo);
-    if (preLoadPixelMap != nullptr) {
-        auto pixelMap = PixelMap::CreatePixelMap(&preLoadPixelMap);
+    std::shared_ptr<PixelMap> preloadPixelMap = nullptr;
+    std::pair<std::shared_ptr<uint8_t>, size_t> preloadBufferInfo = {nullptr, 0};
+    session_->GetPreloadStartingWindow(preloadPixelMap, preloadBufferInfo);
+    if (preloadPixelMap != nullptr) {
+        auto pixelMap = PixelMap::CreatePixelMap(&preloadPixelMap);
         sourceInfo = ImageSourceInfo(pixelMap);
-        Rosen::SceneSessionManager::GetInstance().RemovePreLoadStartingWindowFromMap(sessionInfo);
+        session_->ResetPreloadStartingWindow();
         TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "use preload pixelMap id:%{public}d", session_->GetPersistentId());
+    } else if (preloadBufferInfo.first != nullptr && preloadBufferInfo.second > 0) {
+        sourceInfo = ImageSourceInfo(preloadBufferInfo.first, preloadBufferInfo.second);
+        session_->ResetPreloadStartingWindow();
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "use preload buffer id:%{public}d", session_->GetPersistentId());
     } else if (!session_->GetPreloadingStartingWindow()) {
         sourceInfo = ImageSourceInfo(startingWindowInfo.iconPathEarlyVersion_, sessionInfo.bundleName_,
             sessionInfo.moduleName_);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "not preloading starting window id:%{public}d",
+            session_->GetPersistentId());
     }
     auto color = Color(startingWindowInfo.backgroundColorEarlyVersion_);
     UpdateStartingWindowProperty(sessionInfo, color, sourceInfo);

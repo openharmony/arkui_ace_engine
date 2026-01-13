@@ -967,11 +967,22 @@ void WindowScene::OnPreLoadStartingWindowFinished()
         auto imageLayoutProperty = self->startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         const auto& sessionInfo = self->session_->GetSessionInfo();
-        auto preLoadPixelMap = Rosen::SceneSessionManager::GetInstance().GetPreLoadStartingWindow(sessionInfo);
-        CHECK_NULL_VOID(preLoadPixelMap);
-        auto pixelMap = PixelMap::CreatePixelMap(&preLoadPixelMap);
-        auto sourceInfo = ImageSourceInfo(pixelMap);
-        Rosen::SceneSessionManager::GetInstance().RemovePreLoadStartingWindowFromMap(sessionInfo);
+        std::shared_ptr<Media::PixelMap> preloadPixelMap = nullptr;
+        std::pair<std::shared_ptr<Media::PixelMap>, int32_t> preloadBufferInfo = {nullptr, 0};
+        self->session_->GetPreloadStartingWindow(preloadPixelMap, preloadBufferInfo);
+        ImageSourceInfo sourceInfo;
+        if (preloadPixelMap != nullptr) {
+            auto pixelMap = PixelMap::CreatePixelMap(&preloadPixelMap);
+            sourceInfo = ImageSourceInfo(pixelMap);
+            self->session_->ResetPreloadStartingWindow();
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnPreLoadStartingWindowFinished pixelMap id:%{public}d",
+                self->session_->GetPersistentId());
+        } else if (preloadBufferInfo.first != nullptr && preloadBufferInfo.second > 0) {
+            sourceInfo = ImageSourceInfo(preloadBufferInfo.first, preloadBufferInfo.second);
+            self->session_->ResetPreloadStartingWindow();
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnPreLoadStartingWindowFinished buffer id:%{public}d",
+                self->session_->GetPersistentId());
+        }
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         self->startingWindow_->MarkModifyDone();

@@ -153,6 +153,12 @@ ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, s
     isSvg_ = IsSVGSource(src_, srcType_, resourceId_);
 }
 
+ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<uint8_t>& buffer, size_t size)
+    : srcType_(SrcType::MEMORY), buffer_(buffer), size_(size)
+{
+    isSvg_ = true;
+}
+
 SrcType ImageSourceInfo::ResolveSrcType() const
 {
     if (pixmap_) {
