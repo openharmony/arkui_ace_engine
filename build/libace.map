@@ -1549,6 +1549,9 @@
       non-virtual?thunk?to?OHOS::Ace::RenderBox::PanOnActionCancel*;
       non-virtual?thunk?to?OHOS::Ace::RenderBox::GenerateDragItemInfo*;
       non-virtual?thunk?to?OHOS::Ace::RenderBox::AddDataToClipboard*;
+      VTT?for?OHOS::Ace::OptionComponent;
+      vtable?for?OHOS::Ace::OptionComponent;
+      OHOS::Ace::SELECT_INVALID_INDEX;
       OHOS::Ace::Edge::GetOffsetInPx*;
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (unsigned int)>>::GetInstance()";
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::shared_ptr<OHOS::Ace::BaseEventInfo> const&)>>::GetInstance()";
