@@ -19,9 +19,7 @@ class ArkHyperlinkComponent extends ArkComponent {
     super(nativePtr, classType);
   }
   color(value) {
-    console.info('[Hyperlink] ArkHyperlinkComponent::color arrived')
     modifierWithKey(this._modifiersWithKeys, HyperlinkColorModifier.identity, HyperlinkColorModifier, value);
-    console.info('[Hyperlink] ArkHyperlinkComponent::color modifierWithKey called')
     return this;
   }
   draggable(value) {
@@ -38,14 +36,10 @@ class HyperlinkColorModifier extends ModifierWithKey {
     super(value);
   }
   applyPeer(node, reset) {
-    console.info('[Hyperlink] HyperlinkColorModifier::applyPeer arrived')
-    console.info(`[Hyperlink] HyperlinkColorModifier::applyPeer reset is ${reset}`)
     if (reset) {
-      console.info('[Hyperlink] HyperlinkColorModifier::applyPeer resetColor')
       getUINativeModule().hyperlink.resetColor(node);
     }
     else {
-      console.info('[Hyperlink] HyperlinkColorModifier::applyPeer setColor')
       getUINativeModule().hyperlink.setColor(node, this.value);
     }
   }
@@ -104,15 +98,11 @@ HyperlinkResponseRegionModifier.identity = Symbol('hyperlinkResponseRegion');
 
 class JSHyperlink extends JSViewAbstract {
   static create(address, content) {
-    console.log("[Hyperlink] JSHyperlink::create")
     if (address !== undefined) {
-      console.log(`[Hyperlink] JSHyperlink::create ${typeof address}: ${address}, ${typeof content}: ${content}`)
       getUINativeModule().hyperlink.create(address, content);
     } else {
-      console.log("[Hyperlink] JSHyperlink::create params undefined")
       getUINativeModule().hyperlink.create('', '');
     }
-    console.log("[Hyperlink] JSHyperlink::create end");
   }
 
   static color(color) {

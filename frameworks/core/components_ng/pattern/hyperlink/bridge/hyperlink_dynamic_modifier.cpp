@@ -52,27 +52,22 @@ FrameNode* GetFrameNode(ArkUINodeHandle node)
 
 void Create(const std::string& address, const std::string& content)
 {
-    LOGI("[Hyperlink] HyperlinkDynamicModifier::Create arrived");
     HyperlinkModelNG::CreateFrameNode(address, content);
-    LOGI("[Hyperlink] HyperlinkDynamicModifier::Create finished");
 }
 
 void SetHyperlinkColor(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
 {
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
-    LOGI("[Hyperlink] SetHyperlinkColor frameNode not null");
+
     HyperlinkModelNG::SetColor(frameNode, Color(color));
-    LOGI("[Hyperlink] SetHyperlinkColor color set");
+
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
-    LOGI("[Hyperlink] SetHyperlinkColor pattern not null");
     if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
-        LOGI("[Hyperlink] SetHyperlinkColor RegisterResource");
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(colorRawPtr));
         pattern->RegisterResource<Color>("Color", resObj, Color(color));
     } else {
-        LOGI("[Hyperlink] SetHyperlinkColor UnRegisterResource");
         pattern->UnRegisterResource("Color");
     }
 }

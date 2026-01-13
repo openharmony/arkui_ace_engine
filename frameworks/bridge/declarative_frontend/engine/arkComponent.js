@@ -40555,7 +40555,6 @@ if (globalThis.Hyperlink === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkhyperlink');
       module.exportView();
       if (address !== undefined) {
-        console.log(`[Hyperlink] JSHyperlink::create ${typeof address}: ${address}, ${typeof content}: ${content}`)
         getUINativeModule().hyperlink.create(address, content);
       } else {
         getUINativeModule().hyperlink.create('', '');
@@ -40568,13 +40567,10 @@ if (globalThis.Hyperlink === undefined) {
 if (globalThis.Gauge === undefined) {
   globalThis.Gauge = {
     create: function(params) {
-      console.log('first create gauge nativeModule');
       getUINativeModule().loadNativeModule('Gauge');
       let module = globalThis.requireNapi('arkui.components.arkgauge');
       module.exportView();
       if (params !== undefined) {
-        console.log(`[Hyperlink] Hyperlink::create ${params}`)
-        console.log(`[Hyperlink] Hyperlink::create ${params.value}, ${params.min}, ${params.max}`)
         getUINativeModule().gauge.create(params.value ?? 0, params.min ?? 0, params.max ?? 100);
       } else {
         getUINativeModule().gauge.create(0, 0, 100);

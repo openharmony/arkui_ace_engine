@@ -41,10 +41,9 @@ void HyperlinkModelNG::Create(const std::string& address, const std::string& con
 
 void HyperlinkModelNG::CreateFrameNode(const std::string& address, const std::string& content)
 {
-    LOGI("[Hyperlink] HyperlinkModelNG::CreateFrameNode arrived");
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
-    LOGI("[Hyperlink] HyperlinkModelNG::CreateFrameNode stack is non-null");
+
     auto nodeId = stack->ClaimNodeId();
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::HYPERLINK_ETS_TAG, nodeId);
     auto hyperlinkNode = FrameNode::GetOrCreateFrameNode(
