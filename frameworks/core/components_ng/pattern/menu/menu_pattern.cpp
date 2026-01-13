@@ -966,6 +966,7 @@ void MenuPattern::HideMenu(bool isMenuOnTouch, OffsetF position, const HideMenuT
     if (((IsContextMenu() || (expandDisplay && isShowInSubWindow))) && !IsSelectMenu()) {
         TAG_LOGI(AceLogTag::ACE_MENU, "will hide menu, tagetNode id %{public}d. reason %{public}d", targetId_, reason);
         SubwindowManager::GetInstance()->HideMenuNG(wrapper, targetId_);
+        DoCloseSubMenus();
         return;
     }
     if (IsSelectMenu() && expandDisplay && layoutProperty->GetShowInSubWindowValue(false)) {

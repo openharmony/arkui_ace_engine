@@ -3594,6 +3594,11 @@ void MenuItemPattern::OnColorConfigurationUpdate()
     }
 }
 
+void MenuItemPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutExtAttr("selected", IsSelected(), filter);
+}
+
 void MenuItemPattern::UpdateOptionStyle()
 {
     auto host = GetHost();
