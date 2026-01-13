@@ -27,7 +27,7 @@ public:
     ~SearchTextFieldPattern() override = default;
 
     RefPtr<FocusHub> GetFocusHub() const override;
-    void PerformAction(TextInputAction action, bool forceCloseKeyboard = true) override;
+    void PerformActionOperation(PerformActionInfo info) override;
     TextInputAction GetDefaultTextInputAction() const override;
     void InitDragEvent() override;
     void ApplyNormalTheme() override;

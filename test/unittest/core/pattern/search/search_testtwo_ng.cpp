@@ -828,15 +828,17 @@ HWTEST_F(SearchTestTwoNg, OnSubmitEvent001, TestSize.Level1)
     };
     eventHub->SetOnSubmit(std::move(callback));
 
-    bool forceCloseKeyboard = true;
     TextInputAction action2 = TextInputAction::SEARCH;
-    textFieldPattern->PerformAction(action2, forceCloseKeyboard);
+    PerformActionInfo info;
+    info.action = action2;
+    info.forceCloseKeyboard = true;
+    textFieldPattern->PerformActionOperation(info);
     EXPECT_EQ(count, 1);
-    action2 = TextInputAction::NEW_LINE;
-    textFieldPattern->PerformAction(action2, forceCloseKeyboard);
+    info.action = TextInputAction::NEW_LINE;
+    textFieldPattern->PerformActionOperation(info);
     EXPECT_EQ(count, 2);
-    action2 = TextInputAction::DONE;
-    textFieldPattern->PerformAction(action2, forceCloseKeyboard);
+    info.action = TextInputAction::DONE;
+    textFieldPattern->PerformActionOperation(info);
     EXPECT_EQ(count, 3);
 }
 

@@ -1105,6 +1105,7 @@ HWTEST_F(TextFieldPatternTestNine, RecordTextInputEvent001, TestSize.Level0)
         Recorder::EventRecorder::Get().globalSwitch_[i] = true;
         Recorder::EventRecorder::Get().eventSwitch_[i] = true;
     }
+    Recorder::EventController::Get().cacheEvents_.clear();
     auto host = pattern_->GetHost();
     auto layoutProperty = host->GetLayoutProperty<TextFieldLayoutProperty>();
     layoutProperty->UpdateTextInputType(TextInputType::VISIBLE_PASSWORD);
