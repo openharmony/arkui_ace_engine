@@ -3822,7 +3822,7 @@ void SetExcludeFromRenderGroupImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = converter::OptConvertPtr<bool>(value);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
     if (!convValue) {
         ViewAbstract::SetExcludeFromRenderGroup(frameNode, false);
         return;
