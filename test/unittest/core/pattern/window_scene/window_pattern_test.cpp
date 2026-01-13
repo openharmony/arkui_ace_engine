@@ -427,7 +427,7 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow_PreloadingStartingWindow_True, 
     auto layoutProperty = windowScene_->startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
 }
- 
+
 /**
  * @tc.name: CreateStartingWindow_PreloadingStartingWindow_False
  * @tc.desc: Test CreateStartingWindow when PreloadingStartingWindow is set to false
