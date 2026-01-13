@@ -28,7 +28,7 @@ void RichEditorModelNG::Create(bool isStyledStringMode)
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId,
         [isStyledStringMode]() { return AceType::MakeRefPtr<RichEditorPattern>(isStyledStringMode); });
     stack->Push(frameNode);
-    InitRichEditorModel(nodeId, isStyledStringMode, frameNode);
+    InitRichEditorModel(isStyledStringMode, frameNode);
     isStyledStringMode_ = isStyledStringMode;
 }
  
@@ -36,7 +36,7 @@ RefPtr<FrameNode> RichEditorModelNG::CreateRichEditorStyledStringNode(int32_t no
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::RICH_EDITOR_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<RichEditorPattern>(true); });
-    InitRichEditorModel(nodeId, true, frameNode);
+    InitRichEditorModel(true, frameNode);
 
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(richEditorPattern, nullptr);
