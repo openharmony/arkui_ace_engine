@@ -58,25 +58,12 @@ export class PeerNode extends IncrementalNode {
     private _reusePool?: Map<string, ReusablePool>
     public reusable: boolean = false
     private _uiStateStyle?: MutableState<int32>;
-    private _disabledStateUpdates: MutableState<boolean> | undefined = undefined
 
     getPeerPtr(): pointer {
         return this.peer.ptr
     }
     public getStateStyleMutable(): MutableState<int32> | undefined {
         return this._uiStateStyle;
-    }
-    override get disabledStateUpdates(): boolean {
-        return this._disabledStateUpdates?.value ?? false
-    }
-
-    set disabledStateUpdates(disabled: boolean) {
-        const state = this._disabledStateUpdates
-        if (state) {
-            state.value = disabled
-        } else if (disabled) {
-            this._disabledStateUpdates = GlobalStateManager.instance.mutableState<boolean>(true, true)
-        }
     }
     setId(id: int32) {
         PeerNode.updatePeerNodeMap()
@@ -281,8 +268,6 @@ export class PeerNode extends IncrementalNode {
         this._reusePool = undefined
         this._onRecycle = undefined
         this._onReuse = undefined
-        this._disabledStateUpdates?.dispose()
-        this._disabledStateUpdates = undefined
         super.dispose()
     }
 

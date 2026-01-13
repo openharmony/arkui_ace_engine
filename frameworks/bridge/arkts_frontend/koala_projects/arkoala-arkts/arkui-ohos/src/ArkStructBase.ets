@@ -63,7 +63,7 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
     aboutToRecycle(): void {}
     __aboutToReuse_Internal(param?: RecordData): void { }
     __aboutToRecycle_Internal(): void { }
-
+    switchHasBeenRecycle(recycle: boolean) {}
     // Can be overridden as an effect of @Prop, @Watch etc
     protected __updateStruct(initializers?: T_Options): void { }
 
@@ -188,15 +188,17 @@ export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent 
             const component = remember(() => {
                 const instance = factory()
                 instance.__initializeStruct(content, initializers?.());
-                node.setOnRecycle(() =>
-                    instance.__aboutToRecycle_Internal()
-                )
-                node.component = instance as IExtendableComponent
-                node.isCustomComponent = true
-                return instance
+                node.setOnRecycle(() => {
+                    instance.switchHasBeenRecycle(true);
+                    instance.__aboutToRecycle_Internal();
+                });
+                node.component = instance as IExtendableComponent;
+                node.isCustomComponent = true;
+                return instance;
             });
             node.setOnReuse(
                 (param?: RecordData) => {
+                    component.switchHasBeenRecycle(false)
                     component.__aboutToReuse_Internal(param)
                 }
             )

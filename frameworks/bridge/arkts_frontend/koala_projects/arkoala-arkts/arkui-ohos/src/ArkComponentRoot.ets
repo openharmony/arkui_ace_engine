@@ -22,6 +22,7 @@ import { __context, GlobalStateManager, StateManager } from '@koalaui/runtime';
 import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 import { CallbackTransformer } from './CallbackTransformer';
 import { KPointer, nullptr } from '@koalaui/interop';
+import { FreeRootNode } from './CallbackTransformer';
 
 export function setNeedCreate(isNeedCreate: boolean): boolean {
     const temp = GlobalStateManager.instance._isNeedCreate
@@ -53,6 +54,7 @@ export function ArkComponentRoot(
                         component.aboutToDisappear();
                     });
                 });
+                FreeRootNode.current?.setComponent(node.getComponent()?.getInstance());
                 content(node);
             });
             node.setBuildFunction((): Long => {
