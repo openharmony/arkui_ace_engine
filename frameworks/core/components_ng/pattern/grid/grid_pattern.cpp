@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -318,6 +319,7 @@ void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnRea
     }
     if (!isInitialized_) {
         FireObserverOnReachStart();
+        ReportOnItemGridEvent("onReachStart");
         CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
         if (onReachStart) {
             onReachStart();
@@ -335,6 +337,7 @@ void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnRea
                                  GreatOrEqual(info_.currentHeight_, -info_.contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
             FireObserverOnReachStart();
+            ReportOnItemGridEvent("onReachStart");
             CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
             ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:Grid", scrollUpToStart,
                 scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
@@ -371,6 +374,7 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
             GreatNotEqual(info_.prevHeight_, endHeight_) && LessOrEqual(info_.currentHeight_, endHeight_);
         if (scrollDownToEnd || scrollUpToEnd) {
             FireObserverOnReachEnd();
+            ReportOnItemGridEvent("onReachEnd");
             CHECK_NULL_VOID(onReachEnd || onJSFrameNodeReachEnd);
             ACE_SCOPED_TRACE("OnReachEnd, scrollUpToEnd:%u, scrollDownToEnd:%u, id:%d, tag:Grid", scrollUpToEnd,
                 scrollDownToEnd, static_cast<int32_t>(host->GetAccessibilityId()));
@@ -1824,5 +1828,39 @@ float GridPattern::GetOffsetWithLimit(float offset) const
         return std::max(offset, -remainHeight);
     }
     return 0;
+}
+
+void GridPattern::ReportOnItemGridEvent(const std::string& event)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    auto gridEvent = std::string("Grid.") + event;
+    params->Put("name", gridEvent.c_str());
+    params->Put("nodeId", nodeId);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
+}
+
+int32_t GridPattern::OnInjectionEvent(const std::string& command)
+{
+    std::string ret = ScrollablePattern::ParseCommand(command);
+    if (ret == "scrollForward") {
+        ScrollPage(true);
+    } else if (ret == "scrollBackward") {
+        ScrollPage(false);
+    } else {
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
 }
 } // namespace OHOS::Ace::NG

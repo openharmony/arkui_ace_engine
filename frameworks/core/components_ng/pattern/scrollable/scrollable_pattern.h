@@ -1062,6 +1062,8 @@ protected:
         return isBackToTopRunning_;
     }
 
+    std::string ParseCommand(const std::string& command);
+
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownEvent();
     CrownSensitivity crownSensitivity_ = CrownSensitivity::MEDIUM;
@@ -1204,6 +1206,7 @@ private:
     void SetOnHiddenChangeForParent();
     virtual void ResetForExtScroll() {};
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
+    void ReportOnItemStopEvent();
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;

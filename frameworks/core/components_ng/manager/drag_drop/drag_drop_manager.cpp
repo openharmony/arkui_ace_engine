@@ -41,6 +41,7 @@
 #include "core/components_ng/pattern/text_field/text_field_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 #ifdef ENABLE_ROSEN_BACKEND
 #include "render_service_client/core/transaction/rs_transaction.h"
@@ -1927,15 +1928,7 @@ void DragDropManager::OnItemDragEnd(float globalX, float globalY, int32_t dragge
     if (!dragFrameNode) {
         // drag on one grid and drop on other area
         if (draggedGridFrameNode_) {
-            if (dragType == DragType::GRID) {
-                auto eventHub = draggedGridFrameNode_->GetEventHub<GridEventHub>();
-                CHECK_NULL_VOID(eventHub);
-                eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, -1, false);
-            } else {
-                auto eventHub = draggedGridFrameNode_->GetEventHub<ListEventHub>();
-                CHECK_NULL_VOID(eventHub);
-                eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, -1, false);
-            }
+            FireOnItemDropEvent(draggedGridFrameNode_, dragType, itemDragInfo, draggedIndex, -1, false);
         }
     } else {
         int32_t insertIndex = GetItemIndex(dragFrameNode, dragType, globalX, globalY);
@@ -2005,13 +1998,17 @@ bool DragDropManager::FireOnItemDropEvent(const RefPtr<FrameNode>& frameNode, Dr
     const OHOS::Ace::ItemDragInfo& itemDragInfo, int32_t draggedIndex, int32_t insertIndex, bool isSuccess)
 {
     CHECK_NULL_RETURN(frameNode, false);
+    auto dropPositionX = PipelineBase::Px2VpWithCurrentDensity(itemDragInfo.GetX());
+    auto dropPositionY = PipelineBase::Px2VpWithCurrentDensity(itemDragInfo.GetY());
     if (dragType == DragType::GRID) {
         auto eventHub = frameNode->GetEventHub<GridEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
+        ReportOnItemDropEvent(dragType, frameNode, dropPositionX, dropPositionY);
         return eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, isSuccess);
     } else if (dragType == DragType::LIST) {
         auto eventHub = frameNode->GetEventHub<ListEventHub>();
         CHECK_NULL_RETURN(eventHub, false);
+        ReportOnItemDropEvent(dragType, frameNode, dropPositionX, dropPositionY);
         return eventHub->FireOnItemDrop(itemDragInfo, draggedIndex, insertIndex, isSuccess);
     }
     return false;
@@ -3487,4 +3484,47 @@ std::shared_ptr<Rosen::RSTransaction> DragDropManager::GetRSTransaction()
     }
 }
 #endif
+
+void DragDropManager::ReportOnItemDropEvent(
+    DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY)
+{
+    CHECK_NULL_VOID(dragFrameNode);
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto windowScale = isDragWindowSubWindow_ ? 1.0f : GetWindowScale();
+    auto windowX = PipelineBase::Px2VpWithCurrentDensity(dragStartPoint_.GetX() * windowScale);
+    auto windowY = PipelineBase::Px2VpWithCurrentDensity(dragStartPoint_.GetY() * windowScale);
+
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    params->Put("StartX", windowX);
+    params->Put("StartY", windowY);
+    params->Put("InsertX", dropPositionX);
+    params->Put("InsertY", dropPositionY);
+
+    std::string eventName;
+    std::string type;
+    if (dragType == DragType::GRID) {
+        eventName = "Grid.onItemDrop";
+        type = "Grid";
+    } else {
+        eventName = "List.onItemDrop";
+        type = "List";
+    }
+    auto event = JsonUtil::Create();
+    CHECK_NULL_VOID(event);
+    event->Put("name", eventName.c_str());
+    event->Put("params", params);
+
+    auto json = JsonUtil::Create();
+    CHECK_NULL_VOID(json);
+    json->Put("nodeId", dragFrameNode->GetId());
+    json->Put("event", event);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", json);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
+}
 } // namespace OHOS::Ace::NG

@@ -694,6 +694,12 @@ public:
 
     void DispatchLastDragEventVoluntarily(bool isTrans);
 
+    void SetDragStartPoint(double globalX, double globalY)
+    {
+        dragStartPoint_ = { globalX, globalY };
+    }
+
+
 #ifdef ENABLE_ROSEN_BACKEND
     void InitSyncTransaction();
 
@@ -768,6 +774,8 @@ private:
     void SetRSSyncTransaction(OHOS::Rosen::RSSyncTransactionController** transactionController,
         std::shared_ptr<Rosen::RSSyncTransactionHandler>& transactionHandler,
         const RefPtr<NG::PipelineContext>& pipeline);
+    void ReportOnItemDropEvent(
+        DragType dragType, const RefPtr<FrameNode>& dragFrameNode, double dropPositionX, double dropPositionY);
 
     std::map<int32_t, WeakPtr<FrameNode>> gridDragFrameNodes_;
     std::map<int32_t, WeakPtr<FrameNode>> listDragFrameNodes_;
@@ -845,6 +853,7 @@ private:
     std::shared_ptr<OHOS::Ace::NG::ArkUIInteralDragAction> dragAction_;
     ACE_DISALLOW_COPY_AND_MOVE(DragDropManager);
     bool grayedState_ = false;
+    Point dragStartPoint_ { 0, 0 };
     RefPtr<DragDropSpringLoadingDetector> dragDropSpringLoadingDetector_;
 
     std::map<int32_t, Point> fingerPointInfo_;
