@@ -597,18 +597,8 @@ const char DOM_DIRECTION[] = "direction";
 const char DOM_START_TO_END[] = "startToEnd";
 
 // chart attribute and style constants
-const char DOM_CHART_TYPE[] = "type";
-const char DOM_CHART_TYPE_BAR[] = "bar";
-const char DOM_CHART_TYPE_LINE[] = "line";
-const char DOM_CHART_TYPE_GAUGE[] = "gauge";
-const char DOM_CHART_TYPE_LOADING[] = "loading";
-const char DOM_CHART_TYPE_PROGRESS[] = "progress";
-const char DOM_CHART_TYPE_RAINBOW[] = "rainbow";
-const char DOM_COLORS_ARRAY[] = "colors";
-const char DOM_WEIGHTS_ARRAY[] = "weights";
 const char DOM_EFFECTS_ON[] = "effects";
-const char DOM_AUTO_SCALE[] = "autoscale";
-const char DOM_CHART_ANIMATION_DURATION[] = "animationduration";
+const char DOM_METHOD_APPEND[] = "append";
 
 // slider attribute and style constants
 const char DOM_MIN[] = "min";

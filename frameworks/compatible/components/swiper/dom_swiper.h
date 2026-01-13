@@ -41,7 +41,6 @@ ACE_EXPORT extern const char DOM_INDICATOR_LEFT[];
 ACE_EXPORT extern const char DOM_INDICATOR_RIGHT[];
 ACE_EXPORT extern const char DOM_INDICATOR_BOTTOM[];
 ACE_EXPORT extern const char DOM_METHOD_SWIPE_TO[];
-ACE_EXPORT extern const char DOM_METHOD_APPEND[];
 ACE_EXPORT extern const char DOM_METHOD_SHOW_PREVIOUS[];
 ACE_EXPORT extern const char DOM_METHOD_SHOW_NEXT[];
 ACE_EXPORT extern const char DOM_DIGITAL_INDICATOR[];

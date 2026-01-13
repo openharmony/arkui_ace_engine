@@ -13,13 +13,32 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/common/dom/dom_chart.h"
+#include "compatible/components/chart/dom_chart.h"
+#include "compatible/components/chart/chart_component.h"
 
 #include "frameworks/bridge/common/utils/utils.h"
 #include "core/components/common/properties/color_factory.h"
 
 namespace OHOS::Ace::Framework {
-const char DOM_METHOD_APPEND[] = "append";
+const char DOM_CHART_TYPE[] = "type";
+const char DOM_CHART_TYPE_BAR[] = "bar";
+const char DOM_CHART_TYPE_LINE[] = "line";
+const char DOM_CHART_TYPE_GAUGE[] = "gauge";
+const char DOM_CHART_TYPE_LOADING[] = "loading";
+const char DOM_CHART_TYPE_PROGRESS[] = "progress";
+const char DOM_CHART_TYPE_RAINBOW[] = "rainbow";
+const char DOM_COLORS_ARRAY[] = "colors";
+const char DOM_WEIGHTS_ARRAY[] = "weights";
+const char DOM_AUTO_SCALE[] = "autoscale";
+const char DOM_CHART_ANIMATION_DURATION[] = "animationduration";
+const char DOM_PROGRESS_PERCENT[] = "percent";
+const char DOM_CENTER_X[] = "centerX";
+const char DOM_CENTER_Y[] = "centerY";
+const char DOM_PROGRESS_RADIUS[] = "radius";
+const char DOM_START_DEGREE[] = "startAngle";
+const char DOM_PROGRESS_STROKE_WIDTH[] = "strokeWidth";
+const char DOM_SWEEP_DEGREE[] = "totalAngle";
+
 namespace {
 
 const char LIGHT_RED_COLOR[] = "#EB4034";

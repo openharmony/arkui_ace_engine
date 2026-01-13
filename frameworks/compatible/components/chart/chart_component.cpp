@@ -13,19 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components/chart/rosen_render_chart.h"
+#include "compatible/components/chart/chart_component.h"
+
+#include "compatible/components/chart/render_chart.h"
 
 namespace OHOS::Ace {
-RefPtr<RenderNode> RenderChart::Create()
+
+RefPtr<RenderNode> ChartComponent::CreateRenderNode()
 {
-    if (SystemProperties::GetRosenBackendEnabled()) {
-#ifdef ENABLE_ROSEN_BACKEND
-        return AceType::MakeRefPtr<RosenRenderChart>();
-#else
-        return nullptr;
-#endif
-    } else {
-        return nullptr;
-    }
+    return RenderChart::Create();
 }
+
 } // namespace OHOS::Ace

@@ -17,7 +17,6 @@
 
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/utils.h"
-#include "core/components/chart/chart_component.h"
 #include "core/components/data_panel/data_panel_theme.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 
@@ -25,7 +24,7 @@ using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
 namespace {
-    const std::vector<ChartType> DataPanel_TYPE = { ChartType::LINE, ChartType::RAINBOW};
+    const std::vector<NG::ChartType> DataPanel_TYPE = { NG::ChartType::LINE, NG::ChartType::RAINBOW};
     constexpr unsigned int MAX_VALUES_LENGTH = 9;
     constexpr double DEFAULT_STROKE_WIDTH = 24.0;
 

@@ -18,7 +18,7 @@
 #include "base/log/log_wrapper.h"
 #include "frameworks/core/components/progress/progress_component.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components/chart/chart_component.h"
+#include "compatible/components/chart/chart_component.h"
 
 namespace OHOS::Ace::Framework {
 namespace {

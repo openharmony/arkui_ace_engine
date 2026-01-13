@@ -37,7 +37,6 @@ const char DOM_INDICATOR_LEFT[] = "indicatorLeft";
 const char DOM_INDICATOR_RIGHT[] = "indicatorRight";
 const char DOM_INDICATOR_BOTTOM[] = "indicatorBottom";
 const char DOM_METHOD_SWIPE_TO[] = "swipeTo";
-const char DOM_METHOD_APPEND[] = "append";
 const char DOM_METHOD_SHOW_PREVIOUS[] = "showPrevious";
 const char DOM_METHOD_SHOW_NEXT[] = "showNext";
 const char DOM_DIGITAL_INDICATOR[] = "digital";

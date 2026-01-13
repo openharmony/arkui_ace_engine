@@ -21,11 +21,11 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/macros.h"
+#include "compatible/components/chart/dom_chart.h"
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/image/image_properties.h"
 #include "core/pipeline/pipeline_context.h"
 #include "frameworks/bridge/common/dom/dom_canvas.h"
-#include "frameworks/bridge/common/dom/dom_chart.h"
 #include "frameworks/compatible/components/clock/dom_clock.h"
 #include "frameworks/bridge/common/dom/dom_configs.h"
 #include "frameworks/bridge/common/dom/dom_document.h"

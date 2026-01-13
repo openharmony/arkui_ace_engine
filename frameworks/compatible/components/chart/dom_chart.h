@@ -13,16 +13,33 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_CHART_H
-#define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_CHART_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CHART_DOM_CHART_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CHART_DOM_CHART_H
 
-#include "core/components/chart/chart_component.h"
+#include "compatible/components/chart/chart_component.h"
 #include "core/components/common/properties/color.h"
 #include "core/components/data_panel/data_panel_component.h"
 #include "core/components/progress/progress_component.h"
 #include "frameworks/bridge/common/dom/dom_node.h"
 
 namespace OHOS::Ace::Framework {
+extern const char DOM_CHART_TYPE[];
+extern const char DOM_CHART_TYPE_BAR[];
+extern const char DOM_CHART_TYPE_LINE[];
+extern const char DOM_CHART_TYPE_GAUGE[];
+extern const char DOM_CHART_TYPE_PROGRESS[];
+extern const char DOM_CHART_TYPE_LOADING[];
+extern const char DOM_CHART_TYPE_RAINBOW[];
+extern const char DOM_COLORS_ARRAY[];
+extern const char DOM_WEIGHTS_ARRAY[];
+extern const char DOM_AUTO_SCALE[];
+extern const char DOM_CHART_ANIMATION_DURATION[];
+extern const char DOM_PROGRESS_PERCENT[];
+extern const char DOM_CENTER_X[];
+extern const char DOM_CENTER_Y[];
+extern const char DOM_PROGRESS_RADIUS[];
+extern const char DOM_START_DEGREE[];
+extern const char DOM_PROGRESS_STROKE_WIDTH[];
 
 class ChartOptions {
 public:
@@ -228,4 +245,4 @@ private:
 
 } // namespace OHOS::Ace::Framework
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_BRIDGE_COMMON_DOM_DOM_CHART_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CHART_DOM_CHART_H

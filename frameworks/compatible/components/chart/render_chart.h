@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 
-#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_RENDER_CHART_H
-#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_RENDER_CHART_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CHART_RENDER_CHART_H
+#define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CHART_RENDER_CHART_H
 
-#include "core/components/chart/chart_component.h"
+#include "compatible/components/chart/chart_component.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
@@ -43,4 +43,4 @@ protected:
 
 } // namespace OHOS::Ace
 
-#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_CHART_RENDER_CHART_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_CHART_RENDER_CHART_H
