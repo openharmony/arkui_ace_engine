@@ -3731,6 +3731,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setRenderGroup(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setExcludeFromRenderGroupAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setExcludeFromRenderGroup(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setFreezeAttribute(value: boolean | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -7892,6 +7904,9 @@ export interface CommonMethod {
     renderGroup(value: boolean | undefined): this {
         throw new Error("Unimplemented method renderGroup")
     }
+    excludeFromRenderGroup(value: boolean | undefined): this {
+        throw new Error("Unimplemented method excludeFromRenderGroup")
+    }
     freeze(value: boolean | undefined): this {
         throw new Error("Unimplemented method freeze")
     }
@@ -8395,6 +8410,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     useEffect_value?: boolean | undefined
     useUnionEffect_value?: boolean | undefined
     renderGroup_value?: boolean | undefined
+    excludeFromRenderGroup_value?: boolean | undefined
     freeze_value?: boolean | undefined
     translate_value?: TranslateOptions | undefined
     scale_value?: ScaleOptions | undefined
@@ -8723,6 +8739,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     renderGroup(value: boolean | undefined): this {
+        return this
+    }
+    excludeFromRenderGroup(value: boolean | undefined): this {
         return this
     }
     freeze(value: boolean | undefined): this {
@@ -10204,6 +10223,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("renderGroup")) {
             const value_casted = value as (boolean | undefined)
             this.getPeer()?.setRenderGroupAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public excludeFromRenderGroup(value: boolean | undefined): this {
+        if (this.checkPriority("excludeFromRenderGroup")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setExcludeFromRenderGroupAttribute(value_casted)
             return this
         }
         return this
