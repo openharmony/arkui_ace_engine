@@ -77,8 +77,6 @@ template("bridge_common") {
         "dom/dom_option.cpp",
         "dom/dom_popup.cpp",
         "dom/dom_select.cpp",
-        "dom/dom_stepper.cpp",
-        "dom/dom_stepper_item.cpp",
       ]
     }
 

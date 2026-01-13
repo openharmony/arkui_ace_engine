@@ -19,8 +19,10 @@
 
 #include "base/log/ace_trace.h"
 #include "base/utils/system_properties.h"
+#include "compatible/components/stepper/stepper_modifier_api.h"
 #include "core/accessibility/accessibility_node.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/button/button_component.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/form/form_component.h"
@@ -148,14 +150,32 @@ RefPtr<FlexItemComponent> ViewStackProcessor::GetFlexItemComponent()
     return flexItem;
 }
 
-RefPtr<StepperItemComponent> ViewStackProcessor::GetStepperItemComponent()
+const ArkUIStepperItemComponentModifier* GetStepperItemComponentModifier()
 {
+    static const ArkUIStepperItemComponentModifier* stepperItemComponentModifier_ = nullptr;
+    if (stepperItemComponentModifier_) {
+        return stepperItemComponentModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("stepper-item");
+    if (loader) {
+        stepperItemComponentModifier_ =
+            reinterpret_cast<const ArkUIStepperItemComponentModifier*>(loader->GetCustomModifier());
+        return stepperItemComponentModifier_;
+    }
+    return nullptr;
+}
+
+RefPtr<Component> ViewStackProcessor::GetStepperItemComponent()
+{
+    auto* modifier = GetStepperItemComponentModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
     auto& wrappingComponentsMap = componentsStack_.top();
     if (wrappingComponentsMap.find("stepperItem") != wrappingComponentsMap.end()) {
-        return AceType::DynamicCast<StepperItemComponent>(wrappingComponentsMap["stepperItem"]);
+        auto component = wrappingComponentsMap["stepperItem"];
+        return modifier->updateStepperItem(component);
     }
 
-    RefPtr<StepperItemComponent> stepperItem = AceType::MakeRefPtr<StepperItemComponent>(RefPtr<Component>());
+    auto stepperItem = modifier->createStepperItem();
     wrappingComponentsMap.emplace("stepperItem", stepperItem);
     return stepperItem;
 }

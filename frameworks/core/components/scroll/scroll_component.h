@@ -35,7 +35,7 @@ class ACE_EXPORT ScrollComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(ScrollComponent, SoleChildComponent);
 
 public:
-    explicit ScrollComponent(const RefPtr<Component>& child);
+    ACE_FORCE_EXPORT explicit ScrollComponent(const RefPtr<Component>& child);
     ~ScrollComponent() override = default;
 
     RefPtr<Element> CreateElement() override;

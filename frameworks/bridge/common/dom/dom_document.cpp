@@ -125,10 +125,6 @@ RefPtr<DOMNode> DOMDocument::CreateNodeWithId(const std::string& tag, NodeId nod
         { DOM_NODE_TAG_SLIDER, &DOMNodeCreator<DOMSlider> },
         { DOM_NODE_TAG_SPAN, &DOMNodeCreator<DOMSpan> },
         { DOM_NODE_TAG_STACK, &DOMNodeCreator<DOMStack> },
-#ifndef WEARABLE_PRODUCT
-        { DOM_NODE_TAG_STEPPER, &DOMNodeCreator<DOMStepper> },
-        { DOM_NODE_TAG_STEPPER_ITEM, &DOMListItemCreator<DOMStepperItem> },
-#endif
         { DOM_NODE_TAG_TEXT, &DOMNodeCreator<DOMText> },
 #ifndef WEARABLE_PRODUCT
 #ifdef WEB_SUPPORTED

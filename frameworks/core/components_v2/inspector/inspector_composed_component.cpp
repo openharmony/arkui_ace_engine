@@ -60,8 +60,6 @@
 #include "core/components_v2/inspector/slider_composed_element.h"
 #include "core/components_v2/inspector/span_composed_element.h"
 #include "core/components_v2/inspector/stack_composed_element.h"
-#include "core/components_v2/inspector/stepper_composed_element.h"
-#include "core/components_v2/inspector/stepper_item_composed_element.h"
 #include "core/components_v2/inspector/text_clock_composed_element.h"
 #include "core/components_v2/inspector/text_composed_element.h"
 #include "core/components_v2/inspector/texttimer_composed_element.h"
@@ -162,9 +160,9 @@ const std::unordered_map<std::string, CreateElementFunc> CREATE_ELEMENT_MAP {
     { HYPERLINK_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::HyperlinkComposedElement>(id); } },
     { STEPPER_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::StepperComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_STEPPER, id); } },
     { STEPPER_ITEM_COMPONENT_TAG,
-        [](const std::string& id) { return AceType::MakeRefPtr<V2::StepperItemComposedElement>(id); } },
+        [](const std::string& id) { return DynamicCreateInspectorElement(DOM_NODE_TAG_STEPPER_ITEM, id); } },
     { SCROLL_BAR_COMPONENT_TAG,
         [](const std::string& id) { return AceType::MakeRefPtr<V2::ScrollBarComposedElement>(id); } },
     { REFRESH_COMPONENT_TAG,

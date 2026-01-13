@@ -329,21 +329,7 @@ inline FlexDirection ConvertStrToFlexDirection(const std::string& flexKey)
     return flexKey == DOM_FLEX_COLUMN ? FlexDirection::COLUMN : FlexDirection::ROW;
 }
 
-inline FlexAlign ConvertStrToFlexAlign(const std::string& flexKey)
-{
-    static const LinearMapNode<FlexAlign> flexMap[] = {
-        { DOM_ALIGN_ITEMS_BASELINE, FlexAlign::BASELINE },
-        { DOM_JUSTIFY_CONTENT_CENTER, FlexAlign::CENTER },
-        { DOM_JUSTIFY_CONTENT_END, FlexAlign::FLEX_END },
-        { DOM_JUSTIFY_CONTENT_START, FlexAlign::FLEX_START },
-        { DOM_JUSTIFY_CONTENT_AROUND, FlexAlign::SPACE_AROUND },
-        { DOM_JUSTIFY_CONTENT_BETWEEN, FlexAlign::SPACE_BETWEEN },
-        { DOM_JUSTIFY_CONTENT_EVENLY, FlexAlign::SPACE_EVENLY },
-        { DOM_ALIGN_ITEMS_STRETCH, FlexAlign::STRETCH },
-    };
-    auto index = BinarySearchFindIndex(flexMap, ArraySize(flexMap), flexKey.c_str());
-    return index < 0 ? FlexAlign::FLEX_START : flexMap[index].value;
-}
+ACE_FORCE_EXPORT FlexAlign ConvertStrToFlexAlign(const std::string& flexKey);
 
 inline Offset ConvertStrToOffset(const std::string& value)
 {

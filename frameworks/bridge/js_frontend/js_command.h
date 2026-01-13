@@ -31,8 +31,8 @@
 #include "frameworks/bridge/common/dom/dom_document.h"
 #include "frameworks/compatible/components/input/dom_input.h"
 #include "frameworks/bridge/common/dom/dom_proxy.h"
-#include "frameworks/bridge/common/dom/dom_stepper.h"
-#include "frameworks/bridge/common/dom/dom_stepper_item.h"
+#include "frameworks/compatible/components/stepper/dom_stepper.h"
+#include "frameworks/compatible/components/stepper/dom_stepper_item.h"
 #include "frameworks/bridge/common/dom/dom_xcomponent.h"
 
 namespace OHOS::Ace::Framework {
