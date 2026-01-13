@@ -65,8 +65,7 @@ FONT_FEATURES_LIST GetDefaultFontFeature()
     CHECK_NULL_RETURN(pipelineContext, fontFeatures);
     auto textTheme = pipelineContext->GetTheme<TextTheme>();
     CHECK_NULL_RETURN(textTheme, fontFeatures);
-    fontFeatures = textTheme->GetTextStyle().GetFontFeatures();
-    return fontFeatures;
+    return textTheme->GetTextStyle().GetFontFeatures();
 }
 
 void ConversionPart2(TextStyle& ret, const Ark_RichEditorTextStyle& src)
