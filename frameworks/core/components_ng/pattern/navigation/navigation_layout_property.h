@@ -117,8 +117,10 @@ public:
         CHECK_NULL_VOID(theme);
         auto dividerColor = theme->GetNavigationDividerColor();
         divider->Put("color", GetDividerColor().value_or(dividerColor).ToString().c_str());
-        divider->Put("startMargin", GetDividerStartMargin().value_or(CalcDimension(0.0f)).ToString().c_str());
-        divider->Put("endMargin", GetDividerEndMargin().value_or(CalcDimension(0.0f)).ToString().c_str());
+        divider->Put("startMargin", GetDividerStartMargin().value_or(
+            CalcDimension(0.0f, DimensionUnit::VP)).ToString().c_str());
+        divider->Put("endMargin", GetDividerEndMargin().value_or(
+            CalcDimension(0.0f, DimensionUnit::VP)).ToString().c_str());
         json->Put("divider", divider);
     }
 
