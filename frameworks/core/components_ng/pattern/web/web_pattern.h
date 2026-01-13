@@ -846,7 +846,7 @@ public:
     {
         cursorInfo_ = RectF(x, y, width, height);
     }
-    RectF GetCaretRect() const override
+    RectF GetCaretRect(bool ignoreScale = true) const override
     {
         return cursorInfo_;
     }

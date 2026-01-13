@@ -822,10 +822,7 @@ public:
         enableTouchAndHoverEffect_ = enable;
     }
 
-    RectF GetCaretRect() const override
-    {
-        return selectController_->GetCaretRect();
-    }
+    RectF GetCaretRect(bool ignoreScale = true) const override;
 
     RectF GetFloatingCaretRect() const
     {

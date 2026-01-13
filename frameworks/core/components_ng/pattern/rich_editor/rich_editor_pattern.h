@@ -919,7 +919,7 @@ public:
         return selectOverlay_->GetSecondHandleInfo();
     }
 
-    RectF GetCaretRect() const override;
+    RectF GetCaretRect(bool ignoreScale = true) const override;
     void OnDragNodeFloating() override;
     void CloseSelectOverlay() override;
     void CloseHandleAndSelect() override;

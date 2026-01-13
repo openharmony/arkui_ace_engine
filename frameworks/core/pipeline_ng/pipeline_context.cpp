@@ -3051,7 +3051,7 @@ void PipelineContext::DoKeyboardAvoidFunc(float keyboardHeight, double positionY
     }
 }
 
-float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positionY,
+float PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positionY,
     float height, SizeF& rootSize, bool isInline)
 {
     auto newKeyboardOffset = CalcAvoidOffset(keyboardHeight, positionY, height, rootSize);
@@ -3061,14 +3061,17 @@ float  PipelineContext::CalcNewKeyboardOffset(float keyboardHeight, float positi
     CHECK_NULL_RETURN(manager, newKeyboardOffset);
     auto onFocusField = manager->GetOnFocusTextField().Upgrade();
     CHECK_NULL_RETURN(onFocusField, newKeyboardOffset);
+    auto textBase = DynamicCast<TextBase>(onFocusField);
+    CHECK_NULL_RETURN(textBase, newKeyboardOffset);
     auto host = onFocusField->GetHost();
     CHECK_NULL_RETURN(host, newKeyboardOffset);
     auto geometryNode = host->GetGeometryNode();
     CHECK_NULL_RETURN(geometryNode, newKeyboardOffset);
-    auto paintOffset = host->GetPaintRectOffset(false, true);
+    auto paintOffset = host->GetPaintRectOffsetNG(false, true);
     auto frameSize = geometryNode->GetFrameSize();
+    auto scaleY = textBase->GetHostScale(host).y;
     auto offset = CalcAvoidOffset(keyboardHeight, paintOffset.GetY() - safeAreaManager_->GetKeyboardOffset(true),
-        frameSize.Height() + CARET_AVOID_OFFSET.ConvertToPx(), rootSize);
+        frameSize.Height() * scaleY + CARET_AVOID_OFFSET.ConvertToPx(), rootSize);
     return std::max(offset, newKeyboardOffset);
 }
 
