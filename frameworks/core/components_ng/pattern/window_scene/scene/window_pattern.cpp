@@ -661,7 +661,7 @@ void WindowPattern::CreateStartingWindow()
     imageLayoutProperty->UpdateMeasureType(MeasureType::MATCH_PARENT);
     startingWindow_->SetHitTestMode(HitTestMode::HTMNONE);
     ImageSourceInfo sourceInfo;
-    std::shared_ptr<PixelMap> preloadPixelMap = nullptr;
+    std::shared_ptr<Media::PixelMap> preloadPixelMap = nullptr;
     std::pair<std::shared_ptr<uint8_t[]>, size_t> preloadBufferInfo = {nullptr, 0};
     session_->GetPreloadStartingWindow(preloadPixelMap, preloadBufferInfo);
     if (preloadPixelMap != nullptr) {
