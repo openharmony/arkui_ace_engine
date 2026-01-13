@@ -152,7 +152,7 @@ ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCa
         RefPtr<ResourceObject> resourceObject;
 
         auto nativeNode = nodePtr(frameNode);
-        LOGI("[Hyperlink] HyperlinkBridge::SetColor Node ptr address: %{public}d", int(nativeNode));
+        LOGI("[Hyperlink] HyperlinkBridge::SetColor Node ptr address: %{public}p", nativeNode);
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
 
         if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resourceObject, nodeInfo)) {
@@ -177,7 +177,7 @@ ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCa
         CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
         LOGI("[Hyperlink] HyperlinkBridge::SetColor nodeArg is native ptr");
         auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-        LOGI("[Hyperlink] HyperlinkBridge::SetColor Node ptr address: %{public}d", int(nativeNode));
+        LOGI("[Hyperlink] HyperlinkBridge::SetColor Node ptr address: %{public}p", nativeNode);
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
         LOGI("[Hyperlink] HyperlinkBridge::SetColor nodeInfo made");
 
