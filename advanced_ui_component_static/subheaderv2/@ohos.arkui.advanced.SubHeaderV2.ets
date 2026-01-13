@@ -345,7 +345,7 @@ export struct SubHeaderV2 {
     Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
       if (Util.isSymbolResource($$.iconOptions)) {
         SymbolGlyphChild({
-          icon: $$.iconOptions,
+          icon: $$.iconOptions!,
           fontColor: this.subHeaderV2Theme.leftIconColor,
           changeSymbolWidth: (result: SizeResult) => {
             this.symbolWidth = result.width;

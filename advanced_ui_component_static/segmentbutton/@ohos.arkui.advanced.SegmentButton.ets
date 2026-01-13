@@ -1546,7 +1546,7 @@ export struct SegmentButton {
       if (this.options !== undefined && this.options.buttons !== undefined) {
         if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
           MultiSelectBackground({
-            optionsArray: this.options.buttons,
+            optionsArray: this.options.buttons!,
             options: this.options,
           })
         } else {
@@ -1554,7 +1554,7 @@ export struct SegmentButton {
             if (this.options.buttons !== undefined && this!.options!.buttons!.length as number > 1.0) {
               PressAndHoverEffectArray({
                 options: this.options,
-                buttons: this.options.buttons,
+                buttons: this.options.buttons!,
                 pressArray: this.pressArray,
                 hoverArray: this.hoverArray,
                 hoverColorArray: this.hoverColorArray
@@ -1572,13 +1572,13 @@ export struct SegmentButton {
         Stack() {
           if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
             MultiSelectItemArray({
-              optionsArray: this.options.buttons,
+              optionsArray: this.options.buttons!,
               options: this.options,
               selectedIndexes: this.selectedIndexes
             })
           } else {
             SelectItem({
-              optionsArray: this.options.buttons,
+              optionsArray: this.options.buttons!,
               options: this.options,
               selectedIndexes: this.selectedIndexes
             })
@@ -1597,7 +1597,7 @@ export struct SegmentButton {
           pressArray: this.pressArray,
           hoverArray: this.hoverArray,
           hoverColorArray: this.hoverColorArray,
-          optionsArray: this.options.buttons,
+          optionsArray: this.options.buttons!,
           options: this.options,
           selectedIndexes: this.selectedIndexes,
           maxFontScale: this.getMaxFontSize(),
