@@ -26,10 +26,14 @@
 
 namespace OHOS::Ace::NG {
 class FrameNode;
+#ifndef IS_RELEASE_VERSION
+class ContentChangeDumpManager;
+#endif
+
 class ContentChangeManager final : public AceType {
     DECLARE_ACE_TYPE(ContentChangeManager, AceType);
 public:
-    ContentChangeManager() = default;
+    ContentChangeManager();
     virtual ~ContentChangeManager() = default;
     void StartContentChangeReport(const ContentChangeConfig& config);
     void StopContentChangeReport();
@@ -51,9 +55,13 @@ public:
     void OnVsyncStart();
     void OnVsyncEnd(const RectF& rootRect);
     bool IsTextAABBCollecting() const;
+#ifndef IS_RELEASE_VERSION
+    std::string DumpInfo() const;
+#endif
 
 private:
-    void ReportSwiperEvent();
+    void ProcessSwiperNodes();
+    void ReportSwiperEvent(const RefPtr<FrameNode>& node, bool hasTabsAncestor);
     void StartTextAABBCollecting();
     void StopTextAABBCollecting(const RectF& rootRect);
 
@@ -70,6 +78,9 @@ private:
     std::set<std::pair<WeakPtr<FrameNode>, bool>> changedSwiperNodes_;
     std::set<int32_t> scrollingNodes_;
     RectF textAABB_; // Axis-aligned bounding box(AABB) of Text rects.
+#ifndef IS_RELEASE_VERSION
+    std::shared_ptr<ContentChangeDumpManager> dumpMgr_;
+#endif
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MANAGER_CONTENT_CHANGE_MANAGER_H

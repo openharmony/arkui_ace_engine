@@ -1065,4 +1065,42 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest017, TestSize.Level
     contentChangeMgr->OnScrollRemoved(TEST_SCROLLING_NODE_ID);
     EXPECT_TRUE(contentChangeMgr->scrollingNodes_.empty());
 }
+
+/**
+ * @tc.name: ContentChangeManagerDumpTest001
+ * @tc.desc: Test Dump of ContentChangeManager.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerDumpTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call StartContentChangeReport.
+     * @tc.expected: the contentContentChangeManager is in reporting state
+     */
+    ContentChangeConfig config;
+    contentChangeMgr->StartContentChangeReport(config);
+    ASSERT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
+
+    /**
+     * @tc.steps: step3. call StopContentChangeReport.
+     * @tc.expected: the contentContentChangeManager is not in reporting state
+     */
+    contentChangeMgr->StopContentChangeReport();
+    ASSERT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
+
+    /**
+     * @tc.steps: step4. call dump.
+     * @tc.expected: the dump string contains REGISTER and UNREGISTER event.
+     */
+    std::string str = contentChangeMgr->DumpInfo();
+    EXPECT_TRUE(str.find("UNREGISTERED") != std::string::npos);
+    EXPECT_TRUE(str.find("REGISTER") != std::string::npos);
+}
 } // namespace OHOS::Ace::NG
