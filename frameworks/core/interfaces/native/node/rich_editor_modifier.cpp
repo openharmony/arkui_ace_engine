@@ -44,7 +44,7 @@ void UnregisterRichEditorPatternResource(FrameNode* node, const std::string& key
     pattern->UnRegisterResource(key);
 }
 
-void SetRichEditorDetectEnable(ArkUINodeHandle node, ArkUI_Uint32 value)
+void NodeModifier::SetRichEditorDetectEnable(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
