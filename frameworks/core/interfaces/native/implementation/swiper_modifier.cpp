@@ -170,11 +170,11 @@ bool CheckSwiperParameters(SwiperParameters& p)
     p.dimStart = p.dimStart && (*p.dimStart).Value() >= 0 ? p.dimStart : 0.0_vp;
     p.dimEnd = p.dimEnd && (*p.dimEnd).Value() >= 0 ? p.dimEnd : 0.0_vp;
 
-    p.itemWidth = p.itemWidth && (*p.itemWidth).Value() >= 0 ? p.itemWidth : 6.0_vp;
-    p.itemHeight = p.itemHeight && (*p.itemHeight).Value() >= 0 ? p.itemHeight : 6.0_vp;
+    p.itemWidth = p.itemWidth && (*p.itemWidth).Value() > 0 ? p.itemWidth : 6.0_vp;
+    p.itemHeight = p.itemHeight && (*p.itemHeight).Value() > 0 ? p.itemHeight : 6.0_vp;
 
-    p.selectedItemWidth = p.selectedItemWidth && (*p.selectedItemWidth).Value() >= 0 ? p.selectedItemWidth : 6.0_vp;
-    p.selectedItemHeight = p.selectedItemHeight && (*p.selectedItemHeight).Value() >= 0 ? p.selectedItemHeight : 6.0_vp;
+    p.selectedItemWidth = p.selectedItemWidth && (*p.selectedItemWidth).Value() > 0 ? p.selectedItemWidth : 6.0_vp;
+    p.selectedItemHeight = p.selectedItemHeight && (*p.selectedItemHeight).Value() > 0 ? p.selectedItemHeight : 6.0_vp;
 
     p.dimSpace = p.dimSpace && (*p.dimSpace).Value() >= 0 ? p.dimSpace : 8.0_vp;
 
@@ -195,8 +195,8 @@ void CheckSwiperDigitalParameters(SwiperDigitalParameters& p)
     p.dimStart = p.dimStart && (*p.dimStart).Value() >= 0 ? p.dimStart : 0.0_vp;
     p.dimEnd = p.dimEnd && (*p.dimEnd).Value() >= 0 ? p.dimEnd : 0.0_vp;
 
-    p.fontSize = p.fontSize && (*p.fontSize).Value() >= 0 ? p.fontSize : 14.0_vp;
-    p.selectedFontSize = p.selectedFontSize && (*p.selectedFontSize).Value() >= 0 ? p.selectedFontSize : 14.0_vp;
+    p.fontSize = p.fontSize && (*p.fontSize).Value() > 0 ? p.fontSize : 14.0_vp;
+    p.selectedFontSize = p.selectedFontSize && (*p.selectedFontSize).Value() > 0 ? p.selectedFontSize : 14.0_vp;
 }
 } // namespace SwiperAttributeModifierInternal
 } // namespace OHOS::Ace::NG
