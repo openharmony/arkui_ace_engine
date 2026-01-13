@@ -73,9 +73,9 @@ void MeasureDivider(LayoutWrapper* layoutWrapper, const RefPtr<NavigationGroupNo
     auto constraint = navigationLayoutProperty->CreateChildConstraint();
     auto layoutProperty = hostNode->GetLayoutProperty<NavigationLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
-    auto marginStart = layoutProperty->GetDividerStartMargin().value_or(Dimension(0.0));
+    auto marginStart = layoutProperty->GetDividerStartMargin().value_or(Dimension(0.0, DimensionUnit::VP));
     auto dividerStartMarginPx = marginStart.ConvertToPx();
-    auto marginEnd = layoutProperty->GetDividerEndMargin().value_or(Dimension(0.0f));
+    auto marginEnd = layoutProperty->GetDividerEndMargin().value_or(Dimension(0.0f, DimensionUnit::VP));
     auto dividerEndMarginPx = marginEnd.ConvertToPx();
     auto dividerHeight = dividerSize.Height() - dividerStartMarginPx - dividerEndMarginPx;
     constraint.selfIdealSize = OptionalSizeF(dividerSize.Width(), dividerHeight);
