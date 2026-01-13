@@ -99,7 +99,7 @@ bool ImageGeneratorDialogView::Create(int32_t instanceId)
     CHECK_NULL_RETURN(root, false);
     auto overlayManager = pipeline->GetOverlayManager();
     CHECK_NULL_RETURN(overlayManager, false);
-    auto shouldDismiss = [weakOverlayMgr = WeakPtr(overlayManager)](int32_t reason) {
+    auto onWillDismiss = [weakOverlayMgr = WeakPtr(overlayManager)](int32_t reason) {
         if (reason == static_cast<int32_t>(NG::BindSheetDismissReason::BACK_PRESSED) ||
             reason == static_cast<int32_t>(NG::BindSheetDismissReason::SLIDE_DOWN)) {
             auto overlayManager = weakOverlayMgr.Upgrade();
@@ -110,9 +110,9 @@ bool ImageGeneratorDialogView::Create(int32_t instanceId)
     };
     auto emptySpringBack = []() {};
     auto style = GENERATOR_STYLE;
-    overlayManager->OnBindSheetInner(nullptr, uiNode, nullptr, style, nullptr, nullptr, nullptr,
-        std::move(shouldDismiss), nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, std::move(emptySpringBack),
-        root, true);
+    style.instanceId = instanceId;
+    NG::BindSheetCreateParam param(style, root, uiNode, std::move(onWillDismiss), std::move(emptySpringBack), true);
+    overlayManager->OpenImageGenerator(std::move(param));
     // after call onBindSheet, find sheetNode and set callback
     auto parent = uiNode->GetParent();
     while (parent) {
