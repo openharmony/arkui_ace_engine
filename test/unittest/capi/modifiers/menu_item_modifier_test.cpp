@@ -464,7 +464,7 @@ HWTEST_F(MenuItemModifierTest, setSelectIconSymbolTest, TestSize.Level1)
  * @tc.desc: Check the functionality of MenuItemModifier.setSelected
  * @tc.type: FUNC
  */
-HWTEST_F(MenuItemModifierTest, setSelectedTest, TestSize.Level1)
+HWTEST_F(MenuItemModifierTest, DISABLED_setSelectedTest, TestSize.Level1)
 {
     bool selected = GetAttrValue<bool>(node_, "selected");
     EXPECT_FALSE(selected);

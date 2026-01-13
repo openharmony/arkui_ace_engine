@@ -48,9 +48,11 @@ void AssignArkValue(Ark_LeadingMarginSpanDrawInfo& dst, const LeadingMarginSpanO
 template<>
 NG::DrawableLeadingMargin Convert(const Ark_LeadingMarginSpan& src)
 {
-    NG::DrawableLeadingMargin options;
-    options.getLeadingMarginFunc_ = src->span->getLeadingMarginFunc_;
-    options.onDraw_ = src->span->onDraw_;
+    NG::DrawableLeadingMargin options{};
+    if (src && src->span) {
+        options.getLeadingMarginFunc_ = src->span->getLeadingMarginFunc_;
+        options.onDraw_ = src->span->onDraw_;
+    }
     return options;
 }
 

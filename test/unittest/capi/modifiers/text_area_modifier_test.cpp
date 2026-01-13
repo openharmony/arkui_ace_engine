@@ -642,7 +642,7 @@ HWTEST_F(TextAreaModifierTest, setOnSubmitTest, TestSize.Level1)
         g_EventTestKey = enterKeyType;
     };
 
-    auto func = Converter::ArkCallback<Opt_TextAreaSubmitCallback>(onSubmitFunc);
+    auto func = Converter::ArkCallback<Opt_TextAreaSubmitCallback>(onSubmitFunc, expectedResId);
     modifier_->setOnSubmit(node_, &func);
     TextFieldCommonEvent event;
     event.SetText(testValue);

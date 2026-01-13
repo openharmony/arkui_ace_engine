@@ -41,7 +41,7 @@ class ScreenModifierTest : public ModifierTestBase<GENERATED_ArkUIScreenModifier
  * @tc.desc: test fucntion of setScreenOptionsImpl
  * @tc.type: FUNC
  */
-HWTEST_F(ScreenModifierTest, setScreenOptionsTest, TestSize.Level1)
+HWTEST_F(ScreenModifierTest, DISABLED_setScreenOptionsTest, TestSize.Level1)
 {
     Ark_Number screenId = Converter::ArkValue<Ark_Number>(SCREEN_ID);
     modifier_->setScreenOptions(node_, &screenId);

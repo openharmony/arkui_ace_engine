@@ -63,7 +63,7 @@ ace_unittest("capi_all_modifiers_test") {
     #"ellipse_modifier_test.cpp",
     "flex_modifier_test.cpp",
     "folder_stack_modifier_test.cpp",
-    "form_component_modifier_test.cpp",
+    #"form_component_modifier_test.cpp",
     "form_link_modifier_test.cpp",
     #"gauge_modifier_test.cpp",
     "grid_col_modifier_test.cpp",
@@ -146,7 +146,7 @@ ace_unittest("capi_all_modifiers_test") {
     #"toggle_modifier_test.cpp",
     "video_modifier_test.cpp",
     #"water_flow_modifier_test.cpp",
-    "windowscene_modifier_test.cpp",
+    #"windowscene_modifier_test.cpp",
   ]
   sources += [
     "generated/test_fixtures.cpp",

@@ -33,11 +33,11 @@ void DestroyPeerImpl(Ark_GestureStyle peer)
 Ark_GestureStyle ConstructImpl(const Opt_GestureStyleInterface* value)
 {
     auto peer = PeerUtils::CreatePeer<GestureStylePeer>();
-    CHECK_NULL_RETURN(value, peer);
+    auto optValue = Converter::GetOptPtr(value);
 
-    auto onClickOpt = Converter::OptConvert<Callback_ClickEvent_Void>(value->value.onClick);
-    auto onLongClickOpt = Converter::OptConvert<Callback_GestureEvent_Void>(value->value.onLongPress);
-    auto onTouchOpt = Converter::OptConvert<Callback_TouchEvent_Void>(value->value.onTouch);
+    auto onClickOpt = GET_OPT_FIELD(optValue, onClick);
+    auto onLongClickOpt = GET_OPT_FIELD(optValue, onLongPress);
+    auto onTouchOpt = GET_OPT_FIELD(optValue, onTouch);
     GestureStyle gestureInfo {};
     if (onClickOpt) {
         auto onClick = [arkCallback = CallbackHelper(*onClickOpt)](GestureEvent& info) -> void {

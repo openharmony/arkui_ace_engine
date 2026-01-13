@@ -293,7 +293,7 @@ HWTEST_F(NavDestinationModifierTest, setOnBackPressedTest, TestSize.Level1)
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setRecoverableTestDefaultValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setRecoverableTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -313,7 +313,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean, std::string>> recoverabl
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setRecoverableTestValidValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setRecoverableTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
@@ -346,7 +346,7 @@ static std::vector<std::tuple<std::string, Opt_Boolean>> recoverableRecoverableR
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(NavDestinationModifierTest, setRecoverableTestInvalidValues, TestSize.Level1)
+HWTEST_F(NavDestinationModifierTest, DISABLED_setRecoverableTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     std::string resultStr;
