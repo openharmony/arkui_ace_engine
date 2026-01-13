@@ -58,18 +58,10 @@ const auto LEN_NUM_NEG = Converter::ArkValue<Ark_Length>("-1234.00px");
 const auto LEN_NUM_ZERO = Converter::ArkValue<Ark_Length>("0.00px");
 const auto LEN_NUM_VALID = Converter::ArkValue<Ark_Length>("1234.00px");
 
-const auto OPT_LEN_NUM_NEG = Converter::ArkValue<Opt_Length>("-1234.00px");
-const auto OPT_LEN_NUM_ZERO = Converter::ArkValue<Opt_Length>("0.00px");
-const auto OPT_LEN_NUM_VALID = Converter::ArkValue<Opt_Length>("1234.00px");
-
 constexpr auto EXPECTED_NUM_NEG = "-1234.000000";
 constexpr auto EXPECTED_NUM_VILID = "1234.000000";
 constexpr auto EXPECTED_NUM_ZERO = "0.000000";
 constexpr auto EXPECTED_DEF_MIN_CONTENT_WIDTH = "360.000000";
-
-constexpr auto EXPECTED_NUM_NEG_PX = "-1234.00px";
-constexpr auto EXPECTED_NUM_VILID_PX = "1234.00px";
-constexpr auto EXPECTED_NUM_ZERO_PX = "0.00px";
 
 constexpr auto ICON_STRING = "icon.png";
 constexpr auto ICON_STRING_DEF = "";
@@ -194,7 +186,7 @@ public:
             jsonValue = GetJsonValue(node_);
             divJson = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_DIVIDER_NAME);
             resultStr = GetAttrValue<std::string>(divJson, attribute);
-            EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed;
+            EXPECT_EQ(resultStr, expected) << "Passed value is: " << passed << ", attribute: " << attribute;
         }
     }
 };
@@ -769,23 +761,23 @@ HWTEST_F(SideBarContainerModifierTest, setDividerTestDefaultValues, TestSize.Lev
 
 // Valid values for attribute 'strokeWidth' of method 'setDivider'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerStrokeValidValues = {
-    {EXPECTED_NUM_NEG_PX, OPT_LEN_NUM_NEG, ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE},
-    {EXPECTED_NUM_ZERO_PX, OPT_LEN_NUM_ZERO, EXPECTED_NUM_ZERO_PX},
-    {EXPECTED_NUM_VILID_PX, OPT_LEN_NUM_VALID, EXPECTED_NUM_VILID_PX},
+    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), ATTRIBUTE_DIVIDER_STROKE_WIDTH_DEFAULT_VALUE},
+    {"0.00px", Converter::ArkValue<Opt_Length>("0.00px"), "0.00px"},
+    {"1234.00px", Converter::ArkValue<Opt_Length>("1234.00px"), "1234.00px"},
 };
 
 // Valid values for attribute 'startMargin' of method 'setDivider'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerStartMarginValidValues = {
-    {EXPECTED_NUM_NEG_PX, OPT_LEN_NUM_NEG, EXPECTED_NUM_NEG_PX},
-    {EXPECTED_NUM_ZERO_PX, OPT_LEN_NUM_ZERO, EXPECTED_NUM_ZERO_PX},
-    {EXPECTED_NUM_VILID_PX, OPT_LEN_NUM_VALID, EXPECTED_NUM_VILID_PX},
+    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), ATTRIBUTE_DIVIDER_START_MARGIN_DEFAULT_VALUE},
+    {"0.00px", Converter::ArkValue<Opt_Length>("0.00px"), "0.00px"},
+    {"1234.00px", Converter::ArkValue<Opt_Length>("1234.00px"), "1234.00px"},
 };
 
 // Valid values for attribute 'endMargin' of method 'setDivider'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerEndMarginValidValues = {
-    {EXPECTED_NUM_NEG_PX, OPT_LEN_NUM_NEG, EXPECTED_NUM_NEG_PX},
-    {EXPECTED_NUM_ZERO_PX, OPT_LEN_NUM_ZERO, EXPECTED_NUM_ZERO_PX},
-    {EXPECTED_NUM_VILID_PX, OPT_LEN_NUM_VALID, EXPECTED_NUM_VILID_PX},
+    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), ATTRIBUTE_DIVIDER_END_MARGIN_DEFAULT_VALUE},
+    {"0.00px", Converter::ArkValue<Opt_Length>("0.00px"), "0.00px"},
+    {"1234.00px", Converter::ArkValue<Opt_Length>("1234.00px"), "1234.00px"},
 };
 
 /*

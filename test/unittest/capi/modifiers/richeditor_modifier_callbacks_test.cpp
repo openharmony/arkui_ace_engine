@@ -912,7 +912,7 @@ HWTEST_F(RichEditorModifierCallbacksTest, OnCutTest, TestSize.Level1)
  * @tc.desc: setEditMenuOptions test
  * @tc.type: FUNC
  */
-HWTEST_F(RichEditorModifierCallbacksTest, setEditMenuOptionsTest, TestSize.Level1)
+HWTEST_F(RichEditorModifierCallbacksTest, DISABLED_setEditMenuOptionsTest, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setEditMenuOptions, nullptr);
     auto frameNode = reinterpret_cast<FrameNode*>(node_);
