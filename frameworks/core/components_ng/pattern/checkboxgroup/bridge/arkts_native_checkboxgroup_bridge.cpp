@@ -708,7 +708,10 @@ ArkUINativeModuleValue CheckboxGroupBridge::JsMark(ArkUIRuntimeCallInfo* runtime
     CHECK_NULL_RETURN(theme, panda::NativePointerRef::New(vm, nullptr));
 
     Color strokeColor = theme->GetPointColor();
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, strokeColorValue, strokeColor)) {
+    RefPtr<ResourceObject> colorResObj;
+    auto frameNode = reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(frameNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, strokeColorValue, strokeColor, colorResObj, nodeInfo)) {
         GetArkUINodeModifiers()->getCheckboxGroupModifier()->resetCheckMarkColor(nullptr);
     } else {
         GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckMarkColor(nullptr, strokeColor.GetValue());
@@ -716,15 +719,14 @@ ArkUINativeModuleValue CheckboxGroupBridge::JsMark(ArkUIRuntimeCallInfo* runtime
 
     auto sizeValue = markObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "size"));
     CalcDimension size;
-    if (!(ArkTSUtils::ParseJsDimensionVp(vm, sizeValue, size, false)) || (size.Unit() == DimensionUnit::PERCENT) ||
-        (size.ConvertToVp() < 0)) {
+    if (!((ArkTSUtils::ParseJsDimensionVp(vm, sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) &&
+            (size.ConvertToVp() >= 0))) {
         size = Dimension(DEFAULT_SIZE_VALUE);
     }
-
     auto strokeWidthValue = markObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "strokeWidth"));
     CalcDimension strokeWidth;
-    if (!(ArkTSUtils::ParseJsDimensionVp(vm, strokeWidthValue, strokeWidth, false)) ||
-        (strokeWidth.Unit() == DimensionUnit::PERCENT) || (strokeWidth.ConvertToVp() < 0)) {
+    if (!((ArkTSUtils::ParseJsDimensionVp(vm, strokeWidthValue, strokeWidth)) &&
+            (strokeWidth.Unit() != DimensionUnit::PERCENT) && (strokeWidth.ConvertToVp() >= 0))) {
         strokeWidth = theme->GetCheckStroke();
     }
     GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckMarkSize(
@@ -783,7 +785,7 @@ ArkUINativeModuleValue CheckboxGroupBridge::SetCheckboxGroupPadding(ArkUIRuntime
             ArkTSUtils::ParsePadding(vm, GetProperty(vm, jsObj, "left"), startDimen, newPaddings.start);
             ArkTSUtils::ParsePadding(vm, GetProperty(vm, jsObj, "right"), endDimen, newPaddings.end);
         }
-        if (newPaddings.start.isSet || newPaddings.end.isSet || newPaddings.top.isSet || newPaddings.end.isSet) {
+        if (newPaddings.start.isSet || newPaddings.end.isSet || newPaddings.top.isSet || newPaddings.bottom.isSet) {
             GetArkUINodeModifiers()->getCheckboxGroupModifier()->setCheckboxGroupPadding(
                 &oldPaddings, &newPaddings, flag);
             return panda::JSValueRef::Undefined(vm);

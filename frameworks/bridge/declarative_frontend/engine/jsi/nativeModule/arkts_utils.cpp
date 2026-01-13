@@ -2041,7 +2041,7 @@ bool ArkTSUtils::ParseResponseRegion(
 }
 bool ArkTSUtils::CheckLengthMetrics(EcmaVM* vm, const Local<panda::ObjectRef>& jsObject)
 {
-    if (jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "strat")) ||
+    if (jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "start")) ||
         jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "end")) ||
         jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "topStart")) ||
         jsObject->Has(vm, panda::StringRef::NewFromUtf8(vm, "topEnd")) ||
