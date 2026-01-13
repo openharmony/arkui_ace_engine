@@ -26,6 +26,7 @@
 
 #include "core/common/ace_engine.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/drag_springloadingcontext_peer.h"
 
 namespace OHOS::Ace::Ani {
 namespace {
@@ -956,5 +957,203 @@ void ANICleanDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obj
     DragPreview* ptr = reinterpret_cast<DragPreview *>(dragPreviewPtr);
     delete ptr;
     ptr = nullptr;
+}
+
+void ANICleanSpringLoadingContext([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object aniClass,
+    ani_long springLoadingContextPtr)
+{
+    if (springLoadingContextPtr == 0) {
+        return;
+    }
+    DragController_SpringLoadingContextPeer* ptr =
+        reinterpret_cast<DragController_SpringLoadingContextPeer *>(springLoadingContextPtr);
+    delete ptr;
+    ptr = nullptr;
+}
+
+ani_object ExtractorFromPtrToDragSpringLoadingContext(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer)
+{
+    ani_object springLoadingContextObj = {};
+    CHECK_NULL_RETURN(env, springLoadingContextObj);
+    CHECK_NULL_RETURN(pointer, springLoadingContextObj);
+    ani_status status = ANI_OK;
+    ani_class cls;
+    auto fullClassName = std::string("@ohos.arkui.dragController.dragController.SpringLoadingContext");
+    if ((status = env->FindClass(fullClassName.c_str(), &cls)) != ANI_OK) {
+        HILOGE("AceDrag, find SpringLoadingContext calss fail. status = %{public}d", status);
+        return springLoadingContextObj;
+    }
+    ani_method method;
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "l:", &method)) != ANI_OK) {
+        HILOGE("AceDrag, find constructor method failed. status = %{public}d", status);
+        return springLoadingContextObj;
+    }
+    if ((status = env->Object_New(cls, method, &springLoadingContextObj, pointer)) != ANI_OK) {
+        HILOGE("AceDrag, create SpringLoadingContext object failed. status = %{public}d", status);
+        return {};
+    }
+    return springLoadingContextObj;
+}
+
+ani_enum_item SpringLoadingContextGetState(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
+        return {};
+    }
+    int32_t state = modifier->getDragControllerAniModifier()->aniSpringLoadingContextGetState(pointer);
+    ani_enum enumType;
+    ani_enum_item enumItem;
+    ani_status status = ANI_OK;
+    if ((status = env->FindEnum("@ohos.arkui.dragController.dragController.DragSpringLoadingState", &enumType))
+        != ANI_OK) {
+        HILOGE("DragSpringLoadingState FindEnum failed, status:%{public}d", status);
+        return {};
+    }
+    if ((status = env->Enum_GetEnumItemByIndex(enumType, static_cast<ani_size>(state), &enumItem)) != ANI_OK) {
+        HILOGE("DragSpringLoadingState GetEnumItem failed, status:%{public}d, state:%{public}d", status, state);
+        return {};
+    }
+    return enumItem;
+}
+
+ani_int SpringLoadingContextGetCurrentNotifySequence(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
+        return {};
+    }
+    int32_t sequence =
+        modifier->getDragControllerAniModifier()->aniSpringLoadingContextGetCurrentNotifySequence(pointer);
+    return static_cast<ani_int>(sequence);
+}
+
+ani_object SpringLoadingContextGetDragInfos(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!env || !modifier || !modifier->getDragControllerAniModifier()) {
+        return {};
+    }
+    ArkUIDragInfos info;
+    info.summary = SharedPointerWrapper(std::make_shared<OHOS::UDMF::Summary>());
+    modifier->getDragControllerAniModifier()->aniSpringLoadingContextGetDragInfos(pointer, info);
+    ani_object dragInfosObj = {};
+    CHECK_NULL_RETURN(pointer, dragInfosObj);
+    ani_status status = ANI_OK;
+    ani_class cls;
+    auto fullClassName = std::string("@ohos.arkui.dragController.dragController.SpringLoadingDragInfosInner");
+    if ((status = env->FindClass(fullClassName.c_str(), &cls)) != ANI_OK) {
+        HILOGE("AceDrag, find SpringLoadingDragInfos calss fail. status = %{public}d", status);
+        return dragInfosObj;
+    }
+    ani_method method;
+    if ((status = env->Class_FindMethod(cls, "<ctor>",
+        "C{@ohos.data.unifiedDataChannel.unifiedDataChannel.Summary}C{std.core.String}:", &method)) != ANI_OK) {
+        HILOGE("AceDrag, find SpringLoadingDragInfos constructor method failed. status = %{public}d", status);
+        return dragInfosObj;
+    }
+    ani_object summary_obj = {};
+    ani_string extraInfo_obj = {};
+    auto retValue = AniUtils::StdStringToANIString(env, info.extraInfo);
+    if (retValue.has_value()) {
+        extraInfo_obj = retValue.value();
+    }
+    auto summaryPtr = info.summary.GetSharedPtr();
+    if (summaryPtr) {
+        std::shared_ptr<OHOS::UDMF::Summary> summary =
+            std::static_pointer_cast<OHOS::UDMF::Summary>(summaryPtr);
+        summary_obj = OHOS::UDMF::AniConverter::WrapSummary(env, summary);
+    }
+    if ((status = env->Object_New(cls, method, &dragInfosObj, summary_obj, extraInfo_obj)) != ANI_OK) {
+        HILOGE("AceDrag, create SpringLoadingDragInfos object failed. status = %{public}d", status);
+        return {};
+    }
+    return dragInfosObj;
+}
+
+ani_object SpringLoadingContextGetCurrentConfig(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!env || !modifier || !modifier->getDragControllerAniModifier()) {
+        return {};
+    }
+    auto config = modifier->getDragControllerAniModifier()->aniSpringLoadingContextGetCurrentConfig(pointer);
+    ani_object obj = {};
+    CHECK_NULL_RETURN(pointer, obj);
+    ani_status status = ANI_OK;
+    ani_class cls;
+    auto fullClassName = std::string("@ohos.arkui.dragController.dragController.DragSpringLoadingConfigurationInner");
+    if ((status = env->FindClass(fullClassName.c_str(), &cls)) != ANI_OK) {
+        HILOGE("AceDrag, find DragSpringLoadingConfiguration calss fail. status = %{public}d", status);
+        return obj;
+    }
+    ani_method method;
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "iiii:", &method)) != ANI_OK) {
+        HILOGE("AceDrag, find DragSpringLoadingConfiguration constructor method failed. status = %{public}d", status);
+        return obj;
+    }
+    ani_int stillTimeLimit = static_cast<ani_int>(config.stillTimeLimit);
+    ani_int updateInterval = static_cast<ani_int>(config.updateInterval);
+    ani_int updateNotifyCount = static_cast<ani_int>(config.updateNotifyCount);
+    ani_int updateToFinishInterval = static_cast<ani_int>(config.updateToFinishInterval);
+    if ((status = env->Object_New(cls, method, &obj, stillTimeLimit, updateInterval, updateNotifyCount,
+        updateToFinishInterval)) != ANI_OK) {
+        HILOGE("AceDrag, create DragSpringLoadingConfiguration object failed. status = %{public}d", status);
+        return {};
+    }
+    return obj;
+}
+
+void SpringLoadingContextAbort(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragControllerAniModifier()) {
+        return;
+    }
+    modifier->getDragControllerAniModifier()->aniSpringLoadingContextAbort(pointer);
+}
+
+bool GetPropertyIntByName(ani_env *env, ani_object config, const char *name, int &value)
+{
+    CHECK_NULL_RETURN(env, false);
+    ani_ref res {};
+    ani_status status = env->Object_GetPropertyByName_Ref(config, name, &res);
+    if (status != ANI_OK) {
+        return false;
+    }
+    ani_object obj = static_cast<ani_object>(res);
+    if (AniUtils::IsUndefined(env, obj)) {
+        return false;
+    }
+    ani_int value_obj = 0;
+    if (ANI_OK != env->Object_CallMethodByName_Int(obj, "unboxed", ":i", &value_obj)) {
+        return false;
+    }
+    value = static_cast<int>(value_obj);
+    return true;
+}
+
+void SpringLoadingContextUpdateConfiguration(ani_env* env, [[maybe_unused]] ani_object object,
+    ani_long pointer, ani_object config)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!env || !modifier || !modifier->getDragControllerAniModifier()) {
+        return;
+    }
+    ArkUIDragSpringLoadingConfiguration configValue;
+    int value;
+    if (GetPropertyIntByName(env, config, "stillTimeLimit", value)) {
+        configValue.stillTimeLimit = value;
+    }
+    if (GetPropertyIntByName(env, config, "updateInterval", value)) {
+        configValue.updateInterval = value;
+    }
+    if (GetPropertyIntByName(env, config, "updateNotifyCount", value)) {
+        configValue.updateNotifyCount = value;
+    }
+    if (GetPropertyIntByName(env, config, "updateToFinishInterval", value)) {
+        configValue.updateToFinishInterval = value;
+    }
+    modifier->getDragControllerAniModifier()->aniSpringLoadingContextUpdateConfiguration(pointer, configValue);
 }
 } // namespace OHOS::Ace::Ani

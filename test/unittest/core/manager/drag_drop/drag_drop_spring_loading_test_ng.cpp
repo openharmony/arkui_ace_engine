@@ -416,50 +416,10 @@ HWTEST_F(DragSpringLoadingTestNg, DragSpringLoadingTest002, TestSize.Level1)
 
 /**
  * @tc.name: DragSpringLoadingTest003
- * @tc.desc: Test DragDropSpringLoadingState Handler
- * @tc.type: FUNC
- */
-HWTEST_F(DragSpringLoadingTestNg, DragSpringLoadingTest003, TestSize.Level1)
-{
-    ASSERT_NE(dropFrameNode_, nullptr);
-    int32_t caseNum = 0;
-    for (const auto& testCase : DRAG_DROP_SPRING_LOADING_STATE_HANDLER_TEST_CASES) {
-        detector_ = AceType::MakeRefPtr<DragDropSpringLoadingDetector>();
-        auto machine = detector_->stateMachine_;
-        ASSERT_NE(machine, nullptr);
-        machine->ResetMachine();
-        ASSERT_NE(machine->stateMachinePool_, nullptr);
-        detector_->ResetState();
-        detector_->preTargetFrameNode_ = dropFrameNode_;
-        detector_->preMovePoint_ = Point(0, 0);
-        detector_->preTimeStamp_ = 0;
-        machine->currentState_ = testCase.originStatus;
-        dropFrameNode_->eventHub_ = AceType::MakeRefPtr<EventHub>();
-        SetupTestCaseConditions(testCase);
-        auto handler = machine->stateMachinePool_->GetStateHandler(testCase.originStatus);
-        if (testCase.springLoadingMachineTestCase.transitionFailed &&
-            !testCase.springLoadingMachineTestCase.isAllowedTransitionFind) {
-            ASSERT_EQ(handler, nullptr);
-            EXPECT_FALSE(machine->stateMachinePool_->IsAllowedTransition(testCase.originStatus, testCase.expectStatus));
-            caseNum++;
-            continue;
-        }
-        ASSERT_NE(handler, nullptr);
-        handler->OnEnter(testCase.extraInfo);
-        EXPECT_TRUE(DragSpringLoadingTestNg::CheckDragDropSpringLoadingStatus(
-            caseNum, machine->currentState_, testCase.expectStatus));
-        EXPECT_TRUE(DragSpringLoadingTestNg::CheckDragDropSpringLoadingNotifySequence(
-            caseNum, machine->GetCurrentNotifySequence(), testCase.notifySequence));
-        caseNum++;
-    }
-}
-
-/**
- * @tc.name: DragSpringLoadingTest004
  * @tc.desc: Test NotifyMove
  * @tc.type: FUNC
  */
- HWTEST_F(DragSpringLoadingTestNg, DragSpringLoadingTest004, TestSize.Level1)
+ HWTEST_F(DragSpringLoadingTestNg, DragSpringLoadingTest003, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. initialize detector.
@@ -495,5 +455,45 @@ HWTEST_F(DragSpringLoadingTestNg, DragSpringLoadingTest003, TestSize.Level1)
     machine->isWaitingForIdleFinish_ = true;
     detector_->NotifyIntercept("");
     EXPECT_FALSE(machine->isWaitingForIdleFinish_);
+}
+
+/**
+ * @tc.name: DragSpringLoadingTest004
+ * @tc.desc: Test DragDropSpringLoadingState Handler
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragSpringLoadingTestNg, DragSpringLoadingTest004, TestSize.Level1)
+{
+    ASSERT_NE(dropFrameNode_, nullptr);
+    int32_t caseNum = 0;
+    for (const auto& testCase : DRAG_DROP_SPRING_LOADING_STATE_HANDLER_TEST_CASES) {
+        detector_ = AceType::MakeRefPtr<DragDropSpringLoadingDetector>();
+        auto machine = detector_->stateMachine_;
+        ASSERT_NE(machine, nullptr);
+        machine->ResetMachine();
+        ASSERT_NE(machine->stateMachinePool_, nullptr);
+        detector_->ResetState();
+        detector_->preTargetFrameNode_ = dropFrameNode_;
+        detector_->preMovePoint_ = Point(0, 0);
+        detector_->preTimeStamp_ = 0;
+        machine->currentState_ = testCase.originStatus;
+        dropFrameNode_->eventHub_ = AceType::MakeRefPtr<EventHub>();
+        SetupTestCaseConditions(testCase);
+        auto handler = machine->stateMachinePool_->GetStateHandler(testCase.originStatus);
+        if (testCase.springLoadingMachineTestCase.transitionFailed &&
+            !testCase.springLoadingMachineTestCase.isAllowedTransitionFind) {
+            ASSERT_EQ(handler, nullptr);
+            EXPECT_FALSE(machine->stateMachinePool_->IsAllowedTransition(testCase.originStatus, testCase.expectStatus));
+            caseNum++;
+            continue;
+        }
+        ASSERT_NE(handler, nullptr);
+        handler->OnEnter(testCase.extraInfo);
+        EXPECT_TRUE(DragSpringLoadingTestNg::CheckDragDropSpringLoadingStatus(
+            caseNum, machine->currentState_, testCase.expectStatus));
+        EXPECT_TRUE(DragSpringLoadingTestNg::CheckDragDropSpringLoadingNotifySequence(
+            caseNum, machine->GetCurrentNotifySequence(), testCase.notifySequence));
+        caseNum++;
+    }
 }
 } // namespace OHOS::Ace::NG

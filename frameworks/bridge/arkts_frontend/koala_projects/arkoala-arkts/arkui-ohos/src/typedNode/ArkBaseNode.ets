@@ -47,6 +47,7 @@ import { InteropNativeModule } from '@koalaui/interop';
 import { ArkUIAniModule } from 'arkui.ani';
 import { hookCustomPropertyImpl, hookAllowDrop } from '#handwritten';
 import { CustomProperty } from '#generated';
+import { dragController } from "@ohos.arkui.dragController"
 
 export class ArkBaseNode extends ComponentBase implements CommonAttribute {
 
@@ -432,6 +433,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     }
     public onDrop(eventCallback: ((event: DragEvent, extraParams?: string) => void) | undefined | OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
         this.getPeer()?.setOnDrop1Attribute(eventCallback, dropOptions);
+        return this
+    }
+    public onDragSpringLoading(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): this {
+        this.getPeer()?.setOnDragSpringLoadingAttribute(callback_, configuration)
         return this
     }
     public onDragEnd(value: ((event: DragEvent, extraParams?: string) => void) | undefined): this {

@@ -40,6 +40,7 @@ import { uiMaterial_Material_serializer } from "./../framework/ohos.arkui.uiMate
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
 import { StyledString_serializer, StyledString, ImageAttachment, CustomSpan, StyleOptions, StyledStringKey, SpanStyle, StyledStringMarshallCallback, UserDataSpan, StyledStringUnmarshallCallback } from "./styledString"
 import { ArkThemeScopeManager } from "#arktheme"
+import { dragController_DragSpringLoadingConfiguration_serializer } from "./../framework/ohos.arkui.dragController"
 import { ComponentContent_serializer } from "./../ComponentContent"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
@@ -50,6 +51,7 @@ import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescript
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
 import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
 import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
+import { dragController } from "@ohos.arkui.dragController"
 import { default as image } from "@ohos.multimedia.image"
 import { ComponentContent, ComponentContentBase } from "arkui.ComponentContent"
 import { AsyncCallback, BusinessError } from "@ohos.base"
@@ -5372,6 +5374,25 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setOnDrop1(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOnDragSpringLoadingAttribute(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (callback_ !== undefined && callback_ !== null) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const callback_TmpValue  = callback_!
+            thisSerializer.holdAndWriteCallback(callback_TmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (configuration !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const configurationTmpValue  = configuration!
+            dragController_DragSpringLoadingConfiguration_serializer.write(thisSerializer, configurationTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setOnDragSpringLoading(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setDragPreview1Attribute(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (preview !== undefined) {
@@ -7103,6 +7124,8 @@ export type UnifiedData = unifiedDataChannel.UnifiedData;
 export type Summary = unifiedDataChannel.Summary;
 export type UniformDataType = uniformTypeDescriptor.UniformDataType;
 export type DataSyncOptions = unifiedDataChannel.GetDataParams;
+export type SpringLoadingContext = dragController.SpringLoadingContext;
+export type DragSpringLoadingConfiguration = dragController.DragSpringLoadingConfiguration;
 export enum DragResult {
     UNKNOWN = -1,
     DRAG_SUCCESSFUL = 0,
@@ -8199,6 +8222,9 @@ export interface CommonMethod {
     onDrop(eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
         throw new Error("Unimplemented method onDrop")
     }
+    onDragSpringLoading(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): this {
+        throw new Error("Unimplemented method onDragSpringLoading")
+    }
     dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
         throw new Error("Unimplemented method dragPreview")
     }
@@ -9030,6 +9056,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     onDrop(eventCallback: OnDragEventCallback | undefined, dropOptions?: DropOptions): this {
+        return this
+    }
+    onDragSpringLoading(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): this {
         return this
     }
     dragPreview(preview: CustomBuilder | DragItemInfo | string | undefined, config?: PreviewConfiguration): this {
@@ -11127,6 +11156,15 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
             const eventCallback_casted = eventCallback as (OnDragEventCallback | undefined)
             const dropOptions_casted = dropOptions as (DropOptions | undefined)
             this.getPeer()?.setOnDrop1Attribute(eventCallback_casted, dropOptions_casted)
+            return this
+        }
+        return this
+    }
+    public onDragSpringLoading(callback_: ((value0: dragController.SpringLoadingContext) => void) | null | undefined, configuration?: dragController.DragSpringLoadingConfiguration): this {
+        if (this.checkPriority("onDragSpringLoading")) {
+            const callback__casted = callback_ as (((value0: dragController.SpringLoadingContext) => void) | null | undefined)
+            const configuration_casted = configuration as (dragController.DragSpringLoadingConfiguration | undefined)
+            this.getPeer()?.setOnDragSpringLoadingAttribute(callback__casted, configuration_casted)
             return this
         }
         return this

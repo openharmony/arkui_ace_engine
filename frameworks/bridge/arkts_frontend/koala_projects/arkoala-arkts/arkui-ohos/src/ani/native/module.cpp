@@ -798,6 +798,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANICleanDragPreview)
         },
         ani_native_function {
+            "_DragController_cleanSpringLoadingContext",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ANICleanSpringLoadingContext)
+        },
+        ani_native_function {
             "_DragController_setDragEventStrictReportingEnabled",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionSetDragEventStrictReportingEnabled)
@@ -816,6 +821,36 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_DragController_enableDropDisallowedBadge",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ANIDragActionEnableDropDisallowedBadge)
+        },
+        ani_native_function {
+            "_DragSpringLoadingContext_get_state",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SpringLoadingContextGetState)
+        },
+        ani_native_function {
+            "_DragSpringLoadingContext_get_currentNotifySequence",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SpringLoadingContextGetCurrentNotifySequence)
+        },
+        ani_native_function {
+            "_DragSpringLoadingContext_get_dragInfos",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SpringLoadingContextGetDragInfos)
+        },
+        ani_native_function {
+            "_DragSpringLoadingContext_get_currentConfig",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SpringLoadingContextGetCurrentConfig)
+        },
+        ani_native_function {
+            "_DragSpringLoadingContext_abort",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SpringLoadingContextAbort)
+        },
+        ani_native_function {
+            "_DragSpringLoadingContext_updateConfiguration",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SpringLoadingContextUpdateConfiguration)
         },
         ani_native_function {
             "_StyledString_SetPixelMap",
@@ -1124,6 +1159,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Extractors_fromUnifiedDataChannelUnifiedDataPtr",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorFromPtrToUnifiedData)
+        },
+        ani_native_function {
+            "_Extractors_fromPtrToDragSpringLoadingContext",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorFromPtrToDragSpringLoadingContext)
         },
         ani_native_function {
             "_createDragEventAccessorWithPointer",

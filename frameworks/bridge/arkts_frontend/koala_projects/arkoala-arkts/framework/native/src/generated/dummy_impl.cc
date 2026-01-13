@@ -4778,6 +4778,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetOnDragSpringLoadingImpl(Ark_NativePointer node,
+                                    const Opt_Callback_SpringLoadingContext_Void* callback_,
+                                    const Opt_dragController_DragSpringLoadingConfiguration* configuration)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setOnDragSpringLoading(");
+        WriteToString(&out, callback_);
+        out.append(", ");
+        WriteToString(&out, configuration);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetDragPreview1Impl(Ark_NativePointer node,
                              const Opt_Union_CustomBuilder_DragItemInfo_String* preview,
                              const Opt_PreviewConfiguration* config)
@@ -22889,6 +22904,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetSharedTransitionImpl,
             CommonMethodModifier::SetChainModeImpl,
             CommonMethodModifier::SetOnDrop1Impl,
+            CommonMethodModifier::SetOnDragSpringLoadingImpl,
             CommonMethodModifier::SetDragPreview1Impl,
             CommonMethodModifier::SetOverlayImpl,
             CommonMethodModifier::SetBlendModeImpl,

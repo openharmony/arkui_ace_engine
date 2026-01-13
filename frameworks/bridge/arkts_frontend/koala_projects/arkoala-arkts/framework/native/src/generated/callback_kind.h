@@ -180,6 +180,7 @@ typedef enum CallbackKind {
     Kind_Callback_Size_Void = -646869686,
     Kind_Callback_SizeResult_Void = 1318865891,
     Kind_Callback_SpringBackAction_Void = 1536231691,
+    Kind_Callback_SpringLoadingContext_Void = 188104551,
     Kind_Callback_StateStylesChange = -1872286415,
     Kind_Callback_String_PasteEvent_Void = -683652998,
     Kind_Callback_String_SurfaceRect_Void = -1736208400,

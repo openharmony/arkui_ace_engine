@@ -24,6 +24,7 @@
 #include "core/interfaces/native/implementation/custom_span_peer.h"
 #include "core/interfaces/native/implementation/decoration_style_peer.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/drag_springloadingcontext_peer.h"
 #include "core/interfaces/native/implementation/gesture_style_peer.h"
 #include "core/interfaces/native/implementation/image_attachment_peer.h"
 #include "core/interfaces/native/implementation/length_metrics_peer.h"
@@ -128,6 +129,14 @@ void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>
     const auto peer = PeerUtils::CreatePeer<DragEventPeer>();
     peer->dragInfo = info;
     dragEvent = peer;
+}
+
+void AssignArkValue(
+    Ark_dragController_SpringLoadingContext& dst, const RefPtr<OHOS::Ace::DragSpringLoadingContext>& src)
+{
+    const auto peer = PeerUtils::CreatePeer<DragController_SpringLoadingContextPeer>();
+    peer->context = src;
+    dst = peer;
 }
 
 void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src)

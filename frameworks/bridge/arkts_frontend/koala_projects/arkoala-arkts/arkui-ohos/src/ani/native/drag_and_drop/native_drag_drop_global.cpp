@@ -96,10 +96,11 @@ ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     if (!modifier || !modifier->getDragAniModifier() || !env) {
         return result_obj;
     }
-    auto summary = std::make_shared<OHOS::UDMF::Summary>();
-    modifier->getDragAniModifier()->getDragSummary(dragEvent, reinterpret_cast<ani_ref>(summary.get()));
-
-    auto summary_obj = OHOS::UDMF::AniConverter::WrapSummary(env, summary);
+    auto summary = SharedPointerWrapper(std::make_shared<OHOS::UDMF::Summary>());
+    modifier->getDragAniModifier()->getDragSummary(dragEvent, summary);
+    std::shared_ptr<OHOS::UDMF::Summary> udmfSummary =
+        std::static_pointer_cast<OHOS::UDMF::Summary>(summary.GetSharedPtr());
+    auto summary_obj = OHOS::UDMF::AniConverter::WrapSummary(env, udmfSummary);
     ani_boolean isSummary;
     ani_class summaryClass;
     env->FindClass("@ohos.data.unifiedDataChannel.unifiedDataChannel.Summary", &summaryClass);
@@ -108,7 +109,6 @@ ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] a
         return result_obj;
     }
     return summary_obj;
-    return {};
 }
 
 ani_string DragEveStartDataLoading([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -136,7 +136,6 @@ ani_string DragEveStartDataLoading([[maybe_unused]] ani_env* env, [[maybe_unused
     }
     auto result = AniUtils::StdStringToANIString(env, key);
     return result.value_or(value);
-    return value;
 }
 
 void DragEventSetPixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,

@@ -5147,6 +5147,26 @@ void impl_CommonMethod_setOnDrop1(Ark_NativePointer thisPtr, KSerializerBuffer t
         GetNodeModifiers()->getCommonMethodModifier()->setOnDrop1(self, static_cast<Opt_OnDragEventCallback*>(&eventCallbackValueTemp), static_cast<Opt_DropOptions*>(&dropOptionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(CommonMethod_setOnDrop1, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_CommonMethod_setOnDragSpringLoading(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto callback_ValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Callback_SpringLoadingContext_Void callback_ValueTempTmpBuf = {};
+        callback_ValueTempTmpBuf.tag = callback_ValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((callback_ValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            callback_ValueTempTmpBuf.value = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_dragController_SpringLoadingContext value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_SpringLoadingContext_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_dragController_SpringLoadingContext value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_SpringLoadingContext_Void))))};
+        }
+        Opt_Callback_SpringLoadingContext_Void callback_ValueTemp = callback_ValueTempTmpBuf;;
+        const auto configurationValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_dragController_DragSpringLoadingConfiguration configurationValueTempTmpBuf = {};
+        configurationValueTempTmpBuf.tag = configurationValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((configurationValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            configurationValueTempTmpBuf.value = dragController_DragSpringLoadingConfiguration_serializer::read(thisDeserializer);
+        }
+        Opt_dragController_DragSpringLoadingConfiguration configurationValueTemp = configurationValueTempTmpBuf;;
+        GetNodeModifiers()->getCommonMethodModifier()->setOnDragSpringLoading(self, static_cast<Opt_Callback_SpringLoadingContext_Void*>(&callback_ValueTemp), static_cast<Opt_dragController_DragSpringLoadingConfiguration*>(&configurationValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(CommonMethod_setOnDragSpringLoading, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_CommonMethod_setDragPreview1(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

@@ -14,6 +14,7 @@ import { default as Want } from "@ohos.app.ability.Want";
 import { Configuration } from "@ohos.app.ability.Configuration";
 import { default as window } from "@ohos.window";
 import { default as uiObserver } from "@ohos.arkui.observer";
+import { dragController } from "@ohos.arkui.dragController"
 import { UIContext } from "@ohos.arkui.UIContext";
 import { AbilityInfo, WindowSize } from "bundleManager.AbilityInfo";
 import {
@@ -269,7 +270,6 @@ export namespace extractors {
   export function fromUnifiedDataChannelUnifiedDataPtr(
     ptr: KPointer
   ): unifiedDataChannel.UnifiedData {
-    const x: Object = {};
     return ArkUIAniModule._Extractors_fromUnifiedDataChannelUnifiedDataPtr(ptr);
   }
 
@@ -281,8 +281,19 @@ export namespace extractors {
   export function fromUnifiedDataChannelSummaryPtr(
     ptr: KPointer
   ): unifiedDataChannel.Summary {
-    const x: Object = {};
+    const x: Object = {};	 
     return x as unifiedDataChannel.Summary;
+  }
+
+  export function toDragControllerSpringLoadingContextPtr(
+    value: dragController.SpringLoadingContext
+  ): KPointer {
+    return 123;
+  }
+  export function fromDragControllerSpringLoadingContextPtr(
+    ptr: KPointer
+  ): dragController.SpringLoadingContext {
+    return ArkUIAniModule._Extractors_fromPtrToDragSpringLoadingContext(ptr);
   }
 
   export function toWantPtr(value: Want): KPointer {
