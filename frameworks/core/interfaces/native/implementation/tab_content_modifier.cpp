@@ -315,11 +315,11 @@ void AssignCast(std::optional<LabelStyle>& dst, const Ark_TabBarLabelStyle& src)
     dst->maxLines = maxLines;
     dst->heightAdaptivePolicy =
         Converter::OptConvert<TextHeightAdaptivePolicy>(src.heightAdaptivePolicy);
-    auto minFontSize = Converter::OptConvert<Dimension>(src.minFontSize);
+    auto minFontSize = Converter::OptConvertFromF64ResourceStr(src.minFontSize, DimensionUnit::FP);
     Validator::ValidateNonNegative(minFontSize);
     Validator::ValidateNonPercent(minFontSize);
     dst->minFontSize = minFontSize;
-    auto maxFontSize = Converter::OptConvert<Dimension>(src.maxFontSize);
+    auto maxFontSize = Converter::OptConvertFromF64ResourceStr(src.maxFontSize, DimensionUnit::FP);
     Validator::ValidateNonNegative(maxFontSize);
     Validator::ValidateNonPercent(maxFontSize);
     dst->maxFontSize = maxFontSize;
