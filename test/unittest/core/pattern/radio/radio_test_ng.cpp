@@ -1591,4 +1591,35 @@ HWTEST_F(RadioTestNg, RadioSetIndicatorColorSetByUser001, TestSize.Level1)
     EXPECT_EQ(radioPaintProperty->GetRadioIndicatorColorValue(), NORMAL_COLOR);
     EXPECT_EQ(radioPaintProperty->GetRadioIndicatorColorSetByUserValue(), true);
 }
+
+/**
+ * @tc.name: RadioSetHoverEffect001
+ * @tc.desc: Test SetHoverEffect.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RadioTestNg, RadioSetHoverEffect001, TestSize.Level1)
+{
+    /**
+     * @tc.cases: case1. RadioPattern can Create without value or group.
+     */
+    RadioModelNG radioModelNG;
+    radioModelNG.Create(std::nullopt, std::nullopt, std::nullopt);
+    auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub = frameNode->GetEventHub<NG::RadioEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto inputEventHub = eventHub->GetOrCreateInputEventHub();
+    inputEventHub->SetHoverEffect(HoverEffectType::UNKNOWN);
+    /**
+     * @tc.cases: case2. RadioPattern can Create with value and group.
+     */
+    RadioModelNG radioModelNG2;
+    radioModelNG2.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
+    auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(frameNode, nullptr);
+    auto eventHub2 = frameNode2->GetEventHub<NG::RadioEventHub>();
+    ASSERT_NE(eventHub2, nullptr);
+    EXPECT_EQ(eventHub2->GetValue(), NAME);
+    EXPECT_EQ(eventHub2->GetGroup(), GROUP_NAME);
+}
 } // namespace OHOS::Ace::NG
