@@ -20,7 +20,7 @@
 
 @Builder
 export function SubPageBuilder() {
-  SubPage()
+  SubPage();
 }
 
 type ItemType = number | string;
@@ -130,7 +130,7 @@ struct SubPage {
             .template('number', (Ri: RepeatItem<ItemType>) => {
               ListItem() {
                 if (typeof Ri.item === 'number') {
-                  this.LabelItemBuilder(Ri as RepeatItem<ItemType>)
+                  this.LabelItemBuilder(Ri as RepeatItem<ItemType>);
                 }
               }
               .margin({
@@ -147,7 +147,7 @@ struct SubPage {
               })
             })
             .key((item: ItemType, index: number) => {
-              return item.toString()
+              return item.toString();
             })
             .virtualScroll()
         }
