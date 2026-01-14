@@ -20850,7 +20850,7 @@ const ArkUI_AttributeItem* GetContainerPickerIndicatorStyle(ArkUI_NodeHandle nod
         g_numberValues[3].f32 = indicatorStyle.startMargin;
         g_numberValues[4].f32 = indicatorStyle.endMargin;
     } else if (indicatorStyle.type == 0) {
-        g_numberValues[0].i32 = indicatorStyle.type;
+        g_numberValues[0].i32 = static_cast<int32_t>(indicatorStyle.type);
         g_numberValues[1].u32 = indicatorStyle.backgroundColor;
         g_numberValues[2].f32 = indicatorStyle.topLeftRadius;
         g_numberValues[3].f32 = indicatorStyle.topRightRadius;
