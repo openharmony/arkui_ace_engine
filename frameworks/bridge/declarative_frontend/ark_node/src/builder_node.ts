@@ -140,7 +140,7 @@ class JSBuilderNode extends BaseNode {
           }
           else {
             // FIXME fix for mixed V2 - V3 Hierarchies
-            throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
+            throw new BusinessError(100029, 'aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
           }
         } // if child
       });
@@ -159,7 +159,7 @@ class JSBuilderNode extends BaseNode {
         }
         else {
           // FIXME fix for mixed V2 - V3 Hierarchies
-          throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
+          throw new BusinessError(100029, 'aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
         }
       } // if child
     });
@@ -216,7 +216,7 @@ class JSBuilderNode extends BaseNode {
     if (this._supportNestingBuilder && this.isObject(this.params_)) {
       this._proxyObjectParam = new Proxy(this.params_, {
         set(target, property, val): boolean {
-          throw Error(`@Builder : Invalid attempt to set(write to) parameter '${property.toString()}' error!`);
+          throw new BusinessError(140109, `@Builder : Invalid attempt to set(write to) parameter '${property.toString()}' error!`);
         },
         get: (target, property, receiver): Object => { return this.params_?.[property] }
       });
@@ -469,9 +469,7 @@ class JSBuilderNode extends BaseNode {
         try {
           return `${index}__${JSON.stringify(item)}`;
         } catch (e) {
-          throw new Error(
-            ` ForEach id ${elmtId}: use of default id generator function not possible on provided data structure. Need to specify id generator function (ForEach 3rd parameter). Application Error!`
-          );
+          throw new BusinessError(103801, ` ForEach id ${elmtId}: use of default id generator function not possible on provided data structure. Need to specify id generator function (ForEach 3rd parameter). Application Error!`);
         }
       };
     }
@@ -569,7 +567,7 @@ class JSBuilderNode extends BaseNode {
   }
 
   public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
-    throw new Error('custom component in @Builder used by BuilderNode does not support @Reusable');
+    throw new BusinessError(100030, 'custom component in @Builder used by BuilderNode does not support @Reusable');
   }
   public ifElseBranchUpdateFunctionDirtyRetaken(): void { }
   public forceCompleteRerender(deep: boolean): void { }

@@ -121,7 +121,7 @@ class __RepeatDefaultKeyGen {
         try {
             return __RepeatDefaultKeyGen.funcImpl(item);
         } catch (e) {
-            throw new Error(`Repeat(). Default key gen failed. Application Error!`);
+            throw new BusinessError(103805, `Repeat(). Default key gen failed. Application Error!`);
         }
     }
 
@@ -269,7 +269,7 @@ class __Repeat<T> implements RepeatAPI<T> {
 
     public render(isInitialRender: boolean): void {
         if (!this.config.itemGenFuncs?.[RepeatEachFuncTtype]) {
-            throw new Error(`__Repeat item builder function unspecified. Usage error`);
+            throw new BusinessError(103802,`__Repeat item builder function unspecified. Usage error`);
         }
         if (!this.isVirtualScroll) {
             // Repeat
