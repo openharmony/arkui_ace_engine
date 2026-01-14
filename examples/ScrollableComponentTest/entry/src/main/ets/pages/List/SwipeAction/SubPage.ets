@@ -115,11 +115,11 @@ struct SubPage {
             })
             .templateId((item: ItemType, index: number): string => {
               if (typeof item === 'number') {
-                return 'number'
+                return 'number';
               } else if (typeof item === 'string') {
-                return item
+                return item;
               }
-              return ''
+              return '';
             })
             .template('SpaceTop', (Ri: RepeatItem<ItemType>) => {
               ListItem() {
