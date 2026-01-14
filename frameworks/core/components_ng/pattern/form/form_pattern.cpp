@@ -1890,20 +1890,7 @@ void FormPattern::DelayDeleteImageNode(bool needHandleCachedClick)
 
 void FormPattern::FireFormSurfaceChangeCallback(float width, float height, float borderWidth)
 {
-    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
-    CHECK_NULL_VOID(externalRenderContext);
-    TAG_LOGW(AceLogTag::ACE_FORM,
-        "FireFormSurfaceChangeCallback, "
-        "id: %{public}" PRId64 "  width: %{public}f  height: %{public}f  borderWidth: %{public}f",
-        cardInfo_.id, width, height, borderWidth);
-    externalRenderContext->SetBounds(round(borderWidth), round(borderWidth), round(width - borderWidth * DOUBLE),
-        round(height - borderWidth * DOUBLE));
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
-    auto renderContext = host->GetRenderContext();
-    CHECK_NULL_VOID(renderContext);
     isUnTrust_ = false;
-    RequestRender();
 }
 
 void FormPattern::FireFormSurfaceDetachCallback()
