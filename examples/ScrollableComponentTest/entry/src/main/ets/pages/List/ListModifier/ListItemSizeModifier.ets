@@ -47,7 +47,7 @@ enum DragSortState {
   PRESSING,
   MOVING,
   DROPPING,
-}
+};
 
 @Observed
 class DragSortCtrl<T> {
@@ -131,17 +131,17 @@ class DragSortCtrl<T> {
     }
     if (this.offsetY > this.ITEM_INTV / 2) {
       animateTo({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
-        this.offsetY -= this.ITEM_INTV
-        this.dragRefOffset += this.ITEM_INTV
-        this.modify[index].offsetY = this.offsetY
-        this.itemMove(index, index + 1)
+        this.offsetY -= this.ITEM_INTV;
+        this.dragRefOffset += this.ITEM_INTV;
+        this.modify[index].offsetY = this.offsetY;
+        this.itemMove(index, index + 1);
       });
     } else if (this.offsetY < -this.ITEM_INTV / 2) {
       animateTo({ curve: curves.interpolatingSpring(0, 1, 400, 38) }, () => {
-        this.offsetY += this.ITEM_INTV
-        this.dragRefOffset -= this.ITEM_INTV
-        this.modify[index].offsetY = this.offsetY
-        this.itemMove(index, index - 1)
+        this.offsetY += this.ITEM_INTV;
+        this.dragRefOffset -= this.ITEM_INTV;
+        this.modify[index].offsetY = this.offsetY;
+        this.itemMove(index, index - 1);
       });
     }
   }
@@ -179,18 +179,18 @@ struct ListItemExample {
             GestureGroup(GestureMode.Sequence,
               LongPressGesture({ repeat: false })
                 .onAction((event?: GestureEvent) => {
-                  this.dragSortCtrl.onLongPress(item)
+                  this.dragSortCtrl.onLongPress(item);
                 }),
               PanGesture({ fingers: 1, direction: null, distance: 0 })
                 .onActionUpdate((event: GestureEvent) => {
-                  this.dragSortCtrl.onMove(item, event.offsetY)
+                  this.dragSortCtrl.onMove(item, event.offsetY);
                 })
                 .onActionEnd((event: GestureEvent) => {
-                  this.dragSortCtrl.onDrop(item)
+                  this.dragSortCtrl.onDrop(item);
                 })
             )
               .onCancel(() => {
-                this.dragSortCtrl.onDrop(item)
+                this.dragSortCtrl.onDrop(item);
               })
           )
         }, (item: number) => item.toString())
