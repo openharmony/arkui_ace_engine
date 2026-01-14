@@ -22,9 +22,9 @@
 #define private public
 
 #include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 
 #include "base/json/json_util.h"
 #include "base/memory/ace_type.h"
@@ -37,6 +37,7 @@
 #include "core/components_ng/pattern/texttimer/text_timer_model_static.h"
 #include "core/components_ng/pattern/texttimer/text_timer_pattern.h"
 #include "core/components_v2/inspector/inspector_constants.h"
+
 
 using namespace testing;
 using namespace testing::ext;
@@ -546,7 +547,6 @@ HWTEST_F(TextTimerTestNg, TextTimerTest007, TestSize.Level0)
     EXPECT_NE(pattern->GetTextNode(), nullptr);
 }
 
-
 /**
  * @tc.name: TextTimerLayoutAlgorithmTest001
  * @tc.desc: Test LayoutAlgorithm of TextTimer.
@@ -728,10 +728,10 @@ HWTEST_F(TextTimerTestNg, TextTimerTest011, TestSize.Level0)
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     ASSERT_NE(pattern, nullptr);
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(IS_COUNT_DOWN, config.isCountDown_);
-                EXPECT_EQ(INPUT_COUNT, config.count_);
-                return nullptr;
-            };
+        EXPECT_EQ(IS_COUNT_DOWN, config.isCountDown_);
+        EXPECT_EQ(INPUT_COUNT, config.count_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step2. Set parameters to pattern builderFunc
@@ -759,12 +759,12 @@ HWTEST_F(TextTimerTestNg, TextTimerTest012, TestSize.Level0)
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     ASSERT_NE(pattern, nullptr);
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(IS_COUNT_DOWN_2, config.isCountDown_);
-                EXPECT_EQ(INPUT_COUNT_2, config.count_);
-                return nullptr;
-            };
+        EXPECT_EQ(IS_COUNT_DOWN_2, config.isCountDown_);
+        EXPECT_EQ(INPUT_COUNT_2, config.count_);
+        return nullptr;
+    };
 
-     /**
+    /**
      * @tc.steps: step2. Set parameters to pattern builderFunc
      */
     pattern->SetBuilderFunc(node);
@@ -790,11 +790,11 @@ HWTEST_F(TextTimerTestNg, TextTimerTest013, TestSize.Level0)
     ASSERT_NE(pattern, nullptr);
     pattern->InitTimerDisplay();
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(IS_COUNT_DOWN_2, config.isCountDown_);
-                EXPECT_EQ(INPUT_COUNT_2, config.count_);
-                EXPECT_EQ(false, config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(IS_COUNT_DOWN_2, config.isCountDown_);
+        EXPECT_EQ(INPUT_COUNT_2, config.count_);
+        EXPECT_EQ(false, config.started_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step2. Set parameters to pattern builderFunc
@@ -806,11 +806,11 @@ HWTEST_F(TextTimerTestNg, TextTimerTest013, TestSize.Level0)
      * @tc.steps: step2. start timer and check value.
      */
     auto nextNode = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(IS_COUNT_DOWN_2, config.isCountDown_);
-                EXPECT_EQ(INPUT_COUNT_2, config.count_);
-                EXPECT_TRUE(config.started_);
-                return nullptr;
-            };
+        EXPECT_EQ(IS_COUNT_DOWN_2, config.isCountDown_);
+        EXPECT_EQ(INPUT_COUNT_2, config.count_);
+        EXPECT_TRUE(config.started_);
+        return nullptr;
+    };
     pattern->HandleStart();
     pattern->SetBuilderFunc(nextNode);
     pattern->BuildContentModifierNode();
@@ -831,9 +831,9 @@ HWTEST_F(TextTimerTestNg, TextTimerTest014, TestSize.Level0)
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     ASSERT_NE(pattern, nullptr);
     auto node = [](TextTimerConfiguration config) -> RefPtr<FrameNode> {
-                EXPECT_EQ(ELAPSED_TIME_1, config.elapsedTime_);
-                return nullptr;
-            };
+        EXPECT_EQ(ELAPSED_TIME_1, config.elapsedTime_);
+        return nullptr;
+    };
 
     /**
      * @tc.steps: step2. Tick timer and check value.
@@ -918,20 +918,20 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest001, TestSize.Level0)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     /**
      * @tc.steps: step2. Test UpdateTextColor with isFirstLoad=true
      */
     Color testColor = Color::BLUE;
     pattern->UpdateTextColor(testColor, true);
-    
+
     /**
      * @tc.expected: step3. Verify property and render context updated
      */
     auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetTextColor(), testColor);
-    
+
     auto renderContext = frameNode->GetRenderContext();
     ASSERT_NE(renderContext, nullptr);
     EXPECT_EQ(renderContext->GetForegroundColor(), testColor);
@@ -948,7 +948,7 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest002, TestSize.Level0)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     /**
      * @tc.steps: Test with different font weights
      */
@@ -956,7 +956,7 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest002, TestSize.Level0)
     auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetFontWeight(), FontWeight::BOLD);
-    
+
     // Test no update when isFirstLoad=false
     pattern->UpdateFontWeight(FontWeight::LIGHTER, false);
     EXPECT_EQ(layoutProperty->GetFontWeight(), FontWeight::BOLD);
@@ -973,11 +973,11 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest003, TestSize.Level0)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     ASSERT_NE(pattern, nullptr);
-    
+
     const double testSizeValue = 20.0;
     Dimension testSize(testSizeValue, DimensionUnit::VP);
     pattern->UpdateFontSize(testSize, true);
-    
+
     auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetFontSize(), testSize);
@@ -994,10 +994,10 @@ HWTEST_F(TextTimerTestNg, TextTimerPatternTest005, TestSize.Level0)
     ASSERT_NE(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<TextTimerPattern>();
     ASSERT_NE(pattern, nullptr);
-    
-    std::vector<std::string> fontFamilies = {"Arial", "sans-serif"};
+
+    std::vector<std::string> fontFamilies = { "Arial", "sans-serif" };
     pattern->UpdateFontFamily(fontFamilies, true);
-    
+
     auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetFontFamily(), fontFamilies);
@@ -1209,7 +1209,7 @@ HWTEST_F(TextTimerTestNg, TextTimerModelStaticTest001, TestSize.Level1)
     model.SetIsCountDown(frameNode, std::make_optional(true));
     auto layout = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     EXPECT_TRUE(layout->GetIsCountDown().value());
-    
+
     model.SetIsCountDown(frameNode, std::make_optional(false));
     EXPECT_FALSE(layout->GetIsCountDown().value());
 }
@@ -1268,7 +1268,7 @@ HWTEST_F(TextTimerTestNg, TextTimerModelStaticTest004, TestSize.Level1)
     model.SetFontSize(frameNode, std::make_optional(size));
     auto layout = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     EXPECT_EQ(layout->GetFontSize().value(), size);
-    
+
     model.SetFontSize(frameNode, std::nullopt);
     EXPECT_FALSE(layout->GetFontSize().has_value());
 }
@@ -1286,7 +1286,7 @@ HWTEST_F(TextTimerTestNg, TextTimerModelStaticTest005, TestSize.Level1)
     model.SetFontStyle(frameNode, std::make_optional(Ace::FontStyle::ITALIC));
     auto layout = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     EXPECT_EQ(layout->GetItalicFontStyle().value(), Ace::FontStyle::ITALIC);
-    
+
     model.SetFontStyle(frameNode, std::nullopt);
     EXPECT_FALSE(layout->GetItalicFontStyle().has_value());
 }
@@ -1304,7 +1304,7 @@ HWTEST_F(TextTimerTestNg, TextTimerModelStaticTest006, TestSize.Level1)
     model.SetFontWeight(frameNode, std::make_optional(FontWeight::BOLD));
     auto layout = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     EXPECT_EQ(layout->GetFontWeight().value(), FontWeight::BOLD);
-    
+
     model.SetFontWeight(frameNode, std::nullopt);
     EXPECT_FALSE(layout->GetFontWeight().has_value());
 }
@@ -1319,11 +1319,11 @@ HWTEST_F(TextTimerTestNg, TextTimerModelStaticTest007, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     TextTimerModelStatic model;
-    std::vector<std::string> family = {"Arial", "Verdana"};
+    std::vector<std::string> family = { "Arial", "Verdana" };
     model.SetFontFamily(frameNode, std::make_optional(family));
     auto layout = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     EXPECT_EQ(layout->GetFontFamily().value(), family);
-    
+
     model.SetFontFamily(frameNode, std::nullopt);
     EXPECT_FALSE(layout->GetFontFamily().has_value());
 }
@@ -1342,7 +1342,7 @@ HWTEST_F(TextTimerTestNg, TextTimerModelStaticTest008, TestSize.Level1)
     model.SetFormat(frameNode, std::make_optional(format));
     auto layout = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     EXPECT_EQ(layout->GetFormat().value(), format);
-    
+
     model.SetFormat(frameNode, std::nullopt);
     EXPECT_FALSE(layout->GetFormat().has_value());
 }
@@ -1357,12 +1357,160 @@ HWTEST_F(TextTimerTestNg, TextTimerModelStaticTest009, TestSize.Level1)
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(frameNode, nullptr);
     TextTimerModelStatic model;
-    std::vector<Shadow> shadows = {Shadow()};
+    std::vector<Shadow> shadows = { Shadow() };
     model.SetTextShadow(frameNode, std::make_optional(shadows));
     auto layout = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
     EXPECT_EQ(layout->GetTextShadow().value(), shadows);
-    
+
     model.SetTextShadow(frameNode, std::nullopt);
     EXPECT_FALSE(layout->GetTextShadow().has_value());
+}
+
+/**
+ * @tc.name: TextTimerModelStaticTest010
+ * @tc.desc: Test SetTextColorByUser method of TextTimerModelStatic.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerModelStaticTest010, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Set ConfigChangePerform to true, create text timer and set TextColorByUser to true.
+     * @tc.expected: step1. TextColorSetByUser is set to true.
+     */
+    OHOS::Ace::g_isConfigChangePerform = true;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    TextTimerModelStatic model;
+    model.SetTextColorByUser(frameNode, true);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextColorSetByUser(), true);
+
+    /**
+     * @tc.steps: step2. Set TextColorByUser to false when ConfigChangePerform is true.
+     * @tc.expected: step2. TextColorSetByUser is set to false.
+     */
+    model.SetTextColorByUser(frameNode, false);
+    EXPECT_EQ(layoutProperty->GetTextColorSetByUser(), false);
+
+    /**
+     * @tc.steps: step3. Set ConfigChangePerform to false, set TextColorByUser to true.
+     * @tc.expected: step3. TextColorSetByUser remains false (no change).
+     */
+    OHOS::Ace::g_isConfigChangePerform = false;
+    model.SetTextColorByUser(frameNode, true);
+    EXPECT_EQ(layoutProperty->GetTextColorSetByUser(), false);
+}
+
+/**
+ * @tc.name: TextTimerModelStaticTest011
+ * @tc.desc: Test SetFontWeightByUser method of TextTimerModelStatic.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerModelStaticTest011, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Set ConfigChangePerform to true, create text timer and set FontWeightByUser to true.
+     * @tc.expected: step1. TextFontWeightSetByUser is set to true.
+     */
+    OHOS::Ace::g_isConfigChangePerform = true;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    TextTimerModelStatic model;
+    model.SetFontWeightByUser(frameNode, true);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextFontWeightSetByUser(), true);
+
+    /**
+     * @tc.steps: step2. Set FontWeightByUser to false when ConfigChangePerform is true.
+     * @tc.expected: step2. TextFontWeightSetByUser is set to false.
+     */
+    model.SetFontWeightByUser(frameNode, false);
+    EXPECT_EQ(layoutProperty->GetTextFontWeightSetByUser(), false);
+
+    /**
+     * @tc.steps: step3. Set ConfigChangePerform to false, set FontWeightByUser to true.
+     * @tc.expected: step3. TextFontWeightSetByUser remains false (no change).
+     */
+    OHOS::Ace::g_isConfigChangePerform = false;
+    model.SetFontWeightByUser(frameNode, true);
+    EXPECT_EQ(layoutProperty->GetTextFontWeightSetByUser(), false);
+}
+
+/**
+ * @tc.name: TextTimerModelStaticTest012
+ * @tc.desc: Test SetFontFamilyByUser method of TextTimerModelStatic.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerModelStaticTest012, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Set ConfigChangePerform to true, create text timer and set FontFamilyByUser to true.
+     * @tc.expected: step1. TextFontFamilySetByUser is set to true.
+     */
+    OHOS::Ace::g_isConfigChangePerform = true;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    TextTimerModelStatic model;
+    model.SetFontFamilyByUser(frameNode, true);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextFontFamilySetByUser(), true);
+
+    /**
+     * @tc.steps: step2. Set FontFamilyByUser to false when ConfigChangePerform is true.
+     * @tc.expected: step2. TextFontFamilySetByUser is set to false.
+     */
+    model.SetFontFamilyByUser(frameNode, false);
+    EXPECT_EQ(layoutProperty->GetTextFontFamilySetByUser(), false);
+
+    /**
+     * @tc.steps: step3. Set ConfigChangePerform to false, set FontFamilyByUser to true.
+     * @tc.expected: step3. TextFontFamilySetByUser remains false (no change).
+     */
+    OHOS::Ace::g_isConfigChangePerform = false;
+    model.SetFontFamilyByUser(frameNode, true);
+    EXPECT_EQ(layoutProperty->GetTextFontFamilySetByUser(), false);
+}
+
+/**
+ * @tc.name: TextTimerModelStaticTest013
+ * @tc.desc: Test SetFontSizeByUser method of TextTimerModelStatic.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTimerTestNg, TextTimerModelStaticTest013, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Set ConfigChangePerform to true, create text timer and set FontSizeByUser to true.
+     * @tc.expected: step1. TextFontSizeSetByUser is set to true.
+     */
+    OHOS::Ace::g_isConfigChangePerform = true;
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    TextTimerModelStatic model;
+    model.SetFontSizeByUser(frameNode, true);
+    auto layoutProperty = frameNode->GetLayoutProperty<TextTimerLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_EQ(layoutProperty->GetTextFontSizeSetByUser(), true);
+
+    /**
+     * @tc.steps: step2. Set FontSizeByUser to false when ConfigChangePerform is true.
+     * @tc.expected: step2. TextFontSizeSetByUser is set to false.
+     */
+    model.SetFontSizeByUser(frameNode, false);
+    EXPECT_EQ(layoutProperty->GetTextFontSizeSetByUser(), false);
+
+    /**
+     * @tc.steps: step3. Set ConfigChangePerform to false, set FontSizeByUser to true.
+     * @tc.expected: step3. TextFontSizeSetByUser remains false (no change).
+     */
+    OHOS::Ace::g_isConfigChangePerform = false;
+    model.SetFontSizeByUser(frameNode, true);
+    EXPECT_EQ(layoutProperty->GetTextFontSizeSetByUser(), false);
 }
 } // namespace OHOS::Ace::NG

@@ -77,9 +77,9 @@ public:
     static void CreateWithResourceObj(
         FrameNode* frameNode, JsTextTimerResourceType jsResourceType, const RefPtr<ResourceObject>& resObj);
     static void SetTextColorByUser(FrameNode* frameNode, bool isSetByUser);
-    static void SetFontSizeByUser(FrameNode* frameNode, bool value);
-    static void SetFontWeightByUser(FrameNode* frameNode, bool value);
-    static void SetFontFamilyByUser(FrameNode* frameNode, bool value);
+    static void SetFontSizeByUser(FrameNode* frameNode, bool isSetByUser);
+    static void SetFontWeightByUser(FrameNode* frameNode, bool isSetByUser);
+    static void SetFontFamilyByUser(FrameNode* frameNode, bool isSetByUser);
 
 private:
     static void SetOnTimerMultiThread(FrameNode* frameNode, std::function<void(int64_t, int64_t)>&& onChange);

@@ -32,6 +32,10 @@ public:
     static void SetFontFamily(FrameNode* frameNode, const std::optional<std::vector<std::string>>& value);
     static void SetFormat(FrameNode* frameNode, const std::optional<std::string>& format);
     static void SetTextShadow(FrameNode* frameNode, const std::optional<std::vector<Shadow>>& value);
+    static void SetTextColorByUser(FrameNode* frameNode, bool isSetByUser);
+    static void SetFontSizeByUser(FrameNode* frameNode, bool isSetByUser);
+    static void SetFontWeightByUser(FrameNode* frameNode, bool isSetByUser);
+    static void SetFontFamilyByUser(FrameNode* frameNode, bool isSetByUser);
 };
 } // namespace OHOS::Ace::NG
 

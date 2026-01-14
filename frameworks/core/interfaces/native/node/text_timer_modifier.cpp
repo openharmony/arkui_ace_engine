@@ -70,6 +70,7 @@ void SetFontSize(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit)
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     TextTimerModelNG::SetFontSize(frameNode, Dimension(value, static_cast<DimensionUnit>(unit)));
+    TextTimerModelNG::SetFontSizeByUser(frameNode, true);
 }
 
 void SetFontSizeRes(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* fontSizeRawPtr)
@@ -77,6 +78,7 @@ void SetFontSizeRes(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit,
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextTimerModelNG::SetFontSize(frameNode, Dimension(value, static_cast<DimensionUnit>(unit)));
+    TextTimerModelNG::SetFontSizeByUser(frameNode, true);
     if (SystemProperties::ConfigChangePerform()) {
         if (fontSizeRawPtr) {
             auto* fontSize = reinterpret_cast<ResourceObject*>(fontSizeRawPtr);
@@ -119,6 +121,7 @@ void SetFontWeight(ArkUINodeHandle node, ArkUI_CharPtr fontWeight)
     CHECK_NULL_VOID(frameNode);
     std::string fontWeightStr = fontWeight;
     TextTimerModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeightStr));
+    TextTimerModelNG::SetFontWeightByUser(frameNode, true);
 }
 
 void SetFontWeightRes(ArkUINodeHandle node, ArkUI_CharPtr fontWeight, void* fontWeightRawPtr)
@@ -127,7 +130,8 @@ void SetFontWeightRes(ArkUINodeHandle node, ArkUI_CharPtr fontWeight, void* font
     CHECK_NULL_VOID(frameNode);
     std::string fontWeightStr = fontWeight;
     TextTimerModelNG::SetFontWeight(frameNode, Framework::ConvertStrToFontWeight(fontWeightStr));
-    if (SystemProperties::ConfigChangePerform() && fontWeightRawPtr) {
+    TextTimerModelNG::SetFontWeightByUser(frameNode, true);
+    if (SystemProperties::ConfigChangePerform()) {
         if (fontWeightRawPtr) {
             auto* fontWeight = reinterpret_cast<ResourceObject*>(fontWeightRawPtr);
             auto fontWeightResObj = AceType::Claim(fontWeight);
@@ -156,6 +160,7 @@ void SetFontFamily(ArkUINodeHandle node, ArkUI_CharPtr fontFamily)
     std::string familiesStr = fontFamily;
     std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
     TextTimerModelNG::SetFontFamily(frameNode, fontFamilyResult);
+    TextTimerModelNG::SetFontFamilyByUser(frameNode, true);
 }
 
 void SetFontFamilyRes(ArkUINodeHandle node, ArkUI_CharPtr fontFamily, void* fontFamilyRawPtr)
@@ -165,6 +170,7 @@ void SetFontFamilyRes(ArkUINodeHandle node, ArkUI_CharPtr fontFamily, void* font
     std::string familiesStr = fontFamily;
     std::vector<std::string> fontFamilyResult = Framework::ConvertStrToFontFamilies(familiesStr);
     TextTimerModelNG::SetFontFamily(frameNode, fontFamilyResult);
+    TextTimerModelNG::SetFontFamilyByUser(frameNode, true);
     if (SystemProperties::ConfigChangePerform()) {
         if (fontFamilyRawPtr) {
             auto* fontFamily = reinterpret_cast<ResourceObject*>(fontFamilyRawPtr);
