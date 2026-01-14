@@ -549,8 +549,8 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
         if (isDynamicObject(args)) {
             state = updateDynamicObjectForInterop(args);
         } else {
-            const objType = Type.of(args);
-            let handler = objType instanceof ClassType && (objType as ClassType).getName().endsWith('@Proxy')
+            const objType = Class.of(args);
+            let handler = objType.getName().endsWith('@Proxy')
             ? (proxy.Proxy.tryGetHandler(args) as InteropBuilderLiteralProxyHandler<T>) // a very slow call so need to judge proxy first
             : undefined;
             if (handler) {

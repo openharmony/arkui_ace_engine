@@ -315,7 +315,7 @@ export class SymbolSpanModifier implements SymbolSpanAttribute,AttributeModifier
     }
     setSymbolSpanOptions(value: Resource | undefined): this {
         if (this._setSymbolSpanOptions_flag === AttributeUpdaterFlag.INITIAL ||
-            this._setSymbolSpanOptions0_value !== value || !Type.of(value).isPrimitive()) {
+            this._setSymbolSpanOptions0_value !== value || value != undefined) {
             this._setSymbolSpanOptions0_value = value
             this._setSymbolSpanOptions_flag = AttributeUpdaterFlag.UPDATE
             this._state.fireChange()

@@ -17,7 +17,15 @@ const OBSERVABLE_TARGET = 'target'
 
 export function getObservableTarget(proxy: Object): Object {
     try {
-        return (((reflect.Value.of(proxy) as ClassValue).getFieldByName(OBSERVABLE_TARGET).getData()) ?? proxy) as Object
+        const cls = Class.of(proxy)
+        let field: reflect.InstanceField | undefined = undefined;
+        for (let cls: Class | undefined = Class.of(proxy); cls != undefined; cls = cls!.getSuper()) {
+            field = cls!.getInstanceField(OBSERVABLE_TARGET);
+            if (field != undefined) {
+                return field!.getValue(proxy) as Object
+            }
+        }
+        return proxy
     } catch (error) {
         return proxy
     }
@@ -225,19 +233,20 @@ export function observableProxy<Value>(value: Value, parent?: ObservableHandler,
     // Improve: Fatal error on using proxy with generic types
     // see: panda issue #26492
 
-    const valueType = Type.of(value)
-    if (valueType instanceof ClassType && !(value instanceof BaseEnum)) {
+    if (!(value instanceof BaseEnum)) {
         const meta = extractObservableMetadata(value)
         if (meta === undefined) {
             return value as Value
         }
-        if (valueType.hasEmptyConstructor()) {
-            const result = proxy.Proxy.create(value as Object, new CustomProxyHandler<Object>(meta)) as Value
-            ObservableHandler.installOn(result as Object, new ObservableHandler(parent))
-            return result
-        } else {
-            throw new Error(`Class '${valueType.getName()}' must contain a default constructor`)
+        const valueType = Class.ofAny(value)!
+        for (const ctor of valueType.getConstructors()) {
+            if (ctor.getParametersNum() == 0) {
+                const result = proxy.Proxy.create(value as Object, new CustomProxyHandler<Object>(meta)) as Value
+                ObservableHandler.installOn(result as Object, new ObservableHandler(parent))
+                return result
+            }
         }
+        throw new Error(`Class '${valueType.getName()}' must contain a default constructor`)
     }
 
     return value as Value

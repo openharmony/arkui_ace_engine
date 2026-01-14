@@ -35,17 +35,17 @@ interface JsonDeserializable {
 }
 
 class ConnectOptionsInst<T extends object> implements ConnectOptions<T> {
-    type: Type;
+    type: Class;
     key?: string;
     defaultCreator?: StorageDefaultCreator<T>;
     areaMode?: contextConstant.AreaMode;
-    constructor(ttype: Type) {
+    constructor(ttype: Class) {
         this.type = ttype;
     }
 }
 
-const NonObservedPersonType = Type.of(new NonObservedPerson());
-const NumberInterfaceType = Type.of({ prop: 5 } as NumberInterface);
+const NonObservedPersonType = Class.from<NonObservedPerson>();
+const NumberInterfaceType = Class.from<NumberInterface>();
 
 class NonObservedPerson //implements JsonSerializable, JsonDeserializable
 {

@@ -77,7 +77,7 @@ export function eq<T>(a : T, b : T) : boolean  {
   const ok : boolean = (a === b);
   if (!ok) {
     console.error(`WRONG actual value '${a}' expected equal to value '${b}'`);
-    console.error(`WRONG class value '${Type.of(a).getName()}' expected equal to value '${Type.of(b).getName()}'`);
+    console.error(`WRONG class value '${Class.of(a).getName()}' expected equal to value '${Class.of(b).getName()}'`);
   }
   return ok;
 }

@@ -443,25 +443,33 @@ export function hookDrawModifier(arkComponent: ArkCommonMethodComponent, value: 
   if (value === undefined) {
     return;
   }
-  let classType: ClassType = (Type.of(value) as ClassType);
-  let numberOfFun = classType.getMethodsNum();
   let flag: int32 = 0;
-  for (let i = 0; i < numberOfFun; i++) {
-    if (classType.getMethod(i)?.getName() === "drawFront") {
-      flag |= (1 << 0);
-    } else if (classType.getMethod(i)?.getName() === "drawContent") {
-      flag |= (1 << 1);
-    } else if (classType.getMethod(i)?.getName() === "drawBehind") {
-      flag |= (1 << 2);
-    } else if (classType.getMethod(i)?.getName() === "drawForeground") {
-      flag |= (1 << 3);
-    } else if (classType.getMethod(i)?.getName() === 'drawOverlay') {
-      flag |= (1 << 4);
+  let classType = Class.of(value);
+  for (let cls: Class | undefined = classType; cls != undefined; cls = cls!.getSuper()) {
+    const clsMethods = cls!.getInstanceMethods();
+    for (const method of clsMethods) {
+      let name = method.getName()
+      if (name == "drawFront") {
+        flag |= (1 << 0);
+      }
+      if (name == "drawContent") {
+        flag |= (1 << 1);
+      }
+      if (name == "drawBehind") {
+        flag |= (1 << 2);
+      }
+      if (name == "drawForeground") {
+        flag |= (1 << 3);
+      }
+      if (name == "drawOverlay") {
+        flag |= (1 << 4);
+      }
     }
-  }
-  if (flag) {
-    ArkUIAniModule._SetDrawModifier(arkComponent.getPeer().getPeerPtr(), flag, value!);
-    value.weakRefOfPeerNode = new WeakRef<PeerNode>(arkComponent.getPeer());
+    if (flag) {
+      ArkUIAniModule._SetDrawModifier(arkComponent.getPeer().getPeerPtr(), flag, value!);
+      value.weakRefOfPeerNode = new WeakRef<PeerNode>(arkComponent.getPeer());
+      break;
+    }
   }
 }
 
