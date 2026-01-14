@@ -108,7 +108,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   private elmtIdsDelayedUpdate_: Set<number> = new Set();
 
   protected __lifecycle__Internal: CustomComponentLifecycle;
-  protected __isReuseNodeNeedAttach__Internal: boolean = false;
 
   protected static prebuildPhase_: PrebuildPhase = PrebuildPhase.None;
   protected isPrebuilding_: boolean = false;
@@ -151,13 +150,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     this.isCompFreezeAllowed_ = this.isCompFreezeAllowed_ || (this.parent_ && this.parent_.isCompFreezeAllowed());
     this.__isBlockRecycleOrReuse__ = typeof globalThis.__CheckIsInBuilderNode__ === 'function' ? globalThis.__CheckIsInBuilderNode__(parent) : false;
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
-    let watchProp = Symbol.for('INIT_INTERNAL_FUNCTION' + this.constructor.name);
-    const componentInitFunctions = this[watchProp];
-    if (componentInitFunctions instanceof Array) {
-        componentInitFunctions.forEach((componentInitFunction) => {
-            componentInitFunction.call(this);
-        })
-    }
   }
 
   public __triggerLifecycle__Internal(eventId: LifeCycleEvent): boolean {
@@ -169,8 +161,14 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     return this.__lifecycle__Internal;
   }
 
-  public __setIsReuseNodeNeedAttach__Internal(isReuseNodeNeedAttach: boolean): void {
-    this.__isReuseNodeNeedAttach__Internal = isReuseNodeNeedAttach;
+  public __customComponentExecuteInit__Internal(): void {
+    let watchProp = Symbol.for('INIT_INTERNAL_FUNCTION' + this.constructor.name);
+    const componentInitFunctions = this[watchProp];
+    if (componentInitFunctions instanceof Array) {
+        componentInitFunctions.forEach((componentInitFunction) => {
+            componentInitFunction.call(this);
+        })
+    }
   }
 
   public static create(view: PUV2ViewBase): void {
@@ -954,9 +952,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
         !child.hasBeenRecycled_ &&
         !child.__isBlockRecycleOrReuse__
       ) {
-        child.__setIsReuseNodeNeedAttach__Internal(true);
         recyleOrReuse ? child.aboutToRecycleInternal() : child.aboutToReuseInternal();
-        child.__setIsReuseNodeNeedAttach__Internal(false);
       } // if child
     });
   }

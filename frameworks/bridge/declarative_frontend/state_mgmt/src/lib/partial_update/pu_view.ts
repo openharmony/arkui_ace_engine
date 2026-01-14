@@ -266,6 +266,10 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
   }
 
+  protected finalizeConstruction(): void {
+    this.__customComponentExecuteInit__Internal();
+  }
+
   // inform the subscribed property
   // that the View and thereby all properties
   // are about to be deleted
@@ -1100,9 +1104,6 @@ abstract class ViewPU extends PUV2ViewBase
       this.updateDirtyElements();
     } else {
       this.flushDelayCompleteRerender();
-    }
-    if (this.__isReuseNodeNeedAttach__Internal) {
-      this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_ATTACH);
     }
     this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doReuse);
     this.runReuse_ = false;
