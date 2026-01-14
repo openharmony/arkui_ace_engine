@@ -21,7 +21,7 @@
 @Entry
 @Component
 struct LinearGradientList {
-  @State data: string[] = ['美食','地图','理财','购物','导航','我的','买房','买车']
+  @State data: string[] = ['美食','地图','理财','购物','导航','我的','买房','买车'];
 
   build() {
     Column({space:60}){
