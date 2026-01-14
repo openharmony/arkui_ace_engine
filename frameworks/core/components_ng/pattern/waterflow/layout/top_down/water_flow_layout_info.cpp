@@ -616,7 +616,13 @@ float WaterFlowLayoutInfo::CalcOverScroll(float mainSize, float delta) const
         res = currentOffset_ - contentStartOffset_ + delta;
     }
     if (offsetEnd_) {
-        res = mainSize - (GetMaxMainHeight() + contentEndOffset_ + currentOffset_ - delta);
+		// Fix over-scroll when content doesn't fill the viewport.
+		// Use totalOffset delta to avoid excessive friction at low scroll speed.
+        if (GetMaxMainHeight() < mainSize) {
+            res = currentOffset_ - contentStartOffset_ + delta;
+        } else {
+            res = mainSize - (GetMaxMainHeight() + contentEndOffset_ + currentOffset_ - delta);
+        }
     }
     return res;
 }
