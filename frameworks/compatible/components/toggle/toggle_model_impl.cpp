@@ -18,17 +18,26 @@
 #include "compatible/components/switch/switch_component.h"
 #include "compatible/components/toggle/toggle_component.h"
 
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/checkable/checkable_theme.h"
+#include "core/components/theme/theme_manager.h"
 #include "core/components/toggle/toggle_theme.h"
 
 namespace OHOS::Ace::Framework {
 
 void ToggleModelImpl::Create(NG::ToggleType toggleType, bool isOn)
 {
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     RefPtr<Component> component;
     if (toggleType == NG::ToggleType::CHECKBOX) {
-        RefPtr<CheckboxTheme> checkBoxTheme = JSViewAbstract::GetTheme<CheckboxTheme>();
+        RefPtr<CheckboxTheme> checkBoxTheme = node ? themeManager->GetTheme<CheckboxTheme>(node->GetThemeScopeId())
+                                                   : themeManager->GetTheme<CheckboxTheme>();
         if (!checkBoxTheme) {
             return;
         }
@@ -41,7 +50,8 @@ void ToggleModelImpl::Create(NG::ToggleType toggleType, bool isOn)
         checkboxComponent->SetHeight(checkBoxTheme->GetHeight() - verticalPadding * 2);
         component = checkboxComponent;
     } else if (toggleType == NG::ToggleType::SWITCH) {
-        RefPtr<SwitchTheme> switchTheme = JSViewAbstract::GetTheme<SwitchTheme>();
+        RefPtr<SwitchTheme> switchTheme =
+            node ? themeManager->GetTheme<SwitchTheme>(node->GetThemeScopeId()) : themeManager->GetTheme<SwitchTheme>();
         if (!switchTheme) {
             return;
         }
@@ -54,7 +64,8 @@ void ToggleModelImpl::Create(NG::ToggleType toggleType, bool isOn)
         switchComponent->SetHeight(switchTheme->GetHeight() - verticalPadding * 2);
         component = switchComponent;
     } else {
-        RefPtr<ToggleTheme> toggleTheme = JSViewAbstract::GetTheme<ToggleTheme>();
+        RefPtr<ToggleTheme> toggleTheme =
+            node ? themeManager->GetTheme<ToggleTheme>(node->GetThemeScopeId()) : themeManager->GetTheme<ToggleTheme>();
         if (!toggleTheme) {
             return;
         }
@@ -71,21 +82,24 @@ void ToggleModelImpl::Create(NG::ToggleType toggleType, bool isOn)
     auto box = ViewStackProcessor::GetInstance()->GetBoxComponent();
     box->SetDeliverMinToChild(true);
     if (toggleType == NG::ToggleType::CHECKBOX) {
-        RefPtr<CheckboxTheme> checkBoxTheme = JSViewAbstract::GetTheme<CheckboxTheme>();
+        RefPtr<CheckboxTheme> checkBoxTheme = node ? themeManager->GetTheme<CheckboxTheme>(node->GetThemeScopeId())
+                                                   : themeManager->GetTheme<CheckboxTheme>();
         if (!checkBoxTheme) {
             return;
         }
         box->SetWidth(checkBoxTheme->GetWidth());
         box->SetHeight(checkBoxTheme->GetHeight());
     } else if (toggleType == NG::ToggleType::SWITCH) {
-        RefPtr<SwitchTheme> switchTheme = JSViewAbstract::GetTheme<SwitchTheme>();
+        RefPtr<SwitchTheme> switchTheme =
+            node ? themeManager->GetTheme<SwitchTheme>(node->GetThemeScopeId()) : themeManager->GetTheme<SwitchTheme>();
         if (!switchTheme) {
             return;
         }
         box->SetWidth(switchTheme->GetWidth());
         box->SetHeight(switchTheme->GetHeight());
     } else {
-        RefPtr<ToggleTheme> toggleTheme = JSViewAbstract::GetTheme<ToggleTheme>();
+        RefPtr<ToggleTheme> toggleTheme =
+            node ? themeManager->GetTheme<ToggleTheme>(node->GetThemeScopeId()) : themeManager->GetTheme<ToggleTheme>();
         if (!toggleTheme) {
             return;
         }
@@ -130,11 +144,11 @@ void ToggleModelImpl::OnChange(NG::ChangeEvent&& onChange)
     auto mainComponent = ViewStackProcessor::GetInstance()->GetMainComponent();
     auto toggle = AceType::DynamicCast<ToggleComponent>(mainComponent);
     if (toggle) {
-        JSViewSetProperty(&ToggleComponent::SetOnChange, std::move(onChange));
+        toggle->SetOnChange(std::move(onChange));
     }
     auto checkable = AceType::DynamicCast<CheckableComponent>(mainComponent);
     if (checkable) {
-        JSViewSetProperty(&CheckableComponent::SetOnChange, std::move(onChange));
+        checkable->SetOnChange(std::move(onChange));
     }
 }
 
