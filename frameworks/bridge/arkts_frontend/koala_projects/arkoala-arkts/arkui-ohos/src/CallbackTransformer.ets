@@ -52,7 +52,7 @@ function componentRootPeerFactory(): PeerNode {
 }
 
 export class FreeRootNode extends PeerNode {
-    static current: FreeRootNode | undefined = undefined;
+    public static current: FreeRootNode | undefined = undefined;
     private componentRoot: ArkCustomComponentRootPeer | undefined = undefined;
     private context: UIContextImpl | undefined = undefined;
     public ptr: KPointer = -1;
@@ -69,7 +69,8 @@ export class FreeRootNode extends PeerNode {
     }
     setComponent(component: object | undefined): void {
         this.componentRoot?.deleteFreezeRoot(this);
-        this.componentRoot = (component as ExtendableComponent | undefined)?.__getPeerNode__Internal() as ArkCustomComponentRootPeer | undefined;
+        const node = (component as ExtendableComponent | undefined)?.__getPeerNode__Internal();
+        this.componentRoot = node as ArkCustomComponentRootPeer | undefined;
         this.componentRoot?.addFreezeRoot(this);
     }
     setUIContext(context: UIContextImpl): void {
@@ -127,7 +128,8 @@ export class CallbackTransformer {
             };
             const latestStateManager = GlobalStateManager.instance;
             GlobalStateManager.SetLocalManager(currentStateManager);
-            const peer = context.getDetachedRootEntryManager().createUiDetachedFreeRoot(() => componentFreeRootFactory(currentExtendableComponent, context), cb);
+            const peer = context.getDetachedRootEntryManager().createUiDetachedFreeRoot(
+                () => componentFreeRootFactory(currentExtendableComponent, context), cb);
             GlobalStateManager.SetLocalManager(latestStateManager);
             return peer ? peer.peer.ptr : nullptr;
         }

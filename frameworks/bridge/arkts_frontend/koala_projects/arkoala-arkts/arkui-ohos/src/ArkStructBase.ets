@@ -25,7 +25,7 @@ import { RecordData } from "@ohos.base"
 import { ArkCommonMethodComponent, ArkCommonPeer, CommonMethod } from 'arkui/component/common';
 import { memo_skip } from '@koalaui/runtime/annotations';
 import { int32 } from '@koalaui/common';
-import { IExtendableComponent } from "./component/extendableComponent";
+import { IExtendableComponent } from './component/extendableComponent';
 
 /** base class for user's structs */
 export abstract class ArkStructBase<T, T_Options> implements ArkCustomComponent {

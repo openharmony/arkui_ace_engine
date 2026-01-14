@@ -1272,7 +1272,7 @@ export class DetachedRootEntryImpl<T extends IncrementalNode> implements Detache
 export class DetachedRootEntryManager {
     uicontext_: UIContextImpl;
     detachedRoots_: Map<KPointer, DetachedRootEntry>;
-    freezedRoots_: Map<KPointer, DetachedRootEntry>;
+    private freezedRoots_: Map<KPointer, DetachedRootEntry>;
     constructor(uicontext: UIContextImpl) {
         this.detachedRoots_ = new Map<KPointer, DetachedRootEntry>();
         this.freezedRoots_ = new Map<KPointer, DetachedRootEntry>();
