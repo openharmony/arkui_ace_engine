@@ -3308,6 +3308,7 @@ frameworks/core/interfaces/native/implementation/progress_modifier.cpp @huawei_g
 frameworks/core/interfaces/native/implementation/loading_progress_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/pattern_lock_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/counter_modifier.cpp @huawei_g_five
+frameworks/core/interfaces/native/implementation/gauge_extender_accessor.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/gauge_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/data_panel_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/implementation/search_controller_accessor.cpp @huawei_g_five
