@@ -5866,6 +5866,7 @@ struct ArkUICounterModifier {
     void (*resetCounterOnInc)(ArkUINodeHandle node);
     void (*setCounterOnDec)(ArkUINodeHandle node, void* callback);
     void (*resetCounterOnDec)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 
 struct ArkUICheckboxModifier {

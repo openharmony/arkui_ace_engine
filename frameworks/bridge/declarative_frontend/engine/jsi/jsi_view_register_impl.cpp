@@ -50,7 +50,6 @@
 #include "bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "bridge/declarative_frontend/jsview/js_container_span.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
-#include "bridge/declarative_frontend/jsview/js_counter.h"
 #include "bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_divider.h"
@@ -466,7 +465,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "NativeChildrenMainSize", JSListChildrenMainSize::JSBind },
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
-    { "Counter", JSCounter::JSBind },
 #ifndef ARKUI_WEARABLE
     { "CalendarPicker", JSCalendarPicker::JSBind },
 #endif
@@ -566,7 +564,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "ImageAnimator", JSImageAnimator::JSBind },
-    { "Counter", JSCounter::JSBind },
 #ifndef ARKUI_WEARABLE
     { "CalendarPicker", JSCalendarPicker::JSBind },
 #endif

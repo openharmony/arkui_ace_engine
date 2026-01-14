@@ -21,8 +21,7 @@
 #include "core/components_ng/pattern/counter/counter_node.h"
 
 namespace OHOS::Ace::NG {
-
-class ACE_EXPORT CounterModelNG : public CounterModel {
+class ACE_FORCE_EXPORT CounterModelNG : public CounterModel {
 public:
     void Create() override;
     void SetOnInc(CounterEventFunc&& onInc) override;
