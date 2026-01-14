@@ -25,21 +25,41 @@ let __CreateErrorCode;
     __CreateErrorCode.NO_ERROR = 0;
     __CreateErrorCode.IMAGES_OVERSIZE = 1;
     __CreateErrorCode.CONTENT_OVERSIZE = 2;
+    __CreateErrorCode.INVALID_INSTANCE_ID = 3;
+    __CreateErrorCode.PARAMETERS_ERROR = 4;
 })(__CreateErrorCode || (__CreateErrorCode = {}));
 
-export function __localImageGeneratorDialogCreator(options) {
+export function __localImageGeneratorDialogCreator(options, instanceId) {
     if (options) {
         if (options.images && options.images.length > 4) {
+            AbnormalPopUp.PopUpWindows(ImageGeneratorDialogErrorCode.IMAGES_OVERSIZE);
             return __CreateErrorCode.IMAGES_OVERSIZE;
         }
-        if (options.content && (typeof options.content === 'string') && options.content.length > 600) {
+        if (options.content && (typeof options.content === 'string') && options.content.length > 280) {
+            AbnormalPopUp.PopUpWindows(ImageGeneratorDialogErrorCode.CONTENT_OVERSIZE);
             return __CreateErrorCode.CONTENT_OVERSIZE;
+        } else if (options.content && (typeof options.content === 'object')) {
+            try {
+                let strValue = getContext(this).resourceManager.getStringSync(options.content);
+                options.content = strValue;
+                if (options.content.length > 280) {
+                    AbnormalPopUp.PopUpWindows(ImageGeneratorDialogErrorCode.CONTENT_OVERSIZE);
+                    return __CreateErrorCode.CONTENT_OVERSIZE;
+                }
+            } catch (error) {
+                return __CreateErrorCode.PARAMETERS_ERROR;
+            }
         }
     }
-    console.info('[imageGenerator]', `will call loadImageGeneratorDialog`);
-    ViewStackProcessor.StartGetAccessRecordingFor(ViewStackProcessor.AllocateNewElmetIdForNextComponent());
-    loadImageGeneratorDialog(new ImageGeneratorDialog(undefined, {options: options}));
-    ViewStackProcessor.StopGetAccessRecording();
+    if (!instanceId || instanceId === -1) {
+        return __CreateErrorCode.INVALID_INSTANCE_ID;
+    }
+    globalThis.__getUIContext__(instanceId).runScopedTask(() => {
+        console.info('[imageGenerator]', `will call loadImageGeneratorDialog`);
+        ViewStackProcessor.StartGetAccessRecordingFor(ViewStackProcessor.AllocateNewElmetIdForNextComponent());
+        loadImageGeneratorDialog(new ImageGeneratorDialog(undefined, {options: options}));
+        ViewStackProcessor.StopGetAccessRecording();
+    })
     return __CreateErrorCode.NO_ERROR;
 }
 globalThis.__imageGeneratorDialogCreator = __localImageGeneratorDialogCreator;

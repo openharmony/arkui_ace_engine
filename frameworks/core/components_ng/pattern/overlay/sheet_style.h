@@ -311,6 +311,34 @@ struct SheetStyle {
     ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(BackgroundColor);
     std::vector<RefPtr<ResourceObject>> detentsObj_;
 };
+
+struct BindSheetCreateParam {
+    bool isStartByUIContext = false;
+    SheetStyle style;
+    RefPtr<FrameNode> targetNode = nullptr;
+    RefPtr<UINode> sheetContentNode = nullptr;
+    std::function<void(const std::string&)> callback = nullptr;
+    std::function<RefPtr<UINode>()> buildtitleNodeFunc = nullptr;
+    std::function<void()> onAppear = nullptr;
+    std::function<void()> onDisappear = nullptr;
+    std::function<void()> shouldDismiss = nullptr;
+    std::function<void(const int32_t)> onWillDismiss = nullptr;
+    std::function<void()> onWillAppear = nullptr;
+    std::function<void()> onWillDisappear = nullptr;
+    std::function<void(const float)> onHeightDidChange = nullptr;
+    std::function<void(const float)> onDetentsDidChange = nullptr;
+    std::function<void(const float)> onWidthDidChange = nullptr;
+    std::function<void(const float)> onTypeDidChange = nullptr;
+    std::function<void()> sheetSpringBack = nullptr;
+
+    BindSheetCreateParam() = default;
+    // use for image generator
+    BindSheetCreateParam(SheetStyle style, RefPtr<FrameNode> targetNode, RefPtr<UINode> sheetContentNode,
+        std::function<void(const int32_t)>&& onWillDismiss, std::function<void()>&& springBack, bool byUIContext) :
+        isStartByUIContext(byUIContext), style(style), targetNode(targetNode), sheetContentNode(sheetContentNode),
+        onWillDismiss(std::move(onWillDismiss)), sheetSpringBack(std::move(springBack))
+        {}
+};
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_OVERLAY_SHEET_STYLE_H
