@@ -51,19 +51,19 @@ enum DragSortState {
 
 @Observed
 class DragSortCtrl<T> {
-  private arr: Array<T>
-  private modify: Array<ListItemModify>
-  private dragRefOffset: number = 0
-  offsetY: number = 0
-  state: DragSortState = DragSortState.IDLE
-  private ITEM_INTV: number = 120
+  private arr: Array<T>;
+  private modify: Array<ListItemModify>;
+  private dragRefOffset: number = 0;
+  offsetY: number = 0;
+  state: DragSortState = DragSortState.IDLE;
+  private ITEM_INTV: number = 120;
 
   constructor(arr: Array<T>, intv: number) {
     this.arr = arr;
-    this.modify = new Array<ListItemModify>()
-    this.ITEM_INTV = intv
+    this.modify = new Array<ListItemModify>();
+    this.ITEM_INTV = intv;
     arr.forEach(() => {
-      this.modify.push(new ListItemModify())
+      this.modify.push(new ListItemModify());
     })
   }
 
