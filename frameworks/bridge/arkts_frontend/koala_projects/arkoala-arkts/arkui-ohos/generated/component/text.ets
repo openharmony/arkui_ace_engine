@@ -19,7 +19,7 @@
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { SelectionOptions_serializer, SelectionOptions, ShadowOptions_serializer, ArkCommonMethodPeer, CommonMethod, ShadowOptions, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { StyledString, StyledStringInternal, DecorationStyleInterface_serializer, DecorationStyleInterface } from "./styledString"
-import { LayoutManager_serializer, LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, FontSettingOptions_serializer, TextVerticalAlign, TextDataDetectorConfig, EditMenuOptions, TextDirection, FontSettingOptions, MenuType, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer } from "./textCommon"
+import { LayoutManager_serializer, LayoutManager, LayoutManagerInternal, TextDataDetectorConfig_serializer, EditMenuOptions_serializer, FontSettingOptions_serializer, TextVerticalAlign, TextDataDetectorConfig, EditMenuOptions, TextDirection, FontSettingOptions, MenuType, SelectedDragPreviewStyle, SelectedDragPreviewStyle_serializer, ShaderStyle_serializer, ContentTransition_serializer, LineSpacingOptions_serializer, ShaderStyle, ContentTransition, TextContentAlign, LineSpacingOptions } from "./textCommon"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -32,7 +32,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { Color, FontStyle, TextAlign, TextCase, CopyOptions, TextHeightAdaptivePolicy, WordBreak, LineBreakStrategy, EllipsisMode, TextSelectableMode, FontWeight, TextOverflow } from "./enums"
 import { Resource } from "global.resource"
-import { LengthMetrics } from "arkui.Graphics"
+import { LengthMetrics, LengthUnit } from "arkui.Graphics"
 import { AttributeModifier, hookTextAttributeModifier, AttributeUpdater } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { CustomBuilder } from "./builder"
@@ -320,12 +320,19 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setFontStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setLineSpacingAttribute(value: LengthMetrics | undefined): void {
+    setLineSpacingAttribute(value: LengthMetrics | undefined, options?: LineSpacingOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
             LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            LineSpacingOptions_serializer.write(thisSerializer, optionsTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -868,6 +875,126 @@ export class ArkTextPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAttribute_setTextDirection(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setOptimizeTrailingSpaceAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setOptimizeTrailingSpace(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setShaderStyleAttribute(value: ShaderStyle | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ShaderStyle_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setShaderStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableAutoSpacingAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setEnableAutoSpacing(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setContentTransitionAttribute(value: ContentTransition | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            ContentTransition_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setContentTransition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setTextContentAlignAttribute(value: TextContentAlign | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = (value as TextContentAlign)
+            thisSerializer.writeInt32(valueTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setTextContentAlign(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setMinLinesAttribute(value: int32 | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeInt32(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setMinLines(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setMinLineHeightAttribute(value: LengthMetrics | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setMinLineHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setMaxLineHeightAttribute(value: LengthMetrics | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            LengthMetrics_serializer.write(thisSerializer, valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setMaxLineHeight(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setLineHeightMultipleAttribute(value: double | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeFloat64(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setLineHeightMultiple(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    setEnableSelectedDataDetectorAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._TextAttribute_setEnableSelectedDataDetector(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setFontAttribute(fontValue: Font | undefined, options?: FontSettingOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (fontValue !== undefined) {
@@ -999,7 +1126,7 @@ export interface TextAttribute extends CommonMethod {
     fontStyle(value: FontStyle | undefined): this {
         throw new Error("Unimplemented method fontStyle")
     }
-    lineSpacing(value: LengthMetrics | undefined): this {
+    lineSpacing(value: LengthMetrics | undefined, options?: LineSpacingOptions): this {
         throw new Error("Unimplemented method lineSpacing")
     }
     textAlign(value: TextAlign | undefined): this {
@@ -1111,6 +1238,36 @@ export interface TextAttribute extends CommonMethod {
     textDirection(value: TextDirection | undefined): this {
         throw new Error("Unimplemented method textDirection")
     }
+    optimizeTrailingSpace(value: boolean | undefined): this {
+        throw new Error("Unimplemented method optimizeTrailingSpace")
+    }
+    shaderStyle(value: ShaderStyle | undefined): this {
+        throw new Error("Unimplemented method shaderStyle")
+    }
+    enableAutoSpacing(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableAutoSpacing")
+    }
+    contentTransition(value: ContentTransition | undefined): this {
+        throw new Error("Unimplemented method contentTransition")
+    }
+    textContentAlign(value: TextContentAlign | undefined): this {
+        throw new Error("Unimplemented method textContentAlign")
+    }
+    minLines(value: int32 | undefined): this {
+        throw new Error("Unimplemented method minLines")
+    }
+    minLineHeight(value: LengthMetrics | undefined): this {
+        throw new Error("Unimplemented method minLineHeight")
+    }
+    maxLineHeight(value: LengthMetrics | undefined): this {
+        throw new Error("Unimplemented method maxLineHeight")
+    }
+    lineHeightMultiple(value: double | undefined): this {
+        throw new Error("Unimplemented method lineHeightMultiple")
+    }
+    enableSelectedDataDetector(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableSelectedDataDetector")
+    }
     font(fontValue: Font | undefined, options?: FontSettingOptions): this {
         throw new Error("Unimplemented method font")
     }
@@ -1168,6 +1325,16 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     editMenuOptions_value?: EditMenuOptions | undefined
     halfLeading_value?: boolean | undefined
     enableHapticFeedback_value?: boolean | undefined
+    optimizeTrailingSpace_value?: boolean | undefined
+    shaderStyle_value?: ShaderStyle | undefined
+    enableAutoSpacing_value?: boolean | undefined
+    contentTransition_value?: ContentTransition | undefined
+    textContentAlign_value?: TextContentAlign | undefined
+    minLines_value?: int32 | undefined
+    minLineHeight_value?: LengthMetrics | undefined
+    maxLineHeight_value?: LengthMetrics | undefined
+    lineHeightMultiple_value?: double | undefined
+    enableSelectedDataDetector_value?: boolean | undefined
     compressLeadingPunctuation_value?: boolean | undefined
     includeFontPadding_value?: boolean | undefined
     fallbackLineSpacing_value?: boolean | undefined
@@ -1198,7 +1365,7 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
     fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    lineSpacing(value: LengthMetrics | undefined): this {
+    lineSpacing(value: LengthMetrics | undefined, options?: LineSpacingOptions): this {
         return this
     }
     textAlign(value: TextAlign | undefined): this {
@@ -1295,6 +1462,36 @@ export class ArkTextStyle extends ArkCommonMethodStyle implements TextAttribute 
         return this
     }
     enableHapticFeedback(value: boolean | undefined): this {
+        return this
+    }
+    optimizeTrailingSpace(value: boolean | undefined): this {
+        return this
+    }
+    shaderStyle(value: ShaderStyle | undefined): this {
+        return this
+    }
+    enableAutoSpacing(value: boolean | undefined): this {
+        return this
+    }
+    contentTransition(value: ContentTransition | undefined): this {
+        return this
+    }
+    textContentAlign(value: TextContentAlign | undefined): this {
+        return this
+    }
+    minLines(value: int32 | undefined): this {
+        return this
+    }
+    minLineHeight(value: LengthMetrics | undefined): this {
+        return this
+    }
+    maxLineHeight(value: LengthMetrics | undefined): this {
+        return this
+    }
+    lineHeightMultiple(value: double | undefined): this {
+        return this
+    }
+    enableSelectedDataDetector(value: boolean | undefined): this {
         return this
     }
     compressLeadingPunctuation(value: boolean | undefined): this {
@@ -1441,10 +1638,11 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         }
         return this
     }
-    public lineSpacing(value: LengthMetrics | undefined): this {
+    public lineSpacing(value: LengthMetrics | undefined, options?: LineSpacingOptions): this {
         if (this.checkPriority("lineSpacing")) {
             const value_casted = value as (LengthMetrics | undefined)
-            this.getPeer()?.setLineSpacingAttribute(value_casted)
+            const options_casted = options as (LineSpacingOptions | undefined)
+            this.getPeer()?.setLineSpacingAttribute(value_casted, options_casted)
             return this
         }
         return this
@@ -1741,6 +1939,86 @@ export class ArkTextComponent extends ArkCommonMethodComponent implements TextAt
         if (this.checkPriority("textDirection")) {
             const value_casted = value as (TextDirection | undefined)
             this.getPeer()?.setTextDirectionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public optimizeTrailingSpace(value: boolean | undefined): this {
+        if (this.checkPriority("optimizeTrailingSpace")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setOptimizeTrailingSpaceAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public shaderStyle(value: ShaderStyle | undefined): this {
+        if (this.checkPriority("shaderStyle")) {
+            const value_casted = value as (ShaderStyle | undefined)
+            this.getPeer()?.setShaderStyleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableAutoSpacing(value: boolean | undefined): this {
+        if (this.checkPriority("enableAutoSpacing")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableAutoSpacingAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public contentTransition(value: ContentTransition | undefined): this {
+        if (this.checkPriority("contentTransition")) {
+            const value_casted = value as (ContentTransition | undefined)
+            this.getPeer()?.setContentTransitionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public textContentAlign(value: TextContentAlign | undefined): this {
+        if (this.checkPriority("textContentAlign")) {
+            const value_casted = value as (TextContentAlign | undefined)
+            this.getPeer()?.setTextContentAlignAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public minLines(value: int32 | undefined): this {
+        if (this.checkPriority("minLines")) {
+            const value_casted = value as (int32 | undefined)
+            this.getPeer()?.setMinLinesAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public minLineHeight(value: LengthMetrics | undefined): this {
+        if (this.checkPriority("minLineHeight")) {
+            const value_casted = value as (LengthMetrics | undefined)
+            this.getPeer()?.setMinLineHeightAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public maxLineHeight(value: LengthMetrics | undefined): this {
+        if (this.checkPriority("maxLineHeight")) {
+            const value_casted = value as (LengthMetrics | undefined)
+            this.getPeer()?.setMaxLineHeightAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public lineHeightMultiple(value: double | undefined): this {
+        if (this.checkPriority("lineHeightMultiple")) {
+            const value_casted = value as (double | undefined)
+            this.getPeer()?.setLineHeightMultipleAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableSelectedDataDetector(value: boolean | undefined): this {
+        if (this.checkPriority("enableSelectedDataDetector")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableSelectedDataDetectorAttribute(value_casted)
             return this
         }
         return this

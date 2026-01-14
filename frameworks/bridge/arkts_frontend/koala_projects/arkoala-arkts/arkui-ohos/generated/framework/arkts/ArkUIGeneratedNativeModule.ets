@@ -1111,6 +1111,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ImageSpanAttribute_setAlt(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _ImageSpanAttribute_setSupportSvg2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _IndicatorComponent_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _IndicatorComponentInterface_setIndicatorComponentOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -1905,6 +1907,16 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SearchAttribute_setTextDirection(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _SearchAttribute_setStrokeWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SearchAttribute_setOnWillAttachIME(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SearchAttribute_setStrokeColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SearchAttribute_setEnableAutoSpacing(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SearchAttribute_setEnableSelectedDataDetector(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _SearchAttribute_setSearchButton(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SearchAttribute_setInputFilter(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -2315,6 +2327,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setMaxFontScale(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _SymbolGlyphAttribute_setShaderStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _SymbolGlyphAttribute_setSymbolShadow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setSymbolEffect1(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _SymbolGlyphAttribute_setSymbolEffect2(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -2507,6 +2523,26 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TextAttribute_setTextDirection(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _TextAttribute_setOptimizeTrailingSpace(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAttribute_setShaderStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAttribute_setEnableAutoSpacing(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAttribute_setContentTransition(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAttribute_setTextContentAlign(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAttribute_setMinLines(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAttribute_setMinLineHeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAttribute_setMaxLineHeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAttribute_setLineHeightMultiple(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAttribute_setEnableSelectedDataDetector(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _TextAttribute_setFont(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TextAttribute_setFontWeight(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -2642,6 +2678,20 @@ export class ArkUIGeneratedNativeModule {
     native static _TextAreaAttribute_setSelectedDragPreviewStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TextAreaAttribute_setTextDirection(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAreaAttribute_setMinLines(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAreaAttribute_setEnableAutoSpacing(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAreaAttribute_setStrokeWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAreaAttribute_setStrokeColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAreaAttribute_setOnWillAttachIME(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAreaAttribute_setScrollBarColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextAreaAttribute_setEnableSelectedDataDetector(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TextAreaAttribute_setInputFilter(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -2824,6 +2874,18 @@ export class ArkUIGeneratedNativeModule {
     native static _TextInputAttribute_setSelectedDragPreviewStyle(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TextInputAttribute_setTextDirection(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextInputAttribute_setEnableAutoFillAnimation(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextInputAttribute_setOnWillAttachIME(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextInputAttribute_setStrokeColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextInputAttribute_setEnableAutoSpacing(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextInputAttribute_setStrokeWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TextInputAttribute_setEnableSelectedDataDetector(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TextInputAttribute_setInputFilter(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -3970,6 +4032,14 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ColorMetricsLinearGradient_getFinalizer(): KPointer
     @ani.unsafe.Direct
+    native static _ColorShaderStyle_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _ColorShaderStyle_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _ColorShaderStyle_getColor(ptr: KPointer): KPointer
+    @ani.unsafe.Direct
+    native static _ColorShaderStyle_setColor(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _CommonShape_construct(): KPointer
     @ani.unsafe.Direct
     native static _CommonShape_getFinalizer(): KPointer
@@ -4063,6 +4133,10 @@ export class ArkUIGeneratedNativeModule {
     native static _ContentTransitionEffect_setOPACITY(OPACITY: KPointer): void
     @ani.unsafe.Direct
     native static _ContextMenu_close(): void
+    @ani.unsafe.Direct
+    native static _ContentTransition_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _ContentTransition_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _ControllerHandler_construct(): KPointer
     @ani.unsafe.Direct
@@ -4759,6 +4833,10 @@ export class ArkUIGeneratedNativeModule {
     native static _ImageAttachment_getLayoutStyle(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Quick
     native static _ImageAttachment_getColorFilter(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _ImageAttachment_getSupportSvg2(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Quick
+    native static _ImageAttachment_getSizeInVp(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _ImageBitmap_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -4789,6 +4867,16 @@ export class ArkUIGeneratedNativeModule {
     native static _ImageData_getWidth(ptr: KPointer): int32
     @ani.unsafe.Direct
     native static _ImageData_setWidth(ptr: KPointer, width: KInt): void
+    @ani.unsafe.Direct
+    native static _IMEClient_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _IMEClient_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _IMEClient_setExtraConfig(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _IMEClient_getNodeId(ptr: KPointer): int64
+    @ani.unsafe.Direct
+    native static _IMEClient_setNodeId(ptr: KPointer, nodeId: KLong): void
     @ani.unsafe.Direct
     native static _Indicator_construct(): KPointer
     @ani.unsafe.Direct
@@ -4999,6 +5087,14 @@ export class ArkUIGeneratedNativeModule {
     native static _LinearGradient_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _LinearGradient_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _LinearGradientStyle_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _LinearGradientStyle_getFinalizer(): KPointer
+    @ani.unsafe.Quick
+    native static _LinearGradientStyle_getOptions(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _LinearGradientStyle_setOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _LinearIndicatorController_construct(): KPointer
     @ani.unsafe.Direct
@@ -5417,6 +5513,18 @@ export class ArkUIGeneratedNativeModule {
     native static _NodeContentExtender_addFrameNode(content: KPointer, node: KPointer): int32
     @ani.unsafe.Direct
     native static _NodeContentExtender_removeFrameNode(content: KPointer, node: KPointer): boolean
+    @ani.unsafe.Direct
+    native static _NumericTextTransition_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _NumericTextTransition_getFinalizer(): KPointer
+    @ani.unsafe.Quick
+    native static _NumericTextTransition_getFlipDirection(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _NumericTextTransition_setFlipDirection(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _NumericTextTransition_getEnableBlur(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _NumericTextTransition_setEnableBlur(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _OffscreenCanvas_construct(width: KDouble, height: KDouble, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -5622,6 +5730,14 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _PulseSymbolEffect_getFinalizer(): KPointer
     @ani.unsafe.Direct
+    native static _RadialGradientStyle_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
+    @ani.unsafe.Direct
+    native static _RadialGradientStyle_getFinalizer(): KPointer
+    @ani.unsafe.Quick
+    native static _RadialGradientStyle_getOptions(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _RadialGradientStyle_setOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _RenderingContextSettings_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
     native static _RenderingContextSettings_getFinalizer(): KPointer
@@ -5719,6 +5835,10 @@ export class ArkUIGeneratedNativeModule {
     native static _ReplaceSymbolEffect_getScope(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _ReplaceSymbolEffect_setScope(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _ReplaceSymbolEffect_getReplaceType(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _ReplaceSymbolEffect_setReplaceType(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Quick
     native static _RestrictedWorker_construct(scriptURL: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -5955,6 +6075,10 @@ export class ArkUIGeneratedNativeModule {
     native static _SpringBackAction_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _SpringBackAction_springBack(ptr: KPointer): void
+    @ani.unsafe.Direct
+    native static _ShaderStyle_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _ShaderStyle_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _SpringMotion_construct(start: number, end: number, velocity: number, prop: KPointer): KPointer
     @ani.unsafe.Direct
@@ -6196,6 +6320,8 @@ export class ArkUIGeneratedNativeModule {
     native static _TextContentControllerBase_clearPreviewText(ptr: KPointer): void
     @ani.unsafe.Quick
     native static _TextContentControllerBase_getText(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _TextContentControllerBase_setStyledPlaceholder(ptr: KPointer, styledString: KPointer): void
     @ani.unsafe.Direct
     native static _TextContentControllerBase_deleteBackward(ptr: KPointer): void
     @ani.unsafe.Direct

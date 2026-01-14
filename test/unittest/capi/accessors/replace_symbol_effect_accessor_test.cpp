@@ -30,7 +30,7 @@ class ReplaceSymbolEffectAccessorTest : public AccessorTestCtorBase<GENERATED_Ar
     &GENERATED_ArkUIAccessors::getReplaceSymbolEffectAccessor, ReplaceSymbolEffectPeer> {
     void* CreatePeerInstance() override
     {
-        return accessor_->construct(nullptr);
+        return accessor_->construct(nullptr, nullptr);
     }
 };
 
@@ -58,13 +58,17 @@ HWTEST_F(ReplaceSymbolEffectAccessorTest, ctorTest, TestSize.Level1)
     Opt_EffectScope scope2 = Converter::ArkValue<Opt_EffectScope, Ark_EffectScope>(ARK_EFFECT_SCOPE_WHOLE);
     Opt_EffectScope scopeEmpty = Converter::ArkValue<Opt_EffectScope>(Ark_Empty());
     const std::vector<std::tuple<Opt_EffectScope*, SymbolEffectPeer*>> testPlan {
-        {&scope1, PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(OHOS::Ace::ScopeType::LAYER)},
-        {&scope2, PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(OHOS::Ace::ScopeType::WHOLE)},
-        {&scopeEmpty, PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(std::nullopt)},
-        {nullptr, PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(std::nullopt)},
+        {&scope1, PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(OHOS::Ace::ScopeType::LAYER,
+            OHOS::Ace::SymbolEffectType::REPLACE)},
+        {&scope2, PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(OHOS::Ace::ScopeType::WHOLE,
+            OHOS::Ace::SymbolEffectType::REPLACE)},
+        {&scopeEmpty, PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(std::nullopt,
+            OHOS::Ace::SymbolEffectType::REPLACE)},
+        {nullptr, PeerUtils::CreatePeer<ReplaceSymbolEffectPeer>(std::nullopt,
+            OHOS::Ace::SymbolEffectType::REPLACE)},
     };
     for (auto [value, expected] : testPlan) {
-        Ark_ReplaceSymbolEffect peer = accessor_->construct(value);
+        Ark_ReplaceSymbolEffect peer = accessor_->construct(value, nullptr);
         ASSERT_NE(peer, nullptr);
         EXPECT_EQ(*peer, *expected);
     }

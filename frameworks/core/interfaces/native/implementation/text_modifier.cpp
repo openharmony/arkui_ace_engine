@@ -14,6 +14,11 @@
  */
 
 #include "core/interfaces/native/implementation/text_controller_peer_impl.h"
+#include "core/interfaces/native/implementation/color_shader_style_peer_impl.h"
+#include "core/interfaces/native/implementation/linear_gradient_style_peer_impl.h"
+#include "core/interfaces/native/implementation/radial_gradient_style_peer_impl.h"
+#include "core/interfaces/native/implementation/content_transition_peer_impl.h"
+#include "core/interfaces/native/implementation/numeric_text_transition_peer_impl.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
@@ -24,6 +29,7 @@
 #include "core/components_ng/pattern/text/text_model_static.h"
 #include "base/log/log_wrapper.h"
 #include "base/utils/macros.h"
+#include "core/common/container.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components/common/properties/text_style_parser.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -302,13 +308,19 @@ void SetFontStyleImpl(Ark_NativePointer node,
     TextModelStatic::SetItalicFontStyle(frameNode, fontStyle);
 }
 void SetLineSpacingImpl(Ark_NativePointer node,
-                        const Opt_LengthMetrics* value)
+                        const Opt_LengthMetrics* value,
+                        const Opt_LineSpacingOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto lineSpacing = Converter::OptConvertPtr<Dimension>(value);
     Validator::ValidateNonNegative(lineSpacing);
     TextModelStatic::SetLineSpacing(frameNode, lineSpacing);
+    std::optional<bool> isOnlyBetweenLines = std::nullopt;
+    if (options->tag != INTEROP_TAG_UNDEFINED) {
+        isOnlyBetweenLines = Converter::Convert<bool>(options->value);
+    }
+    TextModelStatic::SetIsOnlyBetweenLines(frameNode, isOnlyBetweenLines);
 }
 void SetTextAlignImpl(Ark_NativePointer node,
                       const Opt_TextAlign* value)
@@ -648,8 +660,21 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
                 arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
+        auto prepareMenuCallback = Converter::GetOpt(optValue->onPrepareMenu);
+    std::function<std::vector<NG::MenuOptionsParam>(const std::vector<NG::MenuItemParam>&)> onPrepareMenuCallback =
+        nullptr;
+    if (prepareMenuCallback) {
+        onPrepareMenuCallback =
+            [arkPrepareMenu = CallbackHelper(*prepareMenuCallback)](
+                const std::vector<NG::MenuItemParam>& systemMenuItems) -> std::vector<NG::MenuOptionsParam> {
+            auto menuItems = Converter::ArkValue<Array_TextMenuItem>(systemMenuItems, Converter::FC);
+            auto result = arkPrepareMenu.InvokeWithOptConvertResult<std::vector<NG::MenuOptionsParam>,
+                Array_TextMenuItem, Callback_Array_TextMenuItem_Void>(menuItems);
+            return result.value_or(std::vector<NG::MenuOptionsParam>());
+        };
+    }
         TextModelStatic::SetSelectionMenuOptions(
-            frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick));
+            frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick), std::move(onPrepareMenuCallback));
     }
 }
 void SetHalfLeadingImpl(Ark_NativePointer node,
@@ -706,6 +731,123 @@ void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
     TextModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
+}
+void SetOptimizeTrailingSpaceImpl(Ark_NativePointer node,
+                                  const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextModelStatic::SetOptimizeTrailingSpace(frameNode, convValue);
+}
+void SetShaderStyleImpl(Ark_NativePointer node,
+                        const Opt_ShaderStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optShaderStyle = Converter::GetOptPtr(value);
+    if (!optShaderStyle.has_value()) {
+        TextModelNG::ResetTextGradient(frameNode);
+        return;
+    }
+    auto shaderPeer = reinterpret_cast<ShaderStylePeer*>(value->value);
+    CHECK_NULL_VOID(shaderPeer);
+    switch (shaderPeer->type) {
+        case ShaderStyleType::LINEAR_GRADIENT:
+            {
+                TextModelNG::SetGradientStyle(frameNode, shaderPeer->gradientOptions.value());
+                break;
+            }
+        case ShaderStyleType::RADIAL_GRADIENT:
+            {
+                TextModelNG::SetGradientStyle(frameNode, shaderPeer->gradientOptions.value());
+                break;
+            }
+        case ShaderStyleType::SOLID_COLOR:
+            {
+                if (shaderPeer->colorValue) {
+                    TextModelNG::SetColorShaderStyle(frameNode, shaderPeer->colorValue.value());
+                } else {
+                    TextModelNG::ResetTextGradient(frameNode);
+                }
+                break;
+            }
+        default:
+            TextModelNG::ResetTextGradient(frameNode);
+            break;
+    }
+}
+void SetEnableAutoSpacingImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextModelStatic::SetEnableAutoSpacing(frameNode, convValue);
+}
+void SetContentTransitionImpl(Ark_NativePointer node,
+                              const Opt_ContentTransition* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optContentTransition = Converter::GetOptPtr(value);
+    if (!optContentTransition.has_value()) {
+        TextModelNG::ResetContentTransition(frameNode);
+        return;
+    }
+    auto contentTransitionPeer = reinterpret_cast<ContentTransitionPeer*>(optContentTransition.value());
+    CHECK_NULL_VOID(contentTransitionPeer);
+    TextFlipDirection direction = contentTransitionPeer->flipDirection;
+    bool enableBlur = contentTransitionPeer->enableBlur;
+    TextModelNG::SetContentTransition(frameNode, TextEffectStrategy::FLIP, direction, enableBlur);
+}
+void SetTextContentAlignImpl(Ark_NativePointer node,
+                             const Opt_TextContentAlign* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<TextContentAlign>(*value);
+    TextModelStatic::SetTextContentAlign(frameNode, convValue);
+}
+void SetMinLinesImpl(Ark_NativePointer node,
+                     const Opt_Int32* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<uint32_t>(*value);
+    TextModelStatic::SetMinLines(frameNode, convValue);
+}
+void SetMinLineHeightImpl(Ark_NativePointer node,
+                          const Opt_LengthMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    TextModelStatic::SetMinimumLineHeight(frameNode, convValue);
+}
+void SetMaxLineHeightImpl(Ark_NativePointer node,
+                          const Opt_LengthMetrics* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<Dimension>(*value);
+    TextModelStatic::SetMaximumLineHeight(frameNode, convValue);
+}
+void SetLineHeightMultipleImpl(Ark_NativePointer node,
+                               const Opt_Float64* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<double>(*value);
+    TextModelStatic::SetLineHeightMultiply(frameNode, convValue);
+}
+void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    TextModelStatic::SetSelectDetectEnable(frameNode, convValue);
 }
 void SetFontImpl(Ark_NativePointer node,
                  const Opt_Font* fontValue,
@@ -855,6 +997,16 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetFallbackLineSpacingImpl,
         TextAttributeModifier::SetSelectedDragPreviewStyleImpl,
         TextAttributeModifier::SetTextDirectionImpl,
+        TextAttributeModifier::SetOptimizeTrailingSpaceImpl,
+        TextAttributeModifier::SetShaderStyleImpl,
+        TextAttributeModifier::SetEnableAutoSpacingImpl,
+        TextAttributeModifier::SetContentTransitionImpl,
+        TextAttributeModifier::SetTextContentAlignImpl,
+        TextAttributeModifier::SetMinLinesImpl,
+        TextAttributeModifier::SetMinLineHeightImpl,
+        TextAttributeModifier::SetMaxLineHeightImpl,
+        TextAttributeModifier::SetLineHeightMultipleImpl,
+        TextAttributeModifier::SetEnableSelectedDataDetectorImpl,
         TextAttributeModifier::SetFontImpl,
         TextAttributeModifier::SetFontWeightImpl,
         TextAttributeModifier::SetSelectionImpl,

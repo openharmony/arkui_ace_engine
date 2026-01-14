@@ -156,6 +156,18 @@ export class ArkImageSpanPeer extends ArkBaseSpanPeer {
         ArkUIGeneratedNativeModule._ImageSpanAttribute_setAlt(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setSupportSvg2Attribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ImageSpanAttribute_setSupportSvg2(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface ImageSpanAttribute extends BaseSpan {
     setImageSpanOptions(value: ResourceStr | image.PixelMap): this {
@@ -179,6 +191,9 @@ export interface ImageSpanAttribute extends BaseSpan {
     alt(value: image.PixelMap | undefined): this {
         throw new Error("Unimplemented method alt")
     }
+    supportSvg2(value: boolean | undefined): this {
+        throw new Error("Unimplemented method supportSvg2")
+    }
     attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
@@ -190,6 +205,7 @@ export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttr
     onComplete_value?: ImageCompleteCallback | undefined
     onError_value?: ImageErrorCallback | undefined
     alt_value?: image.PixelMap | undefined
+    supportSvg2_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<ImageSpanAttribute> | AttributeModifier<CommonMethod> | undefined
     setImageSpanOptions(value: ResourceStr | image.PixelMap): this {
         return this
@@ -210,6 +226,9 @@ export class ArkImageSpanStyle extends ArkBaseSpanStyle implements ImageSpanAttr
         return this
     }
     alt(value: image.PixelMap | undefined): this {
+        return this
+    }
+    supportSvg2(value: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageSpanAttribute> | AttributeModifier<BaseSpan> | AttributeModifier<CommonMethod> | undefined): this {
@@ -289,6 +308,14 @@ export class ArkImageSpanComponent extends ArkBaseSpanComponent implements Image
         if (this.checkPriority("alt")) {
             const value_casted = value as (image.PixelMap | undefined)
             this.getPeer()?.setAltAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public supportSvg2(value: boolean | undefined): this {
+        if (this.checkPriority("supportSvg2")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setSupportSvg2Attribute(value_casted)
             return this
         }
         return this

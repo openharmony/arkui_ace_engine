@@ -32,6 +32,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t MAX_LINES = 3;
+constexpr uint32_t MIN_LINES = 1;
 constexpr double DEFAULT_OPACITY = 0.2;
 constexpr int32_t DEFAULT_ALPHA = 255;
 }
@@ -780,13 +781,14 @@ void TextFieldModelStatic::SetHalfLeading(FrameNode* frameNode, const std::optio
 }
 
 void TextFieldModelStatic::SetSelectionMenuOptions(FrameNode* frameNode,
-    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick)
+    const NG::OnCreateMenuCallback&& onCreateMenuCallback, const NG::OnMenuItemClickCallback&& onMenuItemClick,
+    const NG::OnPrepareMenuCallback&& onPrepareMenuCallback)
 {
     CHECK_NULL_VOID(frameNode);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(textFieldPattern);
     textFieldPattern->OnSelectionMenuOptionsUpdate(std::move(onCreateMenuCallback), std::move(onMenuItemClick),
-        nullptr);
+        std::move(onPrepareMenuCallback));
 }
 
 void TextFieldModelStatic::SetShowPasswordIcon(FrameNode* frameNode, const std::optional<bool>& value)
@@ -950,4 +952,114 @@ void TextFieldModelStatic::SetSelectedDragPreviewStyle(FrameNode* frameNode, con
     TextFieldModelNG::ResetSelectedDragPreviewStyle(frameNode);
 }
 
+void TextFieldModelStatic::SetEnableAutoFillAnimation(FrameNode* frameNode, const std::optional<bool>& optValue)
+{
+    TextFieldModelNG::SetEnableAutoFillAnimation(frameNode, optValue.value_or(true));
+}
+
+void TextFieldModelStatic::SetStrokeColor(FrameNode* frameNode, const std::optional<Color>& optValue)
+{
+    if (optValue) {
+        TextFieldModelNG::SetStrokeColor(frameNode, optValue.value());
+    } else {
+        TextFieldModelNG::ResetStrokeColor(frameNode);
+    }
+}
+
+void TextFieldModelStatic::SetEnableAutoSpacing(FrameNode* frameNode, const std::optional<bool>& optValue)
+{
+    TextFieldModelNG::SetEnableAutoSpacing(frameNode, optValue.value_or(false));
+}
+
+void TextFieldModelStatic::SetStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& optValue)
+{
+    if (optValue) {
+        TextFieldModelNG::SetStrokeWidth(frameNode, optValue.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, StrokeWidth, frameNode);
+    }
+}
+
+void TextFieldModelStatic::SetMinLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt)
+{
+    if (valueOpt.has_value() && valueOpt.value() <= 0) {
+        TextFieldModelNG::SetMinLines(frameNode, MIN_LINES);
+        return;
+    }
+    TextFieldModelNG::SetMinLines(frameNode, valueOpt.value_or(MIN_LINES));
+}
+
+void TextFieldModelStatic::SetOverflowMode(FrameNode* frameNode, const std::optional<OverflowMode>& valueOpt)
+{
+    if (valueOpt.has_value()) {
+        TextFieldModelNG::SetOverflowMode(frameNode, valueOpt.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, OverflowMode, frameNode);
+    }
+}
+
+void TextFieldModelStatic::SetSelectDetectEnable(FrameNode* frameNode, const std::optional<bool>& valueOpt)
+{
+    if (valueOpt) {
+        TextFieldModelNG::SetSelectDetectEnable(frameNode, valueOpt.value());
+    } else {
+        TextFieldModelNG::ResetSelectDetectEnable(frameNode);
+    }
+}
+
+void TextFieldModelStatic::SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& valueOpt)
+{
+    if (valueOpt) {
+        TextFieldModelNG::SetTextAreaScrollBarColor(frameNode, valueOpt.value());
+    } else {
+        TextFieldModelNG::ResetTextAreaScrollBarColor(frameNode);
+    }
+}
+
+void TextFieldModelStatic::SetIsOnlyBetweenLines(FrameNode* frameNode, const std::optional<bool>& isOnlyBetweenLines)
+{
+    if (isOnlyBetweenLines) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(
+            TextFieldLayoutProperty, IsOnlyBetweenLines, isOnlyBetweenLines.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, IsOnlyBetweenLines, frameNode);
+    }
+}
+
+void TextFieldModelStatic::SetMaxLinesMode(FrameNode* frameNode, const std::optional<OverflowMode>& maxLinesMode)
+{
+    if (maxLinesMode) {
+        TextFieldModelNG::SetOverflowMode(frameNode, maxLinesMode.value());
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, OverflowMode, frameNode);
+    }
+}
+
+void TextFieldModelStatic::SetCustomKeyboardWithNode(
+    FrameNode* frameNode, FrameNode* customKeyboard, const std::optional<bool>& supportAvoidance)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetCustomKeyboardWithNode(AceType::Claim<UINode>(customKeyboard));
+    pattern->SetCustomKeyboardOption(supportAvoidance.value_or(false));
+}
+
+void TextFieldModelStatic::SetCounterTextColor(FrameNode* frameNode, const std::optional<Color>& value)
+{
+    if (value) {
+        TextFieldModelNG::SetCounterTextColor(frameNode, value.value());
+    } else {
+        TextFieldModelNG::ResetCounterTextColor(frameNode);
+    }
+}
+
+void TextFieldModelStatic::SetCounterTextOverflowColor(FrameNode* frameNode, const std::optional<Color>& value)
+{
+    if (value) {
+        TextFieldModelNG::SetCounterTextOverflowColor(frameNode, value.value());
+    } else {
+        TextFieldModelNG::ResetCounterTextOverflowColor(frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG

@@ -34,6 +34,7 @@
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 #include "core/components_ng/pattern/particle/particle_model.h"
 #include "core/components_ng/pattern/slider/slider_model.h"
+#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/components_ng/pattern/toggle/toggle_model.h"
 #include "core/components_ng/pattern/ui_extension/session_wrapper.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
@@ -814,6 +815,7 @@ void AssignCast(std::optional<TextInputType>& dst, const Ark_InputType& src)
         case ARK_INPUT_TYPE_NEW_PASSWORD: dst = TextInputType::NEW_PASSWORD; break;
         case ARK_INPUT_TYPE_NUMBER_DECIMAL: dst = TextInputType::NUMBER_DECIMAL; break;
         case ARK_INPUT_TYPE_URL: dst = TextInputType::URL; break;
+        case ARK_INPUT_TYPE_ONE_TIME_CODE: dst = TextInputType::JS_ONE_TIME_CODE; break;
         default: LOGE("Unexpected enum value in Ark_InputType: %{public}d", src);
     }
 }
@@ -2100,6 +2102,106 @@ void AssignCast(std::optional<OHOS::Ace::ScopeType>& dst, const Ark_EffectScope&
         default: {
             LOGE("Unexpected enum value in Ark_EffectScope: %{public}d", src);
         }
+    }
+}
+template<>
+void AssignCast(std::optional<SymbolEffectType>& dst, const Ark_ReplaceEffectType& src)
+{
+    switch (src) {
+        case ARK_REPLACE_EFFECT_TYPE_SEQUENTIAL: dst = SymbolEffectType::REPLACE; break;
+        case ARK_REPLACE_EFFECT_TYPE_CROSS_FADE: dst = SymbolEffectType::QUICK_REPLACE; break;
+        case ARK_REPLACE_EFFECT_TYPE_SLASH_OVERLAY: dst = SymbolEffectType::DISABLE; break;
+        default: {
+            LOGE("Unexpected enum value in Ark_ReplaceEffectType: %{public}d", src);
+        }
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextContentAlign>& dst, const Ark_TextContentAlign& src)
+{
+    switch (src) {
+        case Ark_TextContentAlign::ARK_TEXT_CONTENT_ALIGN_TOP:
+            dst = TextContentAlign::TOP; break;
+        case Ark_TextContentAlign::ARK_TEXT_CONTENT_ALIGN_CENTER:
+            dst = TextContentAlign::CENTER; break;
+        case Ark_TextContentAlign::ARK_TEXT_CONTENT_ALIGN_BOTTOM:
+            dst = TextContentAlign::BOTTOM; break;
+        default:
+            LOGE("Unexpected enum value in Ark_TextContentAlign: %{public}d", src);
+            break;
+    }
+}
+
+template<>
+void AssignCast(std::optional<OverflowMode>& dst, const Ark_MaxLinesMode& src)
+{
+    switch (src) {
+        case Ark_MaxLinesMode::ARK_MAX_LINES_MODE_CLIP:
+            dst = OverflowMode::CLIP; break;
+        case Ark_MaxLinesMode::ARK_MAX_LINES_MODE_SCROLL:
+            dst = OverflowMode::SCROLL; break;
+        default:
+            LOGE("Unexpected enum value in Ark_MaxLinesMode: %{public}d", src);
+            break;
+    }
+}
+
+template<>
+void AssignCast(std::optional<TextFlipDirection>& dst, const Ark_FlipDirection& src)
+{
+    switch (src) {
+        case Ark_FlipDirection::ARK_FLIP_DIRECTION_DOWN:
+            dst = TextFlipDirection::DOWN; break;
+        case Ark_FlipDirection::ARK_FLIP_DIRECTION_UP:
+            dst = TextFlipDirection::UP; break;
+        default:
+            LOGE("Unexpected enum value in Ark_FlipDirection: %{public}d", src);
+            break;
+    }
+}
+
+template<>
+void AssignCast(std::optional<KeyboardGradientMode>& dst, const Ark_KeyboardGradientMode& src)
+{
+    switch (src) {
+        case Ark_KeyboardGradientMode::ARK_KEYBOARD_GRADIENT_MODE_NONE:
+            dst = KeyboardGradientMode::NONE; break;
+        case Ark_KeyboardGradientMode::ARK_KEYBOARD_GRADIENT_MODE_LINEAR_GRADIENT:
+            dst = KeyboardGradientMode::LINEAR_GRADIENT; break;
+        default:
+            LOGE("Unexpected enum value in Ark_KeyboardGradientMode: %{public}d", src);
+            break;
+    }
+}
+
+template<>
+void AssignCast(std::optional<SuperscriptStyle>& dst, const Ark_SuperscriptStyle& src)
+{
+    switch (src) {
+        case Ark_SuperscriptStyle::ARK_SUPERSCRIPT_STYLE_NORMAL:
+            dst = SuperscriptStyle::NORMAL; break;
+        case Ark_SuperscriptStyle::ARK_SUPERSCRIPT_STYLE_SUPERSCRIPT:
+            dst = SuperscriptStyle::SUPERSCRIPT; break;
+        case Ark_SuperscriptStyle::ARK_SUPERSCRIPT_STYLE_SUBSCRIPT:
+            dst = SuperscriptStyle::SUBSCRIPT; break;
+        default:
+            LOGE("Unexpected enum value in Ark_SuperscriptStyle: %{public}d", src);
+            break;
+    }
+}
+
+template<>
+void AssignCast(std::optional<KeyboardFluidLightMode>& dst, const Ark_KeyboardFluidLightMode& src)
+{
+    switch (src) {
+        case Ark_KeyboardFluidLightMode::ARK_KEYBOARD_FLUID_LIGHT_MODE_NONE:
+            dst = KeyboardFluidLightMode::NONE; break;
+        case Ark_KeyboardFluidLightMode::ARK_KEYBOARD_FLUID_LIGHT_MODE_BACKGROUND_FLUID_LIGHT:
+            dst = KeyboardFluidLightMode::BACKGROUND_FLUID_LIGHT; break;
+        default:
+            LOGE("Unexpected enum value in Ark_SuperscriptStyle: %{public}d", src);
+            break;
     }
 }
 template<>

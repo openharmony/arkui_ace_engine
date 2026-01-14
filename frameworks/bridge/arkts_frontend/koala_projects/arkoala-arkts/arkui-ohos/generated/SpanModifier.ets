@@ -21,7 +21,7 @@ import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkSpanPeer, TextBackgroundStyle, SpanAttribute } from "./component/span"
 import { int32 } from "@koalaui/common"
-import { Font, ResourceColor, Length } from "./component/units"
+import { Font, ResourceColor, ResourceStr, Length } from "./component/units"
 import { Color, FontStyle, FontWeight, TextCase } from "./component/enums"
 import { Resource } from "global.resource"
 import { DecorationStyleInterface } from "./component/styledString"
@@ -49,7 +49,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
     _fontStyle_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontStyle_0_0value?: FontStyle | undefined
     _fontWeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _fontWeight_0_0value?: int32 | FontWeight | string | undefined
+    _fontWeight_0_0value?: int32 | FontWeight | ResourceStr | undefined
     _fontFamily_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _fontFamily_0_0value?: string | Resource | undefined
     _decoration_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -156,7 +156,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         {
             switch (this._fontWeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((this._fontWeight_0_0value as int32 | FontWeight | ResourceStr | undefined));
                     this._fontWeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -166,7 +166,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                 }
                 default: {
                     this._fontWeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | string | undefined));
+                    peer.setFontWeightAttribute((undefined as int32 | FontWeight | ResourceStr | undefined));
                 }
             }
         }
@@ -468,7 +468,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
                     break;
                 }
                 default: {
-                    this.fontWeight((undefined as int32 | FontWeight | string | undefined));
+                    this.fontWeight((undefined as int32 | FontWeight | ResourceStr | undefined));
                 }
             }
         }
@@ -690,7 +690,7 @@ export class SpanModifier implements SpanAttribute,AttributeModifier<SpanAttribu
         }
         return this
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         if (((this._fontWeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._fontWeight_0_flag = AttributeUpdaterFlag.UPDATE

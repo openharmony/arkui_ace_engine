@@ -1306,6 +1306,24 @@ void deserializeAndCallSyncCallback_I32_Void(Ark_VMContext vmContext, KSerialize
     Ark_Int32 value0 = thisDeserializer.readInt32();
     callSyncMethod(vmContext, resourceId, value0);
 }
+void deserializeAndCallCallback_IMEClient_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_IMEClient value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_IMEClient_Void))));
+    thisDeserializer.readPointer();
+    Ark_IMEClient value0 = static_cast<Ark_IMEClient>(IMEClient_serializer::read(thisDeserializer));
+    _call(_resourceId, value0);
+}
+void deserializeAndCallSyncCallback_IMEClient_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_IMEClient value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_IMEClient_Void))));
+    Ark_IMEClient value0 = static_cast<Ark_IMEClient>(IMEClient_serializer::read(thisDeserializer));
+    callSyncMethod(vmContext, resourceId, value0);
+}
 void deserializeAndCallCallback_InsertValue_Boolean(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -7693,6 +7711,7 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Callback_I32_I32_Boolean: return deserializeAndCallCallback_I32_I32_Boolean(thisArray, thisLength);
         case Kind_Callback_I32_I32_I32_Void: return deserializeAndCallCallback_I32_I32_I32_Void(thisArray, thisLength);
         case Kind_Callback_I32_I32_Void: return deserializeAndCallCallback_I32_I32_Void(thisArray, thisLength);
+        case Kind_Callback_IMEClient_Void: return deserializeAndCallCallback_IMEClient_Void(thisArray, thisLength);
         case Kind_Callback_I32_Tuple_I32_I32: return deserializeAndCallCallback_I32_Tuple_I32_I32(thisArray, thisLength);
         case Kind_Callback_I32_Tuple_I32_I32_I32_I32: return deserializeAndCallCallback_I32_Tuple_I32_I32_I32_I32(thisArray, thisLength);
         case Kind_Callback_I64_Void: return deserializeAndCallCallback_I64_Void(thisArray, thisLength);
@@ -8042,6 +8061,7 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Callback_I32_I32_Boolean: return deserializeAndCallSyncCallback_I32_I32_Boolean(vmContext, thisArray, thisLength);
         case Kind_Callback_I32_I32_I32_Void: return deserializeAndCallSyncCallback_I32_I32_I32_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_I32_I32_Void: return deserializeAndCallSyncCallback_I32_I32_Void(vmContext, thisArray, thisLength);
+        case Kind_Callback_IMEClient_Void: return deserializeAndCallSyncCallback_IMEClient_Void(vmContext, thisArray, thisLength);
         case Kind_Callback_I32_Tuple_I32_I32: return deserializeAndCallSyncCallback_I32_Tuple_I32_I32(vmContext, thisArray, thisLength);
         case Kind_Callback_I32_Tuple_I32_I32_I32_I32: return deserializeAndCallSyncCallback_I32_Tuple_I32_I32_I32_I32(vmContext, thisArray, thisLength);
         case Kind_Callback_I64_Void: return deserializeAndCallSyncCallback_I64_Void(vmContext, thisArray, thisLength);

@@ -256,6 +256,28 @@ Opt_ColorFilterType GetColorFilterImpl(Ark_ImageAttachment peer)
     }
     return empty;
 }
+Opt_Boolean GetSupportSvg2Impl(Ark_ImageAttachment peer)
+{
+    auto invalid = Converter::ArkValue<Opt_Boolean>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
+    CHECK_NULL_RETURN(peer->span->GetImageAttribute(), invalid);
+    bool isSupportSvg2 = peer->span->GetImageAttribute()->supportSvg2;
+    return Converter::ArkValue<Opt_Boolean>(isSupportSvg2);
+}
+Opt_SizeOptions GetSizeInVpImpl(Ark_ImageAttachment peer)
+{
+    auto invalid = Converter::ArkValue<Opt_SizeOptions>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
+    CHECK_NULL_RETURN(peer->span->GetImageAttribute(), invalid);
+    CHECK_NULL_RETURN(peer->span->GetImageAttribute()->size, invalid);
+    const auto& srcSize = peer->span->GetImageAttribute()->size.value();
+    Ark_SizeOptions vpSize;
+    vpSize.width = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(srcSize.width->Value()), Converter::FC);
+    vpSize.height = ArkValue<Opt_Length>(PipelineBase::Px2VpWithCurrentDensity(srcSize.height->Value()), Converter::FC);
+    return Converter::ArkValue<Opt_SizeOptions>(vpSize);
+}
 } // ImageAttachmentAccessor
 const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor()
 {
@@ -270,6 +292,8 @@ const GENERATED_ArkUIImageAttachmentAccessor* GetImageAttachmentAccessor()
         ImageAttachmentAccessor::GetObjectFitImpl,
         ImageAttachmentAccessor::GetLayoutStyleImpl,
         ImageAttachmentAccessor::GetColorFilterImpl,
+        ImageAttachmentAccessor::GetSupportSvg2Impl,
+        ImageAttachmentAccessor::GetSizeInVpImpl,
     };
     return &ImageAttachmentAccessorImpl;
 }

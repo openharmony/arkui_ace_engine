@@ -948,6 +948,52 @@ void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration
     }
 }
 
+void AssignArkValue(Ark_ResourceColor& dst, const Color& src, ConvContext *ctx)
+{
+    dst.selector = 0;
+    dst.value0 = Converter::ArkValue<Ark_Color>(src, ctx);
+}
+
+void AssignArkValue(Ark_Color& dst, const Color& src)
+{
+    if (src == OHOS::Ace::Color::WHITE) {
+        dst = ARK_COLOR_WHITE;
+    } else if (src == OHOS::Ace::Color::BLACK) {
+        dst = ARK_COLOR_BLACK;
+    } else if (src == OHOS::Ace::Color::BLUE) {
+        dst = ARK_COLOR_BLUE;
+    } else if (src == Color(0xffa52a2a)) {
+        dst = ARK_COLOR_BROWN;
+    } else if (src == OHOS::Ace::Color::GRAY) {
+        dst = ARK_COLOR_GRAY;
+    } else if (src == OHOS::Ace::Color::GREEN) {
+        dst = ARK_COLOR_GREEN;
+    } else if (src == Color(0xff808080)) {
+        dst = ARK_COLOR_GREY;
+    } else if (src == Color(0xffffa500)) {
+        dst = ARK_COLOR_ORANGE;
+    } else if (src == Color(0xffffc0cb)) {
+        dst = ARK_COLOR_PINK;
+    } else if (src == OHOS::Ace::Color::RED) {
+        dst = ARK_COLOR_RED;
+    } else if (src == Color(0xFFFFFF00)) {
+        dst = ARK_COLOR_YELLOW;
+    } else if (src == OHOS::Ace::Color::TRANSPARENT) {
+        dst = ARK_COLOR_TRANSPARENT;
+    } else {
+        dst = static_cast<Ark_Color>(-1);
+    }
+}
+void AssignArkValue(Ark_FlipDirection& dst, const TextFlipDirection& src)
+{
+    switch (src) {
+        case TextFlipDirection::DOWN: dst = ARK_FLIP_DIRECTION_DOWN; break;
+        case TextFlipDirection::UP: dst = ARK_FLIP_DIRECTION_UP; break;
+        default: dst = static_cast<Ark_FlipDirection>(-1);
+            LOGE("Unexpected enum value in TextFlipDirection: %{public}d", src);
+            break;
+    }
+}
 void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src)
 {
     switch (src) {

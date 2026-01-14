@@ -190,7 +190,12 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.L
 
     int callsCount = 0;
     CustomNodeBuilderTestHelper<TextInputModifierTest2> builderHelper(this, frameNode);
-    auto builder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
+    const auto customNodeBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
+    Opt_Union_CustomBuilder_ComponentContentBase builder; 
+    Ark_Union_CustomBuilder_ComponentContentBase unionData;
+    unionData.selector = 0;
+    unionData.value0 = customNodeBuilder.value;
+    builder.value = unionData;
     modifier_->setCustomKeyboard(node_, &builder, nullptr);
 
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
@@ -215,7 +220,12 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOpt
 
     int callsCount = 0;
     CustomNodeBuilderTestHelper<TextInputModifierTest2> builderHelper(this, frameNode);
-    auto builder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
+    const auto customNodeBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
+    Opt_Union_CustomBuilder_ComponentContentBase builder; 
+    Ark_Union_CustomBuilder_ComponentContentBase unionData;
+    unionData.selector = 0;
+    unionData.value0 = customNodeBuilder.value;
+    builder.value = unionData;
     modifier_->setCustomKeyboard(node_, &builder, &optKeyboardOptions);
 
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
