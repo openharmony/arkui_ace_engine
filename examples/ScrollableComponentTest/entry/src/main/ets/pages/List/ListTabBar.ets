@@ -43,10 +43,7 @@ struct CardItem {
       Flex({ wrap: FlexWrap.Wrap }) {
         ForEach(this.classifyItem.courseList, (courseItem: string, index: number) => {
           Button(courseItem).fontSize(30);
-        }
-
-        )
-        ;
+        });
       };
     }.alignItems(HorizontalAlign.Start)
   }
@@ -64,12 +61,12 @@ struct IndexPage {
 
   aboutToAppear() {
     this.classifyList.push(new ClassifyModel(1, '热门',
-      ['热门', '热门', '关注', '热门', '热门', '关注', '热门', '热门', '关注']))
-    this.classifyList.push(new ClassifyModel(2, '体育', ['游戏', '动漫']))
-    this.classifyList.push(new ClassifyModel(3, '轻松', ['八卦', '宠物', '八卦', '宠物', '八卦', '宠物']))
-    this.classifyList.push(new ClassifyModel(4, '科技', ['星座', '宠物', '八卦', '宠物', '八卦', '宠物']))
-    this.classifyList.push(new ClassifyModel(5, '生活', ['奢侈品', '数码', '八卦', '宠物', '八卦', '宠物']))
-    this.classifyList.push(new ClassifyModel(6, '人文', ['航天', '宠物', '八卦', '宠物', '八卦', '宠物']))
+      ['热门', '热门', '关注', '热门', '热门', '关注', '热门', '热门', '关注']));
+    this.classifyList.push(new ClassifyModel(2, '体育', ['游戏', '动漫']));
+    this.classifyList.push(new ClassifyModel(3, '轻松', ['八卦', '宠物', '八卦', '宠物', '八卦', '宠物']));
+    this.classifyList.push(new ClassifyModel(4, '科技', ['星座', '宠物', '八卦', '宠物', '八卦', '宠物']));
+    this.classifyList.push(new ClassifyModel(5, '生活', ['奢侈品', '数码', '八卦', '宠物', '八卦', '宠物']));
+    this.classifyList.push(new ClassifyModel(6, '人文', ['航天', '宠物', '八卦', '宠物', '八卦', '宠物']));
   }
 
   //二级联动逻辑
