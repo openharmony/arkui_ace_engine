@@ -84,6 +84,7 @@
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.h"
@@ -162,6 +163,14 @@ void* createLoadingProgress(ArkUI_Int32 nodeId)
 void* createTextInputNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = TextFieldModelNG::CreateTextInputNode(nodeId, u"", u"");
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
+void* createRichEditorNode(ArkUI_Int32 nodeId)
+{
+    RefPtr<FrameNode> frameNode = RichEditorModelNG::CreateRichEditorStyledStringNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -740,6 +749,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
 #endif
     nullptr,
     createContainerPickerNode,
+    createRichEditorNode,
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)

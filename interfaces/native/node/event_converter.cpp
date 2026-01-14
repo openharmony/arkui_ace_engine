@@ -428,6 +428,8 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_CONTAINER_PICKER_CHANGE;
         case NODE_PICKER_EVENT_ON_SCROLL_STOP :
             return ON_CONTAINER_PICKER_SCROLL_STOP;
+        case NODE_RICH_EDITOR_ON_SELECTION_CHANGE:
+            return ON_RICH_EDITOR_ON_SELECTION_CHANGE;
         default:
             return -1;
     }
@@ -726,6 +728,8 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_PICKER_EVENT_ON_CHANGE;
         case ON_CONTAINER_PICKER_SCROLL_STOP :
             return NODE_PICKER_EVENT_ON_SCROLL_STOP;
+        case ON_RICH_EDITOR_ON_SELECTION_CHANGE:
+            return NODE_RICH_EDITOR_ON_SELECTION_CHANGE;
         default:
             return -1;
     }

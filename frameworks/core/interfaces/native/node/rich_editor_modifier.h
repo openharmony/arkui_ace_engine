@@ -21,6 +21,13 @@
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUIRichEditorModifier* GetRichEditorModifier();
 const CJUIRichEditorModifier* GetCJUIRichEditorModifier();
+void SetRichEditorNapiOnSelectionChange(ArkUINodeHandle node, void* callback);
+void ResetRichEditorOnSelectionChange(ArkUINodeHandle node);
+void SetRichEditorDetectEnable(ArkUINodeHandle node, ArkUI_Uint32 value);
+void ResetRichEditorDetectEnable(ArkUINodeHandle node);
+void SetRichEditorNapiDataDetectorConfigWithEvent(
+    ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig);
+void ResetRichEditorDataDetectorConfigWithEvent(ArkUINodeHandle node);
 }
 
 #endif // FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_RichEditor_MODIFIER_H

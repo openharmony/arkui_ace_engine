@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_EXTENED_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_INTERFACES_NATIVE_NODE_NODE_EXTENED_H
 
+#include <vector>
 #include "drawable_descriptor.h"
 #include "native_node.h"
 #include "native_type.h"
@@ -256,6 +257,22 @@ struct ArkUI_TextContentBaseController {
 
 struct ArkUI_TextLayoutManager {
     ArkUI_NodeHandle node;
+};
+
+struct ArkUI_DecorationStyleOptions {
+    ArkUI_TextDecorationType type;
+    uint32_t color;
+    ArkUI_TextDecorationStyle style;
+    float thicknessScale;
+};
+ 
+struct ArkUI_TextDataDetectorConfig {
+    std::vector<ArkUI_TextDataDetectorType> types;
+    void* onDetectResultUpdate;
+    void* onDetectResultUpdateUserData;
+    uint32_t color;
+    ArkUI_DecorationStyleOptions decoration;
+    bool enablePreviewMenu;
 };
 
 #ifdef __cplusplus
