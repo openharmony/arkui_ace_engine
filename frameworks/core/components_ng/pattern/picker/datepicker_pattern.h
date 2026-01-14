@@ -369,6 +369,11 @@ public:
         dateOrder_ = dateOrder;
     }
 
+    std::string GetDateOrder()
+    {
+        return dateOrder_;
+    }
+
     static std::string GetYearFormatString(uint32_t year)
     {
         return PickerStringFormatter::GetYear(year);
@@ -810,6 +815,7 @@ public:
     void UpdateDisappearTextStyle(const PickerTextStyle& textStyle);
     void UpdateNormalTextStyle(const PickerTextStyle& textStyle);
     void UpdateSelectedTextStyle(const PickerTextStyle& textStyle);
+    void UpdateDateOrder();
 
 private:
     void OnModifyDone() override;
@@ -861,7 +867,6 @@ private:
     void InitFocusKeyEvent();
     void FlushChildNodes();
     void UpdateLunarSwitch();
-    void UpdateDateOrder();
     void UpdateDialogAgingButton(const RefPtr<FrameNode>& buttonNode, bool isNext);
     Dimension ConvertFontScaleValue(const Dimension& fontSizeValue);
 
