@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -78,7 +78,7 @@ public:
     using CustomContentTransitionPtr = std::shared_ptr<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>;
     using PanEventFunction = std::function<void(const GestureEvent& info)>;
 
-    SwiperPattern();
+    ACE_FORCE_EXPORT SwiperPattern();
     ~SwiperPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -239,7 +239,7 @@ public:
     void CheckMarkDirtyNodeForRenderIndicator(
         float additionalOffset = 0.0f, std::optional<int32_t> nextIndex = std::nullopt);
 
-    int32_t TotalCount() const;
+    ACE_FORCE_EXPORT int32_t TotalCount() const;
 
     Axis GetDirection() const;
 

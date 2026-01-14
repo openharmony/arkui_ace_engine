@@ -559,6 +559,8 @@ frameworks/bridge/declarative_frontend/ark_component/components/arkcheckbox.js @
 frameworks/bridge/declarative_frontend/ark_component/export/arkComponent.d.ts @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkcolumnsplit.js @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/components/arkrowsplit.js @arkuilayout1
+frameworks/bridge/declarative_frontend/ark_component/components/arkstepper.js @arkui_navigation
+frameworks/bridge/declarative_frontend/ark_component/components/arkstepperitem.js @arkui_navigation
 frameworks/bridge/declarative_frontend/ark_component/src/ArkAlphabetIndexer.ts @arkuicodepulse
 frameworks/bridge/declarative_frontend/ark_component/src/ArkBadge.ts @huawei_g_five
 frameworks/bridge/declarative_frontend/ark_component/src/ArkBlank.ts @arkuilayout1
@@ -1024,10 +1026,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_span
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_span_bridge.h @huawei_g_five
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.h @arkuilayout1
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_item_bridge.cpp @arkui_navigation
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_item_bridge.h @arkui_navigation
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_bridge.cpp @arkui_navigation
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_bridge.h @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_swiper_bridge.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_swiper_bridge.h @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_glyph_bridge.cpp @huawei_g_five
@@ -1359,10 +1357,6 @@ frameworks/bridge/declarative_frontend/jsview/js_stack.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_stack.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.cpp
 frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h
-frameworks/bridge/declarative_frontend/jsview/js_stepper.cpp @arkui_navigation
-frameworks/bridge/declarative_frontend/jsview/js_stepper.h @arkui_navigation
-frameworks/bridge/declarative_frontend/jsview/js_stepper_item.cpp @arkui_navigation
-frameworks/bridge/declarative_frontend/jsview/js_stepper_item.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_swiper.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_swiper.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_symbol.cpp @huawei_g_five
@@ -1586,10 +1580,6 @@ frameworks/bridge/declarative_frontend/jsview/models/span_model_impl.cpp @huawei
 frameworks/bridge/declarative_frontend/jsview/models/span_model_impl.h @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/models/stack_model_impl.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/models/stack_model_impl.h @arkuilayout1
-frameworks/bridge/declarative_frontend/jsview/models/stepper_item_model_impl.cpp @arkui_navigation
-frameworks/bridge/declarative_frontend/jsview/models/stepper_item_model_impl.h @arkui_navigation
-frameworks/bridge/declarative_frontend/jsview/models/stepper_model_impl.cpp @arkui_navigation
-frameworks/bridge/declarative_frontend/jsview/models/stepper_model_impl.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/models/swiper_model_impl.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/models/swiper_model_impl.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/models/text_clock_model_impl.cpp @huawei_g_five

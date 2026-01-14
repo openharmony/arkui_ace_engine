@@ -29770,191 +29770,6 @@ if (globalThis.ScrollBar !== undefined) {
 }
 
 /// <reference path='./import.ts' />
-class ArkStepperComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  onFinish(callback) {
-    modifierWithKey(this._modifiersWithKeys, StepperOnFinishModifier.identity, StepperOnFinishModifier, callback);
-    return this;
-  }
-  onSkip(callback) {
-    modifierWithKey(this._modifiersWithKeys, StepperOnSkipModifier.identity, StepperOnSkipModifier, callback);
-    return this;
-  }
-  onChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, StepperOnChangeModifier.identity, StepperOnChangeModifier, callback);
-    return this;
-  }
-  onNext(callback) {
-    modifierWithKey(this._modifiersWithKeys, StepperOnNextModifier.identity, StepperOnNextModifier, callback);
-    return this;
-  }
-  onPrevious(callback) {
-    modifierWithKey(this._modifiersWithKeys, StepperOnPreviousModifier.identity, StepperOnPreviousModifier, callback);
-    return this;
-  }
-}
-
-class StepperOnFinishModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepper.resetOnFinish(node);
-    }
-    else {
-      getUINativeModule().stepper.setOnFinish(node, this.value);
-    }
-  }
-}
-StepperOnFinishModifier.identity = Symbol('onFinish');
-
-class StepperOnSkipModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepper.resetOnSkip(node);
-    }
-    else {
-      getUINativeModule().stepper.setOnSkip(node, this.value);
-    }
-  }
-}
-StepperOnSkipModifier.identity = Symbol('onSkip');
-
-class StepperOnChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepper.resetOnChange(node);
-    }
-    else {
-      getUINativeModule().stepper.setOnChange(node, this.value);
-    }
-  }
-}
-StepperOnChangeModifier.identity = Symbol('onChange');
-
-class StepperOnNextModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepper.resetOnNext(node);
-    }
-    else {
-      getUINativeModule().stepper.setOnNext(node, this.value);
-    }
-  }
-}
-StepperOnNextModifier.identity = Symbol('onNext');
-
-class StepperOnPreviousModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepper.resetOnPrevious(node);
-    }
-    else {
-      getUINativeModule().stepper.setOnPrevious(node, this.value);
-    }
-  }
-}
-StepperOnPreviousModifier.identity = Symbol('onPrevious');
-// @ts-ignore
-if (globalThis.Stepper !== undefined) {
-  globalThis.Stepper.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkStepperComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.StepperModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
-class ArkStepperItemComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  prevLabel(value) {
-    modifierWithKey(this._modifiersWithKeys, PrevLabelModifier.identity, PrevLabelModifier, value);
-    return this;
-  }
-  nextLabel(value) {
-    modifierWithKey(this._modifiersWithKeys, NextLabelModifier.identity, NextLabelModifier, value);
-    return this;
-  }
-  status(value) {
-    modifierWithKey(this._modifiersWithKeys, StatusModifier.identity, StatusModifier, value);
-    return this;
-  }
-}
-class NextLabelModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepperItem.resetNextLabel(node);
-    }
-    else {
-      getUINativeModule().stepperItem.setNextLabel(node, this.value);
-    }
-  }
-}
-NextLabelModifier.identity = Symbol('NextLabel');
-
-class PrevLabelModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  static identity = Symbol('prevLabel');
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepperItem.resetPrevLabel(node);
-    }
-    else {
-      getUINativeModule().stepperItem.setPrevLabel(node, this.value);
-    }
-  }
-}
-
-class StatusModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  static identity = Symbol('status');
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepperItem.resetStatus(node);
-    }
-    else {
-      getUINativeModule().stepperItem.setStatus(node, this.value);
-    }
-  }
-}
-// @ts-ignore
-if (globalThis.StepperItem !== undefined) {
-  globalThis.StepperItem.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkStepperItemComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.StepperItemModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
 class ArkTextClockComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -39557,6 +39372,29 @@ if (globalThis.ColumnSplit === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkcolumnsplit');
       module.exportView();
       getUINativeModule().columnSplit.create();
+    }
+  };
+}
+// @ts-ignore
+if (globalThis.Stepper === undefined) {
+  globalThis.Stepper = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('Stepper');
+      let module = globalThis.requireNapi('arkui.components.arkstepper');
+      module.exportView();
+      getUINativeModule().stepper.create(params);
+    }
+  };
+}
+
+// @ts-ignore
+if (globalThis.StepperItem === undefined) {
+  globalThis.StepperItem = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('StepperItem');
+      let module = globalThis.requireNapi('arkui.components.arkstepperitem');
+      module.exportView();
+      getUINativeModule().stepperItem.create(params);
     }
   };
 }

@@ -3671,4 +3671,23 @@ RefPtr<BasicShape> ArkTSUtils::GetBasicShape(const EcmaVM* vm, const Local<panda
     CHECK_NULL_RETURN(jsShapeAbstract, nullptr);
     return jsShapeAbstract->GetBasicShape();
 }
+
+bool ArkTSUtils::IsJsView(const EcmaVM* vm, const Local<JSValueRef>& value)
+{
+    return value->IsBoolean() && value->ToBoolean(vm)->Value();
+}
+
+bool ArkTSUtils::GetNativeNode(const EcmaVM* vm, const Local<JSValueRef>& value, ArkUINodeHandle& nativeNode)
+{
+    if (value->IsNativePointer(vm)) {
+        nativeNode = nodePtr(value->ToNativePointer(vm)->Value());
+        return true;
+    }
+    if (IsJsView(vm, value)) {
+        nativeNode = nullptr;
+        return true;
+    }
+
+    return false;
+}
 } // namespace OHOS::Ace::NG

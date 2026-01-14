@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -31,11 +31,13 @@ public:
     void SetOnNext(IndexCallbackEvent&& eventOnNext) override;
     void SetOnPrevious(IndexCallbackEvent&& eventOnPrevious) override;
     void SetOnChangeEvent(IndexChangeEvent&& onChangeEvent) override;
+    static void CreateFrameNode(uint32_t index);
     static void SetOnFinish(FrameNode* frameNode, RoutineCallbackEvent&& eventOnFinish);
     static void SetOnSkip(FrameNode* frameNode, RoutineCallbackEvent&& eventOnSkip);
     static void SetOnChange(FrameNode* frameNode, IndexCallbackEvent&& eventOnChange);
     static void SetOnNext(FrameNode* frameNode, IndexCallbackEvent&& eventOnNext);
     static void SetOnPrevious(FrameNode* frameNode, IndexCallbackEvent&& eventOnPrevious);
+    static void SetOnChangeEvent(FrameNode* frameNode, IndexChangeEvent&& onChangeEvent);
 
 private:
     static RefPtr<FrameNode> CreateSwiperChild(int32_t id, uint32_t index);

@@ -116,8 +116,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_stepper.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_stepper_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_symbol.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_symbol_span.h"
@@ -455,8 +453,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSSlider::JSBind(globalObj);
     JSGridRow::JSBind(globalObj);
     JSGridCol::JSBind(globalObj);
-    JSStepper::JSBind(globalObj);
-    JSStepperItem::JSBind(globalObj);
     JSBlank::JSBind(globalObj);
     JSCalendar::JSBind(globalObj);
     JSShape::JSBind(globalObj);

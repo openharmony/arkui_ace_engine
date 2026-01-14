@@ -90,6 +90,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"ColumnSplit", "linearsplit"},
         {"RowSplit", "linearsplit"},
         {"Marquee", "marquee"},
+        { "Stepper", "stepper" },
+        { "StepperItem", "stepper" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);

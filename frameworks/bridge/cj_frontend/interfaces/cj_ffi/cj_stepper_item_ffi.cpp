@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,9 +16,27 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_stepper_item_ffi.h"
 
 #include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
+#include "core/common/dynamic_module_helper.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
+
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::StepperItemModelNG* GetStepperItemModel()
+{
+    static NG::StepperItemModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("StepperItem");
+        if (module == nullptr) {
+            LOGF("Can't find stepper dynamic module");
+            abort();
+        }
+        model = reinterpret_cast<NG::StepperItemModelNG*>(module->GetModel());
+    }
+    return model;
+}
+}
 
 namespace {
 const std::vector<std::string> ITEM_STATUS = { "normal", "disabled", "waiting", "skip" };
@@ -27,17 +45,17 @@ const std::vector<std::string> ITEM_STATUS = { "normal", "disabled", "waiting", 
 extern "C" {
 void FfiOHOSAceFrameworkStepperItemCreate()
 {
-    StepperItemModel::GetInstance()->Create();
+    GetStepperItemModel()->Create();
 }
 
 void FfiOHOSAceFrameworkStepperItemSetPrevLabel(const char* value)
 {
-    StepperItemModel::GetInstance()->SetPrevLabel(value);
+    GetStepperItemModel()->SetPrevLabel(value);
 }
 
 void FfiOHOSAceFrameworkStepperItemSetNextLabel(const char* value)
 {
-    StepperItemModel::GetInstance()->SetNextLabel(value);
+    GetStepperItemModel()->SetNextLabel(value);
 }
 
 void FfiOHOSAceFrameworkStepperItemSetStatus(uint32_t value)
@@ -45,6 +63,6 @@ void FfiOHOSAceFrameworkStepperItemSetStatus(uint32_t value)
     if (value < 0 || value >= static_cast<int32_t>(ITEM_STATUS.size())) {
         return;
     }
-    StepperItemModel::GetInstance()->SetStatus(ITEM_STATUS[value]);
+    GetStepperItemModel()->SetStatus(ITEM_STATUS[value]);
 }
 }

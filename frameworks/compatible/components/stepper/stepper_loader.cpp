@@ -30,7 +30,7 @@ RefPtr<Framework::DOMNode> StepperLoader::CreateDomNode(int32_t nodeId, const st
 
 void* StepperLoader::CreateModel()
 {
-    return nullptr;
+    return new Framework::StepperModelImpl();
 }
 
 RefPtr<V2::InspectorComposedElement> StepperLoader::CreateInspectorElement(const std::string& id)

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,86 +12,36 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 #include "core/interfaces/native/node/stepper_item_modifier.h"
 
-#include "core/components_ng/pattern/stepper/stepper_item_model_ng.h"
+#include "ui/base/utils/utils.h"
+
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace::NG {
-void SetNextLabel(ArkUINodeHandle node, ArkUI_CharPtr value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::string rightLabel = value;
-    StepperItemModelNG::SetNextLabel(frameNode, rightLabel);
-}
-
-void ResetNextLabel(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    StepperItemModelNG::ResetNextLabel(frameNode);
-}
-
-void SetPrevLabel(ArkUINodeHandle node, ArkUI_CharPtr value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::string leftLabel = value;
-    StepperItemModelNG::SetPrevLabel(frameNode, leftLabel);
-}
-
-void ResetPrevLabel(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    StepperItemModelNG::ResetPrevLabel(frameNode);
-}
-
-void SetStatus(ArkUINodeHandle node, ArkUI_CharPtr value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    std::string labelStatus = value;
-    StepperItemModelNG::SetStatus(frameNode, labelStatus);
-}
-
-void ResetStatus(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    StepperItemModelNG::ResetStatus(frameNode);
-}
 namespace NodeModifier {
 const ArkUIStepperItemModifier* GetStepperItemModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUIStepperItemModifier modifier = {
-        .setNextLabel = SetNextLabel,
-        .resetNextLabel = ResetNextLabel,
-        .setPrevLabel = SetPrevLabel,
-        .resetPrevLabel = ResetPrevLabel,
-        .setStatus = SetStatus,
-        .resetStatus = ResetStatus,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    static const ArkUIStepperItemModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("StepperItem");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIStepperItemModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
 }
 
 const CJUIStepperItemModifier* GetCJUIStepperItemModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const CJUIStepperItemModifier modifier = {
-        .setNextLabel = SetNextLabel,
-        .resetNextLabel = ResetNextLabel,
-        .setPrevLabel = SetPrevLabel,
-        .resetPrevLabel = ResetPrevLabel,
-        .setStatus = SetStatus,
-        .resetStatus = ResetStatus,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+    static const CJUIStepperItemModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("StepperItem");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const CJUIStepperItemModifier*>(module->GetCjModifier());
+    }
+    return cachedModifier;
+}
 
-    return &modifier;
-}
-}
+} // namespace NodeModifier
 } // namespace OHOS::Ace::NG
