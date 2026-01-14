@@ -15,7 +15,7 @@
 
 #include "compatible/components/picker/timepicker_model_impl.h"
 
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "compatible/components/picker/picker_time_component.h"
 
 namespace OHOS::Ace::Framework {
@@ -32,23 +32,35 @@ void TimePickerModelImpl::CreateTimePicker(RefPtr<PickerTheme> pickerTheme, bool
 
 void TimePickerModelImpl::SetHour24(bool isUseMilitaryTime)
 {
-    JSViewSetProperty(&PickerTimeComponent::SetHour24, isUseMilitaryTime);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerTimeComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetHour24(isUseMilitaryTime);
 }
 
 void TimePickerModelImpl::SetEnableCascade(bool isEnableCascade)
 {
-    JSViewSetProperty(&PickerTimeComponent::SetEnableCascade, isEnableCascade);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerTimeComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetEnableCascade(isEnableCascade);
 }
 
 void TimePickerModelImpl::SetSelectedTime(const PickerTime& value)
 {
-    JSViewSetProperty(&PickerTimeComponent::SetSelectedTime, value);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerTimeComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetSelectedTime(value);
 }
 
 void TimePickerModelImpl::SetOnChange(ChangeEvent&& onChange)
 {
     auto datePicker = EventMarker([func = std::move(onChange)](const BaseEventInfo* info) { func(info); });
-    JSViewSetProperty(&PickerBaseComponent::SetOnChange, std::move(datePicker));
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerBaseComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetOnChange(std::move(datePicker));
 }
 
 void TimePickerModelImpl::SetOnEnterSelectedArea(ChangeEvent&& onEnterSelectedArea) {}

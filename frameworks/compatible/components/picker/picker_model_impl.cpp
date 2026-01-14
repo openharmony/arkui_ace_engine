@@ -18,7 +18,6 @@
 #include "compatible/components/picker/picker_date_component.h"
 #include "compatible/components/picker/picker_time_component.h"
 
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
@@ -46,43 +45,67 @@ void DatePickerModelImpl::CreateTimePicker(RefPtr<PickerTheme> theme)
 
 void DatePickerModelImpl::SetStartDate(const PickerDate& value)
 {
-    JSViewSetProperty(&PickerDateComponent::SetStartDate, value);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerDateComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetStartDate(value);
 }
 
 void DatePickerModelImpl::SetEndDate(const PickerDate& value)
 {
-    JSViewSetProperty(&PickerDateComponent::SetEndDate, value);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerDateComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetEndDate(value);
 }
 
 void DatePickerModelImpl::SetSelectedDate(const PickerDate& value)
 {
-    JSViewSetProperty(&PickerDateComponent::SetSelectedDate, value);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerDateComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetSelectedDate(value);
 }
 
 void DatePickerModelImpl::SetMode(const DatePickerMode& value)
 {
-    JSViewSetProperty(&PickerDateComponent::SetMode, value);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerDateComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetMode(value);
 }
 
 void DatePickerModelImpl::SetSelectedTime(const PickerTime& selectedTime)
 {
-    JSViewSetProperty(&PickerTimeComponent::SetSelectedTime, selectedTime);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerTimeComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetSelectedTime(selectedTime);
 }
 
 void DatePickerModelImpl::SetShowLunar(bool lunar)
 {
-    JSViewSetProperty(&PickerDateComponent::SetShowLunar, lunar);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerDateComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetShowLunar(lunar);
 }
 
 void DatePickerModelImpl::SetHour24(bool value)
 {
-    JSViewSetProperty(&PickerTimeComponent::SetHour24, value);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerTimeComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetHour24(value);
 }
 
 void DatePickerModelImpl::SetOnChange(DateChangeEvent&& onChange)
 {
     auto datePicker = EventMarker([func = std::move(onChange)](const BaseEventInfo* info) { func(info); });
-    JSViewSetProperty(&PickerBaseComponent::SetOnChange, std::move(datePicker));
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerBaseComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetOnChange(std::move(datePicker));
 }
 
 void DatePickerModelImpl::SetBackgroundColor(const Color& color)
