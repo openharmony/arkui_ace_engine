@@ -1219,7 +1219,6 @@ HWTEST_F(EventManagerTestNg, EventManagerTest101, TestSize.Level1)
     EXPECT_EQ(eventManager->lastTouchEvent_.sourceTool, SourceTool::MOUSE);
 }
 
-
 /**
  * @tc.name: EventManagerTest102
  * @tc.desc: Test SetResponseLinkRecognizers
@@ -1247,5 +1246,45 @@ HWTEST_F(EventManagerTestNg, EventManagerTest102, TestSize.Level1)
     EXPECT_TRUE(responseLinkRecognizers.size() == 1);
     EXPECT_TRUE(recognizerGroup->IsPostEventResult());
     EXPECT_TRUE(panHorizontal->IsPostEventResult());
+}
+
+/**
+ * @tc.name: EventManagerTest103
+ * @tc.desc: Test hitTestFrameNodeListener
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventManagerTestNg, EventManagerTest103, TestSize.Level1)
+{
+    auto eventManager = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(eventManager, nullptr);
+
+    int32_t callCount = 0;
+    eventManager->RegisterHitTestFrameNodeListener(100, [](const TouchEvent& touchEvent) {});
+    eventManager->RegisterHitTestFrameNodeListener(101, nullptr);
+    eventManager->RegisterHitTestFrameNodeListener(102, [&callCount](const TouchEvent& touchEvent) {
+        callCount++;
+    });
+    EXPECT_EQ(eventManager->hitTestFrameNodeListener_.size(), 3);
+
+    HitNodeInfos nodeInfos;
+    nodeInfos.pointerId = 0;
+    nodeInfos.hitNodeInfos = { { 101, "101" }, { 102, "102" }, { 103, "103" } };
+    eventManager->touchHitTestInfos_[0] = nodeInfos;
+    TouchEvent firstPoint;
+    firstPoint.id = 0;
+    TouchEvent secondPoint;
+    secondPoint.id = 1;
+    eventManager->NotifyHitTestFrameNodeListener(firstPoint);
+    eventManager->NotifyHitTestFrameNodeListener(secondPoint);
+    EXPECT_EQ(callCount, 1);
+
+    eventManager->UnRegisterHitTestFrameNodeListener(99);
+    EXPECT_EQ(eventManager->hitTestFrameNodeListener_.size(), 3);
+    eventManager->UnRegisterHitTestFrameNodeListener(100);
+    eventManager->UnRegisterHitTestFrameNodeListener(101);
+    eventManager->UnRegisterHitTestFrameNodeListener(102);
+    EXPECT_EQ(eventManager->hitTestFrameNodeListener_.size(), 0);
+    eventManager->NotifyHitTestFrameNodeListener(firstPoint);
+    EXPECT_EQ(eventManager->hitTestFrameNodeListener_.size(), 0);
 }
 } // namespace OHOS::Ace::NG

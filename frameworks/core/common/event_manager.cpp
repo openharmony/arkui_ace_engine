@@ -94,6 +94,7 @@ void EventManager::TouchTest(const TouchEvent& touchPoint, const RefPtr<NG::Fram
         touchPoint.type };
     // For root node, the parent local point is the same as global point.
     frameNode->TouchTest(point, point, point, touchRestrict, hitTestResult, touchPoint.id, responseLinkResult);
+    NotifyHitTestFrameNodeListener(touchPoint);
     hitTestRecordInfo_ = std::nullopt;
     if (touchPoint.type == TouchType::DOWN && coastingAxisEventGenerator_) {
         coastingAxisEventGenerator_->NotifyTouchTestResult(hitTestResult, point);
@@ -238,6 +239,7 @@ void EventManager::CheckRefereeStateAndReTouchTest(const TouchEvent& touchPoint,
         onTouchTestDoneFrameNodeList_.clear();
         frameNode->TouchTest(point, point, point, touchRestrict,
             reHitTestResult, touchPoint.id, reResponseLinkResult);
+        NotifyHitTestFrameNodeListener(touchPoint);
         SetResponseLinkRecognizers(reHitTestResult, reResponseLinkResult, touchPoint.passThrough);
         ExecuteTouchTestDoneCallback(touchPoint, reResponseLinkResult);
         if (!refereeNG_->IsReady()) {
@@ -2911,5 +2913,37 @@ void EventManager::ClearHitTestInfoRecord(const TouchEvent& touchPoint)
     CHECK_NULL_VOID(touchPoint.sourceTool == SourceTool::FINGER && !touchPoint.passThrough &&
         touchPoint.convertInfo.first == UIInputEventType::NONE && touchPoint.sourceType == SourceType::TOUCH);
     touchHitTestInfos_.clear();
+}
+
+void EventManager::RegisterHitTestFrameNodeListener(
+    int32_t uniqueIdentify, std::function<void(const TouchEvent&)> callback)
+{
+    hitTestFrameNodeListener_[uniqueIdentify] = callback;
+}
+
+void EventManager::UnRegisterHitTestFrameNodeListener(int32_t uniqueIdentify)
+{
+    auto it = hitTestFrameNodeListener_.find(uniqueIdentify);
+    if (it != hitTestFrameNodeListener_.end()) {
+        hitTestFrameNodeListener_.erase(it);
+    }
+}
+
+void EventManager::NotifyHitTestFrameNodeListener(const TouchEvent& touchEvent)
+{
+    if (hitTestFrameNodeListener_.empty()) {
+        return;
+    }
+    auto iter = touchHitTestInfos_.find(touchEvent.id);
+    if (iter == touchHitTestInfos_.end()) {
+        return;
+    }
+    for (const auto& item : iter->second.hitNodeInfos) {
+        auto nodeId = item.nodeId;
+        auto hitIter = hitTestFrameNodeListener_.find(nodeId);
+        if (hitIter != hitTestFrameNodeListener_.end() && hitIter->second) {
+            hitIter->second(touchEvent);
+        }
+    }
 }
 } // namespace OHOS::Ace
