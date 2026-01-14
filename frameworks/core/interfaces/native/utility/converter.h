@@ -259,6 +259,7 @@ namespace Converter {
     std::optional<Dimension> OptConvertFromResourceStr(const Ark_ResourceStr& src, DimensionUnit defaultUnit);
     std::optional<Dimension> OptConvertFromF64ResourceStr(
         const Opt_Union_F64_ResourceStr& src, DimensionUnit defaultUnit);
+    Font OptConvertFromFont(const Opt_Font& src, bool isSubTabStyle);
 
     template<typename T, typename P>
     ACE_FORCE_EXPORT void AssignCast(std::optional<T>& dst, const P& src)

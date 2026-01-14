@@ -2578,6 +2578,42 @@ std::optional<Dimension> OptConvertFromF64ResourceStr(const Opt_Union_F64_Resour
     return dimension;
 }
 
+Font OptConvertFromFont(const Opt_Font& src, bool isSubTabStyle)
+{
+    Font font;
+    if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(src.value.family); fontfamiliesOpt) {
+        font.fontFamilies = fontfamiliesOpt->families;
+        font.fontFamiliesNG = std::optional<std::vector<std::string>>(fontfamiliesOpt->families);
+    }
+    auto fontSize = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.value.size);
+    if (fontSize) {
+        Validator::ValidateNonNegative(fontSize);
+        Validator::ValidateNonPercent(fontSize);
+        font.fontSize = fontSize;
+    }
+    Converter::VisitUnion(src.value.weight,
+        [&font](const Ark_FontWeight& value) {
+            font.fontWeight = Converter::OptConvert<FontWeight>(value);
+        },
+        [&font, isSubTabStyle](const Ark_Int32& value) {
+            auto strVal = std::to_string(value);
+            auto parseResult = StringUtils::ParseFontWeight(strVal);
+            if (parseResult.first || !isSubTabStyle) {
+                font.fontWeight = parseResult.second;
+            }
+        },
+        [&font, isSubTabStyle](const Ark_String& value) {
+            auto strVal = Convert<std::string>(value);
+            auto parseResult = StringUtils::ParseFontWeight(strVal);
+            if (parseResult.first || !isSubTabStyle) {
+                font.fontWeight = parseResult.second;
+            }
+        },
+        []() {});
+    font.fontStyle = OptConvert<OHOS::Ace::FontStyle>(src.value.style);
+    return font;
+}
+
 template<>
 std::vector<Dimension> Convert(const Array_Length& src)
 {
