@@ -2886,4 +2886,24 @@ HWTEST_F(TitleBarTestNg, IsChildEmpty001, TestSize.Level1)
     titleBarNode->SetTitle(titleNode);
     EXPECT_FALSE(titleBarNode->IsChildEmpty());
 }
+
+/**
+ * @tc.name: OnAttachToMainTree
+ * @tc.desc: Test isParentModalOrSheet value
+ * @tc.type: FUNC
+ */
+HWTEST_F(TitleBarTestNg, OnAttachToMainTree001, TestSize.Level1)
+{
+    auto titleBarNode = TitleBarNode::GetOrCreateTitleBarNode(V2::TITLE_BAR_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TitleBarPattern>(); });
+    ASSERT_NE(titleBarNode, nullptr);
+
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(-1, V2::BUTTON_ETS_TAG, nullptr));
+    EXPECT_FALSE(titleBarNode->isParentModalOrSheet_);
+
+    sheetNode->AddChild(titleBarNode);
+    titleBarNode->OnAttachToMainTree(false);
+    EXPECT_TRUE(titleBarNode->isParentModalOrSheet_);
+}
 } // namespace OHOS::Ace::NG

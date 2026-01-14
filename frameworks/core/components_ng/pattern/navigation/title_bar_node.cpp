@@ -83,6 +83,14 @@ void TitleBarNode::OnAttachToMainTree(bool recursive)
             titleBarNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             context->RequestFrame();
         });
+    auto parent = GetParent();
+    while (parent) {
+        auto tag = parent->GetTag();
+        if (tag == V2::SHEET_PAGE_TAG || tag == V2::MODAL_PAGE_TAG) {
+            isParentModalOrSheet_ = true;
+        }
+        parent = parent->GetParent();
+    }
 }
 
 void TitleBarNode::OnDetachFromMainTree(bool recursive, PipelineContext* context)
@@ -91,6 +99,7 @@ void TitleBarNode::OnDetachFromMainTree(bool recursive, PipelineContext* context
     if (menuBarChangeListenerId_ != -1) {
         AppBarView::RemoveRectChangeListener(Claim(context), menuBarChangeListenerId_);
     }
+    isParentModalOrSheet_ = false;
 }
 
 void TitleBarNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
