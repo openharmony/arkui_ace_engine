@@ -155,6 +155,26 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         return this.instance instanceof LayoutCallbacks;
     }
 
+    isDefaultOnPlaceChildren(): boolean {
+        if (this.instance instanceof LayoutCallbacks) {
+            const layout = this.instance as LayoutCallbacks;
+            const onPlaceChildren = Class.of(layout).getInstanceMethod('onPlaceChildren');
+            const result = onPlaceChildren!.getOwner() === Class.from<LayoutCallbacks>();
+            return result ;
+        }
+        return false;    
+    }
+ 
+    isDefaultOnMeasureSize(): boolean {
+        if (this.instance instanceof LayoutCallbacks) {
+            const layout = this.instance as LayoutCallbacks;
+            const onMeasureSize = Class.of(layout).getInstanceMethod('onMeasureSize');
+            const result = onMeasureSize!.getOwner() === Class.from<LayoutCallbacks>();
+            return result;
+        }
+        return false;    
+    }
+
     __removeChildWhenDispose__IExtendableComponent_Internal(): void {
         this.instance.__removeMeFromParent__Internal();
         this.instance.__removeAllChild__Internal();

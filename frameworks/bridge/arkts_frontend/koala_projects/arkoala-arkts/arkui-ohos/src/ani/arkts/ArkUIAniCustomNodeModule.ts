@@ -39,7 +39,7 @@ export class MeasurableLayoutableInner implements Measurable, Layoutable {
         }
     }
     
-    uniqueId?: number | undefined;
+    uniqueId?: int32 | undefined;
     measureResult: MeasureResult = {width: 0, height: 0};
 
     public override measure(constraint: ConstraintSizeOptions): MeasureResult | undefined {

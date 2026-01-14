@@ -1299,7 +1299,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
 }
 export interface Layoutable {
     measureResult: MeasureResult
-    uniqueId?: number | undefined
+    uniqueId?: int32 | undefined
     layout(position: Position): void
     getMargin(): DirectionalEdgesT<number> | undefined
     getPadding(): DirectionalEdgesT<number> | undefined
@@ -1316,11 +1316,11 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
     set measureResult(measureResult: MeasureResult) {
         this.setMeasureResult(measureResult)
     }
-    get uniqueId(): number | undefined {
+    get uniqueId(): int32 | undefined {
         return this.getUniqueId()
     }
-    set uniqueId(uniqueId: number | undefined) {
-        const uniqueId_NonNull  = (uniqueId as number)
+    set uniqueId(uniqueId: int32 | undefined) {
+        const uniqueId_NonNull  = (uniqueId as int32)
         this.setUniqueId(uniqueId_NonNull)
     }
     constructor(peerPtr: KPointer) {
@@ -1361,11 +1361,11 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
         this.setMeasureResult_serialize(measureResult_casted)
         return
     }
-    private getUniqueId(): number | undefined {
+    private getUniqueId(): int32 | undefined {
         return this.getUniqueId_serialize()
     }
-    private setUniqueId(uniqueId: number | undefined): void {
-        const uniqueId_casted = uniqueId as (number | undefined)
+    private setUniqueId(uniqueId: int32 | undefined): void {
+        const uniqueId_casted = uniqueId as (int32 | undefined)
         this.setUniqueId_serialize(uniqueId_casted)
         return
     }
@@ -1405,23 +1405,23 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
         ArkUIGeneratedNativeModule._Layoutable_setMeasureResult(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getUniqueId_serialize(): number | undefined {
+    private getUniqueId_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._Layoutable_getUniqueId(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = (retvalDeserializer.readInt32() as int32)
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int32 | undefined = buffer
         return returnResult
     }
-    private setUniqueId_serialize(uniqueId: number | undefined): void {
+    private setUniqueId_serialize(uniqueId: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (uniqueId !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const uniqueIdTmpValue  = uniqueId!
-            thisSerializer.writeNumber(uniqueIdTmpValue)
+            thisSerializer.writeInt32(uniqueIdTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1481,7 +1481,7 @@ export class LayoutPolicy implements MaterializedBase {
     }
 }
 export interface Measurable {
-    uniqueId?: number | undefined
+    uniqueId?: int32 | undefined
     measure(constraint: ConstraintSizeOptions): MeasureResult | undefined
     getMargin(): DirectionalEdgesT<number> | undefined
     getPadding(): DirectionalEdgesT<number> | undefined
@@ -1492,11 +1492,11 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get uniqueId(): number | undefined {
+    get uniqueId(): int32 | undefined {
         return this.getUniqueId()
     }
-    set uniqueId(uniqueId: number | undefined) {
-        const uniqueId_NonNull  = (uniqueId as number)
+    set uniqueId(uniqueId: int32 | undefined) {
+        const uniqueId_NonNull  = (uniqueId as int32)
         this.setUniqueId(uniqueId_NonNull)
     }
     constructor(peerPtr: KPointer) {
@@ -1528,11 +1528,11 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
     public getBorderWidth(): DirectionalEdgesT<number> | undefined {
         return this.getBorderWidth_serialize()
     }
-    private getUniqueId(): number | undefined {
+    private getUniqueId(): int32 | undefined {
         return this.getUniqueId_serialize()
     }
-    private setUniqueId(uniqueId: number | undefined): void {
-        const uniqueId_casted = uniqueId as (number | undefined)
+    private setUniqueId(uniqueId: int32 | undefined): void {
+        const uniqueId_casted = uniqueId as (int32 | undefined)
         this.setUniqueId_serialize(uniqueId_casted)
         return
     }
@@ -1563,23 +1563,23 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         const returnResult : DirectionalEdgesT<number> = DirectionalEdgesT_serializer.read(retvalDeserializer)
         return returnResult
     }
-    private getUniqueId_serialize(): number | undefined {
+    private getUniqueId_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getUniqueId(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = (retvalDeserializer.readInt32() as int32)
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int32 | undefined = buffer
         return returnResult
     }
-    private setUniqueId_serialize(uniqueId: number | undefined): void {
+    private setUniqueId_serialize(uniqueId: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (uniqueId !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const uniqueIdTmpValue  = uniqueId!
-            thisSerializer.writeNumber(uniqueIdTmpValue)
+            thisSerializer.writeInt32(uniqueIdTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }

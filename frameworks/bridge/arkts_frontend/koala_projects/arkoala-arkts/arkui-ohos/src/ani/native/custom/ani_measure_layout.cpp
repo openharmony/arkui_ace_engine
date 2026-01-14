@@ -475,6 +475,7 @@ AniMeasureLayoutParamNG::AniMeasureLayoutParamNG(NG::LayoutWrapper* layoutWrappe
     if (ANI_OK != env->GetVM(&vm)) {
         LOGE("GetVM failed");
     }
+    vm_ = vm;
     deleter_ = [vm](ani_array ref) {
             if (ref != nullptr) {
                 ani_env* env = nullptr;
@@ -537,7 +538,7 @@ void AniMeasureLayoutParamNG::GenChildArray(ani_env* env, int32_t start, int32_t
 
         if (child && child->GetHostNode()) {
             auto uniqueId = child->GetHostNode()->GetId();
-            ani_object uniqueId_obj = AniUtils::CreateDouble(env, uniqueId);
+            ani_object uniqueId_obj = AniUtils::CreateInt32(env, uniqueId);
             if (ANI_OK != env->Object_SetPropertyByName_Ref(info, "uniqueId", uniqueId_obj)) {
                 return;
             }
@@ -585,7 +586,7 @@ void AniMeasureLayoutParamNG::CreateAndWrapChild(ani_env* env, ani_array array, 
 
         if (child && child->GetHostNode()) {
             auto uniqueId = child->GetHostNode()->GetId();
-            ani_object uniqueId_obj = AniUtils::CreateDouble(env, uniqueId);
+            ani_object uniqueId_obj = AniUtils::CreateInt32(env, uniqueId);
             if (ANI_OK != env->Object_SetPropertyByName_Ref(info, "uniqueId", uniqueId_obj)) {
                 return;
             }
@@ -594,6 +595,19 @@ void AniMeasureLayoutParamNG::CreateAndWrapChild(ani_env* env, ani_array array, 
             return;
         }
     }
+}
+
+void AniMeasureLayoutParamNG::UpdateSize(int32_t index, const NG::SizeF& size)
+{
+    ani_env* env = nullptr;
+    vm_->GetEnv(ANI_VERSION_1, &env);
+    ani_ref info_ref;
+    if (ANI_OK != env->Array_Get(childArray_.get(), index, &info_ref)) {
+        return;
+    }
+    ani_object info = static_cast<ani_object>(info_ref);
+    auto layoutWrapper = GetChildByIndex(index);
+    FillPlaceSizeProperty(env, info, size);
 }
 
 void AniMeasureLayoutParamNG::Update(ani_env* env,  NG::LayoutWrapper* layoutWrapper)

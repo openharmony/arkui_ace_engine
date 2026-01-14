@@ -47,7 +47,7 @@ public:
 
     void Update(NG::LayoutWrapper* layoutWrapper) override {};
     void Update(ani_env* env,  NG::LayoutWrapper* layoutWrapper);
-
+    void UpdateSize(int32_t index, const NG::SizeF& size) override;
     void CreateAndWrapChild(ani_env* env, ani_array array, int newCount);
 
     static RefPtr<AniMeasureLayoutParamNG> GetInstance(NG::LayoutWrapper* layoutWrapper, ani_env* env);
@@ -63,6 +63,7 @@ public:
 
     std::shared_ptr<AniArray> childArray_;
     std::function<void(ani_array)> deleter_;
+    ani_vm* vm_ = nullptr;
 
 };
 
