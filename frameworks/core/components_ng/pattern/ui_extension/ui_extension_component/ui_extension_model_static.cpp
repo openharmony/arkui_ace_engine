@@ -27,6 +27,7 @@ const CalcDimension EMBEDDED_COMPONENT_MIN_HEIGHT(10.0f, DimensionUnit::VP);
 
 static RefPtr<FrameNode> CreateEmbeddedComponent(int32_t nodeId, NG::SessionType sessionType)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(
         V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, [sessionType] () {
             return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, sessionType);
@@ -47,6 +48,7 @@ static RefPtr<FrameNode> CreateEmbeddedComponent(int32_t nodeId, NG::SessionType
 
 static RefPtr<FrameNode> CreateUIExtensionComponent(int32_t nodeId, NG::SessionType sessionType)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(
         V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId, [sessionType] () {
             return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, sessionType);

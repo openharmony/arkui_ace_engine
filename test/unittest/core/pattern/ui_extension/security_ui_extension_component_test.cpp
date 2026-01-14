@@ -120,7 +120,7 @@ RefPtr<SecurityUIExtensionPattern> SecurityUIExtensionComponentTestNg::CreateSec
     auto placeholderId = ElementRegister::GetInstance()->MakeUniqueId();
     auto placeholderNode = FrameNode::GetOrCreateFrameNode(
         "placeholderNode", placeholderId, []() { return AceType::MakeRefPtr<Pattern>(); });
-    
+
     NG::UIExtensionConfig config;
     config.wantWrap = AceType::MakeRefPtr<WantWrapOhos>(want);
     config.placeholderNode = placeholderNode;
@@ -503,6 +503,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionOnErrorTest, Tes
      */
     auto pattern = CreateSecurityUEC();
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+
     /**
      * @tc.steps: step2. Test onError
      */
@@ -624,7 +625,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, SecurityUIExtensionHandleTouchEvent
     pattern->HandleTouchEvent(touchEventInfo);
     focusHub->currentFocus_ = false;
     pattern->HandleTouchEvent(touchEventInfo);
-    
+
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_AXIS_BEGIN);
     pattern->HandleTouchEvent(touchEventInfo);
     pointerEvent->SetPointerAction(MMI::PointerEvent::POINTER_ACTION_LEAVE_WINDOW);
@@ -1357,7 +1358,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, GetAccessibilityRectInfo, TestSize.
     EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
     auto pattern = uiExtensionNode->GetPattern<SecurityUIExtensionPattern>();
     ASSERT_NE(pattern, nullptr);
- 
+
     /**
       * @tc.steps: step2. test RegisterEventProxyFlagCallback
     */
@@ -1829,7 +1830,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, InitializeTest002, TestSize.Level1)
      */
     auto pattern = CreateSecurityUEC();
     pattern->Initialize();
-    
+
     EXPECT_TRUE(pattern->hasInitialized_);
     ASSERT_NE(pattern->sessionWrapper_, nullptr);
     ASSERT_NE(pattern->accessibilitySessionAdapter_, nullptr);
@@ -1849,7 +1850,7 @@ HWTEST_F(SecurityUIExtensionComponentTestNg, TransferringCaller001, TestSize.Lev
      */
     auto pattern = CreateSecurityUEC();
     pattern->SetIsTransferringCaller(true);
-    
+
     EXPECT_TRUE(pattern->GetIsTransferringCaller());
 #endif
 }

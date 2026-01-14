@@ -307,6 +307,7 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
 #ifdef XCOMPONENT_SUPPORTED
 void* createXComponentNode(ArkUI_Int32 nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, "", XComponentType::SURFACE, "");
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -314,6 +315,7 @@ void* createXComponentNode(ArkUI_Int32 nodeId)
 
 void* createXComponentTextureNode(ArkUI_Int32 nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, "", XComponentType::TEXTURE, "");
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -321,6 +323,7 @@ void* createXComponentTextureNode(ArkUI_Int32 nodeId)
 
 void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
 {
+    ACE_UINODE_TRACE(nodeId);
     ArkUI_XComponent_Params* xcParams = (ArkUI_XComponent_Params*)(&params);
     CHECK_NULL_RETURN(xcParams, nullptr);
     auto frameNode = XComponentModelNG::CreateTypeNode(nodeId, xcParams);
@@ -333,6 +336,7 @@ void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& par
 void* createEmbeddedComponent(ArkUI_Int32 nodeId)
 {
     RefPtr<OHOS::Ace::WantWrap> want = nullptr;
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = UIExtensionAdapter::CreateEmbeddedComponent(nodeId, want);
     if (frameNode) {
         frameNode->IncRefCount();

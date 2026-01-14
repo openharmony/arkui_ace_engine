@@ -88,13 +88,13 @@ void AceSetResTraceId(uint32_t traceType, uint64_t traceId, uint32_t* pOldTraceT
     *pOldTraceId = gTraceId;
     gTraceType = traceType;
     gTraceId = traceId;
-    std::clog << __func__ << ": traceType=" << traceType << " traceId=" << traceId
-              << " oldTraceType=" << (*pOldTraceType) << " oldTraceId=" << (*pOldTraceId) << std::endl;
 }
 
-ResTracer::ResTracer(uint32_t traceType, uint64_t traceId)
+ResTracer::ResTracer(const char* caller, uint32_t traceType, uint64_t traceId)
 {
     AceSetResTraceId(traceType, traceId, &traceType_, &traceId_);
+    std::clog << __func__ << ": traceType=" << traceType << " traceId=" << traceId
+              << " oldTraceType=" << traceType_ << " oldTraceId=" << traceId_ << " " << caller << std::endl;
 }
 
 ResTracer::~ResTracer()
@@ -104,32 +104,30 @@ ResTracer::~ResTracer()
     AceSetResTraceId(traceType_, traceId_, &traceType, &traceId);
 }
 
-ContainerTracer::ContainerTracer(const Container* container)
-    : ContainerTracer(container ? container->GetInstanceId() : INSTANCE_ID_UNDEFINED)
+ContainerTracer::ContainerTracer(const char* caller, const Container* container)
+    : ContainerTracer(caller, container ? container->GetInstanceId() : INSTANCE_ID_UNDEFINED)
 {}
 
-ContainerTracer::ContainerTracer()
-    : ContainerTracer(Container::CurrentId())
+ContainerTracer::ContainerTracer(const char* caller)
+    : ContainerTracer(caller, Container::CurrentId())
 {}
 
-static void UINodeTracerLog(int32_t nodeId, const std::string_view& nodeTag, const std::string_view& nodePattern,
-    const std::string_view& nodeType = "")
+static std::string UINodeTracerLog(const char* caller, int32_t nodeId, const std::string_view& nodeTag,
+    const std::string_view& nodePattern, const std::string_view& nodeType = "")
 {
-    std::clog << "UINodeTracer: nodeId=" << nodeId << " nodeTag=" << nodeTag << " nodePattern=" << nodePattern;
-    if (!nodeType.empty()) {
-        std::clog << " nodeType=" << nodeType;
+    std::stringstream ss;
+    ss << "UINodeTracer: nodeId=" << nodeId << " nodeTag=" << nodeTag;
+    if (!nodePattern.empty()) {
+        ss << " nodePattern=" << nodePattern;
     }
-    std::clog << std::endl;
+    if (!nodeType.empty()) {
+        ss << " nodeType=" << nodeType;
+    }
+    ss << " " << caller;
+    return ss.str();
 }
 
-UINodeTracer::UINodeTracer(int32_t nodeId, const std::string_view& nodeTag, const std::string_view& nodePattern)
-    : UINodeTracer(nodeId)
-{
-    UINodeTracerLog(nodeId, nodeTag, nodePattern);
-}
-
-UINodeTracer::UINodeTracer(const NG::UINode* uiNode)
-    : UINodeTracer(uiNode ? uiNode->GetId() : ElementRegister::UndefinedElementId)
+static std::string UINodeTracerLog(const char* caller, const NG::UINode* uiNode)
 {
     int32_t nodeId = ElementRegister::UndefinedElementId;
     std::string nodeTag;
@@ -143,6 +141,16 @@ UINodeTracer::UINodeTracer(const NG::UINode* uiNode)
             nodePattern = TypeInfoHelper::TypeName(AceType::RawPtr(frameNode->GetPattern()));
         }
     }
-    UINodeTracerLog(nodeId, nodeTag, nodePattern, nodeType);
+    return UINodeTracerLog(caller, nodeId, nodeTag, nodePattern, nodeType);
 }
+
+UINodeTracer::UINodeTracer(
+    const char* caller, int32_t nodeId, const std::string_view& nodeTag, const std::string_view& nodePattern)
+    : UINodeTracer(UINodeTracerLog(caller, nodeId, nodeTag, nodePattern).c_str(), nodeId)
+{}
+
+UINodeTracer::UINodeTracer(const char* caller, const NG::UINode* uiNode)
+    : UINodeTracer(
+          UINodeTracerLog(caller, uiNode).c_str(), uiNode ? uiNode->GetId() : ElementRegister::UndefinedElementId)
+{}
 } // namespace OHOS::Ace
