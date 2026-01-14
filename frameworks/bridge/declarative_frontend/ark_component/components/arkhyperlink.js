@@ -110,35 +110,15 @@ class JSHyperlink extends JSViewAbstract {
   }
 
   static draggable(draggable) {
-    let node = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().hyperlink.setDraggable(node, draggable);
+    getUINativeModule().hyperlink.setDraggable(true, draggable);
   }
 
   static responseRegion(value) {
-    let _a, _b, _c, _d, _e, _f, _g, _h;
-    let node = getUINativeModule().frameNode.getStackTopNode();
-    let responseRegion = [];
-  
-    if (Array.isArray(value)) {
-      for (let i = 0; i < value.length; i++) {
-        responseRegion.push((_a = value[i].x) !== null && _a !== void 0 ? _a : 'PLACEHOLDER');
-        responseRegion.push((_b = value[i].y) !== null && _b !== void 0 ? _b : 'PLACEHOLDER');
-        responseRegion.push((_c = value[i].width) !== null && _c !== void 0 ? _c : 'PLACEHOLDER');
-        responseRegion.push((_d = value[i].height) !== null && _d !== void 0 ? _d : 'PLACEHOLDER');
-      }
-    } else {
-      responseRegion.push((_e = value.x) !== null && _e !== void 0 ? _e : 'PLACEHOLDER');
-      responseRegion.push((_f = value.y) !== null && _f !== void 0 ? _f : 'PLACEHOLDER');
-      responseRegion.push((_g = value.width) !== null && _g !== void 0 ? _g : 'PLACEHOLDER');
-      responseRegion.push((_h = value.height) !== null && _h !== void 0 ? _h : 'PLACEHOLDER');
-    }
-  
-    getUINativeModule().hyperlink.setResponseRegion(node, responseRegion, responseRegion.length);
+    getUINativeModule().hyperlink.setResponseRegion(true, responseRegion, responseRegion.length);
   }
 
   static pop() {
-    let node = getUINativeModule().frameNode.getStackTopNode();
-    getUINativeModule().hyperlink.pop(node);
+    getUINativeModule().hyperlink.pop();
   }
 
   static onAttach(value) {

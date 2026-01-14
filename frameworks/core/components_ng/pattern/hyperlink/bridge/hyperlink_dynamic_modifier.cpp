@@ -121,6 +121,7 @@ void SetHyperlinkResponseRegion(
         DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
         region.emplace_back(dimenRect);
     }
+    ViewAbstractModel::GetInstance()->SetResponseRegion(region);
     HyperlinkModelNG::SetResponseRegion(frameNode, region, true);
 }
 

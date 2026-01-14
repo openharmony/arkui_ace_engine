@@ -27,6 +27,7 @@ namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
+constexpr uint32_t DIMENSION_LENGTH = 4;
 
 bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
 {
@@ -36,8 +37,6 @@ bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
 
 void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
 {
-    LOGI("Start RegisterHyperlinkAttributes nativeModule");
-
     const char* functionNames[] = {
         "create", "pop", "setColor", "resetColor",
         "setDraggable", "resetDraggable", "setResponseRegion", "resetResponseRegion",
@@ -58,8 +57,6 @@ void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object
         vm, ArraySize(functionNames), functionNames, functionValues
     );
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "hyperlink"), hyperlink);
-
-    LOGI("Finish RegisterHyperlinkAttributes nativeModule");
 }
 
 ArkUINativeModuleValue HyperlinkBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -203,16 +200,29 @@ ArkUINativeModuleValue HyperlinkBridge::SetDraggable(ArkUIRuntimeCallInfo* runti
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-    Local<JSValueRef> draggableArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    if (draggableArg->IsBoolean()) {
-        bool boolValue = draggableArg->ToBoolean(vm)->Value();
+
+    if (IsJsView(runtimeCallInfo->GetCallArgRef(NUM_0), vm)) {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+        auto nativeNode = nodePtr(frameNode);
+
+        Local<JSValueRef> draggableArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+        auto boolValue = draggableArg->ToBoolean(vm)->Value();
+
         GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkDraggable(nativeNode, boolValue);
     } else {
-        GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkDraggable(nativeNode);
+        Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+        CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+        auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+        Local<JSValueRef> draggableArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+        if (draggableArg->IsBoolean()) {
+            bool boolValue = draggableArg->ToBoolean(vm)->Value();
+            GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkDraggable(nativeNode, boolValue);
+        } else {
+            GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkDraggable(nativeNode);
+        }
     }
+
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -232,22 +242,45 @@ ArkUINativeModuleValue HyperlinkBridge::SetResponseRegion(ArkUIRuntimeCallInfo* 
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
 
-    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
-    CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
-    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (IsJsView(runtimeCallInfo->GetCallArgRef(NUM_0), vm)) {
+        Local<JSValueRef> valueOrArrayArg = runtimeCallInfo->GetCallArgRef(NUM_1);
 
-    Local<JSValueRef> regionArrayArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    Local<JSValueRef> regionArrayLengthArg = runtimeCallInfo->GetCallArgRef(NUM_2);
-    int32_t length = regionArrayLengthArg->Int32Value(vm);
+        uint32_t arrayLength = 0;
+        if (valueOrArrayArg->IsArray(vm)) {
+            auto array = static_cast<Local<panda::ArrayRef>>(valueOrArrayArg);
+            arrayLength = DIMENSION_LENGTH * array->Length(vm);
+        } else if (valueOrArrayArg->IsObject(vm)) {
+            arrayLength = DIMENSION_LENGTH;
+        }
 
-    ArkUI_Float32 regionArray[length];
-    int32_t regionUnits[length];
-    if (!ArkTSUtils::ParseResponseRegion(vm, regionArrayArg, regionArray, regionUnits, length)) {
-        GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkResponseRegion(nativeNode);
-        return panda::JSValueRef::Undefined(vm);
+        ArkUI_Float32 regionArray[arrayLength];
+        int32_t regionUnits[arrayLength];
+        auto nativeNode = nodePtr(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        if (ArkTSUtils::ParseJsResponseRegion(vm, valueOrArrayArg, regionArray, regionUnits, arrayLength)) {
+            GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkResponseRegion(
+                nativeNode, regionArray, regionUnits, arrayLength
+            );
+        } else {
+            GetArkUINodeModifiers()->getCheckboxModifier()->resetHyperlinkResponseRegion(nativeNode);
+        }
+    } else {
+        Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+        CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
+        auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+
+        Local<JSValueRef> regionArrayArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+        Local<JSValueRef> regionArrayLengthArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+        int32_t length = regionArrayLengthArg->Int32Value(vm);
+
+        ArkUI_Float32 regionArray[length];
+        int32_t regionUnits[length];
+        if (!ArkTSUtils::ParseResponseRegion(vm, regionArrayArg, regionArray, regionUnits, length)) {
+            GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkResponseRegion(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
+        }
+        GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkResponseRegion(
+            nativeNode, regionArray, regionUnits, length);
     }
-    GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkResponseRegion(
-        nativeNode, regionArray, regionUnits, length);
     return panda::JSValueRef::Undefined(vm);
 }
 
