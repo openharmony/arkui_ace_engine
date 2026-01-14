@@ -260,6 +260,7 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_marquee_bridge.cpp",
       "nativeModule/arkts_native_menu_bridge.cpp",
       "nativeModule/arkts_native_menu_item_bridge.cpp",
+      "nativeModule/arkts_native_menu_item_group_bridge.cpp",
       "nativeModule/arkts_native_nav_destination_bridge.cpp",
       "nativeModule/arkts_native_nav_router_bridge.cpp",
       "nativeModule/arkts_native_navigation_bridge.cpp",

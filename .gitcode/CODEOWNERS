@@ -542,6 +542,9 @@ frameworks/bridge/common/utils/ @arkui_framework_xnode
 frameworks/bridge/common/utils/module_buffer_reader.h @arkui_framework_resource
 frameworks/bridge/common/utils/module_buffer_reader.cpp @arkui_framework_resource
 frameworks/bridge/declarative_frontend/ark_breakpoint/ @arkui_framework_resource
+frameworks/bridge/declarative_frontend/ark_component/components/arkmenu.js @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/ark_component/components/arkmenuitem.js @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/ark_component/components/arkmenuitemgroup.js @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/ark_component/src_dir/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/types/ @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/.gitignore @arkuieco3
@@ -951,6 +954,8 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_bridge.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_item_bridge.cpp @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_item_bridge.h @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_item_group_bridge.cpp @arkuipopupwindow_all
+frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_item_group_bridge.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_destination_bridge.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_destination_bridge.h @arkui_navigation
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.cpp @arkui_navigation
@@ -1236,12 +1241,6 @@ frameworks/bridge/declarative_frontend/jsview/js_location_button.cpp @harylee
 frameworks/bridge/declarative_frontend/jsview/js_location_button.h @harylee
 frameworks/bridge/declarative_frontend/jsview/js_marquee.cpp @huawei_g_five
 frameworks/bridge/declarative_frontend/jsview/js_marquee.h @huawei_g_five
-frameworks/bridge/declarative_frontend/jsview/js_menu.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/js_menu.h @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/js_menu_item.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/js_menu_item_group.cpp @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/js_menu_item_group.h @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/jsview/js_menu_item.h @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/jsview/js_navdestination_context.cpp @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_navdestination_context.h @arkui_navigation
 frameworks/bridge/declarative_frontend/jsview/js_navdestination_scrollable_processor.cpp @arkui_navigation
@@ -2884,6 +2883,8 @@ frameworks/core/interfaces/native/node/marquee_modifier.cpp @huawei_g_five
 frameworks/core/interfaces/native/node/marquee_modifier.h @huawei_g_five
 frameworks/core/interfaces/native/node/menu_item_modifier.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/node/menu_item_modifier.h @arkuipopupwindow_all
+frameworks/core/interfaces/native/node/menu_item_group_modifier.cpp @arkuipopupwindow_all
+frameworks/core/interfaces/native/node/menu_item_group_modifier.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/node/menu_modifier.cpp @arkuipopupwindow_all
 frameworks/core/interfaces/native/node/menu_modifier.h @arkuipopupwindow_all
 frameworks/core/interfaces/native/node/nav_destination_modifier.cpp @arkui_navigation

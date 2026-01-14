@@ -140,6 +140,9 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:waterflow",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:columnsplit",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:rowsplit",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:menu",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:menuitem",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:menuitemgroup",
     ]
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
@@ -153,6 +156,9 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arkwaterflow.abc",
       "${out_path}/arkui/ace_engine/arkcolumnsplit.abc",
       "${out_path}/arkui/ace_engine/arkrowsplit.abc",
+      "${out_path}/arkui/ace_engine/arkmenu.abc",
+      "${out_path}/arkui/ace_engine/arkmenuitem.abc",
+      "${out_path}/arkui/ace_engine/arkmenuitemgroup.abc",
     ]
 
     # Output path description: 

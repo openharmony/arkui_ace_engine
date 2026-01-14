@@ -97,9 +97,6 @@
 #include "bridge/declarative_frontend/jsview/js_location_button.h"
 #include "bridge/declarative_frontend/jsview/js_magnifier_controller.h"
 #include "bridge/declarative_frontend/jsview/js_marquee.h"
-#include "bridge/declarative_frontend/jsview/js_menu.h"
-#include "bridge/declarative_frontend/jsview/js_menu_item.h"
-#include "bridge/declarative_frontend/jsview/js_menu_item_group.h"
 #include "bridge/declarative_frontend/jsview/js_mock.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination.h"
@@ -697,9 +694,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Badge", JSBadge::JSBind },
     { "MagnifierController", JSMagnifierController::JSBind },
     { "Marquee", JSMarquee::JSBind },
-    { "Menu", JSMenu::JSBind },
-    { "MenuItem", JSMenuItem::JSBind },
-    { "MenuItemGroup", JSMenuItemGroup::JSBind },
     { "Gesture", JSGesture::JSBind },
     { "TapGesture", JSGesture::JSBind },
     { "LongPressGesture", JSGesture::JSBind },

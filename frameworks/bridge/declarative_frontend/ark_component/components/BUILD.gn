@@ -39,6 +39,9 @@ arkui_modules = [
   "waterflow",
   "rowsplit",
   "columnsplit",
+  "menu",
+  "menuitem",
+  "menuitemgroup",
 ]
 
 module_targets = []

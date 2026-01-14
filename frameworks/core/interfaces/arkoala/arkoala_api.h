@@ -6004,23 +6004,25 @@ struct ArkUIImageSpanModifier {
 };
 
 struct ArkUIMenuModifier {
+    void (*createMenu)();
     void (*setMenuFontColor)(ArkUINodeHandle node, ArkUI_Uint32 colorVal, void* colorRawPtr);
     void (*resetMenuFontColor)(ArkUINodeHandle node);
     void (*setFont)(ArkUINodeHandle node, ArkUI_CharPtr fontInfo, ArkUI_Int32 styleVal, void* fontSizeRawPtr,
         void* fontFamilyRawPtr);
     void (*resetFont)(ArkUINodeHandle node);
-    void (*setRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, void** resObjs,
-        size_t unitSize);
+    void (*setRadius)(
+        ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, void** resObjs, size_t unitSize);
     void (*resetRadius)(ArkUINodeHandle node);
     void (*setMenuWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setMenuWidthWithResource)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resObjs);
     void (*resetMenuWidth)(ArkUINodeHandle node);
     void (*setMenuItemDivider)(ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemDividerInfo);
-    void (*setMenuItemDividerWithResource)(ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemDividerInfo,
-        void* colorRawPtr);
+    void (*setMenuItemDividerWithResource)(
+        ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemDividerInfo, void* colorRawPtr);
     void (*resetMenuItemDivider)(ArkUINodeHandle node);
     void (*setMenuItemGroupDivider)(ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemGroupDividerInfo);
-    void (*setMenuItemGroupDividerWithResource)(ArkUINodeHandle node,
-        ArkUIMenuDividerOptions* menuItemGroupDividerInfo, void* colorRawPtr);
+    void (*setMenuItemGroupDividerWithResource)(
+        ArkUINodeHandle node, ArkUIMenuDividerOptions* menuItemGroupDividerInfo, void* colorRawPtr);
     void (*resetMenuItemGroupDivider)(ArkUINodeHandle node);
     void (*setSubMenuExpandingMode)(ArkUINodeHandle node, ArkUI_Int32 modeParam);
     void (*resetSubMenuExpandingMode)(ArkUINodeHandle node);
@@ -6143,8 +6145,26 @@ struct ArkUIWaterFlowItemModifier {
     ArkUINodeHandle (*createFlowItem)(ArkUI_Int32 nodeId);
 };
 
+struct ArkUIMenuItemOptions {
+    ArkUI_CharPtr content;
+    ArkUI_CharPtr labelInfo;
+    ArkUI_VoidPtr startIconSrc;
+    ArkUI_VoidPtr endIconSrc;
+    ArkUI_Bool enabled;
+    ArkUI_VoidPtr startIconResObj;
+    ArkUI_VoidPtr endIconResObj;
+    ArkUI_VoidPtr contentResObj;
+    ArkUI_VoidPtr labelResObj;
+    ArkUI_VoidPtr startSymbolApply;
+    ArkUI_VoidPtr endSymbolApply;
+    ArkUI_VoidPtr buildFunc;
+};
+
 struct ArkUIMenuItemModifier {
+    void (*createWithCustomNode)(ArkUINodeHandle customNode);
+    void (*createWithOptions)(const ArkUIMenuItemOptions* options);
     void (*setMenuItemSelected)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*setSelectedChangeEvent)(ArkUINodeHandle node, std::function<void(bool)>&& selectedChangeEvent);
     void (*resetMenuItemSelected)(ArkUINodeHandle node);
     void (*setLabelFontColor)(ArkUINodeHandle node, const ArkUI_Uint32 colorVal, void* colorRawPtr);
     void (*resetLabelFontColor)(ArkUINodeHandle node);
@@ -6167,8 +6187,11 @@ struct ArkUIMenuItemModifier {
 };
 
 struct ArkUIMenuItemGroupModifier {
-    void (*setMenuItemGroupHeader)(ArkUINodeHandle node, ArkUI_CharPtr value);
-    void (*setMenuItemGroupFooter)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    void (*setMenuItemGroupHeaderNode)(ArkUINodeHandle node, ArkUINodeHandle headerNode);
+    void (*setMenuItemGroupFooterNode)(ArkUINodeHandle node, ArkUINodeHandle footerNode);
+    void (*setMenuItemGroupHeaderStrRes)(ArkUINodeHandle node, ArkUI_CharPtr headerStr, void* resRawPtr);
+    void (*setMenuItemGroupFooterStrRes)(ArkUINodeHandle node, ArkUI_CharPtr footerStr, void* resRawPtr);
+    ArkUINodeHandle (*createMenuItemGroup)();
 };
 
 struct ArkUIToggleModifier {
