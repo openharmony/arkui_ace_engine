@@ -18,7 +18,7 @@ import {
   Text, LocalizedPadding, applyStyles, Length, Flex, FontWeight, Select, Margin, Column, HorizontalAlign, KeyEvent, Row,
   ClickEvent, Array, TouchType, GeometryInfo, SymbolGlyph, Measurable, ConstraintSizeOptions, SizeResult, Button, Stack,
   ButtonType, ButtonOptions, VerticalAlign, TouchEvent, FlexAlign, ForEach, HoverEffect, LoadingProgress, Padding,
-  Rectangle, Layoutable, Component, MeasureResult, CustomLayout, ClassCastError
+  Rectangle, Layoutable, Component, MeasureResult, CustomLayout, ClassCastError, AccessibilityRoleType
 } from '@ohos.arkui.component';
 import {
   ObservedV2, Trace, Param, Local, Provider, Monitor, IMonitor, IMonitorValue, Require, Event, Consumer
@@ -68,6 +68,7 @@ export interface SubHeaderV2TitleOptions {
   primaryTitleModifier?: TextModifier;
   secondaryTitle?: ResourceStr;
   secondaryTitleModifier?: TextModifier;
+  titleAccessibilityText?: ResourceStr;
 }
 
 @ObservedV2
@@ -80,12 +81,15 @@ export class SubHeaderV2Title {
   public secondaryTitle?: ResourceStr;
   @Trace
   public secondaryTitleModifier?: TextModifier;
+  @Trace
+  public titleAccessibilityText?: ResourceStr;
 
   constructor(options: SubHeaderV2TitleOptions) {
     this.primaryTitle = options.primaryTitle;
     this.primaryTitleModifier = options.primaryTitleModifier;
     this.secondaryTitle = options.secondaryTitle;
     this.secondaryTitleModifier = options.secondaryTitleModifier;
+    this.titleAccessibilityText = options.titleAccessibilityText;
   }
 }
 
@@ -1052,6 +1056,17 @@ export struct SubHeaderV2 {
     return padding;
   }
 
+  private getTitleAccessibilityText(): string {
+    if (this.select || !this.title || !this.title?.titleAccessibilityText) {
+      return '';
+    }
+    if (Util.isResourceType(this.title?.titleAccessibilityText)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync((this.title?.titleAccessibilityText as Resource).id);
+    }
+    return this.title?.titleAccessibilityText as string;
+  }
+
   build() {
     if (this.isSuitableAging()) {
       Column() {
@@ -1068,7 +1083,8 @@ export struct SubHeaderV2 {
         } as LocalizedPadding)
         .width('100%')
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        .accessibilityDescription(this.select ? '' : Util.getStringByResource(125834353, ''))
+        .accessibilityText(this.getTitleAccessibilityText())
+        .accessibilityRole(this.title ? AccessibilityRoleType.TITLE_BAR : undefined)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParentAging();
@@ -1089,7 +1105,8 @@ export struct SubHeaderV2 {
         .width('100%')
         .flexShrink(1)
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        .accessibilityDescription(this.select ? '' : Util.getStringByResource(125834353, ''))
+        .accessibilityText(this.getTitleAccessibilityText())
+        .accessibilityRole(this.title ? AccessibilityRoleType.TITLE_BAR : undefined)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParent();
