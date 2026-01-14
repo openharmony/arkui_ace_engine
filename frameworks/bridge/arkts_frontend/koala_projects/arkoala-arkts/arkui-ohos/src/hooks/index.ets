@@ -201,9 +201,10 @@ export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPe
   }
 }
 
-export function hookDragPreviewOptions(node: ArkCommonMethodComponent | ArkCommonMethodPeer, value: DragPreviewOptions | undefined, options?: DragInteractionOptions) {
-  if (node instanceof ArkCommonMethodComponent) {
-    let nodeComponent = node as ArkCommonMethodComponent
+export function hookDragPreviewOptions(node: ArkCommonMethodComponent | ArkCommonMethodPeer | ArkBaseNode,
+  value: DragPreviewOptions | undefined, options?: DragInteractionOptions) {
+  if (node instanceof ArkCommonMethodComponent || node instanceof ArkBaseNode) {
+    let nodeComponent = node as (ArkCommonMethodComponent | ArkBaseNode)
     ArkUIAniModule._Drag_Set_DragPreviewOptions(nodeComponent.getPeer().getPeerPtr(), value, options)
   } else if (node instanceof ArkCommonMethodPeer) {
     let nodePeer = node as ArkCommonMethodPeer

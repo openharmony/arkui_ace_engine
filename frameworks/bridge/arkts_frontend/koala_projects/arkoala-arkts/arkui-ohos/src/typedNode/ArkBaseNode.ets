@@ -45,7 +45,7 @@ import { ComponentContent } from 'arkui/ComponentContent'
 import { BlendMode } from "../component/common"
 import { InteropNativeModule } from '@koalaui/interop';
 import { ArkUIAniModule } from 'arkui.ani';
-import { hookCustomPropertyImpl, hookAllowDrop } from '#handwritten';
+import { hookCustomPropertyImpl, hookAllowDrop, hookDragPreviewOptions } from '#handwritten';
 import { CustomProperty } from '#generated';
 
 export class ArkBaseNode extends ComponentBase implements CommonAttribute {
@@ -662,9 +662,11 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
+        hookDragPreviewOptions(this, value, options)
         return this
     }
     public overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this {
+        this.getPeer()?.setOverlayAttribute(value, options)
         return this
     }
     public blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {
