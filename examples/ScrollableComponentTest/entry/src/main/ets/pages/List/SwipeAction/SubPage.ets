@@ -23,7 +23,7 @@ export function SubPageBuilder() {
   SubPage()
 }
 
-type ItemType = number | string
+type ItemType = number | string;
 
 @Entry
 @ComponentV2
