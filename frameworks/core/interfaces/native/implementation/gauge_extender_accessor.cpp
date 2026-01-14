@@ -23,7 +23,7 @@ const GENERATED_ArkUIGaugeExtenderAccessor* GetGaugeExtenderAccessor()
 {
     static const GENERATED_ArkUIGaugeExtenderAccessor* cachedModifier = nullptr;
     if (cachedModifier == nullptr) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("gauge");
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Gauge");
         if (module == nullptr) {
             LOGF("Can't find gauge dynamic module");
             abort();
