@@ -2072,7 +2072,9 @@ const __creatorMap__ = new Map([
         }],
     ['SymbolGlyph', (context) => {
             return new TypedFrameNode(context, 'SymbolGlyph', (node, type) => {
-                return new ArkSymbolGlyphComponent(node, type);
+                getUINativeModule().loadNativeModule('SymbolGlyph');
+                let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
+                return module.createComponent(node, type);
             });
         }],
     ['FlowItem', (context) => {

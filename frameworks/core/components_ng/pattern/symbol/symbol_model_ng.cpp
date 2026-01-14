@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -26,7 +26,20 @@ void SymbolModelNG::Create(const std::uint32_t& unicode)
     CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
     auto symbolNode = FrameNode::GetOrCreateFrameNode(
-        V2::SYMBOL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+        "SymbolGlyph", nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+
+    stack->Push(symbolNode);
+    
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode});
+}
+
+void SymbolModelNG::CreateSymbolGlyph(const std::uint32_t& unicode)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto nodeId = stack->ClaimNodeId();
+    auto symbolNode = FrameNode::GetOrCreateFrameNode(
+        "SymbolGlyph", nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
 
     stack->Push(symbolNode);
     
@@ -35,8 +48,9 @@ void SymbolModelNG::Create(const std::uint32_t& unicode)
 
 RefPtr<FrameNode> SymbolModelNG::CreateFrameNode(int32_t nodeId)
 {
-    return FrameNode::GetOrCreateFrameNode(
-        V2::SYMBOL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    auto symbolNode = FrameNode::GetOrCreateFrameNode(
+        "SymbolGlyph", nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
+    return symbolNode;
 }
 
 void SymbolModelNG::SetFontWeight(const Ace::FontWeight& value)
@@ -49,7 +63,17 @@ void SymbolModelNG::SetFontFamilies(std::vector<std::string>& value)
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value);
 }
 
+void SymbolModelNG::SetSymbolFontFamilies(std::vector<std::string>& value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, FontFamily, value);
+}
+
 void SymbolModelNG::SetSymbolType(SymbolType value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, value);
+}
+
+void SymbolModelNG::SetSymbolGlyphType(SymbolType value)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolType, value);
 }
@@ -82,6 +106,12 @@ void SymbolModelNG::SetSymbolEffect(const std::uint32_t effectStrategy)
 void SymbolModelNG::SetClipEdge()
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+}
+
+void SymbolModelNG::SetClipEdge(FrameNode* frameNode)
+{
     CHECK_NULL_VOID(frameNode);
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
@@ -204,6 +234,23 @@ void SymbolModelNG::InitialCustomSymbol(FrameNode* frameNode, const std::uint32_
 }
 
 void SymbolModelNG::SetSymbolEffectOptions(FrameNode* frameNode, SymbolEffectOptions& symbolEffectOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();
+    CHECK_NULL_VOID(property);
+    auto lastSymbolEffectOptions = property->GetSymbolEffectOptionsValue(SymbolEffectOptions());
+    symbolEffectOptions.UpdateFlags(lastSymbolEffectOptions);
+    bool isLoopAnimation = false;
+    if (symbolEffectOptions.GetEffectType() == SymbolEffectType::PULSE ||
+        (symbolEffectOptions.GetEffectType() == SymbolEffectType::HIERARCHICAL &&
+            symbolEffectOptions.GetFillStyle() == FillStyle::ITERATIVE)) {
+        isLoopAnimation = symbolEffectOptions.GetIsTxtActive();
+    }
+    property->SetIsLoopAnimation(isLoopAnimation);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolEffectOptions, symbolEffectOptions, frameNode);
+}
+
+void SymbolModelNG::SetSymbolEffect(FrameNode* frameNode, SymbolEffectOptions& symbolEffectOptions)
 {
     CHECK_NULL_VOID(frameNode);
     auto property = frameNode->GetLayoutProperty<TextLayoutProperty>();

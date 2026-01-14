@@ -33,6 +33,7 @@ component_modules = [
   "time_picker",
   "calendar_picker",
   "indexer",
+  "symbol",
 ]
 
 if (!ace_engine_feature_wearable) { 

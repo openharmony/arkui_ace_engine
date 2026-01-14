@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,6 +24,9 @@ namespace OHOS::Ace::NG {
 class ACE_EXPORT SymbolModelNG : public SymbolModel {
 public:
     void Create(const std::uint32_t& unicode) override;
+    static void CreateSymbolGlyph(const std::uint32_t& unicode);
+    static void SetSymbolGlyphType(SymbolType value);
+    static void SetSymbolFontFamilies(std::vector<std::string>& value);
     void SetFontWeight(const Ace::FontWeight& value) override;
     void SetFontSize(const CalcDimension& value) override;
     void SetSymbolRenderingStrategy(const std::uint32_t renderingStrategy) override;
@@ -48,9 +51,11 @@ public:
     static void SetFontWeight(FrameNode* frameNode, Ace::FontWeight value);
     static void SetRenderingStrategy(FrameNode* frameNode, const std::uint32_t renderingStrategy);
     static void SetSymbolEffect(FrameNode* frameNode, const std::uint32_t effectStrategy);
+    static void SetClipEdge(FrameNode* frameNode);
     static void InitialSymbol(FrameNode* frameNode, const std::uint32_t& unicode);
     static void InitialCustomSymbol(FrameNode* frameNode, const std::uint32_t& unicode, const char* fontFamilyName);
     static void SetSymbolEffectOptions(FrameNode* frameNode, NG::SymbolEffectOptions& symbolEffectOptions);
+    static void SetSymbolEffect(FrameNode* frameNode, SymbolEffectOptions& symbolEffectOptions);
     static void SetSymbolGlyphInitialize(FrameNode* framwNode, const std::uint32_t& symbolId);
     static void SetCustomSymbolGlyphInitialize(FrameNode* frameNode, const std::uint32_t& symbolId,
         const char* fontFamilyName);
