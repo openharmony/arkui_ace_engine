@@ -351,7 +351,7 @@ HWTEST_F(CheckboxGroupStaticTestNg, CheckboxGroupStaticTestNg008, TestSize.Level
     std::optional<Color> markColor = CHECK_MARK_COLOR;
     CheckBoxGroupModelStatic::SetCheckMarkColor(frameNode, markColor);
     EXPECT_EQ(paintProperty->GetCheckBoxGroupCheckMarkColor(), CHECK_MARK_COLOR);
-    CheckBoxGroupModelStatic::ResetCheckMarkColor(frameNode, markColor);
+    CheckBoxGroupModelStatic::ResetCheckMarkColor(frameNode);
     EXPECT_EQ(paintProperty->GetCheckBoxGroupCheckMarkColor(), std::nullopt);
 }
 
@@ -459,8 +459,7 @@ HWTEST_F(CheckboxGroupStaticTestNg, CheckboxGroupStaticTestNg011, TestSize.Level
      * @tc.steps: step3. test TriggerChange.
      * @tc.expected: step3. the property value meet expectations.
      */
-    std::optional<bool> selectAllValue = SELECTED;
-    CheckBoxGroupModelStatic::TriggerChange(frameNode, selectAllValue);
+    CheckBoxGroupModelStatic::TriggerChange(frameNode, SELECTED);
     EXPECT_EQ(paintProperty->GetCheckBoxGroupSelect(), SELECTED);
 }
 } // namespace OHOS::Ace::NG

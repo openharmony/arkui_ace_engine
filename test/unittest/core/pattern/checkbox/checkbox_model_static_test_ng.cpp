@@ -59,7 +59,6 @@ public:
     static void SetUpTestSuite();
     static void TearDownTestSuite();
     CheckboxBuilderFunc CheckboxBuilder();
-    CheckboxBuilderFuncion CheckboxBuilder();
 };
 
 void CheckboxStaticTestNg::SetUpTestSuite()
@@ -386,7 +385,7 @@ HWTEST_F(CheckboxStaticTestNg, CheckboxStaticTestNg009, TestSize.Level1)
      * @tc.expected: step3. the property value meet expectations.
      */
     CheckboxBuilderFunc checkBoxFunc = CheckboxBuilder();
-    CheckBoxModelStatic::SetBuilder(frameNode, checkBoxFunc.value());
+    CheckBoxModelStatic::SetBuilder(frameNode, std::move(checkBoxFunc.value()));
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     EXPECT_NE(pattern->builder_, nullptr);
@@ -454,7 +453,7 @@ HWTEST_F(CheckboxStaticTestNg, CheckboxStaticTestNgt011, TestSize.Level1)
     std::optional<Color> markColor = CHECK_MARK_COLOR;
     CheckBoxModelStatic::SetCheckMarkColor(frameNode, markColor);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxCheckMarkColor(), CHECK_MARK_COLOR);
-    CheckBoxModelStatic::ResetCheckMarkColor(frameNode, markColor);
+    CheckBoxModelStatic::ResetCheckMarkColor(frameNode);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxCheckMarkColor(), std::nullopt);
 }
 
@@ -483,8 +482,7 @@ HWTEST_F(CheckboxStaticTestNg, CheckboxStaticTestNgt012, TestSize.Level1)
      * @tc.steps: step3. test TriggerChange.
      * @tc.expected: step3. the property value meet expectations.
      */
-    std::optional<bool> selectValue = SELECTED;
-    CheckBoxModelStatic::TriggerChange(frameNode, selectValue);
+    CheckBoxModelStatic::TriggerChange(frameNode, SELECTED);
     EXPECT_EQ(checkBoxPaintProperty->GetCheckBoxSelect(), SELECTED);
 }
 } // namespace OHOS::Ace::NG

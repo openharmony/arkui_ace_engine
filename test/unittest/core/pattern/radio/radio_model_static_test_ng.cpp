@@ -283,7 +283,7 @@ HWTEST_F(RadioStaticTestNg, RadioStaticTestNg006, TestSize.Level1)
      * @tc.expected: step3. the property value meet expectations.
      */
     auto radioFunc = RadioBuilder();
-    RadioModelStatic::SetBuilder(std::move(radioFunc));
+    RadioModelStatic::SetBuilder(frameNode, std::move(radioFunc));
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
     EXPECT_NE(pattern->builder_, nullptr);
@@ -318,6 +318,6 @@ HWTEST_F(RadioStaticTestNg, RadioStaticTestNg007, TestSize.Level1)
     RadioModelStatic::SetOnChangeEvent(frameNode, onChange);
     auto eventHub = frameNode->GetEventHub<RadioEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    EXPECT_NE(eventHub->onChangeEvent_, nullptr);
+    EXPECT_NE(eventHub->checkedChangeEvent_, nullptr);
 }
 } // namespace OHOS::Ace::NG

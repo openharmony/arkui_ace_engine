@@ -1143,7 +1143,7 @@ HWTEST_F(SliderStaticTestNg, SliderStaticTestNg026, TestSize.Level1)
      * @tc.steps: step3. test SetSelectedBorderRadius.
      * @tc.expected: step3. the property value meet expectations.
      */
-    std::optional<float> radius = std::nullopt;
+    std::optional<Dimension> radius = std::nullopt;
     SliderModelStatic::SetSelectedBorderRadius(frameNode, radius);
     EXPECT_EQ(paintProperty->GetSelectedBorderRadius(), std::nullopt);
 

@@ -180,7 +180,7 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg004, TestSize.Level1)
      * @tc.steps: step1. create toggle frameNode.
      */
     auto node = ToggleModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId(),
-                                                   NG::ToggleType::SWITCH, false);
+                                                   NG::ToggleType::SWITCH);
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::TOGGLE_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
@@ -213,7 +213,7 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg005, TestSize.Level1)
      * @tc.steps: step1. create toggle frameNode.
      */
     auto node = ToggleModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId(),
-                                                   NG::ToggleType::BUTTON, false);
+                                                   NG::ToggleType::BUTTON);
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::TOGGLE_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);
@@ -246,7 +246,7 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg006, TestSize.Level1)
      * @tc.steps: step1. create toggle frameNode.
      */
     auto node = ToggleModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId(),
-                                                   NG::ToggleType::CHECKBOX, false);
+                                                   NG::ToggleType::CHECKBOX);
     ASSERT_NE(node, nullptr);
     EXPECT_EQ(node->GetTag(), V2::TOGGLE_ETS_TAG);
     auto frameNode = AceType::RawPtr(node);

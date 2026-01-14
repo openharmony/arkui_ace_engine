@@ -250,7 +250,7 @@ HWTEST_F(RatingStaticTestNg, RatingStaticTestNg005, TestSize.Level1)
     RatingModelStatic::SetOnChangeEvent(frameNode, onChange);
     auto eventHub = frameNode->GetEventHub<RatingEventHub>();
     ASSERT_NE(eventHub, nullptr);
-    EXPECT_NE(eventHub->onChangeEvent_, nullptr);
+    EXPECT_NE(eventHub->indexChangeEvent_, nullptr);
 }
 
 /**

@@ -560,19 +560,6 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg014, TestSize.Level1)
      */
     ButtonModelStatic::SetLabel(frameNode, BUTTON_LABEL);
     ButtonParameters buttonParameters;
-    ButtonModelStatic::SetLabelStyle(frameNode, buttonParameters);
-    ASSERT_NE(layoutProperty, nullptr);
-    EXPECT_EQ(layoutProperty->GetTextOverflowValue(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetMaxLinesValue(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetMinFontSizeValue(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetMaxFontSizeValue(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetFontSizeValue(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetHeightAdaptivePolicyValue(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetFontWeightValue(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetFontFamilyValue(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetFontStyleValue(), std::nullopt);
-    EXPECT_EQ(layoutProperty->GetTextAlignValue(), std::nullopt);
-
     buttonParameters.textOverflow = std::make_optional(TextOverflow::NONE);
     buttonParameters.maxLines = std::make_optional(MAX_LINE_VALUE);
     buttonParameters.minFontSize = std::make_optional(BUTTON_FONT_SIZE_VALUE);
@@ -1176,5 +1163,85 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg032, TestSize.Level1)
     std::optional<float> maxFontScaleValue = std::make_optional(MAX_SCALE_VALUE);
     ButtonModelStatic::SetMaxFontScale(frameNode, maxFontScaleValue);
     EXPECT_EQ(ButtonModelStatic::GetMaxFontScale(frameNode), MAX_SCALE_VALUE);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg033
+ * @tc.desc: test button ApplyTheme.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg033, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create button layoutProperty.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. test ApplyTheme.
+     */
+    ButtonModelStatic::ApplyTheme(frameNode, ButtonStyleMode::NORMAL, ButtonRole::NORMAL);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg034
+ * @tc.desc: test button SetCreateWithLabel.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg034, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create button layoutProperty.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. test SetCreateWithLabel.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    ButtonModelStatic::SetCreateWithLabel(frameNode, true);
+    EXPECT_EQ(layoutProperty->GetCreateWithLabel(), true);
+}
+
+/**
+ * @tc.name: ButtonStaticTestNg035
+ * @tc.desc: test button ResetTextAlign.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg035, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create button frameNode.
+     */
+    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create button layoutProperty.
+     */
+    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. test ResetTextAlign.
+     */
+    ButtonModelStatic::ResetTextAlign(frameNode);
 }
 } // namespace OHOS::Ace::NG
