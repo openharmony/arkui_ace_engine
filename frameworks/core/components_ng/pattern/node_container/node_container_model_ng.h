@@ -36,6 +36,7 @@ public:
     void SetOnUnbind(std::function<void(int32_t)>&& onUnbindCallback) override;
     void ResetController() override;
     void FireMakeNode() override;
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
 };
 
 } // namespace OHOS::Ace::NG
