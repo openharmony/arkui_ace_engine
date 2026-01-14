@@ -28,7 +28,7 @@ using namespace OHOS::Ace;
 namespace OHOS::Ace {
 NG::HyperlinkModelNG* GetHyperlinkModel()
 {
-    auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("hyperlink");
+    static auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("hyperlink");
     if (module == nullptr) {
         LOGF("Cannot find hyperlink dynamic module");
         abort();

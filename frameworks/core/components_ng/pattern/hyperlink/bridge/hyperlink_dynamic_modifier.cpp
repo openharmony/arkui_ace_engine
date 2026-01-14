@@ -159,8 +159,7 @@ void CreateImpl(const std::string& address, const std::string& summary)
 
 void SetHyperlinkColorImpl(ArkUINodeHandle node, ArkUI_Uint32 colorValue, void* colorRawPtr)
 {
-    class Color color{colorValue};
-    GetHyperlinkModelImpl()->SetColor(color);
+    GetHyperlinkModelImpl()->SetColor(Color{colorValue});
 }
 
 void PopImpl()
