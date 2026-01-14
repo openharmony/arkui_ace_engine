@@ -44,7 +44,7 @@ function ItemFoot(params: FootBuilderParams) {
       .backgroundColor('#FF007DFF')
       .borderRadius(12)
       .onClick(() => {
-        console.info(params.item.text)
+        console.info(params.item.text);
       })
   }
 }
@@ -64,12 +64,8 @@ struct SpecialListLayout {
     { id: 3, type: 'special', text: '独立居中项' }, // 特殊居中项
     { id: 4, type: 'normal', text: '普通项3' },
     { id: 5, type: 'normal', text: '普通项4' }
-  ]
-  footer?: ComponentContent<FootBuilderParams> = undefined
-
-  aboutToAppear(): void {
-
-  }
+  ];
+  footer?: ComponentContent<FootBuilderParams> = undefined;
 
   build() {
     List({ space: 10 }) {
