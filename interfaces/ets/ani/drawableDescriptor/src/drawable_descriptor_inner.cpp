@@ -125,8 +125,7 @@ static void HandleDrawableDescriptorLoadResult(std::shared_ptr<OHOS::Ace::Ani::D
                 "[ANI] PromiseResolver_Resolve fail. status: %{public}d", status);
         }
     } else {
-        int32_t errorCode = OHOS::Ace::ERROR_CODE_DRAWABLE_LOADER_ERROR;
-        ani_error error = OHOS::Ace::Ani::GetErrorObject(env, "resource loading failed.", errorCode);
+        ani_error error = OHOS::Ace::Ani::GetErrorObject(env, "resource loading failed.", loadResult.errorCode);
         status = env->PromiseResolver_Reject(asyncContext->deferred, error);
         if (status != ANI_OK) {
             TAG_LOGW(OHOS::Ace::AceLogTag::ACE_DRAWABLE_DESCRIPTOR,
@@ -188,6 +187,10 @@ ani_object LoadSync(ani_env* env, [[maybe_unused]] ani_class aniClass, ani_objec
             if (drawableDescriptorLoadResult.errorCode == 0) {
                 retValue = CreateDrawableDescriptorLoadedResult(
                     env, drawableDescriptorLoadResult.imageWidth_, drawableDescriptorLoadResult.imageHeight_);
+            } else {
+                ani_error error = OHOS::Ace::Ani::GetErrorObject(
+                    env, "resource loading failed.", drawableDescriptorLoadResult.errorCode);
+                env->ThrowError(error);
             }
             break;
         }
