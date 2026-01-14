@@ -138,7 +138,9 @@ ArkUI_Int32 GetScrollScrollSnap(ArkUINodeHandle node, ArkUI_Float32 (*values)[32
     auto index = 3;
     for (auto item : options.paginationParams) {
         (*values)[index] = item.ConvertToVp();
-        index++;
+        if (++index >= 32) { // 32 : max array size
+            break;
+        }
     }
     return index;
 }
