@@ -38,6 +38,8 @@
 #include "core/components_ng/pattern/side_bar/side_bar_container_pattern.h"
 #include "core/components_ng/pattern/stack/stack_layout_property.h"
 #include "core/components_ng/pattern/toolbaritem/toolbaritem_pattern.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 
 namespace OHOS::Ace::NG {
 
@@ -966,14 +968,27 @@ bool ContainerModalToolBar::IsTragetNavigationNodeParse(const RefPtr<FrameNode>&
     return false;
 }
 
+const ArkUISideBarContainerModifier* GetSideBarContainerModel()
+{
+    static const ArkUISideBarContainerModifier* arkUISideBarContainerModifier = nullptr;
+    if (arkUISideBarContainerModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Sidebar");
+        if (module) {
+            arkUISideBarContainerModifier =
+                reinterpret_cast<const ArkUISideBarContainerModifier*>(module->GetDynamicModifier());
+        }
+    }
+    return arkUISideBarContainerModifier;
+}
+
 void ContainerModalToolBar::ToInitNavOrSideBarNode()
 {
     auto sideBarNode = sideBarNode_.Upgrade();
     if (sideBarNode) {
-        auto sideBarPattern = AceType::DynamicCast<NG::SideBarContainerPattern>(sideBarNode->GetPattern());
-        if (sideBarPattern) {
-            sideBarPattern->InitToolBarManager();
-            sideBarNode->MarkModifyDone();
+        auto arkUISideBarContainerModifier = GetSideBarContainerModel();
+        if (arkUISideBarContainerModifier) {
+            arkUISideBarContainerModifier->setSideBarToolBarManager(
+                reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(sideBarNode)));
         }
     }
     auto navigationNode = navigationNode_.Upgrade();

@@ -29,7 +29,7 @@ enum class SideStatus {
     AUTO,
 };
 
-class ACE_EXPORT SideBarContainerComponent : public StackComponent {
+class ACE_FORCE_EXPORT SideBarContainerComponent : public StackComponent {
     DECLARE_ACE_TYPE(SideBarContainerComponent, StackComponent);
 public:
     ACE_DEFINE_COMPONENT_EVENT(OnChange, void(bool));

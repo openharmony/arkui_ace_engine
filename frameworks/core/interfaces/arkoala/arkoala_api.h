@@ -6540,6 +6540,14 @@ struct ArkUIImageAnimatorModifier {
     void (*resetImageAnimatorOnFinish)(ArkUINodeHandle node);
 };
 
+enum class ArkUIWidthType : uint32_t {
+    SIDEBAR_WIDTH = 0,
+    MIN_SIDEBAR_WIDTH,
+    MAX_SIDEBAR_WIDTH,
+};
+
+enum class ArkUISideBarContainerType { EMBED, OVERLAY, AUTO };
+
 struct ArkUISideBarContainerModifier {
     void (*setSideBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* sideBarWidthPtr);
     void (*resetSideBarWidth)(ArkUINodeHandle node);
@@ -6569,6 +6577,26 @@ struct ArkUISideBarContainerModifier {
     void (*resetSideBarContainerDivider)(ArkUINodeHandle node);
     void (*setSideBarOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetSideBarOnChange)(ArkUINodeHandle node);
+    void (*setSideBarToolBarManager)(ArkUINodeHandle node);
+    void (*setSideBarOnChangeEvent)(void* callback);
+    void (*parseAndSetWidthObj)(ArkUIWidthType widthType, void* valueResObj);
+    void (*parseAndSetWidth)(ArkUIWidthType widthType, void* value, ArkUI_Bool isDoubleBind);
+    void (*setOnSideBarWidthChangeEvent)(void* callback);
+    void (*setDividerStrokeWidth)(void* value, void* valueObj);
+    void (*setDividerColor)(void* value, void* valueObj);
+    void (*setDividerStartMargin)(void* value, void* valueObj);
+    void (*setDividerEndMargin)(void* value, void* valueObj);
+    void (*resetResObjDivider)();
+    void (*create)();
+    void (*setSideBarContainerType)(ArkUISideBarContainerType type);
+    void (*setControlButtonIconInfo)(
+        ArkUI_CharPtr showIconStr, void* showIconResObj, ArkUI_Bool isPixelMap, void* pixMap, const ArkUI_Int32 state);
+    void (*setControlButtonLayout)(void* value, const ArkUI_Int32 layout);
+    void (*resetControlButtonLeft)();
+    void (*resetControlButtonTwelve)();
+    void (*resetControlButtonIconInfo)();
+    void (*resetControlButtonIconRes)();
+    void (*setSideBarContainerMinContentWidthJs)(ArkUI_Float32 value, ArkUI_Int32 unit, void* minContentWidthPtr);
 };
 
 struct ArkUICalendarPickerModifier {

@@ -3488,6 +3488,79 @@ bool ArkTSUtils::CheckJavaScriptScope(const EcmaVM* vm)
     return !(Framework::JsiDeclarativeEngineInstance::GetCurrentRuntime() == nullptr || vm == nullptr);
 }
 
+template<class T>
+bool ArkTSUtils::ConvertFromJSValueNG(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, T& result, RefPtr<ResourceObject>& resObj)
+{
+    if constexpr (std::is_same_v<T, bool>) {
+        if (jsValue->IsBoolean()) {
+            result = jsValue->ToBoolean(vm);
+            return true;
+        }
+        result = false;
+    } else if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
+        double value;
+        if (ParseJsDouble(vm, jsValue, value, resObj)) {
+            result = static_cast<T>(value);
+            return true;
+        }
+        result = 0;
+    } else if constexpr (std::is_same_v<T, std::string>) {
+        if (jsValue->IsString(vm)) {
+            result = jsValue->ToString(vm);
+            return true;
+        }
+    } else if constexpr (std::is_same_v<T, Dimension>) {
+        CalcDimension calc;
+        bool ret = ParseJsDimensionVpNG(vm, jsValue, calc, resObj);
+        result = calc;
+        return ret;
+    } else if constexpr (std::is_same_v<T, CalcDimension>) {
+        return ParseJsDimensionVpNG(vm, jsValue, result, resObj);
+    } else if constexpr (std::is_same_v<T, NG::CalcLength>) {
+        return ParseJsLengthVpNG(vm, jsValue, result, resObj);
+    } else if constexpr (std::is_same_v<T, Color>) {
+        return ParseJsColor(vm, jsValue, result, resObj);
+    }
+    return false;
+}
+
+template<class T>
+bool ArkTSUtils::ConvertFromJSValue(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, T& result, RefPtr<ResourceObject>& resObj)
+{
+    if constexpr (std::is_same_v<T, bool>) {
+        if (jsValue->IsBoolean()) {
+            result = jsValue->ToBoolean(vm);
+            return true;
+        }
+        result = false;
+    } else if constexpr (std::is_integral_v<T> || std::is_floating_point_v<T>) {
+        double value;
+        if (ParseJsDouble(vm, jsValue, value, resObj)) {
+            result = static_cast<T>(value);
+            return true;
+        }
+        result = 0;
+    } else if constexpr (std::is_same_v<T, std::string>) {
+        if (jsValue->IsString(vm)) {
+            result = jsValue->ToString(vm);
+            return true;
+        }
+    } else if constexpr (std::is_same_v<T, Dimension>) {
+        CalcDimension calc;
+        bool ret = ParseJsDimensionVp(vm, jsValue, calc, resObj);
+        result = calc;
+        return ret;
+    } else if constexpr (std::is_same_v<T, CalcDimension>) {
+        return ParseJsDimensionVp(vm, jsValue, result, resObj);
+    } else if constexpr (std::is_same_v<T, Color>) {
+        NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
+        return ParseJsColor(vm, jsValue, result, resObj, nodeInfo);
+    }
+    return false;
+}
+
 template<typename T>
 Local<JSValueRef> ArkTSUtils::ToJsValueWithVM(const EcmaVM* vm, T val)
 {
@@ -3559,6 +3632,11 @@ std::vector<Local<JSValueRef>> ArkTSUtils::ConvertToJSValues(const EcmaVM* vm, A
 
 template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<double>(const EcmaVM* vm, double);
 template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ToJsValueWithVM<int32_t>(const EcmaVM* vm, int32_t);
+
+template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValue<Color>(
+    const EcmaVM*, const Local<JSValueRef>&, Color&, RefPtr<ResourceObject>&);
+template ACE_FORCE_EXPORT bool ArkTSUtils::ConvertFromJSValueNG<Dimension>(
+    const EcmaVM*, const Local<JSValueRef>&, Dimension&, RefPtr<ResourceObject>&);
 
 template ACE_FORCE_EXPORT Local<JSValueRef> ArkTSUtils::ConvertToJSValue<CalcDimension>(
     const EcmaVM* vm, CalcDimension&& value);
