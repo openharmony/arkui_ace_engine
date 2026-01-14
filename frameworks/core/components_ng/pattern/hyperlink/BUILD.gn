@@ -27,7 +27,10 @@ build_component_ng("hyperlink_pattern_ng") {
         "bridge/hyperlink_model_impl.cpp"
     ]
 
-    deps = [ "$ace_root/interfaces/inner_api/ace:ace_forward_compatibility" ]
-
-    ark_sources += [ "bridge/hyperlink_static_modifier.cpp" ]
+    if (!is_arkui_x) {
+        if (!ace_engine_feature_wearable) {
+            ark_sources += [ "bridge/hyperlink_static_modifier.cpp" ]
+        }
+    ark_sources += [ "bridge/hyperlink_model_impl.cpp" ]
+  }
 }
