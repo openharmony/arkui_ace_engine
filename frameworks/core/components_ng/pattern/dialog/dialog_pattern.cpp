@@ -1282,6 +1282,7 @@ RefPtr<FrameNode> DialogPattern::BuildSheet(const std::vector<ActionSheetInfo>& 
     };
     auto props = list->GetLayoutProperty<ListLayoutProperty>();
     props->UpdateDivider(divider);
+    props->UpdateDividerColorSetByUser(true);
     props->UpdateListDirection(Axis::VERTICAL);
     return list;
 }
