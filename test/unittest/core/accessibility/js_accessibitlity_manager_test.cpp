@@ -1276,11 +1276,11 @@ HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager023, TestSize.Level1)
 }
 
 /**
- * @tc.name: JsAccessibilityManager024
+ * @tc.name: DumpProcessEventParameters001
  * @tc.desc: dump event test  DumpProcessEventParameters
  * @tc.type: FUNC
  */
-HWTEST_F(JsAccessibilityManagerTest, JsAccessibilityManager024, TestSize.Level1)
+HWTEST_F(JsAccessibilityManagerTest, DumpProcessEventParameters001, TestSize.Level1)
 {
     MockPipelineContext::SetUp();
     auto context = NG::PipelineContext::GetCurrentContext();
