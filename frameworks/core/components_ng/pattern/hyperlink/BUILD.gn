@@ -23,8 +23,7 @@ build_component_ng("hyperlink_pattern_ng") {
     ark_sources = [
         "bridge/arkts_native_hyperlink_bridge.cpp",
         "bridge/hyperlink_dynamic_module.cpp",
-        "bridge/hyperlink_dynamic_modifier.cpp",
-        "bridge/hyperlink_model_impl.cpp"
+        "bridge/hyperlink_dynamic_modifier.cpp"
     ]
 
     if (!is_arkui_x) {
