@@ -100,7 +100,11 @@ export namespace extractors {
   }
 
   export function toComponentContentBasePtr(value: ComponentContentBase): KPointer {
-    return 123;
+    const pointer = value.getNodePtr();
+    if (pointer === undefined) {
+      return nullptr;
+    }
+    return pointer;
   }
   export function fromComponentContentBasePtr(ptr: KPointer): ComponentContentBase {
     const x: Object = {};

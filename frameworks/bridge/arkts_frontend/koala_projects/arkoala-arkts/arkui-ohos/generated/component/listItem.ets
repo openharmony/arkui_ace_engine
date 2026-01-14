@@ -30,12 +30,12 @@ import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { CustomBuilder } from "./builder"
-import { ComponentContent } from "arkui.ComponentContent"
+import { ComponentContentBase } from "arkui.ComponentContent"
 import { Length } from "./units"
 import { Resource } from "global.resource"
 import { ListItemModifier } from "./../ListItemModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
-import { ComponentContent_serializer } from "./../ComponentContent"
+import { ComponentContentBase_serializer } from "./../ComponentContent"
 import { Resource_serializer } from "./../framework/resource"
 import { FrameNode } from "arkui.FrameNode"
 import { BusinessError } from '#external';
@@ -199,7 +199,7 @@ export enum ListItemSwipeActionDirection {
 }
 export interface SwipeActionItem {
     builder?: CustomBuilder;
-    builderComponent?: ComponentContent;
+    builderComponent?: ComponentContentBase;
     actionAreaDistance?: Length;
     onAction?: (() => void);
     onEnterActionArea?: (() => void);
@@ -377,7 +377,7 @@ export class SwipeActionItem_serializer {
         if (valueHolderForBuilderComponent !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForBuilderComponentTmpValue  = valueHolderForBuilderComponent!
-            ComponentContent_serializer.write(valueSerializer, valueHolderForBuilderComponentTmpValue)
+            ComponentContentBase_serializer.write(valueSerializer, valueHolderForBuilderComponentTmpValue)
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -454,11 +454,11 @@ export class SwipeActionItem_serializer {
         }
         const builderTmpResult : CustomBuilder | undefined = builderTmpBuf
         const builderComponentTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let builderComponentTmpBuf : ComponentContent | undefined = undefined
+        let builderComponentTmpBuf : ComponentContentBase | undefined = undefined
         if ((builderComponentTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            builderComponentTmpBuf = (ComponentContent_serializer.read(valueDeserializer) as ComponentContent)
+            builderComponentTmpBuf = (ComponentContentBase_serializer.read(valueDeserializer) as ComponentContentBase)
         }
-        const builderComponentTmpResult : ComponentContent | undefined = builderComponentTmpBuf
+        const builderComponentTmpResult : ComponentContentBase | undefined = builderComponentTmpBuf
         const actionAreaDistanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let actionAreaDistanceTmpBuf : Length | undefined = undefined
         if ((actionAreaDistanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
