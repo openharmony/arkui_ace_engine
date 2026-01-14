@@ -21,8 +21,8 @@
 @Entry
 @Component
 struct ListSwiperComponent {
-  private arr: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9]
-  scroller: Scroller = new Scroller()
+  private arr: number[] = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+  scroller: Scroller = new Scroller();
   @State currentIndex: number = 0;
   @State isScroll: boolean = false;
   @State positionX: number = 0;
@@ -67,16 +67,16 @@ struct ListSwiperComponent {
             if (event) {
               if (event.offsetX < 0) {  //向右滑动
                 this.currentIndex = this.currentIndex === length - 1 ? 0 : this.currentIndex + 1;
-                this.scroller.scrollToIndex(this.currentIndex)
+                this.scroller.scrollToIndex(this.currentIndex);
               }
               if (event.offsetX > 0) { //向左滑动
                 this.currentIndex = this.currentIndex === 0 ?  length - 1 : this.currentIndex - 1;
-                this.scroller.scrollToIndex(this.currentIndex)
+                this.scroller.scrollToIndex(this.currentIndex);
               }
               setTimeout(() => {
                 this.offsetX = this.scroller.currentOffset().xOffset;
                 this.preOffsetX = 0;
-              }, 500)
+              }, 500);
             }
           })
       )
