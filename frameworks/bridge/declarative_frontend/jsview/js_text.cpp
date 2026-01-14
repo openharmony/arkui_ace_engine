@@ -1686,16 +1686,26 @@ void JSText::SetMarqueeSpacing(const JSRef<JSObject>& paramObject, NG::TextMarqu
 {
     auto getSpacing = paramObject->GetProperty("spacing");
     UnRegisterResource("MarqueeSpacing");
-    if (!getSpacing->IsNull() && !getSpacing->IsUndefined()) {
-        CalcDimension value;
-        RefPtr<ResourceObject> resObj;
-        if (ParseLengthMetricsToDimension(getSpacing, value, resObj) && !value.IsNegative()
-            && value.Unit() != DimensionUnit::PERCENT) {
-            options.UpdateTextMarqueeSpacing(value);
+    if (getSpacing->IsNull() || getSpacing->IsUndefined()) {
+        return;
+    }
+    CalcDimension value;
+    RefPtr<ResourceObject> resObj;
+    bool unitIsUndefine = false;
+    if (getSpacing->IsObject()) {
+        auto spaceObj = JSRef<JSObject>::Cast(getSpacing);
+        auto unitObj = spaceObj->GetProperty("unit");
+        unitIsUndefine = unitObj->IsUndefined() || unitObj->IsNull();
+    }
+    if (ParseLengthMetricsToDimension(getSpacing, value, resObj) && !value.IsNegative()
+        && value.Unit() != DimensionUnit::PERCENT) {
+        if (unitIsUndefine) {
+            value.SetUnit(DimensionUnit::VP);
         }
-        if (SystemProperties::ConfigChangePerform() && resObj) {
-            RegisterResource<CalcDimension>("MarqueeSpacing", resObj, value);
-        }
+        options.UpdateTextMarqueeSpacing(value);
+    }
+    if (SystemProperties::ConfigChangePerform() && resObj) {
+        RegisterResource<CalcDimension>("MarqueeSpacing", resObj, value);
     }
 }
 
