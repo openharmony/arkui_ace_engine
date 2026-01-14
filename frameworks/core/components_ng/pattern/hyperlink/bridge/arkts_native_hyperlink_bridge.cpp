@@ -75,7 +75,7 @@ ArkUINativeModuleValue HyperlinkBridge::Create(ArkUIRuntimeCallInfo* runtimeCall
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     std::string content{};
     RefPtr<ResourceObject> contentResObj{};
-    auto contentRet = runtimeCallInfo->GetArgsNumber() == 2
+    auto contentRet = runtimeCallInfo->GetArgsNumber() == NUM_2
                         ? ArkTSUtils::ParseJsString(vm, secondArg, content, contentResObj)
                         : false;
 
