@@ -1309,20 +1309,19 @@ HWTEST_F(RichEditorKeyboardShortcutTestNg, OnFocusCustomKeyboardChange, TestSize
     richEditorPattern->keyboardOverlay_ = pipeline->GetOverlayManager();
     richEditorPattern->OnFocusCustomKeyboardChange();
     EXPECT_FALSE(richEditorPattern->isCustomKeyboardAttached_);
-    richEditorPattern->isCustomKeyboardAttached_ = true;
+
     textFieldManager->SetPreNode(weakNode);
+    textFieldManager->SetCustomKeyboardContinueFeature(true);
     pipeline->SetTextFieldManager(textFieldManager);
     richEditorPattern->OnFocusCustomKeyboardChange();
-    auto customKeyboardId = richEditorPattern->GetTextFieldManager()->GetCustomKeyboardId();
-    EXPECT_EQ(customKeyboardId, richEditorPattern->customKeyboardNode_->GetId());
+    EXPECT_FALSE(richEditorPattern->isCustomKeyboardAttached_);
+
     richEditorPattern->customKeyboardNode_ =
         AceType::MakeRefPtr<FrameNode>("node", 2003, AceType::MakeRefPtr<Pattern>());
     EXPECT_TRUE(richEditorPattern->customKeyboardBuilder_);
-    textFieldManager->SetPreNode(weakNode);
     pipeline->SetTextFieldManager(textFieldManager);
     richEditorPattern->OnFocusCustomKeyboardChange();
-    customKeyboardId = richEditorPattern->GetTextFieldManager()->GetCustomKeyboardId();
-    EXPECT_NE(customKeyboardId, 2003);
+    EXPECT_FALSE(textFieldManager->NeedCloseKeyboard());
 }
 
 /**
