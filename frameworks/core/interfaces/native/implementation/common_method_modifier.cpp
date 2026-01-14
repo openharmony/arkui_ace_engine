@@ -1590,7 +1590,7 @@ RotateOpt Convert(const Ark_RotateOptions& src)
     auto centerX =  OptConvert<Dimension>(src.centerX);
     auto centerY =  OptConvert<Dimension>(src.centerY);
     auto center = DimensionOffset(Dimension(0.5f, DimensionUnit::PERCENT), Dimension(0.5f, DimensionUnit::PERCENT));
-    center.SetZ(Dimension(0, DimensionUnit::VP));
+    center.SetZ(Dimension(0.5f, DimensionUnit::PERCENT));
     if (centerX.has_value()) {
         center.SetX(centerX.value());
     }
