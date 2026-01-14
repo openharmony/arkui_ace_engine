@@ -631,6 +631,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnGestureRecognizerJudgeBegin0Te
 
     auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_BaseGestureEvent event,
         const Ark_GestureRecognizer current, const Array_GestureRecognizer recognizers,
+        const Array_TouchRecognizer touchRecognizers,
         const Callback_GestureJudgeResult_Void continuation)
     {
         auto info = event ? event->GetBaseGestureInfo() : nullptr;
@@ -640,7 +641,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnGestureRecognizerJudgeBegin0Te
         Ark_GestureJudgeResult arkResult = isOk ? ARK_GESTURE_JUDGE_RESULT_CONTINUE : ARK_GESTURE_JUDGE_RESULT_REJECT;
         CallbackHelper(continuation).InvokeSync(arkResult);
     };
-    auto arkCallback = Converter::ArkValue<GestureRecognizerJudgeBeginCallback>(nullptr, callSyncFunc);
+    auto arkCallback = Converter::ArkValue<GestureRecognizerJudgeBeginCallback>(callSyncFunc);
     auto optCallback = Converter::ArkValue<Opt_GestureRecognizerJudgeBeginCallback>(arkCallback);
     modifier_->setOnGestureRecognizerJudgeBegin0(node_, &optCallback);
 
@@ -674,6 +675,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnGestureRecognizerJudgeBegin1Te
 
     auto callSyncFunc = [](Ark_VMContext context, const Ark_Int32 resourceId, const Ark_BaseGestureEvent event,
         const Ark_GestureRecognizer current, const Array_GestureRecognizer recognizers,
+        const Array_TouchRecognizer touchRecognizers,
         const Callback_GestureJudgeResult_Void continuation)
     {
         auto info = event ? event->GetBaseGestureInfo() : nullptr;
@@ -683,7 +685,7 @@ HWTEST_F(CommonMethodModifierTest7, DISABLED_SetOnGestureRecognizerJudgeBegin1Te
         Ark_GestureJudgeResult arkResult = isOk ? ARK_GESTURE_JUDGE_RESULT_CONTINUE : ARK_GESTURE_JUDGE_RESULT_REJECT;
         CallbackHelper(continuation).InvokeSync(arkResult);
     };
-    auto arkCallback = Converter::ArkValue<GestureRecognizerJudgeBeginCallback>(nullptr, callSyncFunc);
+    auto arkCallback = Converter::ArkValue<GestureRecognizerJudgeBeginCallback>(callSyncFunc);
     auto optCallback = Converter::ArkValue<Opt_GestureRecognizerJudgeBeginCallback>(arkCallback);
     auto exposeInnerGesture = Converter::ArkValue<Opt_Boolean>(false);
     modifier_->setOnGestureRecognizerJudgeBegin1(node_, &optCallback, &exposeInnerGesture);

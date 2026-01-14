@@ -109,7 +109,7 @@ import { TextOptions, TextAttribute, ArkTextPeer } from './component/text'
 import { MarqueeOptions, MarqueeAttribute, ArkMarqueePeer } from './component/marquee'
 import { SymbolGlyphAttribute, ArkSymbolGlyphPeer } from './component/symbolglyph'
 import { XComponentParameters, XComponentOptions, NativeXComponentParameters, XComponentAttribute, TypedXComponentPeerInternal } from "./component/xcomponent"
-import { XComponentType, AnimationPropertyType } from './component/enums'
+import { XComponentType, AnimationPropertyType, EventQueryType } from './component/enums'
 import { ComponentContent } from './ComponentContent';
 import { DrawContext } from './Graphics';
 import { JSBuilderNode } from "./BuilderNode"
@@ -125,6 +125,12 @@ import { Vector2 } from "./Graphics.ets"
 
 export interface CrossLanguageOptions {
     attributeSetting?: boolean;
+}
+export interface InteractionEventBindingInfo {
+    baseEventRegistered: boolean;
+    nodeEventRegistered: boolean;
+    nativeEventRegistered: boolean;
+    builtInEventRegistered: boolean;
 }
 export interface LayoutConstraint {
     maxSize: Size;
@@ -165,6 +171,14 @@ export enum ExpandMode {
     EXPAND = 1,
     LAZY_EXPAND = 2,
 }
+export enum UIState {
+    NORMAL = 0,
+    PRESSED = 1 << 0,
+    FOCUSED = 1 << 1,
+    DISABLED = 1 << 2,
+    SELECTED = 1 << 3
+}
+export type UIStatesChangeHandler = (node: FrameNode, currentUIStates: int) => void;
 export class FrameNodeFinalizationRegisterProxy {
     constructor() { }
     public static instance_: FrameNodeFinalizationRegisterProxy = new FrameNodeFinalizationRegisterProxy();
@@ -597,6 +611,16 @@ export class FrameNode implements MaterializedBase {
         this.disposeTreeRecursively();
         FrameNodeExtender.disposeTree(this);
     };
+    public addSupportedUIStates(uiStates: int32, statesChangeHandler: UIStatesChangeHandler, excludeInner?: boolean | undefined): void {
+        let exclude_casted: boolean = false;
+        if (excludeInner !== undefined && excludeInner !== null) {
+            exclude_casted = excludeInner;
+        }
+        FrameNodeExtender.addSupportedUIStates(this, uiStates, statesChangeHandler, exclude_casted);
+    };
+    public removeSupportedUIStates(uiStates: int32): void {
+        FrameNodeExtender.removeSupportedUIStates(this, uiStates);
+    };
     public setCrossLanguageOptions(options: CrossLanguageOptions): void {
         let errorMessage: string = 'The FrameNode cannot be set whether to support cross-language common attribute setting.';
         const error = Error(errorMessage);
@@ -719,6 +743,14 @@ export class FrameNode implements MaterializedBase {
     public recycle(): void {
         FrameNodeExtender.recycle(this)
         return
+    }
+    public getInteractionEventBindingInfo(eventType: EventQueryType): InteractionEventBindingInfo | undefined {
+        const info = FrameNodeExtender.getInteractionEventBindingInfo_serialize(this, eventType);
+        if (!info || (!info.baseEventRegistered && !info.nodeEventRegistered &&
+            !info.nativeEventRegistered && !info.builtInEventRegistered)) {
+            return undefined;
+        }
+        return info;
     }
     public createAnimation(property: AnimationPropertyType, startValue: Array<double> | undefined, endValue: Array<double>, param: AnimateParam): boolean {
         const property_casted = property as (AnimationPropertyType)

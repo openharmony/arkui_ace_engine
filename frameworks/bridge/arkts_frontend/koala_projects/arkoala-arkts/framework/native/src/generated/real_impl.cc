@@ -2222,7 +2222,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     void SetBackgroundImpl(Ark_NativePointer node,
-                           const Opt_CustomNodeBuilder* builder,
+                           const Opt_Union_CustomBuilder_ResourceColor* content,
                            const Opt_BackgroundOptions* options)
     {
     }
@@ -14148,6 +14148,16 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void DisposeTreeImpl(Ark_FrameNode peer)
     {
     }
+    void AddSupportedUIStatesImpl(Ark_FrameNode peer,
+                                  Ark_Int32 uiStates,
+                                  const UIStatesChangeHandler* statesChangeHandler,
+                                  Ark_Boolean excludeInner)
+    {
+    }
+    void RemoveSupportedUIStatesImpl(Ark_FrameNode peer,
+                                     Ark_Int32 uiStates)
+    {
+    }
     Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
                                             Ark_Boolean options)
     {
@@ -14299,6 +14309,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     Ark_Int32 RemoveAdoptedChildImpl(Ark_FrameNode peer,
                                      Ark_FrameNode child)
+    {
+        return {};
+    }
+    Ark_InteractionEventBindingInfo GetInteractionEventBindingInfoImpl(Ark_FrameNode peer,
+                                                                       Ark_EventQueryType eventType)
     {
         return {};
     }
@@ -15220,6 +15235,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     }
     void SetUnicodeImpl(Ark_KeyEvent peer,
                         const Opt_Int64* unicode)
+    {
+    }
+    Opt_Boolean GetIsNumLockOnImpl(Ark_KeyEvent peer)
+    {
+        return {};
+    }
+    void SetIsNumLockOnImpl(Ark_KeyEvent peer,
+                            const Opt_Boolean* isNumLockOn)
+    {
+    }
+    Opt_Boolean GetIsCapsLockOnImpl(Ark_KeyEvent peer)
+    {
+        return {};
+    }
+    void SetIsCapsLockOnImpl(Ark_KeyEvent peer,
+                             const Opt_Boolean* isCapsLockOn)
+    {
+    }
+    Opt_Boolean GetIsScrollLockOnImpl(Ark_KeyEvent peer)
+    {
+        return {};
+    }
+    void SetIsScrollLockOnImpl(Ark_KeyEvent peer,
+                               const Opt_Boolean* isScrollLockOn)
     {
     }
     } // KeyEventAccessor
@@ -16862,6 +16901,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     Ark_PanGestureOptions GetPanGestureOptionsImpl(Ark_PanRecognizer peer)
+    {
+        return {};
+    }
+    Ark_PanDirection GetDirectionImpl(Ark_PanRecognizer peer)
+    {
+        return {};
+    }
+    Ark_Float64 GetDistanceImpl(Ark_PanRecognizer peer)
+    {
+        return {};
+    }
+    Map_SourceTool_Float64 GetDistanceMapImpl(Ark_PanRecognizer peer)
     {
         return {};
     }
@@ -19495,6 +19546,30 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // TouchEventAccessor
+        namespace TouchRecognizerAccessor {
+    void DestroyPeerImpl(Ark_TouchRecognizer peer)
+    {
+        auto peerImpl = reinterpret_cast<TouchRecognizerPeerImpl *>(peer);
+        if (peerImpl) {
+            delete peerImpl;
+        }
+    }
+    Ark_TouchRecognizer ConstructImpl()
+    {
+        return {};
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        return reinterpret_cast<void *>(&DestroyPeerImpl);
+    }
+    Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_TouchRecognizer peer)
+    {
+        return {};
+    }
+    void CancelTouchImpl(Ark_TouchRecognizer peer)
+    {
+    }
+    } // TouchRecognizerAccessor
     namespace TransitionEffectAccessor {
     void DestroyPeerImpl(Ark_TransitionEffect peer)
     {
@@ -21557,6 +21632,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::GetInspectorInfoImpl,
             FrameNodeExtenderAccessor::InvalidateImpl,
             FrameNodeExtenderAccessor::DisposeTreeImpl,
+            FrameNodeExtenderAccessor::AddSupportedUIStatesImpl,
+            FrameNodeExtenderAccessor::RemoveSupportedUIStatesImpl,
             FrameNodeExtenderAccessor::SetCrossLanguageOptionsImpl,
             FrameNodeExtenderAccessor::GetCrossLanguageOptionsImpl,
             FrameNodeExtenderAccessor::SetMeasuredSizeImpl,
@@ -21591,6 +21668,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::CreateByRawPtrImpl,
             FrameNodeExtenderAccessor::UnWrapRawPtrImpl,
             FrameNodeExtenderAccessor::GetCommonEventImpl,
+            FrameNodeExtenderAccessor::GetInteractionEventBindingInfoImpl,
             FrameNodeExtenderAccessor::IsOnRenderTreeImpl,
             FrameNodeExtenderAccessor::IsOnMainTreeImpl,
             FrameNodeExtenderAccessor::ConvertPositionToWindowImpl,
@@ -22017,6 +22095,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             KeyEventAccessor::SetGetModifierKeyStateImpl,
             KeyEventAccessor::GetUnicodeImpl,
             KeyEventAccessor::SetUnicodeImpl,
+            KeyEventAccessor::GetIsNumLockOnImpl,
+            KeyEventAccessor::SetIsNumLockOnImpl,
+            KeyEventAccessor::GetIsCapsLockOnImpl,
+            KeyEventAccessor::SetIsCapsLockOnImpl,
+            KeyEventAccessor::GetIsScrollLockOnImpl,
+            KeyEventAccessor::SetIsScrollLockOnImpl,
         };
         return &KeyEventAccessorImpl;
     }
@@ -22689,6 +22773,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             PanRecognizerAccessor::ConstructImpl,
             PanRecognizerAccessor::GetFinalizerImpl,
             PanRecognizerAccessor::GetPanGestureOptionsImpl,
+            PanRecognizerAccessor::GetDirectionImpl,
+            PanRecognizerAccessor::GetDistanceImpl,
+            PanRecognizerAccessor::GetDistanceMapImpl,
         };
         return &PanRecognizerAccessorImpl;
     }
@@ -23910,6 +23997,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct TouchEventPeer {
         virtual ~TouchEventPeer() = default;
     };
+        const GENERATED_ArkUITouchRecognizerAccessor* GetTouchRecognizerAccessor()
+    {
+        static const GENERATED_ArkUITouchRecognizerAccessor TouchRecognizerAccessorImpl {
+            TouchRecognizerAccessor::DestroyPeerImpl,
+            TouchRecognizerAccessor::ConstructImpl,
+            TouchRecognizerAccessor::GetFinalizerImpl,
+            TouchRecognizerAccessor::GetEventTargetInfoImpl,
+            TouchRecognizerAccessor::CancelTouchImpl,
+        };
+        return &TouchRecognizerAccessorImpl;
+    }
+
+    struct TouchRecognizerPeer {
+        virtual ~TouchRecognizerPeer() = default;
+    };
     const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
     {
         static const GENERATED_ArkUITransitionEffectAccessor TransitionEffectAccessorImpl {
@@ -24510,6 +24612,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetThemeOpsAccessor,
             GetTimePickerDialogAccessor,
             GetTouchEventAccessor,
+            GetTouchRecognizerAccessor,
             GetTransitionEffectAccessor,
             GetUICommonEventAccessor,
             GetUIContextAtomicServiceBarAccessor,

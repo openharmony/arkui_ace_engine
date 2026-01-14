@@ -4427,7 +4427,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetBackgroundImpl(Ark_NativePointer node,
-                           const Opt_CustomNodeBuilder* builder,
+                           const Opt_Union_CustomBuilder_ResourceColor* content,
                            const Opt_BackgroundOptions* options)
     {
         if (!needGroupedLog(1))
@@ -4435,7 +4435,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             return;
         }
         string out("setBackground(");
-        WriteToString(&out, builder);
+        WriteToString(&out, content);
         out.append(", ");
         WriteToString(&out, options);
         out.append(") \n");
@@ -32928,6 +32928,40 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void AddSupportedUIStatesImpl(Ark_FrameNode peer,
+                                  Ark_Int32 uiStates,
+                                  const UIStatesChangeHandler* statesChangeHandler,
+                                  Ark_Boolean excludeInner)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("addSupportedUIStates(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, uiStates);
+        out.append(", ");
+        WriteToString(&out, statesChangeHandler);
+        out.append(", ");
+        WriteToString(&out, excludeInner);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void RemoveSupportedUIStatesImpl(Ark_FrameNode peer,
+                                     Ark_Int32 uiStates)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("removeSupportedUIStates(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, uiStates);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer,
                                             Ark_Boolean options)
     {
@@ -33424,6 +33458,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append("[return 0] \n");
         appendGroupedLog(1, out);
         return 0;
+    }
+    Ark_InteractionEventBindingInfo GetInteractionEventBindingInfoImpl(Ark_FrameNode peer,
+                                                                       Ark_EventQueryType eventType)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getInteractionEventBindingInfo(");
+        WriteToString(&out, peer);
+        out.append(", ");
+        WriteToString(&out, eventType);
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
     }
     Ark_Boolean IsOnRenderTreeImpl(Ark_FrameNode peer)
     {
@@ -35961,6 +36011,78 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         }
         string out("setUnicode(");
         WriteToString(&out, unicode);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Opt_Boolean GetIsNumLockOnImpl(Ark_KeyEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getIsNumLockOn(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    void SetIsNumLockOnImpl(Ark_KeyEvent peer,
+                            const Opt_Boolean* isNumLockOn)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setIsNumLockOn(");
+        WriteToString(&out, isNumLockOn);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Opt_Boolean GetIsCapsLockOnImpl(Ark_KeyEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getIsCapsLockOn(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    void SetIsCapsLockOnImpl(Ark_KeyEvent peer,
+                             const Opt_Boolean* isCapsLockOn)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setIsCapsLockOn(");
+        WriteToString(&out, isCapsLockOn);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Opt_Boolean GetIsScrollLockOnImpl(Ark_KeyEvent peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getIsScrollLockOn(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    void SetIsScrollLockOnImpl(Ark_KeyEvent peer,
+                               const Opt_Boolean* isScrollLockOn)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setIsScrollLockOn(");
+        WriteToString(&out, isScrollLockOn);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -40341,6 +40463,42 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append("[return reinterpret_cast<Ark_PanGestureOptions>(300)] \n");
         appendGroupedLog(1, out);
         return reinterpret_cast<Ark_PanGestureOptions>(300);
+    }
+    Ark_PanDirection GetDirectionImpl(Ark_PanRecognizer peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getDirection(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
+    }
+    Ark_Float64 GetDistanceImpl(Ark_PanRecognizer peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("getDistance(");
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
+    Map_SourceTool_Float64 GetDistanceMapImpl(Ark_PanRecognizer peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return {};
+        }
+        string out("getDistanceMap(");
+        out.append(") \n");
+        out.append("[return {}] \n");
+        appendGroupedLog(1, out);
+        return {};
     }
     } // PanRecognizerAccessor
     namespace ParagraphStyleAccessor {
@@ -47288,6 +47446,64 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // TouchEventAccessor
+    namespace TouchRecognizerAccessor {
+    void DestroyPeerImpl(Ark_TouchRecognizer peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_TouchRecognizer ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_TouchRecognizer>(100);
+        }
+        string out("new TouchRecognizer(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_TouchRecognizer>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_TouchRecognizer>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    Ark_EventTargetInfo GetEventTargetInfoImpl(Ark_TouchRecognizer peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_EventTargetInfo>(300);
+        }
+        string out("getEventTargetInfo(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_EventTargetInfo>(300)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_EventTargetInfo>(300);
+    }
+    void CancelTouchImpl(Ark_TouchRecognizer peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("cancelTouch(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // TouchRecognizerAccessor
     namespace TransitionEffectAccessor {
     void DestroyPeerImpl(Ark_TransitionEffect peer)
     {
@@ -50936,6 +51152,8 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::GetInspectorInfoImpl,
             FrameNodeExtenderAccessor::InvalidateImpl,
             FrameNodeExtenderAccessor::DisposeTreeImpl,
+            FrameNodeExtenderAccessor::AddSupportedUIStatesImpl,
+            FrameNodeExtenderAccessor::RemoveSupportedUIStatesImpl,
             FrameNodeExtenderAccessor::SetCrossLanguageOptionsImpl,
             FrameNodeExtenderAccessor::GetCrossLanguageOptionsImpl,
             FrameNodeExtenderAccessor::SetMeasuredSizeImpl,
@@ -50972,6 +51190,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             FrameNodeExtenderAccessor::GetCommonEventImpl,
             FrameNodeExtenderAccessor::AdoptChildImpl,
             FrameNodeExtenderAccessor::RemoveAdoptedChildImpl,
+            FrameNodeExtenderAccessor::GetInteractionEventBindingInfoImpl,
             FrameNodeExtenderAccessor::IsOnRendertreeImpl,
             FrameNodeExtenderAccessor::IsOnMainTreeImpl,
             FrameNodeExtenderAccessor::ConvertPositionToWindowImpl,
@@ -51396,6 +51615,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             KeyEventAccessor::SetGetModifierKeyStateImpl,
             KeyEventAccessor::GetUnicodeImpl,
             KeyEventAccessor::SetUnicodeImpl,
+            KeyEventAccessor::GetIsNumLockOnImpl,
+            KeyEventAccessor::SetIsNumLockOnImpl,
+            KeyEventAccessor::GetIsCapsLockOnImpl,
+            KeyEventAccessor::SetIsCapsLockOnImpl,
+            KeyEventAccessor::GetIsScrollLockOnImpl,
+            KeyEventAccessor::SetIsScrollLockOnImpl,
         };
         return &KeyEventAccessorImpl;
     }
@@ -52066,6 +52291,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             PanRecognizerAccessor::ConstructImpl,
             PanRecognizerAccessor::GetFinalizerImpl,
             PanRecognizerAccessor::GetPanGestureOptionsImpl,
+            PanRecognizerAccessor::GetDirectionImpl,
+            PanRecognizerAccessor::GetDistanceImpl,
+            PanRecognizerAccessor::GetDistanceMapImpl,
         };
         return &PanRecognizerAccessorImpl;
     }
@@ -53283,6 +53511,21 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct TouchEventPeer {
         virtual ~TouchEventPeer() = default;
     };
+    const GENERATED_ArkUITouchRecognizerAccessor* GetTouchRecognizerAccessor()
+    {
+        static const GENERATED_ArkUITouchRecognizerAccessor TouchRecognizerAccessorImpl {
+            TouchRecognizerAccessor::DestroyPeerImpl,
+            TouchRecognizerAccessor::ConstructImpl,
+            TouchRecognizerAccessor::GetFinalizerImpl,
+            TouchRecognizerAccessor::GetEventTargetInfoImpl,
+            TouchRecognizerAccessor::CancelTouchImpl,
+        };
+        return &TouchRecognizerAccessorImpl;
+    }
+
+    struct TouchRecognizerPeer {
+        virtual ~TouchRecognizerPeer() = default;
+    };
     const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
     {
         static const GENERATED_ArkUITransitionEffectAccessor TransitionEffectAccessorImpl {
@@ -53884,6 +54127,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetThemeOpsAccessor,
             GetTimePickerDialogAccessor,
             GetTouchEventAccessor,
+            GetTouchRecognizerAccessor,
             GetTransitionEffectAccessor,
             GetUICommonEventAccessor,
             GetUIContextAtomicServiceBarAccessor,

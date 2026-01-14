@@ -17,13 +17,35 @@
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
 import { extractors } from "#handwritten"
-import { FrameNode, LayoutConstraint } from "arkui.FrameNode"
+import { InteractionEventBindingInfo, FrameNode, LayoutConstraint } from "arkui.FrameNode"
 import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule, MaterializedBase, Tags, RuntimeType, runtimeType, toPeerPtr, nullptr, KPointer, NativeBuffer, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
 import { Size_serializer } from "./Graphics"
 import { Size } from "arkui.Graphics"
+export class InteractionEventBindingInfo_serializer {
+    public static write(buffer: SerializerBase, value: InteractionEventBindingInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForBaseEventRegistered  = value.baseEventRegistered
+        valueSerializer.writeBoolean(valueHolderForBaseEventRegistered)
+        const valueHolderForNodeEventRegistered  = value.nodeEventRegistered
+        valueSerializer.writeBoolean(valueHolderForNodeEventRegistered)
+        const valueHolderForNativeEventRegistered  = value.nativeEventRegistered
+        valueSerializer.writeBoolean(valueHolderForNativeEventRegistered)
+        const valueHolderForBuiltInEventRegistered  = value.builtInEventRegistered
+        valueSerializer.writeBoolean(valueHolderForBuiltInEventRegistered)
+    }
+    public static read(buffer: DeserializerBase): InteractionEventBindingInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const baseEventRegisteredTmpResult : boolean = valueDeserializer.readBoolean()
+        const nodeEventRegisteredTmpResult : boolean = valueDeserializer.readBoolean()
+        const nativeEventRegisteredTmpResult : boolean = valueDeserializer.readBoolean()
+        const builtInEventRegisteredTmpResult : boolean = valueDeserializer.readBoolean()
+        let value : InteractionEventBindingInfo = ({baseEventRegistered: baseEventRegisteredTmpResult, nodeEventRegistered: nodeEventRegisteredTmpResult, nativeEventRegistered: nativeEventRegisteredTmpResult, builtInEventRegistered: builtInEventRegisteredTmpResult} as InteractionEventBindingInfo)
+        return value
+    }
+}
 export class FrameNode_serializer {
     public static write(buffer: SerializerBase, value: FrameNode): void {
         let valueSerializer : SerializerBase = buffer

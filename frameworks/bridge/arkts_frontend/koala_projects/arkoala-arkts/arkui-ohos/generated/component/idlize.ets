@@ -31,7 +31,7 @@ import { ArcScrollBarOptions } from "@ohos.arkui.ArcScrollBar"
 import { Resource_serializer } from "./../framework/resource"
 import { VoidCallback, SizeOptions_serializer, Length, SizeOptions, Position_serializer, Position, ResourceColor, ConstraintSizeOptions, Offset, Dimension, BorderRadiuses, EdgeWidths, EdgeColors, EdgeStyles, Offset_serializer, BorderRadiuses_serializer, EdgeWidths_serializer, EdgeColors_serializer, EdgeStyles_serializer } from "./units"
 import { Resource } from "global.resource"
-import { CrownSensitivity, BarState, Color, BorderStyle, AnimationPropertyType, ResponseType } from "./enums"
+import { CrownSensitivity, BarState, Color, BorderStyle, AnimationPropertyType, EventQueryType, ResponseType } from "./enums"
 import { ContentModifier, extractors, hookRootAttributeModifier, AttributeModifier, AttributeUpdater, hookComponentRootAttributeModifier, hookCustomBuilderRootAttributeModifier, hookCustomLayoutRootAttributeModifier } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { ButtonConfiguration } from "./button"
@@ -50,8 +50,8 @@ import { ToggleConfiguration } from "./toggle"
 import { CheckBoxGroupConfiguration, CheckBoxGroupConfigurationInternal } from "./checkboxgroup"
 import { default as promptAction, LevelMode, ImmersiveMode } from "@ohos.promptAction"
 import { Size_serializer, Frame_serializer, LengthMetrics_serializer, ColorMetrics_serializer, Vector2_serializer, Vector3_serializer, Circle_serializer, RoundRect_serializer, CommandPath_serializer } from "./../Graphics"
-import { LayoutConstraint_serializer } from "./../FrameNode"
-import { FrameNode, LayoutConstraint } from "arkui.FrameNode"
+import { LayoutConstraint_serializer, InteractionEventBindingInfo_serializer } from "./../FrameNode"
+import { FrameNode, UIStatesChangeHandler, LayoutConstraint, InteractionEventBindingInfo } from "arkui.FrameNode"
 import { Size, Frame, LengthMetrics, ColorMetrics, Vector2, Vector3, Matrix4, Circle, RoundRect, CommandPath } from "arkui.Graphics"
 import { RenderNode } from "arkui.RenderNode"
 import { default as common2D } from "@ohos.graphics.common2D"
@@ -1586,6 +1586,14 @@ export class FrameNodeExtender {
     static disposeTree_serialize(peer: FrameNode): void {
         ArkUIGeneratedNativeModule._FrameNodeExtender_disposeTree(extractors.toFrameNodePtr(peer))
     }
+    static addSupportedUIStates_serialize(peer: FrameNode, uiStates: int32, statesChangeHandler: UIStatesChangeHandler, excludeInner: boolean): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(statesChangeHandler)
+        ArkUIGeneratedNativeModule._FrameNodeExtender_addSupportedUIStates(extractors.toFrameNodePtr(peer), uiStates, thisSerializer.asBuffer(), thisSerializer.length(), excludeInner ? 1 : 0)
+    }
+    static removeSupportedUIStates_serialize(peer: FrameNode, uiStates: int32): void {
+        ArkUIGeneratedNativeModule._FrameNodeExtender_removeSupportedUIStates(extractors.toFrameNodePtr(peer), uiStates)
+    }
     static setCrossLanguageOptions_serialize(peer: FrameNode, options: boolean): boolean {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_setCrossLanguageOptions(extractors.toFrameNodePtr(peer), options ? 1 : 0)
         return retval
@@ -1848,6 +1856,12 @@ export class FrameNodeExtender {
         const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_removeAdoptedChild(extractors.toFrameNodePtr(peer), extractors.toFrameNodePtr(child))
         return retval
     }
+    static getInteractionEventBindingInfo_serialize(peer: FrameNode, eventType: EventQueryType): InteractionEventBindingInfo {
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getInteractionEventBindingInfo(extractors.toFrameNodePtr(peer), eventType.valueOf())
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : InteractionEventBindingInfo = InteractionEventBindingInfo_serializer.read(retvalDeserializer)
+        return returnResult
+    }
     public static constructorFrameNode(): KPointer {
         return FrameNodeExtender.constructorFrameNode_serialize()
     }
@@ -1972,6 +1986,20 @@ export class FrameNodeExtender {
     public static disposeTree(peer: FrameNode): void {
         const peer_casted = peer as (FrameNode)
         FrameNodeExtender.disposeTree_serialize(peer_casted)
+        return
+    }
+    public static addSupportedUIStates(peer: FrameNode, uiStates: int32, statesChangeHandler: UIStatesChangeHandler, excludeInner: boolean): void {
+        const peer_casted = peer as (FrameNode)
+        const uiStates_casted = uiStates as (int32)
+        const statesChangeHandler_casted = statesChangeHandler as (UIStatesChangeHandler)
+        const excludeInner_casted = excludeInner as (boolean)
+        FrameNodeExtender.addSupportedUIStates_serialize(peer_casted, uiStates_casted, statesChangeHandler_casted, excludeInner_casted)
+        return
+    }
+    public static removeSupportedUIStates(peer: FrameNode, uiStates: int32): void {
+        const peer_casted = peer as (FrameNode)
+        const uiStates_casted = uiStates as (int32)
+        FrameNodeExtender.removeSupportedUIStates_serialize(peer_casted, uiStates_casted)
         return
     }
     public static setCrossLanguageOptions(peer: FrameNode, options: boolean): boolean {
@@ -2153,6 +2181,11 @@ export class FrameNodeExtender {
         const peer_casted = peer as (FrameNode)
         const child_casted = child as (FrameNode)
         return FrameNodeExtender.removeAdoptedChild_serialize(peer_casted, child_casted)
+    }
+    public static getInteractionEventBindingInfo(peer: FrameNode, eventType: EventQueryType): InteractionEventBindingInfo {
+        const peer_casted = peer as (FrameNode)
+        const eventType_casted = eventType as (EventQueryType)
+        return FrameNodeExtender.getInteractionEventBindingInfo_serialize(peer_casted, eventType_casted)
     }
     public static isOnRenderTree(peer: FrameNode): boolean {
         const peer_casted = peer as (FrameNode)

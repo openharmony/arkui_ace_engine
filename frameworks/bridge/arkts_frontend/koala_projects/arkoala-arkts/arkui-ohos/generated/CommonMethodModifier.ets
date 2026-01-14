@@ -34,7 +34,7 @@ import { default as matrix4 } from "@ohos.matrix4"
 import { CustomBuilder, CustomBuilderT } from "./component/builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer } from "./component/gesture"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, TouchRecognizer } from "./component/gesture"
 import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
 import { dragController } from "@ohos.arkui.dragController"
 import { ComponentContent } from "arkui.ComponentContent"
@@ -222,7 +222,7 @@ export class CommonMethodModifier implements CommonMethod {
     _expandSafeArea_0_1value?: Array<SafeAreaEdge> | undefined
     _ignoreLayoutSafeArea_0_0value?: Array<LayoutSafeAreaType> | undefined
     _ignoreLayoutSafeArea_0_1value?: Array<LayoutSafeAreaEdge> | undefined
-    _background_0_0value?: CustomBuilder | undefined
+    _background_0_0value?: CustomBuilder | ResourceColor | undefined
     _background_0_1value?: BackgroundOptions | undefined
     _backgroundImage_1_0value?: ResourceStr | image.PixelMap | undefined
     _backgroundImage_1_1value?: BackgroundImageOptions
@@ -3284,7 +3284,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (flagArray[163] as int32) {
                 case 1: {
-                    peer.setBackgroundAttribute((this._background_0_0value as CustomBuilder | undefined), (this._background_0_1value as BackgroundOptions | undefined | undefined));
+                    peer.setBackgroundAttribute((this._background_0_0value as CustomBuilder | ResourceColor | undefined), (this._background_0_1value as BackgroundOptions | undefined));
                     flagArray[163] = 2;
                     break;
                 }
@@ -3294,7 +3294,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[163] = 0;
-                    peer.setBackgroundAttribute((undefined as CustomBuilder | undefined), (undefined as BackgroundOptions | undefined | undefined));
+                    peer.setBackgroundAttribute((undefined as CustomBuilder | ResourceColor | undefined), (undefined as BackgroundOptions | undefined));
                 }
             }
         }
@@ -6270,7 +6270,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.background((undefined as CustomBuilder | undefined), (undefined as BackgroundOptions | undefined | undefined));
+                    this.background((undefined as CustomBuilder | ResourceColor | undefined), (undefined as BackgroundOptions | undefined));
                 }
             }
         }
@@ -8859,11 +8859,11 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
+    background(content: CustomBuilder | ResourceColor | undefined, options?: BackgroundOptions): this {
         if (((this._flagArray[163]) == (0)) || (true) || (true))
         {
             this._flagArray[163] = 1
-            this._background_0_0value = builder
+            this._background_0_0value = content
             this._background_0_1value = options
             this._state.fireChange()
         } else

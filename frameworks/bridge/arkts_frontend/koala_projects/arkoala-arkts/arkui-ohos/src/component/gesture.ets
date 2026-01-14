@@ -536,7 +536,7 @@ export class PanGesture extends Gesture {
     onActionCancelCallback?: Callback<GestureEvent>;
     static $_instantiate(factory: () => PanGesture, value?: PanGestureHandlerOptions | PanGestureOptions): PanGesture {
         const pan = factory();
-        if (TypeChecker.isPanGestureHandlerOptions(value, false, false, false)) {
+        if (TypeChecker.isPanGestureHandlerOptions(value, false, false, false, false)) {
             let options = value as PanGestureHandlerOptions;
             pan.finger = options?.fingers;
             pan.direction = options?.direction;
