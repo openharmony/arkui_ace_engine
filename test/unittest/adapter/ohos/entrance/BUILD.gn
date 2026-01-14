@@ -337,6 +337,7 @@ ohos_unittest("mmi_event_converter_test") {
     "ability_base:base",
     "resource_management:global_resmgr",
     "window_manager:libdm",
+    "window_manager:libwm",
     "samgr:samgr_proxy",
     "napi:ace_napi",
     "ability_runtime:ability_manager",
