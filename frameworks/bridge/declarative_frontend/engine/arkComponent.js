@@ -9627,7 +9627,7 @@ class ArkImageAnimatorComponent extends ArkComponent {
     return this;
   }
   preDecode(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'preDecode function not supported in ArkImageAnimatorComponent class.');
   }
   fillMode(value) {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorFillModeModifier.identity, ImageAnimatorFillModeModifier, value);
@@ -25126,10 +25126,10 @@ class ArkTextPickerComponent extends ArkComponent {
     return this;
   }
   onAccept(callback) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onAccept function not supported in ArkTextPickerComponent class.');
   }
   onCancel(callback) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onCancel function not supported in ArkTextPickerComponent class.');
   }
   onChange(callback) {
     modifierWithKey(
