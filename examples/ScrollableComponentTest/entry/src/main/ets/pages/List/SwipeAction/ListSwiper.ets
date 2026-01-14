@@ -70,7 +70,7 @@ struct ListSwiperComponent {
                 this.scroller.scrollToIndex(this.currentIndex)
               }
               if (event.offsetX > 0) { //向左滑动
-                this.currentIndex = this.currentIndex === 0 ? this.currentIndex = length - 1 : this.currentIndex - 1;
+                this.currentIndex = this.currentIndex === 0 ?  length - 1 : this.currentIndex - 1;
                 this.scroller.scrollToIndex(this.currentIndex)
               }
               setTimeout(() => {
