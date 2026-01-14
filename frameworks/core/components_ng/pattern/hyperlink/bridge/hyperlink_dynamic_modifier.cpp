@@ -152,6 +152,7 @@ void Pop()
     HyperlinkModelNG::PopStatic();
 }
 
+#ifndef CROSS_PLATFORM
 void CreateImpl(const std::string& address, const std::string& summary)
 {
     GetHyperlinkModelImpl()->Create(address, summary);
@@ -166,6 +167,7 @@ void PopImpl()
 {
     GetHyperlinkModelImpl()->Pop();
 }
+#endif // CROSS_PLATFORM
 
 const ArkUIHyperlinkModifier* GetHyperlinkDynamicModifier()
 {
