@@ -26,7 +26,7 @@ import {
   CommonMethod, ButtonOptions, ImageError, ImageOnCompleteCallback, ImageErrorCallback, SymbolGlyphModifier,
   ClassCastError, ClickEvent, LocalizedPadding, LengthMetrics, BusinessError
 } from "@ohos.arkui.component";
-import { State, Observed, PropRef, StorageLink, StorageProp, Watch } from '@ohos.arkui.stateManagement';
+import { State, Observed, PropRef, StorageLink, StoragePropRef, Watch } from '@ohos.arkui.stateManagement';
 import { Context, UIContext, MeasureUtils } from "@ohos.arkui.UIContext";
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import resourceManager from '@ohos.resourceManager';
@@ -1032,7 +1032,7 @@ struct TabTitleBarDialog {
   horizontalsScreenLines: int = 1;
   @State fontSize: number = 1;
   @State maxLines: int = 1;
-  @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
+  @StoragePropRef('windowStandardHeight') windowStandardHeight: number = 0;
   cancel: () => void = () => {
   };
   confirm: () => void = () => {

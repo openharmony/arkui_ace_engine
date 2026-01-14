@@ -68,7 +68,6 @@ import {
   Require,
   State,
   Provide,
-  Prop,
   PropRef
 } from '@ohos.arkui.stateManagement';
 import { ColorMetrics, LengthMetrics } from '@ohos.arkui.node';

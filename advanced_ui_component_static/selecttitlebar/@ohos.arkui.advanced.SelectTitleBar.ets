@@ -27,7 +27,7 @@ import common from '@ohos.app.ability.common';
 import hilog from '@ohos.hilog';
 import { UIContext } from '@ohos.arkui.UIContext';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
-import { State, Observed, PropRef, StorageProp, Watch, StorageLink } from '@ohos.arkui.stateManagement';
+import { State, Observed, PropRef, StoragePropRef, Watch, StorageLink } from '@ohos.arkui.stateManagement';
 import { BusinessError } from '@ohos.base';
 
 export class SelectTitleBarMenuItem {
@@ -837,7 +837,7 @@ export struct SelectTitleBarDialog {
   @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
   @State fontSize: number = 1;
   @State maxLines: int = 1;
-  @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
+  @StoragePropRef('windowStandardHeight') windowStandardHeight: number = 0;
   cancel: () => void = () => {
   }
   confirm: () => void = () => {

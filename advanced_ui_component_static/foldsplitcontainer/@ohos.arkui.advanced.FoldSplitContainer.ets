@@ -15,7 +15,7 @@
 
 import { Column, Component, AnimateParam, BuilderParam, Stack, SizeOptions, Curve,
   Callback, LocalizedEdges, Builder, Entry, Text } from '@ohos.arkui.component';
-import { State, Prop, Watch, PropRef } from '@ohos.arkui.stateManagement';
+import { State, Watch, PropRef } from '@ohos.arkui.stateManagement';
 import { BusinessError } from '@ohos.base';
 import { UIContext, Context } from '@ohos.arkui.UIContext';
 import display from '@ohos.display';
