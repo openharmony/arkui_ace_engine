@@ -222,14 +222,14 @@ void impl_DumpTreeNode(Ark_NativePointer nodePtr)
 }
 KOALA_INTEROP_DIRECT_V1(DumpTreeNode, Ark_NativePointer)
 
-void impl_RemoveChild(Ark_NativePointer parent, Ark_NativePointer child)
+void impl_RemoveChild(KVMContext vmContext, Ark_NativePointer parent, Ark_NativePointer child)
 {
     Ark_NodeHandle parentCast = reinterpret_cast<Ark_NodeHandle>(parent);
     Ark_NodeHandle childCast = reinterpret_cast<Ark_NodeHandle>(child);
     GetArkUIBasicNodeAPI()->removeChild(parentCast, childCast);
     GetArkUIBasicNodeAPI()->markDirty(parentCast, GENERATED_ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST);
 }
-KOALA_INTEROP_DIRECT_V2(RemoveChild, Ark_NativePointer, Ark_NativePointer)
+KOALA_INTEROP_CTX_V2(RemoveChild, Ark_NativePointer, Ark_NativePointer)
 
 Ark_Int32 impl_InsertChildAfter(Ark_NativePointer parent, Ark_NativePointer child, Ark_NativePointer sibling)
 {
