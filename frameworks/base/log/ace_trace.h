@@ -91,7 +91,7 @@
 
 #define ACE_COUNT_TRACE(count, fmt, ...) AceCountTraceWidthArgs(count, fmt, ##__VA_ARGS__)
 
-#define ACE_UINODE_TRACE(uiNode) UINodeTracer ACE_UNIQUE_VAR { uiNode }
+#define ACE_UINODE_TRACE(uiNode...) UINodeTracer ACE_UNIQUE_VAR { uiNode }
 #define ACE_CONTAINER_TRACE(container...) ContainerTracer ACE_UNIQUE_VAR { container }
 
 namespace OHOS::Ace {
@@ -199,6 +199,7 @@ public:
     template<typename T>
     UINodeTracer(const RefPtr<T>& uiNode) : UINodeTracer(AceType::RawPtr(uiNode)) {}
     UINodeTracer(const NG::UINode* uiNode);
+    UINodeTracer(int32_t nodeId, const std::string_view& nodeTag, const std::string_view& nodePattern = "");
 };
 } // namespace OHOS::Ace
 
