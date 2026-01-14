@@ -50,7 +50,6 @@
 #include "bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "bridge/declarative_frontend/jsview/js_container_span.h"
 #include "bridge/declarative_frontend/jsview/js_content_slot.h"
-#include "bridge/declarative_frontend/jsview/js_counter.h"
 #include "bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "bridge/declarative_frontend/jsview/js_divider.h"
@@ -96,9 +95,6 @@
 #include "bridge/declarative_frontend/jsview/js_location_button.h"
 #include "bridge/declarative_frontend/jsview/js_magnifier_controller.h"
 #include "bridge/declarative_frontend/jsview/js_marquee.h"
-#include "bridge/declarative_frontend/jsview/js_menu.h"
-#include "bridge/declarative_frontend/jsview/js_menu_item.h"
-#include "bridge/declarative_frontend/jsview/js_menu_item_group.h"
 #include "bridge/declarative_frontend/jsview/js_mock.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination.h"
@@ -468,7 +464,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "NativeChildrenMainSize", JSListChildrenMainSize::JSBind },
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
-    { "Counter", JSCounter::JSBind },
 #ifndef ARKUI_WEARABLE
     { "CalendarPicker", JSCalendarPicker::JSBind },
 #endif
@@ -568,7 +563,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "ImageAnimator", JSImageAnimator::JSBind },
-    { "Counter", JSCounter::JSBind },
 #ifndef ARKUI_WEARABLE
     { "CalendarPicker", JSCalendarPicker::JSBind },
 #endif
@@ -695,9 +689,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Badge", JSBadge::JSBind },
     { "MagnifierController", JSMagnifierController::JSBind },
     { "Marquee", JSMarquee::JSBind },
-    { "Menu", JSMenu::JSBind },
-    { "MenuItem", JSMenuItem::JSBind },
-    { "MenuItemGroup", JSMenuItemGroup::JSBind },
     { "Gesture", JSGesture::JSBind },
     { "TapGesture", JSGesture::JSBind },
     { "LongPressGesture", JSGesture::JSBind },

@@ -48,7 +48,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_span.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_counter.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_data_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_datepicker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_divider.h"
@@ -85,9 +84,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_magnifier_controller.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_marquee.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_menu.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_menu_item.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_menu_item_group.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navdestination.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_navigation.h"
@@ -383,7 +379,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSScroll::JSBind(globalObj);
     JSNavigator::JSBind(globalObj);
     JSToggle::JSBind(globalObj);
-    JSCounter::JSBind(globalObj);
     JSScopeUtil::JSBind(globalObj);
     JSWithTheme::JSBind(globalObj);
     JSRichEditor::JSBind(globalObj);
@@ -493,9 +488,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSBadge::JSBind(globalObj);
     JSMagnifierController::JSBind(globalObj);
     JSMarquee::JSBind(globalObj);
-    JSMenu::JSBind(globalObj);
-    JSMenuItem::JSBind(globalObj);
-    JSMenuItemGroup::JSBind(globalObj);
     JSGesture::JSBind(globalObj);
     JSPanGestureOption::JSBind(globalObj);
     JSSwiperController::JSBind(globalObj);

@@ -684,7 +684,11 @@ void* createContainerSpanNode(ArkUI_Int32 nodeId)
 
 void* createCounterNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto counterModifier = nodeModifier->getCounterModifier();
+    CHECK_NULL_RETURN(counterModifier, nullptr);
+    return counterModifier->createFrameNode(nodeId);
 }
 
 void* createDataPanelNode(ArkUI_Int32 nodeId)

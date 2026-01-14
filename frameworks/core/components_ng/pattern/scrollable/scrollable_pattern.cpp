@@ -3558,6 +3558,7 @@ void ScrollablePattern::FireOnScrollStop(const OnScrollStopEvent& onScrollStop,
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
         host->GetTag().c_str());
+    ReportOnItemStopEvent();
     if (onScrollStop) {
         onScrollStop();
     }
@@ -5021,5 +5022,38 @@ void ScrollablePattern::ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyN
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnScrollChangeStart(keyNode);
+}
+
+std::string ScrollablePattern::ParseCommand(const std::string& command)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        return std::string("");
+    }
+    return json->GetString("cmd");
+}
+
+void ScrollablePattern::ReportOnItemStopEvent()
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    if (host->GetTag() == V2::GRID_ETS_TAG) {
+        params->Put("name", "Grid.onScrollStop");
+    }
+    if (host->GetTag() == V2::LIST_ETS_TAG) {
+        params->Put("name", "List.onScrollStop");
+    }
+    params->Put("nodeId", nodeId);
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", params);
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
 }
 } // namespace OHOS::Ace::NG

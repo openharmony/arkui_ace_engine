@@ -631,6 +631,7 @@ void SetBarModeImpl(Ark_NativePointer node,
         auto optionsOpt = Converter::OptConvertPtr<Ark_ScrollableBarModeOptions>(options);
         if (optionsOpt) {
             auto marginOpt = Converter::OptConvert<Dimension>(optionsOpt.value().margin);
+            Validator::ValidateNonNegative(marginOpt);
             Validator::ValidateNonPercent(marginOpt);
             auto styleOpt = Converter::OptConvert<LayoutStyle>(optionsOpt.value().nonScrollableLayoutStyle);
             barModeOptions.margin = marginOpt.value_or(defaultMargin);

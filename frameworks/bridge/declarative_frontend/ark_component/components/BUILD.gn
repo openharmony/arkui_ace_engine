@@ -33,12 +33,16 @@ template("arkui_abc") {
 arkui_modules = [
   "flowitem",
   "gauge",
+  "counter",
   "checkbox",
   "checkboxgroup",
   "rating",
   "waterflow",
   "rowsplit",
   "columnsplit",
+  "menu",
+  "menuitem",
+  "menuitemgroup",
   "hyperlink",
 ]
 

@@ -511,10 +511,58 @@ class ColumnSplitModifier extends LazyArkColumnSplitComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class CounterModifier extends ArkCounterComponent {
+class LazyArkCounterComponent extends ArkComponent {
+    static module = undefined;
+
+    constructor(nativePtr, classType) {
+      super(nativePtr, classType);
+      if (LazyArkCounterComponent.module === undefined) {
+        LazyArkCounterComponent.module = globalThis.requireNapi('arkui.components.arkcounter');
+      }
+      this.lazyComponent = LazyArkCounterComponent.module.createComponent(nativePtr, classType);
+      console.log("LazyArkCounterComponent lazyload nativeModule");
+    }
+    setMap() {
+      this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+    }
+    onInc(event) {
+      this.lazyComponent.onInc(event);
+      return this;
+    }
+    onDec(event) {
+      this.lazyComponent.onDec(event);
+      return this;
+    }
+    enableDec(value) {
+      this.lazyComponent.enableDec(value);
+      return this;
+    }
+    enableInc(value) {
+      this.lazyComponent.enableInc(value);
+      return this;
+    }
+    backgroundColor(value) {
+      this.lazyComponent.backgroundColor(value);
+      return this;
+    }
+    width(value) {
+      this.lazyComponent.width(value);
+      return this;
+    }
+    height(value) {
+      this.lazyComponent.height(value);
+      return this;
+    }
+    size(value) {
+      this.lazyComponent.size(value);
+      return this;
+    }
+}
+class CounterModifier extends LazyArkCounterComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
@@ -833,20 +881,116 @@ class MarqueeModifier extends ArkMarqueeComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class MenuModifier extends ArkMenuComponent {
+
+class LazyArkMenuComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkMenuComponent.module === undefined) {
+      LazyArkMenuComponent.module = globalThis.requireNapi('arkui.components.arkmenu');
+    }
+    this.lazyComponent = LazyArkMenuComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  width(value) {
+    this.lazyComponent.width(value);
+    return this;
+  }
+  fontSize(value) {
+    this.lazyComponent.fontSize(value);
+    return this;
+  }
+  font(value) {
+    this.lazyComponent.font(value);
+    return this;
+  }
+  fontColor(value) {
+    this.lazyComponent.fontColor(value);
+    return this;
+  }
+  radius(value) {
+    this.lazyComponent.radius(value);
+    return this;
+  }
+  menuItemDivider(value) {
+    this.lazyComponent.menuItemDivider(value);
+    return this;
+  }
+  menuItemGroupDivider(value) {
+    this.lazyComponent.menuItemGroupDivider(value);
+    return this;
+  }
+  subMenuExpandingMode(value) {
+    this.lazyComponent.subMenuExpandingMode(value);
+    return this;
+  }
+  subMenuExpandSymbol(value) {
+    this.lazyComponent.subMenuExpandSymbol(value);
+    return this;
+  }
+}
+
+class MenuModifier extends LazyArkMenuComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class MenuItemModifier extends ArkMenuItemComponent {
+
+class LazyArkMenuItemComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkMenuItemComponent.module === undefined) {
+      LazyArkMenuItemComponent.module = globalThis.requireNapi('arkui.components.arkmenuitem');
+    }
+    this.lazyComponent = LazyArkMenuItemComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  selected(value) {
+    this.lazyComponent.selected(value);
+    return this;
+  }
+  selectIcon(value) {
+    this.lazyComponent.selectIcon(value);
+    return this;
+  }
+  onChange(callback) {
+    this.lazyComponent.onChange(callback);
+    return this;
+  }
+  contentFont(value) {
+    this.lazyComponent.contentFont(value);
+    return this;
+  }
+  contentFontColor(value) {
+    this.lazyComponent.contentFontColor(value);
+    return this;
+  }
+  labelFont(value) {
+    this.lazyComponent.labelFont(value);
+    return this;
+  }
+  labelFontColor(value) {
+    this.lazyComponent.labelFontColor(value);
+    return this;
+  }
+}
+
+class MenuItemModifier extends LazyArkMenuItemComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

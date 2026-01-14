@@ -7876,13 +7876,13 @@ void JsAccessibilityManager::JsInteractionOperation::SetBelongTreeId(const int32
     auto context = jsAccessibilityManager->GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
     auto instanceId = context->GetInstanceId();
-    jsAccessibilityManager->SendCacheAccessibilityEvent(instanceId);
     context->GetTaskExecutor()->PostTask(
         [weak = GetHandler(), treeId, instanceId] {
             auto jsAccessibilityManager = weak.Upgrade();
             CHECK_NULL_VOID(jsAccessibilityManager);
             ContainerScope scope(instanceId);
             ACE_SCOPED_TRACE("SetBelongTreeId");
+            jsAccessibilityManager->SendCacheAccessibilityEvent(instanceId);
             jsAccessibilityManager->NotifyChildTreeOnRegister(treeId);
             jsAccessibilityManager->ReleaseUIExtCacheEvent();
         },

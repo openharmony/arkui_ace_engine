@@ -133,6 +133,7 @@ if (is_ohos_standard_system) {
   ohos_copy("copy_component_model_abc_library") {
     deps = [
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:flowitem",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:counter",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:gauge",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:hyperlink",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkbox",
@@ -141,12 +142,16 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:waterflow",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:columnsplit",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:rowsplit",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:menu",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:menuitem",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:menuitemgroup",
     ]
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
             "root_out_dir")
     sources = [
       "${out_path}/arkui/ace_engine/arkflowitem.abc",
+      "${out_path}/arkui/ace_engine/arkcounter.abc",
       "${out_path}/arkui/ace_engine/arkgauge.abc",
       "${out_path}/arkui/ace_engine/arkhyperlink.abc",
       "${out_path}/arkui/ace_engine/arkcheckbox.abc",
@@ -155,6 +160,9 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arkwaterflow.abc",
       "${out_path}/arkui/ace_engine/arkcolumnsplit.abc",
       "${out_path}/arkui/ace_engine/arkrowsplit.abc",
+      "${out_path}/arkui/ace_engine/arkmenu.abc",
+      "${out_path}/arkui/ace_engine/arkmenuitem.abc",
+      "${out_path}/arkui/ace_engine/arkmenuitemgroup.abc",
     ]
 
     # Output path description: 

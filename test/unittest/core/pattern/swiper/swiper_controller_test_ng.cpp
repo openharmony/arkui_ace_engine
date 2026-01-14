@@ -897,6 +897,29 @@ HWTEST_F(SwiperControllerTestNg, LazyForEachNeedPredict001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FindLazyForEachNode001
+ * @tc.desc: Test LazyForEach FindLazyForEachNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(SwiperControllerTestNg, FindLazyForEachNode001, TestSize.Level1)
+{
+    SwiperModelNG model = CreateSwiper();
+    CreateItemsInLazyForEach();
+    CreateSwiperDone();
+    auto lazyForEachNode = AceType::DynamicCast<LazyForEachNode>(frameNode_->GetChildAtIndex(0));
+    /**
+     * @tc.steps: step1. lazyforeach node check.
+     * @tc.expected: lazyforeach node.
+     */
+    EXPECT_NE(pattern_->FindLazyForEachNode(lazyForEachNode), std::nullopt);
+    /**
+     * @tc.steps: step2. nullptr node check.
+     * @tc.expected: nullopt.
+     */
+    EXPECT_EQ(pattern_->FindLazyForEachNode(nullptr), std::nullopt);
+}
+
+/**
  * @tc.name: ChangeIndex001
  * @tc.desc: Test ChangeIndex with SwiperDisplayMode::AUTO_LINEAR and item invisible
  * @tc.type: FUNC

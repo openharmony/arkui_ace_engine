@@ -31,7 +31,6 @@
 #endif
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_animator_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_counter_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_embedded_component_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.h"
@@ -49,6 +48,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_destination_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_router_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_item_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_item_group_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_date_picker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigator_bridge.h"
@@ -495,7 +495,8 @@ using RegisterModuleFunc = void (*)(Local<panda::ObjectRef>, EcmaVM*);
 ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     static const std::unordered_set<std::string> loadModuleName = {
-        { "Gauge" },
+        {"Counter"},
+        {"Gauge" },
         {"Checkbox"},
         {"CheckboxGroup"},
         {"Rating"},
@@ -560,8 +561,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     nodeAdapter->Set(vm, panda::StringRef::NewFromUtf8(vm, "getNodeType"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), NodeAdapterBridge::GetNodeType));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "nodeAdapter"), nodeAdapter);
-
-    RegisterCounterAttributes(object, vm);
 
     auto panel = panda::ObjectRef::New(vm);
     panel->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowCloseIcon"),
@@ -2050,6 +2049,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterTabAttributes(object, vm);
     RegisterTabContentAttributes(object, vm);
     RegisterStepperItemAttributes(object, vm);
+    RegisterHyperlinkAttributes(object, vm);
+    RegisterMenuItemGroupAttributes(object, vm);
     RegisterMenuItemAttributes(object, vm);
     RegisterMenuAttributes(object, vm);
     RegisterMarqueeAttributes(object, vm);
@@ -3579,9 +3580,23 @@ void ArkUINativeModule::RegisterCalendarPickerAttributes(Local<panda::ObjectRef>
 #endif
 }
 
+void ArkUINativeModule::RegisterMenuItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    auto menuitemgroup = panda::ObjectRef::New(vm);
+    menuitemgroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "createMenuItemGroup"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemGroupBridge::CreateMenuItemGroup));
+    menuitemgroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuItemGroupHeader"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemGroupBridge::SetMenuItemGroupHeader));
+    menuitemgroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuItemGroupFooter"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemGroupBridge::SetMenuItemGroupFooter));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "menuitemgroup"), menuitemgroup);
+}
+
 void ArkUINativeModule::RegisterMenuItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto menuitem = panda::ObjectRef::New(vm);
+    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "create"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::Create));
     menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuItemSelected"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetMenuItemSelected));
     menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuItemSelected"),
@@ -3616,6 +3631,8 @@ void ArkUINativeModule::RegisterMenuItemAttributes(Local<panda::ObjectRef> objec
 void ArkUINativeModule::RegisterMenuAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     auto menu = panda::ObjectRef::New(vm);
+    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "create"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::CreateMenu));
     menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuFontColor"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetMenuFontColor));
     menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuFontColor"),
@@ -6104,7 +6121,6 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterBlankAttributes(object, vm);
     RegisterCanvasAttributes(object, vm);
     RegisterCommonShapeAttributes(object, vm);
-    RegisterCounterAttributes(object, vm);
     RegisterDataPanelAttributes(object, vm);
     RegisterDividerAttributes(object, vm);
     RegisterFlexAttributes(object, vm);
@@ -7311,44 +7327,6 @@ void ArkUINativeModule::RegisterFrameNodeAttributesForm(Local<panda::ObjectRef> 
     auto frameNode = frameNodeValue->ToObject(vm);
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createTypedFrameNode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateTypedFrameNodeFormLiteSet));
-}
-
-void ArkUINativeModule::RegisterCounterAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto counter = panda::ObjectRef::New(vm);
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableInc"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetEnableInc));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableInc"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetEnableInc));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableDec"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetEnableDec));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableDec"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetEnableDec));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterHeight));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterHeight));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterWidth));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterWidth));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterBackgroundColor));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterBackgroundColor));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterSize));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterSize));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterOnInc"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterOnInc));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterOnInc"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterOnInc));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCounterOnDec"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::SetCounterOnDec));
-    counter->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCounterOnDec"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CounterBridge::ResetCounterOnDec));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "counter"), counter);
 }
 
 void ArkUINativeModule::RegisterRowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

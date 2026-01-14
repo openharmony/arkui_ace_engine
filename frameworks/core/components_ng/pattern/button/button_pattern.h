@@ -33,7 +33,7 @@ namespace OHOS::Ace::NG {
 struct InspectorConfig;
 class InspectorFilter;
 enum class ComponentButtonType { POPUP, BUTTON, STEPPER, NAVIGATION };
-class ButtonPattern : public Pattern {
+class ACE_FORCE_EXPORT ButtonPattern : public Pattern {
     DECLARE_ACE_TYPE(ButtonPattern, Pattern);
 
 public:
