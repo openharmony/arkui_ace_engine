@@ -2884,4 +2884,81 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage089, TestSi
     EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
     SystemProperties::SetMultiInstanceEnabled(res);
 }
+
+/**
+ * @tc.name: CalcContentTrationOffset001
+ * @tc.desc: Test CalcContentTrationOffset
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, CalcContentTrationOffset001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. call DoDragMoveAnimate with pointerEvent.
+     * @tc.expected: dragDropManager->IsNeedScaleDragPreview() returns true.
+     */
+    DragPointerEvent pointerEvent;
+    dragDropManager->info_.scale = 0.5f;
+    dragDropManager->info_.originOffset = {100.0f, 100.0f};
+    dragDropManager->info_.dragPreviewRect = RectF(OffsetF(100, 200), SizeF(100, 100));
+    dragDropManager->info_.originPreviewRect = RectF(OffsetF(100, 200), SizeF(100, 100));
+    dragDropManager->pixelMapOffset_ = {100.0f, 100.0f};
+
+
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = true;
+    /**
+     * @tc.steps: step2. call DoDragMoveAnimate with pointerEvent.
+     * @tc.expected: dragDropManager->IsNeedScaleDragPreview() returns true.
+     */
+    auto newOffset = dragDropManager->CalcContentTrationOffset(8.0_vp, 100, 200, dragDropManager->info_);
+    ASSERT_EQ(newOffset.GetX(), 100.0f);
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
+
+/**
+ * @tc.name: CalcContentTrationOffset002
+ * @tc.desc: Test CalcContentTrationOffset
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, CalcContentTrationOffset002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct a DragDropManager.
+     * @tc.expected: dragDropManager is not null.
+     */
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    /**
+     * @tc.steps: step2. call DoDragMoveAnimate with pointerEvent.
+     * @tc.expected: dragDropManager->IsNeedScaleDragPreview() returns true.
+     */
+    DragPointerEvent pointerEvent;
+    dragDropManager->info_.scale = 0.5f;
+    dragDropManager->info_.originOffset = {100.0f, 100.0f};
+    dragDropManager->info_.dragPreviewRect = RectF(OffsetF(100, 200), SizeF(100, 100));
+    dragDropManager->info_.originPreviewRect = RectF(OffsetF(100, 200), SizeF(100, 100));
+    dragDropManager->pixelMapOffset_ = {100.0f, 100.0f};
+
+    bool backupValue = AceApplicationInfo::GetInstance().isRightToLeft_;
+    AceApplicationInfo::GetInstance().isRightToLeft_ = false;
+    /**
+     * @tc.steps: step2. call DoDragMoveAnimate with pointerEvent.
+     * @tc.expected: dragDropManager->IsNeedScaleDragPreview() returns true.
+     */
+    auto newOffset = dragDropManager->CalcContentTrationOffset(8.0_vp, 100, 200, dragDropManager->info_);
+    ASSERT_EQ(newOffset.GetX(), 50.0f);
+
+    AceApplicationInfo::GetInstance().isRightToLeft_ = backupValue;
+}
 } // namespace OHOS::Ace::NG
