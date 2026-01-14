@@ -26093,6 +26093,11 @@ typedef struct GENERATED_ArkUISliderModifier {
     void (*setShowTips)(Ark_NativePointer node,
                         const Opt_Boolean* value,
                         const Opt_ResourceStr* content);
+    void (*contentModifierSliderImpl)(Ark_NativePointer node,
+                        const Ark_Object* contentModifier,
+                        const SliderModifierBuilder* builder);
+    void (*resetContentModifierSliderImpl)(Ark_NativePointer node);
+    Ark_NativePointer (*createSliderFrameNode)(Ark_UInt32 node);
 } GENERATED_ArkUISliderModifier;
 
 typedef struct GENERATED_ArkUISpanModifier {

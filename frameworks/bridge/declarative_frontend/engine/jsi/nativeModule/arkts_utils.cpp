@@ -28,6 +28,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_utils.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_shape_abstract.h"
 #include "frameworks/core/common/card_scope.h"
 #include "frameworks/core/common/resource/resource_configuration.h"
 #include "frameworks/core/common/resource/resource_parse_utils.h"
@@ -3559,6 +3560,29 @@ bool ArkTSUtils::ConvertFromJSValue(
         return ParseJsColor(vm, jsValue, result, resObj, nodeInfo);
     }
     return false;
+}
+
+void ArkTSUtils::ParseStepOptionsMap(
+    const EcmaVM* vm, const Local<JSValueRef>& optionsArg, StepOptions& optionsMap)
+{
+    Local<panda::MapRef> StepMapRef(optionsArg);
+    int32_t StepMapSize = StepMapRef->GetSize(vm);
+    for (int32_t i = 0; i < StepMapSize; i++) {
+        auto number = StepMapRef->GetKey(vm, i)->ToNumber(vm)->Value();
+        auto itemAccessibility = StepMapRef->GetValue(vm, i)->ToString(vm)->ToString(vm);
+        optionsMap[static_cast<int32_t>(number)] = itemAccessibility;
+    }
+}
+
+ACE_FORCE_EXPORT RefPtr<BasicShape> ArkTSUtils::GetJSBasicShape(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
+{
+    Framework::JSShapeAbstract* shapeAbstract =
+        Framework::JSRef<Framework::JSObject>::Cast(Framework::JSRef<Framework::JSObject>::Make(jsValue))
+            ->Unwrap<Framework::JSShapeAbstract>();
+    if (shapeAbstract == nullptr) {
+        return nullptr;
+    }
+    return shapeAbstract->GetBasicShape();
 }
 
 template<typename T>

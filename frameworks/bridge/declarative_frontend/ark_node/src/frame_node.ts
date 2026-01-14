@@ -1262,7 +1262,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Radio', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Radio', (node: NodePtr, type: ModifierType): ArkRadioComponent => {
-        return new ArkRadioComponent(node, type);
+        getUINativeModule().loadNativeModule('Radio');
+        let module = globalThis.requireNapi('arkui.components.arkradio');
+        return module.createComponent(node, type);
       });
     }],
     ['Rating', (context: UIContext): FrameNode => {
@@ -1274,7 +1276,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['Slider', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'Slider', (node: NodePtr, type: ModifierType): ArkSliderComponent => {
-        return new ArkSliderComponent(node, type);
+           getUINativeModule().loadNativeModule('Slider');
+ 	         let module = globalThis.requireNapi('arkui.components.arkslider');
+ 	         return module.createComponent(node, type);
       });
     }],
     ['Select', (context: UIContext): FrameNode => {
@@ -1445,7 +1449,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkRadioComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('Radio');
+      let module = globalThis.requireNapi('arkui.components.arkradio');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Slider', (node: FrameNode): ArkSliderComponent => {
@@ -1455,7 +1461,9 @@ const __attributeMap__ = new Map<string, (node: FrameNode) => ArkComponent>(
       if (!node.getNodePtr()) {
         return undefined;
       }
-      node._componentAttribute = new ArkSliderComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+      getUINativeModule().loadNativeModule('Slider');
+      let module = globalThis.requireNapi('arkui.components.arkslider');
+      node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
       return node._componentAttribute;
     }],
     ['Toggle', (node: FrameNode): ArkToggleComponent => {

@@ -37,7 +37,7 @@ enum class RadioIndicatorType {
     CUSTOM,
 };
 
-class ACE_EXPORT RadioModelNG : public OHOS::Ace::RadioModel {
+class ACE_FORCE_EXPORT RadioModelNG : public OHOS::Ace::RadioModel {
 public:
     void Create(const std::optional<std::string>& value, const std::optional<std::string>& group,
         const std::optional<int32_t>& indicator) override;
@@ -91,6 +91,12 @@ public:
     static std::string GetRadioGroup(FrameNode* frameNode);
     static void SetRadioOptions(FrameNode* frameNode, const std::string& value,
         const std::string& group, int32_t indicator);
+    static void CreateRadio(const std::optional<std::string>& value, const std::optional<std::string>& group,
+        const std::optional<int32_t>& indicator);
+    static void SetBuilderStatic(FrameNode* frameNode, std::function<void()>&& buildFunc);
+    static void SetOnChangeEventStatic(FrameNode* frameNode, ChangeEvent&& onChangeEvent);
+    static void SetUncheckedBorderColorByJSRadioThemeStatic(FrameNode* frameNode, bool flag);
+    static void SetIndicatorColorByJSRadioThemeStatic(FrameNode* frameNode, bool flag);
 private:
     static std::string ColorTypeToString(const RadioColorType radioColorType);
 };

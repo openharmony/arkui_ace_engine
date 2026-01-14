@@ -15,12 +15,25 @@
 
 #include "core/components_ng/pattern/overlay/group_manager.h"
 
-#include "core/components_ng/pattern/stage/page_event_hub.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/checkboxgroup/checkboxgroup_pattern.h"
-#include "core/components_ng/pattern/radio/radio_pattern.h"
+#include "core/components_ng/pattern/stage/page_event_hub.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+const ArkUIRadioModifier* GetRadioModifier()
+{
+    static const ArkUIRadioModifier* cachedModifier = nullptr;
+    if (!cachedModifier) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Radio");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIRadioModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
+}
+} // namespace
 
 void GroupManager::AddRadioToGroup(const std::string& group, int32_t radioId)
 {
@@ -50,11 +63,12 @@ void GroupManager::UpdateRadioGroupValue(const std::string& group, int32_t radio
         if (!node) {
             continue;
         }
-        auto pattern = node->GetPattern<RadioPattern>();
-        if (!pattern) {
+        auto* modifier = GetRadioModifier();
+        if (!modifier) {
             continue;
         }
-        pattern->UpdateUncheckStatus(node);
+        auto radioNode = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(node));
+        modifier->updateUncheckStatus(radioNode);
     }
 }
 

@@ -199,6 +199,8 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/linear_split/bridge/row_split_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/linear_split/bridge/column_split_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/side_bar/bridge/side_bar_container_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/radio/bridge/radio_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/slider/bridge/slider_static_modifier.cpp",
   ]
   sources += rebased_common_sources
   sources += rebased_generated_sources

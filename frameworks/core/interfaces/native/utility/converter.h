@@ -706,7 +706,7 @@ namespace Converter {
     template<> PointLightStyle Convert(const Ark_PointLightStyle& src);
     template<> ACE_FORCE_EXPORT PresetFillType Convert(const Ark_ItemFillPolicy& src);
     template<> PreviewText Convert(const Ark_PreviewText& src);
-    template<> RadioStyle Convert(const Ark_RadioStyle& src);
+    template<> ACE_FORCE_EXPORT RadioStyle Convert(const Ark_RadioStyle& src);
     template<> RangeContent Convert(const Ark_TextPickerRangeContent& src);
     template<> Rect Convert(const Ark_RectResult& src);
     template<> RectF Convert(const Ark_Frame& src);
@@ -714,10 +714,10 @@ namespace Converter {
     template<> RectWidthStyle Convert(const Ark_text_RectWidthStyle& src);
     template<> NG::AccessibilityActionOptions Convert(const Ark_AccessibilityActionOptions& src);
     template<> NG::AccessibilityGroupOptions Convert(const Ark_AccessibilityOptions& src);
-    template<> RefPtr<BasicShape> Convert(const Ark_CircleShape& src);
-    template<> RefPtr<BasicShape> Convert(const Ark_EllipseShape& src);
-    template<> RefPtr<BasicShape> Convert(const Ark_PathShape& src);
-    template<> RefPtr<BasicShape> Convert(const Ark_RectShape& src);
+    template<> ACE_FORCE_EXPORT RefPtr<BasicShape> Convert(const Ark_CircleShape& src);
+    template<> ACE_FORCE_EXPORT RefPtr<BasicShape> Convert(const Ark_EllipseShape& src);
+    template<> ACE_FORCE_EXPORT RefPtr<BasicShape> Convert(const Ark_PathShape& src);
+    template<> ACE_FORCE_EXPORT RefPtr<BasicShape> Convert(const Ark_RectShape& src);
     template<> RefPtr<ChainedTransitionEffect> Convert(const Ark_TransitionEffect& src);
     template<> RefPtr<Curve> Convert(const Ark_String& src);
     template<> RefPtr<Curve> Convert(const Ark_curves_ICurve& src);
@@ -804,7 +804,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<AutoCapitalizationMode>& dst, const Ark_AutoCapitalizationMode& src);
     template<> void AssignCast(std::optional<AvailableLayoutAreaMode>& dst, const Ark_AvailableLayoutArea& src);
     template<> void AssignCast(std::optional<AvoidanceMode>& dst, const Ark_AvoidanceMode& src);
-    template<> void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollBarDirection& src);
     template<> void AssignCast(std::optional<Axis>& dst, const Ark_ScrollDirection& src);
     template<> void AssignCast(std::optional<BarPosition>& dst, const Ark_BarPosition& src);
@@ -875,8 +875,9 @@ namespace Converter {
     template<> void AssignCast(std::optional<GestureFocusMode>& dst, const Ark_GestureFocusMode& src);
     template<> void AssignCast(std::optional<GestureMask>& dst, const Ark_GestureMask& src);
     template<> void AssignCast(std::optional<GestureMode>& dst, const Ark_GestureMode& src);
-    template<> void AssignCast(std::optional<Gradient>& dst, const Ark_ColorMetricsLinearGradient& src);
-    template<> void AssignCast(std::optional<Gradient>& dst, const Ark_LinearGradient& src);
+    template<>
+    ACE_FORCE_EXPORT void AssignCast(std::optional<Gradient>& dst, const Ark_ColorMetricsLinearGradient& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Gradient>& dst, const Ark_LinearGradient& src);
     template<> void AssignCast(std::optional<GradientDirection>& dst, const Ark_GradientDirection& src);
     template<> void AssignCast(std::optional<HapticFeedbackMode>& dst, const Ark_HapticFeedbackMode& src);
     template<> void AssignCast(std::optional<HitTestMode>& dst, const Ark_HitTestMode& src);
@@ -964,10 +965,15 @@ namespace Converter {
     template<> void AssignCast(std::optional<SheetLevel>& dst, const Ark_SheetMode& src);
     template<> void AssignCast(std::optional<SheetMode>& dst, const Ark_SheetSize& src);
     template<> void AssignCast(std::optional<SheetType>& dst, const Ark_SheetType& src);
-    template<> void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src);
-    template<> void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_SliderChangeMode& src);
-    template<> void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src);
-    template<> void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src);
+    template<>
+    ACE_FORCE_EXPORT void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src);
+    template<>
+    void AssignCast(std::optional<SliderModel::SliderChangeMode>& dst, const Ark_SliderChangeMode& src);
+    template<>
+    ACE_FORCE_EXPORT void AssignCast(
+        std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src);
+    template<>
+    ACE_FORCE_EXPORT void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src);
     template<> void AssignCast(std::optional<SourceTool>& dst, const Ark_SourceTool& src);
     template<> void AssignCast(std::optional<SourceType>& dst, const Ark_SourceType& src);
     template<> void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src);

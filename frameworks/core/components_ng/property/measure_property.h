@@ -32,7 +32,7 @@ enum class MeasureType {
     MATCH_PARENT_MAIN_AXIS,
 };
 
-class CalcSize {
+class ACE_FORCE_EXPORT CalcSize {
 public:
     CalcSize() = default;
     ~CalcSize() = default;

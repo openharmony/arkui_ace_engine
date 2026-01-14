@@ -4990,6 +4990,8 @@ struct ArkUISliderModifier {
     void (*resetPrefix)(ArkUINodeHandle node);
     void (*setSuffix)(ArkUINodeHandle node, ArkUINodeHandle suffix, ArkUISliderCustomContentOptions* options);
     void (*resetSuffix)(ArkUINodeHandle node);
+    void (*setDigitalCrownSensitivity)(ArkUINodeHandle node, ArkUI_Int32 value);
+    void (*resetDigitalCrownSensitivity)(ArkUINodeHandle node);
     void (*setShowStepsWithOptions)(
         ArkUINodeHandle node, ArkUI_Bool showSteps, ArkUISliderShowStepOptions* options, ArkUI_Int32 length);
     void (*setShowTipsPtr)(ArkUINodeHandle node, ArkUI_Bool isShow, ArkUI_CharPtr value, ArkUI_VoidPtr strRawPtr);
@@ -5014,6 +5016,21 @@ struct ArkUISliderModifier {
     ArkUI_Int32 (*getLinearBlockColor)(
         ArkUINodeHandle node, ArkUI_Uint32 (*colors)[ARKUI_SLIDER_LINEAR_GRADIENT_LIMIT],
         ArkUI_Float32 (*stop)[ARKUI_SLIDER_LINEAR_GRADIENT_LIMIT]);
+    void (*createSlider)(ArkUI_Float32 value, ArkUI_Float32 step, ArkUI_Float32 min, ArkUI_Float32 max);
+    ArkUINodeHandle (*createSliderFrameNode)(ArkUI_Uint32 nodeId);
+    void (*sliderPatternUpdateValue)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*sliderLayoutPropertyUpdatePadding)(ArkUINodeHandle node, ArkUIPaddingType value);
+    void (*sliderLayoutPropertyUpdateLayoutWeight)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*sliderEventHubSetOnChange)(ArkUINodeHandle node, void* callback);
+    void (*sliderPaintPropertyUpdateMin)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*sliderPaintPropertyUpdateMax)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*sliderPaintPropertyUpdateSelectGradientColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*sliderPaintPropertyUpdateSelectIsResourceColor)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*sliderPaintPropertyUpdateTrackBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*sliderPaintPropertyUpdateTrackBackgroundIsResourceColor)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*sliderPaintPropertyUpdateValue)(ArkUINodeHandle node, ArkUI_Float32 value);
+    void (*setOnChangeEvent)(void* callback);
+    void (*setOnSliderChange)(ArkUINodeHandle node, void* extraParam);
 };
 
 struct ArkUIProgressModifier {
@@ -7396,6 +7413,25 @@ struct ArkUIRadioModifier {
         ArkUI_Uint32 uncheckedBorderColor, ArkUI_Uint32 indicatorColor, const ArkUIRadioColorStruct& resObjStru);
     void (*setRadioColorSetByUser)(ArkUINodeHandle node, ArkUI_Bool isCheckedBackgroundColorSetByUser,
         ArkUI_Bool isUncheckedBorderColorSetByUser, ArkUI_Bool isIndicatorColorSetByUser);
+    void (*setOnChangeEvent)(void* callback);
+    void (*updateUncheckStatus)(ArkUINodeHandle node);
+    void (*createRadio)(ArkUI_CharPtr namePtr, ArkUI_CharPtr groupPtr, ArkUI_Int32 indicatorType);
+    void (*setBuilder) (void* indicator);
+    void (*setOnRadioChange)(ArkUINodeHandle node, void* extraParam);
+    void (*setRadioPaddingByJs)(const struct ArkUIPaddingType* oldPaddings, const struct ArkUIPaddingType* newPaddings);
+    void (*setRadioMarginByJs)(
+        const struct ArkUIPaddingType* values, ArkUI_Bool isLengthMetrics, void* rawPtr, ArkUI_Bool parse);
+    void (*setCheckedBackgroundColorByJs)(ArkUI_Uint32 checkedBackgroundColor, ArkUI_Bool isSetByJS,
+        ArkUI_Bool isUserSetCheckedBackgroundColor);
+    void (*setUncheckedBorderColorByJs)(ArkUI_Uint32 uncheckedBorderColor,
+        ArkUI_Bool isSetByJS, ArkUI_Bool isUserSetUncheckedBorderColor, ArkUI_Bool isByJSRadioTheme);
+    void (*setIsUserSetUncheckBorderColor)();
+    void (*setIndicatorColorByJs)(ArkUI_Uint32 indicatorColor, ArkUI_Bool isSetByJS,
+        ArkUI_Bool isUserSetIndicatorColor, ArkUI_Bool isByJSRadioTheme);
+    void (*createWithColorResourceObjByJs)(void* resObj, const ArkUI_Int32 colorType);
+    void (*setRadioSizeByJs)(
+        ArkUI_Float32 value, ArkUI_Int32 unit, ArkUI_CharPtr calcValue, void* resPtr, ArkUI_Bool isWidth);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Uint32 nodeId);
 };
 
 struct ArkUIPatternLockControllerModifier {

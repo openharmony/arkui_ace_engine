@@ -24,6 +24,8 @@ component_modules = [
   "side_bar",
   "marquee",
   "stepper",
+  "radio",
+  "slider",
 ]
 component_modules_libs = []
 

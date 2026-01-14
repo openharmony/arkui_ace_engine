@@ -1421,7 +1421,7 @@ Gradient Convert(const Ark_LinearGradient& value)
 }
 
 template<>
-void AssignCast (std::optional<Gradient>& dst, const Ark_LinearGradient& src)
+ACE_FORCE_EXPORT void AssignCast (std::optional<Gradient>& dst, const Ark_LinearGradient& src)
 {
     Gradient gradient;
     gradient.CreateGradientWithType(NG::GradientType::LINEAR);
@@ -2538,7 +2538,7 @@ std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src, DimensionUnit 
 }
 template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Union_F64_String_Resource, Ark_Float64>(
     const Ark_Union_F64_String_Resource&, DimensionUnit);
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(
+template ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(
     const Ark_Dimension&, DimensionUnit);
 template ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Length, Ark_Float64>(
     const Ark_Length&, DimensionUnit);

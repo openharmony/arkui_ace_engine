@@ -25,6 +25,7 @@
 #include "core/components_ng/render/drawing_forward.h"
 
 namespace OHOS::Ace::NG {
+const char RADIO_ETS_TAG[] = "Radio";
 enum class UIStatus {
     SELECTED = 0,
     UNSELECTED,

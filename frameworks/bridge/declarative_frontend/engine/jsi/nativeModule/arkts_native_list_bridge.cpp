@@ -19,6 +19,7 @@
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_list.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_view_abstract.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "frameworks/core/components/list/list_theme.h"
 #include "frameworks/core/components_ng/pattern/list/list_model.h"
 #include "frameworks/core/components_ng/pattern/list/list_model_ng.h"

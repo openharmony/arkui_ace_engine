@@ -70,11 +70,11 @@ public:
     RefPtr<DisplayComponent> GetDisplayComponent();
     bool HasDisplayComponent() const;
     RefPtr<TransformComponent> GetTransformComponent();
-    RefPtr<TouchListenerComponent> GetTouchListenerComponent();
-    bool HasTouchListenerComponent() const;
+    ACE_FORCE_EXPORT RefPtr<TouchListenerComponent> GetTouchListenerComponent();
+    ACE_FORCE_EXPORT bool HasTouchListenerComponent() const;
     RefPtr<MouseListenerComponent> GetMouseListenerComponent();
-    RefPtr<GestureListenerComponent> GetClickGestureListenerComponent();
-    bool HasClickGestureListenerComponent() const;
+    ACE_FORCE_EXPORT RefPtr<GestureListenerComponent> GetClickGestureListenerComponent();
+    ACE_FORCE_EXPORT bool HasClickGestureListenerComponent() const;
     RefPtr<GestureListenerComponent> GetPanGestureListenerComponent();
     ACE_FORCE_EXPORT RefPtr<FocusableComponent> GetFocusableComponent(bool createIfNotExist = true);
     RefPtr<SharedTransitionComponent> GetSharedTransitionComponent();
@@ -183,7 +183,7 @@ public:
     bool ShouldPopImmediately();
 
     void SetIsPercentSize(RefPtr<Component>& component);
-    std::shared_ptr<JsPageRadioGroups> GetRadioGroupComponent();
+    ACE_FORCE_EXPORT std::shared_ptr<JsPageRadioGroups> GetRadioGroupComponent();
     std::shared_ptr<JsPageCheckboxGroups> GetCheckboxGroupComponent();
 
     RefPtr<Component> GetNewComponent();

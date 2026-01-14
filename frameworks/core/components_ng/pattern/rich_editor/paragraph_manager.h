@@ -23,7 +23,7 @@
 #include "core/components/common/properties/text_layout_info.h"
 #include "core/components_ng/render/paragraph.h"
 namespace OHOS::Ace::NG {
-class ParagraphManager : public virtual AceType {
+class ACE_FORCE_EXPORT ParagraphManager : public virtual AceType {
     DECLARE_ACE_TYPE(ParagraphManager, AceType);
 
 public:

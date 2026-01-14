@@ -30,7 +30,7 @@ void PathPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const 
     DrawingPainter::DrawPath(canvas, commands, offset);
 }
 
-SizeF PathPainter::GetPathSize(const std::string& commands)
+ACE_FORCE_EXPORT SizeF PathPainter::GetPathSize(const std::string& commands)
 {
     return DrawingPainter::GetPathSize(commands);
 }

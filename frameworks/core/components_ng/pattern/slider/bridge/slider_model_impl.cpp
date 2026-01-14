@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,20 +13,34 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/slider_model_impl.h"
+#include "core/components_ng/pattern/slider/bridge/slider_model_impl.h"
 
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/slider/slider_component.h"
 #include "core/components/slider/slider_theme.h"
+#include "base/memory/referenced.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+RefPtr<SliderTheme> GetSliderTheme()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto sliderTheme =
+        node ? themeManager->GetTheme<SliderTheme>(node->GetThemeScopeId()) : themeManager->GetTheme<SliderTheme>();
+    return sliderTheme;
+}
 
 void SliderModelImpl::Create(float value, float step, float min, float max)
 {
     auto sliderComponent = AceType::MakeRefPtr<OHOS::Ace::SliderComponent>(value, step, min, max);
     ViewStackProcessor::GetInstance()->ClaimElementId(sliderComponent);
-    auto theme = JSViewAbstract::GetTheme<SliderTheme>();
+    auto theme = GetSliderTheme();
     CHECK_NULL_VOID(theme);
     sliderComponent->SetThemeStyle(theme);
     ViewStackProcessor::GetInstance()->Push(sliderComponent);

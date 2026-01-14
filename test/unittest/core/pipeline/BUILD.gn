@@ -133,6 +133,7 @@ ace_unittest("pipeline_context_test_ng") {
     "pipeline_context_test_ng_two.cpp",
     "resample_and_velocity_test_ng.cpp",
     "velocity_tracker_test.cpp",
+    "$ace_root/test/mock/adapter/mock_dynamic_module_helper.cpp",
   ]
   extra_deps = []
   extra_deps += [ "$ace_root/test/unittest:ace_unittest_log" ]

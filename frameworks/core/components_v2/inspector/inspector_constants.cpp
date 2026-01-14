@@ -94,7 +94,7 @@ const char DRAG_BAR_ETS_TAG[] = "DragBar";
 
 // text
 const char TEXT_COMPONENT_TAG[] = "TextComponentV2";
-const char TEXT_ETS_TAG[] = "Text";
+ACE_FORCE_EXPORT const char TEXT_ETS_TAG[] = "Text";
 const char TEXT_ATTRS_OVER_FLOW[] = "textOverflow";
 const char TEXT_ATTRS_MAX_LINES[] = "maxLines";
 
@@ -105,7 +105,7 @@ const char RICH_EDITOR_CONTENT_ETS_TAG[] = "RichEditorContent";
 
 // stack
 const char STACK_COMPONENT_TAG[] = "StackComponent";
-const char STACK_ETS_TAG[] = "Stack";
+ACE_FORCE_EXPORT const char STACK_ETS_TAG[] = "Stack";
 
 // swiper
 const char SWIPER_COMPONENT_TAG[] = "SwiperComponent";
@@ -227,8 +227,8 @@ const char PATTERN_LOCK_COMPONENT_TAG[] = "PatternLockComponent";
 const char PATTERN_LOCK_ETS_TAG[] = "PatternLock";
 
 // row
-const char ROW_COMPONENT_TAG[] = "RowComponent";
-const char ROW_ETS_TAG[] = "Row";
+ACE_FORCE_EXPORT const char ROW_COMPONENT_TAG[] = "RowComponent";
+ACE_FORCE_EXPORT const char ROW_ETS_TAG[] = "Row";
 
 // rect
 const char RECT_ETS_TAG[] = "Rect";
@@ -370,8 +370,8 @@ const char INDEXER_COMPONENT_TAG[] = "IndexerComponent";
 const char INDEXER_ETS_TAG[] = "AlphabetIndexer";
 
 // slider
-const char SLIDER_COMPONENT_TAG[] = "SliderComponent";
-const char SLIDER_ETS_TAG[] = "Slider";
+ACE_FORCE_EXPORT const char SLIDER_COMPONENT_TAG[] = "SliderComponent";
+ACE_FORCE_EXPORT const char SLIDER_ETS_TAG[] = "Slider";
 
 // rating
 const char RATING_COMPONENT_TAG[] = "RatingComponent";

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,140 +13,27 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/pattern/radio/radio_model_ng.h"
-#include "core/components_ng/pattern/radio/radio_model_static.h"
-#include "core/interfaces/native/utility/callback_helper.h"
-#include "core/interfaces/native/utility/converter.h"
-#include "core/interfaces/native/utility/reverse_converter.h"
-#include "core/interfaces/native/utility/ace_engine_types.h"
-#include "core/common/container.h"
-#include "core/components_ng/pattern/radio/radio_pattern.h"
-
-namespace OHOS::Ace::NG {
-namespace {
-std::optional<bool> ProcessBindableChecked(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
-{
-    std::optional<bool> result;
-    Converter::VisitUnionPtr(value,
-        [&result](const Ark_Boolean& src) {
-            result = Converter::OptConvert<bool>(src);
-        },
-        [&result, frameNode](const Ark_Bindable_Boolean& src) {
-            result = Converter::OptConvert<bool>(src.value);
-            WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
-            auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](bool check) {
-                PipelineContext::SetCallBackNode(weakNode);
-                arkCallback.Invoke(Converter::ArkValue<Ark_Boolean>(check));
-            };
-            RadioModelStatic::SetOnChangeEvent(frameNode, std::move(onEvent));
-        },
-        [] {});
-    return result;
-}
-} // namespace
-} // namespace OHOS::Ace::NG
-
-namespace OHOS::Ace::NG::Converter {
-template<>
-void AssignCast(std::optional<RadioIndicatorType>& dst, const Ark_RadioIndicatorType& src)
-{
-    switch (src) {
-        case ARK_RADIO_INDICATOR_TYPE_TICK: dst = RadioIndicatorType::TICK; break;
-        case ARK_RADIO_INDICATOR_TYPE_DOT: dst = RadioIndicatorType::DOT; break;
-        case ARK_RADIO_INDICATOR_TYPE_CUSTOM: dst = RadioIndicatorType::CUSTOM; break;
-        default: LOGE("Unexpected enum value in Ark_RadioIndicatorType: %{public}d", src);
-    }
-}
-} // namespace OHOS::Ace::NG::Converter
+#include "ui/base/utils/utils.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
+#include "base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace RadioModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    auto frameNode = RadioModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-} // RadioModifier
-namespace RadioInterfaceModifier {
-void SetRadioOptionsImpl(Ark_NativePointer node,
-                         const Ark_RadioOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(options);
-    auto group = Converter::Convert<std::string>(options->group);
-    RadioModelNG::SetRadioGroup(frameNode, group);
-    auto radioValue = Converter::Convert<std::string>(options->value);
-    RadioModelNG::SetRadioValue(frameNode, radioValue);
-    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
-        auto indicatorType = Converter::OptConvert<RadioIndicatorType>(options->indicatorType);
-        RadioModelStatic::SetRadioIndicatorType(frameNode, EnumToInt(indicatorType));
-    }
-    auto arkBuilder = Converter::OptConvert<CustomNodeBuilder>(options->indicatorBuilder);
-    if (arkBuilder.has_value()) {
-        CallbackHelper(arkBuilder.value()).BuildAsync([frameNode](const RefPtr<UINode>& uiNode) {
-            auto builder = [uiNode]() {
-                NG::ViewStackProcessor::GetInstance()->Push(uiNode);
-            };
-            RadioModelStatic::SetBuilder(frameNode, std::move(builder));
-            }, node);
-    }
-}
-} // RadioInterfaceModifier
-namespace RadioAttributeModifier {
-void SetCheckedImpl(Ark_NativePointer node,
-                    const Opt_Union_Boolean_Bindable* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto isChecked = ProcessBindableChecked(frameNode, value);
-    RadioModelStatic::SetChecked(frameNode, isChecked);
-}
-void SetOnChangeImpl(Ark_NativePointer node,
-                     const Opt_OnRadioChangeCallback* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optCallback = Converter::GetOptPtr(value);
-    ChangeEvent onEvent = {};
-    if (optCallback.has_value()) {
-        onEvent = [arkCallback = CallbackHelper(*optCallback)](const bool param) {
-            auto arkValue = Converter::ArkValue<Ark_Boolean>(param);
-            arkCallback.Invoke(arkValue);
-        };
-    }
-    RadioModelNG::SetOnChange(frameNode, std::move(onEvent));
-}
-void SetRadioStyleImpl(Ark_NativePointer node,
-                       const Opt_RadioStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto style = Converter::OptConvertPtr<Converter::RadioStyle>(value);
-    if (style) {
-        RadioModelStatic::SetCheckedBackgroundColor(frameNode, style->checkedBackgroundColor);
-        RadioModelStatic::SetUncheckedBorderColor(frameNode, style->uncheckedBorderColor);
-        RadioModelStatic::SetIndicatorColor(frameNode, style->indicatorColor);
-    } else {
-        RadioModelStatic::SetCheckedBackgroundColor(frameNode, std::nullopt);
-        RadioModelStatic::SetUncheckedBorderColor(frameNode, std::nullopt);
-        RadioModelStatic::SetIndicatorColor(frameNode, std::nullopt);
-    }
-}
-} // RadioAttributeModifier
+#ifdef ARKUI_CAPI_UNITTEST
+const GENERATED_ArkUIRadioModifier* GetRadioStaticModifier();
+#endif
 const GENERATED_ArkUIRadioModifier* GetRadioModifier()
 {
-    static const GENERATED_ArkUIRadioModifier ArkUIRadioModifierImpl {
-        RadioModifier::ConstructImpl,
-        RadioInterfaceModifier::SetRadioOptionsImpl,
-        RadioAttributeModifier::SetCheckedImpl,
-        RadioAttributeModifier::SetOnChangeImpl,
-        RadioAttributeModifier::SetRadioStyleImpl,
-    };
-    return &ArkUIRadioModifierImpl;
+    static const GENERATED_ArkUIRadioModifier* cachedModifier = nullptr;
+    if (!cachedModifier) {
+#ifdef ARKUI_CAPI_UNITTEST
+        cachedModifier = GeneratedModifier::GetRadioStaticModifier();
+#else
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Radio");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIRadioModifier*>(module->GetStaticModifier());
+#endif
+    }
+    return cachedModifier;
 }
-
-}
+} // namespace OHOS::Ace::NG::GeneratedModifier

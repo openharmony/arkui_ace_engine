@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT StackLayoutAlgorithm : public BoxLayoutAlgorithm {
+class ACE_FORCE_EXPORT StackLayoutAlgorithm : public BoxLayoutAlgorithm {
     DECLARE_ACE_TYPE(StackLayoutAlgorithm, BoxLayoutAlgorithm);
 
 public:
