@@ -64,6 +64,7 @@ RefPtr<FrameNode> EventHub::GetFrameNode() const
 
 void EventHub::AddSupportedState(UIState state)
 {
+    ACE_UINODE_TRACE(host_);
     if (!stateStyleMgr_) {
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
@@ -72,6 +73,7 @@ void EventHub::AddSupportedState(UIState state)
 
 void EventHub::SetSupportedStates(UIState state)
 {
+    ACE_UINODE_TRACE(host_);
     if (!stateStyleMgr_) {
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
