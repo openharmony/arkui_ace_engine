@@ -48,7 +48,8 @@ void SearchTextFieldPattern::PerformAction(TextInputAction action, bool forceClo
     // Enter key type callback
     TextFieldCommonEvent event;
     eventHub->FireOnSubmit(GetTextUtf16Value(), event);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onSubmit");
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onSubmit",
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     TAG_LOGI(
         AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] Search reportComponentChangeEvent onSubmit", host->GetId());
     // If the developer wants to keep editing, editing will not stop

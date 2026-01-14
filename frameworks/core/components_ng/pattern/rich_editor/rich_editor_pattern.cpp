@@ -13610,7 +13610,8 @@ RectF RichEditorPattern::GetCaretRelativeRect()
 void RichEditorPattern::OnReportRichEditorEvent(const std::string& event)
 {
     std::string value = RICHEDITOR + event;
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(EVENT, value);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(EVENT, value,
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}s", frameId_,
         event.c_str());
 }
@@ -13680,7 +13681,8 @@ void RichEditorPattern::ReportComponentChangeEvent() {
     auto value = InspectorJsonUtil::Create();
     CHECK_NULL_VOID(value);
     value->Put("text", str.c_str());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameId_, "event", value);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(frameId_, "event", value,
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "nodeId:[%{public}d] RichEditor reportComponentChangeEvent %{public}zu",
         frameId_, str.length());
 #endif

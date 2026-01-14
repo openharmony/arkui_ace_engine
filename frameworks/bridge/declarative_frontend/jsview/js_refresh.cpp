@@ -298,7 +298,8 @@ void JSRefresh::OnStateChange(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(1, &newJSVal);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Refresh.OnStateChange");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Refresh.OnStateChange",
+            ComponentEventType::COMPONENT_EVENT_SCROLL);
     };
     RefreshModel::GetInstance()->SetOnStateChange(std::move(onStateChange));
 }

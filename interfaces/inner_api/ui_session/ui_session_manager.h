@@ -80,13 +80,13 @@ public:
     /**
      * @description: execute click callback when page some component change occurs
      */
-    virtual void ReportComponentChangeEvent(const std::string& key, const std::string& value) {};
+    virtual void ReportComponentChangeEvent(const std::string& key, const std::string& value, uint32_t eventType) {};
 
     /**
      * @description: execute click callback when page some component change occurs
      */
-    virtual void ReportComponentChangeEvent(
-        int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value) {};
+    virtual void ReportComponentChangeEvent(int32_t nodeId, const std::string& key,
+        const std::shared_ptr<InspectorJsonValue>& value, uint32_t eventType) {};
 
     /**
      * @description: execute callback when scroll event occurs
@@ -132,6 +132,7 @@ public:
     virtual void OnRouterChange(const std::string& path, const std::string& event) {};
     virtual void SetRouterChangeEventRegistered(bool status) {};
     virtual void SetComponentChangeEventRegistered(bool status) {};
+    virtual void SetComponentChangeEventMask(uint32_t mask) {};
     virtual void SetScrollEventRegistered(bool status) {};
     virtual void SetLifeCycleEventRegistered(bool status) {};
     virtual void SetSelectTextEventRegistered(bool status) {};
@@ -152,6 +153,10 @@ public:
         return false;
     };
     virtual bool GetComponentChangeEventRegistered()
+    {
+        return false;
+    };
+    virtual bool NeedComponentChangeTypeReporting(uint32_t eventType)
     {
         return false;
     };
@@ -246,6 +251,7 @@ protected:
     std::atomic<int32_t> textChangeEventRegisterProcesses_ = 0;
     std::atomic<int32_t> routerChangeEventRegisterProcesses_ = 0;
     std::atomic<int32_t> componentChangeEventRegisterProcesses_ = 0;
+    uint32_t componentChangeEventMask_ = 0;
     std::atomic<int32_t> scrollEventRegisterProcesses_ = 0;
     std::atomic<int32_t> lifeCycleEventRegisterProcesses_ = 0;
     std::atomic<int32_t> selectTextEventRegisterProcesses_ = 0;

@@ -174,7 +174,8 @@ void CounterModelNG::SetOnInc(CounterEventFunc&& onInc)
     auto gestureHub = addNode->GetOrCreateGestureEventHub();
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onInc)](GestureEvent& /*unused*/) {
                         clickEvent();
-                        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onInc");
+                        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onInc",
+                            ComponentEventType::COMPONENT_EVENT_SELECT);
                     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
@@ -190,7 +191,8 @@ void CounterModelNG::SetOnDec(CounterEventFunc&& onDec)
     auto gestureHub = subNode->GetOrCreateGestureEventHub();
     GestureEventFunc gestureEventFunc = [clickEvent = std::move(onDec)](GestureEvent& /*unused*/) {
                         clickEvent();
-                        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec");
+                        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec",
+                            ComponentEventType::COMPONENT_EVENT_SELECT);
                     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
@@ -354,7 +356,8 @@ void CounterModelNG::SetOnInc(FrameNode* frameNode, CounterEventFunc&& onInc)
         if (clickEvent) {
             clickEvent();
         }
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onInc");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onInc",
+            ComponentEventType::COMPONENT_EVENT_SELECT);
     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
@@ -372,7 +375,8 @@ void CounterModelNG::SetOnDec(FrameNode* frameNode, CounterEventFunc&& onDec)
         if (clickEvent) {
             clickEvent();
         }
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec",
+            ComponentEventType::COMPONENT_EVENT_SELECT);
     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }

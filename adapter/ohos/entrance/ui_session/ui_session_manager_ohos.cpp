@@ -77,12 +77,14 @@ void UiSessionManagerOhos::ReportRouterChangeEvent(const std::string& data)
     }
 }
 
-void UiSessionManagerOhos::ReportComponentChangeEvent(const std::string& key, const std::string& value)
+void UiSessionManagerOhos::ReportComponentChangeEvent(
+    const std::string& key, const std::string& value, uint32_t eventType)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr && GetComponentChangeEventRegistered()) {
+        if (reportService != nullptr && GetComponentChangeEventRegistered() &&
+            NeedComponentChangeTypeReporting(eventType)) {
             auto data = InspectorJsonUtil::Create();
             data->Put(key.data(), value.data());
             reportService->ReportComponentChangeEvent(data->ToString());
@@ -93,12 +95,13 @@ void UiSessionManagerOhos::ReportComponentChangeEvent(const std::string& key, co
 }
 
 void UiSessionManagerOhos::ReportComponentChangeEvent(
-    int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value)
+    int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value, uint32_t eventType)
 {
     std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
-        if (reportService != nullptr && GetComponentChangeEventRegistered()) {
+        if (reportService != nullptr && GetComponentChangeEventRegistered() &&
+            NeedComponentChangeTypeReporting(eventType)) {
             auto data = InspectorJsonUtil::Create();
             data->Put("nodeId", nodeId);
             data->Put(key.data(), value->ToString().data());
@@ -226,6 +229,11 @@ void UiSessionManagerOhos::SetComponentChangeEventRegistered(bool status)
     }
 }
 
+void UiSessionManagerOhos::SetComponentChangeEventMask(uint32_t mask)
+{
+    componentChangeEventMask_ = mask;
+}
+
 void UiSessionManagerOhos::SetScrollEventRegistered(bool status)
 {
     if (status) {
@@ -278,6 +286,11 @@ bool UiSessionManagerOhos::GetRouterChangeEventRegistered()
 bool UiSessionManagerOhos::GetComponentChangeEventRegistered()
 {
     return componentChangeEventRegisterProcesses_.load() > 0 ? true : false;
+}
+
+bool UiSessionManagerOhos::NeedComponentChangeTypeReporting(uint32_t eventType)
+{
+    return (componentChangeEventMask_ & eventType) != 0;
 }
 
 bool UiSessionManagerOhos::GetScrollEventRegistered()

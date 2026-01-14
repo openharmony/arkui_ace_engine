@@ -46,5 +46,22 @@ struct ContentChangeConfig {
     float textContentRatio = 0.15f; // ratio of a single text change bounding box area to window area: 0.15
 };
 
+enum ComponentEventType : uint32_t {
+    COMPONENT_EVENT_NONE = 0,                  // no event
+    COMPONENT_EVENT_GESTURE = 1 << 0,          // gesture event
+    COMPONENT_EVENT_SELECT = 1 << 1,           // select event, including Select, Checkbox, Radio, etc.
+    COMPONENT_EVENT_ANIMATOR = 1 << 2,         // animator event
+    COMPONENT_EVENT_PAGE_TRANSITION = 1 << 3,  // page transition event
+    COMPONENT_EVENT_SCROLL = 1 << 4,           // scroll event, including Scroll, List, Grid, etc.
+    COMPONENT_EVENT_TEXT_INPUT = 1 << 5,       // text input event, including Search, RichEditor, etc.
+    COMPONENT_EVENT_DIALOG = 1 << 6,           // dialog event
+    COMPONENT_EVENT_IMAGE = 1 << 7,            // image event
+    COMPONENT_EVENT_PICKER = 1 << 8,           // picker event, including DatePicker
+    COMPONENT_EVENT_PROGRESS = 1 << 9,         // progress event
+    COMPONENT_EVENT_SWIPER = 1 << 10,          // swiper event, including Swiper and Tabs
+    COMPONENT_EVENT_WEB = 1 << 11,             // web event
+
+    COMPONENT_EVENT_ALL = static_cast<uint32_t>(-1),  // all events
+};
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_PARAM_CONFIG_H

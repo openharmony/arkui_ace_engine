@@ -134,7 +134,8 @@ public:
      * @description: define register a callback on component event occur to execute interface
      * @return: result number
      */
-    virtual int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback) = 0;
+    virtual int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback,
+        uint32_t mask = ComponentEventType::COMPONENT_EVENT_ALL) = 0;
 
     /**
      * @description: define register a callback on web unfocus event occur to execute interface

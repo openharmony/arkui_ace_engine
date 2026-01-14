@@ -267,7 +267,8 @@ void JSScroll::OnScrollEdgeCallback(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto params = ConvertToJSValues(side);
             func->Call(JSRef<JSObject>(), 1, params.data());
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollEdge");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollEdge",
+                ComponentEventType::COMPONENT_EVENT_SCROLL);
         };
         ScrollModel::GetInstance()->SetOnScrollEdge(std::move(scrollEdge));
     }
@@ -280,7 +281,8 @@ void JSScroll::OnScrollEndCallback(const JSCallbackInfo& args)
         auto scrollEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Call(JSRef<JSObject>(), 0, nullptr);
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollEnd");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollEnd",
+                ComponentEventType::COMPONENT_EVENT_SCROLL);
         };
         ScrollModel::GetInstance()->SetOnScrollEnd(std::move(scrollEnd));
     }
@@ -305,7 +307,8 @@ void JSScroll::OnScrollStopCallback(const JSCallbackInfo& args)
         auto scrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             func->Call(JSRef<JSObject>(), 0, nullptr);
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollStop");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onScrollStop",
+                ComponentEventType::COMPONENT_EVENT_SCROLL);
         };
         ScrollModel::GetInstance()->SetOnScrollStop(std::move(scrollStop));
     }

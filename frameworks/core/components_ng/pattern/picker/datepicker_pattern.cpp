@@ -1220,7 +1220,8 @@ bool DatePickerPattern::ReportDateChangeEvent(int32_t nodeId, const std::string&
     value->Put("nodeId", nodeId);
     value->Put(compName.c_str(), eventName.c_str());
     value->Put("params", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString(),
+        ComponentEventType::COMPONENT_EVENT_PICKER);
     return true;
 }
 

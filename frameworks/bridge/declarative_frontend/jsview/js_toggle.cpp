@@ -256,7 +256,8 @@ void JSToggle::OnChange(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto newJSVal = JSRef<JSVal>::Make(ToJSValue(isOn));
         func->ExecuteJS(1, &newJSVal);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Toggle.onChange");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Toggle.onChange",
+            ComponentEventType::COMPONENT_EVENT_SELECT);
     };
     ToggleModel::GetInstance()->OnChange(std::move(onChange));
     args.ReturnSelf();

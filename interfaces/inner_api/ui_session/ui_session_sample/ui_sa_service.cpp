@@ -32,41 +32,13 @@ namespace OHOS::Ace {
 namespace {
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&UiSaService::GetInstance());
 const std::string UI_SA_PATH = "/data/service/el1/public/ui_sa/";
+constexpr size_t BITS_UINT32 = sizeof(uint32_t) * 8;
 constexpr int32_t PARAMS_OFFSET = 1;
 constexpr int32_t SIMPLIFYTREE_WITH_PARAMCONFIG = 5;
 constexpr int32_t SEND_COMMAND_WITH_NODEID = 3;
 constexpr int32_t SEND_COMMAND_WITHOUT_NODEID = 2;
 constexpr int32_t CONTENT_CHANGE_EVENT_WITH_CONFIG = 3;
 constexpr int32_t GET_WEB_INFO_BY_REQUEST_PARAMS = 3;
-} // namespace
-
-const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
-    { "Connect", &UiSaService::HandleConnect },
-    { "GetVisibleInspectorTree", &UiSaService::HandleGetVisibleInspectorTree },
-    { "GetCurrentPageName", &UiSaService::HandleGetCurrentPageName },
-    { "SendCommand", &UiSaService::HandleSendCommand },
-    { "SendCommandAsync", &UiSaService::HandleSendCommandAsync },
-    { "RegisterContentChangeCallback", &UiSaService::HandleRegisterContentChangeCallback },
-    { "UnregisterContentChangeCallback", &UiSaService::HandleUnregisterContentChangeCallback },
-    { "GetCurrentImagesShowing", &UiSaService::HandleGetCurrentImagesShowing },
-    { "GetImagesById", &UiSaService::HandleGetImagesById },
-    { "GetWebInfoByRequest", &UiSaService::HandleGetWebInfoByRequest },
-};
-
-UiSaService::UiSaService() : SystemAbility(UI_SA_ID, true) {}
-
-UiSaService& UiSaService::GetInstance()
-{
-    static UiSaService instance;
-    return instance;
-}
-
-void UiSaService::OnStart()
-{
-    Publish(this);
-}
-
-void UiSaService::OnStop() {}
 
 std::string GetCurrentTimestampStr()
 {
@@ -92,6 +64,52 @@ std::string GetCurrentTimestampStr()
     oss << timeStr << "." << std::setw(3) << std::setfill('0') << (timestamp % SEC_TO_MILLISEC);
     return oss.str();
 }
+
+uint32_t ParseComponentChangeEventMask(std::vector<std::string> params)
+{
+    int32_t paramSize = static_cast<int32_t>(params.size());
+
+    CHECK_EQUAL_RETURN(paramSize <= PARAMS_OFFSET, true, ComponentEventType::COMPONENT_EVENT_ALL);
+    CHECK_EQUAL_RETURN(params[1] == "x", true, ComponentEventType::COMPONENT_EVENT_NONE);
+
+    uint32_t mask = 0;
+    for (int32_t i = PARAMS_OFFSET; i < paramSize; i++) {
+        int32_t bit = std::atoi(params[i].c_str());
+        mask |= (1 << bit);
+    }
+    return mask;
+}
+} // namespace
+
+const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
+    { "Connect", &UiSaService::HandleConnect },
+    { "GetVisibleInspectorTree", &UiSaService::HandleGetVisibleInspectorTree },
+    { "GetCurrentPageName", &UiSaService::HandleGetCurrentPageName },
+    { "SendCommand", &UiSaService::HandleSendCommand },
+    { "SendCommandAsync", &UiSaService::HandleSendCommandAsync },
+    { "RegisterContentChangeCallback", &UiSaService::HandleRegisterContentChangeCallback },
+    { "UnregisterContentChangeCallback", &UiSaService::HandleUnregisterContentChangeCallback },
+    { "GetCurrentImagesShowing", &UiSaService::HandleGetCurrentImagesShowing },
+    { "GetImagesById", &UiSaService::HandleGetImagesById },
+    { "GetWebInfoByRequest", &UiSaService::HandleGetWebInfoByRequest },
+    { "RegisterComponentChangeEventCallback", &UiSaService::HandleRegisterComponentChangeEventCallback },
+    { "UnregisterComponentChangeEventCallback", &UiSaService::HandleUnregisterComponentChangeEventCallback },
+};
+
+UiSaService::UiSaService() : SystemAbility(UI_SA_ID, true) {}
+
+UiSaService& UiSaService::GetInstance()
+{
+    static UiSaService instance;
+    return instance;
+}
+
+void UiSaService::OnStart()
+{
+    Publish(this);
+}
+
+void UiSaService::OnStop() {}
 
 // If the current window ID is not in the corresponding map, clear the original map and insert it again. Otherwise,
 // return.
@@ -345,5 +363,24 @@ void UiSaService::HandleGetWebInfoByRequest(sptr<IUiContentService> service, std
         service->GetWebInfoByRequest(webId, request, finishCallback);
         LOGI("[GetWebInfoByRequest] call GetWebInfoById");
     }
+}
+
+void UiSaService::HandleRegisterComponentChangeEventCallback(
+    sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    uint32_t mask = ParseComponentChangeEventMask(params);
+    auto finishCallback = [](std::string data) {
+        LOGI("[ComponentChangeEvent] data = %{public}s", data.c_str());
+    };
+    service->RegisterComponentChangeEventCallback(mask, finishCallback);
+    LOGI("[ComponentChangeEvent] call RegisterComponentChangeEventCallback mask=%{public}s",
+        std::bitset<BITS_UINT32>(mask).to_string().c_str());
+}
+
+void UiSaService::HandleUnregisterComponentChangeEventCallback(
+    sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    service->UnregisterComponentChangeEventCallback();
+    LOGI("[ComponentChangeEvent] call UnregisterComponentChangeEventCallback");
 }
 } // namespace OHOS::Ace

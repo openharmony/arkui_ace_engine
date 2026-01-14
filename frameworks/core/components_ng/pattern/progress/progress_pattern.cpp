@@ -876,7 +876,8 @@ void ProgressPattern::ReportProgressEvent()
     }
     auto maxValue = progressPaintProperty->GetMaxValue().value();
     if (LessOrEqual(maxValue, value) && LessNotEqual(reportLastValue_, maxValue)) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Progress.onProgress");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Progress.onProgress",
+            ComponentEventType::COMPONENT_EVENT_PROGRESS);
     }
     reportLastValue_ = value;
 }

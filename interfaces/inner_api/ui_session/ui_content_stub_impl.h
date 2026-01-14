@@ -35,7 +35,8 @@ public:
     int32_t RegisterRouterChangeEventCallback(const EventCallback& eventCallback) override;
     int32_t RegisterSearchEventCallback(const EventCallback& eventCallback) override;
     int32_t RegisterTextChangeEventCallback(const EventCallback& eventCallback) override;
-    int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback) override;
+    int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback,
+        uint32_t mask = ComponentEventType::COMPONENT_EVENT_ALL) override;
     int32_t RegisterWebUnfocusEventCallback(
         const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) override;
     int32_t RegisterScrollEventCallback(const EventCallback& eventCallback) override;

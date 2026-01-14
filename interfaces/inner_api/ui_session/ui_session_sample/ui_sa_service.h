@@ -46,6 +46,8 @@ public:
     void HandleGetCurrentImagesShowing(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleGetImagesById(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleGetWebInfoByRequest(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleRegisterComponentChangeEventCallback(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleUnregisterComponentChangeEventCallback(sptr<IUiContentService> service, std::vector<std::string> params);
 
 private:
     DECLEAR_SYSTEM_ABILITY(UiSaService);

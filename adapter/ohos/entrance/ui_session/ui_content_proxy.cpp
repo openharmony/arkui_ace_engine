@@ -223,13 +223,17 @@ int32_t UIContentServiceProxy::RegisterRouterChangeEventCallback(const EventCall
     return NO_ERROR;
 }
 
-int32_t UIContentServiceProxy::RegisterComponentChangeEventCallback(const EventCallback& eventCallback)
+int32_t UIContentServiceProxy::RegisterComponentChangeEventCallback(const EventCallback& eventCallback, uint32_t mask)
 {
     MessageParcel data;
     MessageParcel reply;
     MessageOption option;
     if (!data.WriteInterfaceToken(GetDescriptor())) {
         LOGW("RegisterComponentChangeEventCallback write interface token failed");
+        return FAILED;
+    }
+    if (!data.WriteUint32(mask)) {
+        LOGW("RegisterComponentChangeEventCallback write mask failed");
         return FAILED;
     }
     if (report_ == nullptr) {

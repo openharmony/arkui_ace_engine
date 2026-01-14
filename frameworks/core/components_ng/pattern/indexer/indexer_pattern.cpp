@@ -1691,7 +1691,8 @@ void IndexerPattern::OnListItemClick(int32_t index)
     ReportPoupSelectEvent();
     if (onPopupSelected) {
         onPopupSelected(index);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPopupSelected");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPopupSelected",
+            ComponentEventType::COMPONENT_EVENT_SELECT);
     }
     ChangeListItemsSelectedStyle(index);
 }
@@ -2042,7 +2043,8 @@ void IndexerPattern::FireOnSelect(int32_t selectIndex, bool fromPress)
                 TAG_LOGD(AceLogTag::ACE_ALPHABET_INDEXER, "item %{public}d is selected", actualIndex);
                 onSelected(actualIndex); // fire onSelected with an item's index from original array
             }
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected",
+                ComponentEventType::COMPONENT_EVENT_SELECT);
             TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER,
                 "nodeId:[%{public}d] Indexer reportComponentChangeEvent onSelected", GetHost()->GetId());
         }
@@ -2269,7 +2271,8 @@ void IndexerPattern::DumpInfo(std::unique_ptr<JsonValue>& json)
 void IndexerPattern::ReportSelectEvent()
 {
     if (initialized_ && selectChanged_) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onSelected",
+            ComponentEventType::COMPONENT_EVENT_SELECT);
         TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "nodeId:[%{public}d] Indexer reportComponentChangeEvent onSelected",
             GetHost()->GetId());
     }
@@ -2277,7 +2280,8 @@ void IndexerPattern::ReportSelectEvent()
 
 void IndexerPattern::ReportPoupSelectEvent()
 {
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onPopupSelect");
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Indexer.onPopupSelect",
+        ComponentEventType::COMPONENT_EVENT_SELECT);
     TAG_LOGI(AceLogTag::ACE_ALPHABET_INDEXER, "nodeId:[%{public}d] Indexer reportComponentChangeEvent onPopupSelect",
         GetHost()->GetId());
 }
