@@ -700,6 +700,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_Array_Opt_ShaderStyle_ShaderStyle& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent& src)
 {
     switch (src.selector) {
@@ -907,6 +922,21 @@ void AssignUnionTo(std::optional<T>& dst,
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_CustomBuilder_ComponentContent& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_CustomBuilder_ComponentContentBase& src)
 {
     switch (src.selector) {
         case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
@@ -3560,6 +3590,7 @@ ASSIGN_OPT(Opt_ConfigurationConstant_ScreenDensity)
 ASSIGN_OPT(Opt_ConsoleMessage)
 ASSIGN_OPT(Opt_ConsoleMessageSource)
 ASSIGN_OPT(Opt_ContentClipMode)
+ASSIGN_OPT(Opt_ContentTransition)
 ASSIGN_OPT(Opt_ContentTransitionEffect)
 ASSIGN_OPT(Opt_ContentType)
 ASSIGN_OPT(Opt_contextConstant_AreaMode)
@@ -3629,6 +3660,7 @@ ASSIGN_OPT(Opt_FinishCallbackType)
 ASSIGN_OPT(Opt_FlexAlign)
 ASSIGN_OPT(Opt_FlexDirection)
 ASSIGN_OPT(Opt_FlexWrap)
+ASSIGN_OPT(Opt_FlipDirection)
 ASSIGN_OPT(Opt_Float32)
 ASSIGN_OPT(Opt_Float64)
 ASSIGN_OPT(Opt_FocusDrawLevel)
@@ -3699,6 +3731,8 @@ ASSIGN_OPT(Opt_JsGeolocation)
 ASSIGN_OPT(Opt_JsResult)
 ASSIGN_OPT(Opt_KeyboardAppearance)
 ASSIGN_OPT(Opt_KeyboardAvoidMode)
+ASSIGN_OPT(Opt_KeyboardFluidLightMode)
+ASSIGN_OPT(Opt_KeyboardGradientMode)
 ASSIGN_OPT(Opt_KeyProcessingMode)
 ASSIGN_OPT(Opt_KeySource)
 ASSIGN_OPT(Opt_KeyType)
@@ -3740,6 +3774,7 @@ ASSIGN_OPT(Opt_MarqueeUpdatePolicy)
 ASSIGN_OPT(Opt_MarqueeUpdateStrategy)
 ASSIGN_OPT(Opt_Matrix4)
 ASSIGN_OPT(Opt_matrix4_Matrix4Transit)
+ASSIGN_OPT(Opt_MaxLinesMode)
 ASSIGN_OPT(Opt_MenuAlignType)
 ASSIGN_OPT(Opt_MenuKeyboardAvoidMode)
 ASSIGN_OPT(Opt_MenuPolicy)
@@ -3853,6 +3888,7 @@ ASSIGN_OPT(Opt_RenderMode)
 ASSIGN_OPT(Opt_RenderProcessNotRespondingReason)
 ASSIGN_OPT(Opt_RenderStrategy)
 ASSIGN_OPT(Opt_RepeatMode)
+ASSIGN_OPT(Opt_ReplaceEffectType)
 ASSIGN_OPT(Opt_resourceManager_ResourceManager)
 ASSIGN_OPT(Opt_ResponseRegionSupportedTool)
 ASSIGN_OPT(Opt_ResponseType)
@@ -3896,6 +3932,7 @@ ASSIGN_OPT(Opt_SecurityComponentLayoutDirection)
 ASSIGN_OPT(Opt_SeekMode)
 ASSIGN_OPT(Opt_SelectedMode)
 ASSIGN_OPT(Opt_SelectStatus)
+ASSIGN_OPT(Opt_ShaderStyle)
 ASSIGN_OPT(Opt_ShadowStyle)
 ASSIGN_OPT(Opt_ShadowType)
 ASSIGN_OPT(Opt_SharedTransitionEffectType)
@@ -3926,6 +3963,7 @@ ASSIGN_OPT(Opt_StyledStringController)
 ASSIGN_OPT(Opt_StyledStringKey)
 ASSIGN_OPT(Opt_SubMenuExpandingMode)
 ASSIGN_OPT(Opt_SubmitEvent)
+ASSIGN_OPT(Opt_SuperscriptStyle)
 ASSIGN_OPT(Opt_SwipeActionState)
 ASSIGN_OPT(Opt_SwipeDirection)
 ASSIGN_OPT(Opt_SwipeEdgeEffect)
@@ -3966,6 +4004,7 @@ ASSIGN_OPT(Opt_TextCase)
 ASSIGN_OPT(Opt_TextChangeReason)
 ASSIGN_OPT(Opt_TextClockConfiguration)
 ASSIGN_OPT(Opt_TextClockController)
+ASSIGN_OPT(Opt_TextContentAlign)
 ASSIGN_OPT(Opt_TextContentControllerBase)
 ASSIGN_OPT(Opt_TextContentStyle)
 ASSIGN_OPT(Opt_TextController)
@@ -4157,6 +4196,7 @@ ASSIGN_OPT(Opt_Array_Number)
 ASSIGN_OPT(Opt_Array_Object)
 ASSIGN_OPT(Opt_Array_ObscuredReasons)
 ASSIGN_OPT(Opt_Array_Opt_Object)
+ASSIGN_OPT(Opt_Array_Opt_ShaderStyle)
 ASSIGN_OPT(Opt_Array_PreloadItem)
 ASSIGN_OPT(Opt_Array_RadiusItem)
 ASSIGN_OPT(Opt_Array_Rectangle)
@@ -4260,6 +4300,7 @@ ASSIGN_OPT(Opt_Callback_I32_F64_ComputedBarAttribute)
 ASSIGN_OPT(Opt_Callback_I32_I32_Boolean)
 ASSIGN_OPT(Opt_Callback_I32_I32_I32_Void)
 ASSIGN_OPT(Opt_Callback_I32_I32_Void)
+ASSIGN_OPT(Opt_Callback_IMEClient_Void)
 ASSIGN_OPT(Opt_Callback_I32_Tuple_I32_I32)
 ASSIGN_OPT(Opt_Callback_I32_Tuple_I32_I32_I32_I32)
 ASSIGN_OPT(Opt_Callback_I64_Void)
@@ -4692,6 +4733,7 @@ ASSIGN_OPT(Opt_ImageBitmap)
 ASSIGN_OPT(Opt_ImageCompleteEvent)
 ASSIGN_OPT(Opt_ImageData)
 ASSIGN_OPT(Opt_InputCounterOptions)
+ASSIGN_OPT(Opt_IMEClient)
 ASSIGN_OPT(Opt_InsertValue)
 ASSIGN_OPT(Opt_IntelligentTrackingPreventionDetails)
 ASSIGN_OPT(Opt_intl_DateTimeOptions)
@@ -4710,8 +4752,10 @@ ASSIGN_OPT(Opt_LengthMetrics)
 ASSIGN_OPT(Opt_LengthMetricsCustom)
 ASSIGN_OPT(Opt_LinearGradientBlurOptions)
 ASSIGN_OPT(Opt_LinearGradientOptions)
+ASSIGN_OPT(Opt_LinearGradientStyle)
 ASSIGN_OPT(Opt_LinearIndicatorStartOptions)
 ASSIGN_OPT(Opt_LineOptions)
+ASSIGN_OPT(Opt_LineSpacingOptions)
 ASSIGN_OPT(Opt_ListItemGroupOptions)
 ASSIGN_OPT(Opt_ListItemOptions)
 ASSIGN_OPT(Opt_ListOptions)
@@ -4722,6 +4766,7 @@ ASSIGN_OPT(Opt_LocalizedVerticalAlignParam)
 ASSIGN_OPT(Opt_MarqueeOptions)
 ASSIGN_OPT(Opt_Matrix2D)
 ASSIGN_OPT(Opt_Matrix4Result)
+ASSIGN_OPT(Opt_MaxLinesOptions)
 ASSIGN_OPT(Opt_Measurable)
 ASSIGN_OPT(Opt_MeasureResult)
 ASSIGN_OPT(Opt_MessageEvents)
@@ -4742,6 +4787,8 @@ ASSIGN_OPT(Opt_NavigationOptions)
 ASSIGN_OPT(Opt_NavPathInfo)
 ASSIGN_OPT(Opt_NestedScrollInfo)
 ASSIGN_OPT(Opt_NestedScrollOptionsExt)
+ASSIGN_OPT(Opt_NumericTextTransition)
+ASSIGN_OPT(Opt_NumericTextTransitionOptions)
 ASSIGN_OPT(Opt_OnAlertEvent)
 ASSIGN_OPT(Opt_OnBeforeUnloadEvent)
 ASSIGN_OPT(Opt_OnClientAuthenticationEvent)
@@ -4873,6 +4920,7 @@ ASSIGN_OPT(Opt_unifiedDataChannel_Summary)
 ASSIGN_OPT(Opt_Union_Array_BarrierStyle_Array_LocalizedBarrierStyle)
 ASSIGN_OPT(Opt_Union_Array_MenuElement_CustomBuilder)
 ASSIGN_OPT(Opt_Union_Array_NavigationMenuItem_CustomBuilder)
+ASSIGN_OPT(Opt_Union_Array_Opt_ShaderStyle_ShaderStyle)
 ASSIGN_OPT(Opt_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent)
 ASSIGN_OPT(Opt_Union_Array_ToolbarItem_CustomBuilder)
 ASSIGN_OPT(Opt_Union_BlendMode_Blender)
@@ -4886,6 +4934,7 @@ ASSIGN_OPT(Opt_Union_Color_String_Resource)
 ASSIGN_OPT(Opt_Union_Color_String_Resource_ColoringStrategy)
 ASSIGN_OPT(Opt_Union_Color_String_Resource_I64)
 ASSIGN_OPT(Opt_Union_ColumnOptions_ColumnOptionsV2)
+ASSIGN_OPT(Opt_Union_CustomBuilder_ComponentContentBase)
 ASSIGN_OPT(Opt_Union_CustomBuilder_ComponentContent)
 ASSIGN_OPT(Opt_Union_CustomBuilder_DragItemInfo)
 ASSIGN_OPT(Opt_Union_CustomBuilder_DragItemInfo_String)
@@ -4988,6 +5037,7 @@ ASSIGN_OPT(Opt_CalendarOptions)
 ASSIGN_OPT(Opt_CanvasRenderer)
 ASSIGN_OPT(Opt_CanvasRenderingContext2D)
 ASSIGN_OPT(Opt_CircleStyleOptions)
+ASSIGN_OPT(Opt_ColorShaderStyle)
 ASSIGN_OPT(Opt_ComponentInfo)
 ASSIGN_OPT(Opt_ContentCoverOptions)
 ASSIGN_OPT(Opt_ContextMenuAnimationOptions)
@@ -5184,6 +5234,7 @@ ASSIGN_OPT(Opt_PointLightStyle)
 ASSIGN_OPT(Opt_Position)
 ASSIGN_OPT(Opt_ProgressStyleOptions)
 ASSIGN_OPT(Opt_RadialGradientOptions)
+ASSIGN_OPT(Opt_RadialGradientStyle)
 ASSIGN_OPT(Opt_Rectangle)
 ASSIGN_OPT(Opt_RectOptions)
 ASSIGN_OPT(Opt_RichEditorSymbolSpanOptions)

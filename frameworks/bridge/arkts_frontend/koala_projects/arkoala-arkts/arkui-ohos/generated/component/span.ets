@@ -28,7 +28,7 @@ import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
-import { Font_serializer, Font, ResourceColor, Length, Dimension, BorderRadiuses, BorderRadiuses_serializer } from "./units"
+import { Font_serializer, Font, ResourceColor, ResourceStr, Length, Dimension, BorderRadiuses, BorderRadiuses_serializer } from "./units"
 import { DecorationStyleInterface_serializer, DecorationStyleInterface } from "./styledString"
 import { Color, FontStyle, FontWeight, TextCase, InteractionHand } from "./enums"
 import { Resource } from "global.resource"
@@ -179,7 +179,7 @@ export class ArkSpanPeer extends PeerNode {
         ArkUIGeneratedNativeModule._SpanAttribute_setFontStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
+    setFontWeightAttribute(value: int32 | FontWeight | ResourceStr | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -192,10 +192,18 @@ export class ArkSpanPeer extends PeerNode {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
                 thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
-            } else if (valueTmpValue instanceof string) {
+            } else if (valueTmpValue instanceof ResourceStr) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as ResourceStr
+                if (valueTmpValueForIdx2 instanceof string) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const valueTmpValueForIdx2ForIdx0  = valueTmpValueForIdx2 as string
+                    thisSerializer.writeString(valueTmpValueForIdx2ForIdx0)
+                } else if (valueTmpValueForIdx2 instanceof Resource) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const valueTmpValueForIdx2ForIdx1  = valueTmpValueForIdx2 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx2ForIdx1)
+                }
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -451,7 +459,7 @@ export interface SpanAttribute {
     fontStyle(value: FontStyle | undefined): this {
         throw new Error("Unimplemented method fontStyle")
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     fontFamily(value: string | Resource | undefined): this {
@@ -502,7 +510,7 @@ export class ArkSpanStyle implements SpanAttribute {
     fontColor_value?: ResourceColor | undefined
     fontSize_value?: double | string | Resource | undefined
     fontStyle_value?: FontStyle | undefined
-    fontWeight_value?: int32 | FontWeight | string | undefined
+    fontWeight_value?: int32 | FontWeight | ResourceStr | undefined
     fontFamily_value?: string | Resource | undefined
     decoration_value?: DecorationStyleInterface | undefined
     letterSpacing_value?: double | string | undefined
@@ -531,7 +539,7 @@ export class ArkSpanStyle implements SpanAttribute {
     fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         return this
     }
     fontFamily(value: string | Resource | undefined): this {
@@ -663,9 +671,9 @@ export class ArkSpanComponent extends ComponentBase implements SpanAttribute {
         }
         return this
     }
-    public fontWeight(value: int32 | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (int32 | FontWeight | string | undefined)
+            const value_casted = value as (int32 | FontWeight | ResourceStr | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }

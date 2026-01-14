@@ -612,6 +612,7 @@ void AssignArkValue(Ark_DecorationStyleResult& dst, const TextStyleResult& src, 
     dst.color = ArkUnion<Ark_ResourceColor, Ark_String>(src.decorationColor, ctx);
     dst.style = ArkValue<Opt_TextDecorationStyle>(
         static_cast<OHOS::Ace::TextDecorationStyle>(src.decorationStyle));
+    dst.thicknessScale = ArkValue<Opt_Float64>(src.lineThicknessScale);
 }
 
 void AssignArkValue(Ark_RichEditorTextStyleResult& dst, const TextStyleResult& src, ConvContext *ctx)

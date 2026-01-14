@@ -78,6 +78,7 @@ typedef enum CallbackKind {
     Kind_Callback_I32_I32_Boolean = -730375456,
     Kind_Callback_I32_I32_I32_Void = -776917177,    
     Kind_Callback_I32_I32_Void = 1591865008,
+    Kind_Callback_IMEClient_Void = 1772095735,
     Kind_Callback_I32_Tuple_I32_I32 = 49219211,
     Kind_Callback_I32_Tuple_I32_I32_I32_I32 = 59584331,
     Kind_Callback_I64_Void = 158810308,

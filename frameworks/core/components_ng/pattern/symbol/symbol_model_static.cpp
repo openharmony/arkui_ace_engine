@@ -115,4 +115,14 @@ void SymbolModelStatic::InitialSymbol(FrameNode* frameNode, const std::uint32_t&
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, SymbolSourceInfo, SymbolSourceInfo{unicode}, frameNode);
 }
 
+void SymbolModelStatic::SetSymbolShadow(FrameNode* frameNode, const std::optional<SymbolShadow>& optValue)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (optValue.has_value()) {
+        SymbolModelNG::SetSymbolShadow(frameNode, optValue.value());
+    } else {
+        SymbolShadow symbolShadow;
+        SymbolModelNG::SetSymbolShadow(frameNode, symbolShadow);
+    }
+}
 } // namespace OHOS::Ace::NG

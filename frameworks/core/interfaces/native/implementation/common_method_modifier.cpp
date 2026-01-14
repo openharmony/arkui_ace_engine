@@ -1061,44 +1061,6 @@ OffsetOrEdgesParam Convert(const Ark_LocalizedEdges& src)
 }
 
 template<>
-Gradient Convert(const Ark_RadialGradientOptions& src)
-{
-    NG::Gradient gradient;
-    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
-
-    // center
-    auto centerX = Converter::OptConvert<Dimension>(src.center.value0);
-    if (centerX) {
-        gradient.GetRadialGradient()->radialCenterX = IsPercent(*centerX) ? *centerX * PERCENT_100 : *centerX;
-    }
-
-    auto centerY = Converter::OptConvert<Dimension>(src.center.value1);
-    if (centerY) {
-        gradient.GetRadialGradient()->radialCenterY = IsPercent(*centerY) ? *centerY * PERCENT_100 : *centerY;
-    }
-
-    // radius
-    std::optional<Dimension> radiusOpt = Converter::OptConvert<Dimension>(src.radius);
-    if (radiusOpt) {
-        // radius should be positive [0, +∞)
-        Dimension radius = radiusOpt.value().IsNonPositive() ? Dimension(0, DimensionUnit::VP) : radiusOpt.value();
-        gradient.GetRadialGradient()->radialVerticalSize = radius;
-        gradient.GetRadialGradient()->radialHorizontalSize = radius;
-    }
-
-    // repeating
-    std::optional<bool> repeating = Converter::OptConvert<bool>(src.repeating);
-    if (repeating) {
-        gradient.SetRepeat(repeating.value());
-    }
-
-    // color stops
-    Converter::AssignGradientColors(&gradient, &(src.colors));
-
-    return gradient;
-}
-
-template<>
 BackgroundImageSize Convert(const Ark_SizeOptions& src)
 {
     BackgroundImageSize imageSize;

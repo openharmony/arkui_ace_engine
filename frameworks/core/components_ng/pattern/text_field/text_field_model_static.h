@@ -100,7 +100,7 @@ public:
     static void SetMaxFontScale(FrameNode* frameNode, const std::optional<float>& optValue);
     static void SetHalfLeading(FrameNode* frameNode, const std::optional<bool>& valueOpt);
     static void SetSelectionMenuOptions(FrameNode* frameNode, const NG::OnCreateMenuCallback&& onCreateMenuCallback,
-        const NG::OnMenuItemClickCallback&& onMenuItemClick);
+        const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);
     static void SetShowPasswordIcon(FrameNode* frameNode, const std::optional<bool>& value);
     static void SetShowUnderline(FrameNode* frameNode, const std::optional<bool>& showUnderLine);
     static void SetSelectAllValue(FrameNode* frameNode, const std::optional<bool>& isSelectAllValue);
@@ -114,6 +114,20 @@ public:
     static void SetIncludeFontPadding(FrameNode* frameNode, const std::optional<bool>& optValue);
     static void SetFallbackLineSpacing(FrameNode* frameNode, const std::optional<bool>& optValue);
     static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetEnableAutoFillAnimation(FrameNode* frameNode, const std::optional<bool>& optValue);
+    static void SetStrokeColor(FrameNode* frameNode, const std::optional<Color>& optValue);
+    static void SetEnableAutoSpacing(FrameNode* frameNode, const std::optional<bool>& optValue);
+    static void SetStrokeWidth(FrameNode* frameNode, const std::optional<Dimension>& optValue);
+    static void SetMinLines(FrameNode* frameNode, const std::optional<uint32_t>& valueOpt);
+    static void SetOverflowMode(FrameNode* frameNode, const std::optional<OverflowMode>& valueOpt);
+    static void SetSelectDetectEnable(FrameNode* frameNode, const std::optional<bool>& valueOpt);
+    static void SetScrollBarColor(FrameNode* frameNode, const std::optional<Color>& valueOpt);
+    static void SetIsOnlyBetweenLines(FrameNode* frameNode, const std::optional<bool>& isOnlyBetweenLines);
+    static void SetMaxLinesMode(FrameNode* frameNode, const std::optional<OverflowMode>& maxLinesMode);
+    static void SetCustomKeyboardWithNode(
+ 	    FrameNode* frameNode, FrameNode* customKeyboard, const std::optional<bool>& supportAvoidance);
+    static void SetCounterTextColor(FrameNode* frameNode, const std::optional<Color>& value);
+    static void SetCounterTextOverflowColor(FrameNode* frameNode, const std::optional<Color>& value);
 private:
 
 };

@@ -330,6 +330,8 @@ export class ImageAttachment implements MaterializedBase {
     readonly objectFit?: ImageFit | undefined
     readonly layoutStyle?: ImageAttachmentLayoutStyle | undefined
     readonly colorFilter?: ColorFilterType | undefined
+    readonly supportSvg2?: boolean | undefined
+    readonly sizeInVp?: SizeOptions | undefined
     constructor(_0: boolean, peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, ImageAttachment.getFinalizer())
         this.value = this.getValue()
@@ -339,6 +341,8 @@ export class ImageAttachment implements MaterializedBase {
         this.objectFit = this.getObjectFit()
         this.layoutStyle = this.getLayoutStyle()
         this.colorFilter = this.getColorFilter()
+        this.supportSvg2 = this.getSupportSvg2()
+        this.sizeInVp = this.getSizeInVp()
     }
     constructor(value: AttachmentType | undefined) {
         this(false, ImageAttachment.construct(value))
@@ -387,6 +391,12 @@ export class ImageAttachment implements MaterializedBase {
     }
     private getColorFilter(): ColorFilterType | undefined {
         return this.getColorFilter_serialize()
+    }
+    private getSupportSvg2(): boolean | undefined {
+        return this.getSupportSvg2_serialize()
+    }
+    private getSizeInVp(): SizeOptions | undefined {
+        return this.getSizeInVp_serialize()
     }
     private getValue_serialize(): image.PixelMap {
         const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getValue(this.peer!.ptr)
@@ -466,6 +476,28 @@ export class ImageAttachment implements MaterializedBase {
             buffer = (buffer_ as ColorFilter | drawing.ColorFilter)
         }
         const returnResult : ColorFilterType | undefined = buffer
+        return returnResult
+    }
+    private getSupportSvg2_serialize(): boolean | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getSupportSvg2(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
+    }
+    private getSizeInVp_serialize(): SizeOptions | undefined {
+        const retval  = ArkUIGeneratedNativeModule._ImageAttachment_getSizeInVp(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : SizeOptions | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = SizeOptions_serializer.read(retvalDeserializer)
+        }
+        const returnResult : SizeOptions | undefined = buffer
         return returnResult
     }
 }
@@ -1326,6 +1358,7 @@ export interface ResourceImageAttachmentOptions {
     layoutStyle?: ImageAttachmentLayoutStyle;
     colorFilter?: ColorFilterType;
     syncLoad?: boolean;
+    supportSvg2?: boolean;
 }
 export interface ImageAttachmentInterface {
     value: image.PixelMap;
@@ -2391,6 +2424,14 @@ export class ResourceImageAttachmentOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSupportSvg2  = value.supportSvg2
+        if (valueHolderForSupportSvg2 !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSupportSvg2TmpValue  = valueHolderForSupportSvg2!
+            valueSerializer.writeBoolean(valueHolderForSupportSvg2TmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ResourceImageAttachmentOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -2454,7 +2495,13 @@ export class ResourceImageAttachmentOptions_serializer {
             syncLoadTmpBuf = valueDeserializer.readBoolean()
         }
         const syncLoadTmpResult : boolean | undefined = syncLoadTmpBuf
-        let value : ResourceImageAttachmentOptions = ({resourceValue: resourceValueTmpResult, size: sizeTmpResult, verticalAlign: verticalAlignTmpResult, objectFit: objectFitTmpResult, layoutStyle: layoutStyleTmpResult, colorFilter: colorFilterTmpResult, syncLoad: syncLoadTmpResult} as ResourceImageAttachmentOptions)
+        const supportSvg2TmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let supportSvg2TmpBuf : boolean | undefined = undefined
+        if ((supportSvg2TmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            supportSvg2TmpBuf = valueDeserializer.readBoolean()
+        }
+        const supportSvg2TmpResult : boolean | undefined = supportSvg2TmpBuf
+        let value : ResourceImageAttachmentOptions = ({resourceValue: resourceValueTmpResult, size: sizeTmpResult, verticalAlign: verticalAlignTmpResult, objectFit: objectFitTmpResult, layoutStyle: layoutStyleTmpResult, colorFilter: colorFilterTmpResult, syncLoad: syncLoadTmpResult, supportSvg2: supportSvg2TmpResult} as ResourceImageAttachmentOptions)
         return value
     }
 }

@@ -23,13 +23,100 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { MutableStyledString_serializer, StyledString, StyledStringInternal, MutableStyledString, MutableStyledStringInternal, DecorationStyleInterface, StyledString_serializer, DecorationStyleInterface_serializer } from "./styledString"
-import { SelectionOptions_serializer, SelectionOptions } from "./common"
+import { SelectionOptions_serializer, SelectionOptions, LinearGradientOptions_serializer, LinearGradientOptions, RadialGradientOptions_serializer, RadialGradientOptions } from "./common"
 import { Resource_serializer } from "./../framework/resource"
 import { ResourceStr, ResourceColor, Length } from "./units"
 import { Resource } from "global.resource"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { Color, TextDecorationType, TextDecorationStyle } from "./enums"
+import { default as text } from "@ohos.graphics.text"
+import { extractors } from "#handwritten"
+import { LengthMetrics } from "arkui.Graphics"
+import { ArkThemeScopeManager } from "#arktheme"
+import { text_LineMetrics_serializer, text_TextBox_serializer } from "./../framework/ohos.graphics.text"
+export class ContentTransitionInternal {
+    public static fromPtr(ptr: KPointer): ContentTransition {
+        return new ContentTransition(ptr)
+    }
+}
+export class ContentTransition implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, ContentTransition.getFinalizer())
+    }
+    constructor() {
+        this(ContentTransition.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._ContentTransition_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._ContentTransition_getFinalizer()
+    }
+}
+export interface IMEClient {
+    nodeId: int64
+    setExtraConfig(config: object): void
+}
+export class IMEClientInternal implements MaterializedBase,IMEClient {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    get nodeId(): int64 {
+        return this.getNodeId()
+    }
+    set nodeId(nodeId: int64) {
+        this.setNodeId(nodeId)
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, IMEClientInternal.getFinalizer())
+    }
+    constructor() {
+        this(IMEClientInternal.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._IMEClient_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._IMEClient_getFinalizer()
+    }
+    public static fromPtr(ptr: KPointer): IMEClientInternal {
+        return new IMEClientInternal(ptr)
+    }
+    public setExtraConfig(config: object): void {
+        const config_casted = config as (object)
+        this.setExtraConfig_serialize(config_casted)
+        return
+    }
+    private getNodeId(): int64 {
+        return this.getNodeId_serialize()
+    }
+    private setNodeId(nodeId: int64): void {
+        const nodeId_casted = nodeId as (int64)
+        this.setNodeId_serialize(nodeId_casted)
+        return
+    }
+    setExtraConfig_serialize(config: object): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.writeCustomObject('object', config)
+        ArkUIGeneratedNativeModule._IMEClient_setExtraConfig(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getNodeId_serialize(): int64 {
+        const retval  = ArkUIGeneratedNativeModule._IMEClient_getNodeId(this.peer!.ptr)
+        return retval
+    }
+    private setNodeId_serialize(nodeId: int64): void {
+        ArkUIGeneratedNativeModule._IMEClient_setNodeId(this.peer!.ptr, nodeId)
+    }
+}
 export interface LayoutManager {
     getLineCount(): int32 | undefined
     getGlyphPositionAtCoordinate(x: double, y: double): PositionWithAffinity | undefined
@@ -126,6 +213,30 @@ export class LayoutManagerInternal implements MaterializedBase,LayoutManager {
         }
         const returnResult : Array<text.TextBox> | undefined = buffer
         return returnResult
+    }
+}
+export class ShaderStyleInternal {
+    public static fromPtr(ptr: KPointer): ShaderStyle {
+        return new ShaderStyle(ptr)
+    }
+}
+export class ShaderStyle implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, ShaderStyle.getFinalizer())
+    }
+    constructor() {
+        this(ShaderStyle.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._ShaderStyle_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._ShaderStyle_getFinalizer()
     }
 }
 export interface StyledStringController {
@@ -489,6 +600,7 @@ export type LineMetrics = text.LineMetrics;
 export type RectWidthStyle = text.RectWidthStyle;
 export type RectHeightStyle = text.RectHeightStyle;
 export type TextBox = text.TextBox;
+export type Paragraph = text.Paragraph;
 export interface CaretStyle {
     width?: Length;
     color?: ResourceColor;
@@ -511,6 +623,7 @@ export interface DecorationStyleResult {
     type: TextDecorationType;
     color: ResourceColor;
     style?: TextDecorationStyle;
+    thicknessScale?: double;
 }
 export interface FontSettingOptions {
     enableVariableFontWeight?: boolean;
@@ -553,6 +666,60 @@ export enum TextDirection {
 export interface SelectedDragPreviewStyle {
     color?: ResourceColor;
 }
+export enum TextContentAlign {
+    TOP = 0,
+    CENTER = 1,
+    BOTTOM = 2
+}
+export enum KeyboardGradientMode {
+    NONE = 0,
+    LINEAR_GRADIENT = 1
+}
+export enum FlipDirection {
+    DOWN = 0,
+    UP = 1
+}
+export enum SuperscriptStyle {
+    NORMAL = 0,
+    SUPERSCRIPT = 1,
+    SUBSCRIPT = 2
+}
+export enum MaxLinesMode {
+    CLIP = 0,
+    SCROLL = 1
+}
+export enum KeyboardFluidLightMode {
+    NONE = 0,
+    BACKGROUND_FLUID_LIGHT = 1
+}
+export interface MaxLinesOptions {
+    overflowMode?: MaxLinesMode;
+}
+export interface LineSpacingOptions {
+    onlyBetweenLines?: boolean;
+}
+export interface NumericTextTransitionOptions {
+    flipDirection?: FlipDirection;
+    enableBlur?: boolean;
+}
+export interface TextLayoutOptions {
+    constraintWidth?: LengthMetrics;
+}
+export interface KeyboardAppearanceConfig {
+    gradientMode?: KeyboardGradientMode;
+    fluidLightMode?: KeyboardFluidLightMode;
+}
+export class ContentTransition_serializer {
+    public static write(buffer: SerializerBase, value: ContentTransition): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): ContentTransition {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return ContentTransitionInternal.fromPtr(ptr)
+    }
+}
 export class LayoutManager_serializer {
     public static write(buffer: SerializerBase, value: LayoutManager): void {
         let valueSerializer : SerializerBase = buffer
@@ -562,6 +729,17 @@ export class LayoutManager_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return LayoutManagerInternal.fromPtr(ptr)
+    }
+}
+export class ShaderStyle_serializer {
+    public static write(buffer: SerializerBase, value: ShaderStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): ShaderStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return ShaderStyleInternal.fromPtr(ptr)
     }
 }
 export class StyledStringController_serializer {
@@ -763,6 +941,17 @@ export class FontSettingOptions_serializer {
         return value
     }
 }
+export class IMEClient_serializer {
+    public static write(buffer: SerializerBase, value: IMEClient): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): IMEClient {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return IMEClientInternal.fromPtr(ptr)
+    }
+}
 export class InsertValue_serializer {
     public static write(buffer: SerializerBase, value: InsertValue): void {
         let valueSerializer : SerializerBase = buffer
@@ -792,6 +981,114 @@ export class PositionWithAffinity_serializer {
         const positionTmpResult : int32 = valueDeserializer.readInt32()
         const affinityTmpResult : text.Affinity = text.Affinity.fromValue(valueDeserializer.readInt32())
         let value : PositionWithAffinity = ({position: positionTmpResult, affinity: affinityTmpResult} as PositionWithAffinity)
+        return value
+    }
+}
+export class LinearGradientStyle_serializer {
+    public static write(buffer: SerializerBase, value: LinearGradientStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): LinearGradientStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return LinearGradientStyleInternal.fromPtr(ptr)
+    }
+}
+export class LineSpacingOptions_serializer {
+    public static write(buffer: SerializerBase, value: LineSpacingOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForOnlyBetweenLines  = value.onlyBetweenLines
+        if (valueHolderForOnlyBetweenLines !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOnlyBetweenLinesTmpValue  = valueHolderForOnlyBetweenLines!
+            valueSerializer.writeBoolean(valueHolderForOnlyBetweenLinesTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): LineSpacingOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const onlyBetweenLinesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let onlyBetweenLinesTmpBuf : boolean | undefined = undefined
+        if ((onlyBetweenLinesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            onlyBetweenLinesTmpBuf = valueDeserializer.readBoolean()
+        }
+        const onlyBetweenLinesTmpResult : boolean | undefined = onlyBetweenLinesTmpBuf
+        let value : LineSpacingOptions = ({onlyBetweenLines: onlyBetweenLinesTmpResult} as LineSpacingOptions)
+        return value
+    }
+}
+export class MaxLinesOptions_serializer {
+    public static write(buffer: SerializerBase, value: MaxLinesOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForOverflowMode  = value.overflowMode
+        if (valueHolderForOverflowMode !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOverflowModeTmpValue  = (valueHolderForOverflowMode as MaxLinesMode)
+            valueSerializer.writeInt32(valueHolderForOverflowModeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): MaxLinesOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const overflowModeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let overflowModeTmpBuf : MaxLinesMode | undefined = undefined
+        if ((overflowModeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            overflowModeTmpBuf = MaxLinesMode.fromValue(valueDeserializer.readInt32())
+        }
+        const overflowModeTmpResult : MaxLinesMode | undefined = overflowModeTmpBuf
+        let value : MaxLinesOptions = ({overflowMode: overflowModeTmpResult} as MaxLinesOptions)
+        return value
+    }
+}
+export class NumericTextTransition_serializer {
+    public static write(buffer: SerializerBase, value: NumericTextTransition): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): NumericTextTransition {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return NumericTextTransitionInternal.fromPtr(ptr)
+    }
+}
+export class NumericTextTransitionOptions_serializer {
+    public static write(buffer: SerializerBase, value: NumericTextTransitionOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForFlipDirection  = value.flipDirection
+        if (valueHolderForFlipDirection !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFlipDirectionTmpValue  = (valueHolderForFlipDirection as FlipDirection)
+            valueSerializer.writeInt32(valueHolderForFlipDirectionTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEnableBlur  = value.enableBlur
+        if (valueHolderForEnableBlur !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableBlurTmpValue  = valueHolderForEnableBlur!
+            valueSerializer.writeBoolean(valueHolderForEnableBlurTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): NumericTextTransitionOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const flipDirectionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let flipDirectionTmpBuf : FlipDirection | undefined = undefined
+        if ((flipDirectionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            flipDirectionTmpBuf = FlipDirection.fromValue(valueDeserializer.readInt32())
+        }
+        const flipDirectionTmpResult : FlipDirection | undefined = flipDirectionTmpBuf
+        const enableBlurTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableBlurTmpBuf : boolean | undefined = undefined
+        if ((enableBlurTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableBlurTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableBlurTmpResult : boolean | undefined = enableBlurTmpBuf
+        let value : NumericTextTransitionOptions = ({flipDirection: flipDirectionTmpResult, enableBlur: enableBlurTmpResult} as NumericTextTransitionOptions)
         return value
     }
 }
@@ -1027,6 +1324,17 @@ export class AccessibilitySpanOptions_serializer {
         return value
     }
 }
+export class ColorShaderStyle_serializer {
+    public static write(buffer: SerializerBase, value: ColorShaderStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): ColorShaderStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return ColorShaderStyleInternal.fromPtr(ptr)
+    }
+}
 export class DecorationStyleResult_serializer {
     public static write(buffer: SerializerBase, value: DecorationStyleResult): void {
         let valueSerializer : SerializerBase = buffer
@@ -1058,6 +1366,14 @@ export class DecorationStyleResult_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForThicknessScale  = value.thicknessScale
+        if (valueHolderForThicknessScale !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForThicknessScaleTmpValue  = valueHolderForThicknessScale!
+            valueSerializer.writeFloat64(valueHolderForThicknessScaleTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): DecorationStyleResult {
         let valueDeserializer : DeserializerBase = buffer
@@ -1082,7 +1398,13 @@ export class DecorationStyleResult_serializer {
             styleTmpBuf = TextDecorationStyle.fromValue(valueDeserializer.readInt32())
         }
         const styleTmpResult : TextDecorationStyle | undefined = styleTmpBuf
-        let value : DecorationStyleResult = ({type: typeTmpResult, color: colorTmpResult, style: styleTmpResult} as DecorationStyleResult)
+        const thicknessScaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let thicknessScaleTmpBuf : double | undefined = undefined
+        if ((thicknessScaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            thicknessScaleTmpBuf = valueDeserializer.readFloat64()
+        }
+        const thicknessScaleTmpResult : double | undefined = thicknessScaleTmpBuf
+        let value : DecorationStyleResult = ({type: typeTmpResult, color: colorTmpResult, style: styleTmpResult, thicknessScale: thicknessScaleTmpResult} as DecorationStyleResult)
         return value
     }
 }
@@ -1417,6 +1739,17 @@ export class EditableTextChangeValue_serializer {
         return value
     }
 }
+export class RadialGradientStyle_serializer {
+    public static write(buffer: SerializerBase, value: RadialGradientStyle): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): RadialGradientStyle {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return RadialGradientStyleInternal.fromPtr(ptr)
+    }
+}
 export class TextDataDetectorConfig_serializer {
     public static write(buffer: SerializerBase, value: TextDataDetectorConfig): void {
         let valueSerializer : SerializerBase = buffer
@@ -1545,6 +1878,289 @@ export class TextDataDetectorConfig_serializer {
         const enablePreviewMenuTmpResult : boolean | undefined = enablePreviewMenuTmpBuf
         let value : TextDataDetectorConfig = ({types: typesTmpResult, onDetectResultUpdate: onDetectResultUpdateTmpResult, color: colorTmpResult, decoration: decorationTmpResult, enablePreviewMenu: enablePreviewMenuTmpResult} as TextDataDetectorConfig)
         return value
+    }
+}
+
+export class ColorShaderStyleInternal {
+    public static fromPtr(ptr: KPointer): ColorShaderStyle {
+        return new ColorShaderStyle(false, ptr)
+    }
+}
+export class ColorShaderStyle extends ShaderStyle implements MaterializedBase {
+    get color(): ResourceColor {
+        return this.getColor()
+    }
+    set color(color: ResourceColor) {
+        this.setColor(color)
+    }
+    constructor(_0: boolean, peerPtr: KPointer) {
+        super(peerPtr)
+    }
+    constructor(color: ResourceColor) {
+        this(false, ColorShaderStyle.construct(color))
+    }
+    static construct(color: ResourceColor): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (color instanceof Color) {
+            thisSerializer.writeInt8((0).toByte())
+            const colorForIdx0  = color as Color
+            thisSerializer.writeInt32(colorForIdx0.getOrdinal())
+        } else if (color instanceof int32) {
+            thisSerializer.writeInt8((1).toByte())
+            const colorForIdx1  = color as int32
+            thisSerializer.writeInt32(colorForIdx1)
+        } else if (color instanceof string) {
+            thisSerializer.writeInt8((2).toByte())
+            const colorForIdx2  = color as string
+            thisSerializer.writeString(colorForIdx2)
+        } else if (color instanceof Resource) {
+            thisSerializer.writeInt8((3).toByte())
+            const colorForIdx3  = color as Resource
+            Resource_serializer.write(thisSerializer, colorForIdx3)
+        }
+        const retval  = ArkUIGeneratedNativeModule._ColorShaderStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._ColorShaderStyle_getFinalizer()
+    }
+    private getColor(): ResourceColor {
+        return this.getColor_serialize()
+    }
+    private setColor(color: ResourceColor): void {
+        const color_casted = color as (ResourceColor)
+        this.setColor_serialize(color_casted)
+        return
+    }
+    private getColor_serialize(): ResourceColor {
+        const retval  = ArkUIGeneratedNativeModule._ColorShaderStyle_getColor(this.peer!.ptr)
+        throw new Error("Object deserialization is not implemented.")
+    }
+    private setColor_serialize(color: ResourceColor): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (color instanceof Color) {
+            thisSerializer.writeInt8((0).toByte())
+            const colorForIdx0  = color as Color
+            thisSerializer.writeInt32(colorForIdx0.getOrdinal())
+        } else if (color instanceof int32) {
+            thisSerializer.writeInt8((1).toByte())
+            const colorForIdx1  = color as int32
+            thisSerializer.writeInt32(colorForIdx1)
+        } else if (color instanceof string) {
+            thisSerializer.writeInt8((2).toByte())
+            const colorForIdx2  = color as string
+            thisSerializer.writeString(colorForIdx2)
+        } else if (color instanceof Resource) {
+            thisSerializer.writeInt8((3).toByte())
+            const colorForIdx3  = color as Resource
+            Resource_serializer.write(thisSerializer, colorForIdx3)
+        }
+        ArkUIGeneratedNativeModule._ColorShaderStyle_setColor(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export class LinearGradientStyleInternal {
+    public static fromPtr(ptr: KPointer): LinearGradientStyle {
+        return new LinearGradientStyle(false, ptr)
+    }
+}
+export class LinearGradientStyle extends ShaderStyle implements MaterializedBase {
+    get options(): LinearGradientOptions {
+        return this.getOptions()
+    }
+    set options(options: LinearGradientOptions) {
+        this.setOptions(options)
+    }
+    constructor(_0: boolean, peerPtr: KPointer) {
+        super(peerPtr)
+    }
+    constructor(options: LinearGradientOptions) {
+        this(false, LinearGradientStyle.construct(options))
+    }
+    static construct(options: LinearGradientOptions): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        LinearGradientOptions_serializer.write(thisSerializer, options)
+        const retval  = ArkUIGeneratedNativeModule._LinearGradientStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._LinearGradientStyle_getFinalizer()
+    }
+    private getOptions(): LinearGradientOptions {
+        return this.getOptions_serialize()
+    }
+    private setOptions(options: LinearGradientOptions): void {
+        const options_casted = options as (LinearGradientOptions)
+        this.setOptions_serialize(options_casted)
+        return
+    }
+    private getOptions_serialize(): LinearGradientOptions {
+        const retval  = ArkUIGeneratedNativeModule._LinearGradientStyle_getOptions(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : LinearGradientOptions = LinearGradientOptions_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    private setOptions_serialize(options: LinearGradientOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        LinearGradientOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._LinearGradientStyle_setOptions(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export class NumericTextTransitionInternal {
+    public static fromPtr(ptr: KPointer): NumericTextTransition {
+        return new NumericTextTransition(false, ptr)
+    }
+}
+export class NumericTextTransition extends ContentTransition implements MaterializedBase {
+    get flipDirection(): FlipDirection | undefined {
+        return this.getFlipDirection()
+    }
+    set flipDirection(flipDirection: FlipDirection | undefined) {
+        const flipDirection_NonNull  = (flipDirection as FlipDirection | undefined)
+        this.setFlipDirection(flipDirection_NonNull)
+    }
+    get enableBlur(): boolean | undefined {
+        return this.getEnableBlur()
+    }
+    set enableBlur(enableBlur: boolean | undefined) {
+        const enableBlur_NonNull  = (enableBlur as boolean | undefined)
+        this.setEnableBlur(enableBlur_NonNull)
+    }
+    constructor(_0: boolean, peerPtr: KPointer) {
+        super(peerPtr)
+    }
+    constructor(options?: NumericTextTransitionOptions) {
+        this(false, NumericTextTransition.construct(options))
+    }
+    static construct(options?: NumericTextTransitionOptions): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            NumericTextTransitionOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const retval  = ArkUIGeneratedNativeModule._NumericTextTransition_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._NumericTextTransition_getFinalizer()
+    }
+    private getFlipDirection(): FlipDirection | undefined {
+        return this.getFlipDirection_serialize()
+    }
+    private setFlipDirection(flipDirection: FlipDirection | undefined): void {
+        const flipDirection_casted = flipDirection as (FlipDirection | undefined)
+        this.setFlipDirection_serialize(flipDirection_casted)
+        return
+    }
+    private getEnableBlur(): boolean | undefined {
+        return this.getEnableBlur_serialize()
+    }
+    private setEnableBlur(enableBlur: boolean | undefined): void {
+        const enableBlur_casted = enableBlur as (boolean | undefined)
+        this.setEnableBlur_serialize(enableBlur_casted)
+        return
+    }
+    private getFlipDirection_serialize(): FlipDirection | undefined {
+        const retval  = ArkUIGeneratedNativeModule._NumericTextTransition_getFlipDirection(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : FlipDirection | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = FlipDirection.fromValue(retvalDeserializer.readInt32())
+        }
+        const returnResult : FlipDirection | undefined = buffer
+        return returnResult
+    }
+    private setFlipDirection_serialize(flipDirection: FlipDirection | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (flipDirection !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const flipDirectionTmpValue  = (flipDirection as FlipDirection)
+            thisSerializer.writeInt32(flipDirectionTmpValue.valueOf())
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._NumericTextTransition_setFlipDirection(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getEnableBlur_serialize(): boolean | undefined {
+        const retval  = ArkUIGeneratedNativeModule._NumericTextTransition_getEnableBlur(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
+    }
+    private setEnableBlur_serialize(enableBlur: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (enableBlur !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const enableBlurTmpValue  = enableBlur!
+            thisSerializer.writeBoolean(enableBlurTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._NumericTextTransition_setEnableBlur(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+}
+export class RadialGradientStyleInternal {
+    public static fromPtr(ptr: KPointer): RadialGradientStyle {
+        return new RadialGradientStyle(false, ptr)
+    }
+}
+export class RadialGradientStyle extends ShaderStyle implements MaterializedBase {
+    get options(): RadialGradientOptions {
+        return this.getOptions()
+    }
+    set options(options: RadialGradientOptions) {
+        this.setOptions(options)
+    }
+    constructor(_0: boolean, peerPtr: KPointer) {
+        super(peerPtr)
+    }
+    constructor(options: RadialGradientOptions) {
+        this(false, RadialGradientStyle.construct(options))
+    }
+    static construct(options: RadialGradientOptions): KPointer {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        RadialGradientOptions_serializer.write(thisSerializer, options)
+        const retval  = ArkUIGeneratedNativeModule._RadialGradientStyle_construct(thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._RadialGradientStyle_getFinalizer()
+    }
+    private getOptions(): RadialGradientOptions {
+        return this.getOptions_serialize()
+    }
+    private setOptions(options: RadialGradientOptions): void {
+        const options_casted = options as (RadialGradientOptions)
+        this.setOptions_serialize(options_casted)
+        return
+    }
+    private getOptions_serialize(): RadialGradientOptions {
+        const retval  = ArkUIGeneratedNativeModule._RadialGradientStyle_getOptions(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const returnResult : RadialGradientOptions = RadialGradientOptions_serializer.read(retvalDeserializer)
+        return returnResult
+    }
+    private setOptions_serialize(options: RadialGradientOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        RadialGradientOptions_serializer.write(thisSerializer, options)
+        ArkUIGeneratedNativeModule._RadialGradientStyle_setOptions(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export interface TextEditControllerEx {
