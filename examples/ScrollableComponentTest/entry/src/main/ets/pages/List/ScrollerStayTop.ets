@@ -81,20 +81,20 @@ export class LazyDataSource<T> extends BasicDataSource<T> {
 @Entry
 @ComponentV2
 export struct Index {
-  @Local isRefreshing: boolean = false
-  @Local refreshText: string = ''
-  @Local lazyDataModel: LazyDataSource<string> = new LazyDataSource()
-  @Local listScroller: ListScroller = new ListScroller()
-  @Local timer: number = 1
+  @Local isRefreshing: boolean = false;
+  @Local refreshText: string = '';
+  @Local lazyDataModel: LazyDataSource<string> = new LazyDataSource();
+  @Local listScroller: ListScroller = new ListScroller();
+  @Local timer: number = 1;
   @Local listItemHeight: number = 0;
 
   aboutToAppear(): void {
-    let arr: string[] = []
+    let arr: string[] = [];
     for (let i = 0; i < 30; i++) {
-      arr.push(`${i}Text Item`)
+      arr.push(`${i}Text Item`);
     }
-    this.lazyDataModel.dataArray = arr
-    this.lazyDataModel.notifyDataReload()
+    this.lazyDataModel.dataArray = arr;
+    this.lazyDataModel.notifyDataReload();
   }
 
   @Builder
@@ -110,9 +110,9 @@ export struct Index {
   }
 
   async getData(timer: number) {
-    let arr: string[] = []
+    let arr: string[] = [];
     for (let i = 5; i > 0; i--) {
-      arr.push(`第 ${timer} 次 add HeadItem ${i}`)
+      arr.push(`第 ${timer} 次 add HeadItem ${i}`);
     }
     setTimeout(() => {
       // 向lazyDataModel数据源头部添加一组数据，并使用scrollToIndex、scrollTo滚动到指定位置，使当前页面顶部展示数据不变。
@@ -120,15 +120,15 @@ export struct Index {
       // 使用scrollTo滚动到指定偏移量
       this.listScroller.scrollTo({ yOffset: 0, xOffset: 0 });
       this.isRefreshing = false;
-    }, 500)
+    }, 500);
   }
 
   build() {
     Column() {
       Button(`刷新`)
         .onClick(async ()=>{
-          await this.getData(this.timer)
-          this.timer++
+          await this.getData(this.timer);
+          this.timer++;
         })
 
       Refresh({ refreshing: $$this.isRefreshing, builder: this.getRefreshBuilder() }) {
@@ -157,20 +157,20 @@ export struct Index {
       .onStateChange(async (status) => {
         switch (status) {
           case RefreshStatus.Inactive:
-            break
+            break;
           case RefreshStatus.Drag:
-            this.refreshText = '继续往下拉'
-            break
+            this.refreshText = '继续往下拉';
+            break;
           case RefreshStatus.OverDrag:
-            this.refreshText = '松手加载'
-            break
+            this.refreshText = '松手加载';
+            break;
           case RefreshStatus.Refresh:
-            this.refreshText = '加载中'
-            await this.getData(this.timer)
-            this.timer++
-            break
+            this.refreshText = '加载中';
+            await this.getData(this.timer);
+            this.timer++;
+            break;
           case RefreshStatus.Done:
-            this.refreshText = '加载成功'
+            this.refreshText = '加载成功';
         }
       })
     }
