@@ -3095,15 +3095,15 @@ export class TextInputOptions_serializer {
                     const valueHolderForTextTmpValueForIdx0ForIdx1  = valueHolderForTextTmpValueForIdx0 as Resource
                     Resource_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx0ForIdx1)
                 }
-            } else if (valueHolderForTextTmpValue instanceof Bindable<ResourceStr>) {
+            } else if (valueHolderForTextTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForTextTmpValueForIdx1  = valueHolderForTextTmpValue as Bindable<ResourceStr>
                 Bindable_Arkui_Component_Units_ResourceStr_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx1)
-            } else if (valueHolderForTextTmpValue instanceof Bindable<Resource>) {
+            } else if (valueHolderForTextTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForTextTmpValueForIdx2  = valueHolderForTextTmpValue as Bindable<Resource>
                 Bindable_Global_Resource_Resource_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx2)
-            } else if (valueHolderForTextTmpValue instanceof Bindable<string>) {
+            } else if (valueHolderForTextTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((3).toByte())
                 const valueHolderForTextTmpValueForIdx3  = valueHolderForTextTmpValue as Bindable<string>
                 Bindable_String_serializer.write(valueSerializer, valueHolderForTextTmpValueForIdx3)
