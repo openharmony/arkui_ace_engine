@@ -347,6 +347,9 @@ HWTEST_F(RichEditorDragTestNg, OnDragEnd001, TestSize.Level2)
  */
 HWTEST_F(RichEditorDragTestNg, OnDragEnd002, TestSize.Level2)
 {
+    /**
+     * @tc.steps: step1. get rich editor pattern.
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -356,7 +359,9 @@ HWTEST_F(RichEditorDragTestNg, OnDragEnd002, TestSize.Level2)
         isTestAddObject = true;
         richEditorPattern->recoverDragResultObjects_.emplace_back(resultObject);
     }
-
+    /**
+     * @tc.steps: step2. test OnDragEnd.
+     */
     auto event = AceType::MakeRefPtr<Ace::DragEvent>();
     richEditorPattern->showSelect_ = false;
     richEditorNode_.Reset();
