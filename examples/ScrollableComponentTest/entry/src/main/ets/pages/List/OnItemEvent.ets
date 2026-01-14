@@ -116,8 +116,8 @@ struct Index {
   @Local data: ListData[] = [
     new ListData('A', ['A1', 'A2', 'A3', 'A4', 'A5', 'A6', 'A7', 'A8']),
     new ListData('B', ['B1', 'B2', 'B3', 'B4', 'B5', 'B6', 'B7', 'B8']),
-  ]
-  @Local draggingData: DraggingData = new DraggingData()
+  ];
+  @Local draggingData: DraggingData = new DraggingData();
 
   build() {
     Stack() {
