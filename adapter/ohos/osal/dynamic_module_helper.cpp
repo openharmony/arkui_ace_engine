@@ -83,6 +83,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"CalendarPickerDialog", "calendarpicker"},
         {"Indexer", "indexer"},
         { "Hyperlink", "hyperlink" },
+        {"SymbolGlyph", "symbol"},
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {

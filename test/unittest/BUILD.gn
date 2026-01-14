@@ -1641,6 +1641,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/interfaces/native/node/calendar_picker_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/calendar/calendar_utils.cpp",
     "$ace_root/test/mock/core/modifier/mock_node_slider_modifier.cpp",
+    "$ace_root/test/mock/core/modifier/mock_symbol_glyph_modifier.cpp",
   ]
   if (ace_engine_feature_enable_split_mode) {
     sources += [

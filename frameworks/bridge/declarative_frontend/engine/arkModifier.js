@@ -2360,11 +2360,68 @@ class MediaCachedImageModifier extends ArkMediaCachedImageComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-
-class SymbolGlyphModifier extends ArkSymbolGlyphComponent {
+class LazyArkSymbolGlyphComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkSymbolGlyphComponent.module === undefined) {
+      LazyArkSymbolGlyphComponent.module = globalThis.requireNapi('arkui.components.arksymbolglyph');
+    }
+    this.lazyComponent = LazyArkSymbolGlyphComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  initialize(value) {
+    this.lazyComponent.initialize(value);
+    return this;
+  }
+  fontColor(value) {
+    this.lazyComponent.fontColor(value);
+    return this;
+  }
+  fontSize(value) {
+    this.lazyComponent.fontSize(value);
+    return this;
+  }
+  fontWeight(value) {
+    this.lazyComponent.fontWeight(value);
+    return this;
+  }
+  renderingStrategy(value) {
+    this.lazyComponent.renderingStrategy(value);
+    return this;
+  }
+  effectStrategy(value) {
+    this.lazyComponent.effectStrategy(value);
+    return this;
+  }
+  symbolEffect(effect, action) {
+    this.lazyComponent.symbolEffect(effect, action);
+    return this;
+  }
+  shaderStyle(value) {
+    this.lazyComponent.shaderStyle(value);
+    return this;
+  }
+  symbolShadow(value) {
+    this.lazyComponent.symbolShadow(value);
+    return this;
+  }
+  minFontScale(value) {
+    this.lazyComponent.minFontScale(value);
+    return this;
+  }
+  maxFontScale(value) {
+    this.lazyComponent.maxFontScale(value);
+    return this;
+  }
+}
+class SymbolGlyphModifier extends LazyArkSymbolGlyphComponent {
   constructor(src, nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
     if (src !== undefined) {
       this.initialize([src]);
     }

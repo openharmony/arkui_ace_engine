@@ -6620,7 +6620,9 @@ if (globalThis.Blank !== undefined) {
 }
 
 globalThis.applySymbolGlyphModifierToNode = function (modifier, nodePtr) {
-  let component = new ArkSymbolGlyphComponent(nodePtr);
+  getUINativeModule().loadNativeModule('SymbolGlyph');
+  let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
+  let component = module.createComponent(nodePtr);
   applyUIAttributes(modifier, nodePtr, component);
   component.applyModifierPatch();
 };
@@ -35662,237 +35664,18 @@ if (globalThis.MediaCachedImage !== undefined) {
     });
   };
 }
-
-class SymbolFontColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetFontColor(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setFontColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
+// @ts-ignore
+if (globalThis.SymbolGlyph === undefined) {
+  globalThis.SymbolGlyph = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('SymbolGlyph');
+      let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
+      module.exportView();
+      getUINativeModule().symbolGlyph.create(params);
+    },
+    name: 'JSSymbolGlyph'
   }
 }
-SymbolFontColorModifier.identity = Symbol('symbolGlyphFontColor');
-
-class SymbolFontSizeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetFontSize(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setFontSize(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SymbolFontSizeModifier.identity = Symbol('symbolGlyphFontSize');
-
-class SymbolFontWeightModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetFontWeight(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setFontWeight(node, this.value);
-    }
-  }
-}
-SymbolFontWeightModifier.identity = Symbol('symbolGlyphFontWeight');
-
-class RenderingStrategyModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetRenderingStrategy(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setRenderingStrategy(node, this.value);
-    }
-  }
-}
-RenderingStrategyModifier.identity = Symbol('symbolGlyphRenderingStrategy');
-
-class EffectStrategyModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetEffectStrategy(node);
-    }
-    else {
-      getUINativeModule().symbolGlyph.setEffectStrategy(node, this.value);
-    }
-  }
-}
-EffectStrategyModifier.identity = Symbol('symbolGlyphEffectStrategy');
-
-class SymbolContentModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetSymbolGlyphInitialize(node);
-    } else {
-      getUINativeModule().symbolGlyph.setSymbolGlyphInitialize(node, this.value);
-    }
-  }
-}
-SymbolContentModifier.identity = Symbol('symbolContent');
-
-class SymbolEffectModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetSymbolEffectOptions(node);
-    } else {
-      getUINativeModule().symbolGlyph.setSymbolEffectOptions(node, this.value.symbolEffect, this.value.action);
-    }
-  }
-}
-SymbolEffectModifier.identity = Symbol('symbolEffect');
-
-class SymbolShadowModifier extends ModifierWithKey {
-    constructor(value) {
-      super(value);
-    }
-    applyPeer(node, reset) {
-      if (reset) {
-        getUINativeModule().symbolGlyph.resetSymbolShadow(node);
-      } else {
-        getUINativeModule().symbolGlyph.setSymbolShadow(node, this.value);
-      }
-    }
-  }
-  SymbolShadowModifier.identity = Symbol('symbolShadow');
-
-  class ShaderStyleModifier extends ModifierWithKey {
-    constructor(value) {
-      super(value);
-    }
-    applyPeer(node, reset) {
-      if (reset) {
-        getUINativeModule().symbolGlyph.resetShaderStyle(node);
-      } else {
-        getUINativeModule().symbolGlyph.setShaderStyle(node, this.value);
-      }
-    }
-  }
-  ShaderStyleModifier.identity = Symbol('shaderStyle');
-
-class SymbolMinFontScaleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetMinFontScale(node);
-    } else {
-      getUINativeModule().symbolGlyph.setMinFontScale(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SymbolMinFontScaleModifier.identity = Symbol('symbolGlyphMinFontScale');
-
-class SymbolMaxFontScaleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().symbolGlyph.resetMaxFontScale(node);
-    } else {
-      getUINativeModule().symbolGlyph.setMaxFontScale(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-SymbolMaxFontScaleModifier.identity = Symbol('symbolGlyphMaxFontScale');
-
-/// <reference path='./import.ts' />
-class ArkSymbolGlyphComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  initialize(value) {
-    if (value[0] !== undefined) {
-      modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, value[0]);
-    }
-    else {
-      modifierWithKey(this._modifiersWithKeys, SymbolContentModifier.identity, SymbolContentModifier, undefined);
-    }
-    return this;
-  }
-  fontColor(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolFontColorModifier.identity, SymbolFontColorModifier, value);
-    return this;
-  }
-  fontSize(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolFontSizeModifier.identity, SymbolFontSizeModifier, value);
-    return this;
-  }
-  fontWeight(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolFontWeightModifier.identity, SymbolFontWeightModifier, value);
-    return this;
-  }
-  renderingStrategy(value) {
-    modifierWithKey(this._modifiersWithKeys, RenderingStrategyModifier.identity, RenderingStrategyModifier, value);
-    return this;
-  }
-  effectStrategy(value) {
-    modifierWithKey(this._modifiersWithKeys, EffectStrategyModifier.identity, EffectStrategyModifier, value);
-    return this;
-  }
-  symbolEffect(effect, action) {
-    let symbolEffect = new ArkSymbolEffect();
-    symbolEffect.symbolEffect = effect;
-    symbolEffect.action = action;
-    modifierWithKey(this._modifiersWithKeys, SymbolEffectModifier.identity, SymbolEffectModifier, symbolEffect);
-    return this;
-  }
-  shaderStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, ShaderStyleModifier.identity, ShaderStyleModifier, value);
-    return this;
-  }
-  symbolShadow(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolShadowModifier.identity, SymbolShadowModifier, value);
-    return this;
-  }
-  minFontScale(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolMinFontScaleModifier.identity, SymbolMinFontScaleModifier, value);
-    return this;
-  }
-  maxFontScale(value) {
-    modifierWithKey(this._modifiersWithKeys, SymbolMaxFontScaleModifier.identity, SymbolMaxFontScaleModifier, value);
-    return this;
-  }
-}
-
 class SystemBarEffectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -35902,17 +35685,6 @@ class SystemBarEffectModifier extends ModifierWithKey {
   }
 }
 SystemBarEffectModifier.identity = Symbol('systemBarEffect');
-
-// @ts-ignore
-if (globalThis.SymbolGlyph !== undefined) {
-  globalThis.SymbolGlyph.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkSymbolGlyphComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.SymbolGlyphModifier(undefined, nativePtr, classType);
-    });
-  };
-}
 
 class SymbolSpanFontColorModifier extends ModifierWithKey {
   constructor(value) {

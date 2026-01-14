@@ -115,6 +115,11 @@
       OHOS::Ace::NG::DragDropFuncWrapper::*;
       OHOS::Ace::NG::DragControllerFuncWrapper::*;
       OHOS::Ace::NG::DragDropGlobalController::*;
+      OHOS::Ace::NG::SymbolSourceInfo::*;
+      OHOS::Ace::NG::SymbolEffectOptions::*;
+      "OHOS::Ace::PatternResourceManager::ParsePropertyValue(OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, OHOS::Ace::RefPtr<OHOS::Ace::PropertyValueBase>)";
+      "OHOS::Ace::PatternResourceManager::AddResource(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&, std::__h::function<void (OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> const&)>&&)";
+      "OHOS::Ace::SymbolShadow OHOS::Ace::NG::Converter::Convert<OHOS::Ace::SymbolShadow, Ark_ShadowOptions>(Ark_ShadowOptions const&)";
       OHOS::Ace::NG::Reporter::*;
       OHOS::Ace::WindowUtils::*;
       OHOS::Ace::NG::ParallelPagePattern::*;

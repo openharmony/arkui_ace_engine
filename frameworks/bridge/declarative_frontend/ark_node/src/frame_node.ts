@@ -1204,8 +1204,10 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['SymbolGlyph', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'SymbolGlyph', (node: NodePtr, type: ModifierType): ArkSymbolGlyphComponent => {
-        return new ArkSymbolGlyphComponent(node, type);
-      })
+        getUINativeModule().loadNativeModule('SymbolGlyph');
+        let module = globalThis.requireNapi('arkui.components.arksymbolglyph');
+        return module.createComponent(node, type);
+    })
     }],
     ['FlowItem', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'FlowItem', (node: NodePtr, type: ModifierType): ArkFlowItemComponent => {

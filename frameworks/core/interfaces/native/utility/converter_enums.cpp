@@ -1641,7 +1641,9 @@ template<> void AssignCast(std::optional<ScrollSizeMode>& dst, const Ark_ScrollS
 }
 
 template<>
-void AssignCast(std::optional<Converter::RenderingStrategy>& dst, const Ark_SymbolRenderingStrategy& src)
+ACE_FORCE_EXPORT void AssignCast(
+    std::optional<Converter::RenderingStrategy>& dst,
+    const Ark_SymbolRenderingStrategy& src)
 {
     switch (src) {
         case ARK_SYMBOL_RENDERING_STRATEGY_SINGLE: dst = Converter::RenderingStrategy::SINGLE; break;
@@ -1664,7 +1666,7 @@ void AssignCast(std::optional<LineDirection>& dst, const Ark_Axis& src)
 }
 
 template<>
-void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_SymbolEffectStrategy& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<OHOS::Ace::SymbolEffectType>& dst, const Ark_SymbolEffectStrategy& src)
 {
     switch (src) {
         case ARK_SYMBOL_EFFECT_STRATEGY_NONE: dst = OHOS::Ace::SymbolEffectType::NONE; break;
