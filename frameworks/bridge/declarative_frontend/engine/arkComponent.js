@@ -27522,7 +27522,7 @@ class ArkNavigationComponent extends ArkComponent {
     return this;
   }
   navDestination(builder) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'navDestination function not supported in Navigation class');
   }
   ignoreLayoutSafeArea(types, edges) {
     let opts = new ArkSafeAreaExpandOpts();
@@ -36492,7 +36492,7 @@ class ArkSwiperComponent extends ArkComponent {
     return this;
   }
   indicatorStyle(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'indicatorStyle function not supported in ArkSwiper class');
   }
   prevMargin(value) {
     modifierWithKey(this._modifiersWithKeys, SwiperPrevMarginModifier.identity, SwiperPrevMarginModifier, value);
