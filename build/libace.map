@@ -1626,7 +1626,6 @@
       OHOS::Ace::GridContainerInfo::GetMarginLeft*;
       OHOS::Ace::GridColumnInfo::GetWidth*;
       OHOS::Ace::GridColumnInfo::GetMaxWidth*;
-
       OHOS::Ace::FlexElement::*;
  	  VTT?for?OHOS::Ace::FlexElement;
  	  vtable?for?OHOS::Ace::FlexElement;
