@@ -22,7 +22,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr bool IS_CLOSE_EFFECT = true;
-constexpr double DEFAULT_STROKE_WIDTH = 24.0;
 constexpr double DEFAULT_RADIUS = 20.0;
 constexpr double DEFAULT_OFFSET_X = 5.0;
 constexpr double DEFAULT_OFFSET_Y = 5.0;
@@ -67,7 +66,7 @@ void ResetDataPanelTrackBackgroundColor(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    DataPanelModelNG::SetTrackBackground(frameNode, Color::FromString(DEFAULT_TRACK_BACKGROUND));
+    DataPanelModelNG::ResetTrackBackground(frameNode);
     DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::TRACK_BACKGROUND_COLOR, nullptr);
 }
 
@@ -97,7 +96,7 @@ void ResetDataPanelStrokeWidth(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    DataPanelModelNG::SetStrokeWidth(frameNode, Dimension(DEFAULT_STROKE_WIDTH, DimensionUnit::VP));
+    DataPanelModelNG::ResetStrokeWidth(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         DataPanelModelNG::CreateWithResourceObj(frameNode, DataPanelResourceType::STROKE_WIDTH, nullptr);
     }

@@ -100,10 +100,22 @@ void DataPanelModelNG::SetTrackBackground(const Color& trackBackgroundColor)
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, true);
 }
 
+void DataPanelModelNG::ResetTrackBackground()
+{
+    ACE_RESET_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground);
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, false);
+}
+
 void DataPanelModelNG::SetStrokeWidth(const Dimension& strokeWidth)
 {
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, strokeWidth);
     ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, true);
+}
+
+void DataPanelModelNG::ResetStrokeWidth()
+{
+    ACE_RESET_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth);
+    ACE_UPDATE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, false);
 }
 
 void DataPanelModelNG::SetShadowOption(const DataPanelShadow& shadowOption)
@@ -139,10 +151,22 @@ void DataPanelModelNG::SetTrackBackground(FrameNode* frameNode, const Color& tra
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, true, frameNode);
 }
 
+void DataPanelModelNG::ResetTrackBackground(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackground, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, TrackBackgroundSetByUser, false, frameNode);
+}
+
 void DataPanelModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth)
 {
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, strokeWidth, frameNode);
     ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, true, frameNode);
+}
+
+void DataPanelModelNG::ResetStrokeWidth(FrameNode* frameNode)
+{
+    ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidth, frameNode);
+    ACE_UPDATE_NODE_PAINT_PROPERTY(DataPanelPaintProperty, StrokeWidthSetByUser, false, frameNode);
 }
 
 void DataPanelModelNG::SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption)
