@@ -1640,7 +1640,7 @@ HWTEST_F(RadioTestNg, RadioSetResponseRegion001, TestSize.Level1)
      */
     std::vector<DimensionRect> region = {
         DimensionRect(Dimension(10.0), Dimension(10.0))
-    }
+    };
     radioModelNG.SetResponseRegion(region);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
