@@ -362,7 +362,6 @@ void SubwindowManager::HideMenuNG(bool showPreviewAnimation, bool startDrag)
     auto subwindow = SubwindowManager::GetInstance()->GetSubwindowByType(
         Container::CurrentId(), SubwindowType::TYPE_MENU);
     if (subwindow) {
-        TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hide menu ng enter");
         subwindow->HideMenuNG(showPreviewAnimation, startDrag);
     } else {
         TAG_LOGI(AceLogTag::ACE_SUB_WINDOW, "hide menu ng exit, window not exist");
