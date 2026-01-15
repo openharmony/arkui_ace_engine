@@ -348,15 +348,8 @@ void UiSessionManagerOhos::ReportInspectorTreeValue(const std::string& data)
     for (auto pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
-            size_t partSize = data.size() / ONCE_IPC_SEND_DATA_MAX_SIZE;
-            for (size_t i = 0; i <= partSize; i++) {
-                if (i != partSize) {
-                    reportService->ReportInspectorTreeValue(
-                        data.substr(i * ONCE_IPC_SEND_DATA_MAX_SIZE, ONCE_IPC_SEND_DATA_MAX_SIZE), i + 1, false);
-                } else {
-                    reportService->ReportInspectorTreeValue(data.substr(i * ONCE_IPC_SEND_DATA_MAX_SIZE), i + 1, true);
-                }
-            }
+            int32_t index = 1;
+            reportService->ReportInspectorTreeValue(data, index, true);
         } else {
             LOGW("report component event failed,process id:%{public}d", pair.first);
         }
