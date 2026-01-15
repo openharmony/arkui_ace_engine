@@ -113,8 +113,8 @@ class JSHyperlink extends JSViewAbstract {
     getUINativeModule().hyperlink.setDraggable(true, draggable);
   }
 
-  static responseRegion(value) {
-    getUINativeModule().hyperlink.setResponseRegion(true, responseRegion, responseRegion.length);
+  static responseRegion(region) {
+    getUINativeModule().hyperlink.setResponseRegion(true, region);
   }
 
   static pop() {
