@@ -125,7 +125,17 @@ auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& st
     // board
     TabContentModelStatic::SetBoard(frameNode, Converter::OptConvert<BoardStyle>(style._board));
     // labelStyle
-    TabContentModelStatic::SetLabelStyle(frameNode, Converter::OptConvert<LabelStyle>(style._labelStyle), true);
+    auto optLabelStyle = Converter::OptConvert<LabelStyle>(style._labelStyle);
+    if (optLabelStyle) {
+        auto labelFont = Converter::OptConvertFromFont(style._labelStyle.value.font, true);
+        optLabelStyle->fontSize = labelFont.fontSize;
+        optLabelStyle->fontStyle = labelFont.fontStyle;
+        optLabelStyle->fontWeight = labelFont.fontWeight;
+        if (labelFont.fontFamilies.size() > 0) {
+            optLabelStyle->fontFamily = labelFont.fontFamilies;
+        }
+    }
+    TabContentModelStatic::SetLabelStyle(frameNode, optLabelStyle, true);
     // padding
     std::optional<PaddingProperty> optPadding;
     bool useLocalizedPadding = false;
@@ -191,7 +201,17 @@ auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarSty
     // symmetricExtensible
     TabContentModelStatic::SetSymmetricExtensible(frameNode, Converter::OptConvert<bool>(style._symmetricExtensible));
     // labelStyle
-    TabContentModelStatic::SetLabelStyle(frameNode, Converter::OptConvert<LabelStyle>(style._labelStyle), false);
+    auto optLabelStyle = Converter::OptConvert<LabelStyle>(style._labelStyle);
+    if (optLabelStyle) {
+        auto labelFont = Converter::OptConvertFromFont(style._labelStyle.value.font, false);
+        optLabelStyle->fontSize = labelFont.fontSize;
+        optLabelStyle->fontStyle = labelFont.fontStyle;
+        optLabelStyle->fontWeight = labelFont.fontWeight;
+        if (labelFont.fontFamilies.size() > 0) {
+            optLabelStyle->fontFamily = labelFont.fontFamilies;
+        }
+    }
+    TabContentModelStatic::SetLabelStyle(frameNode, optLabelStyle, false);
     // iconStyle
     TabContentModelStatic::SetIconStyle(frameNode, Converter::OptConvert<IconStyle>(style._iconStyle));
     // id
@@ -323,15 +343,6 @@ void AssignCast(std::optional<LabelStyle>& dst, const Ark_TabBarLabelStyle& src)
     Validator::ValidateNonNegative(maxFontSize);
     Validator::ValidateNonPercent(maxFontSize);
     dst->maxFontSize = maxFontSize;
-    auto labelFont = Converter::OptConvert<Font>(src.font);
-    if (labelFont) {
-        dst->fontSize = labelFont->fontSize;
-        dst->fontStyle = labelFont->fontStyle;
-        dst->fontWeight = labelFont->fontWeight;
-        if (labelFont->fontFamilies.size() > 0) {
-            dst->fontFamily = labelFont->fontFamilies;
-        }
-    }
     dst->unselectedColor = Converter::OptConvert<Color>(src.unselectedColor);
     dst->selectedColor = Converter::OptConvert<Color>(src.selectedColor);
 }
