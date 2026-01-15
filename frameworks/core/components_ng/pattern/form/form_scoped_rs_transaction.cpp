@@ -18,10 +18,11 @@
 #include "base/log/ace_trace.h"
 #include "base/log/log.h"
 #include "base/utils/utils.h"
+#include "core/common/container_scope.h"
+#include "core/pipeline_ng/pipeline_context.h"
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "transaction/rs_sync_transaction_controller.h"
-#include "core/common/form_manager.h"
 
 namespace OHOS::Ace::NG {
 FormScopedRSTransaction::FormScopedRSTransaction(int32_t scopeId)
