@@ -2233,7 +2233,7 @@ HWTEST_F(FormPatternTest, FormPatternTest_SetColorMode, TestSize.Level0)
     // pattern not null
     EXPECT_NE(pattern, nullptr);
     EXPECT_EQ(pattern->formColorMode_, -1);
- 
+
     pattern->SetColorMode(0);
     EXPECT_EQ(pattern->formColorMode_, 0);
 }
@@ -2251,5 +2251,37 @@ HWTEST_F(FormPatternTest, FormPatternTest_064, TestSize.Level0)
     EXPECT_NE(pattern, nullptr);
     pattern->GetRSUIContext();
     EXPECT_FALSE(pattern->rsUIContext_ != nullptr);
+}
+
+/**
+ * @tc.name: FormPatternTest_065
+ * @tc.desc: OnAttachContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_065, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
+    EXPECT_NE(pattern, nullptr);
+    pattern->isDetachContext_ = true;
+    pattern->OnAttachContext(nullptr);
+    EXPECT_FALSE(pattern->isDetachContext_);
+}
+
+/**
+ * @tc.name: FormPatternTest_066
+ * @tc.desc: OnDetachContext.
+ * @tc.type: FUNC
+ */
+HWTEST_F(FormPatternTest, FormPatternTest_066, TestSize.Level0)
+{
+    RefPtr<FormNode> frameNode = CreateFromNode();
+    auto pattern = frameNode->GetPattern<FormPattern>();
+    // pattern not null
+    EXPECT_NE(pattern, nullptr);
+    pattern->isDetachContext_ = false;
+    pattern->OnDetachContext(nullptr);
+    EXPECT_TRUE(pattern->isDetachContext_);
 }
 } // namespace OHOS::Ace::NG
