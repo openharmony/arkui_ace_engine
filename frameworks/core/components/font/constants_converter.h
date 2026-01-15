@@ -83,7 +83,7 @@ OHOS::Rosen::TextDecoration ConvertTxtTextDecoration(std::vector<TextDecoration>
 
 OHOS::Rosen::TextDecorationStyle ConvertTxtTextDecorationStyle(TextDecorationStyle textDecorationStyle);
 
-void ConvertTxtStyle(const TextStyle &textStyle,
+ACE_FORCE_EXPORT void ConvertTxtStyle(const TextStyle &textStyle,
     const WeakPtr<PipelineBase> &context, OHOS::Rosen::TextStyle &txtStyle);
 void ConvertTxtStyle(const TextStyle& textStyle, OHOS::Rosen::TextStyle& txtStyle);
 

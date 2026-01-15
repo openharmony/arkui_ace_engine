@@ -103,8 +103,8 @@ ACE_EXPORT extern const char DOM_WAITING_PSEUDO_CLASS[];
 ACE_EXPORT extern const char DOM_HOVER_PSEUDO_CLASS[];
 
 // common style constants
-ACE_EXPORT extern const char DOM_WIDTH[];
-ACE_EXPORT extern const char DOM_HEIGHT[];
+ACE_FORCE_EXPORT extern const char DOM_WIDTH[];
+ACE_FORCE_EXPORT extern const char DOM_HEIGHT[];
 ACE_EXPORT extern const char DOM_TYPE[];
 ACE_EXPORT extern const char DOM_VALUE[];
 ACE_EXPORT extern const char DOM_START[];
@@ -395,7 +395,7 @@ ACE_EXPORT extern const char DOM_DIV_EVENT_REACH_START[];
 ACE_EXPORT extern const char DOM_DIV_EVENT_REACH_END[];
 
 // image attribute and style constants
-ACE_EXPORT extern const char DOM_SRC[];
+ACE_FORCE_EXPORT extern const char DOM_SRC[];
 ACE_EXPORT extern const char DOM_TOP[];
 ACE_EXPORT extern const char DOM_IMAGE_FIT[];
 ACE_EXPORT extern const char DOM_IMAGE_ALT[];

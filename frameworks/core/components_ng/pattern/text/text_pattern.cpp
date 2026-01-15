@@ -28,6 +28,7 @@
 #include "base/geometry/offset.h"
 #include "base/log/dump_log.h"
 #include "base/log/log_wrapper.h"
+#include "base/utils/measure_util.h"
 #include "base/utils/multi_thread.h"
 #include "base/utils/string_utils.h"
 #include "base/utils/utf_helper.h"
@@ -52,7 +53,6 @@
 #include "core/components_ng/render/render_property.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #ifdef ENABLE_ROSEN_BACKEND
-#include "core/components/custom_paint/rosen_render_custom_paint.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
@@ -7225,7 +7225,7 @@ void TextPattern::CalculateDefaultHandleHeight(float& height)
     content.fontSize = textStyle_.value().GetFontSize();
     auto fontweight = StringUtils::FontWeightToString(textStyle_.value().GetFontWeight());
     content.fontWeight = fontweight;
-    height = std::max(static_cast<float>(RosenRenderCustomPaint::MeasureTextSizeInner(content).Height()), 0.0f);
+    height = std::max(static_cast<float>(MeasureUtil::MeasureTextSize(content).Height()), 0.0f);
 #endif
 }
 

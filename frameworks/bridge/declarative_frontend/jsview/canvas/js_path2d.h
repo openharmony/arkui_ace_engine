@@ -19,6 +19,7 @@
 #include "base/memory/referenced.h"
 #include "bridge/declarative_frontend/engine/bindings_defines.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_canvas_path.h"
+#include "core/components/common/properties/paint_state.h"
 
 namespace OHOS::Ace::Framework {
 

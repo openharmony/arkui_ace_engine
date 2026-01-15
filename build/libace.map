@@ -308,6 +308,10 @@
       vtable?for?OHOS::Ace::V2::WaterFlowPositionController;
 
       virtual?thunk?to?OHOS::Ace::NG::ScrollablePattern::*;
+      "OHOS::Ace::AnimatableColor::AnimatableColor(OHOS::Ace::Color const&, OHOS::Ace::AnimationOption const&)";
+      "OHOS::Ace::AnimatableColor::operator=(OHOS::Ace::AnimatableColor const&)";
+      "OHOS::Ace::Framework::PreviewMockModelImpl::CreateJSRenderingContext(bool, OHOS::Ace::RefPtr<OHOS::Ace::CanvasTaskPool> const&)";
+      "OHOS::Ace::Framework::ArkJSRuntime::HasPendingException()";
 
       OHOS::Ace::Framework::JsAcePage::*;
       OHOS::Ace::TextPickerModel::*;
@@ -856,6 +860,7 @@
       vtable?for?OHOS::Ace::RawRecognizer;
       vtable?for?OHOS::Ace::ProgressDataPanelComponent;
       vtable?for?OHOS::Ace::PercentageDataPanelComponent;
+      vtable?for?OHOS::Ace::Framework::ArkJSValue;
 
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
@@ -1478,7 +1483,26 @@
       "OHOS::Ace::Singleton<OHOS::Ace::BackEndEventManager<void (std::__h::shared_ptr<OHOS::Ace::ClickInfo> const&)>>::GetInstance()";
 
       OHOS::Ace::LinearColor::TRANSPARENT;
-
+      "OHOS::Ace::Framework::JsiEngineInstance::GetRunningPage() const";
+      "OHOS::Ace::Framework::JsiEngineInstance::GetFrontendDelegate() const";
+      OHOS::Ace::ImageProvider::FetchImageObject*;
+      OHOS::Ace::DOM_HEIGHT;
+      OHOS::Ace::DOM_TEXT_FONT_STYLE_ITALIC;
+      OHOS::Ace::DOM_SRC;
+      OHOS::Ace::DOM_WIDTH;
+      "OHOS::Ace::RosenDecorationPainter::PaintShadow(OHOS::Rosen::Drawing::Path const&, OHOS::Ace::Shadow const&, OHOS::Rosen::Drawing::Canvas*, OHOS::Rosen::Drawing::Brush const*, OHOS::Rosen::Drawing::Pen const*)";
+      "OHOS::Ace::Framework::JsiOffscreenCanvasBridge::JsiOffscreenCanvasBridge(OHOS::Ace::RefPtr<OHOS::Ace::PipelineBase> const&, int, int)";
+      "OHOS::Ace::RosenRenderContext::GetRSNode()";
+      "OHOS::Ace::Constants::ConvertTxtTextAlign(OHOS::Ace::TextAlign)";
+      "OHOS::Ace::RosenFontCollection::GetInstance()";
+      "OHOS::Ace::ImageCache::Create()";
+      OHOS::Ace::AssetImageLoader::*;
+      "OHOS::Ace::Constants::ConvertTxtTextDirection(OHOS::Ace::TextDirection)";
+      "OHOS::Ace::ImageProvider::MakeRSBitmapFormatFromPixelMap(OHOS::Ace::RefPtr<OHOS::Ace::PixelMap> const&)";
+      "OHOS::Ace::ImageCache::CacheImage(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, std::__h::shared_ptr<OHOS::Ace::CachedImage> const&)";
+      "OHOS::Ace::ImageCache::GetCacheImage(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&)";
+      "OHOS::Ace::Constants::ConvertTxtStyle(OHOS::Ace::TextStyle const&, OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, OHOS::Rosen::TextStyle&)";
+      "OHOS::Ace::ImageProvider::GetDrawingImage(std::__h::basic_string<char, std::__h::char_traits<char>, std::__h::allocator<char>> const&, OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase>, OHOS::Ace::Size)";
       "OHOS::Ace::CardScope::CurrentId()";
       "OHOS::Ace::NG::Gradient::AddColor(OHOS::Ace::NG::GradientColor const&)";
       "OHOS::Ace::Framework::JsConverter::ConvertNapiValueToJsVal(napi_value__*)";
@@ -1494,6 +1518,7 @@
       OHOS::Ace::PipelineBase::GetImageCache*;
       "OHOS::Ace::ACE_PI";
       "OHOS::Ace::ACE_E";
+      "OHOS::Ace::Framework::ArkJSRuntime::GetThreadVm() const";
       OHOS::Ace::PipelineBase::GetImageCache*;
 
       #sidebar
@@ -1681,6 +1706,8 @@
  	  vtable?for?OHOS::Ace::DisplayComponent;
  	  OHOS::Ace::Edge::GetOffsetInPx*;
  	  OHOS::Ace::RosenRenderContext::GetRSNode*;
+      VTT?for?OHOS::Ace::AssetImageLoader;
+      vtable?for?OHOS::Ace::AssetImageLoader;
     };
   local:
     *;

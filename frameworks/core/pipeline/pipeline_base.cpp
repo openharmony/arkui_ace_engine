@@ -27,7 +27,6 @@
 #include "core/common/window.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/components/custom_paint/render_custom_paint.h"
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
@@ -502,11 +501,6 @@ void PipelineBase::onRouterChange(const std::string& url)
 void PipelineBase::TryLoadImageInfo(const std::string& src, std::function<void(bool, int32_t, int32_t)>&& loadCallback)
 {
     ImageProvider::TryLoadImageInfo(AceType::Claim(this), src, std::move(loadCallback));
-}
-
-RefPtr<OffscreenCanvas> PipelineBase::CreateOffscreenCanvas(int32_t width, int32_t height)
-{
-    return RenderOffscreenCanvas::Create(AceType::WeakClaim(this), width, height);
 }
 
 void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type)

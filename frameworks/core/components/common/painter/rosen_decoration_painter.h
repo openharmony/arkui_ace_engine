@@ -97,7 +97,7 @@ public:
     static void PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize, const Offset& position,
         SkCanvas* canvas, const sk_sp<SkImage>& image, double dipScale);
 #else
-    static void PaintShadow(const RSPath& path, const Shadow& shadow,
+    ACE_FORCE_EXPORT static void PaintShadow(const RSPath& path, const Shadow& shadow,
         RSCanvas* canvas, const RSBrush* brush = nullptr, const RSPen* pen = nullptr);
     static void PaintShadow(const RSPath& path, const Shadow& shadow,
         const std::shared_ptr<RSNode>& rsNode);

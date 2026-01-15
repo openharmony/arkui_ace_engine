@@ -50,7 +50,6 @@
 #include "core/components_ng/pattern/text/paragraph_util.h"
 #include "core/text/text_emoji_processor.h"
 #ifdef ENABLE_ROSEN_BACKEND
-#include "core/components/custom_paint/rosen_render_custom_paint.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #endif
 

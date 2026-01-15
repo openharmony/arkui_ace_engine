@@ -35,7 +35,7 @@ using panda::StringRef;
 class PandaFunctionData;
 
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions, hicpp-special-member-functions)
-class ArkJSValue final : public JsValue {
+class ACE_FORCE_EXPORT ArkJSValue final : public JsValue {
 public:
     ArkJSValue(const shared_ptr<ArkJSRuntime> &runtime, Local<JSValueRef> value) : value_(runtime->GetEcmaVm(), value)
     {

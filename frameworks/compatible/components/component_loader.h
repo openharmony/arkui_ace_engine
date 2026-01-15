@@ -27,6 +27,7 @@ class PipelineBase;
 namespace Framework {
 class DOMNode;
 class JsCommand;
+class BaseCanvasBridge;
 }
 
 namespace V2 {

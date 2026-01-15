@@ -15,7 +15,8 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine_loader.h"
 
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_canvas_bridge.h"
+#include "compatible/components/canvas/canvas_modifier_compatible.h"
+#include "core/common/dynamic_module_helper.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_xcomponent_bridge.h"
 
 namespace OHOS::Ace {
@@ -23,6 +24,23 @@ SINGLETON_INSTANCE_IMPL(Framework::JsiEngineLoader);
 }
 
 namespace OHOS::Ace::Framework {
+
+namespace {
+
+const ArkUICanvasModifierCompatible* GetCanvasInnerModifier()
+{
+    static const ArkUICanvasModifierCompatible* canvasModifier_ = nullptr;
+    if (canvasModifier_) {
+        return canvasModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("canvas");
+    if (loader) {
+        canvasModifier_ = reinterpret_cast<const ArkUICanvasModifierCompatible*>(loader->GetCustomModifier());
+        return canvasModifier_;
+    }
+    return nullptr;
+}
+} // namespace
 
 JsiEngineLoader::JsiEngineLoader() = default;
 JsiEngineLoader::~JsiEngineLoader() = default;
@@ -34,7 +52,10 @@ RefPtr<JsEngine> JsiEngineLoader::CreateJsEngine(int32_t instanceId) const
 
 RefPtr<BaseCanvasBridge> JsiEngineLoader::CreateCanvasBridge() const
 {
-    return AceType::MakeRefPtr<JsiCanvasBridge>();
+    CanvasBridgeParams params = { .pipeline = nullptr, .width = 0, .height = 0, .isOffscreen = false };
+    const auto* modifier = GetCanvasInnerModifier();
+    void* bridgePtr = modifier->createCanvasBridge(params);
+    return AceType::Claim(reinterpret_cast<BaseCanvasBridge*>(bridgePtr));
 }
 
 RefPtr<BaseXComponentBridge> JsiEngineLoader::CreateXComponentBridge() const
