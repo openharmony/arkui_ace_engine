@@ -59,6 +59,7 @@ void RepeatModelNG::CreateNewChildStart(const std::string& key)
     stack->PushKey(key);
     const auto stacksKey = stack->GetKey();
     auto node = AceType::MakeRefPtr<SyntaxItem>(stacksKey);
+    ACE_UINODE_TRACE(node);
     ElementRegister::GetInstance()->AddUINode(node);
     stack->Push(node);
 }
