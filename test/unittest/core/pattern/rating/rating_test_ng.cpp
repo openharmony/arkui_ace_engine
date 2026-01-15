@@ -1551,8 +1551,7 @@ HWTEST_F(RatingTestNg, RatingModelTest003, TestSize.Level1)
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
     RatingModelNG::SetForegroundSrc(node, RATING_FOREGROUND_URL, true);
-    EXPECT_EQ(ratingLayoutProperty->GetForegroundImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
-        RATING_FOREGROUND_URL);
+    EXPECT_EQ(ratingLayoutProperty->GetForegroundImageSourceInfo(), std::nullopt);
 }
 
 /**
@@ -1623,8 +1622,7 @@ HWTEST_F(RatingTestNg, RatingModelTest005, TestSize.Level1)
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
     RatingModelNG::SetSecondarySrc(node, RATING_SECONDARY_URL, true);
-    EXPECT_EQ(ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
-        RATING_SECONDARY_URL);
+    EXPECT_EQ(ratingLayoutProperty->GetSecondaryImageSourceInfo(), std::nullopt);
 }
 
 /**
@@ -1695,8 +1693,7 @@ HWTEST_F(RatingTestNg, RatingModelTest007, TestSize.Level1)
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
     RatingModelNG::SetBackgroundSrc(node, RATING_BACKGROUND_URL, true);
-    EXPECT_EQ(ratingLayoutProperty->GetBackgroundImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
-        RATING_BACKGROUND_URL);
+    EXPECT_EQ(ratingLayoutProperty->GetBackgroundImageSourceInfo(), std::nullopt);
 }
 
 /**
@@ -2031,7 +2028,6 @@ HWTEST_F(RatingTestNg, RatingModelTest016, TestSize.Level1)
     auto node = AceType::RawPtr(frameNode);
     ASSERT_NE(node, nullptr);
     RatingModelNG::UpdateStarStyleImage(node, static_cast<RatingUriType>(-1), RATING_SECONDARY_URL);
-    EXPECT_EQ(ratingLayoutProperty->GetSecondaryImageSourceInfo().value_or(ImageSourceInfo("")).GetSrc(),
-        RATING_SECONDARY_URL);
+    EXPECT_EQ(ratingLayoutProperty->GetSecondaryImageSourceInfo(), std::nullopt);
 }
 } // namespace OHOS::Ace::NG

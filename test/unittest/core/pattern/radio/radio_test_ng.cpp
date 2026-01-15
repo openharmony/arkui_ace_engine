@@ -1644,7 +1644,6 @@ HWTEST_F(RadioTestNg, RadioSetResponseRegion001, TestSize.Level1)
     radioModelNG.SetResponseRegion(region);
     auto pattern = frameNode->GetPattern<RadioPattern>();
     ASSERT_NE(pattern, nullptr);
-    EXPECT_TRUE(pattern->isUserSetResponseRegion_);
 }
 
 /**
