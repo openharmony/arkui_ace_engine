@@ -215,6 +215,8 @@ bool ParseSectionOptions(EcmaVM* vm, const Local<JSValueRef>& jsValue, WaterFlow
 void ParseSections(EcmaVM* vm, const Local<panda::ArrayRef>& sectionArray, RefPtr<WaterFlowSections>& waterFlowSections)
 {
     CHECK_NULL_VOID(vm);
+    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ACE_UINODE_TRACE(frameNode);
     uint32_t length = sectionArray->Length(vm);
     if (sectionArray->IsProxy(vm)) {
         length = sectionArray->Get(vm, "length")->IsNumber()

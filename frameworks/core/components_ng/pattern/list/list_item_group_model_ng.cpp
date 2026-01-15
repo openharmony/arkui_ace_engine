@@ -60,15 +60,16 @@ void ListItemGroupModelNG::SetDivider(const V2::ItemDivider& divider)
 
 void ListItemGroupModelNG::SetHeader(std::function<void()>&& header)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     RefPtr<NG::UINode> headerNode;
     if (header) {
+        ACE_UINODE_TRACE(frameNode);
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         header();
         headerNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
     CHECK_NULL_VOID(headerNode);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->AddHeader(headerNode);
@@ -77,15 +78,16 @@ void ListItemGroupModelNG::SetHeader(std::function<void()>&& header)
 
 void ListItemGroupModelNG::SetFooter(std::function<void()>&& footer)
 {
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
     RefPtr<NG::UINode> footerNode;
     if (footer) {
+        ACE_UINODE_TRACE(frameNode);
         NG::ScopedViewStackProcessor builderViewStackProcessor;
         footer();
         footerNode = NG::ViewStackProcessor::GetInstance()->Finish();
     }
     CHECK_NULL_VOID(footerNode);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_VOID(pattern);
     pattern->AddFooter(footerNode);
