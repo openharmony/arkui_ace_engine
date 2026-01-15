@@ -871,10 +871,62 @@ class LoadingProgressModifier extends ArkLoadingProgressComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class MarqueeModifier extends ArkMarqueeComponent {
+
+class LazyArkMarqueeComponent extends ArkComponent {
+  static module = undefined;
+ 	constructor(nativePtr, classType) {
+ 	  super(nativePtr, classType);
+ 	  if (LazyArkMarqueeComponent.module === undefined) {
+ 	    LazyArkMarqueeComponent.module = globalThis.requireNapi('arkui.components.arkmarquee');
+ 	  }
+ 	  this.lazyComponent = LazyArkMarqueeComponent.module.createComponent(nativePtr, classType);
+ 	}
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  fontSize(value) {
+    this.lazyComponent.fontSize(value);
+    return this;
+  }
+  fontColor(value) {
+    this.lazyComponent.fontColor(value);
+    return this;
+  }
+  allowScale(value) {
+    this.lazyComponent.allowScale(value);
+    return this;
+  }
+  fontWeight(value) {
+    this.lazyComponent.fontWeight(value);
+    return this;
+  }
+  fontFamily(value) {
+    this.lazyComponent.fontFamily(value);
+    return this;
+  }
+  onStart(event) {
+    this.lazyComponent.onStart(event);
+    return this;
+  }
+  onBounce(event) {
+    this.lazyComponent.onBounce(event);
+    return this;
+  }
+  onFinish(event) {
+    this.lazyComponent.onFinish(event);
+    return this;
+  }
+  marqueeUpdateStrategy(value) {
+    this.lazyComponent.marqueeUpdateStrategy(value);
+    return this;
+  }
+}
+
+class MarqueeModifier extends LazyArkMarqueeComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

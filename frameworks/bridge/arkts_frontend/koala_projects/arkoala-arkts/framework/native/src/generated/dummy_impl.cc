@@ -3376,6 +3376,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetExcludeFromRenderGroupImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setExcludeFromRenderGroup(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetFreezeImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
     {
@@ -23175,6 +23187,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetUseShadowBatchingImpl,
             CommonMethodModifier::SetUseEffect0Impl,
             CommonMethodModifier::SetRenderGroupImpl,
+            CommonMethodModifier::SetExcludeFromRenderGroupImpl,
             CommonMethodModifier::SetFreezeImpl,
             CommonMethodModifier::SetTranslateImpl,
             CommonMethodModifier::SetScaleImpl,

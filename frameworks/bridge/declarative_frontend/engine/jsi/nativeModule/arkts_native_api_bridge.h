@@ -80,7 +80,6 @@ private:
     static void RegisterMenuItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterMenuItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterMenuAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterMarqueeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);

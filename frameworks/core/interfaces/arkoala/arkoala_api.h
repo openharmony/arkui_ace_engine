@@ -7067,7 +7067,7 @@ struct ArkUITextTimerControllerModifier {
 
 struct ArkUIMarqueeModifier {
     void (*setMarqueeFontSize)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* fontSizeRawPtr);
-    void (*resetMarqueeFontSize)(ArkUINodeHandle node);
+    void (*resetMarqueeFontSize)(ArkUINodeHandle node, ArkUI_Bool isJsView);
     void (*setMarqueeFontColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resourceRawPtr);
     void (*resetMarqueeFontColor)(ArkUINodeHandle node);
     void (*setMarqueeAllowScale)(ArkUINodeHandle node, ArkUI_Bool allowScale);
@@ -7075,7 +7075,7 @@ struct ArkUIMarqueeModifier {
     void (*setMarqueeFontWeight)(ArkUINodeHandle node, ArkUI_CharPtr fontWeight);
     void (*resetMarqueeFontWeight)(ArkUINodeHandle node);
     void (*setMarqueeFontFamily)(ArkUINodeHandle node, ArkUI_CharPtr fontFamily);
-    void (*resetMarqueeFontFamily)(ArkUINodeHandle node);
+    void (*resetMarqueeFontFamily)(ArkUINodeHandle node, ArkUI_Bool isJsView);
     void (*setMarqueeUpdateStrategy)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetMarqueeUpdateStrategy)(ArkUINodeHandle node);
     void (*setMarqueeOnStart)(ArkUINodeHandle node, void* callback);
@@ -7094,6 +7094,9 @@ struct ArkUIMarqueeModifier {
     void (*resetMarqueeLoop)(ArkUINodeHandle node);
     void (*setMarqueeDirection)(ArkUINodeHandle node, ArkUI_Int32 direction);
     void (*resetMarqueeDirection)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createMarqueeFrameNode)(ArkUI_Uint32 nodeId);
+    void (*setMarqueeFrameRateRange)(ArkUINodeHandle node, ArkUI_Int32 minValue, ArkUI_Int32 maxValue,
+        ArkUI_Int32 expectValue, ArkUI_Int32 value);
 };
 
 struct ArkUIDatePickerModifier {

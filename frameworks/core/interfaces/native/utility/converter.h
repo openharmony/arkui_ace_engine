@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/slider/slider_model.h" // Inner types
 #include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/components_ng/property/accessibility_property.h"
+#include "core/interfaces/native/utility/ace_engine_types.h"
 
 #include "converter_union.h"
 #include "generated/converter_generated.h"
@@ -211,7 +212,7 @@ namespace Converter {
             ResourceConverter(ResourceConverter&&) = default;
             ResourceConverter& operator=(ResourceConverter&&) = default;
 
-            explicit ResourceConverter(const Ark_Resource& resource);
+            ACE_FORCE_EXPORT explicit ResourceConverter(const Ark_Resource& resource);
 
             std::optional<std::string> ToString();
             std::optional<StringArray> ToStringArray();
@@ -222,7 +223,7 @@ namespace Converter {
             std::optional<float> ToFloat();
             std::optional<int32_t> ToInt();
             std::optional<uint32_t> ToSymbol();
-            std::optional<Color> ToColor();
+            ACE_FORCE_EXPORT std::optional<Color> ToColor();
             std::optional<bool> ToBoolean();
 
             const std::string& BundleName() { return bundleName_; }
@@ -618,12 +619,12 @@ namespace Converter {
     template<> CalcLength Convert(const Ark_Number& src);
     template<> ACE_FORCE_EXPORT CalcLength Convert(const Ark_String& src);
     template<> CaretStyle Convert(const Ark_CaretStyle& src);
-    template<> Color Convert(const Ark_ColorMetrics& src);
-    template<> Color Convert(const Ark_Float64& src);
+    template<> ACE_FORCE_EXPORT Color Convert(const Ark_ColorMetrics& src);
+    template<> ACE_FORCE_EXPORT Color Convert(const Ark_Float64& src);
     template<> ACE_FORCE_EXPORT Color Convert(const Ark_Int32& src);
-    template<> Color Convert(const Ark_Int64& src);
+    template<> ACE_FORCE_EXPORT Color Convert(const Ark_Int64& src);
     template<> ACE_FORCE_EXPORT Color Convert(const Ark_Number& src);
-    template<> Color Convert(const Ark_String& src);
+    template<> ACE_FORCE_EXPORT Color Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_Float64& src);
     template<> Dimension Convert(const Ark_Int32& src);
     template<> Dimension Convert(const Ark_LengthMetrics& src);

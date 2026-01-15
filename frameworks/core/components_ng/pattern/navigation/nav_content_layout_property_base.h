@@ -47,9 +47,7 @@ public:
     {
         auto host = GetHost();
         CHECK_NULL_VOID(host);
-        bool dependencySatisfied =
-            host->GetIgnoreLayoutProcess() || host->IsRootMeasureNode() || host->GetEscapeDelayForIgnore();
-        if (!dependencySatisfied) {
+        if (!IsExpandConstraintDependencySatisfied()) {
             return;
         }
         auto parent = AceType::DynamicCast<NavDestinationNodeBase>(host->GetAncestorNodeOfFrame(false));

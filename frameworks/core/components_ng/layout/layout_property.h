@@ -233,6 +233,8 @@ public:
 
     void CalcToString(const CalcSize& calcSize, std::pair<std::vector<std::string>, std::vector<std::string>>& result);
 
+    bool IsExpandConstraintDependencySatisfied() const;
+
     IgnoreLayoutSafeAreaOpts GenIgnoreOpts() const;
 
     virtual void ExpandConstraintWithSafeArea();

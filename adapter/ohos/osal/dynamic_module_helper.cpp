@@ -68,6 +68,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "WaterFlow", "waterflow" },
         {"ColumnSplit", "linearsplit"},
         {"RowSplit", "linearsplit"},
+        {"Marquee", "marquee"},
         { "Hyperlink", "hyperlink" },
     };
     auto it = soMap.find(name);
