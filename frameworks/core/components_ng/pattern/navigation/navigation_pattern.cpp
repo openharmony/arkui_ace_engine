@@ -1448,6 +1448,19 @@ void NavigationPattern::UpdateColorModeForNodes(
     }
 }
 
+void NavigationPattern::ReportPrimaryTopChangeIfNeeded(const WeakPtr<NavDestinationGroupNode>& prePrimaryTop)
+{
+    if (primaryNodes_.empty()) {
+        return;
+    }
+    auto curPrimaryTop = primaryNodes_.back().Upgrade();
+    CHECK_NULL_VOID(curPrimaryTop);
+    if (curPrimaryTop == prePrimaryTop.Upgrade()) {
+        return;
+    }
+    ContentChangeReport(curPrimaryTop);
+}
+
 void NavigationPattern::ProcessSameTopNavPath()
 {
     TAG_LOGI(AceLogTag::ACE_NAVIGATION, "page is not change. don't transition");
@@ -1461,7 +1474,9 @@ void NavigationPattern::ProcessSameTopNavPath()
     auto pipeline = hostNode->GetContextRefPtr();
     bool isForceSplitSupported = IsForceSplitSupported(pipeline);
     std::set<RefPtr<NavDestinationGroupNode>> filterNodes;
+    WeakPtr<NavDestinationGroupNode> prePrimaryTop = nullptr;
     if (isForceSplitSupported) {
+        prePrimaryTop = prePrimaryNodes_.empty() ? nullptr : prePrimaryNodes_.back();
         AppendFilterNodesForWillHideLifecycle(filterNodes);
     }
     hostNode->FireHideNodeChange(NavDestinationLifecycle::ON_WILL_HIDE);
@@ -1473,7 +1488,7 @@ void NavigationPattern::ProcessSameTopNavPath()
     }
     NotifyDialogLifecycle(NavDestinationLifecycle::ON_WILL_SHOW, true);
     CHECK_NULL_VOID(pipeline);
-    pipeline->AddAfterLayoutTask([weakPattern = WeakClaim(this), isForceSplitSupported]() {
+    pipeline->AddAfterLayoutTask([weakPattern = WeakClaim(this), isForceSplitSupported, prePrimaryTop]() {
         auto pattern = weakPattern.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto hostNode = AceType::DynamicCast<NavigationGroupNode>(pattern->GetHost());
@@ -1501,6 +1516,7 @@ void NavigationPattern::ProcessSameTopNavPath()
             pattern->prePrimaryNodes_.clear();
             pattern->primaryNodesToBeRemoved_.clear();
             pattern->RemoveRedundantPrimaryNavDestination();
+            pattern->ReportPrimaryTopChangeIfNeeded(prePrimaryTop);
         }
     });
     ClearRecoveryList();

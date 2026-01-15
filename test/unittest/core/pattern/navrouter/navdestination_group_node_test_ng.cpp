@@ -1176,7 +1176,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, BuildTransitionFinishCallback001, TestSi
     navDestinationRenderContext->translateXY_ = AceType::MakeRefPtr<AnimatablePropertyOffsetF>(OffsetF(100.0f, 60.0f));
     navDestinationNode->GetLayoutProperty()->UpdateVisibility(VisibleType::VISIBLE);
 
-    auto finish = navDestinationNode->BuildTransitionFinishCallback(false, nullptr);
+    auto finish = navDestinationNode->BuildTransitionFinishCallback(false, false, nullptr);
     finish();
     EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetX(), 100.0f);
     EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetY(), 60.0f);
@@ -1218,7 +1218,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, BuildTransitionFinishCallback002, TestSi
     auto extraOption = [&extraOptionCalled] () {
         extraOptionCalled = true;
     };
-    auto finish = navDestinationNode->BuildTransitionFinishCallback(true, extraOption);
+    auto finish = navDestinationNode->BuildTransitionFinishCallback(false, true, extraOption);
     finish();
     EXPECT_TRUE(extraOptionCalled);
     EXPECT_EQ(navDestinationRenderContext->GetTranslateXYProperty().GetX(), 0.0f);
@@ -1251,7 +1251,7 @@ HWTEST_F(NavDestinationGroupNodeTestNg, BuildTransitionFinishCallback003, TestSi
     navDestinationNode->SetInCurrentStack(false);
     navDestinationNode->SetIsOnAnimation(true);
 
-    auto finish = navDestinationNode->BuildTransitionFinishCallback(true, [] () {});
+    auto finish = navDestinationNode->BuildTransitionFinishCallback(false, true, [] () {});
     finish();
     EXPECT_TRUE(navDestinationNode->isOnAnimation_);
 }

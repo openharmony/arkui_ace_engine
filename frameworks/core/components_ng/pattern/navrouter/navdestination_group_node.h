@@ -297,7 +297,7 @@ private:
     void ResetCustomTransitionAnimationProperties();
 
     std::optional<AnimationOption> GetTransitionAnimationOption(NavigationOperation operation, bool isEnter) const;
-    std::function<void()> BuildTransitionFinishCallback(
+    std::function<void()> BuildTransitionFinishCallback(bool needReport = false,
         bool isSystemTransition = true, std::function<void()>&& extraOption = nullptr);
     std::function<void()> BuildEmptyFinishCallback();
 

@@ -956,7 +956,7 @@ int32_t NavDestinationGroupNode::DoSystemFadeTransition(bool isEnter)
     }
     animationId_ = MakeUniqueAnimationId();
     SetIsOnAnimation(true);
-    auto option = BuildAnimationOption(Curves::SHARP, BuildTransitionFinishCallback(),
+    auto option = BuildAnimationOption(Curves::SHARP, BuildTransitionFinishCallback(isEnter),
         isEnter ? SYSTEM_ENTER_FADE_TRANSITION_DURATION : SYSTEM_EXIT_FADE_TRANSITION_DURATION,
         isEnter ? SYSTEM_ENTER_FADE_TRANSITION_DELAY : SYSTEM_EXIT_FADE_TRANSITION_DELAY);
     OnStartOneTransitionAnimation();
@@ -987,7 +987,7 @@ int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation ope
         };
         RefPtr<Curve> curve = isRight ? MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 342.0f, 37.0f)
             : MakeRefPtr<InterpolatingSpring>(0.0f, 1.0f, 328.0f, 36.0f);
-        auto option = BuildAnimationOption(curve, BuildTransitionFinishCallback());
+        auto option = BuildAnimationOption(curve, BuildTransitionFinishCallback(isEnter));
         auto renderContext = GetRenderContext();
         auto paintRect = renderContext->GetPaintRectWithoutTransform().GetSize();
         auto translate = CalcTranslateForSlideTransition(paintRect, isRight, isEnter, false);
@@ -998,7 +998,7 @@ int32_t NavDestinationGroupNode::DoSystemSlideTransition(NavigationOperation ope
     } else {
         // mask animation
         auto option = BuildAnimationOption(
-            Curves::FRICTION, BuildTransitionFinishCallback(), SYSTEM_SLIDE_TRANSITION_MASK_DURATION);
+            Curves::FRICTION, BuildTransitionFinishCallback(isEnter), SYSTEM_SLIDE_TRANSITION_MASK_DURATION);
         auto beginColor = isEnter ? SLIDE_ANIMATION_MASK_COLOR : Color::TRANSPARENT;
         auto endColor = !isEnter ? SLIDE_ANIMATION_MASK_COLOR : Color::TRANSPARENT;
         OnStartOneTransitionAnimation();
@@ -1025,14 +1025,14 @@ int32_t NavDestinationGroupNode::DoSystemEnterExplodeTransition(NavigationOperat
             BuildAnimationOption(Curves::FRICTION, BuildEmptyFinishCallback(), SYSTEM_EXPLODE_TRANSITION_MASK_DURATION),
             SLIDE_ANIMATION_MASK_COLOR, Color::TRANSPARENT);
         // opacity animation
-        auto option = BuildAnimationOption(Curves::SHARP, BuildTransitionFinishCallback(),
+        auto option = BuildAnimationOption(Curves::SHARP, BuildTransitionFinishCallback(true),
             SYSTEM_ENTER_POP_EXPLODE_OPACITY_DURATION, SYSTEM_ENTER_POP_EXPLODE_OPACITY_DELAY);
         OnStartOneTransitionAnimation();
         renderContext->OpacityAnimation(option, 0.0f, 1.0f);
         return animationId_;
     }
     // opacity animation
-    auto option = BuildAnimationOption(Curves::SHARP, BuildTransitionFinishCallback(),
+    auto option = BuildAnimationOption(Curves::SHARP, BuildTransitionFinishCallback(true),
         SYSTEM_ENTER_PUSH_EXPLODE_OPACITY_DURATION, SYSTEM_ENTER_PUSH_EXPLODE_OPACITY_DELAY);
     OnStartOneTransitionAnimation();
     renderContext->OpacityAnimation(option, 0.0f, 1.0f);
@@ -1170,18 +1170,7 @@ void NavDestinationGroupNode::StartCustomTransitionAnimation(NavDestinationTrans
     std::function<void()> finish;
     // only do remove or set visibility in longest custom transition animation's finish callback.
     if (transition.duration + transition.delay == longestAnimationDuration) {
-        finish = BuildTransitionFinishCallback(false, std::move(transition.onTransitionEnd));
-        if (isEnter) {
-            std::function<void()> finishWrapper = [innerFinish = std::move(finish), weakNode = WeakClaim(this)]() {
-                if (innerFinish) {
-                    innerFinish();
-                }
-                auto destNode = weakNode.Upgrade();
-                CHECK_NULL_VOID(destNode);
-                destNode->ContentChangeReport();
-            };
-            finish = std::move(finishWrapper);
-        }
+        finish = BuildTransitionFinishCallback(isEnter, false, std::move(transition.onTransitionEnd));
     } else {
         finish = [onTransitionEnd = std::move(transition.onTransitionEnd), weak = WeakClaim(this)]() {
             auto node = weak.Upgrade();
@@ -1211,10 +1200,10 @@ int32_t NavDestinationGroupNode::MakeUniqueAnimationId()
 }
 
 std::function<void()> NavDestinationGroupNode::BuildTransitionFinishCallback(
-    bool isSystemTransition, std::function<void()>&& extraOption)
+    bool needReport, bool isSystemTransition, std::function<void()>&& extraOption)
 {
     std::function<void()> finish = [extraOption = std::move(extraOption), weak = WeakClaim(this),
-        animationId = animationId_, isSystemTransition]() {
+        animationId = animationId_, isSystemTransition, needReport]() {
             auto navDestination = weak.Upgrade();
             CHECK_NULL_VOID(navDestination);
             auto destinationPattern = navDestination->GetPattern<NavDestinationPattern>();
@@ -1257,6 +1246,9 @@ std::function<void()> NavDestinationGroupNode::BuildTransitionFinishCallback(
                 navDestination->SetJSViewActive(false);
             }
             navDestination->SetIsOnAnimation(false);
+            if (needReport) {
+                navDestination->ContentChangeReport();
+            }
         };
     auto finisWrapper = [onFinish = std::move(finish), weak = WeakClaim(this)]() {
         auto node = weak.Upgrade();
