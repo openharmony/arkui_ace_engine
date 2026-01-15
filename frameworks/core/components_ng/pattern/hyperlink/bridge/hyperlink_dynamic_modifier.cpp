@@ -22,16 +22,27 @@
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_static.h"
 #include "core/components_ng/base/view_abstract_model.h"
+ #include "bridge/declarative_frontend/jsview/models/view_abstract_model_impl.h"
 
 #include "core/components_ng/pattern/hyperlink/bridge/hyperlink_model_impl.h"
 
+#ifndef CROSS_PLATFORM
 namespace OHOS::Ace {
+namespace {
+Framework::ViewAbstractModelImpl* GetViewAbstractModelImpl()
+{
+    static Framework::ViewAbstractModelImpl instance;
+    return &instance;
+}
+} // namespace
+
 Framework::HyperlinkModelImpl* GetHyperlinkModelImpl()
 {
     static Framework::HyperlinkModelImpl instance;
     return &instance;
 }
 } // namespace OHOS::Ace
+#endif
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -122,7 +133,7 @@ void SetHyperlinkResponseRegion(
         DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
         region.emplace_back(dimenRect);
     }
-    ViewAbstractModel::GetInstance()->SetResponseRegion(region);
+    ViewAbstract::SetResponseRegion(region);
     HyperlinkModelNG::SetResponseRegion(frameNode, region, true);
 }
 
@@ -169,6 +180,28 @@ void PopImpl()
 {
     GetHyperlinkModelImpl()->Pop();
 }
+
+void SetHyperlinkResponseRegionImpl(
+    ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
+{
+    auto frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    std::vector<DimensionRect> region;
+    for (int32_t i = 0; i < length / NUM_4; i++) {
+        CalcDimension xDimen =
+            CalcDimension(values[i * NUM_4 + NUM_0], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_0]));
+        CalcDimension yDimen =
+            CalcDimension(values[i * NUM_4 + NUM_1], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_1]));
+        CalcDimension widthDimen =
+            CalcDimension(values[i * NUM_4 + NUM_2], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_2]));
+        CalcDimension heightDimen =
+            CalcDimension(values[i * NUM_4 + NUM_3], static_cast<DimensionUnit>(units[i * NUM_4 + NUM_3]));
+        DimensionOffset offsetDimen(xDimen, yDimen);
+        DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
+        region.emplace_back(dimenRect);
+    }
+    GetViewAbstractModelImpl()->SetResponseRegion(region);
+}
 #endif // CROSS_PLATFORM
 
 const ArkUIHyperlinkModifier* GetHyperlinkDynamicModifier()
@@ -183,7 +216,7 @@ const ArkUIHyperlinkModifier* GetHyperlinkDynamicModifier()
             .resetHyperlinkColor = nullptr,
             .setHyperlinkDraggable = nullptr,
             .resetHyperlinkDraggable = nullptr,
-            .setHyperlinkResponseRegion = nullptr,
+            .setHyperlinkResponseRegion = SetHyperlinkResponseRegionImpl,
             .resetHyperlinkResponseRegion = nullptr,
             .createHyperlinkFrameNode = CreateHyperlinkFrameNode,
             .pop = PopImpl
