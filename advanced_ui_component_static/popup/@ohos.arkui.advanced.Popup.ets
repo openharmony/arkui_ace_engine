@@ -413,17 +413,14 @@ export struct PopupComponent {
 
   private getTitleFontWeight(): int | FontWeight | string {
     const fontWeight = this.title?.fontWeight
-    if (typeof fontWeight === 'string') {
+    if (fontWeight === undefined || fontWeight === null) {
+      return this.theme.title.fontWeight
+    } else if (typeof fontWeight === 'string') {
       return fontWeight as string
     } else if (typeof fontWeight === 'number') {
-      let fontWeightValue: int = Math.trunc(fontWeight as number) as int
-      if (fontWeight instanceof Number) {
-        return fontWeightValue
-      } else {
-        return fontWeightValue as FontWeight;
-      }
+      return Math.trunc(fontWeight as number) as int
     } else {
-      return this.theme.title.fontWeight
+      return fontWeight as FontWeight
     }
   }
 
