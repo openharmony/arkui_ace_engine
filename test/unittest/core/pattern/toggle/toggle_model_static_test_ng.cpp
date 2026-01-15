@@ -201,8 +201,6 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg004, TestSize.Level1)
     auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->onChangeEvent_, nullptr);
-    eventHub->UpdateChangeEvent(true);
-    EXPECT_EQ(isChecked, true);
 }
 
 /**
@@ -231,11 +229,14 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg005, TestSize.Level1)
      * @tc.steps: step3. test OnChangeEvent.
      * @tc.expected: step3. the property value meet expectations.
      */
-    ChangeEvent changeEvent;
-    ToggleModelStatic::OnChangeEvent(frameNode, std::move(changeEvent));
+    bool isChecked = false;
+    auto onChange = [&isChecked](bool select) { isChecked = select; };
+    ToggleModelStatic::OnChangeEvent(frameNode, std::move(onChange));
     auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->onChangeEvent_, nullptr);
+    eventHub->UpdateChangeEvent(true);
+    EXPECT_EQ(isChecked, true);
 }
 
 /**
@@ -263,8 +264,12 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg006, TestSize.Level1)
     /**
      * @tc.steps: step3. test OnChangeEvent.
      */
-    ChangeEvent changeEvent;
-    ToggleModelStatic::OnChangeEvent(frameNode, std::move(changeEvent));
+    bool isChecked = false;
+    auto onChange = [&isChecked](bool select) { isChecked = select; };
+    ToggleModelStatic::OnChangeEvent(frameNode, std::move(onChange));
+    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_NE(eventHub->selectChangeEvent_, nullptr);
 }
 
 /**
