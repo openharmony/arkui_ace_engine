@@ -88,8 +88,9 @@ void ParseGetGridItemSize(const EcmaVM* vm, const Local<JSValueRef>& getSizeByIn
     if (getSizeByIndex->IsFunction(vm)) {
         Local<panda::FunctionRef> functionRef = getSizeByIndex->ToObject(vm);
         auto onGetIrregularSizeByIndex =
-            [func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
+            [vm, func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
                  Framework::JSRef<Framework::JSFunc>(Framework::JSFunc(functionRef)))](int32_t index) {
+                panda::LocalScope scope(vm);
                 GridItemSize gridItemSize;
                 auto itemIndex = Framework::JSRef<Framework::JSVal>::Make(Framework::ToJSValue(index));
                 auto result = func->ExecuteJS(1, &itemIndex);
@@ -108,8 +109,9 @@ void ParseGetGridItemRect(const EcmaVM* vm, const Local<JSValueRef>& getRectByIn
     if (getRectByIndex->IsFunction(vm)) {
         Local<panda::FunctionRef> functionRef = getRectByIndex->ToObject(vm);
         auto onGetRectByIndex =
-            [func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
+            [vm, func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
                  Framework::JSRef<Framework::JSFunc>(Framework::JSFunc(functionRef)))](int32_t index) {
+                panda::LocalScope scope(vm);
                 GridItemRect gridItemRect;
                 auto itemIndex = Framework::JSRef<Framework::JSVal>::Make(Framework::ToJSValue(index));
                 auto result = func->ExecuteJS(1, &itemIndex);
