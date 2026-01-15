@@ -130,6 +130,7 @@ export class CommonMethodModifier implements CommonMethod {
     _useEffect_0_0value?: boolean | undefined
     _useUnionEffect_0_0value?: boolean | undefined
     _renderGroup_0_0value?: boolean | undefined
+    _excludeFromRenderGroup_0_0value?: boolean | undefined
     _freeze_0_0value?: boolean | undefined
     _translate_0_0value?: TranslateOptions | undefined
     _scale_0_0value?: ScaleOptions | undefined
@@ -7788,6 +7789,18 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._flagArray[76] = 3
+        }
+        return this
+    }
+    excludeFromRenderGroup(value: boolean | undefined): this {
+        if (((this._flagArray[208]) == (0)) || ((this._excludeFromRenderGroup_0_0value) !== (value)))
+        {
+            this._flagArray[208] = 1
+            this._excludeFromRenderGroup_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[208] = 3
         }
         return this
     }
