@@ -115,9 +115,7 @@ export struct DownloadFileButton {
 
   @Builder
   downloadText() {
-    Text(!this.contentOptions.text || !this.getTextContent(this.contentOptions.text) ?
-    $r('sys.string.ohos_id_text_save_button_description_download') : this.getTextContent(this.contentOptions.text)
- )
+    Text(this.getTextContent(this.contentOptions?.text) || $r('sys.string.ohos_id_text_save_button_description_download'))
       .fontSize(this.styleOptions.fontSize)
       .fontColor(this.styleOptions.fontColor)
       .fontStyle(this.styleOptions.fontStyle)
@@ -125,11 +123,9 @@ export struct DownloadFileButton {
       .fontFamily(this.styleOptions.fontFamily)
       .margin({
         top: this.styleOptions.layoutDirection === DownloadLayoutDirection.VERTICAL ?
-        this.styleOptions.textIconSpace :
-          MARGIN_DEFAULT,
+          (this.styleOptions.textIconSpace || '4vp') : MARGIN_DEFAULT,
         left: this.styleOptions.layoutDirection === DownloadLayoutDirection.HORIZONTAL ?
-        this.styleOptions.textIconSpace :
-          MARGIN_DEFAULT
+          (this.styleOptions.textIconSpace || '4vp') : MARGIN_DEFAULT
       })
   }
 
