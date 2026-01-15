@@ -231,6 +231,7 @@ export interface Router {
 
 const CURRENT_ROUTER = "ohos.arkoala.router"
 const CURRENT_ROUTER_TRANSITION = "ohos.arkoala.router.transition"
+const MAX_ROUTER_STACK_SIZE = 32;
 
 class MockEntryPoint extends EntryPoint {
     constructor() {
@@ -405,6 +406,11 @@ export class RouterImpl implements Router {
     }
 
     push(options: router.RouterOptions, mode?: router.RouterMode): Promise<void> {
+        if (this.visiblePages.length >= MAX_ROUTER_STACK_SIZE) {
+            return Promise.reject({
+                code: 100003,
+                message: "Page stack error. Too many pages are pushed."});
+        }
         if (options.url === '/') {
             options.url = this.entryPage?.path! + this.entryPage?.url!;
         }
@@ -530,6 +536,12 @@ export class RouterImpl implements Router {
     }
 
     pushAsync(options: router.RouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void {
+        if (this.visiblePages.length >= MAX_ROUTER_STACK_SIZE) {
+            let error: BusinessError = new BusinessError(100003,
+                "Page stack error. Too many pages are pushed.");
+            callback(error, undefined);
+            return;
+        }
         if (options.url === '/') {
             options.url = this.entryPage?.path! + this.entryPage?.url!;
         }
@@ -621,6 +633,11 @@ export class RouterImpl implements Router {
             params: RouterImpl.StringifyParams(options.params),
             recoverable: options.recoverable
         };
+        if (this.visiblePages.length >= MAX_ROUTER_STACK_SIZE) {
+            return Promise.reject({
+                code: 100003,
+                message: "Page stack error. Too many pages are pushed."});
+        }
         if (mode !== undefined && mode === router.RouterMode.Single && this.findPageInStack(options.name)) {
             let pagePushTransitionCallback = (jsNode: KPointer) => {
                 let index = this.peerNodeList.indexOf(jsNode);
@@ -690,6 +707,12 @@ export class RouterImpl implements Router {
     }
 
     pushNamedRouteAsync(options: router.NamedRouterOptions, callback: AsyncCallback<void>, mode?: router.RouterMode): void {
+        if (this.visiblePages.length >= MAX_ROUTER_STACK_SIZE) {
+            let error: BusinessError = new BusinessError(100003,
+                "Page stack error. Too many pages are pushed.");
+            callback(error, undefined);
+            return;
+        }
         let asyncCallback = (code: int32, message: string) => {
             if (code != 0) {
                 let error: BusinessError = new BusinessError(code, message);

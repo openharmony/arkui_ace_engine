@@ -172,14 +172,12 @@ bool CheckSwiperParameters(SwiperParameters& p)
 
     p.itemWidth = p.itemWidth && (*p.itemWidth).Value() > 0 ? p.itemWidth : 6.0_vp;
     p.itemHeight = p.itemHeight && (*p.itemHeight).Value() > 0 ? p.itemHeight : 6.0_vp;
-
     p.selectedItemWidth = p.selectedItemWidth && (*p.selectedItemWidth).Value() > 0 ? p.selectedItemWidth : 6.0_vp;
     p.selectedItemHeight = p.selectedItemHeight && (*p.selectedItemHeight).Value() > 0 ? p.selectedItemHeight : 6.0_vp;
-
     p.dimSpace = p.dimSpace && (*p.dimSpace).Value() >= 0 ? p.dimSpace : 8.0_vp;
 
-    if (p.maxDisplayCountVal && (*(p.maxDisplayCountVal) < 6 || *(p.maxDisplayCountVal) > 9)) {
-        p.maxDisplayCountVal.reset();
+    if (p.maxDisplayCountVal) {
+        p.maxDisplayCountVal = *p.maxDisplayCountVal > 0 ? p.maxDisplayCountVal : 0;
     }
 
     return IsCustom(p.itemWidth) || IsCustom(p.itemHeight) ||
