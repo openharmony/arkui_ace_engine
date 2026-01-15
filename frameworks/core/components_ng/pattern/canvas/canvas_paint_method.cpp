@@ -511,6 +511,7 @@ void CanvasPaintMethod::GetSimplifyDumpInfo(std::unique_ptr<JsonValue>& json)
 void CanvasPaintMethod::SetCanvasRenderContext(const RefPtr<CanvasRenderContext>& canvasRenderContext)
 {
     canvasRenderContext_ = canvasRenderContext;
+    CHECK_NULL_VOID(canvasRenderContext_);
     canvasRenderContext_->SetPaintMethod(this);
 }
 

@@ -368,7 +368,7 @@ std::unique_ptr<Ace::ImageData> CanvasPattern::GetImageData(double left, double 
         return data;
     }
     // Rely on the single-threaded model. Should guarantee the timing between Render Task of pipeline and GetImageData
-    if (immediateRender_.value_or(false) == false) {
+    if (!immediateRender_.value_or(false)) {
         paintMethod_->FlushUITasks();
     }
     return paintMethod_->GetImageData(left, top, width, height);
@@ -377,7 +377,7 @@ std::unique_ptr<Ace::ImageData> CanvasPattern::GetImageData(double left, double 
 void CanvasPattern::GetImageData(const std::shared_ptr<Ace::ImageData>& imageData)
 {
     CHECK_NULL_VOID(paintMethod_);
-    if (immediateRender_.value_or(false) == false) {
+    if (!immediateRender_.value_or(false)) {
         paintMethod_->FlushUITasks();
     }
     paintMethod_->GetImageData(imageData);
@@ -653,7 +653,7 @@ void CanvasPattern::Translate(double x, double y)
 std::string CanvasPattern::ToDataURL(const std::string& type, double quality)
 {
     // Rely on the single-threaded model. Should guarantee the timing between Render Task of pipeline and ToDataURL
-    if (immediateRender_.value_or(false) == false) {
+    if (!immediateRender_.value_or(false)) {
         paintMethod_->FlushUITasks();
     }
     return paintMethod_->ToDataURL(type, quality);
