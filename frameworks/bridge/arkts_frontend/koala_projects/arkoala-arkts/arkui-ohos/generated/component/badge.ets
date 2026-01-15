@@ -32,9 +32,11 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { ResourceColor, ResourceStr, Length, Position, Position_serializer } from "./units"
 import { Color, FontWeight } from "./enums"
 import { Resource } from "global.resource"
+import { LengthMetrics } from "arkui.Graphics"
 import { BadgeModifier } from "./../BadgeModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { Resource_serializer } from "./../framework/resource"
+import { LengthMetrics_serializer } from "./../Graphics"
 export class ArkBadgePeer extends ArkCommonMethodPeer {
     attributeSet?: BadgeModifier;
     public constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -79,6 +81,9 @@ export interface BadgeStyle {
     borderColor?: ResourceColor;
     borderWidth?: Length;
     fontWeight?: int32 | FontWeight | ResourceStr;
+    outerBorderColor?: ResourceColor;
+    outerBorderWidth?: LengthMetrics;
+    enableAutoAvoidance?: boolean;
 }
 export interface BadgeParam {
     position?: BadgePosition | Position;
@@ -311,6 +316,46 @@ export class BadgeStyle_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForOuterBorderColor  = value.outerBorderColor
+        if (valueHolderForOuterBorderColor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOuterBorderColorTmpValue  = valueHolderForOuterBorderColor!
+            if (valueHolderForOuterBorderColorTmpValue instanceof Color) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForOuterBorderColorTmpValueForIdx0  = valueHolderForOuterBorderColorTmpValue as Color
+                valueSerializer.writeInt32(valueHolderForOuterBorderColorTmpValueForIdx0.getOrdinal())
+            } else if (valueHolderForOuterBorderColorTmpValue instanceof int32) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForOuterBorderColorTmpValueForIdx1  = valueHolderForOuterBorderColorTmpValue as int32
+                valueSerializer.writeInt32(valueHolderForOuterBorderColorTmpValueForIdx1)
+            } else if (valueHolderForOuterBorderColorTmpValue instanceof string) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForOuterBorderColorTmpValueForIdx2  = valueHolderForOuterBorderColorTmpValue as string
+                valueSerializer.writeString(valueHolderForOuterBorderColorTmpValueForIdx2)
+            } else if (valueHolderForOuterBorderColorTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((3).toByte())
+                const valueHolderForOuterBorderColorTmpValueForIdx3  = valueHolderForOuterBorderColorTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForOuterBorderColorTmpValueForIdx3)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForOuterBorderWidth  = value.outerBorderWidth
+        if (valueHolderForOuterBorderWidth !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForOuterBorderWidthTmpValue  = valueHolderForOuterBorderWidth!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForOuterBorderWidthTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEnableAutoAvoidance  = value.enableAutoAvoidance
+        if (valueHolderForEnableAutoAvoidance !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEnableAutoAvoidanceTmpValue  = valueHolderForEnableAutoAvoidance!
+            valueSerializer.writeBoolean(valueHolderForEnableAutoAvoidanceTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): BadgeStyle {
         let valueDeserializer : DeserializerBase = buffer
@@ -462,7 +507,38 @@ export class BadgeStyle_serializer {
             fontWeightTmpBuf = (fontWeightTmpBuf_ as int32 | FontWeight | ResourceStr)
         }
         const fontWeightTmpResult : int32 | FontWeight | ResourceStr | undefined = fontWeightTmpBuf
-        let value : BadgeStyle = ({color: colorTmpResult, fontSize: fontSizeTmpResult, badgeSize: badgeSizeTmpResult, badgeColor: badgeColorTmpResult, borderColor: borderColorTmpResult, borderWidth: borderWidthTmpResult, fontWeight: fontWeightTmpResult} as BadgeStyle)
+        const outerBorderColorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let outerBorderColorTmpBuf : ResourceColor | undefined = undefined
+        if ((outerBorderColorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const outerBorderColorTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let outerBorderColorTmpBuf_ : Color | int32 | string | Resource | undefined
+            if (outerBorderColorTmpBuf_UnionSelector == (0).toByte()) {
+                outerBorderColorTmpBuf_ = Color.values()[valueDeserializer.readInt32()]
+            } else if (outerBorderColorTmpBuf_UnionSelector == (1).toByte()) {
+                outerBorderColorTmpBuf_ = valueDeserializer.readInt32()
+            } else if (outerBorderColorTmpBuf_UnionSelector == (2).toByte()) {
+                outerBorderColorTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (outerBorderColorTmpBuf_UnionSelector == (3).toByte()) {
+                outerBorderColorTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for outerBorderColorTmpBuf_ has to be chosen through deserialisation.")
+            }
+            outerBorderColorTmpBuf = (outerBorderColorTmpBuf_ as Color | int32 | string | Resource)
+        }
+        const outerBorderColorTmpResult : ResourceColor | undefined = outerBorderColorTmpBuf
+        const outerBorderWidthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let outerBorderWidthTmpBuf : LengthMetrics | undefined = undefined
+        if ((outerBorderWidthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            outerBorderWidthTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const outerBorderWidthTmpResult : LengthMetrics | undefined = outerBorderWidthTmpBuf
+        const enableAutoAvoidanceTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let enableAutoAvoidanceTmpBuf : boolean | undefined = undefined
+        if ((enableAutoAvoidanceTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            enableAutoAvoidanceTmpBuf = valueDeserializer.readBoolean()
+        }
+        const enableAutoAvoidanceTmpResult : boolean | undefined = enableAutoAvoidanceTmpBuf
+        let value : BadgeStyle = ({color: colorTmpResult, fontSize: fontSizeTmpResult, badgeSize: badgeSizeTmpResult, badgeColor: badgeColorTmpResult, borderColor: borderColorTmpResult, borderWidth: borderWidthTmpResult, fontWeight: fontWeightTmpResult, outerBorderColor: outerBorderColorTmpResult, outerBorderWidth: outerBorderWidthTmpResult, enableAutoAvoidance: enableAutoAvoidanceTmpResult} as BadgeStyle)
         return value
     }
 }

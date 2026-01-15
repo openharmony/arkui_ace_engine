@@ -22,6 +22,7 @@ component_modules = [
   "rating",
   "waterflow",
   "linear_split",
+  "side_bar",
 ]
 component_modules_libs = []
 

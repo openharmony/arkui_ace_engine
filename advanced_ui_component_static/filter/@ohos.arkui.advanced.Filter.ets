@@ -520,7 +520,7 @@ struct MultiFilterRow {
   @Builder
   DownAndUpArrow() {
     Row() {
-      Button({ stateEffect: false, type: ButtonType.Normal } as ButtonOptions) {
+      Button() {
         SymbolGlyph(this.isArrowIconDown.value ? $r('sys.symbol.chevron_down') : $r('sys.symbol.chevron_up'))
           .fontSize(`${(this.fontSizeScale ?? DEFAULT_SYMBOL_FONT_SCALE) * SYMBOL_SIZE}vp`)
           .height(LIST_ROW_HEIGHT)
@@ -550,6 +550,8 @@ struct MultiFilterRow {
           })
           .tabIndex(-1)
       }
+      .stateEffect(false)
+      .type(ButtonType.Normal)
       .border({
         radius: $r('sys.float.ohos_id_corner_radius_clicked')
       })

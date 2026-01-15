@@ -668,26 +668,6 @@ void JsCommandCallDomElementMethod::Execute(const RefPtr<JsAcePage>& page) const
     }
 }
 
-void JsCommandContextOperation::Execute(const RefPtr<JsAcePage>& page) const
-{
-    if (!task_) {
-        return;
-    }
-    auto canvas = AceType::DynamicCast<DOMCanvas>(GetNodeFromPage(page, nodeId_));
-    if (!canvas) {
-        LOGE("Node %{private}d not exists or not a canvas", nodeId_);
-        return;
-    }
-    auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
-    ACE_DCHECK(paintChild);
-    auto pool = paintChild->GetTaskPool();
-    if (!pool) {
-        LOGE("canvas get pool failed");
-        return;
-    }
-    task_(pool);
-}
-
 void JsCommandXComponentOperation::Execute(const RefPtr<JsAcePage>& page) const
 {
     if (!task_) {

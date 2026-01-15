@@ -6088,6 +6088,19 @@ void OverlayManager::CloseBindSheetByUIContext(const RefPtr<NG::FrameNode>& shee
     CloseSheet(sheetKey);
 }
 
+void OverlayManager::OpenImageGenerator(BindSheetCreateParam&& param)
+{
+    if (!param.style.instanceId.has_value()) {
+        TAG_LOGE(AceLogTag::ACE_SHEET, "instanceId invalid, open image generator failed");
+        return;
+    }
+    int32_t instanceId = param.style.instanceId.value();
+    ContainerScope scope(instanceId);
+    OnBindSheetInner(nullptr, param.sheetContentNode, nullptr, param.style, nullptr, nullptr, nullptr,
+        std::move(param.onWillDismiss), nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
+        std::move(param.sheetSpringBack), param.targetNode, true);
+}
+
 void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& callback,
     const RefPtr<UINode>& sheetContentNode, std::function<RefPtr<UINode>()>&& buildtitleNodeFunc,
     NG::SheetStyle& sheetStyle, std::function<void()>&& onAppear, std::function<void()>&& onDisappear,

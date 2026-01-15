@@ -116,6 +116,7 @@ struct ArkUI_EditModeOptions {
     ArkUI_Bool enableGatherSelectedItemsAnimation;
 };
 
+struct _ArkUIMatrix4;
 typedef ArkUIGestureRecognizer* ArkUIGestureRecognizerHandle;
 typedef ArkUIGestureRecognizerHandle* ArkUIGestureRecognizerHandleArray;
 typedef _ArkUINode* ArkUINodeHandle;
@@ -125,6 +126,7 @@ typedef _ArkUIVMObject* ArkUIVMObject;
 typedef _ArkUICanvas* ArkUICanvasHandle;
 typedef _ArkUIPaint* ArkUIPaintHandle;
 typedef _ArkUIFont* ArkUIFontHandle;
+typedef _ArkUIMatrix4* ArkUIMatrix4Handle;
 typedef _ArkUIXComponentController* ArkUIXComponentControllerHandle;
 typedef _ArkUINodeAdapter* ArkUINodeAdapterHandle;
 typedef ArkUI_WaterFlowSectionOption* ArkUIWaterFlowSectionOption;
@@ -147,6 +149,32 @@ struct ArkUI_MotionPathOptions {
     ArkUI_Float32 from;
     ArkUI_Float32 to;
     ArkUI_Bool rotatable;
+};
+
+struct ArkUI_Matrix4ScaleOptions {
+    ArkUI_Float32 x;
+    ArkUI_Float32 y;
+    ArkUI_Float32 z;
+    ArkUI_Float32 centerX;
+    ArkUI_Float32 centerY;
+};
+
+struct ArkUI_Matrix4RotationOptions {
+    ArkUI_Float32 x;
+    ArkUI_Float32 y;
+    ArkUI_Float32 z;
+    ArkUI_Float32 centerX;
+    ArkUI_Float32 centerY;
+    ArkUI_Float32 angle;
+    ArkUI_Bool isSetX;
+    ArkUI_Bool isSetY;
+    ArkUI_Bool isSetZ;
+};
+
+struct ArkUI_Matrix4TranslationOptions {
+    ArkUI_Float32 x;
+    ArkUI_Float32 y;
+    ArkUI_Float32 z;
 };
 
 struct ArkUI_TextPickerRangeContentArray {
@@ -602,6 +630,7 @@ struct ArkUITextDetectConfigStruct {
     ArkUI_Uint32 entityDecorationColor;
     ArkUI_Int32 entityDecorationStyle;
     ArkUI_Bool entityEnablePreviewMenu;
+    void* onDetectResultUpdateUserData;
 };
 
 struct ArkUIImagePropertiesStruct {
@@ -1219,6 +1248,7 @@ enum ArkUINodeType {
     ARKUI_EMBEDDED_COMPONENT,
     ARKUI_UNDEFINED,
     ARKUI_PICKER,
+    ARKUI_RICH_EDITOR,
 };
 
 enum ArkUIEventCategory {
@@ -1441,6 +1471,8 @@ enum ArkUIEventSubKind {
 
     ON_CONTAINER_PICKER_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_PICKER,
     ON_CONTAINER_PICKER_SCROLL_STOP,
+
+    ON_RICH_EDITOR_ON_SELECTION_CHANGE = ARKUI_MAX_EVENT_NUM * ARKUI_RICH_EDITOR,
 };
 
 enum ArkUIAPIGestureAsyncEventSubKind {
@@ -2569,6 +2601,7 @@ struct ArkUICommonModifier {
         ArkUI_Int32 length, void* rawPtr, ArkUI_Bool isLengthMetrics);
     void (*resetBorderWidth)(ArkUINodeHandle node);
     void (*setTransform)(ArkUINodeHandle node, const ArkUI_Float32* matrix, ArkUI_Int32 length);
+    void (*setTransformMatrix)(ArkUINodeHandle node, ArkUIMatrix4Handle matrix);
     void (*resetTransform)(ArkUINodeHandle node);
     void (*setTransform3D)(ArkUINodeHandle node, const ArkUI_Float32* matrix, ArkUI_Int32 length);
     void (*resetTransform3D)(ArkUINodeHandle node);
@@ -6539,6 +6572,14 @@ struct ArkUIImageAnimatorModifier {
     void (*resetImageAnimatorOnFinish)(ArkUINodeHandle node);
 };
 
+enum class ArkUIWidthType : uint32_t {
+    SIDEBAR_WIDTH = 0,
+    MIN_SIDEBAR_WIDTH,
+    MAX_SIDEBAR_WIDTH,
+};
+
+enum class ArkUISideBarContainerType { EMBED, OVERLAY, AUTO };
+
 struct ArkUISideBarContainerModifier {
     void (*setSideBarWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* sideBarWidthPtr);
     void (*resetSideBarWidth)(ArkUINodeHandle node);
@@ -6568,6 +6609,26 @@ struct ArkUISideBarContainerModifier {
     void (*resetSideBarContainerDivider)(ArkUINodeHandle node);
     void (*setSideBarOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetSideBarOnChange)(ArkUINodeHandle node);
+    void (*setSideBarToolBarManager)(ArkUINodeHandle node);
+    void (*setSideBarOnChangeEvent)(void* callback);
+    void (*parseAndSetWidthObj)(ArkUIWidthType widthType, void* valueResObj);
+    void (*parseAndSetWidth)(ArkUIWidthType widthType, void* value, ArkUI_Bool isDoubleBind);
+    void (*setOnSideBarWidthChangeEvent)(void* callback);
+    void (*setDividerStrokeWidth)(void* value, void* valueObj);
+    void (*setDividerColor)(void* value, void* valueObj);
+    void (*setDividerStartMargin)(void* value, void* valueObj);
+    void (*setDividerEndMargin)(void* value, void* valueObj);
+    void (*resetResObjDivider)();
+    void (*create)();
+    void (*setSideBarContainerType)(ArkUISideBarContainerType type);
+    void (*setControlButtonIconInfo)(
+        ArkUI_CharPtr showIconStr, void* showIconResObj, ArkUI_Bool isPixelMap, void* pixMap, const ArkUI_Int32 state);
+    void (*setControlButtonLayout)(void* value, const ArkUI_Int32 layout);
+    void (*resetControlButtonLeft)();
+    void (*resetControlButtonTwelve)();
+    void (*resetControlButtonIconInfo)();
+    void (*resetControlButtonIconRes)();
+    void (*setSideBarContainerMinContentWidthJs)(ArkUI_Float32 value, ArkUI_Int32 unit, void* minContentWidthPtr);
 };
 
 struct ArkUICalendarPickerModifier {
@@ -7396,7 +7457,10 @@ struct ArkUIColumnSplitModifier {
 struct ArkUIRichEditorModifier {
     void (*setRichEditorEnableDataDetector)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
     void (*resetRichEditorEnableDataDetector)(ArkUINodeHandle node);
+    bool (*getRichEditorEnableDataDetector)(ArkUINodeHandle node);
     void (*setRichEditorDataDetectorConfigWithEvent)(
+        ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig);
+    void (*setRichEditorNapiDataDetectorConfigWithEvent)(
         ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig);
     void (*resetRichEditorDataDetectorConfigWithEvent)(ArkUINodeHandle node);
     void (*setRichEditorOnIMEInputComplete)(ArkUINodeHandle node, void* callback);
@@ -7407,6 +7471,7 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorOnSelectionChange)(ArkUINodeHandle node);
     void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetRichEditorCaretColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getRichEditorCaretColor)(ArkUINodeHandle node);
     void (*setRichEditorOnSelect)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnSelect)(ArkUINodeHandle node);
     void (*setRichEditorOnSubmit)(ArkUINodeHandle node, void* callback);
@@ -7429,6 +7494,7 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorOnCopy)(ArkUINodeHandle node);
     void (*setRichEditorEnterKeyType)(ArkUINodeHandle node, ArkUI_Uint32 enterKeyType);
     void (*resetRichEditorEnterKeyType)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getRichEditorEnterKeyType)(ArkUINodeHandle node);
     void (*setRichEditorEnableKeyboardOnFocus)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetRichEditorEnableKeyboardOnFocus)(ArkUINodeHandle node);
     void (*setRichEditorEnablePreviewText)(ArkUINodeHandle node, ArkUI_Bool value);
@@ -7448,6 +7514,7 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorAboutToDelete)(ArkUINodeHandle node);
     void (*setRichEditorBarState)(ArkUINodeHandle node, ArkUI_Uint32 barStateValue);
     void (*resetRichEditorBarState)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getRichEditorBarState)(ArkUINodeHandle node);
     void (*setRichEditorMaxLength)(ArkUINodeHandle node, ArkUI_Uint32 maxLength);
     void (*resetRichEditorMaxLength)(ArkUINodeHandle node);
     void (*setRichEditorMaxLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine);
@@ -7476,6 +7543,7 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorUndoStyle)(ArkUINodeHandle node);
     void (*setRichEditorScrollBarColor)(ArkUINodeHandle node, ArkUI_Int32 color, void* resRawPtr);
     void (*resetRichEditorScrollBarColor)(ArkUINodeHandle node);
+    ArkUI_Uint32 (*getRichEditorScrollBarColor)(ArkUINodeHandle node);
     void (*setRichEditorSelectedDragPreviewStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetRichEditorSelectedDragPreviewStyle)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getRichEditorSelectedDragPreviewStyle)(ArkUINodeHandle node);
@@ -8019,6 +8087,24 @@ struct ArkUIAtomicServiceModifier {
     ArkUI_Int32 (*setMenuBarVisible)(ArkUIContext* context, ArkUI_Bool visible);
 };
 
+struct ArkUIMatrix4Modifier {
+    ArkUIMatrix4Handle (*createMatrix4)();
+    ArkUIMatrix4Handle (*createByElements)(const ArkUI_Float32* elements);
+    void (*getElements)(const ArkUIMatrix4Handle matrix, ArkUI_Float32* result);
+    void (*dispose)(ArkUIMatrix4Handle matrix);
+    ArkUIMatrix4Handle (*copy)(const ArkUIMatrix4Handle matrix);
+    void (*invert)(ArkUIMatrix4Handle matrix);
+    void (*combine)(ArkUIMatrix4Handle oriMatrix, ArkUIMatrix4Handle anotherMatrix);
+    void (*translate)(ArkUIMatrix4Handle matrix, ArkUI_Float32 dx, ArkUI_Float32 dy, ArkUI_Float32 dz);
+    void (*scale)(ArkUIMatrix4Handle matrix, const ArkUI_Matrix4ScaleOptions* scale);
+    void (*rotate)(ArkUIMatrix4Handle matrix, const ArkUI_Matrix4RotationOptions* rotate);
+    void (*skew)(ArkUIMatrix4Handle matrix, const ArkUI_Float32 skewX, const ArkUI_Float32 skewY);
+    void (*transformPoint)(ArkUIMatrix4Handle matrix, ArkUI_Float32 oriPointX, ArkUI_Float32 oriPointY,
+        ArkUI_Float32* resultX, ArkUI_Float32* resultY);
+    void (*setPolyToPoly)(ArkUIMatrix4Handle matrix, std::vector<std::pair<float, float>>& srcIndex,
+        std::vector<std::pair<float, float>>& dstIndex);
+};
+
 struct ArkUINDKRenderNodeModifier {
     ArkUI_Int32 (*addRenderNode)(ArkUINodeHandle node, ArkUIRenderNodeHandle child);
     ArkUI_Int32 (*removeRenderNode)(ArkUINodeHandle node, ArkUIRenderNodeHandle child);
@@ -8255,6 +8341,7 @@ struct ArkUINodeModifiers {
     const ArkUINDKRenderNodeModifier* (*getNDKRenderNodeModifier)();
     const ArkUIContainerPickerModifier* (*getContainerPickerModifier)();
     const ArkUIAtomicServiceModifier* (*getAtomicServiceModifier)();
+    const ArkUIMatrix4Modifier* (*getMatrix4Modifier)();
 };
 
 // same as inner defines in property.h

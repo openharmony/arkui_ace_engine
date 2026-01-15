@@ -16,6 +16,7 @@
 #include "ui/base/utils/utils.h"
 #include "base/geometry/dimension.h"
 #include "base/utils/utf_helper.h"
+#include "base/utils/measure_util.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/pattern/security_component/security_component_common.h"
 #include "core/components_ng/pattern/security_component/security_component_layout_element.h"
@@ -26,9 +27,6 @@
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_property.h"
 #include "core/pipeline_ng/pipeline_context.h"
-#ifdef ENABLE_ROSEN_BACKEND
-#include "core/components/custom_paint/rosen_render_custom_paint.h"
-#endif
 
 namespace OHOS::Ace::NG {
 
@@ -459,7 +457,7 @@ std::optional<SizeF> TextLayoutElement::GetMeasureTextSize(const std::string& da
     content.fontSize = fontSize;
     auto fontweight = StringUtils::FontWeightToString(fontWeight);
     content.fontWeight = fontweight;
-    auto size = RosenRenderCustomPaint::MeasureTextSizeInner(content);
+    auto size = MeasureUtil::MeasureTextSize(content);
     return SizeF(size.Width(), size.Height());
 #else
     return std::nullopt;

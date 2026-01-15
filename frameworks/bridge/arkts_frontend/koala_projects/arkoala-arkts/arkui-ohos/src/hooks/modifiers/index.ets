@@ -262,6 +262,8 @@ import { DrawableDescriptor } from "@ohos.arkui.drawableDescriptor"
 import { ImageAIOptions, DataPanelOptions, GaugeOptions, PatternLockController, TextTimerOptions, TextClockOptions } from "../../framework"
 import { ArkUIAniModule } from 'arkui.ani';
 import { KPointer } from '@koalaui/interop';
+import { ArkParticleComponent, ParticleAttribute } from './../../component/particle';
+import { ParticleModifier } from './../../ParticleModifier';
 
 export function hookAlphabetIndexerAttributeModifier(component: ArkAlphabetIndexerComponent, modifier: AttributeModifier<AlphabetIndexerAttribute> | AttributeModifier<CommonMethod> | undefined):void {
      if (modifier === undefined) {
@@ -3217,34 +3219,34 @@ export function hookRichEditorAttributeModifier(component: ArkRichEditorComponen
         constructParam, updaterReceiver, component.getPeer());
 }
 
-// export function hookParticleAttributeModifier(component: ArkParticleComponent, modifier: AttributeModifier<ParticleAttribute> | AttributeModifier<CommonMethod> | undefined): void {
-//     if (modifier === undefined) {
-//         return;
-//     }
-//     let isCommonModifier: boolean = modifier instanceof CommonModifier;
-//     if (isCommonModifier) {
-//         applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
-//         return;
-//     }
-//     let attributeSet = (): ParticleModifier => {
-//         let isParticleModifier: boolean = modifier instanceof ParticleModifier;
-//         let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ParticleModifier();
-//         if (isParticleModifier) {
-//             let particleModifier = modifier as object as ParticleModifier;
-//             initModifier.mergeModifier(particleModifier);
-//             component.getPeer().attributeSet = initModifier;
-//             return initModifier;
-//         } else {
-//             component.getPeer().attributeSet = initModifier;
-//             return initModifier;
-//         }
-//     }
-//     let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
-//     };
-//     let updaterReceiver = (): ArkParticleComponent => {
-//         let componentNew: ArkParticleComponent = new ArkParticleComponent();
-//         componentNew.setPeer(component.getPeer());
-//         return componentNew;
-//     };
-//     applyAttributeModifierBase(modifier as Object as AttributeModifier<ParticleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
-// }
+export function hookParticleAttributeModifier(component: ArkParticleComponent, modifier: AttributeModifier<ParticleAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): ParticleModifier => {
+        let isParticleModifier: boolean = modifier instanceof ParticleModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new ParticleModifier();
+        if (isParticleModifier) {
+            let particleModifier = modifier as object as ParticleModifier;
+            initModifier.mergeModifier(particleModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkParticleComponent => {
+        let componentNew: ArkParticleComponent = new ArkParticleComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<ParticleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}

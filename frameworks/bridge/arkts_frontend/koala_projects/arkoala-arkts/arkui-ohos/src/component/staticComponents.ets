@@ -30,6 +30,7 @@ import { IExtendableComponent } from './extendableComponent';
 import { destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
 import { UIContextImpl } from 'arkui/base/UIContextImpl';
 import { ArkUINativeModule } from '#components';
+import { FreeRootNode } from '../CallbackTransformer';
 
 export class ArkRootPeer extends PeerNode {
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
@@ -59,8 +60,10 @@ export class ArkCustomComponentRootPeer extends PeerNode {
     private component?: IExtendableComponent;
     private childPeerPtr: KPointer = nullptr;
     private buildFunc?: () => Long;
+    private freezeRoot: Set<FreeRootNode>;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags, RootPeerType)
+        this.freezeRoot = new Set<FreeRootNode>();
     }
     setComponent(component: IExtendableComponent) {
         this.component = component;
@@ -68,6 +71,27 @@ export class ArkCustomComponentRootPeer extends PeerNode {
     }
     getComponent(): IExtendableComponent | undefined {
         return this.component;
+    }
+    freezeMyRoot(): void {
+        this.freezeRoot.forEach((root: FreeRootNode) => {
+            root.freezeSelf();
+        });
+    }
+    unfreezeMyRoot(): void {
+        this.freezeRoot.forEach((root: FreeRootNode) => {
+            root.unfreezeSelf();
+        });
+    }
+    addFreezeRoot(freezeRoot: FreeRootNode): void {
+        this.freezeRoot.add(freezeRoot);
+    }
+    deleteFreezeRoot(freezeRoot: FreeRootNode): void {
+        this.freezeRoot.delete(freezeRoot);
+    }
+    recompute(): void {
+        this.freezeRoot.forEach((root: FreeRootNode) => {
+            root.compute();
+        });
     }
     public static create(component: ArkCustomComponent, flags: int32 = 0): ArkCustomComponentRootPeer {
         const peerId  = PeerNode.nextId();

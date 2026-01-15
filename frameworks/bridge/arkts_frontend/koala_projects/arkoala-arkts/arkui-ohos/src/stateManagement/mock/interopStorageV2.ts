@@ -28,18 +28,18 @@ export class InteropAppStorageV2 {
   }
 
   public connect<T extends object>(
-      ttype: Type,
+      ttype: Class,
       key: string,
       defaultCreator?: StorageDefaultCreator<T>
   ): T | undefined {
       return AppStorageV2Impl.instance().connect<T>(ttype, key, defaultCreator);
   }
 
-  public connect<T extends object>(ttype: Type, defaultCreator?: StorageDefaultCreator<T>): T | undefined {
+  public connect<T extends object>(ttype: Class, defaultCreator?: StorageDefaultCreator<T>): T | undefined {
       return AppStorageV2Impl.instance().connect<T>(ttype, defaultCreator);
   }
 
-  public remove(keyOrType: string | Type): void {
+  public remove(keyOrType: string | Class): void {
     AppStorageV2Impl.instance().remove(keyOrType);
   }
 

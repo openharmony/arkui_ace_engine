@@ -1295,10 +1295,70 @@ class ShapeModifier extends ArkShapeComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class SideBarContainerModifier extends ArkSideBarContainerComponent {
+class LazyArkSideBarContainerComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkSideBarContainerComponent.module === undefined) {
+      LazyArkSideBarContainerComponent.module = globalThis.requireNapi('arkui.components.arksidebarcontainer');
+    }
+    this.lazyComponent = LazyArkSideBarContainerComponent.module.createComponent(nativePtr, classType);
+    console.log('LazyArkSideBarContainerComponent lazyload nativeModule');
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  onChange(callback) {
+    this.lazyComponent.onChange(callback);
+    return this;
+  }
+  autoHide(value) {
+    this.lazyComponent.autoHide(callback);
+    return this;
+  }
+  showSideBar(value) {
+    this.lazyComponent.showSideBar(callback);
+    return this;
+  }
+  maxSideBarWidth(value) {
+    this.lazyComponent.maxSideBarWidth(callback);
+    return this;
+  }
+  minSideBarWidth(value) {
+    this.lazyComponent.minSideBarWidth(callback);
+    return this;
+  }
+  minContentWidth(value) {
+    this.lazyComponent.minContentWidth(callback);
+    return this;
+  }
+  controlButton(value) {
+    this.lazyComponent.controlButton(callback);
+    return this;
+  }
+  divider(value) {
+    this.lazyComponent.divider(callback);
+    return this;
+  }
+  sideBarPosition(value) {
+    this.lazyComponent.sideBarPosition(callback);
+    return this;
+  }
+  sideBarWidth(value) {
+    this.lazyComponent.sideBarWidth(callback);
+    return this;
+  }
+  showControlButton(value) {
+    this.lazyComponent.showControlButton(callback);
+    return this;
+  }
+}
+
+class SideBarContainerModifier extends LazyArkSideBarContainerComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

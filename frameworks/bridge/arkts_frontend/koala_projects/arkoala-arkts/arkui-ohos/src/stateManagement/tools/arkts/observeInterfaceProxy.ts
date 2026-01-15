@@ -61,9 +61,9 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
         }
         const varName = method.getName().substring(5);
         const SETTER_PREFIX = '<set>';
-        const targetType = Type.of(this._target) as ClassType;
+        const targetType = Class.of(this._target);
         try {
-            const setter = targetType.getMethodByName(SETTER_PREFIX + varName);
+            const setter = targetType.getInstanceMethod(SETTER_PREFIX + varName);
             if (setter) {
                 setter.invoke(this._target, [makeObserved]);
             }
@@ -75,9 +75,9 @@ export class InterfaceProxyHandler implements reflect.InvocationHandler, IObserv
     set (target: Object, method: reflect.InstanceMethod, newValue: Any): void {
         const varName = method.getName().substring(5);
         const GETTER_PREFIX = '<get>';
-        const targetType = Type.of(this._target) as ClassType;
+        const targetType = Class.of(this._target);
         try {
-            const getter = targetType.getMethodByName(GETTER_PREFIX + varName);
+            const getter = targetType.getInstanceMethod(GETTER_PREFIX + varName);
             if (getter && getter.invoke(this._target, []) !== newValue) {
                 method.invoke(this._target, [newValue]);
                 this.__meta.fireChange();

@@ -21,6 +21,7 @@ namespace OHOS::Ace::NG {
 namespace {
     constexpr uint32_t NORMAL_VALUE_ARRAY_STEP = 2;
     constexpr DisplayMode DEFAULT_BAR_STATE_VALUE = DisplayMode::AUTO;
+    constexpr int32_t ERROR_INT_CODE = -1;
     const uint32_t ERROR_UINT_CODE = -1;
 }
 
@@ -43,14 +44,21 @@ void UnregisterRichEditorPatternResource(FrameNode* node, const std::string& key
     pattern->UnRegisterResource(key);
 }
 
-void SetRichEditorDetectEnable(ArkUINodeHandle node, ArkUI_Uint32 value)
+void NodeModifier::SetRichEditorDetectEnable(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetTextDetectEnable(frameNode, static_cast<bool>(value));
 }
 
-void ResetRichEditorDetectEnable(ArkUINodeHandle node)
+bool GetRichEditorDetectEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return RichEditorModelNG::GetSelectDetectEnable(frameNode);
+}
+
+void NodeModifier::ResetRichEditorDetectEnable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -60,6 +68,7 @@ void ResetRichEditorDetectEnable(ArkUINodeHandle node)
 void SetRichEditorDataDetectorConfigWithEvent(
     ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig)
 {
+    CHECK_NULL_VOID(arkUITextDetectConfig);
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextDetectConfig textDetectConfig;
@@ -75,11 +84,34 @@ void SetRichEditorDataDetectorConfigWithEvent(
     RichEditorModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
 }
 
-void ResetRichEditorDataDetectorConfigWithEvent(ArkUINodeHandle node)
+void NodeModifier::ResetRichEditorDataDetectorConfigWithEvent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextDetectConfig textDetectConfig;
+    RichEditorModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
+}
+
+void NodeModifier::SetRichEditorNapiDataDetectorConfigWithEvent(
+    ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextDetectConfig textDetectConfig;
+    textDetectConfig.types = arkUITextDetectConfig->types;
+    if (arkUITextDetectConfig->onResult) {
+        auto onResult = reinterpret_cast<void (*)(const char*, int32_t, void*)>(arkUITextDetectConfig->onResult);
+        textDetectConfig.onResult = [onResult, arkUITextDetectConfig](const std::string& result) {
+            if (onResult) {
+                onResult(result.c_str(), static_cast<int32_t>(result.size()),
+                    arkUITextDetectConfig->onDetectResultUpdateUserData);
+            }
+        };
+    }
+    textDetectConfig.entityColor = Color(arkUITextDetectConfig->entityColor);
+    textDetectConfig.entityDecorationType = TextDecoration(arkUITextDetectConfig->entityDecorationType);
+    textDetectConfig.entityDecorationColor = Color(arkUITextDetectConfig->entityDecorationColor);
+    textDetectConfig.entityDecorationStyle = TextDecorationStyle(arkUITextDetectConfig->entityDecorationStyle);
     RichEditorModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
 }
 
@@ -130,11 +162,32 @@ void SetRichEditorOnSelectionChange(ArkUINodeHandle node, void* callback)
     }
 }
 
-void ResetRichEditorOnSelectionChange(ArkUINodeHandle node)
+void NodeModifier::ResetRichEditorOnSelectionChange(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetOnSelectionChange(frameNode, nullptr);
+}
+
+void NodeModifier::SetRichEditorNapiOnSelectionChange(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto onSelectionChange = [node, extraParam](const BaseEventInfo* info) {
+        ArkUINodeEvent event;
+        const auto* castInfo = TypeInfoHelper::DynamicCast<SelectionRangeInfo>(info);
+        if (!castInfo) {
+            TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "SetRichEditorOnSelectionChange castInfo fail");
+            return;
+        }
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.componentAsyncEvent.subKind = ON_RICH_EDITOR_ON_SELECTION_CHANGE;
+        event.componentAsyncEvent.data[0].i32 = static_cast<int>(castInfo->start_);
+        event.componentAsyncEvent.data[1].i32 = static_cast<int>(castInfo->end_);
+        SendArkUISyncEvent(&event);
+    };
+    RichEditorModelNG::SetOnSelectionChange(frameNode, std::move(onSelectionChange));
 }
 
 void SetRichEditorCaretColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
@@ -157,6 +210,13 @@ void ResetRichEditorCaretColor(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetCaretColor(frameNode, caretColor);
     UnregisterRichEditorPatternResource(frameNode, "caretColor");
+}
+
+ArkUI_Uint32 GetRichEditorCaretColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return RichEditorModelNG::GetCaretColor(frameNode).GetValue();
 }
 
 void SetRichEditorOnSelect(ArkUINodeHandle node, void* callback)
@@ -357,6 +417,13 @@ void SetRichEditorEnterKeyType(ArkUINodeHandle node, ArkUI_Uint32 enterKeyType)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetEnterKeyType(frameNode, TextInputAction(enterKeyType));
+}
+
+ArkUI_Int32 GetRichEditorEnterKeyType(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(RichEditorModelNG::GetEnterKeyType(frameNode));
 }
 
 void ResetRichEditorEnterKeyType(ArkUINodeHandle node)
@@ -587,6 +654,13 @@ void ResetRichEditorBarState(ArkUINodeHandle node)
     RichEditorModelNG::SetBarState(frameNode, DEFAULT_BAR_STATE_VALUE);
 }
 
+ArkUI_Int32 GetRichEditorBarState(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return static_cast<ArkUI_Int32>(RichEditorModelNG::GetBarState(frameNode));
+}
+
 void SetRichEditorMaxLength(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
@@ -809,6 +883,13 @@ void ResetRichEditorScrollBarColor(ArkUINodeHandle node)
     UnregisterRichEditorPatternResource(frameNode, "scrollBarColor");
 }
 
+ArkUI_Uint32 GetRichEditorScrollBarColor(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return RichEditorModelNG::GetScrollBarColor(frameNode).GetValue();
+}
+
 void SetRichEditorSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -879,7 +960,9 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
     static const ArkUIRichEditorModifier modifier = {
         .setRichEditorEnableDataDetector = SetRichEditorDetectEnable,
         .resetRichEditorEnableDataDetector = ResetRichEditorDetectEnable,
+        .getRichEditorEnableDataDetector = GetRichEditorDetectEnable,
         .setRichEditorDataDetectorConfigWithEvent = SetRichEditorDataDetectorConfigWithEvent,
+        .setRichEditorNapiDataDetectorConfigWithEvent = SetRichEditorNapiDataDetectorConfigWithEvent,
         .resetRichEditorDataDetectorConfigWithEvent = ResetRichEditorDataDetectorConfigWithEvent,
         .setRichEditorOnIMEInputComplete = SetRichEditorOnIMEInputComplete,
         .resetRichEditorOnIMEInputComplete = ResetRichEditorOnIMEInputComplete,
@@ -889,6 +972,7 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorOnSelectionChange = ResetRichEditorOnSelectionChange,
         .setRichEditorCaretColor = SetRichEditorCaretColor,
         .resetRichEditorCaretColor = ResetRichEditorCaretColor,
+        .getRichEditorCaretColor = GetRichEditorCaretColor,
         .setRichEditorOnSelect = SetRichEditorOnSelect,
         .resetRichEditorOnSelect = ResetRichEditorOnSelect,
         .setRichEditorOnSubmit = SetRichEditorOnSubmit,
@@ -911,6 +995,7 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorOnCopy = ResetRichEditorOnCopy,
         .setRichEditorEnterKeyType = SetRichEditorEnterKeyType,
         .resetRichEditorEnterKeyType = ResetRichEditorEnterKeyType,
+        .getRichEditorEnterKeyType = GetRichEditorEnterKeyType,
         .setRichEditorEnableKeyboardOnFocus = SetRichEditorEnableKeyboardOnFocus,
         .resetRichEditorEnableKeyboardOnFocus = ResetRichEditorEnableKeyboardOnFocus,
         .setRichEditorEnablePreviewText = SetRichEditorEnablePreviewText,
@@ -927,6 +1012,7 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorAboutToDelete = ResetRichEditorAboutToDelete,
         .setRichEditorBarState = SetRichEditorBarState,
         .resetRichEditorBarState = ResetRichEditorBarState,
+        .getRichEditorBarState = GetRichEditorBarState,
         .setRichEditorMaxLength = SetRichEditorMaxLength,
         .resetRichEditorMaxLength = ResetRichEditorMaxLength,
         .setRichEditorMaxLines = SetRichEditorMaxLines,
@@ -955,6 +1041,7 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorUndoStyle = ResetRichEditorUndoStyle,
         .setRichEditorScrollBarColor = SetRichEditorScrollBarColor,
         .resetRichEditorScrollBarColor = ResetRichEditorScrollBarColor,
+        .getRichEditorScrollBarColor = GetRichEditorScrollBarColor,
         .setRichEditorSelectedDragPreviewStyle = SetRichEditorSelectedDragPreviewStyle,
         .resetRichEditorSelectedDragPreviewStyle = ResetRichEditorSelectedDragPreviewStyle,
         .getRichEditorSelectedDragPreviewStyle = GetRichEditorSelectedDragPreviewStyle,
@@ -976,6 +1063,7 @@ const CJUIRichEditorModifier* GetCJUIRichEditorModifier()
         .resetRichEditorCopyOptions = ResetRichEditorCopyOptions,
         .setRichEditorCaretColor = SetRichEditorCaretColor,
         .resetRichEditorCaretColor = ResetRichEditorCaretColor,
+        .getRichEditorCaretColor = GetRichEditorCaretColor,
         .setOnReady = SetRichEditorOnReady,
         .resetOnReady = ResetRichEditorOnReady,
         .setOnDeleteComplete = SetRichEditorOnDeleteComplete,
@@ -986,8 +1074,10 @@ const CJUIRichEditorModifier* GetCJUIRichEditorModifier()
         .resetRichEditorSelectedBackgroundColor = ResetRichEditorSelectedBackgroundColor,
         .setRichEditorEnterKeyType = SetRichEditorEnterKeyType,
         .resetRichEditorEnterKeyType = ResetRichEditorEnterKeyType,
+        .getRichEditorEnterKeyType = GetRichEditorEnterKeyType,
         .setRichEditorBarState = SetRichEditorBarState,
         .resetRichEditorBarState = ResetRichEditorBarState,
+        .getRichEditorBarState = GetRichEditorBarState,
         .setRichEditorSingleLine = SetRichEditorSingleLine,
         .resetRichEditorSingleLine = ResetRichEditorSingleLine,
         .getRichEditorSingleLine = GetRichEditorSingleLine,

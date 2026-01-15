@@ -67,7 +67,7 @@ struct ArkUI_Node {
     void* gridLayoutOptions =  nullptr;
 };
 
-constexpr int BASIC_COMPONENT_NUM = 22;
+constexpr int BASIC_COMPONENT_NUM = 23;
 struct ArkUI_GuidelineStyle {
     std::string id;
     ArkUI_Axis direction;

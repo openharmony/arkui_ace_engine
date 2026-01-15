@@ -1061,44 +1061,6 @@ OffsetOrEdgesParam Convert(const Ark_LocalizedEdges& src)
 }
 
 template<>
-Gradient Convert(const Ark_RadialGradientOptions& src)
-{
-    NG::Gradient gradient;
-    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
-
-    // center
-    auto centerX = Converter::OptConvert<Dimension>(src.center.value0);
-    if (centerX) {
-        gradient.GetRadialGradient()->radialCenterX = IsPercent(*centerX) ? *centerX * PERCENT_100 : *centerX;
-    }
-
-    auto centerY = Converter::OptConvert<Dimension>(src.center.value1);
-    if (centerY) {
-        gradient.GetRadialGradient()->radialCenterY = IsPercent(*centerY) ? *centerY * PERCENT_100 : *centerY;
-    }
-
-    // radius
-    std::optional<Dimension> radiusOpt = Converter::OptConvert<Dimension>(src.radius);
-    if (radiusOpt) {
-        // radius should be positive [0, +∞)
-        Dimension radius = radiusOpt.value().IsNonPositive() ? Dimension(0, DimensionUnit::VP) : radiusOpt.value();
-        gradient.GetRadialGradient()->radialVerticalSize = radius;
-        gradient.GetRadialGradient()->radialHorizontalSize = radius;
-    }
-
-    // repeating
-    std::optional<bool> repeating = Converter::OptConvert<bool>(src.repeating);
-    if (repeating) {
-        gradient.SetRepeat(repeating.value());
-    }
-
-    // color stops
-    Converter::AssignGradientColors(&gradient, &(src.colors));
-
-    return gradient;
-}
-
-template<>
 BackgroundImageSize Convert(const Ark_SizeOptions& src)
 {
     BackgroundImageSize imageSize;
@@ -6348,19 +6310,23 @@ void SetBindSheetImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    CallbackHelper(*optBuilder).BuildAsync([frameNode, isShowValue, sheetStyle, changeEvent = std::move(changeEvent),
-        cb = std::move(cbs)](
-        const RefPtr<UINode>& uiNode) mutable {
-        auto buildFunc = [frameNode, uiNode]() {
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-            ViewStackProcessor::GetInstance()->Push(uiNode);
-        };
-        ViewAbstractModelStatic::BindSheet(frameNode, *isShowValue, std::move(changeEvent), std::move(buildFunc),
-            std::move(cb.titleBuilder), sheetStyle, std::move(cb.onAppear), std::move(cb.onDisappear),
-            std::move(cb.shouldDismiss), std::move(cb.onWillDismiss), std::move(cb.onWillAppear),
-            std::move(cb.onWillDisappear), std::move(cb.onHeightDidChange), std::move(cb.onDetentsDidChange),
-            std::move(cb.onWidthDidChange), std::move(cb.onTypeDidChange), std::move(cb.sheetSpringBack));
-        }, node);
+    auto buildFunc = [arkBuilder = CallbackHelper(*optBuilder), weak = AceType::WeakClaim(frameNode), node]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        PipelineContext::SetCallBackNode(weak);
+        auto builderNode = arkBuilder.BuildSync(node);
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+        auto finalNode = CreateProxyNode(builderNode);
+#else
+        auto finalNode = builderNode;
+#endif
+        ViewStackProcessor::GetInstance()->Push(finalNode);
+    };
+    ViewAbstractModelStatic::BindSheet(frameNode, *isShowValue, std::move(changeEvent), std::move(buildFunc),
+        std::move(cbs.titleBuilder), sheetStyle, std::move(cbs.onAppear), std::move(cbs.onDisappear),
+        std::move(cbs.shouldDismiss), std::move(cbs.onWillDismiss), std::move(cbs.onWillAppear),
+        std::move(cbs.onWillDisappear), std::move(cbs.onHeightDidChange), std::move(cbs.onDetentsDidChange),
+        std::move(cbs.onWidthDidChange), std::move(cbs.onTypeDidChange), std::move(cbs.sheetSpringBack));
 }
 void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
                                 const Opt_Array_Float64* ratios,

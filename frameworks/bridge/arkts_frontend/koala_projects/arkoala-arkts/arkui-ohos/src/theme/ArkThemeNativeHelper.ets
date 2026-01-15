@@ -70,9 +70,18 @@ export class ArkThemeNativeHelper {
             srcTheme.colors = isDark? theme.darkColors : theme.colors;
         } else if (theme instanceof CustomTheme) {
             if (isDark) {
-                ArkColorsImpl.assign(srcTheme.colors, (theme as CustomTheme).darkColors!);
+                const colorArrayDark = (theme as CustomTheme).darkColors;
+                if (colorArrayDark) {
+                    ArkColorsImpl.assign(srcTheme.colors, colorArrayDark);
+                } else {
+                    const colorArrayLight = (theme as CustomTheme).colors;
+                    ArkColorsImpl.assign(srcTheme.colors, colorArrayLight!);
+                }
             } else {
-                ArkColorsImpl.assign(srcTheme.colors, (theme as CustomTheme).colors!);
+                const colorArrayLight = (theme as CustomTheme).colors;
+                if (colorArrayLight) {
+                    ArkColorsImpl.assign(srcTheme.colors, colorArrayLight);
+                }
             }
         }
         return [

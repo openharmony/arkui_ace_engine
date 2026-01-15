@@ -746,4 +746,23 @@ HWTEST_F(CustomTestNg, CustomTest102, TestSize.Level1)
     EXPECT_EQ(foundParentInRegular, nullptr);
 }
 
+/**
+ * @tc.name: CustomTest103
+ * @tc.desc: Test colorMode when reuse
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomTestNg, CustomTest103, TestSize.Level1)
+{
+    MockContainer::SetUp();
+    auto customNode = CustomNode::CreateCustomNode(ElementRegister::GetInstance()->MakeUniqueId(), TEST_TAG);
+    EXPECT_FALSE(customNode->isDarkMode_);
+
+    g_isConfigChangePerform = true;
+    MockContainer::SetMockColorMode(ColorMode::DARK);
+    auto childNode = FrameNode::CreateFrameNode("childNode", 1000, AceType::MakeRefPtr<Pattern>());
+    customNode->AddChild(childNode);
+    customNode->FireRecycleRenderFunc();
+    EXPECT_TRUE(childNode->isDarkMode_);
+}
+
 } // namespace OHOS::Ace::NG

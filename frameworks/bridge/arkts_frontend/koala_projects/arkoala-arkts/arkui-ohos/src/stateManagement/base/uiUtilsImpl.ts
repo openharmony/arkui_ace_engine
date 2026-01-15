@@ -23,10 +23,10 @@ import { ObserveWrappedBase, ObserveWrappedKeyedMeta } from './observeWrappedBas
 import { Binding, MutableBinding } from '../utils';
 import { getRawObject, isDynamicObject } from '#generated';
 
-const ArrayTypeName = Type.from<Array<Any>>().getName();
-const SetTypeName = Type.from<Set<Any>>().getName();
-const MapTypeName = Type.from<Map<Any, Any>>().getName();
-const DateTypeName = Type.from<Date>().getName();
+const ArrayTypeName = Class.from<Array<Any>>().getName();
+const SetTypeName = Class.from<Set<Any>>().getName();
+const MapTypeName = Class.from<Map<Any, Any>>().getName();
+const DateTypeName = Class.from<Date>().getName();
 
 export class UIUtilsImpl {
     private static observedMap: WeakMap<Object, Object> = new WeakMap<Object, Object>();
@@ -143,7 +143,7 @@ export class UIUtilsImpl {
         if (value instanceof ObserveWrappedBase || !(UIUtilsImpl.checkIsBuitInType(value) || isProxy)) {
             return value as T;
         }
-        const valueTypeName = Type.of(value).getName();
+        const valueTypeName = Class.of(value as Object).getName();
         const makeObservedWrappedBase: ((value: object, allowDeep: boolean, isAPI: boolean) => object) | undefined = 
             UIUtilsImpl.makeObservedWrappedBaseMap.get(valueTypeName);
         if (makeObservedWrappedBase) {
@@ -165,7 +165,7 @@ export class UIUtilsImpl {
         if (value instanceof ObserveWrappedBase || !(UIUtilsImpl.checkIsBuitInType(value))) {
             return value as T;
         }
-        const valueTypeName = Type.of(value).getName();
+        const valueTypeName = Class.of(value as Object).getName();
         const makeObservedWrappedBase: ((value: object, allowDeep: boolean, isAPI: boolean) => object) | undefined = 
             UIUtilsImpl.makeObservedWrappedBaseMap.get(valueTypeName);
         if (makeObservedWrappedBase) {
@@ -185,7 +185,7 @@ export class UIUtilsImpl {
         if (value instanceof ObserveWrappedBase || !(UIUtilsImpl.checkIsBuitInType(value) || isProxy)) {
             return value as T;
         }
-        const valueTypeName = Type.of(value).getName();
+        const valueTypeName = Class.of(value as Object).getName();
         const makeObservedWrappedBase: ((value: object, allowDeep: boolean, isAPI: boolean) => object) | undefined = 
             UIUtilsImpl.makeObservedWrappedBaseMap.get(valueTypeName);
         if (makeObservedWrappedBase) {

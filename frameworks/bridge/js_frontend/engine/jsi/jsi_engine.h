@@ -37,14 +37,14 @@ public:
     {}
     ~JsiEngineInstance() override;
     static std::map<const std::string, std::string> dataMap_;
-    RefPtr<JsAcePage> GetRunningPage() const;
+    ACE_FORCE_EXPORT RefPtr<JsAcePage> GetRunningPage() const;
     void SetRunningPage(const RefPtr<JsAcePage>& page);
     RefPtr<JsAcePage> GetStagingPage() const;
     void SetStagingPage(const RefPtr<JsAcePage>& page);
     void ResetStagingPage(const RefPtr<JsAcePage>& page);
     void SetJsMessageDispatcher(const WeakPtr<JsMessageDispatcher>& dispatcher);
     WeakPtr<JsMessageDispatcher> GetJsMessageDispatcher() const;
-    RefPtr<FrontendDelegate> GetFrontendDelegate() const;
+    ACE_FORCE_EXPORT RefPtr<FrontendDelegate> GetFrontendDelegate() const;
     bool FireJsEvent(const std::string& eventStr);
     void CallJs(const std::string& callbackId, const std::string& args, bool keepAlive = false, bool isGlobal = false);
     shared_ptr<JsRuntime> GetJsRuntime() const;

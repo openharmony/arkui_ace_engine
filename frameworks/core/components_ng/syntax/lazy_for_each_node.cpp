@@ -35,6 +35,7 @@ RefPtr<LazyForEachNode> LazyForEachNode::GetOrCreateLazyForEachNode(
         }
         return node;
     }
+    ACE_UINODE_TRACE(nodeId);
     node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
     ElementRegister::GetInstance()->AddUINode(node);
     node->RegisterBuilderListener();
@@ -64,6 +65,7 @@ LazyForEachNode::~LazyForEachNode()
 RefPtr<LazyForEachNode> LazyForEachNode::CreateLazyForEachNode(
     int32_t nodeId, const RefPtr<LazyForEachBuilder>& forEachBuilder)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto node = MakeRefPtr<LazyForEachNode>(nodeId, forEachBuilder);
     ElementRegister::GetInstance()->AddUINode(node);
     return node;

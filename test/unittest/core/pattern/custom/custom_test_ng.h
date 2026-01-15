@@ -23,6 +23,8 @@
 #define private public
 #define protected public
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_container.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_wrapper.h"

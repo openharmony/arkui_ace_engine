@@ -83,8 +83,8 @@ export class StateMgmtTool {
         return value instanceof InterfaceProxyHandler;
     }
     static tryGetHandler(value: Object): NullableObject {
-        const objType = Type.of(value);
-        return objType instanceof ClassType && (objType as ClassType).getName().startsWith('$Proxy')
+        const objType = Class.of(value);
+        return objType.getName().startsWith('$Proxy')
             ? ((value as reflect.Proxy).getHandler() as NullableObject) // a very slow call so need to judge proxy first
             : undefined;
     }
@@ -101,7 +101,7 @@ export class StateMgmtTool {
         return reflect.Proxy.create(linker, ifaces, new InterfaceProxyHandler(value, allowDeep, isAPI)) as T;
     }
     static isObjectLiteral<T extends Object>(value: T): boolean {
-        return Reflect.isLiteralInitializedInterface(value);
+        return reflect.isLiteralInitializedInterface(value);
     }
     static getGlobalStateManager(): StateManager {
         return GlobalStateManager.instance;

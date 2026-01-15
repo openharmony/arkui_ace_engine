@@ -159,7 +159,6 @@ void ScrollerPeerImpl::TriggerScrollTo(Ark_VMContext vmContext, const Ark_Scroll
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollTo Controller not bound to component.");
-        ScrollerPeerImpl::ThrowControllerError(vmContext);
         return;
     }
     ScrollOptions options = Converter::Convert<ScrollOptions>(*optionsValue);
@@ -211,7 +210,6 @@ void ScrollerPeerImpl::TriggerScrollEdge(Ark_VMContext vmContext, Ark_Edge value
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollEdge Controller not bound to component.");
-        ScrollerPeerImpl::ThrowControllerError(vmContext);
         return;
     }
     std::optional<ScrollEdgeType> edgeType = Converter::OptConvert<ScrollEdgeType>(value);
@@ -254,7 +252,6 @@ void ScrollerPeerImpl::TriggerScrollPage0(Ark_VMContext vmContext, const Ark_Scr
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollPage0 Controller not bound to component.");
-        ScrollerPeerImpl::ThrowControllerError(vmContext);
         return;
     }
     ContainerScope scope(instanceId_);
@@ -281,7 +278,6 @@ Opt_OffsetResult ScrollerPeerImpl::TriggerCurrentOffset(Ark_VMContext vmContext)
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerCurrentOffset Controller not bound to component.");
-        ScrollerPeerImpl::ThrowControllerError(vmContext);
         return Converter::ArkValue<Opt_OffsetResult>();
     }
     ContainerScope scope(instanceId_);
@@ -310,7 +306,6 @@ void ScrollerPeerImpl::TriggerScrollToIndex(Ark_VMContext vmContext, const Ark_I
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollToIndex Controller not bound to component.");
-        ScrollerPeerImpl::ThrowControllerError(vmContext);
         return;
     }
 
@@ -334,7 +329,6 @@ void ScrollerPeerImpl::TriggerScrollBy(Ark_VMContext vmContext, const Dimension&
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollBy Controller not bound to component.");
-        ScrollerPeerImpl::ThrowControllerError(vmContext);
         return;
     }
 

@@ -28,6 +28,7 @@ namespace {
 constexpr int32_t ARKUI_EVENT_NULL = -1;
 constexpr int32_t ARKUI_EVENT_ACTION = 1;
 constexpr int32_t ARKUI_MOUSE_ACTION = 0;
+constexpr float ARKUI_TEST_NODE_Y = 5.0f;
 } // namespace
 class UIInputEventTest : public testing::Test {
 public:
@@ -586,11 +587,12 @@ HWTEST_F(UIInputEventTest, PointerEventGetYByIndex002, TestSize.Level1)
     event->inputEvent = static_cast<void*>(touchEvent.get());
     touchEvent->touchPointSize = 3;
     uint32_t pointerIndex = 1;
-    ArkUITouchPoint touchPoint;
-    touchEvent->touchPointes = &touchPoint;
+    ArkUITouchPoint touchPoint[3];
+    touchPoint[1].nodeY = ARKUI_TEST_NODE_Y;
+    touchEvent->touchPointes = touchPoint;
 
-    auto sourceType = OH_ArkUI_PointerEvent_GetYByIndex(event.get(), pointerIndex);
-    EXPECT_NE(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    auto nodeY = OH_ArkUI_PointerEvent_GetYByIndex(event.get(), pointerIndex);
+    EXPECT_DOUBLE_EQ(nodeY, ARKUI_TEST_NODE_Y);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 
@@ -1349,11 +1351,12 @@ HWTEST_F(UIInputEventTest, PointerEventGetDisplayYByIndex002, TestSize.Level1)
     event->inputEvent = static_cast<void*>(touchEvent.get());
     touchEvent->touchPointSize = 3;
     uint32_t pointerIndex = 1;
-    ArkUITouchPoint touchPoint;
-    touchEvent->touchPointes = &touchPoint;
+    ArkUITouchPoint touchPoint[3];
+    touchPoint[1].screenY = ARKUI_TEST_NODE_Y;
+    touchEvent->touchPointes = touchPoint;
 
-    auto sourceType = OH_ArkUI_PointerEvent_GetDisplayYByIndex(event.get(), pointerIndex);
-    EXPECT_NE(sourceType, UI_INPUT_EVENT_SOURCE_TYPE_UNKNOWN);
+    auto screenY = OH_ArkUI_PointerEvent_GetDisplayYByIndex(event.get(), pointerIndex);
+    EXPECT_DOUBLE_EQ(screenY, ARKUI_TEST_NODE_Y);
     EXPECT_EQ(OH_ArkUI_UIInputEvent_GetLatestStatus(), ARKUI_ERROR_CODE_NO_ERROR);
 }
 

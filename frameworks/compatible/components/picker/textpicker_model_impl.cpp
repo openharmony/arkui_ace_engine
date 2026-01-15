@@ -15,7 +15,7 @@
 
 #include "compatible/components/picker/textpicker_model_impl.h"
 
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 #include "compatible/components/picker/picker_text_component.h"
 
 namespace OHOS::Ace::Framework {
@@ -35,12 +35,18 @@ void TextPickerModelImpl::SetDefaultPickerItemHeight(const Dimension& value)
 {
     auto textPicker = AceType::DynamicCast<PickerTextComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
     textPicker->SetDefaultHeight(true);
-    JSViewSetProperty(&PickerTextComponent::SetColumnHeight, value);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerTextComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetColumnHeight(value);
 }
 
 void TextPickerModelImpl::SetSelected(uint32_t value)
 {
-    JSViewSetProperty(&PickerTextComponent::SetSelected, value);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerTextComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetSelected(value);
 }
 
 void TextPickerModelImpl::SetRange(const std::vector<NG::RangeContent>& value)
@@ -52,7 +58,10 @@ void TextPickerModelImpl::SetRange(const std::vector<NG::RangeContent>& value)
     for (auto& range : value) {
         textRange.emplace_back(range.text_);
     }
-    JSViewSetProperty(&PickerTextComponent::SetRange, textRange);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerTextComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetRange(textRange);
 }
 
 void TextPickerModelImpl::SetOnCascadeChange(TextCascadeChangeEvent&& onChange)
@@ -63,7 +72,10 @@ void TextPickerModelImpl::SetOnCascadeChange(TextCascadeChangeEvent&& onChange)
         std::vector<double> changeIndex { index };
         func(changeValue, changeIndex);
     };
-    JSViewSetProperty(&PickerBaseComponent::SetOnTextChange, std::move(onChangeEvent));
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto component = AceType::DynamicCast<OHOS::Ace::PickerBaseComponent>(stack->GetMainComponent());
+    CHECK_NULL_VOID(component);
+    component->SetOnTextChange(std::move(onChangeEvent));
 }
 
 void TextPickerModelImpl::SetOnScrollStop(TextCascadeChangeEvent&& onScrollStop) {}

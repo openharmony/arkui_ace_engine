@@ -22,6 +22,10 @@ export class StateUpdateLoop {
     private static activeTasks: Map<int32, Set<WatchIdType>> = new Map<int32, Set<WatchIdType>>();
     public static canRequestFrame: boolean = true;
     public static add(callback: () => void): void {
+        if (StateUpdateLoop.syncMode) {
+            callback();
+            return;
+        }
         StateUpdateLoop.callbacks.push(callback);
     }
     public static addFreezeTask(peerId: int32, watchId: WatchIdType): void {
@@ -55,5 +59,11 @@ export class StateUpdateLoop {
     }
     public static get len(): number {
         return StateUpdateLoop.callbacks.length;
+    }
+    public static syncMode: boolean = false;
+    public static execTaskInSyncMode(task: () => void): void {
+        StateUpdateLoop.syncMode = true;
+        task();
+        StateUpdateLoop.syncMode = false;
     }
 }

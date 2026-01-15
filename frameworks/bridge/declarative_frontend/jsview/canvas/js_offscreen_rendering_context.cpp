@@ -15,10 +15,12 @@
 
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
 
+#include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
-#include "bridge/declarative_frontend/jsview/models/canvas/offscreen_canvas_rendering_context_2d_model_impl.h"
+#include "compatible/components/canvas/canvas_modifier_compatible.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_pattern.h"
 #include "core/components_ng/pattern/canvas/offscreen_canvas_rendering_context_2d_model_ng.h"
 
@@ -26,6 +28,24 @@ namespace OHOS::Ace::Framework {
 std::mutex JSOffscreenRenderingContext::mutex_;
 std::unordered_map<uint32_t, RefPtr<AceType>> JSOffscreenRenderingContext::offscreenPatternMap_;
 uint32_t JSOffscreenRenderingContext::offscreenPatternCount_ = 0;
+
+namespace {
+#ifndef NG_BUILD
+const ArkUICanvasModifierCompatible* GetCanvasInnerModifier()
+{
+    static const ArkUICanvasModifierCompatible* canvasModifier_ = nullptr;
+    if (canvasModifier_) {
+        return canvasModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("canvas");
+    if (loader) {
+        canvasModifier_ = reinterpret_cast<const ArkUICanvasModifierCompatible*>(loader->GetCustomModifier());
+        return canvasModifier_;
+    }
+    return nullptr;
+}
+#endif
+}
 
 JSOffscreenRenderingContext::JSOffscreenRenderingContext()
 {
@@ -37,7 +57,15 @@ JSOffscreenRenderingContext::JSOffscreenRenderingContext()
     if (Container::IsCurrentUseNewPipeline()) {
         renderingContext2DModel_ = AceType::MakeRefPtr<NG::OffscreenCanvasRenderingContext2DModelNG>();
     } else {
-        renderingContext2DModel_ = AceType::MakeRefPtr<Framework::OffscreenCanvasRenderingContext2DModelImpl>();
+        const auto* modifier = GetCanvasInnerModifier();
+        if (modifier == nullptr) {
+            LOGF("Cannot find video modifier");
+            abort();
+        }
+        void* renderContext = modifier->createCanvasRenderingContextModel(true);
+        if (renderContext != nullptr) {
+            renderingContext2DModel_ = AceType::Claim(reinterpret_cast<RenderingContext2DModel*>(renderContext));
+        }
     }
 #endif
 }
@@ -166,8 +194,7 @@ void JSOffscreenRenderingContext::Constructor(const JSCallbackInfo& args)
         jsRenderContext->SetHeight(height);
         auto renderingContext =
             AceType::DynamicCast<OffscreenCanvasRenderingContext2DModel>(jsRenderContext->renderingContext2DModel_);
-        auto offscreenPattern =
-            renderingContext->CreateOffscreenPattern(round(width), round(height));
+        auto offscreenPattern = renderingContext->CreateOffscreenPattern(round(width), round(height));
         CHECK_NULL_VOID(offscreenPattern);
         size_t bitmapSize = renderingContext->GetBitmapSize(offscreenPattern);
         args.SetSize(bitmapSize);

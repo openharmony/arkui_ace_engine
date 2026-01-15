@@ -25,7 +25,6 @@
 #include "core/accessibility/accessibility_manager.h"
 #include "core/components_ng/pattern/image/image_properties.h"
 #include "core/pipeline/pipeline_context.h"
-#include "frameworks/bridge/common/dom/dom_canvas.h"
 #include "frameworks/compatible/components/clock/dom_clock.h"
 #include "frameworks/bridge/common/dom/dom_configs.h"
 #include "frameworks/bridge/common/dom/dom_document.h"
@@ -34,6 +33,7 @@
 #include "frameworks/compatible/components/stepper/dom_stepper.h"
 #include "frameworks/compatible/components/stepper/dom_stepper_item.h"
 #include "frameworks/bridge/common/dom/dom_xcomponent.h"
+#include "frameworks/compatible/components/canvas/custom_paint_component.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -318,19 +318,6 @@ private:
     NodeId nodeId_ = -1;
     std::string method_;
     std::string param_;
-};
-
-class ACE_EXPORT JsCommandContextOperation final : public JsCommand {
-public:
-    JsCommandContextOperation(NodeId nodeId, std::function<void(const RefPtr<CanvasTaskPool>&)> task)
-        : nodeId_(nodeId), task_(std::move(task))
-    {}
-    ~JsCommandContextOperation() final = default;
-    void Execute(const RefPtr<JsAcePage>& page) const final;
-
-private:
-    NodeId nodeId_ = -1;
-    std::function<void(const RefPtr<CanvasTaskPool>&)> task_;
 };
 
 class ACE_EXPORT JsCommandXComponentOperation final : public JsCommand {

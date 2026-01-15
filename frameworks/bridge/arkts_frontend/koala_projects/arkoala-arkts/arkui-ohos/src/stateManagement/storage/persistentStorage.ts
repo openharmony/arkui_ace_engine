@@ -66,13 +66,13 @@ interface PersistPropsOptions<T> {
 }
 
 class TypedMap {
-    private key2Type_ = new Map<string, Type>();
+    private key2Type_ = new Map<string, Class>();
     private key2Value_ = new Map<string, IStorageProperty>();
 
-    public add(key: string, ttype: Type, sp: IStorageProperty): boolean {
+    public add(key: string, ttype: Class, sp: IStorageProperty): boolean {
         const typeOpt = this.key2Type_.get(key);
         if (typeOpt !== undefined) {
-            if (!typeOpt!.equals(ttype)) {
+            if (typeOpt! != ttype) {
                 return false;
             }
         }
@@ -81,9 +81,9 @@ class TypedMap {
         return true;
     }
 
-    public get(key: string, expectedTtype: Type): IStorageProperty | undefined {
+    public get(key: string, expectedTtype: Class): IStorageProperty | undefined {
         const typeOpt = this.key2Type_.get(key);
-        if (typeOpt === undefined || !typeOpt!.equals(expectedTtype)) {
+        if (typeOpt === undefined || typeOpt! != expectedTtype) {
             return undefined;
         }
         return this.key2Value_.get(key);
@@ -154,14 +154,14 @@ class PersistentStorage {
     private static instance_: PersistentStorage | undefined = undefined;
     private readonly storage_: IAniStorage = new AniStorage();
     private map_: TypedMap = new TypedMap();
-    private simpleTypeSet: Set<Type> = new Set<Type>([
-        Type.from<int>(),
-        Type.from<long>(),
-        Type.from<float>(),
-        Type.from<double>(),
-        Type.from<number>(),
-        Type.from<string>(),
-        Type.from<boolean>(),
+    private simpleTypeSet: Set<Class> = new Set<Class>([
+        Class.from<int>(),
+        Class.from<long>(),
+        Class.from<float>(),
+        Class.from<double>(),
+        Class.from<number>(),
+        Class.from<string>(),
+        Class.from<boolean>(),
     ]);
 
     private static getOrCreate(): PersistentStorage {
@@ -182,7 +182,7 @@ class PersistentStorage {
      *
      * @param { string } key - property name
      * @param { T } defaultValue - If AppStorage does not include this property it will be initialized with this value
-     * @param { Type } ttype - type of this property.
+     * @param { Class } ttype - type of this property.
      * @param { ToJSONType<T> } [toJson] - serialization function
      * @param { FromJSONType<T> } [fromJson] - deserialization function
      * @static
@@ -215,7 +215,7 @@ class PersistentStorage {
         });
     }
 
-    private isSimpleOrEnumType(ttype: Type, isEnum: boolean): boolean {
+    private isSimpleOrEnumType(ttype: Class, isEnum: boolean): boolean {
         return this.simpleTypeSet.has(ttype) || isEnum;
     }
 
@@ -225,7 +225,7 @@ class PersistentStorage {
         toJson?: ToJSONType<T>,
         fromJson?: FromJSONType<T>
     ): boolean {
-        const ttype = Type.of(defaultValue);
+        const ttype = Class.ofAny(defaultValue)!;
         let isSimpleType = false;
         if (!toJson && !fromJson && this.isSimpleOrEnumType(ttype, defaultValue instanceof BaseEnum)) {
             isSimpleType = true;
@@ -326,7 +326,7 @@ class PersistentStorage {
 
     // case 1: neither on disk nor in storage
     // create with default value and start to persist
-    private __createNewAndPersist<T>(key: string, ttype: Type, defaultValue: T, isSimpleType: boolean, toJson?: ToJSONType<T>): boolean {
+    private __createNewAndPersist<T>(key: string, ttype: Class, defaultValue: T, isSimpleType: boolean, toJson?: ToJSONType<T>): boolean {
         if (!AppStorage.setOrCreate<T>(key, defaultValue)) {
             StateMgmtConsole.log(`__createNewAndPersist return false`);
             return false;
@@ -339,7 +339,7 @@ class PersistentStorage {
     // create in storage with read value and start to persist
     private __readFromDiskSetAndPersist<T>(
         key: string,
-        ttype: Type,
+        ttype: Class,
         isSimpleType: boolean,
         fromJson?: FromJSONType<T>,
         toJson?: ToJSONType<T>
@@ -388,7 +388,7 @@ class PersistentStorage {
 
     // case 3 - used by case 1 and 2: property exists in storage (caller needs to verify)
     // start to persist it
-    private __startToPersistStorageProperty<T>(key: string, ttype: Type, isSimpleType: boolean, toJson?: ToJSONType<T>): boolean {
+    private __startToPersistStorageProperty<T>(key: string, ttype: Class, isSimpleType: boolean, toJson?: ToJSONType<T>): boolean {
         const ref = AppStorage.ref<T>(key) as AbstractProperty<T> | undefined; // Explicitly specify T
         if (ref === undefined) {
             StateMgmtConsole.log(`Failed to get AppStorage ref for key ${key}`);

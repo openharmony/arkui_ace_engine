@@ -430,7 +430,6 @@ template("declarative_js_engine") {
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
       "jsview/js_sheet.cpp",
-      "jsview/js_side_bar.cpp",
       "jsview/js_slider.cpp",
       "jsview/js_sliding_panel.cpp",
       "jsview/js_span.cpp",
@@ -487,9 +486,6 @@ template("declarative_js_engine") {
       "jsview/models/button_model_impl.cpp",
       "jsview/models/calendar_controller_model_impl.cpp",
       "jsview/models/calendar_model_impl.cpp",
-      "jsview/models/canvas/canvas_model_impl.cpp",
-      "jsview/models/canvas/canvas_rendering_context_2d_model_impl.cpp",
-      "jsview/models/canvas/offscreen_canvas_rendering_context_2d_model_impl.cpp",
       "jsview/models/circle_model_impl.cpp",
       "jsview/models/column_model_impl.cpp",
       "jsview/models/common_view_model_impl.cpp",
@@ -527,7 +523,6 @@ template("declarative_js_engine") {
       "jsview/models/select_model_impl.cpp",
       "jsview/models/shape_abstract_model_impl.cpp",
       "jsview/models/shape_model_impl.cpp",
-      "jsview/models/side_bar_container_model_impl.cpp",
       "jsview/models/slider_model_impl.cpp",
       "jsview/models/sliding_panel_model_impl.cpp",
       "jsview/models/span_model_impl.cpp",
@@ -676,7 +671,10 @@ template("declarative_js_engine") {
     }
 
     if (defined(config.preview_support) && config.preview_support) {
-      sources += [ "jsview/js_previewer_mock.cpp" ]
+      sources += [
+        "jsview/js_previewer_mock.cpp",
+        "jsview/models/preview_mock_model_impl.cpp"
+      ]
     }
 
     if (defined(config.model_component_support) &&
@@ -979,7 +977,6 @@ template("declarative_js_engine_ng") {
       "jsview/js_select.cpp",
       "jsview/js_shape.cpp",
       "jsview/js_shape_abstract.cpp",
-      "jsview/js_side_bar.cpp",
       "jsview/js_slider.cpp",
       "jsview/js_sliding_panel.cpp",
       "jsview/js_span.cpp",

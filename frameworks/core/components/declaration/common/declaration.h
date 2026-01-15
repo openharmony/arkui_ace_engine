@@ -63,7 +63,7 @@ public:
     virtual void InitializeStyle() {}
     virtual void Clear() {}
 
-    Attribute& GetAttribute(AttributeTag tag) const;
+    ACE_FORCE_EXPORT Attribute& GetAttribute(AttributeTag tag) const;
     Style& GetStyle(StyleTag tag) const;
     Event& GetEvent(EventTag tag) const;
     Method& GetMethod(MethodTag tag) const;

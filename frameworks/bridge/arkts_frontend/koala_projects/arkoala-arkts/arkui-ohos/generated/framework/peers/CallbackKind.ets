@@ -65,6 +65,7 @@ export enum CallbackKind {
     Kind_Callback_I32_Tuple_I32_I32_I32_I32 = 59584331,
     Kind_Callback_I64_Void = 158810308,
     Kind_Callback_I32_Void = 1148910599,
+    Kind_Callback_IMEClient_Void = 1772095735,
     Kind_Callback_InsertValue_Boolean = -383025085,
     Kind_Callback_InsertValue_Void = -1121207885,
     Kind_Callback_ItemDragInfo_I32_I32_Boolean_Void = -945004737,

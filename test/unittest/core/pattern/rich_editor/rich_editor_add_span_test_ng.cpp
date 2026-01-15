@@ -254,11 +254,18 @@ HWTEST_F(RichEditorAddSpanTestNg, AddImageSpan004, TestSize.Level0)
  */
 HWTEST_F(RichEditorAddSpanTestNg, AddTextSpan001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern and controller
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     auto richEditorController = richEditorPattern->GetRichEditorController();
     ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. add text span
+     */
     TextStyle style;
     style.SetTextColor(TEXT_COLOR_VALUE);
     style.SetFontSize(FONT_SIZE_VALUE);

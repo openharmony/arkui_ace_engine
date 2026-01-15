@@ -175,7 +175,6 @@ template("ace_core_source_set") {
 
       # declaration
       "components/declaration/button/button_declaration.cpp",
-      "components/declaration/canvas/canvas_declaration.cpp",
       "components/declaration/common/declaration.cpp",
       "components/declaration/common/declaration_constants.cpp",
       "components/declaration/common/declaration_creator_manager.cpp",
@@ -365,7 +364,6 @@ template("ace_core_source_set") {
       "$ace_root/frameworks/core/components/counter:ace_core_components_counter_$platform",
       "$ace_root/frameworks/core/components/coverage:ace_core_components_coverage_$platform",
       "$ace_root/frameworks/core/components/custom_dialog:ace_core_components_custom_dialog_$platform",
-      "$ace_root/frameworks/core/components/custom_paint:ace_core_components_custom_paint_$platform",
       "$ace_root/frameworks/core/components/data_panel:ace_core_components_data_panel_$platform",
       "$ace_root/frameworks/core/components/dialog:ace_core_components_dialog_$platform",
       "$ace_root/frameworks/core/components/dialog_modal:ace_core_components_dialog_modal_$platform",
@@ -863,10 +861,6 @@ template("ace_core_ng_source_set") {
       "$root_out_dir/arkui/framework/core/components/theme/theme_constants_tv.cpp",
       "components/checkable/checkable_theme.cpp",
       "components/common/painter/rosen_svg_painter.cpp",
-      "components/custom_paint/render_custom_paint_creator.cpp",
-      "components/custom_paint/render_offscreen_canvas_creator.cpp",
-      "components/custom_paint/rosen_render_offscreen_canvas.cpp",
-      "components/custom_paint/rosen_render_custom_paint.cpp",
       "components/dialog/dialog_theme.cpp",
       "components/font/constants_converter.cpp",
       "components/font/font_loader_creator.cpp",

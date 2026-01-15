@@ -67,6 +67,7 @@
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/node_relative_container_modifier.h"
 #include "core/interfaces/native/node/node_render_node_modifier.h"
+#include "core/interfaces/native/node/martix_modifier.h"
 #include "core/interfaces/native/node/node_scroll_bar_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
@@ -304,6 +305,7 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getNDKRenderNodeModifier = NodeModifier::GetNDKRenderNodeModifier,
         .getContainerPickerModifier = NodeModifier::GetContainerPickerModifier,
         .getAtomicServiceModifier = NodeModifier::GetAtomicServiceModifier,
+        .getMatrix4Modifier = NodeModifier::GetMatrix4Modifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;

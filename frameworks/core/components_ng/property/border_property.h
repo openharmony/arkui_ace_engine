@@ -114,7 +114,7 @@ struct ACE_FORCE_EXPORT BorderRadiusPropertyT<Dimension> {
           radiusBottomLeft(radiusBottomLeft)
     {}
 
-    bool operator==(const BorderRadiusPropertyT<Dimension>& value) const;
+    ACE_FORCE_EXPORT bool operator==(const BorderRadiusPropertyT<Dimension>& value) const;
     bool operator!=(const BorderRadiusPropertyT<Dimension>& value) const;
 
     void SetRadius(const Dimension& borderRadius);

@@ -68,15 +68,15 @@ export class DecoratedVariableBase {
     }
 
     public getTraceInfo(): string {
-            return `get: ${this.varName} ${Type.of(this.owningComponent_)} ${this.shouldAddRef()} ${ObserveSingleton.instance.renderingComponent}`
+            return `get: ${this.varName} ${Class.ofAny(this.owningComponent_)} ${this.shouldAddRef()} ${ObserveSingleton.instance.renderingComponent}`
         }
     
     public setTraceInfo(): string {
-        return `set: ${this.varName} ${Type.of(this.owningComponent_)}`;
+        return `set: ${this.varName} ${Class.ofAny(this.owningComponent_)}`;
     } 
 
     public updateTraceInfo(): string {
-        return `update: ${this.varName} ${Type.of(this.owningComponent_)}`;
+        return `update: ${this.varName} ${Class.ofAny(this.owningComponent_)}`;
     }
 
     public shouldAddRef(): boolean {

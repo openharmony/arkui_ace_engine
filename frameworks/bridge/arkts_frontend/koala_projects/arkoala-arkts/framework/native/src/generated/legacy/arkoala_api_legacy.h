@@ -2660,7 +2660,7 @@ struct ArkUIMenuModifier {
     void (*resetFont)(ArkUINodeHandle node);
     void (*setRadius)(ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units);
     void (*resetRadius)(ArkUINodeHandle node);
-    void (*setMenuWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resObjs);
+    void (*setMenuWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetMenuWidth)(ArkUINodeHandle node);
 };
 

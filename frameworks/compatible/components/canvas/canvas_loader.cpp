@@ -20,6 +20,7 @@
 #include "compatible/components/canvas/bridge/jsi_offscreen_canvas_bridge.h"
 #include "compatible/components/canvas/canvas_declaration.h"
 #include "compatible/components/canvas/canvas_model_impl.h"
+#include "compatible/components/canvas/canvas_modifier_compatible.h"
 #include "compatible/components/canvas/canvas_rendering_context_2d_model_impl.h"
 #include "compatible/components/canvas/dom_canvas.h"
 #include "compatible/components/canvas/offscreen_canvas_rendering_context_2d_model_impl.h"
@@ -28,6 +29,12 @@
 #include "core/components_v2/inspector/inspector_composed_element.h"
 
 namespace OHOS::Ace {
+
+namespace CanvasModifierCompatible {
+
+const ArkUICanvasModifierCompatible* GetCanvasModifier();
+
+}
 
 RefPtr<Framework::DOMNode> CanvasLoader::CreateDomNode(int32_t nodeId, const std::string& nodeName)
 {
@@ -65,6 +72,11 @@ void* OHOS_ACE_Compatible_CreateCanvasBridge(CanvasBridgeParams& params)
     } else {
         return new Framework::JsiCanvasBridge();
     }
+}
+
+const void* CanvasLoader::GetCustomModifier(const std::string& tag)
+{
+    return CanvasModifierCompatible::GetCanvasModifier();
 }
 
 } // namespace OHOS::Ace

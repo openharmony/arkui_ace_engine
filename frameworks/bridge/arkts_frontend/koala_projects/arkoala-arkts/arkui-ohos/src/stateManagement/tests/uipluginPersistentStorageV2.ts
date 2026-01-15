@@ -41,11 +41,11 @@ interface JsonDeserializable {
 }
 
 class ConnectOptionsInst<T extends object> implements ConnectOptions<T> {
-    type: Type;
+    type: Class;
     key?: string;
     defaultCreator?: StorageDefaultCreator<T>;
     areaMode?: contextConstant.AreaMode;
-    constructor(ttype: Type) {
+    constructor(ttype: Class) {
         this.type = ttype;
     }
 }
@@ -55,9 +55,9 @@ class ConnectOptionsInst<T extends object> implements ConnectOptions<T> {
     username: string;
 }
 */
-const UserTypeValue = Type.from<User>();
-const NonObservedPersonType = Type.from<NonObservedPerson>();
-const NumberInterfaceType = Type.of({ prop: 5 } as NumberInterface);
+const UserTypeValue = Class.from<User>();
+const NonObservedPersonType = Class.from<NonObservedPerson>();
+const NumberInterfaceType = Class.from<NumberInterface>();
 
 class User implements IObservedObject, IWatchSubscriberRegister, JsonSerializable, JsonDeserializable {
 
@@ -251,7 +251,7 @@ export function run_persistent_storage_v2(): Boolean {
         let errorTriggered = false;
         try {
             let userFromStorage1 = PersistenceV2.connect<Map<string, string>>(
-                Type.of(new Map<string, string>()),
+                Class.from<Map<string, string>>(),
                 "userKey",
                 toJson,
                 fromJson,
@@ -273,7 +273,7 @@ export function run_persistent_storage_v2(): Boolean {
         let errorTriggered = false;
         try {
             let userFromStorage1 = PersistenceV2.connect<Set<Number>>(
-                Type.of(new Set<Number>()),
+                Class.from<Set<Number>>(),
                 "userKey",
                 toJson,
                 fromJson,

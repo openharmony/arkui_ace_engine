@@ -1506,6 +1506,44 @@ Gradient Convert(const Ark_LinearGradientOptions& value)
 }
 
 template<>
+Gradient Convert(const Ark_RadialGradientOptions& src)
+{
+    NG::Gradient gradient;
+    gradient.CreateGradientWithType(NG::GradientType::RADIAL);
+
+    // center
+    auto centerX = Converter::OptConvert<Dimension>(src.center.value0);
+    if (centerX) {
+        gradient.GetRadialGradient()->radialCenterX = IsPercent(*centerX) ? *centerX * PERCENT_100 : *centerX;
+    }
+
+    auto centerY = Converter::OptConvert<Dimension>(src.center.value1);
+    if (centerY) {
+        gradient.GetRadialGradient()->radialCenterY = IsPercent(*centerY) ? *centerY * PERCENT_100 : *centerY;
+    }
+
+    // radius
+    std::optional<Dimension> radiusOpt = Converter::OptConvertFromArkLength(src.radius, DimensionUnit::VP);
+    if (radiusOpt) {
+        // radius should be positive [0, +∞)
+        Dimension radius = radiusOpt.value().IsNonPositive() ? Dimension(0, DimensionUnit::VP) : radiusOpt.value();
+        gradient.GetRadialGradient()->radialVerticalSize = radius;
+        gradient.GetRadialGradient()->radialHorizontalSize = radius;
+    }
+
+    // repeating
+    std::optional<bool> repeating = Converter::OptConvert<bool>(src.repeating);
+    if (repeating) {
+        gradient.SetRepeat(repeating.value());
+    }
+
+    // color stops
+    Converter::AssignGradientColors(&gradient, &(src.colors));
+
+    return gradient;
+}
+
+template<>
 GradientColor Convert(const Ark_Tuple_ResourceColor_Number& src)
 {
     GradientColor gradientColor;
@@ -2576,6 +2614,42 @@ std::optional<Dimension> OptConvertFromF64ResourceStr(const Opt_Union_F64_Resour
         []() {});
 
     return dimension;
+}
+
+Font OptConvertFromFont(const Opt_Font& src, bool isSubTabStyle)
+{
+    Font font;
+    if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(src.value.family); fontfamiliesOpt) {
+        font.fontFamilies = fontfamiliesOpt->families;
+        font.fontFamiliesNG = std::optional<std::vector<std::string>>(fontfamiliesOpt->families);
+    }
+    auto fontSize = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(src.value.size);
+    if (fontSize) {
+        Validator::ValidateNonNegative(fontSize);
+        Validator::ValidateNonPercent(fontSize);
+        font.fontSize = fontSize;
+    }
+    Converter::VisitUnion(src.value.weight,
+        [&font](const Ark_FontWeight& value) {
+            font.fontWeight = Converter::OptConvert<FontWeight>(value);
+        },
+        [&font, isSubTabStyle](const Ark_Int32& value) {
+            auto strVal = std::to_string(value);
+            auto parseResult = StringUtils::ParseFontWeight(strVal);
+            if (parseResult.first || !isSubTabStyle) {
+                font.fontWeight = parseResult.second;
+            }
+        },
+        [&font, isSubTabStyle](const Ark_String& value) {
+            auto strVal = Convert<std::string>(value);
+            auto parseResult = StringUtils::ParseFontWeight(strVal);
+            if (parseResult.first || !isSubTabStyle) {
+                font.fontWeight = parseResult.second;
+            }
+        },
+        []() {});
+    font.fontStyle = OptConvert<OHOS::Ace::FontStyle>(src.value.style);
+    return font;
 }
 
 template<>
@@ -3824,6 +3898,29 @@ TextRange Convert(const Ark_TextRange& src)
     if (end.has_value()) {
         dst.end = end.value();
     }
+    return dst;
+}
+template<>
+bool Convert(const Ark_LineSpacingOptions& src)
+{
+    return Converter::OptConvert<bool>(src.onlyBetweenLines).value_or(false);
+}
+
+template<>
+OverflowMode Convert(const Ark_MaxLinesOptions& src)
+{
+    auto overflowMode = Converter::OptConvert<OverflowMode>(src.overflowMode);
+    return overflowMode.value();
+}
+
+template<>
+SymbolShadow Convert(const Ark_ShadowOptions& src)
+{
+    SymbolShadow dst;
+    dst.color = Converter::OptConvert<Color>(src.color).value_or(Color::BLACK);
+    dst.offset.first = Converter::OptConvert<float>(src.offsetX).value_or(0.0f);
+    dst.offset.second = Converter::OptConvert<float>(src.offsetY).value_or(0.0f);
+    dst.radius = Converter::OptConvert<float>(src.radius).value_or(0.0f);
     return dst;
 }
 
