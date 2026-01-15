@@ -1394,6 +1394,34 @@ HWTEST_F(BubbleTestTwoNg, GetLeftRect001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateBubbleGradient001
+ * @tc.desc: Test BubblePattern::UpdateBubbleGradient
+ * @tc.type: FUNC
+ */
+HWTEST_F(BubbleTestTwoNg, UpdateBubbleGradient001, TestSize.Level1)
+{
+     /**
+     * @tc.steps: step1. create targetNode and get frameNode.
+     */
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto popupParam = AceType::MakeRefPtr<PopupParam>();
+    popupParam->SetBlurStyle(BlurStyle::COMPONENT_REGULAR);
+    auto popupNode = BubbleView::CreateBubbleNode(targetNode->GetTag(), targetNode->GetId(), popupParam);
+    ASSERT_NE(popupNode, nullptr);
+    auto bubblePattern = popupNode->GetPattern<BubblePattern>();
+    ASSERT_NE(bubblePattern, nullptr);
+    PopupLinearGradientProperties outlineGradient;
+    PopupGradientColor gradientColor;
+    gradientColor.gradientColor = Color::RED;
+    outlineGradient.gradientColors.push_back(gradientColor);
+    bubblePattern->SetOutlineLinearGradient(outlineGradient);
+    EXPECT_EQ(bubblePattern->outlineLinearGradient_.gradientColors[0].gradientColor, Color::RED);
+    bubblePattern->UpdateBubbleGradient(0, Color::BLUE, true);
+    EXPECT_EQ(bubblePattern->outlineLinearGradient_.gradientColors[0].gradientColor, Color::BLUE);
+}
+
+/**
  * @tc.name: BubblePatternUpdateStyleOptionTest001
  * @tc.desc: Test BubblePattern::UpdateStyleOption
  * @tc.type: FUNC

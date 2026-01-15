@@ -222,8 +222,16 @@ void ParseGradientColor(const JSRef<JSArray>& colorArray, PopupGradientColor& gr
 {
     Color gradientColorItem;
     auto colorVal = colorArray->GetValueAt(0);
-    if (JSViewAbstract::ParseJsColor(colorVal, gradientColorItem)) {
-        gradientColor.gradientColor = gradientColorItem;
+    if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj = nullptr;
+        if (JSViewAbstract::ParseJsColor(colorVal, gradientColorItem, resObj)) {
+            gradientColor.gradientColor = gradientColorItem;
+            gradientColor.gradientColorObj = resObj;
+        }
+    } else {
+        if (JSViewAbstract::ParseJsColor(colorVal, gradientColorItem)) {
+            gradientColor.gradientColor = gradientColorItem;
+        }
     }
     if (colorArray->GetValueAt(1)->IsNumber()) {
         gradientColor.gradientNumber = colorArray->GetValueAt(1)->ToNumber<double>();
@@ -598,7 +606,7 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     Shadow shadow;
     auto shadowVal = popupObj->GetProperty("shadow");
     if (shadowVal->IsObject() || shadowVal->IsNumber()) {
-        auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow);
+        auto ret = JSViewAbstract::ParseShadowProps(shadowVal, shadow, false, true);
         if (!ret) {
             if (!(popupParam->GetIsPartialUpdate().has_value() && popupParam->GetIsPartialUpdate().value())) {
                 JSViewAbstract::GetShadowFromTheme(defaultShadowStyle, shadow);
