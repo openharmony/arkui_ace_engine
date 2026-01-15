@@ -173,36 +173,38 @@ void PopImpl()
 
 const ArkUIHyperlinkModifier* GetHyperlinkDynamicModifier()
 {
-    static bool IsCurrentUseNewPipeline = Container::IsCurrentUseNewPipeline();
-    if (IsCurrentUseNewPipeline) {
+    static bool isCurrentUseNewPipeline = Container::IsCurrentUseNewPipeline();
+    if (!isCurrentUseNewPipeline) {
+        #ifndef CROSS_PLATFORM
         CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         static const ArkUIHyperlinkModifier modifier = {
-            .create = Create,
-            .setHyperlinkColor = SetHyperlinkColor,
-            .resetHyperlinkColor = ResetHyperlinkColor,
-            .setHyperlinkDraggable = SetHyperlinkDraggable,
-            .resetHyperlinkDraggable = ResetHyperlinkDraggable,
-            .setHyperlinkResponseRegion = SetHyperlinkResponseRegion,
-            .resetHyperlinkResponseRegion = ResetHyperlinkResponseRegion,
+            .create = CreateImpl,
+            .setHyperlinkColor = SetHyperlinkColorImpl,
+            .resetHyperlinkColor = nullptr,
+            .setHyperlinkDraggable = nullptr,
+            .resetHyperlinkDraggable = nullptr,
+            .setHyperlinkResponseRegion = nullptr,
+            .resetHyperlinkResponseRegion = nullptr,
             .createHyperlinkFrameNode = CreateHyperlinkFrameNode,
-            .pop = Pop
+            .pop = PopImpl
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
         return &modifier;
+        #endif // CROSS_PLATFORM
     }
 
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIHyperlinkModifier modifier = {
-        .create = CreateImpl,
-        .setHyperlinkColor = SetHyperlinkColorImpl,
-        .resetHyperlinkColor = nullptr,
-        .setHyperlinkDraggable = nullptr,
-        .resetHyperlinkDraggable = nullptr,
-        .setHyperlinkResponseRegion = nullptr,
-        .resetHyperlinkResponseRegion = nullptr,
+        .create = Create,
+        .setHyperlinkColor = SetHyperlinkColor,
+        .resetHyperlinkColor = ResetHyperlinkColor,
+        .setHyperlinkDraggable = SetHyperlinkDraggable,
+        .resetHyperlinkDraggable = ResetHyperlinkDraggable,
+        .setHyperlinkResponseRegion = SetHyperlinkResponseRegion,
+        .resetHyperlinkResponseRegion = ResetHyperlinkResponseRegion,
         .createHyperlinkFrameNode = CreateHyperlinkFrameNode,
-        .pop = PopImpl
+        .pop = Pop
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
