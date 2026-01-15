@@ -261,7 +261,7 @@ ArkUINativeModuleValue HyperlinkBridge::SetResponseRegion(ArkUIRuntimeCallInfo* 
                 nativeNode, regionArray, regionUnits, arrayLength
             );
         } else {
-            GetArkUINodeModifiers()->getCheckboxModifier()->resetHyperlinkResponseRegion(nativeNode);
+            GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkResponseRegion(nativeNode);
         }
     } else {
         Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);

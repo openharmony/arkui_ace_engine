@@ -21,6 +21,7 @@
 #include "core/interfaces/cjui/cjui_api.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_static.h"
+#include "core/components_ng/base/view_abstract_model.h"
 
 #include "core/components_ng/pattern/hyperlink/bridge/hyperlink_model_impl.h"
 

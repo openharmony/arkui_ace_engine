@@ -2049,7 +2049,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterTabAttributes(object, vm);
     RegisterTabContentAttributes(object, vm);
     RegisterStepperItemAttributes(object, vm);
-    RegisterHyperlinkAttributes(object, vm);
     RegisterMenuItemGroupAttributes(object, vm);
     RegisterMenuItemAttributes(object, vm);
     RegisterMenuAttributes(object, vm);
