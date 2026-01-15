@@ -14,6 +14,7 @@
  */
 
 #include "gtest/gtest.h"
+#include "gmock/gmock.h"
 
 #define private public
 #include "core/components_ng/base/view_stack_processor.h"
@@ -315,4 +316,75 @@ HWTEST_F(WebPatternEventTest, GetPixelMapName_001, TestSize.Level1)
         "web-1x1-test-" + std::to_string(frameNode->GetId()));
 #endif
 }
+
+class MockWebPattern : public WebPattern {
+DECLARE_ACE_TYPE(MockWebPattern, WebPattern);
+
+public:
+    MockWebPattern() = default;
+    ~MockWebPattern() override = default;
+
+    MOCK_METHOD(bool, IsConvertByWhiteList, (), (override));
+};
+
+/**
+ * @tc.name: ConvertMouseToTouchByWhiteList_001
+ * @tc.desc: ConvertMouseToTouchByWhiteList.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternEventTest, ConvertMouseToTouchByWhiteList_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    const std::string src = "web_pattern_event_test";
+    RefPtr<WebController> webController = AceType::MakeRefPtr<WebController>();
+
+    EXPECT_NE(webController, nullptr);
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId,
+        [src, webController]() { return AceType::MakeRefPtr<WebPattern>(src, webController); });
+    stack->Push(frameNode);
+    RefPtr<WebPattern> webPattern = frameNode->GetPattern<WebPattern>();
+    RefPtr<MockWebPattern> mockWebPattern = AceType::DynamicCast<MockWebPattern>(webPattern);
+    CHECK_NULL_VOID(mockWebPattern);
+    mockWebPattern->SetWebSrc(src);
+    mockWebPattern->SetWebController(webController);
+
+    bool result;
+    MouseInfo mouseInfo;
+    mouseInfo.SetAction(MouseAction::PRESS);
+    mouseInfo.SetButton(MouseButton::RIGHT_BUTTON);
+
+    TouchEventInfo touchEventInfo("touchEvent");
+    result = mockWebPattern->ConvertMouseToTouchByWhiteList(mouseInfo, touchEventInfo);
+    EXPECT_FALSE(result);
+
+    mouseInfo.SetButton(MouseButton::LEFT_BUTTON);
+    result = mockWebPattern->ConvertMouseToTouchByWhiteList(mouseInfo, touchEventInfo);
+    EXPECT_FALSE(result);
+
+    EXPECT_CALL(*mockWebPattern, IsConvertByWhiteList())
+        .WillRepeatedly(::testing::Return(true));
+
+    result = mockWebPattern->ConvertMouseToTouchByWhiteList(mouseInfo, touchEventInfo);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(touchEventInfo.GetSourceDevice(), SourceType::TOUCH);
+
+    mouseInfo.SetAction(MouseAction::RELEASE);
+    result = mockWebPattern->ConvertMouseToTouchByWhiteList(mouseInfo, touchEventInfo);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(touchEventInfo.GetSourceDevice(), SourceType::TOUCH);
+
+    mouseInfo.SetAction(MouseAction::MOVE);
+    result = mockWebPattern->ConvertMouseToTouchByWhiteList(mouseInfo, touchEventInfo);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(touchEventInfo.GetSourceDevice(), SourceType::TOUCH);
+
+    mouseInfo.SetAction(MouseAction::CANCEL);
+    result = mockWebPattern->ConvertMouseToTouchByWhiteList(mouseInfo, touchEventInfo);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(touchEventInfo.GetSourceDevice(), SourceType::TOUCH);
+#endif
+}
+
 } // namespace OHOS::Ace::NG

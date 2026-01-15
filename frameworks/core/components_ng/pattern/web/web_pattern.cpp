@@ -1996,7 +1996,15 @@ void WebPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+
         TouchEventInfo touchEventInfo("touchEvent");
+
+        if (pattern->ConvertMouseToTouchByWhiteList(info, touchEventInfo)) {
+            pattern->isMouseEvent_ = false;
+            pattern->HandleTouchEvent(touchEventInfo);
+            return;
+        }
+
         if (EventInfoConvertor::ConvertMouseToTouchIfNeeded(info, touchEventInfo)) {
             TAG_LOGI(AceLogTag::ACE_WEB, "Convert mouse event to touch event: button %{public}d, action %{public}d.",
                 (int)info.GetButton(), (int)info.GetAction());
@@ -10213,4 +10221,58 @@ void WebPattern::HighlightSpecifiedContent(
             TAG_LOGD(AceLogTag::ACE_WEB, "HighlightSpecifiedContent result = %{public}s ", result.c_str());
         });
 }
+
+bool WebPattern::ConvertMouseToTouchByWhiteList(MouseInfo& mouseInfo, TouchEventInfo& touchEventInfo)
+{
+    if (mouseInfo.GetButton() != MouseButton::LEFT_BUTTON) {
+        return false;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebPattern::ConvertMouseToTouchByWhiteList: IsConvertByWhiteList %{public}d.",
+        IsConvertByWhiteList());
+
+    if (!IsConvertByWhiteList()) {
+        return false;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebPattern::ConvertMouseToTouchByWhiteList: Action %{public}d, Button %{public}d",
+        static_cast<int32_t>(mouseInfo.GetAction()), static_cast<int32_t>(mouseInfo.GetButton()));
+
+    // Only process PRESS/MOVE/RELEASE/CANCEL event
+    TouchLocationInfo touchLocationInfo(0);
+    switch (mouseInfo.GetAction()) {
+        case MouseAction::PRESS:
+            touchLocationInfo.SetTouchType(TouchType::DOWN);
+            break;
+        case MouseAction::RELEASE:
+            touchLocationInfo.SetTouchType(TouchType::UP);
+            break;
+        case MouseAction::MOVE:
+            touchLocationInfo.SetTouchType(TouchType::MOVE);
+            break;
+        case MouseAction::CANCEL:
+            touchLocationInfo.SetTouchType(TouchType::CANCEL);
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_WEB, "Mouse action is not match, skip convert.");
+            return false;
+    }
+    touchLocationInfo.SetLocalLocation(mouseInfo.GetLocalLocation());
+    touchLocationInfo.SetScreenLocation(mouseInfo.GetScreenLocation());
+    touchLocationInfo.SetTimeStamp(mouseInfo.GetTimeStamp());
+
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.SetSourceDevice(SourceType::TOUCH);
+    touchEventInfo.SetTouchEventsEnd(true);
+    return true;
+}
+
+bool WebPattern::IsConvertByWhiteList()
+{
+    return EventInfoConvertor::IfNeedMouseTransform();
+}
+
 } // namespace OHOS::Ace::NG
