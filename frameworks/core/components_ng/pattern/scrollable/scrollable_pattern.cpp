@@ -1293,9 +1293,10 @@ void ScrollablePattern::ProcessScrollOverDrag(double velocity, bool isNestScroll
 {
     auto vel = std::clamp(velocity, -maxFlingVelocity_, maxFlingVelocity_);
     if (!isNestScroller) {
-        CHECK_NULL_VOID(scrollEffect_);
-        if (scrollEffect_->IsSpringEffect()) {
+        if (scrollEffect_ && scrollEffect_->IsSpringEffect()) {
             scrollEffect_->ProcessScrollOver(vel);
+        } else {
+            OnScrollEnd();
         }
         return;
     }

@@ -2097,6 +2097,50 @@ HWTEST_F(ScrollEventTestNg, ScrollBarOverDrag001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ScrollBarOverDrag002
+ * @tc.desc: Test overDrag by scrollbar trigger scroll event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollEventTestNg, ScrollBarOverDrag002, TestSize.Level1)
+{
+    auto container = AceType::DynamicCast<Container>(MockContainer::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY_THREE);
+    StackModelNG stackModel;
+    stackModel.Create();
+
+    bool isStart = false;
+    bool isStop = false;
+    OnScrollStartEvent startEvent = [&isStart]() { isStart = true; };
+    OnScrollStopEvent stopEvent = [&isStop]() { isStop = true; };
+
+    ScrollModelNG model = CreateScroll();
+    model.SetOnScrollStart(std::move(startEvent));
+    model.SetOnScrollStop(std::move(stopEvent));
+    CreateContent();
+
+    ScrollBarModelNG scrollBarModel;
+    scrollBarModel.Create(
+        pattern_->GetScrollBarProxy(), true, true, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON));
+    auto scrollBarPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ScrollBarPattern>();
+    CreateScrollDone();
+
+    float dragDelta = 100.f;
+    GestureEvent info;
+    info.SetMainDelta(-dragDelta);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    scrollBarPattern->scrollBar_->HandleDragStart(info);
+    EXPECT_TRUE(isStart);
+    scrollBarPattern->scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+
+    scrollBarPattern->scrollBar_->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_TRUE(isStop);
+}
+
+/**
  * @tc.name: onWillStopDragging001
  * @tc.desc: Test onWillStopDragging001
  * @tc.type: FUNC

@@ -1669,6 +1669,52 @@ HWTEST_F(ListEventTestNg, ListScrollBarOverDrag001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListScrollBarOverDrag002
+ * @tc.desc: Test list overDrag by scrollbar trigger scroll event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListEventTestNg, ListScrollBarOverDrag002, TestSize.Level1)
+{
+    auto container = AceType::DynamicCast<Container>(MockContainer::Current());
+    ASSERT_NE(container, nullptr);
+    container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY_THREE);
+    StackModelNG stackModel;
+    stackModel.Create();
+
+    bool isStart = false;
+    bool isStop = false;
+    OnScrollStartEvent startEvent = [&isStart]() { isStart = true; };
+    OnScrollStopEvent stopEvent = [&isStop]() { isStop = true; };
+
+    ListModelNG model = CreateList();
+    model.SetEdgeEffect(EdgeEffect::NONE, true);
+    model.SetOnScrollStart(std::move(startEvent));
+    model.SetOnScrollStop(std::move(stopEvent));
+    ViewAbstract::SetHeight(CalcLength(HEIGHT));
+    CreateListItems(5);
+
+    ScrollBarModelNG scrollBarModel;
+    scrollBarModel.Create(
+        pattern_->GetScrollBarProxy(), true, true, static_cast<int>(Axis::VERTICAL), static_cast<int>(DisplayMode::ON));
+    auto scrollBarPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<ScrollBarPattern>();
+    CreateDone();
+
+    float dragDelta = 100.f;
+    GestureEvent info;
+    info.SetMainDelta(-dragDelta);
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    scrollBarPattern->scrollBar_->HandleDragStart(info);
+    EXPECT_TRUE(isStart);
+    scrollBarPattern->scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_EQ(pattern_->GetTotalOffset(), 0);
+
+    scrollBarPattern->scrollBar_->HandleDragEnd(info);
+    FlushUITasks();
+    EXPECT_TRUE(isStop);
+}
+
+/**
  * @tc.name: HandleBoxSelectDragStart
  * @tc.desc: Handle drag start for box select
  * @tc.type: FUNC

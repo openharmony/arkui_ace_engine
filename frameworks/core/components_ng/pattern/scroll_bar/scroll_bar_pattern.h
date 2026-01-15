@@ -396,7 +396,7 @@ private:
     void ProcessFrictionMotionStop();
     void CalcFlingVelocity(float offset);
     void RegisterScrollBarOverDragEventTask();
-    void DragEndOverScroll();
+    bool DragEndOverScroll();
     bool CanOverScrollWithDelta(double delta) const;
 
     RefPtr<ScrollBarProxy> scrollBarProxy_;
