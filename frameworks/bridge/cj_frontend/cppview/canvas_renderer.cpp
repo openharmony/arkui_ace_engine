@@ -222,7 +222,7 @@ void NativeCanvasRenderer::SetShadowOffsetX(const double offsetX)
 
 void NativeCanvasRenderer::SetShadowOffsetY(const double offsetY)
 {
-    renderingContext2DModel_->SetShadowOffsetX(offsetY * GetDensity());
+    renderingContext2DModel_->SetShadowOffsetY(offsetY * GetDensity());
 }
 
 void NativeCanvasRenderer::SetImageSmoothingEnabled(const bool enabled)
