@@ -3415,7 +3415,7 @@ bool ArkTSUtils::ParseContentTransitionEffect(
 bool ArkTSUtils::GetResourceId(
     const std::string& resName, const std::string& bundleName, const std::string& moduleName, int32_t& resId)
 {
-    auto resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, Container::CurrentIdSafely());
+    auto resObj = AceType::MakeRefPtr<ResourceObject>(bundleName, moduleName, Container::CurrentIdSafelyWithCheck());
     auto resAdapter = ResourceManager::GetInstance().GetOrCreateResourceAdapter(resObj);
     CHECK_NULL_RETURN(resAdapter, false);
     resId = resAdapter->GetResId(resName);
