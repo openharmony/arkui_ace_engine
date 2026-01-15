@@ -83,6 +83,7 @@ import { IUIContext, SystemOps } from 'arkui/component/idlize';
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
+import { FreeRootNode } from '../CallbackTransformer';
 
 export class ContextRecord {
     uiContext?: UIContext
@@ -1279,8 +1280,10 @@ export class DetachedRootEntryImpl<T extends IncrementalNode> implements Detache
 export class DetachedRootEntryManager {
     uicontext_: UIContextImpl;
     detachedRoots_: Map<KPointer, DetachedRootEntry>;
+    private freezedRoots_: Map<KPointer, DetachedRootEntry>;
     constructor(uicontext: UIContextImpl) {
         this.detachedRoots_ = new Map<KPointer, DetachedRootEntry>();
+        this.freezedRoots_ = new Map<KPointer, DetachedRootEntry>();
         this.uicontext_ = uicontext;
     }
 
@@ -1329,9 +1332,13 @@ export class DetachedRootEntryManager {
         builder: () => void
     ): PeerNode | undefined {
         const manager = GlobalStateManager.instance;
-        const node = manager.updatableNodeEx<IncrementalNode>(nodeFactory(), (context: StateContext) => {
+        const freeRoot = nodeFactory();
+        const node = manager.updatableNodeEx<IncrementalNode>(freeRoot, (context: StateContext) => {
             ArkUIAniModule._Common_Sync_InstanceId(this.uicontext_.getInstanceId())
+            const lastFreezeNode = FreeRootNode.current;
+            FreeRootNode.current = freeRoot as FreeRootNode;
             memoEntry<void>(context, 0, builder)
+            FreeRootNode.current = lastFreezeNode;
             ArkUIAniModule._Common_Restore_InstanceId();
         })
 
@@ -1341,19 +1348,44 @@ export class DetachedRootEntryManager {
             node.dispose()
             return undefined
         }
+        (freeRoot as FreeRootNode).setPtr(peerNode.peer.ptr);
+        this.detachedRoots_.set(peerNode.peer.ptr, new DetachedRootEntryImpl<IncrementalNode>(node));
+        return peerNode;
+    }
 
-        this.detachedRoots_.set(peerNode.peer.ptr, new DetachedRootEntryImpl<IncrementalNode>(node))
-        return peerNode
+    public freezeDetachedFreeRoot(ptr: KPointer): void {
+        if (!this.detachedRoots_.has(ptr)) {
+            return;
+        }
+        const node = this.detachedRoots_.get(ptr) as DetachedRootEntry;
+        this.freezedRoots_.set(ptr, node);
+        this.detachedRoots_.delete(ptr);
+    }
+
+    public unfreezeDetachedFreeRoot(ptr: KPointer): void {
+        if (!this.freezedRoots_.has(ptr)) {
+            return;
+        }
+        const node = this.freezedRoots_.get(ptr) as DetachedRootEntry;
+        this.detachedRoots_.set(ptr, node);
+        this.freezedRoots_.delete(ptr);
     }
 
     public destroyUiDetachedRoot(ptr: KPointer): boolean {
-        if (!this.detachedRoots_.has(ptr)) {
+        if (!this.detachedRoots_.has(ptr) && !this.freezedRoots_.has(ptr)) {
             return false;
         }
-
-        const root = this.detachedRoots_.get(ptr)!
-        this.detachedRoots_.delete(ptr)
-        root.dispose()
+        if (this.detachedRoots_.has(ptr)) {
+            const root = this.detachedRoots_.get(ptr)!;
+            this.detachedRoots_.delete(ptr);
+            root.dispose();
+        } else if (this.freezedRoots_.has(ptr)) {
+            const root = this.freezedRoots_.get(ptr)!;
+            this.freezedRoots_.delete(ptr);
+            root.dispose();
+        } else {
+            return false;
+        }
         return true;
     }
 }

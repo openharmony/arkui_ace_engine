@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { __context, StateManager, remember, scheduleCallback } from '@koalaui/runtime';
+import { __context, StateManager, remember, scheduleCallback, GlobalStateManager } from '@koalaui/runtime';
 import { int32 } from '@koalaui/common';
 import { WrappedBuilder, CustomBuilderT } from "./builder"
 import { NavigationRouterMap, NavDestinationBuilder } from "#handwritten"
@@ -37,6 +37,7 @@ import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { ArkThemeScopeManager } from '../theme/ArkThemeScopeManager';
 import { transferTypeName } from '../stateManagement/storage/persistenceV2';
+import { ArkCustomComponentRootPeer } from './staticComponents';
 /** @custom_components_common_method_imports */
 
 export class ReuseObject {
@@ -150,7 +151,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.styles?.(this.instance as T)
     }
  
- 
+    getInstance(): ExtendableComponent {
+        return this.instance;
+    }
+
     applyStyles(instance: CommonMethod): void {
         if (this.instance instanceof HasCommonMethod) {
             const component = this.instance as HasCommonMethod
@@ -268,10 +272,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             ObserveSingleton.instance.unFreezeDelayedComputedProps();
             ObserveSingleton.instance.unFreezeDelayedMonitorPaths();
         }
-        const peer = this.getPeerNode() as PeerNode | undefined;
-        if (peer) {
-            peer.disabledStateUpdates = !this.isViewActive();
-        }
+        this.switchNodeFreeze();
         this.instance.__propagateToChild__Internal(active, isReuse);
     }
     pageTransition(): void {
@@ -308,6 +309,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.instance.__aboutToRecycle_Internal();
     }
 
+    switchHasBeenRecycle(recycle: boolean): void {
+        this.instance.__switchHasBeenRecycle_Ineternal(recycle);
+    }
+
     aboutToReuse(param: RecordData, initializers?: T_Options): void {
         if (this.instance instanceof ReusableLifeCycle) {
             ArkUIAniModule._CustomNode_OnReuse(this.getPeer()!.peer.ptr);
@@ -315,17 +320,31 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             StateUpdateLoop.clearFreezeTaskWhenReuse(this.getUniqueId());
             const reusable = this.instance as ReusableLifeCycle;
             if (param) {
+                StateUpdateLoop.execTaskInSyncMode(() => {
+                    // update propref and objectlink in sync mode, means no wait next update loop
+                    this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
+                });
                 reusable.aboutToReuse(new ReuseObject(param))
+                this.switchNodeFreeze();
+                this.updateUISync();
                 return;
             }
             if (initializers === undefined) {
+                StateUpdateLoop.execTaskInSyncMode(() => {
+                    this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
+                });
                 reusable.aboutToReuse(new ReuseObject({} as Record<string, RecordData> as RecordData));
             } else {
                 const component = this.instance as BaseCustomComponent<T_Options>;
                 const data: T_Options = initializers as T_Options;
                 const params: Record<string, object> = component.__toRecord(data! as object);
+                StateUpdateLoop.execTaskInSyncMode(() => {
+                    this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
+                });
                 reusable.aboutToReuse(new ReuseObject(params));
             }
+            this.switchNodeFreeze();
+            this.updateUISync();
         } else if (this.instance instanceof ReusableV2LifeCycle) {
             ArkUIAniModule._CustomNode_OnReuse(this.getPeer()!.peer.ptr);
             const reusable = this.instance as ReusableV2LifeCycle<T_Options>;
@@ -333,6 +352,8 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             reusable.resetStateVarsOnReuse(initializers0);
             this.instance.__unfreezeWhenReuse__Internal();
             reusable.aboutToReuse();
+            this.switchNodeFreeze();
+            this.updateUISync();
         } else {
             throw new Error('not an custom component');
         }
@@ -345,8 +366,30 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
                 component.aboutToRecycle(); // aboutToRecycle can change variable
             });
             this.instance.__freezeWhenRecycle__Internal();
+            this.switchNodeFreeze();
         } else {
             throw new Error('not an custom component');
+        }
+    }
+
+    updateUISync(): void {
+        const manager = GlobalStateManager.instance;
+        manager.syncChanges();
+        manager.updateSnapshot();
+        // should it contain BuilderNode and LazyItems
+        const peer = this.getPeerNode() as ArkCustomComponentRootPeer | undefined;
+        peer?.recompute();
+    }
+
+    switchNodeFreeze(): void {
+        const peer = this.getPeerNode() as ArkCustomComponentRootPeer | undefined;
+        if (!peer) {
+            return;
+        }
+        if (this.isViewActive()) {
+            peer.unfreezeMyRoot();
+        } else {
+            peer.freezeMyRoot();
         }
     }
 

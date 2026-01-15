@@ -61,6 +61,7 @@ export interface IExtendableComponent {
     fireAboutToReuse(param?: RecordData): void;
     fireAboutToRecycle(): void;
     __getParentNode__Internal(): PeerNode | undefined;
+    getInstance(): ExtendableComponent;
 }
 
 export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
@@ -76,6 +77,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     private useSharedStorage_?: boolean | undefined = undefined;
     private childrenWeakRefMap_: Map<int32, WeakRef<ExtendableComponent>> = new Map<int32, WeakRef<ExtendableComponent>>();
     private activeChangeListenerForInterop_: Set<(active: boolean, isReuse: boolean) => void> = new Set<(active: boolean, isReuse: boolean) => void>();
+    private hasBeenRecycled_: boolean = false;
 
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         this.useSharedStorage_ = useSharedStorage;
@@ -87,10 +89,19 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         this.delegate_!.fireAboutToReuse(param);
         this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
             const child = weak.deref();
-            child?.__aboutToReuse_Internal(param);
+            child?.__checkAndCallReuse_Internal(param);
         });
     }
 
+    __checkAndCallReuse_Internal(param?: RecordData): void {
+        if (!this.hasBeenRecycled_) {
+            this.__aboutToReuse_Internal(param);
+        }
+    }
+
+    __switchHasBeenRecycle_Ineternal(recycle: boolean): void {
+        this.hasBeenRecycled_ = recycle;
+    }
     __aboutToRecycle_Internal(): void {
         this.delegate_!.fireAboutToRecycle();
         this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
