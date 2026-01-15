@@ -116,6 +116,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stepper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_stepper_item.h"
