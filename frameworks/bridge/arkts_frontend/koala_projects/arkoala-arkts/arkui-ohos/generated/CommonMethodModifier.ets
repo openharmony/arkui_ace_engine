@@ -4112,19 +4112,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
-        if (flagArray[208] != 0) {
-            switch (flagArray[208]) {
+        if (flagArray[209] != 0) {
+            switch (flagArray[209]) {
                 case 1: {
                     peer.setExcludeFromRenderGroupAttribute((this._excludeFromRenderGroup_0_0value as boolean | undefined));
-                    flagArray[208] = 2;
+                    flagArray[209] = 2;
                     break;
                 }
                 case 3: {
-                    flagArray[208] = 2;
+                    flagArray[209] = 2;
                     break;
                 }
                 default: {
-                    flagArray[208] = 0;
+                    flagArray[209] = 0;
                     peer.setExcludeFromRenderGroupAttribute((undefined as boolean | undefined));
                 }
             }
