@@ -2678,7 +2678,7 @@ void UINode::GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& fou
             foundNodeId.emplace_back(nodeId_);
         }
     }
-    for (auto& child : children_) {
+    for (const auto& child : GetChildren(true)) {
         child->GetNodeListByComponentName(depth + 1, foundNodeId, name);
     }
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
