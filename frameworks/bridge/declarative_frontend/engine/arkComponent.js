@@ -32897,7 +32897,7 @@ class ArkXComponentComponent extends ArkComponent {
     });
   }
   background(builder, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'background Method not supportted in ArkXComponentComponent class.');
   }
   backgroundColor(value) {
     modifierWithKey(this._modifiersWithKeys, XComponentBackgroundColorModifier.identity, XComponentBackgroundColorModifier, value);
@@ -32932,7 +32932,7 @@ class ArkXComponentComponent extends ArkComponent {
     return this;
   }
   foregroundColor(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'foregroundColor Method not supportted in ArkXComponentComponent class.');
   }
   onClick(event) {
     if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
@@ -32983,16 +32983,16 @@ class ArkXComponentComponent extends ArkComponent {
     return this;
   }
   animation(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'animation Method not supportted in ArkXComponentComponent class.');
   }
   gesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'gesture Method not supportted in ArkXComponentComponent class.');
   }
   priorityGesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'priorityGesture Method not supportted in ArkXComponentComponent class.');
   }
   parallelGesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'parallelGesture Method not supportted in ArkXComponentComponent class.');
   }
   blur(value, options, sysOptions) {
     if (this.xComponentType !== XComponentType.NODE) {
@@ -33106,7 +33106,7 @@ class ArkXComponentComponent extends ArkComponent {
     return this;
   }
   useEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'useEffect Method not supportted in ArkXComponentComponent class.');
   }
   backdropBlur(value, options, sysOptions) {
     if (this.xComponentType !== XComponentType.NODE) {
@@ -33122,7 +33122,7 @@ class ArkXComponentComponent extends ArkComponent {
     return this;
   }
   renderGroup(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'renderGroup Method not supportted in ArkXComponentComponent class.');
   }
   onAppear(event) {
     if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
@@ -33149,49 +33149,49 @@ class ArkXComponentComponent extends ArkComponent {
     return this;
   }
   flexGrow(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'flexGrow Method not supportted in ArkXComponentComponent class.');
   }
   direction(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'direction Method not supportted in ArkXComponentComponent class.');
   }
   align(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'align Method not supportted in ArkXComponentComponent class.');
   }
   useSizeType(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'useSizeType Method not supportted in ArkXComponentComponent class.');
   }
   privacySensitive(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'privacySensitive Method not supportted in ArkXComponentComponent class.');
   }
   clip(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'clip Method not supportted in ArkXComponentComponent class.');
   }
   geometryTransition(id) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'geometryTransition Method not supportted in ArkXComponentComponent class.');
   }
   bindPopup(show, popup) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindPopup Method not supportted in ArkXComponentComponent class.');
   }
   bindMenu(content, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindMenu Method not supportted in ArkXComponentComponent class.');
   }
   bindContextMenu(content, responseType, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindContextMenu Method not supportted in ArkXComponentComponent class.');
   }
   bindContentCover(isShow, builder, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindContentCover Method not supportted in ArkXComponentComponent class.');
   }
   bindSheet(isShow, builder, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindSheet Method not supportted in ArkXComponentComponent class.');
   }
   stateStyles(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'stateStyles Method not supportted in ArkXComponentComponent class.');
   }
   restoreId(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'restoreId Method not supportted in ArkXComponentComponent class.');
   }
   onVisibleAreaChange(ratios, event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onVisibleAreaChange Method not supportted in ArkXComponentComponent class.');
   }
   sphericalEffect(value) {
     if (this.xComponentType !== XComponentType.NODE) {
@@ -33215,13 +33215,13 @@ class ArkXComponentComponent extends ArkComponent {
     return this;
   }
   accessibilityGroup(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'accessibilityGroup Method not supportted in ArkXComponentComponent class.');
   }
   obscured(reasons) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'obscured Method not supportted in ArkXComponentComponent class.');
   }
   reuseId(id) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'reuseId Method not supportted in ArkXComponentComponent class.');
   }
   renderFit(fitMode) {
     modifierWithKey(this._modifiersWithKeys, XComponentRenderFitModifier.identity, XComponentRenderFitModifier, fitMode);
