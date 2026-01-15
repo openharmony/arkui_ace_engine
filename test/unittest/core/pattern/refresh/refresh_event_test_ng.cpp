@@ -629,6 +629,125 @@ HWTEST_F(RefreshEventTestNg, PullUpToCancelRefreshTest002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: SpeedTriggerAnimationDragStatusTest
+ * @tc.desc: Test SpeedTriggerAnimation with pullUpToCancelRefresh=false and refreshStatus=DRAG
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshEventTestNg, SpeedTriggerAnimationDragStatusTest, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    model.SetPullUpToCancelRefresh(false);
+    CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+
+    /**
+     * @tc.steps: step1. Set refreshStatus to DRAG
+     * @tc.expected: refreshStatus is set to DRAG
+     */
+    pattern_->refreshStatus_ = RefreshStatus::DRAG;
+    pattern_->scrollOffset_ = 0.0f;
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+
+    /**
+     * @tc.steps: step2. Call SpeedTriggerAnimation with negative speed
+     * @tc.expected: SwitchToFinish() is called due to refreshStatus=DRAG, status changes to DONE
+     */
+    pattern_->SpeedTriggerAnimation(-100.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: SpeedTriggerAnimationRefreshStatusTest
+ * @tc.desc: Test SpeedTriggerAnimation with pullUpToCancelRefresh=false and refreshStatus=REFRESH
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshEventTestNg, SpeedTriggerAnimationRefreshStatusTest, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    model.SetPullUpToCancelRefresh(false); // Disable pull up to cancel refresh
+    CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+
+    /**
+     * @tc.steps: step1. Set refreshStatus to REFRESH
+     * @tc.expected: refreshStatus is set to REFRESH
+     */
+    pattern_->refreshStatus_ = RefreshStatus::REFRESH;
+    pattern_->scrollOffset_ = 0.0f;
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+
+    /**
+     * @tc.steps: step2. Call SpeedTriggerAnimation with negative speed
+     * @tc.expected: SwitchToFinish() is not called because refreshStatus is not DRAG, status remains REFRESH
+     */
+    pattern_->SpeedTriggerAnimation(-100.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+}
+
+/**
+ * @tc.name: SpeedTriggerAnimationDragTargetZeroTest
+ * @tc.desc: Test SpeedTriggerAnimation with pullUpToCancelRefresh=false, refreshStatus=DRAG and targetOffset near zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshEventTestNg, SpeedTriggerAnimationDragTargetZeroTest, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    model.SetPullUpToCancelRefresh(false); // Disable pull up to cancel refresh
+    CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+
+    /**
+     * @tc.steps: step1. Set refreshStatus to DRAG and small scrollOffset
+     * @tc.expected: refreshStatus is set to DRAG, scrollOffset is set to small value
+     */
+    pattern_->refreshStatus_ = RefreshStatus::DRAG;
+    pattern_->scrollOffset_ = 5.0f;
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::DRAG);
+    EXPECT_EQ(pattern_->scrollOffset_, 5.0f);
+
+    /**
+     * @tc.steps: step2. Call SpeedTriggerAnimation with negative speed
+     * @tc.expected: SwitchToFinish() is called due to refreshStatus=DRAG, status changes to DONE
+     */
+    pattern_->SpeedTriggerAnimation(-50.f); // Negative speed to trigger animation
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::INACTIVE);
+}
+
+/**
+ * @tc.name: SpeedTriggerAnimationInactiveTargetZeroTest
+ * @tc.desc: Test SpeedTriggerAnimation with pullUpToCancelRefresh=false, refreshStatus=INACTIVE and targetOffset near
+ * zero
+ * @tc.type: FUNC
+ */
+HWTEST_F(RefreshEventTestNg, SpeedTriggerAnimationRefreshingTargetZeroTest, TestSize.Level1)
+{
+    MockPipelineContext::pipeline_->SetMinPlatformVersion(static_cast<int32_t>(PlatformVersion::VERSION_TWELVE));
+    RefreshModelNG model = CreateRefresh();
+    model.SetPullUpToCancelRefresh(false); // Disable pull up to cancel refresh
+    CreateDone();
+    EXPECT_TRUE(pattern_->isHigherVersion_);
+
+    /**
+     * @tc.steps: step1. Set refreshStatus to INACTIVE and small scrollOffset
+     * @tc.expected: refreshStatus is set to INACTIVE, scrollOffset is set to small value
+     */
+    pattern_->refreshStatus_ = RefreshStatus::REFRESH;
+    pattern_->scrollOffset_ = 5.0f; // Small offset, targetOffset will be 0.0f
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+    EXPECT_EQ(pattern_->scrollOffset_, 5.0f);
+
+    /**
+     * @tc.steps: step2. Call SpeedTriggerAnimation with negative speed
+     * @tc.expected: SwitchToFinish() is not called because refreshStatus is not DRAG, status remains INACTIVE
+     */
+    pattern_->SpeedTriggerAnimation(-50.f);
+    EXPECT_EQ(pattern_->refreshStatus_, RefreshStatus::REFRESH);
+}
+
+/**
  * @tc.name: VersionElevenCustomHandleDrag001
  * @tc.desc: Test whole refresh action with customBuilder_ in VERSION_ELEVEN
  * @tc.type: FUNC
