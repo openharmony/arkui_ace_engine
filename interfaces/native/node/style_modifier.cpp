@@ -5399,8 +5399,7 @@ int32_t SetRichEditorDataDetectorConfig(ArkUI_NodeHandle node, const ArkUI_Attri
     for (auto i = 0; i < item->size; i++) {
         ArkUI_TextDataDetectorType value = dataDetectorConfig->types[i];
         auto index = static_cast<size_t>(value);
-        CHECK_NULL_RETURN(index >= 0 && index < static_cast<int32_t>(TEXT_DETECT_TYPES.size()),
-            ERROR_CODE_PARAM_INVALID);
+        CHECK_NULL_RETURN(index >= 0 && index < TEXT_DETECT_TYPES.size(), ERROR_CODE_PARAM_INVALID);
         if (i != 0) {
             typesString.append(",");
         }
