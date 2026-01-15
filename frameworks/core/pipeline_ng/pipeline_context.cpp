@@ -4065,6 +4065,11 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         rootNode_->DumpSimplifyTreeWithParamConfig(
             0, root, params[1] == "1", { params[2] == "1", params[3] == "1", params[4] == "1" });
         DumpLog::GetInstance().Print(root->ToString());
+#ifndef IS_RELEASE_VERSION
+    } else if (params[0] == "-contentChange") {
+        std::string info = contentChangeMgr_ ? contentChangeMgr_->DumpInfo() : "No available ContentChangeManager";
+        DumpLog::GetInstance().Print(info);
+#endif
     }
     return true;
 }
