@@ -283,15 +283,15 @@ export struct ArcButton {
   private dataProcessUtil: DataProcessUtil = new DataProcessUtil(this.arcButtonTheme);
 
   @Monitor('options.label', 'options.type', 'options.fontSize', 'options.styleMode', 'options.status',
-  'options.backgroundColor', 'options.fontColor')
+  'options.backgroundColor', 'options.fontColor', 'options.progressConfig.color', 'options.progressConfig.total',
+  'options.progressConfig.value')
   optionsChange() {
     this.fontSize = this.cover(this.options.fontSize ?? new LengthMetrics(Constants.MAX_FONT_SIZE))
     this.judgeTextWidth()
     this.changeStatus()
+    this.progressOptionsChange()
   }
 
-  @Monitor('options.progressConfig', 'options.progressConfig.color', 'options.progressConfig.total',
-  'options.progressConfig.value')
   progressOptionsChange(){
     if(this.options.progressConfig) {
       this.progressValue = this.options.progressConfig.value;
