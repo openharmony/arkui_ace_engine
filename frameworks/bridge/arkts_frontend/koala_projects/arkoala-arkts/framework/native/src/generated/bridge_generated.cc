@@ -42687,6 +42687,32 @@ void impl_XComponentController_stopImageAnalyzer(Ark_NativePointer thisPtr) {
         GetAccessors()->getXComponentControllerAccessor()->stopImageAnalyzer(self);
 }
 KOALA_INTEROP_DIRECT_V1(XComponentController_stopImageAnalyzer, Ark_NativePointer)
+KInteropReturnBuffer impl_XComponentController_lockCanvas(Ark_NativePointer thisPtr) {
+        Ark_XComponentController self = reinterpret_cast<Ark_XComponentController>(thisPtr);
+        const auto &retValue = GetAccessors()->getXComponentControllerAccessor()->lockCanvas(self);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            drawing_Canvas_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
+}
+KOALA_INTEROP_1(XComponentController_lockCanvas, KInteropReturnBuffer, Ark_NativePointer)
+void impl_XComponentController_unlockCanvasAndPost(Ark_NativePointer thisPtr, Ark_NativePointer canvas) {
+        Ark_XComponentController self = reinterpret_cast<Ark_XComponentController>(thisPtr);
+        GetAccessors()->getXComponentControllerAccessor()->unlockCanvasAndPost(self, static_cast<Ark_drawing_Canvas>(canvas));
+}
+KOALA_INTEROP_DIRECT_V2(XComponentController_unlockCanvasAndPost, Ark_NativePointer, Ark_NativePointer)
+void impl_XComponentController_setXComponentSurfaceConfig(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_XComponentController self = reinterpret_cast<Ark_XComponentController>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_SurfaceConfig configValueTemp = SurfaceConfig_serializer::read(thisDeserializer);;
+        GetAccessors()->getXComponentControllerAccessor()->setXComponentSurfaceConfig(self, static_cast<Ark_SurfaceConfig*>(&configValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(XComponentController_setXComponentSurfaceConfig, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_XComponentController_getOnSurfaceCreated(Ark_NativePointer thisPtr) {
         Ark_XComponentController self = reinterpret_cast<Ark_XComponentController>(thisPtr);
         [[maybe_unused]] const auto &_api_call_result = GetAccessors()->getXComponentControllerAccessor()->getOnSurfaceCreated(self);

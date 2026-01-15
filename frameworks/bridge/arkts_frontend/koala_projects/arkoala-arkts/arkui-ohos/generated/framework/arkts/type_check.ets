@@ -179,7 +179,7 @@ import { RoundedRectOptions, RadiusItem, RectOptions } from "./../../component/r
 import { Scene, SceneResourceFactory, RenderParameters } from "graphics3d.Scene"
 import { SkillUri, Skill } from "bundleManager.Skill"
 import { StackOptions } from "./../../component/stack"
-import { SurfaceRect, SurfaceRotationOptions, XComponentController, NativeXComponentParameters, XComponentOptions, XComponentParameters, NativeXComponentPointer } from "./../../component/xcomponent"
+import { SurfaceConfig, SurfaceRect, SurfaceRotationOptions, XComponentController, NativeXComponentParameters, XComponentOptions, XComponentParameters, NativeXComponentPointer } from "./../../component/xcomponent"
 import { ViewportRect } from "./../../component/shape"
 import { default as Want } from "@ohos.app.ability.Want"
 import { FlexSpaceOptions, FlexOptions } from "./../../component/flex"
@@ -3153,6 +3153,9 @@ export class TypeChecker {
     }
     static isSubTabBarStyle(value: Object | string | number | undefined): boolean {
         return value instanceof SubTabBarStyle
+    }
+    static isSurfaceConfig(value: Object | string | number | undefined, arg0: boolean): boolean {
+        return value instanceof SurfaceConfig
     }
     static isSuperscriptStyle(value: Object | string | number | undefined): boolean {
         return value instanceof SuperscriptStyle

@@ -90,6 +90,15 @@ void XComponentControllerPeerImpl::SetOnSurfaceDestroyedEvent(const Callback_Str
         arkCallback.InvokeSync(arkSurfaceId);
     };
 }
-
+std::shared_ptr<drawing_CanvasPeer> XComponentControllerPeerImpl::GetCanvas()
+{
+    CHECK_NULL_RETURN(controller, nullptr);
+    CHECK_NULL_RETURN(controller->LockCanvas(), nullptr);
+    auto canvas = controller->LockCanvas();
+    if (!rsCanvas_ || rsCanvas_->GetCanvas() != canvas) {
+        rsCanvas_ = std::make_shared<drawing_CanvasPeer>(canvas);
+    }
+    return rsCanvas_;
+}
 } // namespace OHOS::Ace::NG::GeneratedModifier
 #endif // XCOMPONENT_SUPPORTED
