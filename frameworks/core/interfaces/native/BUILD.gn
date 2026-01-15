@@ -64,6 +64,7 @@ template("ace_core_interfaces_native_node") {
       "node/linear_indicator_modifier.cpp",
       "node/marquee_modifier.cpp",
       "node/menu_item_group_modifier.cpp",
+      "node/martix_modifier.cpp",
       "node/menu_item_modifier.cpp",
       "node/menu_modifier.cpp",
       "node/nav_destination_modifier.cpp",
