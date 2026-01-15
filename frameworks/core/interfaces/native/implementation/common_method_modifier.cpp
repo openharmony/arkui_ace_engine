@@ -3827,7 +3827,7 @@ void SetExcludeFromRenderGroupImpl(Ark_NativePointer node,
         ViewAbstract::SetExcludeFromRenderGroup(frameNode, false);
         return;
     }
-    ViewAbstract::SetExcludeFromRenderGroup(frameNode, true);
+    ViewAbstract::SetExcludeFromRenderGroup(frameNode, *convValue);
 }
 void SetFreezeImpl(Ark_NativePointer node,
                    const Opt_Boolean* value)
