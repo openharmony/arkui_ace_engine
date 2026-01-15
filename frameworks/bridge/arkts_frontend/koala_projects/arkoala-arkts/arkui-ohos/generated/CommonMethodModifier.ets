@@ -130,6 +130,7 @@ export class CommonMethodModifier implements CommonMethod {
     _useEffect_0_0value?: boolean | undefined
     _useUnionEffect_0_0value?: boolean | undefined
     _renderGroup_0_0value?: boolean | undefined
+    _excludeFromRenderGroup_0_0value?: boolean | undefined
     _freeze_0_0value?: boolean | undefined
     _translate_0_0value?: TranslateOptions | undefined
     _scale_0_0value?: ScaleOptions | undefined
@@ -4111,6 +4112,23 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[208] != 0) {
+            switch (flagArray[208]) {
+                case 1: {
+                    peer.setExcludeFromRenderGroupAttribute((this._excludeFromRenderGroup_0_0value as boolean | undefined));
+                    flagArray[208] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[208] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[208] = 0;
+                    peer.setExcludeFromRenderGroupAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: CommonMethodModifier): void {
         this._state = modifier._state;
@@ -6863,6 +6881,18 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[209] != 0) {
+            switch (flagArray[209]) {
+                case 1:
+                case 3: {
+                    this.excludeFromRenderGroup(modifier._excludeFromRenderGroup_0_0value);
+                    break;
+                }
+                default: {
+                    this.excludeFromRenderGroup((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     width(value: Length | LayoutPolicy | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true))
@@ -9483,6 +9513,18 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._flagArray[208] = 3
+        }
+        return this
+    }
+    excludeFromRenderGroup(value: boolean | undefined): this {
+        if (((this._flagArray[209]) == (0)) || ((this._excludeFromRenderGroup_0_0value) !== (value)))
+        {
+            this._flagArray[209] = 1
+            this._excludeFromRenderGroup_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[209] = 3
         }
         return this
     }

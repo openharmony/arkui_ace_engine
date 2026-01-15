@@ -3801,6 +3801,18 @@ void SetRenderGroupImpl(Ark_NativePointer node,
     }
     ViewAbstract::SetRenderGroup(frameNode, *convValue);
 }
+void SetExcludeFromRenderGroupImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    if (!convValue) {
+        ViewAbstract::SetExcludeFromRenderGroup(frameNode, false);
+        return;
+    }
+    ViewAbstract::SetExcludeFromRenderGroup(frameNode, *convValue);
+}
 void SetFreezeImpl(Ark_NativePointer node,
                    const Opt_Boolean* value)
 {
@@ -6635,6 +6647,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetUseEffect0Impl,
         CommonMethodModifier::SetUseUnionEffectImpl,
         CommonMethodModifier::SetRenderGroupImpl,
+        CommonMethodModifier::SetExcludeFromRenderGroupImpl,
         CommonMethodModifier::SetFreezeImpl,
         CommonMethodModifier::SetTranslateImpl,
         CommonMethodModifier::SetScaleImpl,
