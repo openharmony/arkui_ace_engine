@@ -6310,19 +6310,23 @@ void SetBindSheetImpl(Ark_NativePointer node,
         // Implement Reset value
         return;
     }
-    CallbackHelper(*optBuilder).BuildAsync([frameNode, isShowValue, sheetStyle, changeEvent = std::move(changeEvent),
-        cb = std::move(cbs)](
-        const RefPtr<UINode>& uiNode) mutable {
-        auto buildFunc = [frameNode, uiNode]() {
-            PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-            ViewStackProcessor::GetInstance()->Push(uiNode);
-        };
-        ViewAbstractModelStatic::BindSheet(frameNode, *isShowValue, std::move(changeEvent), std::move(buildFunc),
-            std::move(cb.titleBuilder), sheetStyle, std::move(cb.onAppear), std::move(cb.onDisappear),
-            std::move(cb.shouldDismiss), std::move(cb.onWillDismiss), std::move(cb.onWillAppear),
-            std::move(cb.onWillDisappear), std::move(cb.onHeightDidChange), std::move(cb.onDetentsDidChange),
-            std::move(cb.onWidthDidChange), std::move(cb.onTypeDidChange), std::move(cb.sheetSpringBack));
-        }, node);
+    auto buildFunc = [arkBuilder = CallbackHelper(*optBuilder), weak = AceType::WeakClaim(frameNode), node]() {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        PipelineContext::SetCallBackNode(weak);
+        auto builderNode = arkBuilder.BuildSync(node);
+#if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
+        auto finalNode = CreateProxyNode(builderNode);
+#else
+        auto finalNode = builderNode;
+#endif
+        ViewStackProcessor::GetInstance()->Push(finalNode);
+    };
+    ViewAbstractModelStatic::BindSheet(frameNode, *isShowValue, std::move(changeEvent), std::move(buildFunc),
+        std::move(cbs.titleBuilder), sheetStyle, std::move(cbs.onAppear), std::move(cbs.onDisappear),
+        std::move(cbs.shouldDismiss), std::move(cbs.onWillDismiss), std::move(cbs.onWillAppear),
+        std::move(cbs.onWillDisappear), std::move(cbs.onHeightDidChange), std::move(cbs.onDetentsDidChange),
+        std::move(cbs.onWidthDidChange), std::move(cbs.onTypeDidChange), std::move(cbs.sheetSpringBack));
 }
 void SetOnVisibleAreaChangeImpl(Ark_NativePointer node,
                                 const Opt_Array_Float64* ratios,
