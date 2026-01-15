@@ -1761,8 +1761,7 @@ void FormPattern::DelayRemoveFormChildNode(FormChildNodeType formChildNodeType, 
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->RemoveFormChildNode(formChildNodeType);
-        },
-        delay, "DelayRemoveFormChildNode" + nodeIdStr);
+        }, delay, "DelayRemoveFormChildNode" + nodeIdStr);
 }
 
 void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want)
@@ -1868,8 +1867,7 @@ void FormPattern::FireFormSurfaceNodeCallback(
                 CHECK_NULL_VOID(pattern);
                 pattern->DoSkeletonAnimation();
             },
-            TaskExecutor::TaskType::UI, FORM_UNLOCK_ANIMATION_DELAY, "DoSkeletonAnimation_" + nodeIdStr,
-            PriorityType::HIGH);
+            FORM_UNLOCK_ANIMATION_DELAY, "DoSkeletonAnimation_" + nodeIdStr);
     }
 }
 
