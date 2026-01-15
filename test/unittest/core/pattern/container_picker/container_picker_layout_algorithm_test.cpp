@@ -434,6 +434,9 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureHeightWithLayoutPolicyWrapCo
      * @tc.steps: step3. Set layoutPolicy to FIX_AT_IDEAL_SIZE
      * @tc.expected: step3. The height should be set to default height
      */
+    LayoutConstraintF pickerLayoutConstraint;
+    pickerLayoutConstraint.parentIdealSize.SetSize(SizeF(100.0f, 100.0f));
+    layoutProperty->contentConstraint_ = pickerLayoutConstraint;
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, false);
     OptionalSizeF contentIdealSize2;
 
@@ -705,6 +708,10 @@ HWTEST_F(ContainerPickerLayoutAlgorithmTest, MeasureWidthWithFixAtIdealSizeAndPa
 
     auto layoutProperty = AceType::DynamicCast<ContainerPickerLayoutProperty>(layoutWrapper->GetLayoutProperty());
     ASSERT_NE(layoutProperty, nullptr);
+    LayoutConstraintF pickerLayoutConstraint;
+    pickerLayoutConstraint.maxSize = SizeF(100.0f, 100.0f);
+    pickerLayoutConstraint.parentIdealSize.SetSize(SizeF(100.0f, 100.0f));
+    layoutProperty->contentConstraint_ = pickerLayoutConstraint;
     layoutProperty->contentConstraint_ = layoutConstraintF;
     layoutProperty->UpdateLayoutPolicyProperty(LayoutCalPolicy::FIX_AT_IDEAL_SIZE, true);
 
