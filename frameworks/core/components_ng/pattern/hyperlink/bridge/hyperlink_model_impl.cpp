@@ -36,10 +36,19 @@ void HyperlinkModelImpl::Create(const std::string& address, const std::string& s
     ViewAbstractModel::GetInstance()->SetFocusNode(true);
 }
 
+void HyperlinkModelImpl::PopNew()
+{
+    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[HyperlinkModelImpl][popNew]", &HyperlinkModelImpl::PopNew);
+    }
+    ViewStackModel::GetInstance()->PopContainer();
+}
+
 void HyperlinkModelImpl::Pop()
 {
     auto hyperlink =
         AceType::DynamicCast<OHOS::Ace::HyperlinkComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    PopNew();
     if (hyperlink) {
         std::string summary = hyperlink->GetSummary();
         std::list<RefPtr<Component>> children = hyperlink->GetChildren();

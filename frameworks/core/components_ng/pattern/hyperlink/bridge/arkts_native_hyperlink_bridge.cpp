@@ -104,7 +104,7 @@ ArkUINativeModuleValue HyperlinkBridge::Create(ArkUIRuntimeCallInfo* runtimeCall
 void HyperlinkBridge::PopNew()
 {
     if (ViewStackModel::GetInstance()->IsPrebuilding()) {
-        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[JSHyperlink][pop]", &HyperlinkBridge::PopNew);
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[HyperlinkBridge][popNew]", &HyperlinkBridge::PopNew);
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
