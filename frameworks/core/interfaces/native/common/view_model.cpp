@@ -873,11 +873,11 @@ void* createPathNode(ArkUI_Int32 nodeId)
 
 void* createPatternLockNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = PatternLockModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto patternlockModifier = nodeModifier->getPatternLockModifier();
+    CHECK_NULL_RETURN(patternlockModifier, nullptr);
+    return patternlockModifier->createFrameNode(nodeId);
 }
 
 void* createPluginComponentNode(ArkUI_Int32 nodeId)

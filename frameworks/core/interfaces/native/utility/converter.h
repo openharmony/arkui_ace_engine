@@ -627,7 +627,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT Color Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_Float64& src);
     template<> Dimension Convert(const Ark_Int32& src);
-    template<> Dimension Convert(const Ark_LengthMetrics& src);
+    template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_LengthMetrics& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_Number& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT DimensionOffset Convert(const Ark_Offset& src);

@@ -143,7 +143,7 @@
 #ifdef USE_COMPONENTS_LIB
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #else
-#include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock_controller_binding.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #endif
 
@@ -520,8 +520,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSBindLibs("arkui.patternlockcontroller", "PatternLockController", true);
 #else
     JSRelativeContainer::JSBind(globalObj);
-    JSPatternLock::JSBind(globalObj);
-    JSPatternLockController::JSBind(globalObj);
+    JSPatternLockControllerBinding::JSBind(globalObj);
 #endif
     // add missing binds to ng build
     JSContextMenu::JSBind(globalObj);

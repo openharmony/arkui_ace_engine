@@ -19,7 +19,7 @@
 #include <cstdint>
 
 #include "frameworks/base/utils/macros.h"
-#include "foundation/arkui/ace_engine/interfaces/inner_api/ace_kit/include/ui/base/macros.h"
+#include "ui/base/macros.h"
 
 namespace OHOS::Ace {
 

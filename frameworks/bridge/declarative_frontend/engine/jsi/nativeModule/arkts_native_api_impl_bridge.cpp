@@ -56,7 +56,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_adapter_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_panel_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_node_container_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_pattern_lock_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_progress_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_resource_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_area_bridge.h"
@@ -486,6 +485,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
     static const std::unordered_set<std::string> loadModuleName = {
         {"Counter"},
         {"Gauge" },
+        {"PatternLock"},
         {"Sidebar"},
         {"Checkbox"},
         {"CheckboxGroup"},
@@ -1409,60 +1409,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "textArea"), textArea);
     
     RegisterVideoAttributes(object, vm);
-
-    auto patternLock = panda::ObjectRef::New(vm);
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSideLength"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetSideLength));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSideLength"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetSideLength));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoReset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetAutoReset));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoReset"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetAutoReset));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPathStrokeWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPathStrokeWidth));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPathStrokeWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPathStrokeWidth));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRegularColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetRegularColor));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRegularColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetRegularColor));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPathColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPathColor));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPathColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPathColor));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setActiveColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockActiveColor));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetActiveColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockActiveColor));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCircleRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockCircleRadius));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCircleRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockCircleRadius));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockSelectedColor));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockSelectedColor));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setActivateCircleStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockActivateCircleStyle));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetActivateCircleStyle"),
-        panda::FunctionRef::New(
-            const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockActivateCircleStyle));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSkipUnselectedPoint"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockSkipUnselectedPoint));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSkipUnselectedPoint"),
-        panda::FunctionRef::New(
-            const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockSkipUnselectedPoint));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPatternLockOnPatternComplete"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockOnPatternComplete));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPatternLockOnPatternComplete"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockOnPatternComplete));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPatternLockOnDotConnect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::SetPatternLockOnDotConnect));
-    patternLock->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPatternLockOnDotConnect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PatternLockBridge::ResetPatternLockOnDotConnect));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "patternLock"), patternLock);
-
     RegisterImageAnimatorAttributes(object, vm);
 
     auto textInput = panda::ObjectRef::New(vm);
