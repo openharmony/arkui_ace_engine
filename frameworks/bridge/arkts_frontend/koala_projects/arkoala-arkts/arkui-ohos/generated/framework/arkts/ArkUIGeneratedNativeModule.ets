@@ -5426,24 +5426,17 @@ export class ArkUIGeneratedNativeModule {
     native static _NavPathStack_construct(): KPointer
     @ani.unsafe.Direct
     native static _NavPathStack_getFinalizer(): KPointer
-    @ani.unsafe.Direct
     native static _NavPathStack_pushPath0(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _NavPathStack_pushPath1(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _NavPathStack_pushDestination0(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _NavPathStack_pushDestination1(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Quick
     native static _NavPathStack_pushPathByName0(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Quick
     native static _NavPathStack_pushPathByName1(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _NavPathStack_pushDestinationByName0(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _NavPathStack_pushDestinationByName1(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _NavPathStack_replacePath0(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _NavPathStack_replacePath1(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _NavPathStack_replaceDestination(ptr: KPointer, info: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Quick
     native static _NavPathStack_replacePathByName(ptr: KPointer, name: KStringPtr, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _NavPathStack_removeByIndexes(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): int32
@@ -5963,7 +5956,6 @@ export class ArkUIGeneratedNativeModule {
     native static _RouterExtender_back0(thisArray: KSerializerBuffer, thisLength: int32): void
     native static _RouterExtender_back1(index: KInt, thisArray: KSerializerBuffer, thisLength: int32): void
     native static _RouterExtender_runPage(jsView: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _RouterExtender_clear(): void
     @ani.unsafe.Quick
     native static _RouterExtender_showAlertBeforeBackPage(message: KStringPtr): void
