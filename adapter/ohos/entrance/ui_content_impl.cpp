@@ -6318,7 +6318,7 @@ UIContentErrorCode UIContentImpl::InitializeWithAniStorage(OHOS::Rosen::Window* 
     CHECK_ERROR_CODE_RETURN(errorCode);
     AddWatchSystemParameter();
     if (content) {
-        LOGI("Initialize by buffer, size:%{public}zu", content->size());
+        LOGI("Initialize by buffer, contentName:%{public}s size:%{public}zu", contentName.c_str(), content->size());
         // run page.
         errorCode = Platform::AceContainer::RunPage(instanceId_, content, contentName);
         CHECK_ERROR_CODE_RETURN(errorCode);

@@ -26,13 +26,8 @@
 #include "utils/ani_utils.h"
 
 namespace OHOS::Ace {
-UIContentErrorCode ArktsFrontend::RunPage(
-    const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
-{
-    return UIContentErrorCode::NO_ERRORS;
-}
-
 namespace {
+const std::string ENTRY_SUFFIX = "/__EntryWrapper";
 /* copied from arkcompiler_ets_frontend vmloader.cc*/
 struct AppInfo {
     const char* className;
@@ -407,6 +402,112 @@ bool ArktsFrontend::GetNearestNonBootRuntimeLinker()
         return false;
     }
     return true;
+}
+
+UIContentErrorCode ArktsFrontend::RunPage(
+    const std::shared_ptr<std::vector<uint8_t>>& content, const std::string& params)
+{
+    auto* env = Ani::AniUtils::GetAniEnv(vm_);
+    CHECK_NULL_RETURN(env, UIContentErrorCode::NULL_POINTER);
+    GetNearestNonBootRuntimeLinker();
+    if (!pageRouterManager_) {
+        pageRouterManager_ = NG::PageRouterManagerFactory::CreateManager();
+    }
+    ani_class appClass;
+    if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
+        LOGE("Cannot load main class %{public}s", KOALA_APP_INFO.className);
+        return UIContentErrorCode::INVALID_URL;
+    }
+    ani_static_method create;
+    if (env->Class_FindStaticMethod(
+            appClass, KOALA_APP_INFO.createMethodName, KOALA_APP_INFO.createMethodSig, &create) != ANI_OK) {
+        LOGE("Cannot find create method %{public}s", KOALA_APP_INFO.createMethodName);
+        return UIContentErrorCode::INVALID_URL;
+    }
+
+    ani_string aniUrl;
+    env->String_NewUTF8(params.c_str(), params.size(), &aniUrl);
+    ani_string aniParams;
+    env->String_NewUTF8("", 0, &aniParams);
+    ani_string aniName;
+    env->String_NewUTF8("", 0, &aniName);
+
+    NG::EntryLoader entryLoader { env, *(content.get()) };
+    std::string entryPath = params + ENTRY_SUFFIX;
+    auto entryPointObj = entryLoader.GetPageEntryObj(entryPath);
+    auto currentContainer = Container::Current();
+    CHECK_NULL_RETURN(currentContainer, UIContentErrorCode::NULL_POINTER);
+    std::string moduleName = currentContainer->GetModuleName();
+    ani_string module;
+    env->String_NewUTF8(moduleName.c_str(), moduleName.size(), &module);
+    ani_boolean enableDebug = ani_boolean(SystemProperties::GetDebugEnabled());
+    ani_class appConstructorParamClass;
+    if (env->FindClass(KOALA_APP_INFO.constructorParamClassName, &appConstructorParamClass) != ANI_OK) {
+        LOGE("Cannot load class %{public}s", KOALA_APP_INFO.constructorParamClassName);
+        return UIContentErrorCode::INVALID_URL;
+    }
+    ani_method paramConstructor;
+    if (env->Class_FindMethod(appConstructorParamClass, KOALA_APP_INFO.constructorParamCtorMethod,
+        KOALA_APP_INFO.constructorParamSig, &paramConstructor) != ANI_OK) {
+        LOGE("Cannot find create method %{public}s", KOALA_APP_INFO.constructorParamCtorMethod);
+        return UIContentErrorCode::INVALID_URL;
+    }
+    ani_ref optionalEntry;
+    env->GetUndefined(&optionalEntry);
+    ani_object param;
+    if (env->Object_New(appConstructorParamClass, paramConstructor, &param, aniUrl, aniParams, aniName, false, module,
+        optionalEntry, entryPointObj ? entryPointObj : optionalEntry,
+        enableDebug) != ANI_OK) {
+        LOGE("Fail to create ApplicationConstructorParam");
+        return UIContentErrorCode::INVALID_URL;
+    }
+    ani_ref appLocal;
+    if (env->Class_CallStaticMethod_Ref(appClass, create, &appLocal, param) != ANI_OK) {
+        LOGE("createApplication returned null");
+        return UIContentErrorCode::INVALID_URL;
+    }
+    env->GlobalReference_Create(appLocal, &app_);
+
+    if (taskExecutor_ == nullptr) {
+        LOGE("taskExecutor is nullptr");
+        return UIContentErrorCode::NULL_POINTER;
+    }
+    taskExecutor_->PostTask([weak = WeakClaim(this)]() {
+        auto frontend = weak.Upgrade();
+        CHECK_NULL_VOID(frontend);
+        auto* env = Ani::AniUtils::GetAniEnv(frontend->GetVM());
+        CHECK_NULL_VOID(env);
+        ani_class appClass;
+        if (env->FindClass(KOALA_APP_INFO.className, &appClass) != ANI_OK) {
+            LOGE("Cannot load main class %{public}s", KOALA_APP_INFO.className);
+            return;
+        }
+        ani_method start;
+        if (env->Class_FindMethod(appClass, KOALA_APP_INFO.startMethodName, KOALA_APP_INFO.startMethodSig, &start) !=
+            ANI_OK) {
+            LOGE("find start method returned null");
+            return;
+        }
+        ani_long result;
+        if (env->Object_CallMethod_Long(static_cast<ani_object>(frontend->GetApp()), start, &result, ANI_FALSE) !=
+            ANI_OK) {
+            LOGE("call start method returned null");
+            return;
+        }
+        }, TaskExecutor::TaskType::JS, "ArkUIRunPageUrl");
+
+    // TODO: init event loop
+    CHECK_NULL_RETURN(pipeline_, UIContentErrorCode::NULL_POINTER);
+    pipeline_->SetVsyncListener([vm = vm_, app = app_]() {
+        auto* env = Ani::AniUtils::GetAniEnv(vm);
+        RunArkoalaEventLoop(env, app);
+    });
+    // register one hook method to pipeline, which will be called at the tail of vsync
+    pipeline_->SetAsyncEventsHookListener([vm = vm_, app = app_]() {
+        auto* env = Ani::AniUtils::GetAniEnv(vm);
+        FireAllArkoalaAsyncEvents(env, app);
+    });
+    return UIContentErrorCode::NO_ERRORS;
 }
 
 UIContentErrorCode ArktsFrontend::RunPage(const std::string& url, const std::string& params)
