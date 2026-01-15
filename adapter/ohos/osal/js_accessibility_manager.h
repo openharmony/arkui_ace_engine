@@ -476,6 +476,8 @@ public:
 
     void ResetBlockedEvent();
     int32_t GetTreeId(int32_t instanceId = -1) override;
+    void GetCursorPosition(const int64_t elementId, const int32_t requestId,
+        Accessibility::AccessibilityElementOperatorCallback& callback);
 
 protected:
     void OnDumpInfoNG(const std::vector<std::string>& params, uint32_t windowId, bool hasJson = false) override;
