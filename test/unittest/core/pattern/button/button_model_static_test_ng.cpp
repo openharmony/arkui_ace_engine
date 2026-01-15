@@ -1101,6 +1101,8 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg030, TestSize.Level1)
      * @tc.steps: step3. test SetLabelWithCheck.
      * @tc.expected: step3. the property value meet expectations.
      */
+    ButtonModelStatic::SetCreateWithLabel(frameNode, true);
+    EXPECT_EQ(layoutProperty->GetCreateWithLabelValue(), true);
     ButtonModelStatic::SetLabelWithCheck(frameNode, BUTTON_LABEL);
     EXPECT_EQ(layoutProperty->GetLabelValue(), BUTTON_LABEL);
 }
@@ -1216,7 +1218,7 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg034, TestSize.Level1)
      * @tc.expected: step3. the property value meet expectations.
      */
     ButtonModelStatic::SetCreateWithLabel(frameNode, true);
-    EXPECT_EQ(layoutProperty->GetCreateWithLabel(), true);
+    EXPECT_EQ(layoutProperty->GetCreateWithLabelValue(), true);
 }
 
 /**

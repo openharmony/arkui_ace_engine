@@ -1616,7 +1616,7 @@ HWTEST_F(RadioTestNg, RadioSetHoverEffect001, TestSize.Level1)
     RadioModelNG radioModelNG2;
     radioModelNG2.Create(NAME, GROUP_NAME, INDICATOR_TYPE_TICK);
     auto frameNode2 = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
-    ASSERT_NE(frameNode, nullptr);
+    ASSERT_NE(frameNode2, nullptr);
     auto eventHub2 = frameNode2->GetEventHub<NG::RadioEventHub>();
     ASSERT_NE(eventHub2, nullptr);
     EXPECT_EQ(eventHub2->GetValue(), NAME);

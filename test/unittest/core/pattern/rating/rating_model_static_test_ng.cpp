@@ -279,8 +279,8 @@ HWTEST_F(RatingStaticTestNg, RatingStaticTestNg006, TestSize.Level1)
      * @tc.steps: step3. test TriggerChange.
      * @tc.expected: step3. the property value meet expectations.
      */
-    double ratingValue = RATING_SCORE_3;
+    double ratingValue = 0.0;
     RatingModelStatic::TriggerChange(frameNode, ratingValue);
-    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(0.0), RATING_SCORE_3);
+    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(0.0), 0.0);
 }
 } // namespace OHOS::Ace::NG

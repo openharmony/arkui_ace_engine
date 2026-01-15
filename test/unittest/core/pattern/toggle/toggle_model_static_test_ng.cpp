@@ -195,11 +195,14 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg004, TestSize.Level1)
      * @tc.steps: step3. test OnChangeEvent.
      * @tc.expected: step3. the property value meet expectations.
      */
-    ChangeEvent changeEvent;
-    ToggleModelStatic::OnChangeEvent(frameNode, std::move(changeEvent));
+    bool isChecked = false;
+    auto onChange = [&isChecked](bool select) { isChecked = select; };
+    ToggleModelStatic::OnChangeEvent(frameNode, std::move(onChange));
     auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
     ASSERT_NE(eventHub, nullptr);
     EXPECT_NE(eventHub->onChangeEvent_, nullptr);
+    eventHub->UpdateChangeEvent(true);
+    EXPECT_EQ(isChecked, true);
 }
 
 /**
@@ -221,7 +224,7 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg005, TestSize.Level1)
     /**
      * @tc.steps: step2. create toggle paintProperty.
      */
-    auto togglePaintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    auto togglePaintProperty = frameNode->GetPaintProperty<ToggleButtonPaintProperty>();
     ASSERT_NE(togglePaintProperty, nullptr);
 
     /**
@@ -254,7 +257,7 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg006, TestSize.Level1)
     /**
      * @tc.steps: step2. create toggle paintProperty.
      */
-    auto togglePaintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    auto togglePaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
     ASSERT_NE(togglePaintProperty, nullptr);
 
     /**
@@ -311,7 +314,7 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg008, TestSize.Level1)
     /**
      * @tc.steps: step2. create toggle paintProperty.
      */
-    auto togglePaintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    auto togglePaintProperty = frameNode->GetPaintProperty<ToggleButtonPaintProperty>();
     ASSERT_NE(togglePaintProperty, nullptr);
 
     /**
@@ -339,7 +342,7 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg009, TestSize.Level1)
     /**
      * @tc.steps: step2. create toggle paintProperty.
      */
-    auto togglePaintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    auto togglePaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
     ASSERT_NE(togglePaintProperty, nullptr);
 
     /**
