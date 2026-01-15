@@ -206,6 +206,7 @@ if (enable_glfw_window) {
 
 if (use_clang_coverage) {
   ace_common_defines += [ "USE_CLANG_COVERAGE" ]
+  ace_engine_feature_enable_codemerge = false
 }
 
 if (enable_ace_debug) {
