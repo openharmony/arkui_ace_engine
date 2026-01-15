@@ -95,7 +95,6 @@
 #include "bridge/declarative_frontend/jsview/js_local_storage.h"
 #include "bridge/declarative_frontend/jsview/js_location_button.h"
 #include "bridge/declarative_frontend/jsview/js_magnifier_controller.h"
-#include "bridge/declarative_frontend/jsview/js_marquee.h"
 #include "bridge/declarative_frontend/jsview/js_mock.h"
 #include "bridge/declarative_frontend/jsview/js_nav_path_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navdestination.h"
@@ -500,7 +499,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Piece", JSPiece::JSBind },
     { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
-    { "Marquee", JSMarquee::JSBind },
     { "Swiper", JSSwiper::JSBind },
     { "Indicator", JSIndicator::JSBind },
     { "SwiperController", JSSwiperController::JSBind },
@@ -689,7 +687,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
     { "MagnifierController", JSMagnifierController::JSBind },
-    { "Marquee", JSMarquee::JSBind },
     { "Gesture", JSGesture::JSBind },
     { "TapGesture", JSGesture::JSBind },
     { "LongPressGesture", JSGesture::JSBind },

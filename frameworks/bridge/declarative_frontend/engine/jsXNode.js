@@ -2054,7 +2054,9 @@ const __creatorMap__ = new Map([
         }],
     ['Marquee', (context) => {
             return new TypedFrameNode(context, 'Marquee', (node, type) => {
-                return new ArkMarqueeComponent(node, type);
+                getUINativeModule().loadNativeModule('Marquee');
+                let module = globalThis.requireNapi('arkui.components.arkmarquee');
+                return module.createComponent(node, type);
             });
         }],
     ['TextArea', (context) => {

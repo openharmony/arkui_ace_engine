@@ -89,6 +89,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "WaterFlow", "waterflow" },
         {"ColumnSplit", "linearsplit"},
         {"RowSplit", "linearsplit"},
+        {"Marquee", "marquee"},
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);
