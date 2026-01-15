@@ -43,6 +43,7 @@ public:
     static void SetAltPlaceholder(FrameNode* frameNode, const std::optional<ImageSourceInfo>& src);
     static void SetSupportSvg2(FrameNode* frameNode, bool enable);
     static void SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition);
+    static void SetAntialiased(FrameNode* frameNode, const std::optional<bool>& antialiased);
     static void SetImageInterpolation(FrameNode* frameNode, const std::optional<ImageInterpolation>& interpolation);
     static void SetDynamicRangeMode(FrameNode* frameNode, const std::optional<DynamicRangeMode>& dynamicRangeMode);
     static void SetOrientation(FrameNode* frameNode, const std::optional<ImageRotateOrientation>& orientation);
