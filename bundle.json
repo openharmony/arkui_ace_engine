@@ -280,8 +280,7 @@
             ],
             "test": [
                 "//foundation/arkui/ace_engine/test/unittest:unittest",
-                "//foundation/arkui/ace_engine/test/benchmark:benchmark",
-                "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/test/unittest:statemgmt_ut_hap"
+                "//foundation/arkui/ace_engine/test/benchmark:benchmark"
             ]
         }
     }
