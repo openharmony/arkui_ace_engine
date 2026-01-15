@@ -176,8 +176,16 @@ void FfiOHOSAceFrameworkTextFieldSetPlaceholderFont(
         return;
     }
     Dimension sizeDime(size, static_cast<DimensionUnit>(unit));
-    if (sizeDime.IsNegative()) {
-        sizeDime.SetValue(0.0);
+
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+        if (sizeDime.Unit() == DimensionUnit::PERCENT) {
+            auto theme = GetTheme<TextFieldTheme>();
+            sizeDime = theme->GetFontSize();
+        }
+    } else {
+        if (sizeDime.IsNegative()) {
+            sizeDime.SetValue(0.0);
+        }
     }
 
     OHOS::Ace::Font font;
