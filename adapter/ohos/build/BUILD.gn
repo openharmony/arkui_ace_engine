@@ -22,6 +22,7 @@ component_modules = [
   "waterflow",
   "linear_split",
   "side_bar",
+  "marquee",
 ]
 component_modules_libs = []
 
