@@ -22,6 +22,7 @@
 #include "core/common/container_scope.h"
 #include "core/components_ng/pattern/node_container/node_container_event_hub.h"
 #include "core/components_ng/pattern/node_container/node_container_node.h"
+#include "core/components_ng/pattern/node_container/node_container_model_ng.h"
 #include "core/components_ng/pattern/node_container/node_container_pattern.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/touch_event_peer.h"
@@ -33,7 +34,7 @@ namespace NodeContainerModifier {
 Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
-    auto frameNode = NodeContainerNode::GetOrCreateNodeContainerNode(id);
+    auto frameNode = NodeContainerModelNG::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
