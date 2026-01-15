@@ -46,7 +46,7 @@ RefPtr<Framework::DOMNode> StepperItemLoader::CreateDomNodeWithItemIndex(
 
 void* StepperItemLoader::CreateModel()
 {
-    return nullptr;
+    return new Framework::StepperItemModelImpl();
 }
 
 RefPtr<V2::InspectorComposedElement> StepperItemLoader::CreateInspectorElement(const std::string& id)

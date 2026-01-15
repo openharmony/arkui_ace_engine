@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/stepper/stepper_model_static.h"
 
+#include "core/components_ng/pattern/stepper/stepper_constants.h"
 #include "core/components_ng/pattern/stepper/stepper_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
@@ -23,7 +24,7 @@ namespace OHOS::Ace::NG {
 RefPtr<FrameNode> StepperModelStatic::CreateFrameNode(int32_t nodeId)
 {
     auto stepperNode = StepperNode::GetOrCreateStepperNode(
-        V2::STEPPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperPattern>(); });
+        STEPPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperPattern>(); });
     return stepperNode;
 }
 
@@ -96,7 +97,7 @@ void StepperModelStatic::SetOnPrevious(FrameNode* frameNode, IndexCallbackEvent&
 RefPtr<FrameNode> StepperModelStatic::CreateSwiperChild(int32_t id, uint32_t index)
 {
     auto swiperNode =
-        FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG, id, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+        FrameNode::GetOrCreateFrameNode(SWIPER_ETS_TAG, id, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(swiperPaintProperty, nullptr);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::NONE);

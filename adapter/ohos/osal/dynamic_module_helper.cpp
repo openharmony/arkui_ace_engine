@@ -69,6 +69,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"ColumnSplit", "linearsplit"},
         {"RowSplit", "linearsplit"},
         {"Marquee", "marquee"},
+        { "Stepper", "stepper" },
+        { "StepperItem", "stepper" },
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {

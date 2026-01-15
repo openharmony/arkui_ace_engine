@@ -45,6 +45,8 @@ arkui_modules = [
   "menuitem",
   "menuitemgroup",
   "marquee",
+  "stepper",
+  "stepperitem",
 ]
 
 module_targets = []
