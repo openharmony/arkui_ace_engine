@@ -448,7 +448,8 @@ void NavDestinationPatternBase::OnColorConfigurationUpdate()
     dividerRenderProperty->UpdateDividerColor(theme->GetToolBarDividerColor());
 }
 
-void NavDestinationPatternBase::InitOnTouchEvent(const RefPtr<FrameNode>& host) {
+void NavDestinationPatternBase::InitOnTouchEvent(const RefPtr<FrameNode>& host)
+{
     CHECK_NULL_VOID(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
@@ -459,8 +460,7 @@ void NavDestinationPatternBase::InitOnTouchEvent(const RefPtr<FrameNode>& host) 
     }
     auto eventManager = context->GetEventManager();
     CHECK_NULL_VOID(eventManager);
-    eventManager->RegisterHitTestFrameNodeListener(host->GetId(), [weak = WeakClaim(this)](const TouchEvent& info)
-    {
+    eventManager->RegisterHitTestFrameNodeListener(host->GetId(), [weak = WeakClaim(this)](const TouchEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
