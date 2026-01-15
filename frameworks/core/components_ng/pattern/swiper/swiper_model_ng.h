@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -213,6 +213,12 @@ public:
     static int32_t GetFillType(FrameNode* frameNode);
     static void ResetFillType(FrameNode* frameNode);
     static void ResetDisplayCountWithObject(FrameNode* frameNode);
+    static bool CallSwiperStartFakeDrag(FrameNode* frameNode);
+    static bool CallSwiperFakeDragBy(FrameNode* frameNode, float offset);
+    static bool CallSwiperStopFakeDrag(FrameNode* frameNode);
+    static bool CallSwiperIsFakeDragging(FrameNode* frameNode);
+    static void CallSwiperShowPrevious(FrameNode* frameNode);
+    static void CallSwiperShowNext(FrameNode* frameNode);
 };
 
 } // namespace OHOS::Ace::NG

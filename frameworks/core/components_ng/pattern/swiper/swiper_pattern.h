@@ -875,6 +875,18 @@ public:
     {
         return isPureSwiper_;
     }
+
+    bool StartFakeDrag();
+
+    bool FakeDragBy(float offset);
+
+    bool StopFakeDrag();
+
+    bool IsFakeDragging()
+    {
+        return isFakeDragging_;
+    }
+
 protected:
     void MarkDirtyNodeSelf();
     void OnPropertyTranslateAnimationFinish(const OffsetF& offset);
@@ -925,7 +937,7 @@ protected:
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(double dragVelocity, float mainDelta = 0.0f);
 
-    void HandleTouchDown(const TouchLocationInfo& locationInfo);
+    void HandleTouchDown(const TouchLocationInfo& locationInfo, bool isFakeDragging = false);
     void HandleTouchUp();
 
     bool ChildPreMeasureHelperEnabled() override
@@ -1357,6 +1369,10 @@ private:
     void LoadCompleteManagerStartCollect();
     void LoadCompleteManagerStopCollect(bool needSwiperChangeEnd = true);
 
+    bool FakeDragCheckAtStart(float& offset);
+    bool FakeDragCheckAtEnd(float& offset);
+    void CheckOffsetAfterLyout(float offset);
+
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
     RefPtr<InputEvent> hoverEvent_;
@@ -1552,6 +1568,11 @@ private:
 
     std::list<int32_t> itemsLatestSwitched_;
     std::set<int32_t> itemsNeedClean_;
+
+    bool isFakeDragging_ = false;
+    VelocityTracker velocityTracker_;
+    Offset offsetXY_;
+    std::optional<float> lastDragByOffset_;
 };
 } // namespace OHOS::Ace::NG
 

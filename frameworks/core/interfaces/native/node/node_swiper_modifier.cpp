@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1930,6 +1930,48 @@ ArkUI_Int32 GetSwiperFillType(ArkUINodeHandle node)
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
     return SwiperModelNG::GetFillType(frameNode);
 }
+
+void CallSwiperStartFakeDrag(ArkUINodeHandle node, bool* isSuccessful)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    *isSuccessful = SwiperModelNG::CallSwiperStartFakeDrag(frameNode);
+}
+
+void CallSwiperFakeDragBy(ArkUINodeHandle node, float offset, bool* isConsumedOffset)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    *isConsumedOffset = SwiperModelNG::CallSwiperFakeDragBy(frameNode, offset);
+}
+
+void CallSwiperStopFakeDrag(ArkUINodeHandle node, bool* isSuccessful)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    *isSuccessful = SwiperModelNG::CallSwiperStopFakeDrag(frameNode);
+}
+
+void CallSwiperIsFakeDragging(ArkUINodeHandle node, bool* isFakeDragging)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    *isFakeDragging = SwiperModelNG::CallSwiperIsFakeDragging(frameNode);
+}
+
+void CallSwiperShowPrevious(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::CallSwiperShowPrevious(frameNode);
+}
+
+void CallSwiperShowNext(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SwiperModelNG::CallSwiperShowNext(frameNode);
+}
 } // namespace
 
 namespace NodeModifier {
@@ -2051,6 +2093,12 @@ const ArkUISwiperModifier* GetSwiperModifier()
         .setSwiperFillType = SetSwiperFillType,
         .resetSwiperFillType = ResetSwiperFillType,
         .getSwiperFillType = GetSwiperFillType,
+        .callSwiperStartFakeDrag = CallSwiperStartFakeDrag,
+        .callSwiperFakeDragBy = CallSwiperFakeDragBy,
+        .callSwiperStopFakeDrag = CallSwiperStopFakeDrag,
+        .callSwiperIsFakeDragging = CallSwiperIsFakeDragging,
+        .callSwiperShowPrevious = CallSwiperShowPrevious,
+        .callSwiperShowNext = CallSwiperShowNext,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

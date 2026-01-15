@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -76,6 +76,8 @@ void SwiperHelper::InitSwiperController(const RefPtr<SwiperController>& controll
         CHECK_NULL_VOID(swiper);
         swiper->PreloadItems(indexSet);
     });
+
+    SetFakeDragImpl(controller, weak);
 }
 
 void SwiperHelper::SetChangeIndexWithModeImpl(const RefPtr<SwiperController>& controller,
@@ -88,6 +90,33 @@ void SwiperHelper::SetChangeIndexWithModeImpl(const RefPtr<SwiperController>& co
         TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper ChangeIndex %{public}d, animationMode:%{public}d",
             index, animationMode);
         swiper->ChangeIndex(index, animationMode);
+    });
+}
+
+void SwiperHelper::SetFakeDragImpl(const RefPtr<SwiperController>& controller, const WeakPtr<SwiperPattern>& weak)
+{
+    controller->SetStartFakeDragImpl([weak]() {
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_RETURN(swiper, false);
+        return swiper->StartFakeDrag();
+    });
+
+    controller->SetFakeDragByImpl([weak](float offset) {
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_RETURN(swiper, false);
+        return swiper->FakeDragBy(offset);
+    });
+
+    controller->SetStopFakeDragImpl([weak]() {
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_RETURN(swiper, false);
+        return swiper->StopFakeDrag();
+    });
+
+    controller->SetIsFakeDraggingImpl([weak]() {
+        auto swiper = weak.Upgrade();
+        CHECK_NULL_RETURN(swiper, false);
+        return swiper->IsFakeDragging();
     });
 }
 
