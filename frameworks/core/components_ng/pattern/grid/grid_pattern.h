@@ -217,6 +217,7 @@ public:
     void GetEventDumpInfo(std::unique_ptr<JsonValue>& json) override;
     void BuildGridLayoutInfo(std::unique_ptr<JsonValue>& json);
     void BuildScrollAlignInfo(std::unique_ptr<JsonValue>& json);
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
 
     std::string ProvideRestoreInfo() override;
     void OnRestoreInfo(const std::string& restoreInfo) override;
@@ -320,6 +321,8 @@ private:
     void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
     void ReportOnItemGridEvent(const std::string& event);
     int32_t OnInjectionEvent(const std::string& command) override;
+    void ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId);
+    void HandleGridScroll(float distance, int32_t reportEventId);
 
     inline bool UseIrregularLayout() const;
 

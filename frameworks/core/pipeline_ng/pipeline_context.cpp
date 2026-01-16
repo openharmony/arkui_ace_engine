@@ -4000,6 +4000,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         }
         DumpLog::GetInstance().OutPutByCompress();
         LOGI("end collect simplify dump info");
+    } else if (params[0] == "-allInfo") {
+        auto root = JsonUtil::CreateSharedPtrJson(true);
+        rootNode_->DumpSimplifyTree(0, root);
+        DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-allInfoWithParamConfig") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);

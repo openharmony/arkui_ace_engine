@@ -167,6 +167,7 @@ public:
     void DumpAdvanceInfo() override;
     void GetEventDumpInfo() override;
     void GetEventDumpInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override;
 
     void SetPreloadList(std::list<int32_t>&& preload)
     {
@@ -259,6 +260,11 @@ private:
     void FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEvent& onJSFrameNodeReachEnd) override;
     void FireOnScrollIndex(bool indexChanged, const ScrollIndexFunc& onScrollIndex);
     void DumpInfoAddSections();
+    void ReportOnItemWaterFlowEvent(const std::string& event);
+    void ReportOnItemWaterFlowScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
+    int32_t OnInjectionEvent(const std::string& command) override;
+    void ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId);
+    void HandleWaterFlowScroll(float distance, int32_t reportEventId);
 
     /**
      * @param step FocusStep

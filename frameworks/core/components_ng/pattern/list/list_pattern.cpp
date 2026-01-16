@@ -3438,6 +3438,19 @@ void ListPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("IsAtBottom", IsAtBottom());
 }
 
+void ListPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto listLayoutProperty = host->GetLayoutProperty<ListLayoutProperty>();
+    CHECK_NULL_VOID(listLayoutProperty);
+    auto axis = listLayoutProperty->GetListDirection().value_or(Axis::VERTICAL);
+    json->Put("isScrollable",
+        isScrollable_ ? (IsAtTop() ? "scrollBackward" : (IsAtBottom() ? "scrollForward" : "scrollBidirectional"))
+                      : "false");
+    json->Put("scrollDirection", (axis == Axis::VERTICAL) ? "vertical" : "horizontal");
+}
+
 SizeF ListPattern::GetChildrenExpandedSize()
 {
     auto viewSize = GetViewSizeMinusPadding();
@@ -4476,14 +4489,59 @@ void ListPattern::ReportOnItemListScrollEvent(const std::string& event, int32_t 
 
 int32_t ListPattern::OnInjectionEvent(const std::string& command)
 {
-    std::string ret = ScrollablePattern::ParseCommand(command);
+    int reportEventId = 0;
+    float ratio = 0.0f;
+    bool isScrollByRatio = false;
+    std::string ret = ParseCommand(command, reportEventId, ratio, isScrollByRatio);
+    if (LessNotEqual(ratio, 0.0f) || GreatNotEqual(ratio, 1.0f)) {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
     if (ret == "scrollForward") {
-        ScrollPage(true);
+        if (isScrollByRatio) {
+            ScrollPageByRatio(true, ratio, reportEventId);
+        } else {
+            ScrollPage(true);
+        }
     } else if (ret == "scrollBackward") {
-        ScrollPage(false);
+        if (isScrollByRatio) {
+            ScrollPageByRatio(false, ratio, reportEventId);
+        } else {
+            ScrollPage(false);
+        }
     } else {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
         return RET_FAILED;
     }
     return RET_SUCCESS;
+}
+
+void ListPattern::ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId)
+{
+    float height = GetMainContentSize();
+    float distance = reverse ? height : -height;
+    distance = distance * ratio;
+    StopAnimate();
+    SetIsOverScroll(false);
+    HandleListScroll(distance, reportEventId);
+    isScrollEnd_ = true;
+}
+
+void ListPattern::HandleListScroll(float distance, int32_t reportEventId)
+{
+    if (UpdateCurrentOffset(distance, SCROLL_FROM_JUMP)) {
+        ReportScroll(true, ScrollError::SCROLL_NO_ERROR, reportEventId);
+        return;
+    }
+
+    ScrollError error = ScrollError::SCROLL_ERROR_OTHER;
+    if (!IsScrollable()) {
+        error = ScrollError::SCROLL_NOT_SCROLLABLE_ERROR;
+    } else if (IsAtTop()) {
+        error = ScrollError::SCROLL_TOP_ERROR;
+    } else if (IsAtBottom()) {
+        error = ScrollError::SCROLL_BOTTOM_ERROR;
+    }
+    ReportScroll(false, error, reportEventId);
 }
 } // namespace OHOS::Ace::NG
