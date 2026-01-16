@@ -113,9 +113,7 @@ void HyperlinkBridge::PopNew()
         return ViewStackModel::GetInstance()->PopContainer();
     }
 
-    auto nodeModifiers = GetArkUINodeModifiers();
-    CHECK_NULL_VOID(nodeModifiers);
-    nodeModifiers->getHyperlinkModifier()->pop();
+    GetArkUINodeModifiers()->getHyperlinkModifier()->pop();
 }
 
 ArkUINativeModuleValue HyperlinkBridge::Pop(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -133,50 +131,28 @@ ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCa
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
 
+    ArkUINodeHandle nativeNode;
+
     if (IsJsView(runtimeCallInfo->GetCallArgRef(NUM_0), vm)) {
-        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-        auto pattern = frameNode->GetPattern();
-        CHECK_NULL_RETURN(pattern, panda::JSValueRef::Undefined(vm));
-        pattern->UnRegisterResource("Color");
-
-        Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-        class Color color;
-        RefPtr<ResourceObject> resourceObject;
-        auto nativeNode = nodePtr(frameNode);
-        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-        if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resourceObject, nodeInfo)) {
-            pattern->RegisterResource<class Color>("Color", resourceObject, color);
-        } else {
-            auto pipelineContext = PipelineBase::GetCurrentContext();
-            CHECK_NULL_RETURN(pipelineContext, panda::JSValueRef::Undefined(vm));
-
-            auto theme = pipelineContext->GetTheme<HyperlinkTheme>();
-            CHECK_NULL_RETURN(theme, panda::JSValueRef::Undefined(vm));
-
-            color = theme->GetTextColor();
-        }
-
-        GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkColor(
-            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject)
-        );
+        nativeNode = nodePtr(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     } else {
         Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
         CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
 
-        auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
-        auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+        nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    }
 
-        Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-        class Color color;
-        RefPtr<ResourceObject> resourceObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
 
-        if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resourceObject, nodeInfo)) {
-            GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkColor(nativeNode);
-        } else {
-            GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkColor(
-                nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
-        }
+    Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    class Color color;
+    RefPtr<ResourceObject> resourceObject;
+
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resourceObject, nodeInfo)) {
+        GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkColor(nativeNode);
+    } else {
+        GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkColor(
+            nativeNode, color.GetValue(), AceType::RawPtr(resourceObject));
     }
 
     return panda::JSValueRef::Undefined(vm);
@@ -243,8 +219,12 @@ ArkUINativeModuleValue HyperlinkBridge::SetResponseRegion(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
 
     if (IsJsView(runtimeCallInfo->GetCallArgRef(NUM_0), vm)) {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+        auto nativeNode = nodePtr(frameNode);
+
         bool boolValue = runtimeCallInfo->GetCallArgRef(NUM_0)->ToBoolean(vm)->Value();
-        GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkResponseRegionEnabled(boolValue);
+        GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkResponseRegionEnabled(nativeNode, boolValue);
     } else {
         Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
         CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));

@@ -89,10 +89,7 @@ void ResetHyperlinkColor(ArkUINodeHandle node)
     auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     auto context = frameNode->GetContext();
-    CHECK_NULL_VOID(context);
-    auto themeManager = context->GetThemeManager();
-    CHECK_NULL_VOID(themeManager);
-    auto hyperlinkTheme = themeManager->GetTheme<HyperlinkTheme>();
+    auto hyperlinkTheme = context->GetTheme<HyperlinkTheme>();
     CHECK_NULL_VOID(hyperlinkTheme);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
