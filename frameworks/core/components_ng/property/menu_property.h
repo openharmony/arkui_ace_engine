@@ -169,6 +169,11 @@ struct MenuParam {
         return nullptr;
     }
 
+    void RemoveResource(const std::string& key)
+    {
+        resMap_.erase(key);
+    }
+
     bool HasResources() const
     {
         return !resMap_.empty();

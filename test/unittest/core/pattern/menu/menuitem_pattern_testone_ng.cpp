@@ -73,6 +73,8 @@ const std::string MENU_TOUCH_EVENT_TYPE = "1";
 constexpr MenuType TYPE = MenuType::MENU;
 constexpr int32_t TARGET_ID = 3;
 const V2::ItemDivider ITEM_DIVIDER = { Dimension(5.f), Dimension(10), Dimension(20), Color(0x000000) };
+constexpr Color COLOR_SRC(0xff0000aa);
+constexpr Color COLOR_DES(0xffffffee);
 } // namespace
 class MenuItemPatternTestOneNg : public testing::Test {
 public:
@@ -1404,6 +1406,47 @@ HWTEST_F(MenuItemPatternTestOneNg, InitFocusEvent003, TestSize.Level1)
     itemPattern->showDefaultSelectedIcon_ = true;
     itemPattern->SetFocusStyle();
     EXPECT_EQ(itemPattern->fontColor_.has_value(), false);
+}
+
+/**
+ * @tc.name: UpdateOptionStyle001
+ * @tc.desc: Verify UpdateOptionStyle().
+ * @tc.type: FUNC
+ */
+HWTEST_F(MenuItemPatternTestOneNg, UpdateOptionStyle001, TestSize.Level1)
+{
+    MenuItemModelNG MenuItemModelInstance;
+    MenuItemProperties itemOption;
+    itemOption.labelInfo = "label";
+    MenuItemModelInstance.Create(itemOption);
+    auto itemNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
+    ASSERT_NE(itemNode, nullptr);
+    auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
+    ASSERT_NE(itemPattern, nullptr);
+
+    auto textId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, textId, AceType::MakeRefPtr<TextPattern>());
+    itemPattern->SetTextNode(textNode);
+
+    auto selectId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto selectNode = FrameNode::GetOrCreateFrameNode(
+        V2::SELECT_ETS_TAG, selectId, []() { return AceType::MakeRefPtr<SelectPattern>(); });
+    auto menuNode = FrameNode::GetOrCreateFrameNode(V2::MENU_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        [selectId]() { return AceType::MakeRefPtr<MenuPattern>(selectId, V2::SELECT_ETS_TAG, MenuType::MENU); });
+    ASSERT_NE(selectNode, nullptr);
+    ASSERT_NE(menuNode, nullptr);
+    itemPattern->SetMenu(menuNode);
+
+    auto selectPattern = selectNode->GetPattern<SelectPattern>();
+    selectPattern->optionFont_.FontColor = COLOR_DES;
+
+    itemPattern->isSelected_ = false;
+    itemPattern->SetFontColor(COLOR_SRC);
+    ASSERT_TRUE(itemPattern->fontColor_.has_value());
+    EXPECT_EQ(itemPattern->fontColor_.value(), COLOR_SRC);
+    itemPattern->UpdateOptionStyle();
+
+    EXPECT_EQ(itemPattern->fontColor_.value(), selectPattern->optionFont_.FontColor.value());
 }
 
 /**

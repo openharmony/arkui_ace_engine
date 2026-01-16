@@ -3576,17 +3576,18 @@ void MenuItemPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(itemProperty);
 
     if (SystemProperties::ConfigChangePerform() && label_) {
-        auto isSetByUser = itemProperty->GetLabelFontColorSetByUser().value_or(false);
-        if (!isSetByUser) {
-            itemProperty->UpdateLabelFontColor(menuTheme->GetSecondaryFontColor());
-            host->MarkModifyDone();
-            host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        }
+        auto isSetByUser = menuProperty->GetFontColorSetByUser().value_or(false);
+        auto fontColor = itemProperty->GetLabelFontColor();
+        auto property = isSetByUser ? menuProperty : nullptr;
+        auto defaultFontColor = menuTheme->GetSecondaryFontColor();
+        UpdateFontColor(label_, property, fontColor, defaultFontColor);
+        label_->MarkModifyDone();
+        label_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     }
     if (SystemProperties::ConfigChangePerform() && content_) {
         auto fontColor = itemProperty->GetFontColor();
         auto isSetbyUser = menuProperty->GetFontColorSetByUser().value_or(false);
-        auto property = isSetbyUser ? menuProperty : AceType::MakeRefPtr<MenuLayoutProperty>();
+        auto property = isSetbyUser ? menuProperty : nullptr;
         auto defaultFontColor = menuTheme->GetMenuFontColor();
         UpdateFontColor(content_, property, fontColor, defaultFontColor);
         content_->MarkModifyDone();
@@ -3596,19 +3597,35 @@ void MenuItemPattern::OnColorConfigurationUpdate()
 
 void MenuItemPattern::UpdateOptionStyle()
 {
+    // Only for SelectMenu
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    ResetSelectTextProps();
+
+    auto menuNode = GetMenuWeak().Upgrade();
+    if (!menuNode) {
+        TAG_LOGW(AceLogTag::ACE_MENU, "GetMenuWeak null");
+        menuNode = GetMenu();
+        CHECK_NULL_VOID(menuNode);
+    }
+    auto menuPattern = menuNode->GetPattern<MenuPattern>();
+    CHECK_NULL_VOID(menuPattern);
+    auto selectNode = FrameNode::GetFrameNode(menuPattern->GetTargetTag(), menuPattern->GetTargetId());
+    CHECK_NULL_VOID(selectNode);
+    auto selectPattern = selectNode->GetPattern<SelectPattern>();
+    CHECK_NULL_VOID(selectPattern);
+
     if (isSelected_) {
         ApplySelectedThemeStyles();
         if (optionSelectedApply_) {
             ApplyTextModifier(optionSelectedApply_);
         }
+        selectPattern->UpdateSelectedOptionFontFromPattern(AceType::Claim<MenuItemPattern>(this));
     } else {
         ApplyOptionThemeStyles();
         if (optionApply_) {
             ApplyTextModifier(optionApply_);
         }
+        selectPattern->UpdateOptionFontFromPattern(AceType::Claim<MenuItemPattern>(this));
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);

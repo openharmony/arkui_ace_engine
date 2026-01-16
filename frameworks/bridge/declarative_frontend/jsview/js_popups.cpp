@@ -1292,6 +1292,29 @@ void JSViewPopups::GetMenuShowInSubwindow(NG::MenuParam& menuParam)
     menuParam.isShowInSubWindow = theme->GetExpandDisplay();
 }
 
+void JSViewPopups::RegisterMenuMaskColorRes(const RefPtr<ResourceObject>& maskColorResObj, NG::MenuParam& menuParam)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    std::string key = "maskColor";
+    if (!maskColorResObj) {
+        menuParam.RemoveResource(key);
+        return;
+    }
+    auto&& updateFunc = [](const RefPtr<ResourceObject>& maskColorResObj, NG::MenuParam& menuParam) {
+        Color maskColor;
+        if (!ResourceParseUtils::ParseResColor(maskColorResObj, maskColor)) {
+            return;
+        }
+        if (!menuParam.maskType.has_value()) {
+            menuParam.maskType.emplace();
+        }
+        menuParam.maskType->maskColor = maskColor;
+    };
+    menuParam.AddResource(key, maskColorResObj, std::move(updateFunc));
+}
+
 void JSViewPopups::ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam)
 {
     auto maskValue = menuOptions->GetProperty("mask");
@@ -1305,9 +1328,12 @@ void JSViewPopups::ParseMenuMaskType(const JSRef<JSObject>& menuOptions, NG::Men
         auto maskObj = JSRef<JSObject>::Cast(maskValue);
         auto colorValue = maskObj->GetProperty("color");
         Color maskColor;
-        if (JSViewAbstract::ParseJsColor(colorValue, maskColor)) {
+        RefPtr<ResourceObject> maskColorResObj;
+        if (JSViewAbstract::ParseJsColor(colorValue, maskColor, maskColorResObj)) {
             menuParam.maskType->maskColor = maskColor;
         }
+        JSViewPopups::RegisterMenuMaskColorRes(maskColorResObj, menuParam);
+
         auto backgroundBlurStyleValue = maskObj->GetProperty("backgroundBlurStyle");
         if (backgroundBlurStyleValue->IsNumber()) {
             auto blurStyle = backgroundBlurStyleValue->ToNumber<int32_t>();

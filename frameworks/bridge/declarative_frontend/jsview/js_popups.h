@@ -68,6 +68,7 @@ private:
         const RefPtr<ResourceObject>& bottomResObj, NG::BorderWidthProperty& outlineWidth);
     static void ParseMenuBorderRadiusWithResourceObj(const RefPtr<ResourceObject>& borderRadiusResObj,
         NG::BorderRadiusProperty& menuBorderRadius);
+    static void RegisterMenuMaskColorRes(const RefPtr<ResourceObject>& maskColorResObj, NG::MenuParam& menuParam);
     static void ParseMenuPreviewScaleMode(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static void ParseMenuAvailableLayoutArea(const JSRef<JSObject>& menuOptions, NG::MenuParam& menuParam);
     static bool ParseMenuPreviewBorderRadiusObject(const JSRef<JSVal>& args, NG::BorderRadiusProperty& props);
