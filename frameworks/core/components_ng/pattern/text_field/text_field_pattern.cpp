@@ -6426,7 +6426,8 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     if (textInputBlurOnSubmit_) {
         HandleCloseKeyboard(forceCloseKeyboard);
     }
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Textfield.onSubmit");
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Textfield.onSubmit",
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
 }
 
 void TextFieldPattern::TextFieldLostFocusToViewRoot()
@@ -10562,7 +10563,8 @@ void TextFieldPattern::ReportEvent()
         CHECK_NULL_VOID(value);
         auto textString = GetTextValue();
         value->Put("text", textString.c_str());
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(), "event", value);
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(), "event", value,
+            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
         SEC_TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] TextField reportComponentChangeEvent %{public}zu",
             host->GetId(), textString.length());
     }
@@ -12070,11 +12072,13 @@ void TextFieldPattern::OnReportPasteEvent(const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "TextInput.onPasteComplete");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "TextInput.onPasteComplete",
+            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] TextInput reportComponentChangeEvent onPasteComplete",
             frameNode->GetId());
     } else if (frameNode->GetTag() == V2::SEARCH_Field_ETS_TAG) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onPasteComplete");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onPasteComplete",
+            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] Search reportComponentChangeEvent onPasteComplete",
             frameNode->GetId());
     }
@@ -12084,7 +12088,8 @@ void TextFieldPattern::OnReportSubmitEvent(const RefPtr<FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
     if (frameNode->GetTag() == V2::TEXTINPUT_ETS_TAG) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "TextInput.onSubmitComplete");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "TextInput.onSubmitComplete",
+            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
         TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "nodeId:[%{public}d] TextInput reportComponentChangeEvent onSubmitComplete",
             frameNode->GetId());
     }

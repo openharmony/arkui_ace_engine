@@ -186,7 +186,8 @@ void JSTabs::SetOnTabBarClick(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("Tabs.onTabBarClick");
         PipelineContext::SetCallBackNode(node);
         func->Execute(*tabsInfo);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Tabs.onTabBarClick");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Tabs.onTabBarClick",
+            ComponentEventType::COMPONENT_EVENT_SWIPER);
     };
     TabsModel::GetInstance()->SetOnTabBarClick(std::move(onTabBarClick));
 }
@@ -268,7 +269,8 @@ void JSTabs::SetOnAnimationEnd(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(executionContext);
         ACE_SCORING_EVENT("Tabs.onAnimationEnd");
         func->Execute(index, info);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Tabs.onAnimationEnd");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Tabs.onAnimationEnd",
+            ComponentEventType::COMPONENT_EVENT_SWIPER);
     };
     TabsModel::GetInstance()->SetOnAnimationEnd(std::move(onAnimationEnd));
 }

@@ -596,7 +596,8 @@ void RichEditorEventHub::FireOnDeleteComplete()
 {
     if (onDeleteComplete_) {
         onDeleteComplete_();
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Radio.onChange");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "RichEditor.onDeleteComplete",
+            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     }
 }
 

@@ -1300,7 +1300,8 @@ ArkUINativeModuleValue SelectBridge::SetOnSelect(ArkUIRuntimeCallInfo* runtimeCa
         params[NUM_0] = JSRef<JSVal>::Make(ToJSValue(index));
         params[NUM_1] = JSRef<JSVal>::Make(ToJSValue(value));
         func->ExecuteJS(NUM_2, params);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Select.onSelect");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Select.onSelect",
+            ComponentEventType::COMPONENT_EVENT_SELECT);
     };
     SelectModel::GetInstance()->SetOnSelect(std::move(onSelect));
     info.ReturnSelf();

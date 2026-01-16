@@ -4357,7 +4357,8 @@ void ViewAbstract::DismissDialog()
     auto dialogPattern = AceType::DynamicCast<DialogPattern>(pattern);
     if (dialogPattern) {
         dialogPattern->OverlayDismissDialog(dialogNode);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "destroy");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "destroy",
+            ComponentEventType::COMPONENT_EVENT_DIALOG);
     }
 }
 

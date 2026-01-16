@@ -34,9 +34,9 @@ public:
     void ReportSearchEvent(const std::string& data) override;
     void ReportTextChangeEvent(const std::string& data) override;
     void ReportRouterChangeEvent(const std::string& data) override;
-    void ReportComponentChangeEvent(const std::string& key, const std::string& value) override;
-    void ReportComponentChangeEvent(
-        int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value) override;
+    void ReportComponentChangeEvent(const std::string& key, const std::string& value, uint32_t eventType) override;
+    void ReportComponentChangeEvent(int32_t nodeId, const std::string& key,
+        const std::shared_ptr<InspectorJsonValue>& value, uint32_t eventType) override;
     void ReportWebInputEvent(
         int64_t accessibilityId, const std::string& data, const std::string& type = "") override;
     void ReportScrollEvent(const std::string& data) override;
@@ -47,6 +47,7 @@ public:
     void SetTextChangeEventRegistered(bool status) override;
     void SetRouterChangeEventRegistered(bool status) override;
     void SetComponentChangeEventRegistered(bool status) override;
+    void SetComponentChangeEventMask(uint32_t mask) override;
     void SetScrollEventRegistered(bool status) override;
     void SetLifeCycleEventRegistered(bool status) override;
     void SetSelectTextEventRegistered(bool status) override;
@@ -55,6 +56,7 @@ public:
     bool GetTextChangeEventRegistered() override;
     bool GetRouterChangeEventRegistered() override;
     bool GetComponentChangeEventRegistered() override;
+    bool NeedComponentChangeTypeReporting(uint32_t eventType) override;
     bool GetScrollEventRegistered() override;
     bool GetLifeCycleEventRegistered() override;
     bool GetSelectTextEventRegistered() override;

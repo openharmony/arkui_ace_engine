@@ -139,7 +139,8 @@ std::function<void()> GetEventCallback(const JSCallbackInfo& info, const std::st
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT(name);
         func->Execute();
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", name);
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", name,
+            ComponentEventType::COMPONENT_EVENT_ANIMATOR);
     };
 }
 

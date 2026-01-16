@@ -133,7 +133,8 @@ void CounterModelStatic::SetOnInc(FrameNode* frameNode, CounterModel::CounterEve
         if (clickEvent) {
             clickEvent();
         }
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onInc");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onInc",
+            ComponentEventType::COMPONENT_EVENT_SELECT);
     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }
@@ -151,7 +152,8 @@ void CounterModelStatic::SetOnDec(FrameNode* frameNode, CounterModel::CounterEve
         if (clickEvent) {
             clickEvent();
         }
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDec",
+            ComponentEventType::COMPONENT_EVENT_SELECT);
     };
     gestureHub->SetUserOnClick(std::move(gestureEventFunc));
 }

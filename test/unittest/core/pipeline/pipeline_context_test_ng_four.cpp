@@ -121,7 +121,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg001, TestSize.Level
     ASSERT_NE(node, nullptr);
 
     /**
-     * @tc.steps3: Call AddDirtyPropertyNode on UI thread.
+     * @tc.steps2: Call AddDirtyPropertyNode on UI thread.
      * @tc.expected: No warning log, node added to dirty list.
      */
     context_->AddDirtyPropertyNode(node);
@@ -635,7 +635,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg018, TestSize.Level
     for (int i = 0; i < iterations; i++) {
         context_->isTransFlag_ = (i % 2 == 0);
         context_->FlushDragEventVoluntarily();
-        
+
         if (i % 2 == 0) {
             EXPECT_TRUE(context_->isTransFlag_);
         } else {
@@ -1096,7 +1096,7 @@ HWTEST_F(PipelineContextFourTestNg, PipelineContextFourTestNg033, TestSize.Level
     context_->SetOnWindowFocused(firstCallback);
     context_->SetOnWindowFocused(secondCallback);
     context_->SetOnWindowFocused(thirdCallback);
-    
+
     EXPECT_NE(context_->GetWindowFocusCallback(), nullptr);
 }
 

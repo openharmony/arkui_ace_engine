@@ -5055,6 +5055,7 @@ void ScrollablePattern::ReportOnItemStopEvent()
     CHECK_NULL_VOID(result);
     result->Put("result", params);
 
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
+        ComponentEventType::COMPONENT_EVENT_SCROLL);
 }
 } // namespace OHOS::Ace::NG

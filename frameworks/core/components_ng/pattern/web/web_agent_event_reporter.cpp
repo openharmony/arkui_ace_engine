@@ -297,7 +297,8 @@ void WebAgentEventReporter::ReportEventImediately(const std::shared_ptr<Inspecto
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(), "event", eventJson);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(host->GetId(), "event", eventJson,
+        ComponentEventType::COMPONENT_EVENT_WEB);
 }
 
 void WebAgentEventReporter::AIPostTask(

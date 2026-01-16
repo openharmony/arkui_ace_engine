@@ -544,7 +544,8 @@ void JSRichEditor::SetOnIMEInputComplete(const JSCallbackInfo& args)
                         const NG::RichEditorAbstractSpanResult& textSpanResult) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute(textSpanResult);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onIMEInputComplete");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onIMEInputComplete",
+            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     };
     RichEditorModel::GetInstance()->SetOnIMEInputComplete(std::move(callback));
 }
@@ -558,7 +559,8 @@ void JSRichEditor::SetOnDidIMEInput(const JSCallbackInfo& args)
                         const TextRange& textRange) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute(textRange);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDidIMEInput");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onDidIMEInput",
+            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     };
     RichEditorModel::GetInstance()->SetOnDidIMEInput(std::move(callback));
 }
@@ -1145,7 +1147,8 @@ void JSRichEditor::SetOnPaste(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onPaste");
         PipelineContext::SetCallBackNode(node);
         func->Execute(info);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPaste");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "onPaste",
+            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     };
     RichEditorModel::GetInstance()->SetOnPaste(std::move(onPaste));
 }
