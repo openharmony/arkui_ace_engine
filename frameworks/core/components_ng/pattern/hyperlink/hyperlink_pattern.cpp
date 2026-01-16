@@ -126,6 +126,7 @@ void HyperlinkPattern::OnModifyDone()
     TextPattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
 

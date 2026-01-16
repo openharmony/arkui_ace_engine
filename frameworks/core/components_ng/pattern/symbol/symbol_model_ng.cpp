@@ -35,9 +35,8 @@ void SymbolModelNG::Create(const std::uint32_t& unicode)
 
 RefPtr<FrameNode> SymbolModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto symbolNode = FrameNode::GetOrCreateFrameNode(
+    return FrameNode::GetOrCreateFrameNode(
         V2::SYMBOL_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPattern>(); });
-    return symbolNode;
 }
 
 void SymbolModelNG::SetFontWeight(const Ace::FontWeight& value)

@@ -160,6 +160,7 @@ RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
         return spanNode;
     }
     spanNode = MakeRefPtr<SpanNode>(nodeId);
+    ACE_UINODE_TRACE(spanNode);
     ElementRegister::GetInstance()->AddUINode(spanNode);
     return spanNode;
 }
@@ -167,6 +168,7 @@ RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(int32_t nodeId)
 RefPtr<SpanNode> SpanNode::CreateSpanNode(int32_t nodeId)
 {
     auto spanNode = MakeRefPtr<SpanNode>(nodeId);
+    ACE_UINODE_TRACE(spanNode);
     ElementRegister::GetInstance()->AddUINode(spanNode);
     return spanNode;
 }
@@ -178,6 +180,7 @@ RefPtr<SpanNode> SpanNode::GetOrCreateSpanNode(const std::string& tag, int32_t n
         return spanNode;
     }
     spanNode = MakeRefPtr<SpanNode>(tag, nodeId);
+    ACE_UINODE_TRACE(spanNode);
     ElementRegister::GetInstance()->AddUINode(spanNode);
     return spanNode;
 }
@@ -448,6 +451,7 @@ using Handler = std::function<void(int32_t, RefPtr<PropertyValueBase>)>;
 template<typename T>
 void ContainerSpanNode::UpdateProperty(std::string key, const RefPtr<ResourceObject>& resObj)
 {
+    ACE_UINODE_TRACE(nodeId_);
     auto value = AceType::MakeRefPtr<PropertyValueBase>();
     if constexpr (std::is_same_v<T, std::string>) {
         value->SetValueType(ValueType::STRING);
@@ -539,6 +543,7 @@ void SpanNode::NotifyColorModeChange(uint32_t colorMode)
 void SpanItem::AddResObj(const std::string& key, const RefPtr<ResourceObject>& resObj,
     std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc)
 {
+    ACE_UINODE_TRACE(nodeId_);
     if (resourceMgr_ == nullptr) {
         resourceMgr_ = MakeRefPtr<PatternResourceManager>();
     }
@@ -649,6 +654,7 @@ void SpanNode::RegisterSymbolFontColorResource(const std::string& key,
 template<typename T>
 void SpanNode::UpdateProperty(std::string key, const RefPtr<ResourceObject>& resObj)
 {
+    ACE_UINODE_TRACE(nodeId_);
     auto value = AceType::MakeRefPtr<PropertyValueBase>();
     if constexpr (std::is_same_v<T, std::string>) {
         value->SetValueType(ValueType::STRING);
@@ -1173,6 +1179,7 @@ ResultObject SpanItem::GetSpanResultObject(int32_t start, int32_t end)
 
 RefPtr<SpanItem> SpanItem::GetSameStyleSpanItem(bool isEncodeTlvS) const
 {
+    ACE_UINODE_TRACE(nodeId_);
     auto sameSpan = MakeRefPtr<SpanItem>();
     GetFontStyleSpanItem(sameSpan);
     COPY_TEXT_STYLE(textLineStyle, LineHeight, UpdateLineHeight);

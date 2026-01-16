@@ -27,6 +27,7 @@ RefPtr<TextClockController> TextClockModelNG::Create()
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXTCLOCK_ETS_TAG, nodeId);
     auto textClockNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXTCLOCK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextClockPattern>(); });
+    ACE_UINODE_TRACE(textClockNode);
 
     auto pattern = textClockNode->GetPattern<TextClockPattern>();
     if (textClockNode->GetChildren().empty()) {
@@ -59,6 +60,7 @@ void TextClockModelNG::SetTextShadow(const std::vector<Shadow>& value)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<TextClockPattern>();
     CHECK_NULL_VOID(pattern);
     const std::string key = "textClock.shadow";
@@ -164,6 +166,7 @@ RefPtr<FrameNode> TextClockModelNG::CreateFrameNode(int32_t nodeId)
     auto textClockNode =
         FrameNode::CreateFrameNode(V2::TEXTCLOCK_ETS_TAG, nodeId, AceType::MakeRefPtr<TextClockPattern>());
     CHECK_NULL_RETURN(textClockNode, nullptr);
+    ACE_UINODE_TRACE(textClockNode);
     auto pattern = textClockNode->GetPattern<TextClockPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);
     if (textClockNode->GetChildren().empty()) {
@@ -207,6 +210,7 @@ void TextClockModelNG::SetHoursWest(FrameNode* frameNode, float hoursWest)
 void TextClockModelNG::SetTextShadow(FrameNode* frameNode, const std::vector<Shadow>& value)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<TextClockPattern>();
     CHECK_NULL_VOID(pattern);
     const std::string key = "textClock.shadow";

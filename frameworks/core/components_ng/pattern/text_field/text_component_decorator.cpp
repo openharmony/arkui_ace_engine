@@ -67,6 +67,7 @@ void TextComponentDecorator::BuildDecoratorMultiThread()
         CHECK_NULL_VOID(decoratedNode);
         auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG,
             ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextPattern>(); });
+        ACE_UINODE_TRACE(textNode);
         decorator->textNode_ = textNode;
         CHECK_NULL_VOID(textNode);
         textNode->MountToParent(decoratedNode);

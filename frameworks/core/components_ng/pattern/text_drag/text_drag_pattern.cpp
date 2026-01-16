@@ -87,6 +87,7 @@ const RectF GetLastBoxRect(const std::vector<RectF>& boxes, const RectF& content
 RefPtr<FrameNode> TextDragPattern::CreateDragNode(const RefPtr<FrameNode>& hostNode)
 {
     CHECK_NULL_RETURN(hostNode, nullptr);
+    ACE_UINODE_TRACE(hostNode);
     auto hostPattern = hostNode->GetPattern<TextDragBase>();
     const auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
     auto dragNode = FrameNode::GetOrCreateFrameNode(
@@ -237,6 +238,10 @@ void TextDragPattern::AdjustHandlers(const RectF contentRect, RectF& leftHandler
 
 std::shared_ptr<RSPath> TextDragPattern::GenerateClipPath()
 {
+    auto host = GetHost();
+    if (host) {
+        ACE_UINODE_TRACE(host);
+    }
     std::shared_ptr<RSPath> path = std::make_shared<RSPath>();
     auto selectPosition = GetSelectPosition();
     float startX = selectPosition.startX_;
@@ -269,6 +274,10 @@ std::shared_ptr<RSPath> TextDragPattern::GenerateClipPath()
 
 std::shared_ptr<RSPath> TextDragPattern::GenerateBackgroundPath(float offset, float radiusRatio)
 {
+    auto host = GetHost();
+    if (host) {
+        ACE_UINODE_TRACE(host);
+    }
     std::shared_ptr<RSPath> path = std::make_shared<RSPath>();
     std::vector<TextPoint> points;
     GenerateBackgroundPoints(points, offset);
@@ -278,6 +287,10 @@ std::shared_ptr<RSPath> TextDragPattern::GenerateBackgroundPath(float offset, fl
 
 std::shared_ptr<RSPath> TextDragPattern::GenerateSelBackgroundPath(float offset)
 {
+    auto host = GetHost();
+    if (host) {
+        ACE_UINODE_TRACE(host);
+    }
     std::shared_ptr<RSPath> path = std::make_shared<RSPath>();
     std::vector<TextPoint> points;
     GenerateBackgroundPoints(points, offset);
