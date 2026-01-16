@@ -1164,6 +1164,28 @@ bool SecurityComponentHandler::IsInModalPage(const RefPtr<UINode>& node)
     return false;
 }
 
+bool SecurityComponentHandler::IsNodeSkipCheck(const RefPtr<FrameNode>& frameNode)
+{
+    if (!frameNode) {
+        return false;
+    }
+    if (IsContextTransparent(frameNode) || !frameNode->IsActive()) {
+        return true;
+    }
+    if (frameNode->GetTag() == "WindowScene") {
+        auto windowScene = frameNode->GetPattern<SystemWindowScene>();
+        CHECK_NULL_RETURN(windowScene, false);
+        auto session = windowScene->GetSession();
+        CHECK_NULL_RETURN(session, false);
+        auto windowType = session->GetWindowType();
+        if (windowType == Rosen::WindowType::WINDOW_TYPE_STATUS_BAR) {
+            SC_LOG_WARN("Skip check status bar.");
+            return true;
+        }
+    }
+    return false;
+}
+
 bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>& root, NodeMaps& maps,
     int32_t secNodeId, std::string& message, NG::RectF& clipRect)
 {
@@ -1183,7 +1205,7 @@ bool SecurityComponentHandler::CheckSecurityComponentStatus(const RefPtr<UINode>
     auto& children = root->GetChildren();
     for (auto child = children.rbegin(); child != children.rend(); ++child) {
         auto node = AceType::DynamicCast<NG::FrameNode>(*child);
-        if (node && (IsContextTransparent(node) || !node->IsActive())) {
+        if (IsNodeSkipCheck(node)) {
             continue;
         }
         NG::RectF bakClipRect = clipRect;

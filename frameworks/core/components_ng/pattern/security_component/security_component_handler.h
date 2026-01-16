@@ -128,6 +128,7 @@ private:
     static bool InitChildInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo, RefPtr<FrameNode>& node);
     static NG::RectF UpdateClipRect(NG::RectF& clipRect, NG::RectF& paintRect);
     static NG::RectF UpdatePaintRect(NG::RectF& paintRect, NG::RectF& clipRect);
+    static bool IsNodeSkipCheck(const RefPtr<FrameNode>& frameNode);
     static bool CheckSecurityComponentStatus(const RefPtr<UINode>& root, NodeMaps& maps,
         int32_t secNodeId, std::string& message, NG::RectF& clipRect);
     static bool CheckRectIntersect(const RectF& dest, int32_t secNodeId,
