@@ -2909,4 +2909,13 @@ void TextFieldModelNG::ResetSelectedDragPreviewStyle(FrameNode* frameNode)
     ACE_RESET_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, SelectedDragPreviewStyle, frameNode);
 }
 
+void TextFieldModelNG::SetUserAccessibilityText()
+{
+    auto frameNode = ViewStackProcessor ::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<TextFieldPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetHasUserAccessibilityText();
+}
+
 } // namespace OHOS::Ace::NG

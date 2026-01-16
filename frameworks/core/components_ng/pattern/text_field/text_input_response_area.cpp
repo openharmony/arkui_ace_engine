@@ -1114,7 +1114,20 @@ void CleanNodeResponseArea::OnCleanNodeClicked()
     textFieldPattern->CleanNodeResponseKeyEvent();
     auto host = textFieldPattern->GetHost();
     CHECK_NULL_VOID(host);
-    host->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS_FOR_ACCESSIBILITY_NOT_INTERRUPT);
+    auto context = host->GetContext();
+    if (context) {
+        context->AddAfterRenderTask(
+            [weakHost = WeakPtr<FrameNode>(host), weakPattern = WeakPtr<TextFieldPattern>(textFieldPattern)] {
+                auto textFieldPattern = weakPattern.Upgrade();
+                CHECK_NULL_VOID(textFieldPattern);
+                if (textFieldPattern->HasUserAccessibilityText()) {
+                    return;
+                }
+                auto host = weakHost.Upgrade();
+                CHECK_NULL_VOID(host);
+                host->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS_FOR_ACCESSIBILITY_NOT_INTERRUPT);
+            });
+    }
 }
 
 void CleanNodeResponseArea::UpdateCleanNode(bool isShow)

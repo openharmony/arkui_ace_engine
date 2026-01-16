@@ -857,7 +857,17 @@ void SearchPattern::OnClickCancelButton()
     CHECK_NULL_VOID(focusHub);
     focusHub->RequestFocusImmediately();
     textFieldPattern->HandleFocusEvent();
-    textFieldFrameNode->OnAccessibilityEvent(AccessibilityEventType::REQUEST_FOCUS_FOR_ACCESSIBILITY_NOT_INTERRUPT);
+    auto context = host->GetContext();
+    if (context) {
+        context->AddAfterRenderTask([weakHost = WeakPtr<FrameNode>(host)] {
+            auto host = weakHost.Upgrade();
+            CHECK_NULL_VOID(host);
+            auto textFieldFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+            CHECK_NULL_VOID(textFieldFrameNode);
+            textFieldFrameNode->OnAccessibilityEvent(
+                AccessibilityEventType::REQUEST_FOCUS_FOR_ACCESSIBILITY_NOT_INTERRUPT);
+        });
+    }
     host->MarkModifyDone();
     textFieldFrameNode->MarkModifyDone();
 }

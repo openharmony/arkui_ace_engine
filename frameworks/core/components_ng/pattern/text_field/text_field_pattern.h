@@ -1888,6 +1888,16 @@ public:
     virtual void UpdateHoverStyleForTV(bool isHover);
     virtual void UpdatePressStyleForTV(bool isPressed);
 
+    void SetHasUserAccessibilityText()
+    {
+        hasUserAccessibilityText_ = true;
+    }
+
+    bool HasUserAccessibilityText() const
+    {
+        return hasUserAccessibilityText_;
+    }
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -2478,6 +2488,7 @@ private:
     RelatedLPXInfo lpxInfo_;
     std::string placeholderColorInfo_;
     bool needResetFocusColor_ = true;
+    bool hasUserAccessibilityText_ = false;
 
 #if defined(CROSS_PLATFORM)
     std::shared_ptr<TextEditingValue> editingValue_;
