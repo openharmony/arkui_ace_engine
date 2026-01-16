@@ -315,7 +315,7 @@ ArkUI_Bool GetContainerPickerCanLoop(ArkUINodeHandle node)
 
 ArkUI_PickerIndicatorStyle GetContainerPickerIndicator(ArkUINodeHandle node)
 {
-    ArkUI_PickerIndicatorStyle indicatorStyle;
+    ArkUI_PickerIndicatorStyle indicatorStyle = {};
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, indicatorStyle);
     auto style = ContainerPickerModel::GetIndicatorStyle(frameNode);
