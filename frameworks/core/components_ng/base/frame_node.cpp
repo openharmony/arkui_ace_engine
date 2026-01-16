@@ -1615,10 +1615,15 @@ bool FrameNode::RenderCustomChild(int64_t deadline)
 
 void FrameNode::NotifyColorModeChange(uint32_t colorMode)
 {
+    NotifyColorModeChange(colorMode, true);
+}
+
+void FrameNode::NotifyColorModeChange(uint32_t colorMode, bool recursive)
+{
     FireColorNDKCallback();
 
     if (GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
-        UINode::NotifyColorModeChange(colorMode);
+        UINode::NotifyColorModeChange(colorMode, recursive);
         return;
     }
 
@@ -1648,7 +1653,7 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
     }
 
     ResourceParseUtils::SetNeedReload(needReload);
-    UINode::NotifyColorModeChange(colorMode);
+    UINode::NotifyColorModeChange(colorMode, recursive);
 }
 
 void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
