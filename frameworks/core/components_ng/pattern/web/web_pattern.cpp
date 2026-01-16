@@ -567,6 +567,7 @@ constexpr double ZOOMIN_PUBLIC_ERRAND = 0.4444;
 constexpr int32_t ZOOM_CONVERT_NUM = 10;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t MIN_ACCESSIBILITY_FOCUS_SIZE = 2;
+constexpr int32_t MENU_WINDOW_ENTER_LIMIT_TIME = 300;
 
 constexpr int32_t PINCH_START_TYPE = 1;
 constexpr int32_t PINCH_UPDATE_TYPE = 3;
@@ -1209,9 +1210,13 @@ void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
     if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_APPEAR) {
         isMenuShownFromWeb_ = true;
         isLastEventMenuClose_ = false;
+        isMenuShownFromWebBeforeStartClose_ = true;
+    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR) {
+       isMenuShownFromWebBeforeStartClose_ = false;
+       isLastEventMenuClose_ = true;
+       lastMenuCloseTimestamp_ = GetCurrentTimestamp();
     } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_DISAPPEAR) {
         isMenuShownFromWeb_ = false;
-        isLastEventMenuClose_ = true;
         if (!isFocus_) {
             CHECK_NULL_VOID(delegate_);
             delegate_->SetBlurReason(OHOS::NWeb::BlurReason::VIEW_SWITCH);
@@ -2297,7 +2302,7 @@ void WebPattern::WebSendMouseEvent(const MouseInfo& info, int32_t clickNum)
 
 bool WebPattern::CheckShouldBlockMouseEvent(const MouseInfo &info)
 {
-    if (isMenuShownFromWeb_) {
+    if (isMenuShownFromWebBeforeStartClose_) {
         if (info.GetAction() == MouseAction::PRESS) {
             // When menu is showing ,the action down will be costed,
             isUpSupplementDown_ = true;
@@ -2328,7 +2333,8 @@ void WebPattern::SupplementMouseEventsIfNeeded(
     const MouseInfo &info, int32_t clickNum, std::vector<int32_t> pressedCodes)
 {
     CHECK_NULL_VOID(delegate_);
-    if (isLastEventMenuClose_ && info.GetAction() == MouseAction::WINDOW_ENTER) {
+    if (isLastEventMenuClose_ && info.GetAction() == MouseAction::WINDOW_ENTER &&
+        GetCurrentTimestamp() - lastMenuCloseTimestamp_ < MENU_WINDOW_ENTER_LIMIT_TIME) {
         // When the menu is closed and the mouse is inside the menu, a mouseMove event needs to be supplemented.
         isSupplementMouseLeave_ = false;
         TAG_LOGI(AceLogTag::ACE_WEB, "LastEvent is bindMenu close, WINDOW_ENTER only supplement mouseMove");

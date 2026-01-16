@@ -400,6 +400,8 @@ HWTEST_F(WebPatternPartOneTest, NotifyMenuLifeCycleEvent_001, TestSize.Level1)
     EXPECT_FALSE(webPattern->isMenuShownFromWeb_);
     webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ABOUT_TO_APPEAR);
     EXPECT_TRUE(webPattern->isMenuShownFromWeb_);
+    webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR);
+    EXPECT_FALSE(webPattern->isMenuShownFromWebBeforeStartClose_);
     webPattern->isFocus_ = true;
     webPattern->NotifyMenuLifeCycleEvent(MenuLifeCycleEvent::ON_DID_DISAPPEAR);
     EXPECT_FALSE(webPattern->isMenuShownFromWeb_);
