@@ -2695,7 +2695,6 @@ void SetTextSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 color, v
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextModelNG::SetSelectedDragPreviewStyle(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
@@ -2711,18 +2710,19 @@ void SetTextSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 color, v
             pattern->UnRegisterResource("selectedDragPreviewStyleColor");
         }
     }
+    TextModelNG::SetSelectedDragPreviewStyle(frameNode, result);
 }
 
 void ResetTextSelectedDragPreviewStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextModelNG::ResetSelectedDragPreviewStyle(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         pattern->UnRegisterResource("selectedDragPreviewStyle");
     }
+    TextModelNG::ResetSelectedDragPreviewStyle(frameNode);
 }
 
 ArkUI_Uint32 GetTextSelectedDragPreviewStyle(ArkUINodeHandle node)
