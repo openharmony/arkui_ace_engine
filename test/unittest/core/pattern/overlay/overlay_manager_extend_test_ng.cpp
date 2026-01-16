@@ -1153,4 +1153,36 @@ HWTEST_F(OverlayManagerExtendTestNg, GetPixelMapBadgeNodeTest001, TestSize.Level
     auto result = overlayManager->GetPixelMapBadgeNode();
     EXPECT_NE(result, nullptr);
 }
+
+/**
+ * @tc.name: UpdatePopupCustomNode001
+ * @tc.desc: Test OverlayManager::UpdatePopupCustomNode.
+ * @tc.type: FUNC
+ */
+HWTEST_F(OverlayManagerExtendTestNg, UpdatePopupCustomNode001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create root node and overlayManager and call RemovePixelMapAnimation.
+     */
+    auto overlayNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(overlayNode);
+    overlayManager->UpdatePopupCustomNode();
+    EXPECT_EQ(overlayManager->popupMap_.size(), 0);
+    /**
+     * @tc.steps: step2. create dialogMap_  and call ReloadBuilderNodeConfig.
+     */
+
+    auto targetNode = FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    auto targetId = targetNode->GetId();
+    auto targetTag = targetNode->GetTag();
+    auto popupNode =
+        FrameNode::CreateFrameNode(V2::POPUP_ETS_TAG, 1, AceType::MakeRefPtr<BubblePattern>(targetId, targetTag));
+    
+    NG::PopupInfo PopupInfo1;
+    PopupInfo1.popupNode = popupNode;
+    overlayManager->popupMap_.emplace(targetId, PopupInfo1);
+    overlayManager->UpdatePopupCustomNode();
+    EXPECT_EQ(overlayManager->popupMap_.size(), 1);
+}
 }
