@@ -52,8 +52,8 @@ SecurityComponent::SecCompUiRegister uiRegister(g_callList, &SecurityComponentHa
 
 bool SecurityComponentHandler::GetDisplayOffset(RefPtr<FrameNode>& node, double& offsetX, double& offsetY)
 {
-    double x = node->GetTransformRelativeOffset().GetX();
-    double y = node->GetTransformRelativeOffset().GetY();
+    double x = node->GetPaintRectOffsetNG().GetX();
+    double y = node->GetPaintRectOffsetNG().GetY();
     auto container = Container::CurrentSafely();
     CHECK_NULL_RETURN(container, false);
     auto pipelineContext = container->GetPipelineContext();
@@ -801,6 +801,23 @@ bool SecurityComponentHandler::GetPaddingInfo(OHOS::Security::SecurityComponent:
     return true;
 }
 
+bool SecurityComponentHandler::GetSizeWithScale(RefPtr<FrameNode>& node, double& width, double& height)
+{
+    auto render = node->GetRenderContext();
+    CHECK_NULL_RETURN(render, false);
+    auto rect = render->GetPaintRectWithTransform();
+    width = rect.Width();
+    height = rect.Height();
+    auto parent = node->GetAncestorNodeOfFrame(true);
+    while (parent) {
+        auto scale = parent->GetTransformScale();
+        width *= scale.x;
+        height *= scale.y;
+        parent = parent->GetAncestorNodeOfFrame(true);
+    }
+    return true;
+}
+
 bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::SecCompBase& buttonInfo,
     RefPtr<FrameNode>& node)
 {
@@ -820,11 +837,10 @@ bool SecurityComponentHandler::InitBaseInfo(OHOS::Security::SecurityComponent::S
         SC_LOG_WARN("InitBaseInfoWarning: Get window rect failed");
         return false;
     }
-    auto render = node->GetRenderContext();
-    CHECK_NULL_RETURN(render, false);
-    auto rect = render->GetPaintRectWithTransform();
-    buttonInfo.rect_.width_ = rect.Width();
-    buttonInfo.rect_.height_ = rect.Height();
+    if (!GetSizeWithScale(node, buttonInfo.rect_.width_, buttonInfo.rect_.height_)) {
+        SC_LOG_WARN("InitBaseInfoWarning: Get width and height failed");
+        return false;
+    }
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::CurrentSafely());
     CHECK_NULL_RETURN(container, false);
     uint32_t windId = container->GetWindowId();
