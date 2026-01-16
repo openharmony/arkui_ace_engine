@@ -338,10 +338,11 @@ export class RouterImpl implements Router {
         const element = this.visiblePages.splice(index as Int, 1);
         const stateNode = this.rootState.splice(index, 1);
         const peerNode = this.peerNodeList.splice(index, 1);
-        if (isReplace) {
+        if (isReplace && index !== this.showingPageIndex) {
             this.visiblePages.pop();
             this.rootState.pop();
             this.peerNodeList.pop();
+            this.showingPageIndex = this.showingPageIndex -1;
         }
         this.visiblePages.push(element.at(0)!);
         this.rootState.push(stateNode[0]);
