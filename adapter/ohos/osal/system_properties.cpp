@@ -263,6 +263,11 @@ bool IsDebugEnabled()
     return (system::GetParameter("persist.ace.debug.enabled", "0") == "1");
 }
 
+bool IsEventBenchMarkEnabled()
+{
+    return (system::GetParameter("benchMark.ace.event.enabled", "0") == "1");
+}
+
 bool IsMouseTransformEnable()
 {
     return (system::GetParameter("persist.ace.event.transform.enable", "1") == "1");
@@ -719,6 +724,7 @@ bool SystemProperties::recycleImageEnabled_ = IsRecycleImageEnabled();
 bool SystemProperties::debugOffsetLogEnabled_ = IsDebugOffsetLogEnabled();
 ACE_WEAK_SYM bool SystemProperties::windowAnimationEnabled_ = IsWindowAnimationEnabled();
 ACE_WEAK_SYM bool SystemProperties::debugEnabled_ = IsDebugEnabled();
+bool SystemProperties::eventBenchMarkEnabled_ = IsEventBenchMarkEnabled();
 ACE_WEAK_SYM bool SystemProperties::compatibleInputTransEnabled_ = IsCompatibleInputTransEnabled();
 float SystemProperties::scrollCoefficients_ = ReadScrollCoefficients();
 ACE_WEAK_SYM DebugFlags SystemProperties::debugFlags_ = GetDebugFlags();
@@ -915,6 +921,7 @@ void SystemProperties::ReadSystemParametersCallOnce()
     std::call_once(getSysPropertiesFlag_, [] () {
         developerModeOn_ = IsDeveloperModeOn();
         debugEnabled_ = IsDebugEnabled();
+        eventBenchMarkEnabled_ = IsEventBenchMarkEnabled();
         debugFlags_ = GetDebugFlags();
         multiInstanceEnabled_ = IsMultiInstanceEnabled();
         layoutDetectEnabled_ = IsLayoutDetectEnabled();
@@ -1349,6 +1356,11 @@ std::string SystemProperties::GetWebDebugRenderMode()
 std::string SystemProperties::GetDebugInspectorId()
 {
     return system::GetParameter("ace.debug.inspectorId", INVALID_PARAM);
+}
+
+bool SystemProperties::GetEventBenchMarkEnabled()
+{
+    return eventBenchMarkEnabled_;
 }
 
 double SystemProperties::GetSrollableVelocityScale()

@@ -65,6 +65,10 @@
     if (SystemProperties::GetLayoutTraceEnabled()) { \
         AceTraceEnd(); \
     }
+#define ACE_BENCH_MARK_TRACE(fmt, ...) \
+    if (SystemProperties::GetEventBenchMarkEnabled()) { \
+        ACE_SCOPED_TRACE(fmt, ##__VA_ARGS__); \
+    }
 
 // Enable trace for component creation and attribute settings
 #define ACE_BUILD_TRACE_BEGIN(fmt, ...) \

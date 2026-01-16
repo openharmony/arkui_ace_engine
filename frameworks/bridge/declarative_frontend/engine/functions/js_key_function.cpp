@@ -51,6 +51,7 @@ void JsKeyFunction::Execute(OHOS::Ace::KeyEventInfo& event)
 JSRef<JSVal> JsKeyFunction::ExecuteWithValue(OHOS::Ace::KeyEventInfo& event)
 {
     JSRef<JSVal> param = JSRef<JSObject>::Cast(createKeyEvent(event));
+    ACE_BENCH_MARK_TRACE("OnKeyEvent_end type:%d", event.GetKeyType());
     return JsFunction::ExecuteJS(1, &param);
 }
 

@@ -80,6 +80,7 @@ ScreenShape SystemProperties::screenShape_ { ScreenShape::NOT_ROUND };
 std::atomic<bool> SystemProperties::unZipHap_(true);
 bool SystemProperties::windowAnimationEnabled_ = false;
 bool SystemProperties::debugEnabled_ = false;
+bool SystemProperties::eventBenchMarkEnabled_ = false;
 DebugFlags SystemProperties::debugFlags_ = 0;
 bool SystemProperties::layoutDetectEnabled_ = false;
 std::atomic<bool> SystemProperties::debugBoundaryEnabled_(false);
@@ -417,6 +418,11 @@ bool SystemProperties::IsBigFoldProduct()
 std::string SystemProperties::GetDebugInspectorId()
 {
     return UNDEFINED_PARAM;
+}
+
+bool SystemProperties::GetEventBenchMarkEnabled()
+{
+    return false;
 }
 
 double SystemProperties::GetSrollableVelocityScale()
