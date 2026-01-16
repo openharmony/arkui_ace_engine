@@ -89,12 +89,10 @@ class FrameNode {
   protected supportedStates_: number;
   constructor(uiContext: UIContext, type: string, options?: object) {
     if (uiContext === undefined) {
-      throw Error('Node constructor error, param uiContext error');
+      throw new BusinessError(401, 'Node constructor error, param uiContext error');
     } else {
       if (!(typeof uiContext === "object") || !("instanceId_" in uiContext)) {
-        throw Error(
-          'Node constructor error, param uiContext is invalid'
-        );
+        throw new BusinessError(401, 'Node constructor error, param uiContext is invalid');
       }
     }
     this.instanceId_ = uiContext.instanceId_;
@@ -192,7 +190,7 @@ class FrameNode {
   getValidNodePtr(): NodePtr {
     const node = this.getNodePtr();
     if (node === null) {
-      throw Error('The FrameNode has been disposed!');
+      throw new BusinessError(100026, 'The FrameNode has been disposed!');
     } else {
       return node;
     }

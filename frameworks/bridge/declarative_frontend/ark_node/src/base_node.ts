@@ -60,12 +60,10 @@ abstract class BaseNode extends ViewBuildNodeBase {
     this.builderBaseNode_ = baseNode;
 
     if (uiContext === undefined) {
-      throw Error('Node constructor error, param uiContext error');
+      throw new BusinessError(401, 'Node constructor error, param uiContext error');
     } else {
       if (!(typeof uiContext === 'object') || !('instanceId_' in uiContext)) {
-        throw Error(
-          'Node constructor error, param uiContext is invalid'
-        );
+        throw new BusinessError(401, 'Node constructor error, param uiContext is invalid');
       }
     }
     this.instanceId_ = uiContext.instanceId_;
