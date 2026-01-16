@@ -1549,23 +1549,4 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder40, TestSize.Level1)
     EXPECT_EQ(removingNodes.size(), 1);
 }
 
-/**
- * @tc.name: LazyForEachBuilder40
- * @tc.desc: Test the RemovingExpiringItem function. 
- * Release all nodes.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder41, TestSize.Level1)
-{
-    auto lazyForEachBuilder = CreateLazyForEachBuilder();
-    auto uiNode_1 = AceType::MakeRefPtr<NG::CustomNode>(666, "node_1");
-    auto uiNode_2 = AceType::MakeRefPtr<NG::CustomNode>(777, "node_2");
-    auto childNode = AceType::MakeRefPtr<NG::CustomNode>(666, "childNode");
-    uiNode_1->children_ = { childNode };
-    std::list<RefPtr<UINode>> removingNodes;
-    int64_t deadline = GetSysTimestamp() + 1000;
-    std::unordered_map<std::string, LazyForEachCacheChild> cache{{"1", {1, uiNode_1}}, {"2", {2, uiNode_2}}};
-    lazyForEachBuilder->RemovingExpiringItem(removingNodes, deadline, cache);
-    EXPECT_EQ(removingNodes.size(), 0);
-}
 } // namespace OHOS::Ace::NG

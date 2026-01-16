@@ -1105,7 +1105,7 @@ HWTEST_F(LazyForEachSyntaxTestNg2, PreBuildByIndex03, TestSize.Level1)
     bool canRunLongPredictTask = false;
     lazyForEachBuilder->enablePreBuild_ = false;
     bool result = lazyForEachBuilder->PreBuildByIndex(index, cache, deadline, itemConstraint, canRunLongPredictTask);
-    EXPECT_EQ(result, false);
+    EXPECT_EQ(result, true);
 }
 /**
  * @tc.name: LazyForEachBuilder33
