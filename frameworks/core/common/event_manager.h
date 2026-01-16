@@ -446,6 +446,9 @@ public:
     void AddHitTestInfoRecord(const RefPtr<NG::FrameNode>& frameNode);
     void LogHitTestInfoRecord(const TouchEvent& touchPoint);
     void ClearHitTestInfoRecord(const TouchEvent& touchPoint);
+    void RegisterHitTestFrameNodeListener(int32_t uniqueIdentify, std::function<void(const TouchEvent&)> callback);
+    void UnRegisterHitTestFrameNodeListener(int32_t uniqueIdentify);
+    void NotifyHitTestFrameNodeListener(const TouchEvent& touchEvent);
 
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
@@ -557,6 +560,7 @@ private:
     std::map<int32_t, HitNodeInfos> touchHitTestInfos_;
     // Only used in TouchTest
     std::optional<HitTestRecordInfo> hitTestRecordInfo_ = std::nullopt;
+    std::unordered_map<int32_t, std::function<void(const TouchEvent&)>> hitTestFrameNodeListener_;
 };
 
 } // namespace OHOS::Ace
