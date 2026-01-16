@@ -570,6 +570,7 @@ void TimePickerRowPattern::CreateAmPmNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto pickerTheme = context->GetTheme<PickerTheme>();
@@ -621,6 +622,7 @@ void TimePickerRowPattern::CreateOrDeleteSecondNode()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     if (!HasSecondNode()) {
         if (hasSecond_) {
             auto secondColumnNode = FrameNode::GetOrCreateFrameNode(
