@@ -423,7 +423,7 @@ namespace Converter {
     template<>
     inline uint32_t Convert(const Array_Int32& src)
     {
-        return src.array ? Convert<uint32_t>(src.array[0]) : 0;
+        return src.array && src.length > 0 ? Convert<uint32_t>(src.array[0]) : 0;
     }
 
     template<>
