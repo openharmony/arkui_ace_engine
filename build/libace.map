@@ -1724,6 +1724,8 @@
 
       OHOS::Ace::V2::HYPERLINK_ETS_TAG;
       OHOS::Ace::V2::SYMBOL_ETS_TAG;
+      OHOS::Ace::UINodeTracer::UINodeTracer*;
+      OHOS::Ace::ResTracer::~ResTracer*;
       OHOS::Ace::FontManager::AddFontNodeNG*;
       OHOS::Ace::PipelineBase::CheckIfGetTheme*;
       OHOS::Ace::PipelineBase::HyperlinkStartAbility*;
