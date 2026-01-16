@@ -230,7 +230,7 @@ bool GetArrayIntParam(ani_env* env, ani_ref ref, std::vector<int32_t>& result)
     for (size_t i = 0; i < length; i++) {
         ani_ref itemRef;
         status = env->Object_CallMethodByName_Ref(
-            static_cast<ani_object>(arrayObj), "$_get", "i:C{std.core.Object}", &itemRef, (ani_int)i);
+            static_cast<ani_object>(arrayObj), "$_get", "i:Y", &itemRef, (ani_int)i);
         if (status != ANI_OK) {
             return false;
         }
@@ -328,7 +328,7 @@ void ProcessResourceType(ani_env* env, ani_object value, ani_ref paramsRef, ani_
     std::vector<std::string> stringArray;
     for (int i = 0; i < int(length); i++) {
         ani_ref itemRef;
-        status = env->Object_CallMethodByName_Ref(paramsObj, "$_get", "i:C{std.core.Object}", &itemRef, (ani_int)i);
+        status = env->Object_CallMethodByName_Ref(paramsObj, "$_get", "i:Y", &itemRef, (ani_int)i);
         if (status != ANI_OK) {
             continue;
         }
@@ -352,7 +352,7 @@ void ProcessResourceType(ani_env* env, ani_object value, ani_ref paramsRef, ani_
     ani_string firstStr;
     status = env->String_NewUTF8(resName.c_str(), resName.size(), &firstStr);
     if (status != ANI_OK) {
-        status = env->Object_CallMethodByName_Void(paramsObj, "$_set", "iC{std.core.Object}:", index, firstStr);
+        status = env->Object_CallMethodByName_Void(paramsObj, "$_set", "iY:", index, firstStr);
         if (status != ANI_OK) {
             return;
         }
@@ -366,7 +366,7 @@ void ProcessResourceType(ani_env* env, ani_object value, ani_ref paramsRef, ani_
             break;
         }
 
-        status = env->Object_CallMethodByName_Void(paramsObj, "$_set", "iC{std.core.Object}:", index, aniStr);
+        status = env->Object_CallMethodByName_Void(paramsObj, "$_set", "iY:", index, aniStr);
         if (status != ANI_OK) {
             break;
         }
