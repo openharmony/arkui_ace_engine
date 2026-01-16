@@ -675,7 +675,7 @@ private:
     void GetRadiusAndPadding(
         float& startRadius, float& endRadius, float& padding, const RefPtr<PipelineContext>& context = nullptr);
     void CalcFlingVelocity(float offset);
-    void DragEndOverScroll();
+    bool DragEndOverScroll();
     DisplayMode displayMode_ = DisplayMode::AUTO;
     ShapeMode shapeMode_ = ShapeMode::RECT;
     PositionMode positionMode_ = PositionMode::RIGHT;
