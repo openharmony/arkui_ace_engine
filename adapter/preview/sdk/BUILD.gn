@@ -132,6 +132,7 @@ if (is_ohos_standard_system) {
 
   ohos_copy("copy_component_model_abc_library") {
     deps = [
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:datapanel",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:flowitem",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:counter",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:calendarpicker",
@@ -164,6 +165,7 @@ if (is_ohos_standard_system) {
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
             "root_out_dir")
     sources = [
+      "${out_path}/arkui/ace_engine/arkdatapanel.abc",
       "${out_path}/arkui/ace_engine/arkflowitem.abc",
       "${out_path}/arkui/ace_engine/arkcounter.abc",
       "${out_path}/arkui/ace_engine/arkcalendarpicker.abc",

@@ -161,7 +161,21 @@
       OHOS::Ace::CircleModel::*;
       OHOS::Ace::CounterModel::*;
       OHOS::Ace::CustomDialogControllerModel::*;
+      OHOS::Ace::DataPanelComponent*;
+      OHOS::Ace::NG::DataPanelModelNG::*;
+      "OHOS::Ace::NG::DataPanelModelNG::SetBuilderFunc(OHOS::Ace::NG::FrameNode*, std::function<OHOS::Ace::RefPtr<OHOS::Ace::NG::FrameNode>(OHOS::Ace::NG::DataPanelConfiguration const&)>&&)";
       OHOS::Ace::DataPanelModel::*;
+      OHOS::Ace::NG::Converter::ConvContext::*;
+      OHOS::Ace::NG::SliderModelNG::*;
+      OHOS::Ace::NG::FloatToDouble*;
+      "OHOS::Ace::NG::DataPanelType*";
+      OHOS::Ace::ThemeManagerImpl::ThemeManagerImpl*;
+      OHOS::Ace::PercentageDataPanelComponent*;
+      OHOS::Ace::UINodeTracer::UINodeTracer*;
+      OHOS::Ace::ResTracer::*;
+      "OHOS::Ace::NG::DataPanelModelNG::SetValueColors(std::__h::vector<OHOS::Ace::NG::Gradient, std::__h::allocator<OHOS::Ace::NG::Gradient>> const&)";
+      "OHOS::Ace::NG::DataPanelModelNG::SetShadowOption(OHOS::Ace::NG::DataPanelShadow const&)";
+      "OHOS::Ace::NG::DataPanelModelNG::SetShadowOption(OHOS::Ace::NG::FrameNode*, OHOS::Ace::NG::DataPanelShadow const&)";
       OHOS::Ace::DatePickerModel::*;
       OHOS::Ace::DividerModel::*;
       OHOS::Ace::EllipseModel::*;
@@ -511,6 +525,7 @@
       OHOS::Ace::NG::MinusPaddingToSize*;
       OHOS::Ace::NG::AddPaddingToSize*;
       OHOS::Ace::ToRSPoint*;
+      OHOS::Ace::ToRSColor*;
       OHOS::Ace::NG::GeometryNode::*;
       OHOS::Ace::NG::ModifierAdapter::*;
       OHOS::Ace::NG::TextLayoutAlgorithm::*;
@@ -681,6 +696,8 @@
       vtable?for?OHOS::Ace::Framework::DOMDocument;
       vtable?for?OHOS::Ace::NG::ButtonPattern;
       vtable?for?OHOS::Ace::CounterComponent;
+      vtable?for?OHOS::Ace::DataPanelComponent;
+      vtable?for?OHOS::Ace::PercentageDataPanelComponent;
       vtable?for?OHOS::Ace::NG::TapGesture;
       vtable?for?OHOS::Ace::NG::LongPressGesture;
       vtable?for?OHOS::Ace::NG::PinchGesture;
@@ -745,6 +762,8 @@
       VTT?for?OHOS::Ace::Framework::DOMDocument;
       VTT?for?OHOS::Ace::NG::ButtonPattern;
       VTT?for?OHOS::Ace::CounterComponent;
+      VTT?for?OHOS::Ace::DataPanelComponent;
+      VTT?for?OHOS::Ace::PercentageDataPanelComponent;
       VTT?for?OHOS::Ace::NG::TapGesture;
       VTT?for?OHOS::Ace::NG::LongPressGesture;
       VTT?for?OHOS::Ace::NG::PinchGesture;

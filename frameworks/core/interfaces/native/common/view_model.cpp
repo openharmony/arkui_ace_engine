@@ -713,11 +713,11 @@ void* createCounterNode(ArkUI_Int32 nodeId)
 
 void* createDataPanelNode(ArkUI_Int32 nodeId)
 {
-    // auto frameNode = DataPanelModelNG::CreateFrameNode(nodeId);
-    // CHECK_NULL_RETURN(frameNode, nullptr);
-    // frameNode->IncRefCount();
-    // return AceType::RawPtr(frameNode);
-    return nullptr;
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto dataPanelModifier = nodeModifier->getDataPanelModifier();
+    CHECK_NULL_RETURN(dataPanelModifier, nullptr);
+    return dataPanelModifier->createFrameNode(nodeId);
 }
 
 void* createEffectComponentNode(ArkUI_Int32 nodeId)

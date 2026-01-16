@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
-enum class DataPanelType {
+enum class ACE_FORCE_EXPORT DataPanelType {
     CIRCLE = 0,
     LINE = 1
 };
@@ -57,6 +57,7 @@ public:
     void CreateWithResourceObj(DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj) override;
     void SetValueColorsSetByUser(bool value) override;
 
+    static void CreateDataPanelModelNG(const std::vector<double>& values, double max, int32_t dataPanelType);
     static void SetCloseEffect(FrameNode* frameNode, bool isClose);
     static void SetTrackBackground(FrameNode* frameNode, const Color& trackBackgroundColor);
     static void ResetTrackBackground(FrameNode* frameNode);

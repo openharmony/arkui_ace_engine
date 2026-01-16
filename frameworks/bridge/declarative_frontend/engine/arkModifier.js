@@ -755,10 +755,49 @@ class CounterModifier extends LazyArkCounterComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class DataPanelModifier extends ArkDataPanelComponent {
+class LazyArkDataPanelComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkDataPanelComponent.module === undefined) {
+      LazyArkDataPanelComponent.module = globalThis.requireNapi('arkui.components.arkdatapanel');
+    }
+    this.lazyComponent = LazyArkDataPanelComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  closeEffect(value) {
+    this.lazyComponent.closeEffect(value);
+    return this;
+  }
+  valueColors(value) {
+    this.lazyComponent.valueColors(value);
+    return this;
+  }
+  trackBackgroundColor(value) {
+    this.lazyComponent.trackBackgroundColor(value);
+    return this;
+  }
+  strokeWidth(value) {
+    this.lazyComponent.strokeWidth(value);
+    return this;
+  }
+  trackShadow(value) {
+    this.lazyComponent.trackShadow(value);
+    return this;
+  }
+  contentModifier(value) {
+    this.lazyComponent.contentModifier(value);
+    return this;
+  }
+}
+  
+class DataPanelModifier extends LazyArkDataPanelComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
@@ -1323,7 +1362,6 @@ class LazyArkQRCodeComponent extends ArkComponent {
       LazyArkQRCodeComponent.module = globalThis.requireNapi('arkui.components.arkqrcode');
     }
     this.lazyComponent = LazyArkQRCodeComponent.module.createComponent(nativePtr, classType);
-    console.log("LazyArkQRCodeComponent lazyload nativeModule");
   }
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
