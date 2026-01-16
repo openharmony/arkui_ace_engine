@@ -6663,6 +6663,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TimePickerDialog_getFinalizer(): KPointer
     @ani.unsafe.Direct
+    native static _ToggleExtender_constructButton(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _ToggleExtender_constructCheckbox(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
     native static _TouchEvent_construct(): KPointer
     @ani.unsafe.Direct
     native static _TouchEvent_getFinalizer(): KPointer

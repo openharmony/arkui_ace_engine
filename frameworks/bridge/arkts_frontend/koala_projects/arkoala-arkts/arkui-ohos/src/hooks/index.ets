@@ -89,8 +89,8 @@ import { WebHandWritten } from "./WebHandWritten";
 import { ArkSaveButtonComponent, ArkSaveButtonPeer, SaveButtonCallback, ArkPasteButtonComponent, ArkPasteButtonPeer, PasteButtonCallback } from '#generated';
 import { SaveButtonOpsHandWritten } from './SaveButtonOpsHandWritten';
 import { PasteButtonOpsHandWritten } from './PasteButtonOpsHandWritten';
-import { ArkDataPanelComponent, ArkDataPanelPeer, DataPanelShadowOptions, ArkGaugeComponent, ArkGaugePeer, GaugeIndicatorOptions, GaugeShadowOptions } from '#generated';
-import { DataPanelExtender, GaugeExtender } from '#generated';
+import { ArkToggleComponent, ToggleOptions } from "#generated";
+import { ToggleHandWritten } from "./ToggleHandWritten";
 
 export function hookId(component: object, value?: string) {}
 
@@ -878,6 +878,7 @@ export function hookGaugeIndicator(receiver: ArkGaugeComponent | ArkGaugePeer,
   }
 }
 
+<<<<<<< HEAD
 export function hookGaugeTrackShadow(receiver: ArkGaugeComponent | ArkGaugePeer,
   value: GaugeShadowOptions | null | undefined): void {
 
@@ -928,3 +929,8 @@ export function hookDataPanelTrackShadow(receiver: ArkDataPanelComponent | ArkDa
     DataPanelExtender.setTrackShadow(dataPanelPeer.peer.ptr, value);
   }
 }
+=======
+export function hookSetToggleOptions(toggle: ArkToggleComponent, options: ToggleOptions): void {
+  ToggleHandWritten.hookSetToggleOptions(toggle, options)
+}
+>>>>>>> 8ee86ea79c1 (Add ToggleExtender accessor and SetToggleOptions hook)

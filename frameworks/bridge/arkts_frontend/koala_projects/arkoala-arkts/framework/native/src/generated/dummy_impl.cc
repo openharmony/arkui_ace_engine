@@ -48493,6 +48493,40 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return fnPtr<KNativePointer>(dummyClassFinalizer);
     }
     } // TimePickerDialogAccessor
+    namespace ToggleExtenderAccessor {
+    Ark_NativePointer ConstructButtonImpl(Ark_Int32 id,
+                                          Ark_Int32 flags)
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("constructButton(");
+        WriteToString(&out, id);
+        out.append(", ");
+        WriteToString(&out, flags);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    Ark_NativePointer ConstructCheckboxImpl(Ark_Int32 id,
+                                            Ark_Int32 flags)
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("constructCheckbox(");
+        WriteToString(&out, id);
+        out.append(", ");
+        WriteToString(&out, flags);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    } // ToggleExtenderAccessor
     namespace TouchEventAccessor {
     void DestroyPeerImpl(Ark_TouchEvent peer)
     {
@@ -55087,6 +55121,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct TimePickerDialogPeer {
         virtual ~TimePickerDialogPeer() = default;
     };
+    const GENERATED_ArkUIToggleExtenderAccessor* GetToggleExtenderAccessor()
+    {
+        static const GENERATED_ArkUIToggleExtenderAccessor ToggleExtenderAccessorImpl {
+            ToggleExtenderAccessor::ConstructButtonImpl,
+            ToggleExtenderAccessor::ConstructCheckboxImpl,
+        };
+        return &ToggleExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
     {
         static const GENERATED_ArkUITouchEventAccessor TouchEventAccessorImpl {
@@ -55762,6 +55805,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetTextTimerControllerAccessor,
             GetThemeOpsAccessor,
             GetTimePickerDialogAccessor,
+            GetToggleExtenderAccessor,
             GetTouchEventAccessor,
             GetTouchRecognizerAccessor,
             GetTransitionEffectAccessor,

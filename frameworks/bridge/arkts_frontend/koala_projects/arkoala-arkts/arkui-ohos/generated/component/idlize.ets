@@ -5983,6 +5983,26 @@ export class TabsExtender {
         return
     }
 }
+export class ToggleExtender {
+    static constructButton_serialize(id: int32, flags: int32): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._ToggleExtender_constructButton(id, flags)
+        return retval
+    }
+    static constructCheckbox_serialize(id: int32, flags: int32): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._ToggleExtender_constructCheckbox(id, flags)
+        return retval
+    }
+    public static constructButton(id: int32, flags: int32): KPointer {
+        const id_casted = id as (int32)
+        const flags_casted = flags as (int32)
+        return ToggleExtender.constructButton_serialize(id_casted, flags_casted)
+    }
+    public static constructCheckbox(id: int32, flags: int32): KPointer {
+        const id_casted = id as (int32)
+        const flags_casted = flags as (int32)
+        return ToggleExtender.constructCheckbox_serialize(id_casted, flags_casted)
+    }
+}
 export class UIContextAtomicServiceBar {
     static getBarRect_serialize(): Frame {
         const retval  = ArkUIGeneratedNativeModule._UIContextAtomicServiceBar_getBarRect()

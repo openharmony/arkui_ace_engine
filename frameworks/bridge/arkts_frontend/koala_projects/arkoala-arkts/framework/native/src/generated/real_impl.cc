@@ -19984,6 +19984,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return reinterpret_cast<void *>(&DestroyPeerImpl);
     }
     } // TimePickerDialogAccessor
+    namespace ToggleExtenderAccessor {
+    Ark_NativePointer ConstructButtonImpl(Ark_Int32 id,
+                                          Ark_Int32 flags)
+    {
+        return {};
+    }
+    Ark_NativePointer ConstructCheckboxImpl(Ark_Int32 id,
+                                            Ark_Int32 flags)
+    {
+        return {};
+    }
+    } // ToggleExtenderAccessor
     namespace TouchEventAccessor {
     void DestroyPeerImpl(Ark_TouchEvent peer)
     {
@@ -24716,6 +24728,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct TimePickerDialogPeer {
         virtual ~TimePickerDialogPeer() = default;
     };
+    const GENERATED_ArkUIToggleExtenderAccessor* GetToggleExtenderAccessor()
+    {
+        static const GENERATED_ArkUIToggleExtenderAccessor ToggleExtenderAccessorImpl {
+            ToggleExtenderAccessor::ConstructButtonImpl,
+            ToggleExtenderAccessor::ConstructCheckboxImpl,
+        };
+        return &ToggleExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor()
     {
         static const GENERATED_ArkUITouchEventAccessor TouchEventAccessorImpl {
@@ -25389,6 +25410,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetTextTimerControllerAccessor,
             GetThemeOpsAccessor,
             GetTimePickerDialogAccessor,
+            GetToggleExtenderAccessor,
             GetTouchEventAccessor,
             GetTouchRecognizerAccessor,
             GetTransitionEffectAccessor,

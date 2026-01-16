@@ -31590,6 +31590,13 @@ typedef struct GENERATED_ArkUITimePickerDialogAccessor {
     Ark_NativePointer (*getFinalizer)();
 } GENERATED_ArkUITimePickerDialogAccessor;
 
+typedef struct GENERATED_ArkUIToggleExtenderAccessor {
+    Ark_NativePointer (*constructButton)(Ark_Int32 id,
+                                         Ark_Int32 flags);
+    Ark_NativePointer (*constructCheckbox)(Ark_Int32 id,
+                                           Ark_Int32 flags);
+} GENERATED_ArkUIToggleExtenderAccessor;
+
 typedef struct GENERATED_ArkUITouchEventAccessor {
     void (*destroyPeer)(Ark_TouchEvent peer);
     Ark_TouchEvent (*construct)();
@@ -32323,6 +32330,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUITextTimerControllerAccessor* (*getTextTimerControllerAccessor)();
     const GENERATED_ArkUIThemeOpsAccessor* (*getThemeOpsAccessor)();
     const GENERATED_ArkUITimePickerDialogAccessor* (*getTimePickerDialogAccessor)();
+    const GENERATED_ArkUIToggleExtenderAccessor* (*getToggleExtenderAccessor)();
     const GENERATED_ArkUITouchEventAccessor* (*getTouchEventAccessor)();
     const GENERATED_ArkUITouchRecognizerAccessor* (*getTouchRecognizerAccessor)();
     const GENERATED_ArkUITransitionEffectAccessor* (*getTransitionEffectAccessor)();

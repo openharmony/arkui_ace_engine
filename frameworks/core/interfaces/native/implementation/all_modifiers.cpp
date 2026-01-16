@@ -402,6 +402,7 @@ const GENERATED_ArkUITextStyleAccessor* GetTextStyleAccessor();
 const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor();
 const GENERATED_ArkUIThemeOpsAccessor* GetThemeOpsAccessor();
 const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor();
+const GENERATED_ArkUIToggleExtenderAccessor* GetToggleExtenderAccessor();
 const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
 const GENERATED_ArkUITouchRecognizerAccessor* GetTouchRecognizerAccessor();
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
@@ -758,6 +759,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetTextTimerControllerAccessor,
         GetThemeOpsAccessor,
         GetTimePickerDialogAccessor,
+        GetToggleExtenderAccessor,
         GetTouchEventAccessor,
         GetTouchRecognizerAccessor,
         GetTransitionEffectAccessor,

@@ -42579,6 +42579,14 @@ Ark_NativePointer impl_TimePickerDialog_getFinalizer() {
         return GetAccessors()->getTimePickerDialogAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(TimePickerDialog_getFinalizer, Ark_NativePointer)
+Ark_NativePointer impl_ToggleExtender_constructButton(Ark_Int32 id, Ark_Int32 flags) {
+        return GetAccessors()->getToggleExtenderAccessor()->constructButton(id, flags);
+}
+KOALA_INTEROP_DIRECT_2(ToggleExtender_constructButton, Ark_NativePointer, Ark_Int32, Ark_Int32)
+Ark_NativePointer impl_ToggleExtender_constructCheckbox(Ark_Int32 id, Ark_Int32 flags) {
+        return GetAccessors()->getToggleExtenderAccessor()->constructCheckbox(id, flags);
+}
+KOALA_INTEROP_DIRECT_2(ToggleExtender_constructCheckbox, Ark_NativePointer, Ark_Int32, Ark_Int32)
 Ark_NativePointer impl_TouchEvent_construct() {
         return GetAccessors()->getTouchEventAccessor()->construct();
 }

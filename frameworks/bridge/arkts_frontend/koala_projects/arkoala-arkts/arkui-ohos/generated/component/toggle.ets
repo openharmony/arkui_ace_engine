@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -21,10 +21,10 @@ import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KS
 import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
-import { PeerNode, findSiblingPeerNode } from "./../PeerNode"
-import { ArkUIGeneratedNativeModule, TypeChecker, ArkUINativeModule } from "#components"
+import { PeerNode } from "./../PeerNode"
+import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, CommonConfiguration, Bindable, ArkCommonMethodComponent, ArkCommonMethodStyle, Bindable_Boolean_serializer } from "./common"
-import { ContentModifier, AttributeModifier, hookToggleContentModifier, hookToggleAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookToggleContentModifier, hookSetToggleOptions, hookToggleAttributeModifier, AttributeUpdater } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { ResourceColor } from "./units"
 import { Color } from "./enums"
@@ -219,55 +219,8 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements Togg
     }
     public setToggleOptions(options: ToggleOptions): this {
         if (this.checkPriority("setToggleOptions")) {
+            hookSetToggleOptions(this, options)
             const options_casted = options as (ToggleOptions)
-            if (!this.getPeer().peer.ptr) {
-                if (options.type == ToggleType.SWITCH) {
-                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_construct(this.getPeer().getId(), 0)
-                    this.getPeer().peer.ptr = _peerPtr
-                } else if (options.type == ToggleType.CHECKBOX) {
-                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_checkbox_construct(this.getPeer().getId(), 0)
-                    this.getPeer().peer.ptr = _peerPtr
-                } else if (options.type == ToggleType.BUTTON) {
-                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_button_construct(this.getPeer().getId(), 0)
-                    this.getPeer().peer.ptr = _peerPtr
-                } else {
-                    throw new Error("Invalid Toggle Type")
-                    return this
-                }
-            } else {
-                if (!this.getPeer().parent || this.getPeer().parent == undefined) {
-                    console.log("Toggle's parent is null")
-                    return this
-                }
-
-                let sibling: PeerNode | undefined = findSiblingPeerNode(this.getPeer(), true)
-                const node = this.getPeer().parent! as PeerNode
-                const preNativePtr = this.getPeer().peer.ptr
-                node.peer.removeChild(this.getPeer().peer.ptr)
-                
-                if (options.type == ToggleType.SWITCH) {
-                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_construct(this.getPeer().getId(), 0)
-                    this.getPeer().peer.ptr = _peerPtr                   
-                } else if (options.type == ToggleType.CHECKBOX) {
-                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_checkbox_construct(this.getPeer().getId(), 0)
-                    this.getPeer().peer.ptr = _peerPtr
-                } else if (options.type == ToggleType.BUTTON) {
-                    const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_button_construct(this.getPeer().getId(), 0)
-                    this.getPeer().peer.ptr = _peerPtr
-                } else {
-                    throw new Error("Invalid Toggle Type")
-                    return this
-                }
-                ArkUINativeModule._DisposeNode(preNativePtr)
-
-                if (sibling === undefined) {
-                    // Add to the end (common case!).
-                    node.peer.addChild(this.getPeer().peer.ptr)
-                } else {
-                    // Insert child in the middle.
-                    node.peer.insertChildBefore(this.getPeer().peer.ptr, sibling?.peer?.ptr ?? nullptr)
-                }
-            }
             this.getPeer()?.setToggleOptionsAttribute(options_casted)
             this.applyOptionsFinish('ToggleAttribute');
             return this
@@ -325,24 +278,6 @@ export class ArkToggleComponent extends ArkCommonMethodComponent implements Togg
     public applyOptionsFinish(traceName: string): void {
         super.applyOptionsFinish(traceName)
     }
-}
-
-@memo
-export function ToggleImpl(
-    @memo
-    style: ((attributes: ToggleAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
-): void {
-    const receiver = remember<ArkToggleComponent>((): ArkToggleComponent => {
-        return new ArkToggleComponent()
-    })
-    NodeAttach<ArkTogglePeer>((): ArkTogglePeer => ArkTogglePeer.create(receiver), (peer: ArkTogglePeer): void => {
-        receiver.setPeer(peer)
-        style?.(receiver)
-        receiver.setPeer(undefined)
-        content_?.()
-    })
 }
 
 export class ToggleConfiguration_serializer {

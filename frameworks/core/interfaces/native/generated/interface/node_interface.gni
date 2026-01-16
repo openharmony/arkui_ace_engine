@@ -335,6 +335,7 @@ generated_sources = [
   "implementation/theme_ops_accessor.cpp",
   "implementation/time_picker_dialog_accessor.cpp",
   "implementation/time_picker_modifier.cpp",
+  "implementation/toggle_extender_accessor.cpp",
   "implementation/toggle_modifier.cpp",
   "implementation/tool_bar_item_modifier.cpp",
   "implementation/touch_event_accessor.cpp",
