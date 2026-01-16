@@ -64,14 +64,12 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_text_input_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_toggle_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_radio_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_render_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_row_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_search_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_folder_stack_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_slider_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_glyph_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_span_bridge.h"
@@ -504,6 +502,8 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "Marquee" },
         { "Stepper" },
         { "StepperItem" },
+        {"Radio"},
+        { "Slider" },
         { "Hyperlink" },
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -2054,8 +2054,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterAlphabetIndexerAttributes(object, vm);
     RegisterSwiperAttributes(object, vm);
     RegisterSelectAttributes(object, vm);
-    RegisterRadioAttributes(object, vm);
-    RegisterSliderAttributes(object, vm);
     RegisterTimepickerAttributes(object, vm);
     RegisterTextpickerAttributes(object, vm);
     RegisterThemeAttributes(object, vm);
@@ -2240,154 +2238,6 @@ void ArkUINativeModule::RegisterTimepickerAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TimepickerBridge::SetDigitalCrownSensitivity));
     timepicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetDigitalCrownSensitivity"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TimepickerBridge::ResetDigitalCrownSensitivity));
-}
-
-void ArkUINativeModule::RegisterSliderAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
-{
-    auto slider = panda::ObjectRef::New(vm);
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowTips"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetShowTips));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShowTips"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetShowTips));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStepSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetSliderStepSize));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStepSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetSliderStepSize));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlockSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetBlockSize));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlockSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetBlockSize));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTrackBorderRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetTrackBorderRadius));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTrackBorderRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetTrackBorderRadius));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStepColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetStepColor));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStepColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetStepColor));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlockBorderColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetBlockBorderColor));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlockBorderColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetBlockBorderColor));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlockBorderWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetBlockBorderWidth));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlockBorderWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetBlockBorderWidth));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlockColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetBlockColor));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlockColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetBlockColor));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTrackBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetTrackBackgroundColor));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTrackBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetTrackBackgroundColor));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTrackColorMetrics"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetTrackColorMetrics));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTrackColorMetrics"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetTrackColorMetrics));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetSelectColor));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetSelectColor));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setShowSteps"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetShowSteps));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetShowSteps"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetShowSteps));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setThickness"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetThickness));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetThickness"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetThickness));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setBlockStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetBlockStyle));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetBlockStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetBlockStyle));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setValidSlideRange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetValidSlideRange));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetValidSlideRange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetValidSlideRange));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedBorderRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetSelectedBorderRadius));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedBorderRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetSelectedBorderRadius));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setInteractionMode"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetInteractionMode));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetInteractionMode"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetInteractionMode));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMinResponsiveDistance"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetMinResponsiveDistance));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinResponsiveDistance"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetMinResponsiveDistance));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetContentModifierBuilder));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSliderOptions"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetSliderOptions));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableHapticFeedback"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetEnableHapticFeedback));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableHapticFeedback"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetEnableHapticFeedback));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetOnChange));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetOnChange));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPrefix"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetPrefix));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPrefix"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetPrefix));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSuffix"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::SetSuffix));
-    slider->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSuffix"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SliderBridge::ResetSuffix));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "slider"), slider);
-}
-
-void ArkUINativeModule::RegisterRadioAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
-{
-    auto radio = panda::ObjectRef::New(vm);
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioChecked"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioChecked));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioChecked"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioChecked));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioStyle));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioStyle));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioWidth));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioWidth));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioHeight));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioHeight));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioSize));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioSize));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioHoverEffect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioHoverEffect));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioHoverEffect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioHoverEffect));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioPadding"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioPadding));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioPadding"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioPadding));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioResponseRegion"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioResponseRegion));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioResponseRegion"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioResponseRegion));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentModifierBuilder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetContentModifierBuilder));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioOptions"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioOptions));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadioOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::SetRadioOnChange));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadioOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), RadioBridge::ResetRadioOnChange));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMargin"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), RadioBridge::SetMargin));
-    radio->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMargin"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM *>(vm), RadioBridge::ResetMargin));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "radio"), radio);
 }
 
 void ArkUINativeModule::RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM *vm)
@@ -5993,13 +5843,11 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     RegisterPolylineAttributes(object, vm);
     RegisterProgressAttributes(object, vm);
     RegisterQRCodeAttributes(object, vm);
-    RegisterRadioAttributes(object, vm);
     RegisterRectAttributes(object, vm);
     RegisterRelativeContainerAttributes(object, vm);
     RegisterScrollableAttributes(object, vm);
     RegisterSpanAttributes(object, vm);
     RegisterShapeAttributes(object, vm);
-    RegisterSliderAttributes(object, vm);
     RegisterSwiperAttributes(object, vm);
     RegisterSymbolSpanAttributes(object, vm);
     RegisterTextClockAttributes(object, vm);

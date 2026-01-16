@@ -53,6 +53,7 @@ RefPtr<DynamicNode> DynamicNode::GetOrCreateDynamicNode(
     }
 
     auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
+    ACE_UINODE_TRACE(nodeId, tag, TypeInfoHelper::TypeName(AceType::RawPtr(pattern)));
     dynamicNode = AceType::MakeRefPtr<DynamicNode>(tag, nodeId, pattern, false);
     dynamicNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(dynamicNode);

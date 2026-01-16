@@ -59,6 +59,13 @@ void RosenRenderRating::Paint(RenderContext& context, const Offset& offset)
     if ((IsPhone() || IsTablet()) && !isIndicator_) {
         PaintHoverRect(canvas);
     }
+    PaintPressAndPhoneAnimation(context, offset, offsetDeltaX, offsetDeltaY, imageVerticalOffset);
+    PaintRatingBar(context, canvas);
+}
+
+void RosenRenderRating::PaintPressAndPhoneAnimation(RenderContext& context, const Offset& offset,
+    double offsetDeltaX, double offsetDeltaY, double imageVerticalOffset)
+{
     Offset pressstarOffset = Offset(singleWidth_ * pressstarNum_ + imageVerticalOffset, imageVerticalOffset);
     if (!isIndicator_ && (IsTablet() || IsPhone()) && isPress_) {
         Offset animationOffset = pressstarOffset + Offset(offsetDeltaX, offsetDeltaY);
@@ -70,7 +77,6 @@ void RosenRenderRating::Paint(RenderContext& context, const Offset& offset)
         // total width of focus border is twice the width of [focusBorderWidth_], border-width + padding-width
         RequestFocusAnimationForPhone();
     }
-    PaintRatingBar(context, canvas);
 }
 
 void RosenRenderRating::PaintHoverRect(RSCanvas* canvas)

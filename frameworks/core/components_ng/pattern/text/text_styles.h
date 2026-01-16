@@ -341,7 +341,7 @@ struct HandleInfoNG {
 
 PlaceholderAlignment GetPlaceHolderAlignmentFromVerticalAlign(VerticalAlign verticalAlign);
 
-TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
+ACE_FORCE_EXPORT TextStyle CreateTextStyleUsingTheme(const std::unique_ptr<FontStyle>& fontStyle,
     const std::unique_ptr<TextLineStyle>& textLineStyle, const RefPtr<TextTheme>& textTheme, bool isSymbol = false);
 
 void CreateTextStyleUsingTheme(const RefPtr<TextLayoutProperty>& property, const RefPtr<TextTheme>& textTheme,

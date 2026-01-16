@@ -1041,6 +1041,28 @@ ani_boolean SetTouchEventPreventDefault(ani_long nativePtr)
     eventInfo->SetPreventDefault(true);
     return true;
 }
+void GetCallingScopeUIContext(int32_t& instanceId)
+{
+    instanceId = ContainerScope::CurrentId();
+}
+
+void GetLastFocusedUIContext(int32_t& instanceId)
+{
+    instanceId = ContainerScope::RecentActiveId();
+}
+
+void GetLastForegroundUIContext(int32_t& instanceId)
+{
+    instanceId = ContainerScope::RecentForegroundId();
+}
+
+void GetAllInstanceIds(std::vector<int32_t>& instanceIds)
+{
+    const auto allIds = ContainerScope::GetAllUIContexts();
+    for (const auto& id : allIds) {
+        instanceIds.push_back(id);
+    }
+}
 
 void ResolveUIContext(std::vector<int32_t>& instnace)
 {
@@ -1129,7 +1151,11 @@ const ArkUIAniCommonModifier* GetCommonAniModifier()
         .getKeyEventPressedModifierKey = OHOS::Ace::NG::GetKeyEventPressedModifierKey,
         .setClickEventPreventDefault = OHOS::Ace::NG::SetClickEventPreventDefault,
         .setTouchEventPreventDefault = OHOS::Ace::NG::SetTouchEventPreventDefault,
-        .resolveUIContext = OHOS::Ace::NG::ResolveUIContext
+        .getCallingScopeUIContext = OHOS::Ace::NG::GetCallingScopeUIContext,
+        .getLastFocusedUIContext = OHOS::Ace::NG::GetLastFocusedUIContext,
+        .getLastForegroundUIContext = OHOS::Ace::NG::GetLastForegroundUIContext,
+        .getAllInstanceIds = OHOS::Ace::NG::GetAllInstanceIds,
+        .resolveUIContext = OHOS::Ace::NG::ResolveUIContext,
     };
     return &impl;
 }

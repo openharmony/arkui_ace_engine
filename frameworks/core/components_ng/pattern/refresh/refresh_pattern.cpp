@@ -860,7 +860,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
         auto pullDownRatio = CalculatePullDownRatio();
         dealSpeed = (pullDownRatio * speed) / (targetOffset - scrollOffset_);
     } else if (NearZero(scrollOffset_) && NonPositive(speed)) {
-        if (pullUpToCancelRefresh_) {
+        if (pullUpToCancelRefresh_ || refreshStatus_ == RefreshStatus::DRAG) {
             SwitchToFinish();
         }
         return;
@@ -871,7 +871,7 @@ void RefreshPattern::SpeedTriggerAnimation(float speed)
         UpdateLoadingProgressStatus(RefreshAnimationState::FOLLOW_TO_RECYCLE, GetFollowRatio());
     } else if (NearZero(targetOffset)) {
         recycle = false;
-        if (pullUpToCancelRefresh_) {
+        if (pullUpToCancelRefresh_ || refreshStatus_ == RefreshStatus::DRAG) {
             SwitchToFinish();
         }
     }

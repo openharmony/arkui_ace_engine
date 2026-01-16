@@ -21,12 +21,12 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ICurve, ArkCommonMethodComponent, ArkCommonMethodStyle, AttributeModifier } from "./common"
 import { VP, Dimension, ResourceStr, ResourceColor } from "./units"
-import { SizeT, PositionT, LengthMetrics } from "../Graphics"
+import { SizeT, PositionT, LengthMetrics, Vector2T } from "../Graphics"
 import { ParticleHelper, ParticlesInner, ParticleOptionsInner, EmitterOptionsInner, ParticleColorPropertyOptionsInner } from "./idlize"
 import { ParticlePropertyOptionsInner, AccelerationOptionsInner, ParticleAnnulusRegionInner, ParticleColorUpdaterOptionsInner } from "./idlize"
 import { ParticleUpdaterOptionsInner, PositionLengthMetricsInner, ParticleColorPropertyUpdaterConfigsInner, EmitterPropertyInner } from "./idlize"
 import { ParticlePropertyUpdaterConfigsInner, ParticlePropertyAnimationColorInner, ParticlePropertyAnimationNumberInner } from "./idlize"
-import { PositionF64Inner, SizeF64Inner, DisturbanceFieldOptionsInner } from "./idlize"
+import { PositionF64Inner, SizeF64Inner, Vector2F64, DisturbanceFieldOptionsInner, RippleFieldOptionsInner, VelocityFieldOptionsInner, FieldRegionInner } from "./idlize"
 import { NodeAttach, remember } from "@koalaui/runtime"
 import { ParticleModifier } from "../ParticleModifier"
 import { hookParticleAttributeModifier } from "#handwritten"
@@ -75,6 +75,11 @@ export interface ParticleColorPropertyOptions {
 export interface Particles {
     particles: Array<ParticleOptions>;
 }
+export interface FieldRegion {
+    shape?: DisturbanceFieldShape;
+    position?: PositionT<double>;
+    size?: SizeT<double>;
+}
 export interface DisturbanceFieldOptions {
     strength?: double;
     shape?: DisturbanceFieldShape;
@@ -85,12 +90,26 @@ export interface DisturbanceFieldOptions {
     noiseFrequency?: double;
     noiseAmplitude?: double;
 }
+export interface RippleFieldOptions {
+    amplitude?: double;
+    wavelength?: double;
+    waveSpeed?: double;
+    attenuation?: double;
+    center?: PositionT<double>;
+    region?: FieldRegion;
+}
+export interface VelocityFieldOptions {
+    velocity?: Vector2T<double>;
+    region?: FieldRegion;
+}
 
 export interface ParticleAttribute extends CommonMethod {
     disturbanceFields(value: Array<DisturbanceFieldOptions> | undefined): this
     emitter(value: Array<EmitterProperty> | undefined): this
     attributeModifier(modifier: AttributeModifier<ParticleAttribute> | AttributeModifier<CommonMethod> | undefined): this
     setParticleOptions(particles: Particles): this
+    rippleFields(value: Array<RippleFieldOptions> | undefined): this
+    velocityFields(fields: Array<VelocityFieldOptions> | undefined): this
 }
 
 class ParticleToParticleInnerHelper {
@@ -258,6 +277,15 @@ class ParticleToParticleInnerHelper {
             y: input.y,
         }
     }
+    static ConvertVectorNumber(input: Vector2T<double> | undefined): Vector2F64 | undefined {
+        if (input === undefined) {
+            return input;
+        }
+        return {
+            x: input.x,
+            y: input.y,
+        }
+    }
     static ConvertSizeNumber(input: SizeT<double> | undefined): SizeF64Inner | undefined {
         if (input === undefined) {
             return input;
@@ -282,6 +310,46 @@ class ParticleToParticleInnerHelper {
                 noiseScale: element.noiseScale,
                 noiseFrequency: element.noiseFrequency,
                 noiseAmplitude: element.noiseAmplitude,
+            });
+        });
+        return result;
+    }
+    static ConvertFieldRegion(input: FieldRegion | undefined): FieldRegionInner | undefined {
+        if (input === undefined) {
+            return undefined;
+        }
+        return {
+            shape: input.shape,
+            size: ParticleToParticleInnerHelper.ConvertSizeNumber(input.size),
+            position: ParticleToParticleInnerHelper.ConvertPositionNumber(input.position),
+        };
+    }
+    static ConvertArrayRippleFieldOptions(input: Array<RippleFieldOptions> | undefined): Array<RippleFieldOptionsInner> | undefined {
+        if (input === undefined) {
+            return input;
+        }
+        let result: Array<RippleFieldOptionsInner> = new Array<RippleFieldOptionsInner>();
+        input.forEach((element: RippleFieldOptions) => {
+            result.push({
+                amplitude: element.amplitude,
+                wavelength: element.wavelength,
+                waveSpeed: element.waveSpeed,
+                attenuation: element.attenuation,
+                center: ParticleToParticleInnerHelper.ConvertPositionNumber(element.center),
+                region: ParticleToParticleInnerHelper.ConvertFieldRegion(element.region),
+            });
+        });
+        return result;
+    }
+    static ConvertArrayVelocityFieldOptions(input: Array<VelocityFieldOptions> | undefined): Array<VelocityFieldOptionsInner> | undefined {
+        if (input === undefined) {
+            return input;
+        }
+        let result: Array<VelocityFieldOptionsInner> = new Array<VelocityFieldOptionsInner>();
+        input.forEach((element: VelocityFieldOptions) => {
+            result.push({
+                velocity: ParticleToParticleInnerHelper.ConvertVectorNumber(element.velocity),
+                region: ParticleToParticleInnerHelper.ConvertFieldRegion(element.region),
             });
         });
         return result;
@@ -313,11 +381,21 @@ export class ArkParticlePeer extends ArkCommonMethodPeer {
         const valueInner = ParticleToParticleInnerHelper.ConvertArrayEmitterProperty(value);
         ParticleHelper.SetEmitterProperty(this.peer.ptr, valueInner);
     }
+    rippleFieldsAttribute(value: Array<RippleFieldOptions> | undefined): void {
+        const valueInner = ParticleToParticleInnerHelper.ConvertArrayRippleFieldOptions(value);
+        ParticleHelper.SetRippleFields(this.peer.ptr, valueInner);
+    }
+    velocityFieldsAttribute(value: Array<VelocityFieldOptions> | undefined): void {
+        const valueInner = ParticleToParticleInnerHelper.ConvertArrayVelocityFieldOptions(value);
+        ParticleHelper.SetVelocityFields(this.peer.ptr, valueInner);
+    }
 }
 export class ArkParticleStyle extends ArkCommonMethodStyle implements ParticleAttribute {
     disturbanceFields_value?: Array<DisturbanceFieldOptions> | undefined
     emitter_value?: Array<EmitterProperty> | undefined
     attributeModifier_value?: AttributeModifier<ParticleAttribute> | AttributeModifier<CommonMethod> | undefined
+    rippleFields_value?: Array<RippleFieldOptions> | undefined
+    velocityFields_value?: Array<VelocityFieldOptions> | undefined
     public disturbanceFields(value: Array<DisturbanceFieldOptions> | undefined): this {
         return this
     }
@@ -328,6 +406,12 @@ export class ArkParticleStyle extends ArkCommonMethodStyle implements ParticleAt
         return this
     }
     public setParticleOptions(particles: Particles): this {
+        return this
+    }
+    public rippleFields(value: Array<RippleFieldOptions> | undefined): this {
+        return this
+    }
+    public velocityFields(value: Array<VelocityFieldOptions> | undefined): this {
         return this
     }
 }
@@ -356,6 +440,22 @@ export class ArkParticleComponent extends ArkCommonMethodComponent implements Pa
         if (this.checkPriority("emitter")) {
             const value_casted = value as (Array<EmitterProperty> | undefined)
             this.getPeer()?.emitterAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public rippleFields(value: Array<RippleFieldOptions> | undefined): this {
+        if (this.checkPriority("rippleFields")) {
+            const value_casted = value as (Array<RippleFieldOptions> | undefined)
+            this.getPeer()?.rippleFieldsAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public velocityFields(value: Array<VelocityFieldOptions> | undefined): this {
+        if (this.checkPriority("velocityFields")) {
+            const value_casted = value as (Array<VelocityFieldOptions> | undefined)
+            this.getPeer()?.velocityFieldsAttribute(value_casted)
             return this
         }
         return this

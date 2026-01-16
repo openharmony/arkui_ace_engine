@@ -1983,19 +1983,20 @@ void NavigationPattern::ProcessPageShowEvent()
     }
 }
 
-void NavigationPattern::ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+bool NavigationPattern::ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
     const RefPtr<NavDestinationGroupNode>& newTopNavDestination)
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
-    CHECK_NULL_VOID(navigationNode);
+    CHECK_NULL_RETURN(navigationNode, false);
     auto navBarOrHomeDestNode =
         AceType::DynamicCast<NavDestinationNodeBase>(navigationNode->GetNavBarOrHomeDestinationNode());
-    CHECK_NULL_VOID(navBarOrHomeDestNode);
+    CHECK_NULL_RETURN(navBarOrHomeDestNode, false);
     bool preUseCustomTransition = TriggerNavDestinationTransition(
         (preTopNavDestination ? preTopNavDestination :
         AceType::DynamicCast<NavDestinationGroupNode>(navBarOrHomeDestNode)),
         NavigationOperation::REPLACE, false) != INVALID_ANIMATION_ID;
-    TriggerNavDestinationTransition(newTopNavDestination, NavigationOperation::REPLACE, true);
+    bool newUseCustomTransition = TriggerNavDestinationTransition(
+        newTopNavDestination, NavigationOperation::REPLACE, true) != INVALID_ANIMATION_ID;
     if (newTopNavDestination && preTopNavDestination && !preUseCustomTransition) {
         navigationNode->DealNavigationExit(preTopNavDestination, false, false);
     } else if (newTopNavDestination && navigationMode_ == NavigationMode::STACK) {
@@ -2009,13 +2010,14 @@ void NavigationPattern::ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& 
     navigationStack_->UpdateReplaceValue(0);
 
     auto context = navigationNode->GetContext();
-    CHECK_NULL_VOID(context);
+    CHECK_NULL_RETURN(context, newUseCustomTransition);
     OnStartOneTransitionAnimation();
     context->AddAfterLayoutTask([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         pattern->OnFinishOneTransitionAnimation();
     });
+    return newUseCustomTransition;
 }
 
 void NavigationPattern::TransitionWithOutAnimation(RefPtr<NavDestinationGroupNode> preTopNavDestination,
@@ -2195,6 +2197,8 @@ void NavigationPattern::StartDefaultAnimation(const RefPtr<NavDestinationGroupNo
             navigationNode->TransitionWithReplace(preTopNavDestination, newTopNavDestination, false);
         } else if (newTopNavDestination && navigationMode_ == NavigationMode::STACK) {
             navigationNode->TransitionWithReplace(navBarOrHomeDestNode, newTopNavDestination, true);
+        } else if (newTopNavDestination && navigationMode_ == NavigationMode::SPLIT) {
+            ContentChangeReport(newTopNavDestination);
         }
         navigationStack_->UpdateReplaceValue(0);
         return;
@@ -4485,6 +4489,9 @@ void NavigationPattern::FollowStdNavdestinationAnimation(const RefPtr<NavDestina
         navigationNode->TransitionWithDialogPush(navBarOrHomeDestNode, newTopNavDestination, true);
         return;
     }
+    if (newTopNavDestination && navigationMode_ == NavigationMode::SPLIT) {
+        ContentChangeReport(newTopNavDestination);
+    }
     if (preTopNavDestination) {
         if (navigationMode_ == NavigationMode::SPLIT) {
             navigationNode->TransitionWithDialogPop(preTopNavDestination, nullptr);
@@ -4507,11 +4514,14 @@ void NavigationPattern::TransitionWithDialogAnimation(const RefPtr<NavDestinatio
     // if last standard id is not changed and new top navdestination is standard
     if (!isPopPage && !IsLastStdChange() && newTopNavDestination &&
         newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD) {
+        ContentChangeReport(newTopNavDestination);
         return;
     }
     auto replaceVal = navigationStack_->GetReplaceValue();
     if (replaceVal != 0) {
-        ReplaceAnimation(preTopNavDestination, newTopNavDestination);
+        if (!ReplaceAnimation(preTopNavDestination, newTopNavDestination)) {
+            ContentChangeReport(newTopNavDestination);
+        }
         return;
     }
     // last std id is not change, but new dialogs came into stack and upward animation
@@ -4521,6 +4531,7 @@ void NavigationPattern::TransitionWithDialogAnimation(const RefPtr<NavDestinatio
         } else {
             if (!preTopNavDestination && navigationMode_ == NavigationMode::SPLIT) {
                 // if split mode and push one dialog at the first time, no animation
+                ContentChangeReport(newTopNavDestination);
                 return;
             }
             navigationNode->StartDialogtransition(preTopNavDestination, newTopNavDestination, true);

@@ -11567,6 +11567,63 @@ HWTEST_F(NativeNodeTest, NativeNodeConvertToWindowTest001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeNodeRefreshCancelTest01
+ * @tc.desc: Test refreshNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRefreshCancelTest01, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ ARKUI_NODE_REFRESH, nullptr, true });
+    ASSERT_NE(rootNode, nullptr);
+    ArkUI_NumberValue value[] = { { .i32 = true } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue), nullptr, nullptr };
+    nodeAPI->setAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH, &item);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH), nullptr);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeRefreshCancelTest02
+ * @tc.desc: Test refreshNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRefreshCancelTest02, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ ARKUI_NODE_REFRESH, nullptr, true });
+    ASSERT_NE(rootNode, nullptr);
+    ArkUI_NumberValue value[] = { { .i32 = false } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue), nullptr, nullptr };
+    nodeAPI->setAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH, &item);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH), nullptr);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeRefreshCancelTest03
+ * @tc.desc: Test refreshNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRefreshCancelTest03, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ ARKUI_NODE_REFRESH, nullptr, true });
+    ASSERT_NE(rootNode, nullptr);
+    ArkUI_NumberValue value[] = {};
+    ArkUI_AttributeItem item = { value, 0, nullptr, nullptr };
+    EXPECT_EQ(
+        nodeAPI->setAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH), nullptr);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
  * @tc.name: NativeNodeConvertFromWindowTest001
  * @tc.desc: Test convert to window function.
  * @tc.type: FUNC

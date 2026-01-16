@@ -287,7 +287,8 @@ class Paragraph : public virtual AceType {
     DECLARE_ACE_TYPE(NG::Paragraph, AceType);
 
 public:
-    static RefPtr<Paragraph> Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
+    ACE_FORCE_EXPORT static RefPtr<Paragraph> Create(
+        const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection);
     static RefPtr<Paragraph> CreateRichEditorParagraph(
         const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection, bool isSingleLineMode);
 

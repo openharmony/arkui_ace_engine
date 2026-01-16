@@ -1299,7 +1299,8 @@ void CheckBoxPattern::ReportChangeEvent(bool selectStatus)
     CHECK_NULL_VOID(host);
     auto id = host->GetId();
     json->Put("nodeId", id);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", json->ToString(),
+        ComponentEventType::COMPONENT_EVENT_SELECT);
 }
 
 void CheckBoxPattern::RegisterVisibleAreaChange()

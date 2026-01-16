@@ -169,4 +169,197 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg003, TestSize.Level1)
     EXPECT_EQ(togglePaintProperty->GetTrackBorderRadius(), SWITCH_TRACK_BORDER_RADIUS);
 }
 
+/**
+ * @tc.name: ToggleStaticTestNg004
+ * @tc.desc: test toggle CreateFrameNode and OnChangeEvent with type switch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle frameNode.
+     */
+    auto node = ToggleModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId(),
+                                                   NG::ToggleType::SWITCH);
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::TOGGLE_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create toggle paintProperty.
+     */
+    auto togglePaintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(togglePaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test OnChangeEvent.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    bool isChecked = false;
+    auto onChange = [&isChecked](bool select) { isChecked = select; };
+    ToggleModelStatic::OnChangeEvent(frameNode, std::move(onChange));
+    auto eventHub = frameNode->GetEventHub<SwitchEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_NE(eventHub->onChangeEvent_, nullptr);
+}
+
+/**
+ * @tc.name: ToggleStaticTestNg005
+ * @tc.desc: test toggle CreateFrameNode and OnChangeEvent with type button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle frameNode.
+     */
+    auto node = ToggleModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId(),
+                                                   NG::ToggleType::BUTTON);
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::TOGGLE_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create toggle paintProperty.
+     */
+    auto togglePaintProperty = frameNode->GetPaintProperty<ToggleButtonPaintProperty>();
+    ASSERT_NE(togglePaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test OnChangeEvent.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    bool isChecked = false;
+    auto onChange = [&isChecked](bool select) { isChecked = select; };
+    ToggleModelStatic::OnChangeEvent(frameNode, std::move(onChange));
+    auto eventHub = frameNode->GetEventHub<ToggleButtonEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_NE(eventHub->onChangeEvent_, nullptr);
+    eventHub->UpdateChangeEvent(true);
+    EXPECT_EQ(isChecked, true);
+}
+
+/**
+ * @tc.name: ToggleStaticTestNg006
+ * @tc.desc: test toggle CreateFrameNode and OnChangeEvent with type checkbox.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle frameNode.
+     */
+    auto node = ToggleModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId(),
+                                                   NG::ToggleType::CHECKBOX);
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::TOGGLE_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create toggle paintProperty.
+     */
+    auto togglePaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(togglePaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test OnChangeEvent.
+     */
+    bool isChecked = false;
+    auto onChange = [&isChecked](bool select) { isChecked = select; };
+    ToggleModelStatic::OnChangeEvent(frameNode, std::move(onChange));
+    auto eventHub = frameNode->GetEventHub<CheckBoxEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_NE(eventHub->selectChangeEvent_, nullptr);
+}
+
+/**
+ * @tc.name: ToggleStaticTestNg007
+ * @tc.desc: test toggle TriggerChange with type switch.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle frameNode.
+     */
+    auto node =
+        ToggleModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId(), NG::ToggleType::SWITCH, false);
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::TOGGLE_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create toggle paintProperty.
+     */
+    auto togglePaintProperty = frameNode->GetPaintProperty<SwitchPaintProperty>();
+    ASSERT_NE(togglePaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test TriggerChange.
+     */
+    ToggleModelStatic::TriggerChange(frameNode, true);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: ToggleStaticTestNg008
+ * @tc.desc: test toggle TriggerChange with type button.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle frameNode.
+     */
+    auto node =
+        ToggleModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId(), NG::ToggleType::BUTTON, false);
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::TOGGLE_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create toggle paintProperty.
+     */
+    auto togglePaintProperty = frameNode->GetPaintProperty<ToggleButtonPaintProperty>();
+    ASSERT_NE(togglePaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test TriggerChange.
+     */
+    ToggleModelStatic::TriggerChange(frameNode, true);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
+}
+
+/**
+ * @tc.name: ToggleStaticTestNg009
+ * @tc.desc: test toggle TriggerChange with type checkbox.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create toggle frameNode.
+     */
+    auto node = ToggleModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId(),
+                                               NG::ToggleType::CHECKBOX, false);
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::TOGGLE_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create toggle paintProperty.
+     */
+    auto togglePaintProperty = frameNode->GetPaintProperty<CheckBoxPaintProperty>();
+    ASSERT_NE(togglePaintProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test TriggerChange.
+     */
+    ToggleModelStatic::TriggerChange(frameNode, true);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
+}
+
 } // namespace OHOS::Ace::NG

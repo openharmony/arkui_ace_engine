@@ -35,6 +35,9 @@ public:
     void PaintImageArea(RenderContext& context, const RefPtr<RenderImage>& renderImage, RSCanvas* canvas,
         const ImageAreaProperties& properties);
     void PaintHoverRect(RSCanvas* canvas);
+private:
+    void PaintPressAndPhoneAnimation(RenderContext& context, const Offset& offset,
+        double offsetDeltaX, double offsetDeltaY, double imageVerticalOffset);
 };
 
 } // namespace OHOS::Ace

@@ -35,7 +35,7 @@ namespace OHOS::Ace {
 constexpr double HALF = 0.5;
 
 // The slider component manages the step, value, min, max, selectColor and padding.
-class ACE_EXPORT SliderComponent : public RenderComponent {
+class ACE_FORCE_EXPORT SliderComponent : public RenderComponent {
     DECLARE_ACE_TYPE(SliderComponent, RenderComponent);
 
 public:

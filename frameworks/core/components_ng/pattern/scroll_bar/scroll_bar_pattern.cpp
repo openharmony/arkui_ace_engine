@@ -854,7 +854,7 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     ACE_SCOPED_TRACE("outer scrollBar HandleDragEnd velocity:%f", velocity);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
-        if (scrollEndCallback_) {
+        if (!DragEndOverScroll() && scrollEndCallback_) {
             if (scrollBarProxy_) {
                 scrollBarProxy_->NotifyScrollStop();
                 scrollBarProxy_->SetScrollSnapTrigger_(false);
@@ -869,7 +869,6 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
                 0, 0, GetScrollableDistance(), static_cast<float>(GetDragOffset()), isTouchScreen_);
         }
         scrollBarProxy_->NotifyScrollBarOnDidStopDragging(isWillFling);
-        DragEndOverScroll();
         return;
     }
     frictionPosition_ = 0.0;
@@ -941,7 +940,7 @@ void ScrollBarPattern::ProcessFrictionMotion(double value)
 
 void ScrollBarPattern::ProcessFrictionMotionStop()
 {
-    if (scrollEndCallback_) {
+    if (scrollEndCallback_ && firstAtEdge_) {
         if (scrollBarProxy_) {
             scrollBarProxy_->NotifyScrollStop();
         }
@@ -1277,9 +1276,9 @@ void ScrollBarPattern::CalcFlingVelocity(float offset)
     lastVsyncTime_ = currentVsync;
 }
 
-void ScrollBarPattern::DragEndOverScroll()
+bool ScrollBarPattern::DragEndOverScroll()
 {
-    CHECK_NULL_VOID(scrollBarProxy_);
+    CHECK_NULL_RETURN(scrollBarProxy_, false);
     bool isFreeScroll = scrollBarProxy_->IsFreeScroll();
     if (isTouchScreen_ && CanOverScrollWithDelta(.0f)) {
         if (isFreeScroll) {
@@ -1287,7 +1286,9 @@ void ScrollBarPattern::DragEndOverScroll()
         } else {
             scrollBarProxy_->NotifyScrollOverDrag(.0f);
         }
+        return true;
     }
+    return false;
 }
 
 bool ScrollBarPattern::CanOverScrollWithDelta(double delta) const

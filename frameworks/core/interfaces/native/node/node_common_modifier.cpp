@@ -24,6 +24,7 @@
 #include "core/accessibility/static/accessibility_static_utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/curves.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
@@ -44,7 +45,6 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/property/grid_property.h"
@@ -9378,7 +9378,9 @@ void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
         CHECK_NULL_VOID(checkboxModifier);
         return checkboxModifier->setCheckboxOnChange(node, reinterpret_cast<void*>(&onChange));
     } else {
-        RadioModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+        auto* radioModifier = GetArkUINodeModifiers()->getRadioModifier();
+        CHECK_NULL_VOID(radioModifier);
+        radioModifier->setRadioOnChange(reinterpret_cast<ArkUINodeHandle>(node), reinterpret_cast<void*>(&onChange));
     }
 }
 

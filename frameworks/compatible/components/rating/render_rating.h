@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATILBE_COMPONENTS_RATING_RENDER_RATING_H
 
 #include "base/utils/system_properties.h"
+#include "compatible/components/rating/rating_component.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/focus_animation/render_focus_animation.h"
 #include "core/components/image/image_component.h"
@@ -173,6 +174,7 @@ protected:
     {
         onChangeRating = value;
     }
+    void UpdateRatingImages(const RefPtr<RatingComponent>& rating);
 
     int32_t starNum_ = DEFAULT_RATING_STAR_NUM;
     int32_t pressstarNum_ = DEFAULT_RATING_STAR_NUM;

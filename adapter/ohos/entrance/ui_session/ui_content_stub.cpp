@@ -282,7 +282,8 @@ int32_t UiContentStub::RegisterTextChangeEventCallbackInner(
 int32_t UiContentStub::RegisterComponentChangeEventCallbackInner(
     MessageParcel& data, MessageParcel& reply, MessageOption& option)
 {
-    reply.WriteInt32(RegisterComponentChangeEventCallback(nullptr));
+    uint32_t mask = data.ReadUint32();
+    reply.WriteInt32(RegisterComponentChangeEventCallback(nullptr, mask));
     return NO_ERROR;
 }
 

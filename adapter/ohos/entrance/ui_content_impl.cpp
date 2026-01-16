@@ -3106,7 +3106,8 @@ bool UIContentImpl::ProcessBackPressed()
         []() {
             auto value = JsonUtil::CreateSharedPtrJson();
             value->Put("GestureType", "backpressed");
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString());
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString(),
+                ComponentEventType::COMPONENT_EVENT_GESTURE);
         },
         TaskExecutor::TaskType::UI, "ArkUIReportBackPressedEvent");
     auto pipeline = AceType::DynamicCast<NG::PipelineContext>(container->GetPipelineContext());

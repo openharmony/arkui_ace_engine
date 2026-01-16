@@ -58,6 +58,9 @@ import { Size } from '@ohos.arkui.node'
     export native function onTabChange(options: ObserverOptions, callback: Callback<ObserverOptions>): void;
     export native function offTabChange(options: ObserverOptions, callback?: Callback<ObserverOptions>): void;
 
+    export native function onWindowSizeLayoutBreakpointChange(callback: Callback<WindowSizeLayoutBreakpointInfo>): void;
+    export native function offWindowSizeLayoutBreakpointChange(callback?: Callback<WindowSizeLayoutBreakpointInfo>): void;
+
     export class DensityInfo {
         density: number;
     }
@@ -112,6 +115,9 @@ import { Size } from '@ohos.arkui.node'
         public native offTabChange(callback?: Callback<TabContentInfo>): void;
         public native onTabChange(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
         public native offTabChange(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
+
+        public native onWindowSizeLayoutBreakpointChange(callback: Callback<WindowSizeLayoutBreakpointInfo>): void;
+ 	    public native offWindowSizeLayoutBreakpointChange(callback?: Callback<WindowSizeLayoutBreakpointInfo>): void;
 
         public native onTabContentUpdate(callback: Callback<TabContentInfo>): void;
         public native offTabContentUpdate(callback?: Callback<TabContentInfo>): void;

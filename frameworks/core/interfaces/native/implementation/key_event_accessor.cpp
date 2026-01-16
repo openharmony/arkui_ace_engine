@@ -182,6 +182,53 @@ void SetUnicodeImpl(Ark_KeyEvent peer,
 {
     LOGW("ARKOALA KeyEventAccessor::SetUnicodeImpl doesn't have sense.");
 }
+Opt_Boolean GetIsNumLockOnImpl(Ark_KeyEvent peer)
+{
+    auto invalid = Converter::ArkValue<Opt_Boolean>();
+    CHECK_NULL_RETURN(peer, invalid);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, invalid);
+    const auto isNumLockOn = info->GetNumLock();
+    return Converter::ArkValue<Opt_Boolean>(isNumLockOn);
+}
+
+void SetIsNumLockOnImpl(Ark_KeyEvent peer,
+                        const Opt_Boolean* isNumLockOn)
+{
+    LOGW("ARKOALA KeyEventAccessor::SetIsNumLockOnImpl doesn't have sense.");
+}
+
+Opt_Boolean GetIsCapsLockOnImpl(Ark_KeyEvent peer)
+{
+    auto invalid = Converter::ArkValue<Opt_Boolean>();
+    CHECK_NULL_RETURN(peer, invalid);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, invalid);
+    const auto isCapsLockOn = info->GetCapsLock();
+    return Converter::ArkValue<Opt_Boolean>(isCapsLockOn);
+}
+
+void SetIsCapsLockOnImpl(Ark_KeyEvent peer,
+                         const Opt_Boolean* isCapsLockOn)
+{
+    LOGW("ARKOALA KeyEventAccessor::SetIsCapsLockOnImpl doesn't have sense.");
+}
+
+Opt_Boolean GetIsScrollLockOnImpl(Ark_KeyEvent peer)
+{
+    auto invalid = Converter::ArkValue<Opt_Boolean>();
+    CHECK_NULL_RETURN(peer, invalid);
+    const auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, invalid);
+    const auto isScrollLockOn = info->GetScrollLock();
+    return Converter::ArkValue<Opt_Boolean>(isScrollLockOn);
+}
+
+void SetIsScrollLockOnImpl(Ark_KeyEvent peer,
+                           const Opt_Boolean* isScrollLockOn)
+{
+    LOGW("ARKOALA KeyEventAccessor::SetIsScrollLockOnImpl doesn't have sense.");
+}
 } // KeyEventAccessor
 const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
 {
@@ -210,6 +257,12 @@ const GENERATED_ArkUIKeyEventAccessor* GetKeyEventAccessor()
         KeyEventAccessor::SetGetModifierKeyStateImpl,
         KeyEventAccessor::GetUnicodeImpl,
         KeyEventAccessor::SetUnicodeImpl,
+        KeyEventAccessor::GetIsNumLockOnImpl,
+        KeyEventAccessor::SetIsNumLockOnImpl,
+        KeyEventAccessor::GetIsCapsLockOnImpl,
+        KeyEventAccessor::SetIsCapsLockOnImpl,
+        KeyEventAccessor::GetIsScrollLockOnImpl,
+        KeyEventAccessor::SetIsScrollLockOnImpl,
     };
     return &KeyEventAccessorImpl;
 }

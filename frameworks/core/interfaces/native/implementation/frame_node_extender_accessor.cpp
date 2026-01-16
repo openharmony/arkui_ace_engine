@@ -452,6 +452,45 @@ void DisposeTreeImpl(Ark_FrameNode peer)
         parent->RemoveChild(frameNode);
     }
 }
+void AddSupportedUIStatesImpl(Ark_FrameNode peer,
+                              Ark_Int32 uiStates,
+                              const UIStatesChangeHandler* statesChangeHandler,
+                              Ark_Boolean excludeInner)
+{
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CreateEventHubInner();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto callFunc = statesChangeHandler ? statesChangeHandler->call : nullptr;
+    auto resourceId = statesChangeHandler ? statesChangeHandler->resource.resourceId : 0;
+    WeakPtr<FrameNode> weakFrameNode(frameNode);
+    std::function<void(uint64_t)> callback = [callFunc, resourceId, weakFrameNode](uint64_t currentUIStates) {
+        auto frameNode = weakFrameNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        if (callFunc) {
+            callFunc(resourceId,
+                     FrameNodePeer::Create(frameNode),
+                     static_cast<Ark_Int32>(currentUIStates));
+        }
+    };
+    eventHub->AddSupportedUIStateWithCallback(
+        static_cast<UIState>(uiStates),
+        callback,
+        false,
+        static_cast<bool>(excludeInner));
+}
+void RemoveSupportedUIStatesImpl(Ark_FrameNode peer,
+                                 Ark_Int32 uiStates)
+{
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(frameNode);
+    
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    
+    eventHub->RemoveSupportedUIState(static_cast<UIState>(uiStates), false);
+}
 Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer, Ark_Boolean options)
 {
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -1176,6 +1215,24 @@ Ark_Int32 RemoveAdoptedChildImpl(Ark_FrameNode peer, Ark_FrameNode child)
     renderContext->RemoveFromTree();
     return ERROR_CODE_NO_ERROR;
 }
+Ark_InteractionEventBindingInfo GetInteractionEventBindingInfoImpl(Ark_FrameNode peer,
+                                                                   Ark_EventQueryType eventType)
+{
+    Ark_InteractionEventBindingInfo info {};
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(peerNode, info);
+    if (eventType != Ark_EventQueryType::ARK_EVENT_QUERY_TYPE_ON_CLICK) {
+        return info;
+    }
+    auto frameNode = AceType::DynamicCast<FrameNode>(peerNode);
+    CHECK_NULL_RETURN(frameNode, info);
+    auto bindingInfo = frameNode->GetInteractionEventBindingInfo();
+    info.baseEventRegistered = bindingInfo.baseEventRegistered;
+    info.nodeEventRegistered = bindingInfo.nodeEventRegistered;
+    info.nativeEventRegistered = bindingInfo.nativeEventRegistered;
+    info.builtInEventRegistered = bindingInfo.builtInEventRegistered;
+    return info;
+}
 Ark_Boolean IsOnRenderTreeImpl(Ark_FrameNode peer)
 {
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -1233,6 +1290,8 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::GetInspectorInfoImpl,
         FrameNodeExtenderAccessor::InvalidateImpl,
         FrameNodeExtenderAccessor::DisposeTreeImpl,
+        FrameNodeExtenderAccessor::AddSupportedUIStatesImpl,
+        FrameNodeExtenderAccessor::RemoveSupportedUIStatesImpl,
         FrameNodeExtenderAccessor::SetCrossLanguageOptionsImpl,
         FrameNodeExtenderAccessor::GetCrossLanguageOptionsImpl,
         FrameNodeExtenderAccessor::SetMeasuredSizeImpl,
@@ -1271,6 +1330,7 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::ConvertPointImpl,
         FrameNodeExtenderAccessor::AdoptChildImpl,
         FrameNodeExtenderAccessor::RemoveAdoptedChildImpl,
+        FrameNodeExtenderAccessor::GetInteractionEventBindingInfoImpl,
         FrameNodeExtenderAccessor::IsOnRenderTreeImpl,
         FrameNodeExtenderAccessor::IsOnMainTreeImpl,
         FrameNodeExtenderAccessor::ConvertPositionToWindowImpl,

@@ -31,7 +31,8 @@ constexpr int32_t THOUSAND = 1000;
 constexpr char16_t NEWLINE_CODE = u'\n';
 constexpr float TEXT_SPLIT_RATIO = 0.6f;
 } // namespace
-RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
+ACE_FORCE_EXPORT RefPtr<Paragraph> Paragraph::Create(
+    const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
     auto txtFontCollection = DynamicCast<TxtFontCollection>(fontCollection);
     CHECK_NULL_RETURN(txtFontCollection, nullptr);

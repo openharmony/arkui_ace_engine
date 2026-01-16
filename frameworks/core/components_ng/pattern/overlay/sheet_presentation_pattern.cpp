@@ -967,7 +967,7 @@ float SheetPresentationPattern::GetSheetHeightChange()
         return .0f;
     }
     float inputH = 0.f;
-    if (pipelineContext->UsingCaretAvoidMode()) {
+    if (pipelineContext->UsingCaretAvoidMode() && !needDoubleAvoidAfterLayout_) {
         // when user scroll after avoiding keyboard, we need to update scroll offset before avoid keyboard twice.
         GetCurrentScrollHeight();
         // when avoiding keyboard twice, recover input height before avoiding is needed.
@@ -978,6 +978,7 @@ float SheetPresentationPattern::GetSheetHeightChange()
         inputH = textFieldManager ? (pipelineContext->GetRootHeight() -
             textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight()) : 0.f;
     }
+    SetNeedDoubleAvoidAfterLayout(false);
     // keyboardH : keyboard height + height of the bottom navigation bar
     auto keyboardH = keyboardInsert.Length() + manager->GetSystemSafeArea().bottom_.Length();
     // The minimum height of the input component from the bottom of the screen after popping up the soft keyboard
@@ -1113,6 +1114,10 @@ void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bo
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
+    // The window or sheet type changes
+    if (isTransitionIn == true && isFirstTransition == false) {
+        SetNeedDoubleAvoidAfterLayout(true);
+    }
     AnimationUtils::Animate(option,
         sheetObject_->GetAnimationPropertyCallForOverlay(isTransitionIn), // Moving effect end point
         option.GetOnFinishEvent(), nullptr, pipeline);

@@ -133,25 +133,21 @@ HWTEST_F(GridItemModifierTest, setRowStartTestDefaultValues, TestSize.Level1)
 HWTEST_F(GridItemModifierTest, setRowStartTestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_Number inputValue;
 
     // check positive value
-    inputValue = Converter::ArkValue<Ark_Number>(1);
-    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    auto optInputValue = Converter::ArkValue<Opt_Int32>(1);
     modifier_->setRowStart(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_START_NAME);
     EXPECT_EQ(strResult, "1");
 
     // check another positive value
-    inputValue = Converter::ArkValue<Ark_Number>(5);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    optInputValue = Converter::ArkValue<Opt_Int32>(5);
     modifier_->setRowStart(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_START_NAME);
     EXPECT_EQ(strResult, "5");
 
     // check negative value
-    inputValue = Converter::ArkValue<Ark_Number>(-10);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    optInputValue = Converter::ArkValue<Opt_Int32>(-10);
     modifier_->setRowStart(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_START_NAME);
     EXPECT_EQ(strResult, "-10");
@@ -191,25 +187,21 @@ HWTEST_F(GridItemModifierTest, setRowEndTestDefaultValues, TestSize.Level1)
 HWTEST_F(GridItemModifierTest, setRowEndTestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_Number inputValue;
 
     // check positive value
-    inputValue = Converter::ArkValue<Ark_Number>(1);
-    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    auto optInputValue = Converter::ArkValue<Opt_Int32>(1);
     modifier_->setRowEnd(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_END_NAME);
     EXPECT_EQ(strResult, "1");
 
     // check another positive value
-    inputValue = Converter::ArkValue<Ark_Number>(5);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    optInputValue = Converter::ArkValue<Opt_Int32>(5);
     modifier_->setRowEnd(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_END_NAME);
     EXPECT_EQ(strResult, "5");
 
     // check negative value
-    inputValue = Converter::ArkValue<Ark_Number>(-10);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    optInputValue = Converter::ArkValue<Opt_Int32>(-10);
     modifier_->setRowEnd(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_ROW_END_NAME);
     EXPECT_EQ(strResult, "-10");
@@ -249,25 +241,21 @@ HWTEST_F(GridItemModifierTest, setColumnStartTestDefaultValues, TestSize.Level1)
 HWTEST_F(GridItemModifierTest, setColumnStartTestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_Number inputValue;
 
     // check positive value
-    inputValue = Converter::ArkValue<Ark_Number>(1);
-    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    auto optInputValue = Converter::ArkValue<Opt_Int32>(1);
     modifier_->setColumnStart(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_START_NAME);
     EXPECT_EQ(strResult, "1");
 
     // check another positive value
-    inputValue = Converter::ArkValue<Ark_Number>(5);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    optInputValue = Converter::ArkValue<Opt_Int32>(5);
     modifier_->setColumnStart(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_START_NAME);
     EXPECT_EQ(strResult, "5");
 
     // check negative value
-    inputValue = Converter::ArkValue<Ark_Number>(-10);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    optInputValue = Converter::ArkValue<Opt_Int32>(-10);
     modifier_->setColumnStart(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_START_NAME);
     EXPECT_EQ(strResult, "-10");
@@ -307,25 +295,21 @@ HWTEST_F(GridItemModifierTest, setColumnEndTestDefaultValues, TestSize.Level1)
 HWTEST_F(GridItemModifierTest, setColumnEndTestValidValues, TestSize.Level1)
 {
     std::string strResult;
-    Ark_Number inputValue;
 
     // check positive value
-    inputValue = Converter::ArkValue<Ark_Number>(1);
-    auto optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    auto optInputValue = Converter::ArkValue<Opt_Int32>(1);
     modifier_->setColumnEnd(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_END_NAME);
     EXPECT_EQ(strResult, "1");
 
     // check another positive value
-    inputValue = Converter::ArkValue<Ark_Number>(5);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    optInputValue = Converter::ArkValue<Opt_Int32>(5);
     modifier_->setColumnEnd(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_END_NAME);
     EXPECT_EQ(strResult, "5");
 
     // check negative value
-    inputValue = Converter::ArkValue<Ark_Number>(-10);
-    optInputValue = Converter::ArkValue<Opt_Number>(inputValue);
+    optInputValue = Converter::ArkValue<Opt_Int32>(-10);
     modifier_->setColumnEnd(node_, &optInputValue);
     strResult = GetStringAttribute(node_, ATTRIBUTE_COLUMN_END_NAME);
     EXPECT_EQ(strResult, "-10");

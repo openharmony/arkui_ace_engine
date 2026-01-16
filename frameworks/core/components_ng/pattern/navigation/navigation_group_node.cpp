@@ -809,6 +809,9 @@ void NavigationGroupNode::TransitionWithPop(const RefPtr<FrameNode>& preNode, co
             context->MarkNeedFlushMouseEvent();
             CHECK_NULL_VOID(preNavDesNode);
             preNavDesNode->AddToOcclusionMap(false);
+            if (!curNavDesNode) {
+                curNavDesNode = AceType::DynamicCast<FrameNode>(navigation->GetNavBarOrHomeDestinationNode());
+            }
             navigation->ContentChangeReport(curNavDesNode);
         };
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weakNavigation = WeakClaim(this)]() {
@@ -1738,8 +1741,6 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
             auto navigation = weakNavigation.Upgrade();
             CHECK_NULL_VOID(navigation);
             navigation->LoadCompleteManagerStopCollect();
-            auto curNode = weakCurNode.Upgrade();
-            navigation->ContentChangeReport(curNode);
             navigation->isOnAnimation_ = false;
             navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
@@ -1764,6 +1765,11 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
                 navigation->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
             }
             navigation->RemoveDialogDestination();
+            auto curNode = weakCurNode.Upgrade();
+            if (!curNode) {
+                // NavDestination pop to navBar/HomeNavDestination
+                curNode = AceType::DynamicCast<FrameNode>(navigation->GetNavBarOrHomeDestinationNode());
+            }
             navigation->ContentChangeReport(curNode);
             auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
@@ -2100,6 +2106,9 @@ void NavigationGroupNode::DialogTransitionPopAnimation(const RefPtr<FrameNode>& 
             CHECK_NULL_VOID(context);
             context->MarkNeedFlushMouseEvent();
             navigation->CleanPopAnimations();
+            if (!curNode) {
+                curNode = AceType::DynamicCast<FrameNode>(navigation->GetNavBarOrHomeDestinationNode());
+            }
             navigation->ContentChangeReport(curNode);
         };
     auto finishWrapper = [onFinishCb = std::move(onFinish), weak = WeakPtr(navigationPattern)]() {

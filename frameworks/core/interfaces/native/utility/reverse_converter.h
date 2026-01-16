@@ -418,7 +418,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_SheetType& dst, const SheetType& src);
     void AssignArkValue(Ark_Size& dst, const SizeF& src);
     void AssignArkValue(Ark_SizeResult& dst, const SizeF& src);
-    void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMode& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_SliderChangeMode& dst, const SliderModel::SliderChangeMode& src);
     void AssignArkValue(Ark_SourceTool& dst, const SourceTool& src);
     void AssignArkValue(Ark_SourceType& dst, const SourceType& src);
     void AssignArkValue(Ark_SpanStyle& dst, const RefPtr<OHOS::Ace::SpanBase>& src);
@@ -461,9 +461,16 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_drawing_FontMetrics& dst, const FontMetrics& src, ConvContext *ctx);
     void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonState& src);
 
+    template<typename T, std::enable_if_t<std::is_same_v<T, GestureRecognizerJudgeBeginCallback>, bool> = true>
+    void AssignArkValue(T& dst, const std::function<void(Ark_VMContext, Ark_Int32, Ark_BaseGestureEvent,
+        Ark_GestureRecognizer, Array_GestureRecognizer, Array_TouchRecognizer, Callback_GestureJudgeResult_Void)>& src)
+    {
+        dst = Converter::ArkValue<T>(src);
+    }
     // Long declarations
     void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src,
         ConvContext *ctx);
+    // DO NOT ADD NEW DECLARATIONS HERE!!! Add in alphabetic order above!
 
     // SORTED_SECTION
     template<> Ark_LengthMetrics ArkCreate(Ark_LengthUnit unit, float value);

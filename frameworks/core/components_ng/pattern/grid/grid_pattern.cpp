@@ -1848,7 +1848,8 @@ void GridPattern::ReportOnItemGridEvent(const std::string& event)
     auto result = JsonUtil::Create();
     CHECK_NULL_VOID(result);
     result->Put("result", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
+        ComponentEventType::COMPONENT_EVENT_SCROLL);
 }
 
 int32_t GridPattern::OnInjectionEvent(const std::string& command)

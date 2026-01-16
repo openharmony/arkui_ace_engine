@@ -520,6 +520,7 @@ public:
     virtual void OnReuse();
 
     virtual void NotifyColorModeChange(uint32_t colorMode);
+    virtual void NotifyColorModeChange(uint32_t colorMode, bool recursive);
 
     virtual bool MarkRemoving();
 
@@ -1360,6 +1361,8 @@ private:
     virtual bool MaybeRelease() override;
     void DumpBasicInfo(int32_t depth, bool hasJson, const std::string& desc);
     void DumpMoreBasicInfo();
+
+    void HandleColorModeChange();
 
     std::list<RefPtr<UINode>> children_;
     // disappearingChild、index、branchId

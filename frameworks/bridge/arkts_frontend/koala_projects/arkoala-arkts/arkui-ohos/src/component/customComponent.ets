@@ -473,6 +473,11 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     __getParentNode__Internal(): PeerNode | undefined {
         return this.instance.__getParentNode__Internal();
     }
+
+    __getJsViewName_Internal(): string {
+        const classPath = Class.of(this.instance).getName();
+        return classPath.substring(classPath.lastIndexOf('.') + 1);
+    }
 }
 
 function createInstance<T extends ExtendableComponent, T_Options>(

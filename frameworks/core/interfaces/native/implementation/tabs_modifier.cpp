@@ -646,19 +646,21 @@ void SetBarHeight1Impl(Ark_NativePointer node, const Opt_Length* height, const O
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     bool adaptiveHeight = false;
-    if (height && height->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
-        auto selector = height->value.selector;
-        if (selector == 0) {
-            std::string valueString = Converter::Convert<std::string>(height->value.value0);
+    Converter::VisitUnionPtr(height,
+        [&adaptiveHeight](const Ark_String& src) {
+            std::string valueString = Converter::Convert<std::string>(src);
             adaptiveHeight = (valueString == "auto");
-        }
-    }
+        },
+        [](const auto&) {},
+        []() {});
     TabsModelStatic::SetBarAdaptiveHeight(frameNode, adaptiveHeight);
-    auto valueOpt = Converter::OptConvert<Dimension>(*height);
+    auto valueOpt = Converter::OptConvertPtr<Dimension>(height);
     Validator::ValidateNonNegative(valueOpt);
     TabsModelStatic::SetTabBarHeight(frameNode, valueOpt);
-    auto noMinHeightLimitOpt = Converter::OptConvert<bool>(*noMinHeightLimit);
-    TabsModelStatic::SetNoMinHeightLimit(frameNode, *noMinHeightLimitOpt);
+    auto noMinHeightLimitOpt = Converter::OptConvertPtr<bool>(noMinHeightLimit);
+    if (noMinHeightLimitOpt.has_value()) {
+        TabsModelStatic::SetNoMinHeightLimit(frameNode, *noMinHeightLimitOpt);
+    }
 }
 void SetBarBackgroundBlurStyle1Impl(Ark_NativePointer node,
                                     const Opt_BlurStyle* style,

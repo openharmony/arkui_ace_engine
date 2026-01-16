@@ -328,7 +328,7 @@ std::vector<std::tuple<std::string, Ark_ResourceColor, std::string>> unselectedC
     { "ARK_COLOR_BLUE", Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE), "#FF0000FF" },
     { "ARK_COLOR_RED", Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), "#FFFF0000" },
 };
-}
+} // namespace
 
 /*
  * @tc.name: setUnselectedColorTestValidValues

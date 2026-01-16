@@ -151,7 +151,8 @@ void SwiperEventHub::FireAnimationEndEvent(int32_t index, const AnimationCallbac
         index, info.currentOffset.has_value(), info.currentOffset.value_or(0.0), info.isForceStop,
         aniStartCalledCount_, swiperId_);
     ACE_SCOPED_TRACE("Swiper FireAnimationEndEvent, index: %d, id: %d", index, swiperId_);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Swiper.onAnimationEnd");
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Swiper.onAnimationEnd",
+        ComponentEventType::COMPONENT_EVENT_SWIPER);
     if (!animationEndEvents_.empty()) {
         std::for_each(animationEndEvents_.begin(), animationEndEvents_.end(),
             [index, info](const AnimationEndEventPtr& animationEndEvent) {
@@ -178,7 +179,8 @@ void SwiperEventHub::FireAnimationEndOnForceEvent(int32_t index, const Animation
         };
         return;
     }
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Swiper.onAnimationEnd");
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Swiper.onAnimationEnd",
+        ComponentEventType::COMPONENT_EVENT_SWIPER);
     if (animationEndEvents_.empty()) {
         --aniStartCalledCount_;
         return;
@@ -226,7 +228,8 @@ void SwiperEventHub::FireSelectedEvent(int32_t index)
 
 void SwiperEventHub::FireJSChangeEvent(int32_t preIndex, int32_t index)
 {
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Swiper.onChange");
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Swiper.onChange",
+        ComponentEventType::COMPONENT_EVENT_SWIPER);
     auto frameNode = GetFrameNode();
     ACE_SCOPED_TRACE("Swiper FireChangeEvent, id: %d, preIndex: %d, index: %d", frameNode ? frameNode->GetId() : -1,
         preIndex, index);

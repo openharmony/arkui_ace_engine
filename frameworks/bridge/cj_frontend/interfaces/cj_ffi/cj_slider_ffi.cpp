@@ -16,7 +16,8 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_slider_ffi.h"
 
 #include "cj_lambda.h"
-
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
 #include "core/components_ng/pattern/slider/slider_model.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
@@ -45,6 +46,17 @@ void CreateSolidGradient(uint32_t& color, NG::Gradient& gradient)
     gradientColorEnd.SetDimension(Dimension(1.0f));
     gradient.AddColor(gradientColorEnd);
 }
+
+// Should use CJUIModifier API later
+NG::SliderModelNG* GetSliderModel()
+{
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Slider");
+    if (module == nullptr) {
+        LOGF("Can't find slider dynamic module");
+        abort();
+    }
+    return reinterpret_cast<NG::SliderModelNG*>(module->GetModel());
+}
 } // namespace
 
 extern "C" {
@@ -59,57 +71,57 @@ void FfiOHOSAceFrameworkSliderCreate(CJSliderCreate value)
         return;
     }
 
-    SliderModel::GetInstance()->Create(value.value, value.step, value.min, value.max);
-    SliderModel::GetInstance()->SetSliderMode(SLIDER_MODES_NG[value.style]);
-    SliderModel::GetInstance()->SetDirection(AXIS[value.direction]);
-    SliderModel::GetInstance()->SetReverse(value.reverse);
+    GetSliderModel()->Create(value.value, value.step, value.min, value.max);
+    GetSliderModel()->SetSliderMode(SLIDER_MODES_NG[value.style]);
+    GetSliderModel()->SetDirection(AXIS[value.direction]);
+    GetSliderModel()->SetReverse(value.reverse);
 }
 
 void FfiOHOSAceFrameworkSliderBlockColor(uint32_t color)
 {
-    SliderModel::GetInstance()->SetBlockColor(Color(color));
+    GetSliderModel()->SetBlockColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkSliderResetBlockColor()
 {
-    SliderModel::GetInstance()->ResetBlockColor();
+    GetSliderModel()->ResetBlockColor();
 }
 
 void FfiOHOSAceFrameworkSliderTrackColor(uint32_t color)
 {
     NG::Gradient gradient;
     CreateSolidGradient(color, gradient);
-    SliderModel::GetInstance()->SetTrackBackgroundColor(Color(color));
-    SliderModel::GetInstance()->SetTrackBackgroundColor(gradient, true);
+    GetSliderModel()->SetTrackBackgroundColor(Color(color));
+    GetSliderModel()->SetTrackBackgroundColor(gradient, true);
 }
 
 void FfiOHOSAceFrameworkSliderResetTrackColor()
 {
-    SliderModel::GetInstance()->ResetTrackColor();
+    GetSliderModel()->ResetTrackColor();
 }
 
 void FfiOHOSAceFrameworkSliderSelectedColor(uint32_t color)
 {
     NG::Gradient gradient;
     CreateSolidGradient(color, gradient);
-    SliderModel::GetInstance()->SetSelectColor(Color(color));
-    SliderModel::GetInstance()->SetSelectColor(gradient, true);
+    GetSliderModel()->SetSelectColor(Color(color));
+    GetSliderModel()->SetSelectColor(gradient, true);
 }
 
 void FfiOHOSAceFrameworkSliderResetSelectedColor()
 {
-    SliderModel::GetInstance()->ResetSelectColor();
+    GetSliderModel()->ResetSelectColor();
 }
 
 void FfiOHOSAceFrameworkSliderShowSteps(bool isShow)
 {
-    SliderModel::GetInstance()->SetShowSteps(isShow);
+    GetSliderModel()->SetShowSteps(isShow);
 }
 
 void FfiOHOSAceFrameworkSliderShowTips(bool isShow)
 {
     std::optional<std::string> none;
-    SliderModel::GetInstance()->SetShowTips(isShow, none);
+    GetSliderModel()->SetShowTips(isShow, none);
 }
 
 void FfiOHOSAceFrameworkSliderShowTipsNew(bool isShow, const char* content, bool contentExist)
@@ -120,7 +132,7 @@ void FfiOHOSAceFrameworkSliderShowTipsNew(bool isShow, const char* content, bool
     } else {
         value = std::nullopt;
     }
-    SliderModel::GetInstance()->SetShowTips(isShow, value);
+    GetSliderModel()->SetShowTips(isShow, value);
 }
 
 void FfiOHOSAceFrameworkSliderTrackThickness(double value, int32_t unit)
@@ -129,85 +141,85 @@ void FfiOHOSAceFrameworkSliderTrackThickness(double value, int32_t unit)
     if (LessNotEqual(value, 0.0)) {
         return;
     }
-    SliderModel::GetInstance()->SetThickness(width);
+    GetSliderModel()->SetThickness(width);
 }
 
 void FfiOHOSAceFrameworkSliderMaxLabel(double value)
 {
-    SliderModel::GetInstance()->SetMaxLabel(value);
+    GetSliderModel()->SetMaxLabel(value);
 }
 
 void FfiOHOSAceFrameworkSliderMinLabel(double value)
 {
-    SliderModel::GetInstance()->SetMinLabel(value);
+    GetSliderModel()->SetMinLabel(value);
 }
 
 void FfiOHOSAceFrameworkSliderOnChange(void (*callback)(double value, int32_t mode))
 {
-    SliderModel::GetInstance()->SetOnChange(CJLambda::Create(callback));
+    GetSliderModel()->SetOnChange(CJLambda::Create(callback));
 }
 
 void FfiOHOSAceFrameworkSliderBlockBorderColor(uint32_t color)
 {
-    SliderModel::GetInstance()->SetBlockBorderColor(Color(color));
+    GetSliderModel()->SetBlockBorderColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkSliderBlockBorderWidth(double value, int32_t unit)
 {
     Dimension blockBorderWidth(value, static_cast<DimensionUnit>(unit));
-    SliderModel::GetInstance()->SetBlockBorderWidth(blockBorderWidth);
+    GetSliderModel()->SetBlockBorderWidth(blockBorderWidth);
 }
 
 void FfiOHOSAceFrameworkSliderBlockSize(double widthVal, int32_t widthUnit, double heightVal, int32_t heightUnit)
 {
     Dimension width(widthVal, static_cast<DimensionUnit>(widthUnit));
     Dimension height(heightVal, static_cast<DimensionUnit>(heightUnit));
-    SliderModel::GetInstance()->SetBlockSize(width, height);
+    GetSliderModel()->SetBlockSize(width, height);
 }
 
 void FfiOHOSAceFrameworkSliderMinResponsiveDistance(float value)
 {
-    SliderModel::GetInstance()->SetMinResponsiveDistance(value);
+    GetSliderModel()->SetMinResponsiveDistance(value);
 }
 
 void FfiOHOSAceFrameworkSliderSelectedBorderRadius(double value, int32_t unit)
 {
     Dimension selectedBorderRadius(value, static_cast<DimensionUnit>(unit));
-    SliderModel::GetInstance()->SetSelectedBorderRadius(selectedBorderRadius);
+    GetSliderModel()->SetSelectedBorderRadius(selectedBorderRadius);
 }
 
 void FfiOHOSAceFrameworkSliderInteractionMode(int32_t value)
 {
-    SliderModel::GetInstance()->SetSliderInteractionMode(static_cast<SliderModel::SliderInteraction>(value));
+    GetSliderModel()->SetSliderInteractionMode(static_cast<SliderModel::SliderInteraction>(value));
 }
 
 void FfiOHOSAceFrameworkSliderSlideRange(float from, float to, bool fromExist, bool toExist)
 {
     if (!fromExist && !toExist) {
-        SliderModel::GetInstance()->ResetValidSlideRange();
+        GetSliderModel()->ResetValidSlideRange();
         return;
     }
     float fromValue = fromExist ? from : std::numeric_limits<float>::infinity();
     float toValue = toExist ? to : std::numeric_limits<float>::infinity();
-    SliderModel::GetInstance()->SetValidSlideRange(fromValue, toValue);
+    GetSliderModel()->SetValidSlideRange(fromValue, toValue);
 }
 
 void FfiOHOSAceFrameworkSliderStepColor(uint32_t color)
 {
-    SliderModel::GetInstance()->SetStepColor(Color(color));
+    GetSliderModel()->SetStepColor(Color(color));
 }
 
 void FfiOHOSAceFrameworkSliderStepSize(double value, int32_t unit)
 {
     double stepSizeValue = value < 0 ? 4 : value;
     Dimension stepSize(stepSizeValue, static_cast<DimensionUnit>(unit));
-    SliderModel::GetInstance()->SetStepSize(stepSize);
+    GetSliderModel()->SetStepSize(stepSize);
 }
 
 void FfiOHOSAceFrameworkSliderTrackBorderRadius(double value, int32_t unit)
 {
     Dimension trackBorderRadius(value, static_cast<DimensionUnit>(unit));
-    SliderModel::GetInstance()->SetTrackBorderRadius(trackBorderRadius);
+    GetSliderModel()->SetTrackBorderRadius(trackBorderRadius);
 }
 
 void FfiOHOSAceFrameworkSliderContentModifier() {}
@@ -219,15 +231,15 @@ void FfiOHOSAceFrameworkSliderBlockStyle(int32_t type, const char* image, int64_
         std::string src(image);
         std::string bundleName;
         std::string moduleName;
-        SliderModel::GetInstance()->SetBlockImage(src, bundleName, moduleName);
+        GetSliderModel()->SetBlockImage(src, bundleName, moduleName);
     } else if (blockType == SliderModel::BlockStyleType::SHAPE) {
         auto context = OHOS::FFI::FFIData::GetData<NativeShapeAbstract>(shapeId);
         if (context != nullptr) {
-            SliderModel::GetInstance()->SetBlockShape(context->GetBasicShape());
+            GetSliderModel()->SetBlockShape(context->GetBasicShape());
         } else {
             LOGI("set BlockShape error, Cannot get NativeShape by id: %{public}" PRId64, shapeId);
         }
     }
-    SliderModel::GetInstance()->SetBlockType(blockType);
+    GetSliderModel()->SetBlockType(blockType);
 }
 }

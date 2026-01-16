@@ -1626,6 +1626,8 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/test/mock/core/modifier/mock_node_checkbox_modifier.cpp",
     "$ace_root/test/mock/core/modifier/mock_checkboxgroup_modifier.cpp",
     "$ace_root/test/mock/core/modifier/mock_water_flow_modifier.cpp",
+    "$ace_root/test/mock/core/modifier/mock_radio_modifier.cpp",
+    "$ace_root/test/mock/core/modifier/mock_slider_modifier.cpp",
   ]
   if (ace_engine_feature_enable_split_mode) {
     sources += [

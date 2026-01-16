@@ -15,10 +15,13 @@
 
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
+#include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 
 #include "core/interfaces/native/node/flow_item_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
+
+#include "core/interfaces/native/node/radio_modifier.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
@@ -69,7 +72,6 @@
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
-#include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
@@ -349,10 +351,14 @@ void* createListItemGroupNode(ArkUI_Int32 nodeId)
 
 void* createSliderNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = SliderModelNG::CreateFrameNode(nodeId);
+    auto arkUISliderModifier = NG::NodeModifier::GetSliderModifier();
+    CHECK_NULL_RETURN(arkUISliderModifier, nullptr);
+    auto arkUINodeHandle = arkUISliderModifier->createSliderFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createCanvasNode(ArkUI_Int32 nodeId)
@@ -543,10 +549,14 @@ void* createImageAnimatorNode(ArkUI_Int32 nodeId)
 
 void* createRadioNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = RadioModelNG::CreateFrameNode(nodeId);
+    auto arkUIRadioModifier = NG::NodeModifier::GetRadioModifier();
+    CHECK_NULL_RETURN(arkUIRadioModifier, nullptr);
+    auto arkUINodeHandle = arkUIRadioModifier->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createSelectNode(ArkUI_Int32 nodeId)

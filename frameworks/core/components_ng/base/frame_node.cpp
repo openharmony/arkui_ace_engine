@@ -641,7 +641,7 @@ RefPtr<FrameNode> FrameNode::GetFrameNodeOnly(const std::string& tag, int32_t no
 RefPtr<FrameNode> FrameNode::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
-    ACE_UINODE_TRACE(nodeId);
+    ACE_UINODE_TRACE(nodeId, tag, TypeInfoHelper::TypeName(AceType::RawPtr(pattern)));
     auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
     ElementRegister::GetInstance()->AddUINode(frameNode);
     frameNode->InitializePatternAndContext();
@@ -651,7 +651,7 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
 RefPtr<FrameNode> FrameNode::CreateCommonNode(
     const std::string& tag, int32_t nodeId, bool isLayoutNode, const RefPtr<Pattern>& pattern, bool isRoot)
 {
-    ACE_UINODE_TRACE(nodeId);
+    ACE_UINODE_TRACE(nodeId, tag, TypeInfoHelper::TypeName(AceType::RawPtr(pattern)));
     auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot, isLayoutNode);
     ElementRegister::GetInstance()->AddUINode(frameNode);
     frameNode->InitializePatternAndContext();
@@ -1615,10 +1615,15 @@ bool FrameNode::RenderCustomChild(int64_t deadline)
 
 void FrameNode::NotifyColorModeChange(uint32_t colorMode)
 {
+    NotifyColorModeChange(colorMode, true);
+}
+
+void FrameNode::NotifyColorModeChange(uint32_t colorMode, bool recursive)
+{
     FireColorNDKCallback();
 
     if (GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
-        UINode::NotifyColorModeChange(colorMode);
+        UINode::NotifyColorModeChange(colorMode, recursive);
         return;
     }
 
@@ -1648,7 +1653,7 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
     }
 
     ResourceParseUtils::SetNeedReload(needReload);
-    UINode::NotifyColorModeChange(colorMode);
+    UINode::NotifyColorModeChange(colorMode, recursive);
 }
 
 void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)

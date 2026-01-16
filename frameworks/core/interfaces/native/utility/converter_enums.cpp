@@ -611,7 +611,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<FlexDirection>& dst, const Ark_Fl
 }
 
 template<>
-void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<Axis>& dst, const Ark_Axis& src)
 {
     switch (src) {
         case ARK_AXIS_VERTICAL: dst = Axis::VERTICAL; break;
@@ -1235,7 +1235,7 @@ void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
 }
 
 template<>
-void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<SliderModel::SliderMode>& dst, const Ark_SliderStyle& src)
 {
     switch (src) {
         case ARK_SLIDER_STYLE_OUT_SET: dst = SliderModel::SliderMode::OUTSET; break;
@@ -1289,7 +1289,7 @@ void AssignCast(std::optional<AdaptiveColor>& dst, const Ark_AdaptiveColor& src)
 }
 
 template<>
-void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<SliderModel::SliderInteraction>& dst, const Ark_SliderInteraction& src)
 {
     switch (src) {
         case ARK_SLIDER_INTERACTION_SLIDE_AND_CLICK: dst = SliderModel::SliderInteraction::SLIDE_AND_CLICK;
@@ -1315,7 +1315,7 @@ void AssignCast(std::optional<BorderImageRepeat>& dst, const Ark_RepeatMode& src
 }
 
 template<>
-void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<SliderModel::BlockStyleType>& dst, const Ark_SliderBlockType& src)
 {
     switch (src) {
         case ARK_SLIDER_BLOCK_TYPE_DEFAULT: dst = SliderModel::BlockStyleType::DEFAULT;

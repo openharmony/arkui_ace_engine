@@ -41,6 +41,7 @@ using panda::JSValueRef;
 using panda::ObjectRef;
 using panda::Local;
 using panda::ecmascript::EcmaVM;
+using StepOptions = std::unordered_map<uint32_t, std::string>;
 
 enum class ResourceType : uint32_t {
     COLOR = 10001,
@@ -429,6 +430,8 @@ public:
         const EcmaVM* vm, const Local<panda::ObjectRef>& obj, const std::string& propertyName);
     static Local<JSValueRef> GetProperty(const EcmaVM* vm, const Local<panda::ObjectRef>& obj, int32_t propertyIndex);
     static bool CheckJavaScriptScope(const EcmaVM* vm);
+    static void ParseStepOptionsMap(const EcmaVM* vm, const Local<JSValueRef>& optionsArg, StepOptions& optionsMap);
+    static ACE_FORCE_EXPORT RefPtr<BasicShape> GetJSBasicShape(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
 
     template<typename T>
     static Local<JSValueRef> ToJsValueWithVM(const EcmaVM* vm, T val);

@@ -153,6 +153,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         this.isCompFreezeAllowed_ = freezeState || this.isCompFreezeAllowed_;
         stateMgmtConsole.debug(`${this.debugInfo__()}: @ComponentV2 freezeWhenInactive state is set to ${this.isCompFreezeAllowed()}`);
 
+        this.__customComponentExecuteInit__Internal();
     }
 
     public debugInfo__(): string {
@@ -229,9 +230,6 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
         }, 'aboutToReuseInternal', this.constructor.name);
         ObserveV2.getObserve().updateDirty2(true, true);
         ObserveV2.getObserve().setCurrentReuseId(ObserveV2.NO_REUSE);
-        if (this.__isReuseNodeNeedAttach__Internal) {
-            this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_ATTACH);
-        }
         this.traverseChildDoRecycleOrReuse(PUV2ViewBase.doReuse);
     }
 

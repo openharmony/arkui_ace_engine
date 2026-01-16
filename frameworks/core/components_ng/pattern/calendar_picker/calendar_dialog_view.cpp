@@ -1299,7 +1299,8 @@ bool CalendarDialogView::ReportChangeEvent(int32_t nodeId, const std::string& co
     value->Put("nodeId", nodeId);
     value->Put(compName.c_str(), eventName.c_str());
     value->Put("params", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", value->ToString(),
+        ComponentEventType::COMPONENT_EVENT_DIALOG);
     return true;
 }
 

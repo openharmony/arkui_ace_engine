@@ -170,7 +170,7 @@ public:
         std::unique_ptr<JsonValue> jsonValue;
         std::unique_ptr<JsonValue> divJson;
         std::string resultStr;
-        Ark_DividerStyle inputValue;
+        Ark_DividerStyle inputValue{};
         for (auto [passed, checkVal, expected]: styleArray) {
             if (attribute == ATTRIBUTE_DIVIDER_STROKE_WIDTH) {
                 inputValue.strokeWidth = checkVal;
@@ -768,14 +768,14 @@ static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerStro
 
 // Valid values for attribute 'startMargin' of method 'setDivider'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerStartMarginValidValues = {
-    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), ATTRIBUTE_DIVIDER_START_MARGIN_DEFAULT_VALUE},
+    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), "-1234.00px"},
     {"0.00px", Converter::ArkValue<Opt_Length>("0.00px"), "0.00px"},
     {"1234.00px", Converter::ArkValue<Opt_Length>("1234.00px"), "1234.00px"},
 };
 
 // Valid values for attribute 'endMargin' of method 'setDivider'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerEndMarginValidValues = {
-    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), ATTRIBUTE_DIVIDER_END_MARGIN_DEFAULT_VALUE},
+    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), "-1234.00px"},
     {"0.00px", Converter::ArkValue<Opt_Length>("0.00px"), "0.00px"},
     {"1234.00px", Converter::ArkValue<Opt_Length>("1234.00px"), "1234.00px"},
 };

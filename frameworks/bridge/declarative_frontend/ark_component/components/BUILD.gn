@@ -47,6 +47,8 @@ arkui_modules = [
   "marquee",
   "stepper",
   "stepperitem",
+  "radio",
+  "slider",
   "hyperlink",
 ]
 

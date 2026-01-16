@@ -105,7 +105,7 @@ void processResourceType(ani_env *env, ani_object value, ani_ref params_ref, siz
     for (int i = 0; i < int(length); i++) {
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(params_ref),
-            "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)i)) {
+            "$_get", "i:Y", &stringEntryRef, (ani_int)i)) {
             break;
         }
         auto stringContent = ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(stringEntryRef));
@@ -123,7 +123,7 @@ void processResourceType(ani_env *env, ani_object value, ani_ref params_ref, siz
     ani_string ani_first_str;
     if (ANI_OK == env->String_NewUTF8(resName.c_str(), resName.size(), &ani_first_str)) {
         if (ANI_OK != env->Object_CallMethodByName_Void(static_cast<ani_object>(params_ref),
-            "$_set", "iC{std.core.Object}:", index, ani_first_str)) {
+            "$_set", "iY:", index, ani_first_str)) {
             return;
         }
     }
@@ -134,7 +134,7 @@ void processResourceType(ani_env *env, ani_object value, ani_ref params_ref, siz
             break;
         }
         if (ANI_OK != env->Object_CallMethodByName_Void(static_cast<ani_object>(params_ref),
-            "$_set", "iC{std.core.Object}:", index, ani_str)) {
+            "$_set", "iY:", index, ani_str)) {
             break;
         }
         index++;
@@ -234,7 +234,7 @@ void CompleteResourceParamV2(ani_env *env, ani_object value)
         return;
     }
     int32_t aniType = static_cast<int32_t>(resType);
-    
+
     if (ANI_OK != env->Object_SetPropertyByName_Int(value, "type", static_cast<ani_int>(aniType))) {
         return;
     }
@@ -324,13 +324,13 @@ std::string ANIUtils_ANIStringToStdString(ani_env *env, ani_string ani_str)
 {
     ani_size strSize;
     env->String_GetUTF8Size(ani_str, &strSize);
-   
+
     std::vector<char> buffer(strSize + 1);
     char* utf8Buffer = buffer.data();
 
     ani_size bytesWritten = 0;
     env->String_GetUTF8(ani_str, utf8Buffer, strSize + 1, &bytesWritten);
-    
+
     utf8Buffer[bytesWritten] = '\0';
     std::string content = std::string(utf8Buffer);
     return content;
@@ -493,7 +493,7 @@ bool ParseResourceParamName(ani_env *env, ani_object objects, ResourceInfo& info
     for (int i = 0; i < int(length); i++) {
         ani_ref stringEntryRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(static_cast<ani_object>(params_ref),
-            "$_get", "i:C{std.core.Object}", &stringEntryRef, (ani_int)i)) {
+            "$_get", "i:Y", &stringEntryRef, (ani_int)i)) {
             return false;
         }
         strings.emplace_back(ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(stringEntryRef)));
@@ -885,7 +885,7 @@ void ParseArray([[maybe_unused]] ani_env* env,
     for (int i = 0; i < static_cast<int32_t>(length); i++) {
         ani_ref pointRef;
         if (ANI_OK != env->Object_CallMethodByName_Ref(
-            static_cast<ani_object>(options), "$_get", "i:C{std.core.Object}", &pointRef, (ani_int)i)) {
+            static_cast<ani_object>(options), "$_get", "i:Y", &pointRef, (ani_int)i)) {
             break;
         }
         OHOS::Ace::CalcDimension result;

@@ -82,6 +82,7 @@ HWTEST_F(PipelineContextTestNg, SetNeedRenderNodeByUniqueId001, TestSize.Level1)
      */
     ASSERT_NE(context_, nullptr);
     ASSERT_TRUE(context_->needRenderNodeByUniqueId_.empty());
+
     /**
      *@tc.steps2: Call the function SetNeedRenderNodeByUniqueId.
      *@tc.expected: The return value is same as the expectation.
@@ -105,6 +106,7 @@ HWTEST_F(PipelineContextTestNg, needRenderForLayoutChildrenNodes001, TestSize.Le
      */
     ASSERT_NE(context_, nullptr);
     ASSERT_TRUE(context_->needRenderForLayoutChildrenNodes_.empty());
+
     /**
      *@tc.steps2: Call the function SetNeedRenderNodeByUniqueId.
      *@tc.expected: The return value is same as the expectation.
@@ -134,6 +136,7 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg502, TestSize.Level1)
     std::unique_ptr<std::ostream> ostream = std::make_unique<std::ostringstream>();
     ASSERT_NE(ostream, nullptr);
     DumpLog::GetInstance().SetDumpFile(std::move(ostream));
+    
     /**
      * @tc.steps2: init a vector with some string params and
                 call OnDumpInfo with every param array.

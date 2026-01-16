@@ -19,19 +19,16 @@ enum __CustomComponentLifecycleState__Internal {
     INIT = 0,
     APPEARED = 1,
     BUILT = 2,
-    MOUNTED = 3,
-    RECYCLED = 4,
-    DISAPPEARED = 5
+    RECYCLED = 3,
+    DISAPPEARED = 4
 }
 
 enum LifeCycleEvent {
     ON_APPEAR = 0,
     ON_BUILD = 1,
-    ON_ATTACH = 2,
-    ON_DETACH = 3,
-    ON_RECYCLE = 4,
-    ON_REUSE = 5,
-    ON_DISAPPEAR = 6
+    ON_RECYCLE = 2,
+    ON_REUSE = 3,
+    ON_DISAPPEAR = 4
 }
 
 // the state transition table of node lifecycle.
@@ -44,12 +41,8 @@ const transitionTable: { [key in __CustomComponentLifecycleState__Internal]: { [
         [LifeCycleEvent.ON_BUILD]: __CustomComponentLifecycleState__Internal.BUILT
     },
     [__CustomComponentLifecycleState__Internal.BUILT]: {
-        [LifeCycleEvent.ON_ATTACH]: __CustomComponentLifecycleState__Internal.MOUNTED,
         [LifeCycleEvent.ON_RECYCLE]: __CustomComponentLifecycleState__Internal.RECYCLED,
         [LifeCycleEvent.ON_DISAPPEAR]: __CustomComponentLifecycleState__Internal.DISAPPEARED
-    },
-    [__CustomComponentLifecycleState__Internal.MOUNTED]: {
-        [LifeCycleEvent.ON_DETACH]: __CustomComponentLifecycleState__Internal.BUILT
     },
     [__CustomComponentLifecycleState__Internal.RECYCLED]: {
         [LifeCycleEvent.ON_REUSE]: __CustomComponentLifecycleState__Internal.BUILT,
@@ -116,32 +109,6 @@ class CustomComponentLifecycle {
         }
     }
 
-    public executeAboutToAttach(): void {
-        let watchProp = Symbol.for('ATTACH_INTERNAL_FUNCTION' + this.owningView_.constructor.name);
-        const componentAttachFunctions = this.owningView_[watchProp];
-        if (componentAttachFunctions instanceof Array) {
-            componentAttachFunctions.forEach((componentAttachFunction) => {
-                componentAttachFunction.call(this.owningView_);
-            })
-        }
-        for (const observer of this.observers_) {
-            observer.aboutToAttach?.();
-        }
-    }
-
-    public executeAboutToDetach(): void {
-        let watchProp = Symbol.for('DETACH_INTERNAL_FUNCTION' + this.owningView_.constructor.name);
-        const componentDetachFunctions = this.owningView_[watchProp];
-        if (componentDetachFunctions instanceof Array) {
-            componentDetachFunctions.forEach((componentDetachFunction) => {
-                componentDetachFunction.call(this.owningView_);
-            })
-        }
-        for (const observer of this.observers_) {
-            observer.aboutToDetach?.();
-        }
-    }
-
     public executeAboutToRecycle(): void {
         let watchProp = Symbol.for('RECYCLE_INTERNAL_FUNCTION' + this.owningView_.constructor.name);
         const componentRecycleFunctions = this.owningView_[watchProp];
@@ -195,10 +162,6 @@ class CustomComponentLifecycle {
             this.executeAboutToAppear();
         } else if (event === LifeCycleEvent.ON_BUILD) {
             this.executeOnDidBuild();
-        }else if (event === LifeCycleEvent.ON_ATTACH) {
-            this.executeAboutToAttach();
-        } else if (event === LifeCycleEvent.ON_DETACH) {
-            this.executeAboutToDetach();
         } else if (event === LifeCycleEvent.ON_RECYCLE) {
             this.executeAboutToRecycle();
         } else if (event === LifeCycleEvent.ON_REUSE) {
@@ -227,10 +190,6 @@ interface CustomComponentLifecycleObserver {
     onDidBuild?(): void;
 
     aboutToDisappear?(): void;
-
-    aboutToAttach?(): void;
-
-    aboutToDetach?(): void;
 
     aboutToReuse?(params?: Record<string, Object>): void;
 
@@ -275,34 +234,6 @@ function __componentBuilt__Internal(target: PUV2ViewBase, propertyName: string, 
       target[watchProp] = componentBuiltFunctionArray;
     } else {
       target[watchProp].push(componentBuiltFunction as Function);
-    }
-  }
-}
-
-function __componentAttach__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
-  const watchProp = Symbol.for('ATTACH_INTERNAL_FUNCTION' + target.constructor.name);
-  const componentAttachFunction = descriptor.value;
-  if (componentAttachFunction && typeof componentAttachFunction === 'function') {
-    if (!target[watchProp]) {
-      const componentAttachFunctionArray: Array<Function> = new Array<Function>();
-      componentAttachFunctionArray.push(componentAttachFunction as Function);
-      target[watchProp] = componentAttachFunctionArray;
-    } else {
-      target[watchProp].push(componentAttachFunction as Function);
-    }
-  }
-}
-
-function __componentDetach__Internal(target: PUV2ViewBase, propertyName: string, descriptor: PropertyDescriptor): void {
-  const watchProp = Symbol.for('DETACH_INTERNAL_FUNCTION' + target.constructor.name);
-  const componentDetachFunction = descriptor.value;
-  if (componentDetachFunction && typeof componentDetachFunction === 'function') {
-    if (!target[watchProp]) {
-      const componentDetachFunctionArray: Array<Function> = new Array<Function>();
-      componentDetachFunctionArray.push(componentDetachFunction as Function);
-      target[watchProp] = componentDetachFunctionArray;
-    } else {
-      target[watchProp].push(componentDetachFunction as Function);
     }
   }
 }

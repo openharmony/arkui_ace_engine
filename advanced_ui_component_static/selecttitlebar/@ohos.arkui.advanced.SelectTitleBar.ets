@@ -432,7 +432,6 @@ struct CollapsibleMenuSection {
             placement: Placement.Bottom,
             popupColor: Color.White,
             enableArrow: false,
-            mask: false,
             onStateChange: (e: PopupStateChangeParam) => {
               this.isPopupShown = e.isVisible
               if (!e.isVisible) {

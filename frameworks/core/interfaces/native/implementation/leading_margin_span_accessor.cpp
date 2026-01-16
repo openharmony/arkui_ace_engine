@@ -41,8 +41,8 @@ void AssignArkValue(Ark_LeadingMarginSpanDrawInfo& dst, const LeadingMarginSpanO
     dst.top = Converter::ArkValue<Ark_Float64>(src.top);
     dst.baseline = Converter::ArkValue<Ark_Float64>(src.baseline);
     dst.bottom = Converter::ArkValue<Ark_Float64>(src.bottom);
-    dst.start = Converter::ArkValue<Ark_Float64>(src.start);
-    dst.end = Converter::ArkValue<Ark_Float64>(src.end);
+    dst.start = Converter::ArkValue<Ark_Int32>(src.start);
+    dst.end = Converter::ArkValue<Ark_Int32>(src.end);
     dst.first = Converter::ArkValue<Ark_Boolean>(src.first);
 }
 template<>
@@ -65,8 +65,8 @@ NG::LeadingMarginSpanOptions Convert(const Ark_LeadingMarginSpanDrawInfo& src)
     options.top = Converter::Convert<double>(src.top);
     options.baseline = Converter::Convert<double>(src.baseline);
     options.bottom = Converter::Convert<double>(src.bottom);
-    options.start = Converter::Convert<size_t>(src.start);
-    options.end = Converter::Convert<size_t>(src.end);
+    options.start = static_cast<size_t>(src.start);
+    options.end = static_cast<size_t>(src.end);
     options.first = Converter::Convert<bool>(src.first);
     return options;
 }

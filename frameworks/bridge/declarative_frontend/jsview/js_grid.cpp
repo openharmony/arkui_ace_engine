@@ -695,7 +695,8 @@ void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Grid.onItemDrop");
         func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onItemDrop");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onItemDrop",
+            ComponentEventType::COMPONENT_EVENT_SCROLL);
     };
     GridModel::GetInstance()->SetOnItemDrop(std::move(onItemDrop));
 }
@@ -837,7 +838,8 @@ void JSGrid::JsOnScrollStop(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onScrollStop");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onScrollStop",
+                ComponentEventType::COMPONENT_EVENT_SCROLL);
             return;
         };
         GridModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
@@ -898,7 +900,8 @@ void JSGrid::JsOnReachStart(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onReachStart");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onReachStart",
+                ComponentEventType::COMPONENT_EVENT_SCROLL);
             return;
         };
         GridModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
@@ -911,7 +914,8 @@ void JSGrid::JsOnReachEnd(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onReachEnd");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onReachEnd",
+                ComponentEventType::COMPONENT_EVENT_SCROLL);
             return;
         };
         GridModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));

@@ -82,7 +82,7 @@ public:
      *
      * @return The system safe area insets.
      */
-    SafeAreaInsets GetSystemSafeArea() const;
+    ACE_FORCE_EXPORT SafeAreaInsets GetSystemSafeArea() const;
 
     SafeAreaInsets GetNavSafeArea() const
     {
@@ -262,7 +262,7 @@ public:
 
     void ExpandSafeArea();
 
-    OffsetF GetWindowWrapperOffset();
+    ACE_FORCE_EXPORT OffsetF GetWindowWrapperOffset();
 
     SafeAreaInsets GetSafeAreaWithoutProcess() const;
 

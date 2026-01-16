@@ -37,7 +37,7 @@ namespace OHOS::Ace::Ani {
 namespace {
 constexpr char PIXEL_MAP_CONSTRUCTOR[] = "C{@ohos.multimedia.image.image.PixelMap}:";
 constexpr char PIXEL_MAP_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.PixelMapDrawableDescriptor";
-constexpr char ARRAY_GET[] = "i:C{std.core.Object}";
+constexpr char ARRAY_GET[] = "i:Y";
 constexpr char ANIMATED_CONSTRUCTOR[] = "C{std.core.Array}C{@ohos.arkui.drawableDescriptor.AnimationOptions}:";
 constexpr char ANIMATED_DRAWABLE[] = "@ohos.arkui.drawableDescriptor.AnimatedDrawableDescriptor";
 constexpr char LAYERED_CONSTRUCTOR[] =

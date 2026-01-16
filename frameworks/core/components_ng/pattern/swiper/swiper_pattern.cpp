@@ -7591,7 +7591,8 @@ void SwiperPattern::ReportComponentChangeEvent(bool result, SwiperCommand type)
             json->Put("reason", "InvalidCommand");
         }
     }
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("swiperResult", json->ToString().c_str());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("swiperResult", json->ToString().c_str(),
+        ComponentEventType::COMPONENT_EVENT_SWIPER);
 }
 
 GestureState SwiperPattern::GetGestureState()

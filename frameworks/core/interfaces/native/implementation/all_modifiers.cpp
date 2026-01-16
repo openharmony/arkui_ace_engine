@@ -395,6 +395,7 @@ const GENERATED_ArkUITextTimerControllerAccessor* GetTextTimerControllerAccessor
 const GENERATED_ArkUIThemeOpsAccessor* GetThemeOpsAccessor();
 const GENERATED_ArkUITimePickerDialogAccessor* GetTimePickerDialogAccessor();
 const GENERATED_ArkUITouchEventAccessor* GetTouchEventAccessor();
+const GENERATED_ArkUITouchRecognizerAccessor* GetTouchRecognizerAccessor();
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
 const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor();
 const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor();
@@ -660,9 +661,9 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetNavPathInfoAccessor,
         GetNavPathStackAccessor,
         GetNodeContainerOpsAccessor,
+        GetNumericTextTransitionAccessor,
         GetNodeContentExtenderAccessor,
         GetOffscreenCanvasAccessor,
-        GetNumericTextTransitionAccessor,
         GetOffscreenCanvasRenderingContext2DAccessor,
         GetPanGestureEventAccessor,
         GetPanGestureOptionsAccessor,
@@ -740,6 +741,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetThemeOpsAccessor,
         GetTimePickerDialogAccessor,
         GetTouchEventAccessor,
+        GetTouchRecognizerAccessor,
         GetTransitionEffectAccessor,
         GetUICommonEventAccessor,
         GetUIContextAtomicServiceBarAccessor,

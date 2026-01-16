@@ -4436,7 +4436,8 @@ void ListPattern::ReportOnItemListEvent(const std::string& event)
     auto result = JsonUtil::Create();
     CHECK_NULL_VOID(result);
     result->Put("result", params);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
+        ComponentEventType::COMPONENT_EVENT_SCROLL);
 }
 
 void ListPattern::ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex)
@@ -4467,7 +4468,8 @@ void ListPattern::ReportOnItemListScrollEvent(const std::string& event, int32_t 
     CHECK_NULL_VOID(result);
     result->Put("result", json);
 
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString());
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
+        ComponentEventType::COMPONENT_EVENT_SCROLL);
 }
 
 int32_t ListPattern::OnInjectionEvent(const std::string& command)

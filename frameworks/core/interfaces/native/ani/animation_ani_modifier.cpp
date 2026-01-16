@@ -219,7 +219,8 @@ static void PageTransitionSetOnEnter(void* callback)
             if (callbackFunc) {
                 callbackFunc(static_cast<ArkUIAniRouteType>(type), value);
             }
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "PageTransition.onEnter");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "PageTransition.onEnter",
+                ComponentEventType::COMPONENT_EVENT_PAGE_TRANSITION);
         };
     effect->SetUserCallback(std::move(handler));
 }
@@ -247,7 +248,8 @@ static void PageTransitionSetOnExit(void* callback)
             if (callbackFunc) {
                 callbackFunc(static_cast<ArkUIAniRouteType>(type), value);
             }
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "PageTransition.onExit");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "PageTransition.onExit",
+                ComponentEventType::COMPONENT_EVENT_PAGE_TRANSITION);
         };
     effect->SetUserCallback(std::move(handler));
 }

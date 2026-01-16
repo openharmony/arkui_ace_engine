@@ -605,7 +605,7 @@ void SetSideBarContainerMinContentWidthJs(ArkUI_Float32 value, ArkUI_Int32 unit,
 {
     auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
-    GetSideBarContainerModelImpl()->ResetResObj("sideBarContainer.minContentWidth");
+    SideBarContainerModelNG::ResetResObj(frameNode, "sideBarContainer.maxSideBarWidth");
     Dimension maxSideBarWidthDimension(value, static_cast<DimensionUnit>(unit));
     if (minContentWidthPtr) {
         auto* minContentWidth = reinterpret_cast<ResourceObject*>(minContentWidthPtr);
@@ -995,8 +995,8 @@ const ArkUISideBarContainerModifier* GetSideBarContainerDynamicModifier()
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
-    }
 #endif
+    }
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUISideBarContainerModifier modifier = {
         .setSideBarWidth = SetSideBarWidth,

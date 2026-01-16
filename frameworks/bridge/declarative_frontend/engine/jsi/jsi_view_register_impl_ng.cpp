@@ -20,6 +20,7 @@
 #include "bridge/declarative_frontend/jsview/js_isolated_component.h"
 #include "bridge/declarative_frontend/jsview/js_layout_manager.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient_binding.h"
+#include "bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient_binding.h"
 #include "bridge/declarative_frontend/jsview/js_mock.h"
 #include "bridge/declarative_frontend/jsview/js_node_container.h"
 #include "core/components_ng/pattern/custom/custom_title_node.h"
@@ -96,7 +97,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_polygon.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_polyline.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_progress.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_radio.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_recycle_view.h"
@@ -111,9 +111,9 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_search.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_select.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_shape.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_slider.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_span.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_stack.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_state_mgmt_profiler.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_swiper.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_symbol.h"
@@ -435,7 +435,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSListScroller::JSBind(globalObj);
     JSScrollBar::JSBind(globalObj);
     JSButton::JSBind(globalObj);
-    JSRadio::JSBind(globalObj);
     JSRectShape::JSBind(globalObj);
     JSEllipseShape::JSBind(globalObj);
     JSCircleShape::JSBind(globalObj);
@@ -449,7 +448,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSImageAnimator::JSBind(globalObj);
     JSProgress::JSBind(globalObj);
     JSGridContainer::JSBind(globalObj);
-    JSSlider::JSBind(globalObj);
     JSGridRow::JSBind(globalObj);
     JSGridCol::JSBind(globalObj);
     JSBlank::JSBind(globalObj);
@@ -503,7 +501,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSCommonView::JSBind(globalObj);
     JSRecycleView::JSBind(globalObj);
     JSLinearGradientBinding::JSBind(globalObj);
-    JSColorMetricsLinearGradient::JSBind(globalObj);
+    JSColorMetricsLinearGradientBinding::JSBind(globalObj);
     JSNavigation::JSBind(globalObj);
     JSNavPathStack::JSBind(globalObj);
     JSTextField::JSBind(globalObj);

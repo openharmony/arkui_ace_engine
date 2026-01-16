@@ -117,11 +117,9 @@ public:
     enum LifeCycleEvent {
         ON_APPEAR = 0,
         ON_BUILD = 1,
-        ON_ATTACH = 2,
-        ON_DETACH = 3,
-        ON_RECYCLE = 4,
-        ON_REUSE = 5,
-        ON_DISAPPEAR = 6
+        ON_RECYCLE = 2,
+        ON_REUSE = 3,
+        ON_DISAPPEAR = 4
     };
 
     void SetClearAllRecycleFunc(std::function<void()>&& func);

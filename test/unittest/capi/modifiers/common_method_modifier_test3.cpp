@@ -376,9 +376,9 @@ HWTEST_F(CommonMethodModifierTest3, DISABLED_setUseShadowBatchingTestValidValues
 }
 
 struct ProgressMaskTestPlan {
-    Ark_Number inputValue;
+    Ark_Float64 inputValue;
     std::string expectedValue;
-    Ark_Number inputTotal;
+    Ark_Float64 inputTotal;
     std::string expectedTotal;
     Ark_ResourceColor inputColor;
     std::string expectedColor;
@@ -392,7 +392,7 @@ struct AutoProgressMaskPeer {
 
     AutoProgressMaskPeer(
         const GENERATED_ArkUIFullNodeAPI* fullAPI,
-        const Ark_Number* value, const Ark_Number* total, const Ark_ResourceColor* color
+        Ark_Float64 value, Ark_Float64 total, const Ark_ResourceColor* color
     ) : accessor(fullAPI->getAccessors()->getProgressMaskAccessor()),
         ptr(accessor->construct(value, total, color))
     {}
@@ -416,26 +416,26 @@ HWTEST_F(CommonMethodModifierTest3, DISABLED_setMaskValidValues, TestSize.Level1
     ASSERT_NE(modifier_->setMask, nullptr);
     const std::vector<ProgressMaskTestPlan> validValues {
         {
-            Converter::ArkValue<Ark_Number>(0), "0",
-            Converter::ArkValue<Ark_Number>(100), "100",
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), Color::RED.ToString(),
+            Converter::ArkValue<Ark_Float64>(0), "0",
+            Converter::ArkValue<Ark_Float64>(100), "100",
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_RED), "0xFFFF0000",
             Converter::ArkValue<Ark_Boolean>(false), "false"
         },
         {
-            Converter::ArkValue<Ark_Number>(20.5f), "20.5",
-            Converter::ArkValue<Ark_Number>(200.25f), "200.25",
-            Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff0000ff), Color(0xff0000ff).ToString(),
+            Converter::ArkValue<Ark_Float64>(20.5), "20.5",
+            Converter::ArkValue<Ark_Float64>(200.25), "200.25",
+            Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff0000ff), "0xFF0000FF",
             Converter::ArkValue<Ark_Boolean>(true), "true"
         },
         {
-            Converter::ArkValue<Ark_Number>(65535), "65535",
-            Converter::ArkValue<Ark_Number>(32267), "32267",
-            Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#123456"), Color::FromString("#123456").ToString(),
+            Converter::ArkValue<Ark_Float64>(65535), "65535",
+            Converter::ArkValue<Ark_Float64>(32267), "32267",
+            Converter::ArkUnion<Ark_ResourceColor, Ark_String>("#123456"), "#123456",
             Converter::ArkValue<Ark_Boolean>(false), "false"
         },
     };
     for (const auto& plan : validValues) {
-        AutoProgressMaskPeer peer(fullAPI_, &plan.inputValue, &plan.inputTotal, &plan.inputColor);
+        AutoProgressMaskPeer peer(fullAPI_, plan.inputValue, plan.inputTotal, &plan.inputColor);
         ASSERT_NE(peer.ptr, nullptr);
         peer.accessor->enableBreathingAnimation(peer.ptr, plan.inputEnableBreathe);
         const auto materialized = Converter::ArkValue<Opt_ProgressMask>(peer.GetArkValue());
@@ -463,20 +463,20 @@ HWTEST_F(CommonMethodModifierTest3, setMask1PartForProgressMaskValidValues, Test
     ASSERT_NE(modifier_->setMask1, nullptr);
     const std::vector<ProgressMaskTestPlan> validValues {
         {
-            Converter::ArkValue<Ark_Number>(255), "255",
-            Converter::ArkValue<Ark_Number>(99.5f), "99.5",
+            Converter::ArkValue<Ark_Float64>(255), "255",
+            Converter::ArkValue<Ark_Float64>(99.5f), "99.5",
             Converter::ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_TRANSPARENT), Color::TRANSPARENT.ToString(),
             Converter::ArkValue<Ark_Boolean>(true), "true"
         },
         {
-            Converter::ArkValue<Ark_Number>(20.5f), "20.5",
-            Converter::ArkValue<Ark_Number>(20.5f), "20.5",
+            Converter::ArkValue<Ark_Float64>(20.5f), "20.5",
+            Converter::ArkValue<Ark_Float64>(20.5f), "20.5",
             Converter::ArkUnion<Ark_ResourceColor, Ark_Int32>(0xff123456), Color(0xff123456).ToString(),
             Converter::ArkValue<Ark_Boolean>(false), "false"
         },
     };
     for (const auto& plan : validValues) {
-        AutoProgressMaskPeer peer(fullAPI_, &plan.inputValue, &plan.inputTotal, &plan.inputColor);
+        AutoProgressMaskPeer peer(fullAPI_, plan.inputValue, plan.inputTotal, &plan.inputColor);
         ASSERT_NE(peer.ptr, nullptr);
         peer.accessor->enableBreathingAnimation(peer.ptr, plan.inputEnableBreathe);
         const auto materialized = peer.GetArkValue();

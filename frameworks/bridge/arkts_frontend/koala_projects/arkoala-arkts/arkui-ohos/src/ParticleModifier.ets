@@ -16,7 +16,7 @@
 import { CommonMethodModifier, AttributeUpdaterFlag } from "./CommonMethodModifier"
 import { ModifierState } from './CommonModifier'
 import { AttributeModifier, CommonMethod } from "./component/common"
-import { ArkParticlePeer, ParticleAttribute, DisturbanceFieldOptions, EmitterProperty, Particles } from "./component/particle"
+import { ArkParticlePeer, ParticleAttribute, DisturbanceFieldOptions, EmitterProperty, Particles, RippleFieldOptions, VelocityFieldOptions } from "./component/particle"
 import { PeerNode } from './PeerNode';
 
 export class ParticleModifier extends CommonMethodModifier implements ParticleAttribute, AttributeModifier<ParticleAttribute> {
@@ -35,6 +35,10 @@ export class ParticleModifier extends CommonMethodModifier implements ParticleAt
     _disturbanceFields_0_0value?: Array<DisturbanceFieldOptions> | undefined
     _emitter_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _emitter_0_0value?: Array<EmitterProperty> | undefined
+    _rippleFields_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _rippleFields_0_0value?: Array<RippleFieldOptions> | undefined
+    _velocityFields_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _velocityFields_0_0value?: Array<VelocityFieldOptions> | undefined
     applyModifierPatch(peerNode: PeerNode): void {
         super.applyModifierPatch(peerNode)
         const peer = peerNode as ArkParticlePeer
@@ -72,6 +76,40 @@ export class ParticleModifier extends CommonMethodModifier implements ParticleAt
                 }
             }
         }
+        if (this._rippleFields_0_flag != AttributeUpdaterFlag.INITIAL) {
+            switch (this._rippleFields_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.rippleFieldsAttribute((this._rippleFields_0_0value as Array<RippleFieldOptions> | undefined));
+                    this._rippleFields_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._rippleFields_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._rippleFields_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.rippleFieldsAttribute((undefined as Array<RippleFieldOptions> | undefined));
+                }
+            }
+        }
+        if (this._velocityFields_0_flag != AttributeUpdaterFlag.INITIAL) {
+            switch (this._velocityFields_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.velocityFieldsAttribute((this._velocityFields_0_0value as Array<VelocityFieldOptions> | undefined));
+                    this._velocityFields_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._velocityFields_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._velocityFields_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.velocityFieldsAttribute((undefined as Array<VelocityFieldOptions> | undefined));
+                }
+            }
+        }
     }
     mergeModifier(value: CommonMethodModifier): void {
         super.mergeModifier(value)
@@ -104,6 +142,30 @@ export class ParticleModifier extends CommonMethodModifier implements ParticleAt
                 }
             }
         }
+        if (modifier._rippleFields_0_flag != AttributeUpdaterFlag.INITIAL) {
+            switch (modifier._rippleFields_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.rippleFields(modifier._rippleFields_0_0value);
+                    break;
+                }
+                default: {
+                    this.rippleFields((undefined as Array<RippleFieldOptions> | undefined));
+                }
+            }
+        }
+        if (modifier._velocityFields_0_flag != AttributeUpdaterFlag.INITIAL) {
+            switch (modifier._velocityFields_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.velocityFields(modifier._velocityFields_0_0value);
+                    break;
+                }
+                default: {
+                    this.velocityFields((undefined as Array<VelocityFieldOptions> | undefined));
+                }
+            }
+        }
     }
     disturbanceFields(value: Array<DisturbanceFieldOptions> | undefined): this {
         if (((this._disturbanceFields_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -124,6 +186,28 @@ export class ParticleModifier extends CommonMethodModifier implements ParticleAt
         } else
         {
             this._emitter_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    rippleFields(value: Array<RippleFieldOptions> | undefined): this {
+        if (((this._rippleFields_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._rippleFields_0_flag = AttributeUpdaterFlag.UPDATE
+            this._rippleFields_0_0value = value
+        } else
+        {
+            this._rippleFields_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    velocityFields(value: Array<VelocityFieldOptions> | undefined): this {
+        if (((this._velocityFields_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._velocityFields_0_flag = AttributeUpdaterFlag.UPDATE
+            this._velocityFields_0_0value = value
+        } else
+        {
+            this._velocityFields_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

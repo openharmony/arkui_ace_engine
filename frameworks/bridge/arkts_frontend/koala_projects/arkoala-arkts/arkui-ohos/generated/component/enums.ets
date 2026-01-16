@@ -762,6 +762,9 @@ export enum DividerMode {
     FLOATING_ABOVE_MENU = 0,
     EMBEDDED_IN_MENU = 1
 }
+export enum EventQueryType {
+ 	ON_CLICK = 0
+}
 export enum TipsAnchorType {
     TARGET = 0,
     CURSOR = 1

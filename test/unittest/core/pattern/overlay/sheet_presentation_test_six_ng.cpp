@@ -1442,4 +1442,26 @@ HWTEST_F(SheetPresentationTestSixNg, SetSheetKey001, TestSize.Level1)
     EXPECT_EQ(hasValidTargetNode, false);
     SheetPresentationTestSixNg::TearDownTestCase();
 }
+
+/**
+ * @tc.name: SheetTransitionForOverlay002
+ * @tc.desc: SheetTransitionForOverlay
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestSixNg, SheetTransitionForOverlay002, TestSize.Level1)
+{
+    SheetPresentationTestSixNg::SetUpTestCase();
+        auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(V2::SHEET_PAGE_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<SheetPresentationPattern>(0, "", std::move(callback)));
+    ASSERT_NE(sheetNode, nullptr);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->InitSheetObject();
+    sheetPattern->sheetType_ = SheetType::SHEET_BOTTOM;
+    sheetPattern->SetNeedDoubleAvoidAfterLayout(false);
+    sheetPattern->SheetTransitionForOverlay(true, false);
+    EXPECT_EQ(sheetPattern->GetNeedDoubleAvoidAfterLayout(), true);
+    SheetPresentationTestSixNg::TearDownTestCase();
+}
 } // namespace OHOS::Ace::NG

@@ -211,6 +211,17 @@ public:
     {
         const auto& groupProperty = GetOrCreateBackground();
         groupProperty->propBlurStyleOption = bgBlurStyle;
+        sysOptions_ = sysOptions;
+    }
+
+    void UpdateBackBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
+    {
+        const auto& groupProperty = GetOrCreateBackground();
+        groupProperty->propBlurRadius = radius;
+        // see ./components_ng/render/adapter/rosen_render_context.cpp
+        // RosenRenderContext::UpdateBackBlur
+        backdropBlurOption = blurOption;
+        sysOptions_ = sysOptions;
     }
 
     void UpdateBackgroundEffect(
@@ -233,6 +244,13 @@ public:
     {
         const auto& groupProperty = GetOrCreateForeground();
         groupProperty->propMotionBlur = motionBlurOption;
+    }
+
+    void UpdateFrontBlur(const Dimension& radius, const BlurOption& blurOption, const SysOptions& sysOptions) override
+    {
+        const auto& groupProperty = GetOrCreateForeground();
+        groupProperty->propBlurRadius = radius;
+        foregroundBlurOption = blurOption;
     }
 
     int32_t CalcExpectedFrameRate(const std::string& scene, float speed)
@@ -270,6 +288,11 @@ public:
         animationsCount_ = count;
     }
 
+    const std::optional<SysOptions>& GetSysOptions() const
+    {
+        return sysOptions_;
+    }
+
     bool isVisible_ = true;
     bool hasDisappearTransition_ = false;
     RectF rect_;
@@ -280,8 +303,11 @@ public:
     std::function<void()> transitionOutCallback_;
     Color actualForegroundColor_;
 
+    BlurOption backdropBlurOption;
+    BlurOption foregroundBlurOption;
     RefPtr<NG::ChainedTransitionEffect> chainedTransitionEffect_ = nullptr;
     TransitionFinishCallback transitionUserCallback_;
+    std::optional<SysOptions> sysOptions_;
 private:
     size_t animationsCount_ = 0;
 };

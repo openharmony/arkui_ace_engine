@@ -5206,6 +5206,30 @@ void callManagedType_WebAttribute_onInterceptRequestSync(Ark_VMContext vmContext
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedUIStatesChangeHandler(Ark_Int32 resourceId, Ark_FrameNode node, Ark_Int32 currentUIStates)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_UIStatesChangeHandler);
+    argsSerializer.writeInt32(resourceId);
+    FrameNode_serializer::write(argsSerializer, node);
+    argsSerializer.writeInt32(currentUIStates);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedUIStatesChangeHandlerSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_FrameNode node, Ark_Int32 currentUIStates)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_UIStatesChangeHandler);
+    argsSerializer.writeInt32(resourceId);
+    FrameNode_serializer::write(argsSerializer, node);
+    argsSerializer.writeInt32(currentUIStates);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedCheckBoxModifierBuilder(Ark_Int32 resourceId, Ark_NativePointer parentNode, Ark_CheckBoxConfiguration config, Callback_Pointer_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -5505,7 +5529,7 @@ void callManagedGaugeModifierBuilderSync(Ark_VMContext vmContext, Ark_Int32 reso
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
-void callManagedGestureRecognizerJudgeBeginCallback(Ark_Int32 resourceId, Ark_BaseGestureEvent event, Ark_GestureRecognizer current, Array_GestureRecognizer recognizers, Callback_GestureJudgeResult_Void continuation)
+void callManagedGestureRecognizerJudgeBeginCallback(Ark_Int32 resourceId, Ark_BaseGestureEvent event, Ark_GestureRecognizer current, Array_GestureRecognizer recognizers, Opt_Array_TouchRecognizer touchRecognizers, Callback_GestureJudgeResult_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
     const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
@@ -5520,12 +5544,23 @@ void callManagedGestureRecognizerJudgeBeginCallback(Ark_Int32 resourceId, Ark_Ba
         const Ark_GestureRecognizer recognizersTmpElement = recognizers.array[recognizersCounterI];
         GestureRecognizer_serializer::write(argsSerializer, recognizersTmpElement);
     }
+    if (runtimeType(touchRecognizers) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto touchRecognizersTmpValue = touchRecognizers.value;
+        argsSerializer.writeInt32(touchRecognizersTmpValue.length);
+        for (int touchRecognizersTmpValueCounterI = 0; touchRecognizersTmpValueCounterI < touchRecognizersTmpValue.length; touchRecognizersTmpValueCounterI++) {
+            const Ark_TouchRecognizer touchRecognizersTmpValueTmpElement = touchRecognizersTmpValue.array[touchRecognizersTmpValueCounterI];
+            TouchRecognizer_serializer::write(argsSerializer, touchRecognizersTmpValueTmpElement);
+        }
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.callSync));
     enqueueCallback(10, &callbackBuffer);
 }
-void callManagedGestureRecognizerJudgeBeginCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_BaseGestureEvent event, Ark_GestureRecognizer current, Array_GestureRecognizer recognizers, Callback_GestureJudgeResult_Void continuation)
+void callManagedGestureRecognizerJudgeBeginCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_BaseGestureEvent event, Ark_GestureRecognizer current, Array_GestureRecognizer recognizers, Opt_Array_TouchRecognizer touchRecognizers, Callback_GestureJudgeResult_Void continuation)
 {
     SerializerBase argsSerializer = SerializerBase(nullptr);
     argsSerializer.writeInt32(10);
@@ -5537,6 +5572,17 @@ void callManagedGestureRecognizerJudgeBeginCallbackSync(Ark_VMContext vmContext,
     for (int recognizersCounterI = 0; recognizersCounterI < recognizers.length; recognizersCounterI++) {
         const Ark_GestureRecognizer recognizersTmpElement = recognizers.array[recognizersCounterI];
         GestureRecognizer_serializer::write(argsSerializer, recognizersTmpElement);
+    }
+    if (runtimeType(touchRecognizers) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto touchRecognizersTmpValue = touchRecognizers.value;
+        argsSerializer.writeInt32(touchRecognizersTmpValue.length);
+        for (int touchRecognizersTmpValueCounterI = 0; touchRecognizersTmpValueCounterI < touchRecognizersTmpValue.length; touchRecognizersTmpValueCounterI++) {
+            const Ark_TouchRecognizer touchRecognizersTmpValueTmpElement = touchRecognizersTmpValue.array[touchRecognizersTmpValueCounterI];
+            TouchRecognizer_serializer::write(argsSerializer, touchRecognizersTmpValueTmpElement);
+        }
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
     }
     argsSerializer.writeCallbackResource(continuation.resource);
     argsSerializer.writePointer(reinterpret_cast<Ark_NativePointer>(continuation.call));
@@ -9389,6 +9435,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Type_CommonMethod_onDragStart: return reinterpret_cast<Ark_NativePointer>(callManagedType_CommonMethod_onDragStart);
         case Kind_Type_NavigationAttribute_customNavContentTransition: return reinterpret_cast<Ark_NativePointer>(callManagedType_NavigationAttribute_customNavContentTransition);
         case Kind_Type_WebAttribute_onInterceptRequest: return reinterpret_cast<Ark_NativePointer>(callManagedType_WebAttribute_onInterceptRequest);
+        case Kind_UIStatesChangeHandler: return reinterpret_cast<Ark_NativePointer>(callManagedUIStatesChangeHandler);
         case Kind_UpdateTransitionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUpdateTransitionCallback);
         case Kind_VisibleAreaChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedVisibleAreaChangeCallback);
         case Kind_VoidCallback: return reinterpret_cast<Ark_NativePointer>(callManagedVoidCallback);
@@ -9739,6 +9786,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Type_CommonMethod_onDragStart: return reinterpret_cast<Ark_NativePointer>(callManagedType_CommonMethod_onDragStartSync);
         case Kind_Type_NavigationAttribute_customNavContentTransition: return reinterpret_cast<Ark_NativePointer>(callManagedType_NavigationAttribute_customNavContentTransitionSync);
         case Kind_Type_WebAttribute_onInterceptRequest: return reinterpret_cast<Ark_NativePointer>(callManagedType_WebAttribute_onInterceptRequestSync);
+        case Kind_UIStatesChangeHandler: return reinterpret_cast<Ark_NativePointer>(callManagedUIStatesChangeHandlerSync);
         case Kind_UpdateTransitionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUpdateTransitionCallbackSync);
         case Kind_VisibleAreaChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedVisibleAreaChangeCallbackSync);
         case Kind_VoidCallback: return reinterpret_cast<Ark_NativePointer>(callManagedVoidCallbackSync);

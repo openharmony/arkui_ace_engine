@@ -114,9 +114,18 @@ HWTEST_F(CommonMethodModifierTest10, DISABLED_setBackgroundCustomNodeBuilderTest
     CustomNodeBuilderTestHelper<CommonMethodModifierTest10> builderHelper2(this, frameNode);
     CustomNodeBuilderTestHelper<CommonMethodModifierTest10> builderHelper3(this, frameNode);
 
-    const auto builder1 = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper1.GetBuilder());
-    const auto builder2 = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper2.GetBuilder());
-    const auto builder3 = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper3.GetBuilder());
+    Ark_Union_CustomBuilder_ResourceColor arkUnion1;
+    TypeHelper::WriteToUnion<CustomNodeBuilder>(arkUnion1) = builderHelper1.GetBuilder();
+    const auto builder1 = Converter::ArkValue<Opt_Union_CustomBuilder_ResourceColor>(arkUnion1);
+
+    Ark_Union_CustomBuilder_ResourceColor arkUnion2;
+    TypeHelper::WriteToUnion<CustomNodeBuilder>(arkUnion2) = builderHelper2.GetBuilder();
+    const auto builder2 = Converter::ArkValue<Opt_Union_CustomBuilder_ResourceColor>(arkUnion2);
+
+    Ark_Union_CustomBuilder_ResourceColor arkUnion3;
+    TypeHelper::WriteToUnion<CustomNodeBuilder>(arkUnion3) = builderHelper3.GetBuilder();
+    const auto builder3 = Converter::ArkValue<Opt_Union_CustomBuilder_ResourceColor>(arkUnion3);
+
 
     // Testing builderHelper3
     modifier_->setBackground(node_, &builder3, nullptr);
@@ -146,7 +155,9 @@ HWTEST_F(CommonMethodModifierTest10, DISABLED_setBackgroundTestValidValues, Test
 
     int callsCount(0);
     CustomNodeBuilderTestHelper<CommonMethodModifierTest10> builderHelper(this, frameNode);
-    const auto builder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
+    Ark_Union_CustomBuilder_ResourceColor arkUnion;
+    TypeHelper::WriteToUnion<CustomNodeBuilder>(arkUnion) = builderHelper.GetBuilder();
+    const auto builder = Converter::ArkValue<Opt_Union_CustomBuilder_ResourceColor>(arkUnion);
 
     using OneTestStep = std::tuple<Opt_BackgroundOptions, std::string>;
     const std::vector<OneTestStep> testPlan = {

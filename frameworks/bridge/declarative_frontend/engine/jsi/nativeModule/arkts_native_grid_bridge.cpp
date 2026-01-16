@@ -17,6 +17,7 @@
 #include "base/utils/string_utils.h"
 #include "base/utils/utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
+#include "frameworks/bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/jsview/js_grid.h"
 #include "bridge/declarative_frontend/jsview/js_scroller.h"
 #include "core/components_ng/pattern/grid/grid_model_ng.h"
@@ -88,8 +89,9 @@ void ParseGetGridItemSize(const EcmaVM* vm, const Local<JSValueRef>& getSizeByIn
     if (getSizeByIndex->IsFunction(vm)) {
         Local<panda::FunctionRef> functionRef = getSizeByIndex->ToObject(vm);
         auto onGetIrregularSizeByIndex =
-            [func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
+            [vm, func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
                  Framework::JSRef<Framework::JSFunc>(Framework::JSFunc(functionRef)))](int32_t index) {
+                panda::LocalScope scope(vm);
                 GridItemSize gridItemSize;
                 auto itemIndex = Framework::JSRef<Framework::JSVal>::Make(Framework::ToJSValue(index));
                 auto result = func->ExecuteJS(1, &itemIndex);
@@ -108,8 +110,9 @@ void ParseGetGridItemRect(const EcmaVM* vm, const Local<JSValueRef>& getRectByIn
     if (getRectByIndex->IsFunction(vm)) {
         Local<panda::FunctionRef> functionRef = getRectByIndex->ToObject(vm);
         auto onGetRectByIndex =
-            [func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
+            [vm, func = AceType::MakeRefPtr<Framework::JsFunction>(Framework::JSRef<Framework::JSObject>(),
                  Framework::JSRef<Framework::JSFunc>(Framework::JSFunc(functionRef)))](int32_t index) {
+                panda::LocalScope scope(vm);
                 GridItemRect gridItemRect;
                 auto itemIndex = Framework::JSRef<Framework::JSVal>::Make(Framework::ToJSValue(index));
                 auto result = func->ExecuteJS(1, &itemIndex);
