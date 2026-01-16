@@ -467,6 +467,7 @@ public:
     virtual void SetFallbackLineSpacing(bool enabled) {};
     virtual void SetSelectedDragPreviewStyle(const Color& value) {};
     virtual void ResetSelectedDragPreviewStyle() {};
+    virtual void SetUserAccessibilityText() {};
 
 private:
     static std::unique_ptr<TextFieldModel> instance_;

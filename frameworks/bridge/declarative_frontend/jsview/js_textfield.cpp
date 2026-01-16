@@ -2689,6 +2689,12 @@ void JSTextField::SetSelectedDragPreviewStyle(const JSCallbackInfo& info)
     TextFieldModel::GetInstance()->SetSelectedDragPreviewStyle(color);
 }
 
+void JSTextField::SetAccessibilityText(const JSCallbackInfo& info)
+{
+    JSViewAbstract::JsAccessibilityText(info);
+    TextFieldModel::GetInstance()->SetUserAccessibilityText();
+}
+
 void JSTextField::SetSearchKeyboardAppearanceConfig(const JSCallbackInfo& info)
 {
     EcmaVM* vm = info.GetVm();
