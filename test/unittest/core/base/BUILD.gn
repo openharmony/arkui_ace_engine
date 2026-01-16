@@ -74,6 +74,7 @@ ace_unittest("ui_node_test_ng") {
   type = "new"
   module_output = "basic"
   sources = [
+    "ui_node_multi_thread_test.cpp",
     "ui_node_test_ng.cpp",
     "ui_node_test_ng_two.cpp",
   ]

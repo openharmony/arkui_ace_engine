@@ -23,7 +23,7 @@ namespace Ace {
 class StatisticEvent {
 public:
     explicit StatisticEvent(const std::string& eventName): eventName_(eventName) {};
-    ~StatisticEvent() = default;
+    virtual ~StatisticEvent() = default;
     void SetReportInterval(int32_t reportInterval);
     std::string& GetEventName();
     int32_t GetReportInterval() const;

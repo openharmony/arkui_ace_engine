@@ -44,7 +44,8 @@ struct StatisticEventInfo {
 class StatisticEventReporter : public std::enable_shared_from_this<StatisticEventReporter> {
 public:
     StatisticEventReporter();
-    ~StatisticEventReporter() = default;
+    explicit StatisticEventReporter(int32_t instanceId);
+    virtual ~StatisticEventReporter() = default;
     void SendEvent(StatisticEventType eventType);
     void TryReportStatisticEvents(PipelineBase* pipeline);
     void ForceReportStatisticEvents();

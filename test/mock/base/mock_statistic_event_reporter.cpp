@@ -21,6 +21,8 @@ namespace {
 
 StatisticEventReporter::StatisticEventReporter() {}
 
+StatisticEventReporter::StatisticEventReporter(int32_t instanceId) {}
+
 void StatisticEventReporter::SendEvent(StatisticEventType eventName) {}
 
 void StatisticEventReporter::ReportStatisticEvents(const std::map<StatisticEventType, StatisticEventInfo>& events) {}
