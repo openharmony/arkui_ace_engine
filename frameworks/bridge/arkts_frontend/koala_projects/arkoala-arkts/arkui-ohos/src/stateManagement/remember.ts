@@ -31,7 +31,7 @@ import { NullableObject } from './base/types';
 import { functionOverValue, unsafeCast } from '@koalaui/common';
 
 export class CascadeMemoState<Value> implements MemoState<Value> {
-    private manager: StateManager | undefined = undefined;
+    private manager: StateManager;
     private _value: Value;
     public dependencies: StateToScopes | undefined = undefined;
 
@@ -41,11 +41,12 @@ export class CascadeMemoState<Value> implements MemoState<Value> {
     }
 
     get value(): Value {
-        const manager = GlobalStateManager.instance;
-        const scope = unsafeCast<Dependency | undefined>(manager?.currentScope);
-        this.manager?.scheduleCallback(() => {
-            this.dependencies?.register(scope);
-        });
+        const scope = GlobalStateManager.instance.currentScope;
+        if (scope) {
+            this.manager.scheduleCallback(() => {
+                this.dependencies?.register(unsafeCast<Dependency>(scope));
+            });
+        }
         return this._value;
     }
 
