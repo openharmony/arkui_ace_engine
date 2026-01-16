@@ -79,17 +79,6 @@ export function parseNumber(str: string, name: string = 'number', verify: boolea
     throw new Error(`cannot parse ${name}: "${str}"`)
 }
 
-/**
- * An ArkTS-compliant replacement for {@link isFinite}.
- */
-export function isFiniteNumber(number: float64): boolean {
-    // With Node.js:
-    // isFiniteNumber(Number.NEGATIVE_INFINITY) == false
-    // isFiniteNumber(Number.POSITIVE_INFINITY) == false
-    // isFiniteNumber(NaN) == false
-    return number >= Number.MIN_SAFE_INTEGER && number <= Number.MAX_SAFE_INTEGER
-}
-
 export function getDistancePx(startX: float64, startY: float64, endX: float64, endY: float64): float64 {
     const cathetA = Math.abs(endX - startX)
     const cathetB = Math.abs(endY - startY)

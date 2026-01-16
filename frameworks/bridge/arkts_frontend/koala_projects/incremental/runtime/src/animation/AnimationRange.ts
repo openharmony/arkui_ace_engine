@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { float64, isFiniteNumber, lerp } from '@koalaui/common'
+import { float64, lerp } from '@koalaui/common'
 
 /**
  * Declares a function that can convert a state to a value.
@@ -57,10 +57,10 @@ export function NumberAnimationRange(from: float64, to: float64): AnimationRange
     if (from === 0 && to === 1) {
         return (state: float64) => state
     }
-    if (!isFiniteNumber(from)) {
+    if (!isFinite(from)) {
         throw new Error('illegal start value: ' + from)
     }
-    if (!isFiniteNumber(to)) {
+    if (!isFinite(to)) {
         throw new Error('illegal end value: ' + to)
     }
     return (weight: float64) => lerp(weight, from, to)
