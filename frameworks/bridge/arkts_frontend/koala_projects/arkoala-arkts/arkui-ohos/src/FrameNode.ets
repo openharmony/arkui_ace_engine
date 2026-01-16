@@ -2033,6 +2033,66 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    function getRadioAttribute(node: FrameNode): RadioAttribute | undefined {
+        if (node.getType() !== 'Radio') {
+            return undefined
+        }
+        let radioNode = node as RadioFrameNode
+        if (radioNode !== undefined) {
+            return radioNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    function getToggleAttribute(node: FrameNode): ToggleAttribute | undefined {
+        if (node.getType() !== 'Toggle') {
+            return undefined
+        }
+        let toggleNode = node as ToggleFrameNode
+        if (toggleNode !== undefined) {
+            return toggleNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    function getSliderAttribute(node: FrameNode): SliderAttribute | undefined {
+        if (node.getType() !== 'Slider') {
+            return undefined
+        }
+        let sliderNode = node as SliderFrameNode
+        if (sliderNode !== undefined) {
+            return sliderNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    function getButtonAttribute(node: FrameNode): ButtonAttribute | undefined {
+        if (node.getType() !== 'Button') {
+            return undefined
+        }
+        let buttonNode = node as ButtonFrameNode
+        if (buttonNode !== undefined) {
+            return buttonNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    function getCheckboxAttribute(node: FrameNode): CheckboxAttribute | undefined {
+        if (node.getType() !== "Checkbox") {
+            return undefined
+        }
+        let checkboxNode = node as CheckboxFrameNode
+        if (checkboxNode !== undefined) {
+            return checkboxNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     function createBadgeNode(context: UIContext): BadgeFrameNode {
         return new BadgeFrameNode(context, 'Badge', (node: FrameNode, type: ModifierType): ArkBadgeNode => {
             let arknode = new ArkBadgeNode();
