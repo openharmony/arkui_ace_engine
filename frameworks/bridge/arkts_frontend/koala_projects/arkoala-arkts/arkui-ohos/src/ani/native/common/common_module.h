@@ -130,6 +130,10 @@ ani_boolean GetKeyEventModifierKeyState(
     ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer, ani_array keys);
 void SetClickEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer);
 void SetTouchEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, ani_long pointer);
+ani_int GetCallingScopeUIContext(ani_env* env, [[maybe_unused]]ani_object obj);
+ani_int GetLastFocusedUIContext(ani_env* env, [[maybe_unused]]ani_object obj);
+ani_int GetLastForegroundUIContext(ani_env* env, [[maybe_unused]]ani_object obj);
+ani_array GetAllUIContexts(ani_env* env, [[maybe_unused]]ani_object obj);
 ani_array ResolveUIContext(ani_env* env, [[maybe_unused]]ani_object obj);
 } // namespace OHOS::Ace::Ani
 

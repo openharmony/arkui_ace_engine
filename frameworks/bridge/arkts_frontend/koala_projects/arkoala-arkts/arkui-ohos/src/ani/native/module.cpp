@@ -1650,6 +1650,26 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallbackWithCheck)
         },
         ani_native_function {
+            "_GetCallingScopeUIContext",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetCallingScopeUIContext)
+        },
+        ani_native_function {
+            "_GetLastFocusedUIContext",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetLastFocusedUIContext)
+        },
+        ani_native_function {
+            "_GetLastForegroundUIContext",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetLastForegroundUIContext)
+        },
+        ani_native_function {
+            "_GetAllUIContexts",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::GetAllUIContexts)
+        },
+        ani_native_function {
             "_ResolveUIContext",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ResolveUIContext)

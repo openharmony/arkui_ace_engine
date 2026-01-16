@@ -3,6 +3,7 @@ import { NavPathStack, NavigationOperation, NavBar } from 'arkui/framework'
 import { UIContext } from '@ohos/arkui/UIContext';
 import UIAbilityContext from 'application.UIAbilityContext';
 import { NavDestinationMode } from 'arkui/framework'
+import { HeightBreakpoint, WidthBreakpoint } from '/arkui/component/enums';
 import { int32 } from "@koalaui/common"
 import { Size } from 'arkui/Graphics'
 
@@ -25,6 +26,9 @@ declare namespace uiObserver {
         offScrollEvent(callback: Callback_<ScrollEventInfo>): void;
 
         onNavDestinationUpdate(callback: Callback_<NavDestinationInfo>): void;
+
+        onWindowSizeLayoutBreakpointChange(callback: Callback_<WindowSizeLayoutBreakpointInfo>): void;
+        offWindowSizeLayoutBreakpointChange(callback?: Callback_<WindowSizeLayoutBreakpointInfo>): void;
 
         offNavDestinationUpdate(callback?: Callback_<NavDestinationInfo>): void;
         onNavDestinationUpdate(
@@ -140,6 +144,11 @@ declare namespace uiObserver {
         size?: Size;
     }
 
+    export class WindowSizeLayoutBreakpointInfo {
+        widthBreakpoint: WidthBreakpoint;
+        heightBreakpoint: HeightBreakpoint;
+    }
+    
     export enum RouterPageState {
         ABOUT_TO_APPEAR = 0,
         ABOUT_TO_DISAPPEAR = 1,

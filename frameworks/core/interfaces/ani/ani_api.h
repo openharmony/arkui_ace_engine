@@ -604,6 +604,10 @@ struct ArkUIAniCommonModifier {
     void (*getKeyEventPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
     ani_boolean (*setClickEventPreventDefault)(ani_long nativePtr);
     ani_boolean (*setTouchEventPreventDefault)(ani_long nativePtr);
+    void(*getCallingScopeUIContext)(int32_t& instance);
+    void(*getLastFocusedUIContext)(int32_t& instance);
+    void(*getLastForegroundUIContext)(int32_t& instance);
+    void(*getAllInstanceIds)(std::vector<int32_t>& instance);
     void(*resolveUIContext)(std::vector<int32_t>& instance);
 };
 struct  ArkUICustomNodeInfo {
