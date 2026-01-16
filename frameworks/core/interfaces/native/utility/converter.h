@@ -590,10 +590,10 @@ namespace Converter {
     template<> BorderRadiusProperty Convert(const Ark_Resource& src);
     template<> BorderRadiusProperty Convert(const Ark_String& src);
     template<> BorderRadiusPropertyOpt Convert(const Ark_BorderRadiuses& src);
+    template<> BorderRadiusPropertyOpt Convert(const Ark_Float64& src);
     template<> BorderRadiusPropertyOpt Convert(const Ark_LengthMetrics& src);
     template<> BorderRadiusPropertyOpt Convert(const Ark_LocalizedBorderRadiuses& src);
     template<> BorderRadiusPropertyOpt Convert(const Ark_Number& src);
-    template<> BorderRadiusPropertyOpt Convert(const Ark_Float64& src);
     template<> BorderRadiusPropertyOpt Convert(const Ark_Resource& src);
     template<> BorderRadiusPropertyOpt Convert(const Ark_String& src);
     template<> BorderStyleProperty Convert(const Ark_BorderStyle& src);
@@ -1025,11 +1025,9 @@ namespace Converter {
     template<> void AssignCast(std::optional<WebRotateEffect>& dst, const Ark_WebRotateEffect& src);
     template<> void AssignCast(std::optional<WordBreak>& dst, const Ark_WordBreak& src);
     template<> void AssignCast(std::optional<XComponentType>& dst, const Ark_XComponentType& src);
-    template<> void AssignCast(std::optional<double>& dst, const Ark_Float64& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_LevelOrder& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src);
     template<> void AssignCast(std::optional<double>& dst, const Ark_String& src);
-    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<float>& dst, const Ark_Float64& src);
     template<> void AssignCast(std::optional<float>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<int32_t>& dst, const Ark_PageFlipMode& src);
     template<> void AssignCast(std::optional<int32_t>& dst, const Ark_UIContext& src);
@@ -1038,7 +1036,6 @@ namespace Converter {
     template<> void AssignCast(std::optional<std::string>& dst, const Ark_uniformTypeDescriptor_UniformDataType& src);
     template<> void AssignCast(std::optional<std::u16string>& dst, const Ark_Resource& src);
     template<> void AssignCast(std::optional<uint32_t>& dst, const Ark_Number& src);
-    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<float>& dst, const Ark_Float64& src);
 
     // Long declarations goes below. DO NOT ADD SHORT DECLARATIONS HERE!
     template<> void AssignCast(std::optional<AccessibilityActionInterceptResult>& dst,
@@ -1047,6 +1044,7 @@ namespace Converter {
         const Ark_ResponseRegionSupportedTool& src);
     template<> void AssignCast(std::optional<SharedTransitionEffectType>& dst,
         const Ark_SharedTransitionEffectType& src);
+    // DO NOT ADD NEW DECLARATIONS HERE!!! Add in alphabetic order above!
 
     template<typename From>
     std::optional<decltype(From().value)> GetOpt(const From& src)

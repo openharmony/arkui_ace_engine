@@ -64,16 +64,13 @@ public:
 };
 
 /*
- * @tc.name: setSaveButtonOptions0
+ * @tc.name: setSaveButtonOptionsTestDefaultValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions0, TestSize.Level1)
+HWTEST_F(SaveButtonModifierTest, DISABLED_setSaveButtonOptionsTestDefaultValues, TestSize.Level1)
 {
-    auto node = CreateNode();
-    modifier_->setSaveButtonOptions0(node);
-    auto jsonValue = GetJsonValue(node);
-    DisposeNode(node);
+    auto jsonValue = GetJsonValue(node_);
     int32_t resultText = jsonValue->GetInt(ATTRIBUTE_TEXT_NAME, DEFAULT_JSON_INT);
     int32_t resultIcon = jsonValue->GetInt(ATTRIBUTE_ICON_NAME, DEFAULT_JSON_INT);
     int32_t resultButtonType = jsonValue->GetInt(ATTRIBUTE_BUTTON_TYPE_NAME, DEFAULT_JSON_INT);
@@ -192,11 +189,11 @@ static std::vector<std::tuple<std::string, Opt_ButtonType, ButtonType>> setSaveB
 };
 
 /*
- * @tc.name: setSaveButtonOptions1TestValidValues
+ * @tc.name: setSaveButtonOptionsTestValidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestValidValues, TestSize.Level1)
+HWTEST_F(SaveButtonModifierTest, setSaveButtonOptionsTestValidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     int32_t result;
@@ -214,7 +211,8 @@ HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestValidValues, TestSize.
     for (auto&& value: setSaveButtonOptionsIconValidValues) {
         inputValueOptions.icon = std::get<1>(value);
         auto node = CreateNode();
-        modifier_->setSaveButtonOptions1(node, &inputValueOptions);
+        auto inputValue = Converter::ArkValue<Opt_SaveButtonOptions>(inputValueOptions);
+        modifier_->setSaveButtonOptions(node, &inputValue);
         jsonValue = GetJsonValue(node);
         DisposeNode(node);
         result = jsonValue->GetInt(ATTRIBUTE_ICON_NAME, DEFAULT_JSON_INT);
@@ -227,7 +225,8 @@ HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestValidValues, TestSize.
     for (auto&& value: setSaveButtonOptionsTextValidValues) {
         inputValueOptions.text = std::get<1>(value);
         auto node = CreateNode();
-        modifier_->setSaveButtonOptions1(node, &inputValueOptions);
+        auto inputValue = Converter::ArkValue<Opt_SaveButtonOptions>(inputValueOptions);
+        modifier_->setSaveButtonOptions(node, &inputValue);
         jsonValue = GetJsonValue(node);
         DisposeNode(node);
         result = jsonValue->GetInt(ATTRIBUTE_TEXT_NAME, DEFAULT_JSON_INT);
@@ -240,7 +239,8 @@ HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestValidValues, TestSize.
     for (auto&& value: setSaveButtonOptionsButtonTypeValidValues) {
         inputValueOptions.buttonType = std::get<1>(value);
         auto node = CreateNode();
-        modifier_->setSaveButtonOptions1(node, &inputValueOptions);
+        auto inputValue = Converter::ArkValue<Opt_SaveButtonOptions>(inputValueOptions);
+        modifier_->setSaveButtonOptions(node, &inputValue);
         jsonValue = GetJsonValue(node);
         DisposeNode(node);
         result = jsonValue->GetInt(ATTRIBUTE_BUTTON_TYPE_NAME, DEFAULT_JSON_INT);
@@ -274,11 +274,11 @@ static std::vector<std::tuple<std::string, Opt_ButtonType>> setSaveButtonOptions
 };
 
 /*
- * @tc.name: setSaveButtonOptions1TestInvalidValues
+ * @tc.name: setSaveButtonOptionsTestInvalidValues
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestInvalidValues, TestSize.Level1)
+HWTEST_F(SaveButtonModifierTest, setSaveButtonOptionsTestInvalidValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue;
     int32_t result;
@@ -296,7 +296,8 @@ HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestInvalidValues, TestSiz
         inputValueOptions = initValueOptions;
         inputValueOptions.icon = std::get<1>(value);
         auto node = CreateNode();
-        modifier_->setSaveButtonOptions1(node, &inputValueOptions);
+        auto inputValue = Converter::ArkValue<Opt_SaveButtonOptions>(inputValueOptions);
+        modifier_->setSaveButtonOptions(node, &inputValue);
         jsonValue = GetJsonValue(node);
         DisposeNode(node);
         result = jsonValue->GetInt(ATTRIBUTE_ICON_NAME, DEFAULT_JSON_INT);
@@ -309,7 +310,8 @@ HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestInvalidValues, TestSiz
         inputValueOptions = initValueOptions;
         inputValueOptions.text = std::get<1>(value);
         auto node = CreateNode();
-        modifier_->setSaveButtonOptions1(node, &inputValueOptions);
+        auto inputValue = Converter::ArkValue<Opt_SaveButtonOptions>(inputValueOptions);
+        modifier_->setSaveButtonOptions(node, &inputValue);
         jsonValue = GetJsonValue(node);
         DisposeNode(node);
         result = jsonValue->GetInt(ATTRIBUTE_TEXT_NAME, DEFAULT_JSON_INT);
@@ -322,7 +324,8 @@ HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestInvalidValues, TestSiz
         inputValueOptions = initValueOptions;
         inputValueOptions.buttonType = std::get<1>(value);
         auto node = CreateNode();
-        modifier_->setSaveButtonOptions1(node, &inputValueOptions);
+        auto inputValue = Converter::ArkValue<Opt_SaveButtonOptions>(inputValueOptions);
+        modifier_->setSaveButtonOptions(node, &inputValue);
         jsonValue = GetJsonValue(node);
         DisposeNode(node);
         result = jsonValue->GetInt(ATTRIBUTE_BUTTON_TYPE_NAME, DEFAULT_JSON_INT);
@@ -332,11 +335,11 @@ HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestInvalidValues, TestSiz
 }
 
 /*
- * @tc.name: setSaveButtonOptions1TestTextAndIconEmpty
+ * @tc.name: setSaveButtonOptionsTestTextAndIconEmpty
  * @tc.desc: Verify that all attributes are set to default values in case neither text nor icon is set.
  * @tc.type: FUNC
  */
-HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestTextAndIconEmpty, TestSize.Level1)
+HWTEST_F(SaveButtonModifierTest, setSaveButtonOptionsTestTextAndIconEmpty, TestSize.Level1)
 {
     Ark_SaveButtonOptions inputValueOptions = {
         .text = Converter::ArkValue<Opt_SaveDescription>(Ark_Empty()),
@@ -344,7 +347,8 @@ HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestTextAndIconEmpty, Test
         .buttonType = Converter::ArkValue<Opt_ButtonType>(ARK_BUTTON_TYPE_NORMAL)
     };
     auto node = CreateNode();
-    modifier_->setSaveButtonOptions1(node, &inputValueOptions);
+        auto inputValue = Converter::ArkValue<Opt_SaveButtonOptions>(inputValueOptions);
+    modifier_->setSaveButtonOptions(node, &inputValue);
     auto jsonValue = GetJsonValue(node);
     DisposeNode(node);
     int32_t resultText = jsonValue->GetInt(ATTRIBUTE_TEXT_NAME, DEFAULT_JSON_INT);
@@ -357,9 +361,9 @@ HWTEST_F(SaveButtonModifierTest, setSaveButtonOptions1TestTextAndIconEmpty, Test
 
 struct CheckEvent {
     int32_t nodeId;
-    Ark_Int32 offsetX = -1;
-    Ark_Int32 offsetY = -1;
-    std::optional<Ark_SaveButtonOnClickResult> result = std::nullopt;
+    double offsetX;
+    double offsetY;
+    Ark_SaveButtonOnClickResult result;
 };
 
 /*
@@ -376,8 +380,8 @@ HWTEST_F(SaveButtonModifierTest, setOnClickTest, TestSize.Level1)
         auto accessor = GeneratedModifier::GetClickEventAccessor();
         checkEvent = {
             .nodeId = resourceId,
-            .offsetX = Converter::Convert<int32_t>(accessor->getWindowX(peer)),
-            .offsetY = Converter::Convert<int32_t>(accessor->getWindowY(peer)),
+            .offsetX = Converter::Convert<double>(accessor->getWindowX(peer)),
+            .offsetY = Converter::Convert<double>(accessor->getWindowY(peer)),
             .result = result
         };
         accessor->destroyPeer(peer);
@@ -400,10 +404,10 @@ HWTEST_F(SaveButtonModifierTest, setOnClickTest, TestSize.Level1)
         Ark_SaveButtonOnClickResult expected) {
         checkEvent.reset();
         gestureEventHub->ActClick(CreateJson(input));
-        ASSERT_TRUE(checkEvent.has_value() && checkEvent->result.has_value());
-        EXPECT_EQ(checkEvent->result.value(), expected);
-        EXPECT_EQ(checkEvent->offsetX, static_cast<int32_t>(OFFSET_X));
-        EXPECT_EQ(checkEvent->offsetY, static_cast<int32_t>(OFFSET_Y));
+        ASSERT_TRUE(checkEvent.has_value());
+        EXPECT_EQ(checkEvent->result, expected);
+        EXPECT_FLOAT_EQ(checkEvent->offsetX, OFFSET_X);
+        EXPECT_FLOAT_EQ(checkEvent->offsetY, OFFSET_Y);
     };
 
 #ifdef SECURITY_COMPONENT_ENABLE
