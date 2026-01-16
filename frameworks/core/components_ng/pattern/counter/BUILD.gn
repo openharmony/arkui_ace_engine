@@ -29,15 +29,13 @@ build_component_ng("counter_pattern_ng") {
     "bridge/counter_dynamic_module.cpp",
   ]
 
-  deps = [ "$ace_root/interfaces/inner_api/ace:ace_forward_compatibility" ]
-
   if (!is_arkui_x) {
     ark_sources += [
       "bridge/counter_model_impl.cpp",
       "bridge/counter_static_modifier.cpp",
     ]
     if (!build_ohos_sdk) {
-      deps += [
+      deps = [
       "$ace_root/interfaces/inner_api/ui_session:ui_session",
       ]
     }
