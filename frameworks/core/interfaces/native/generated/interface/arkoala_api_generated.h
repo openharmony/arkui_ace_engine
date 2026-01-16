@@ -2664,6 +2664,8 @@ typedef struct Ark_Union_Color_String_Resource_I64 Ark_Union_Color_String_Resour
 typedef struct Opt_Union_Color_String_Resource_I64 Opt_Union_Color_String_Resource_I64;
 typedef struct Ark_Union_ColumnOptions_ColumnOptionsV2 Ark_Union_ColumnOptions_ColumnOptionsV2;
 typedef struct Opt_Union_ColumnOptions_ColumnOptionsV2 Opt_Union_ColumnOptions_ColumnOptionsV2;
+typedef struct Ark_Union_CustomBuilder_ComponentContentBase Ark_Union_CustomBuilder_ComponentContentBase;
+typedef struct Opt_Union_CustomBuilder_ComponentContentBase Opt_Union_CustomBuilder_ComponentContentBase;
 typedef struct Ark_Union_CustomBuilder_ComponentContent Ark_Union_CustomBuilder_ComponentContent;
 typedef struct Opt_Union_CustomBuilder_ComponentContent Opt_Union_CustomBuilder_ComponentContent;
 typedef struct Ark_Union_CustomBuilder_DragItemInfo Ark_Union_CustomBuilder_DragItemInfo;
@@ -31636,9 +31638,9 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUINavPathInfoAccessor* (*getNavPathInfoAccessor)();
     const GENERATED_ArkUINavPathStackAccessor* (*getNavPathStackAccessor)();
     const GENERATED_ArkUINodeContainerOpsAccessor* (*getNodeContainerOpsAccessor)();
+    const GENERATED_ArkUINumericTextTransitionAccessor* (*getNumericTextTransitionAccessor)();
     const GENERATED_ArkUINodeContentExtenderAccessor* (*getNodeContentExtenderAccessor)();
     const GENERATED_ArkUIOffscreenCanvasAccessor* (*getOffscreenCanvasAccessor)();
-    const GENERATED_ArkUINumericTextTransitionAccessor* (*getNumericTextTransitionAccessor)();
     const GENERATED_ArkUIOffscreenCanvasRenderingContext2DAccessor* (*getOffscreenCanvasRenderingContext2DAccessor)();
     const GENERATED_ArkUIPanGestureEventAccessor* (*getPanGestureEventAccessor)();
     const GENERATED_ArkUIPanGestureOptionsAccessor* (*getPanGestureOptionsAccessor)();
