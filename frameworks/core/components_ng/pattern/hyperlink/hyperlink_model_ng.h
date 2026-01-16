@@ -30,6 +30,7 @@ public:
     void SetResponseRegion(bool isUserSetResponseRegion) override;
     static void SetColor(FrameNode* frameNode, const Color& value);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
+    static void SetResponseRegion(FrameNode* frameNode, bool isUserSetResponseRegion);
     static void SetResponseRegion(
         FrameNode* frameNode, const std::vector<DimensionRect>& regions, bool isUserSetResponseRegion);
     static void PopStatic() {};

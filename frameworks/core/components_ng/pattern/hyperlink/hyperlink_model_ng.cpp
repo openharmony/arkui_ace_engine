@@ -14,6 +14,7 @@
  */
 
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
+#include "ui/base/utils/utils.h"
 
 #include "core/components/hyperlink/hyperlink_theme.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_pattern.h"
@@ -123,6 +124,13 @@ void HyperlinkModelNG::SetDraggable(FrameNode* frameNode, bool draggable)
 void HyperlinkModelNG::SetResponseRegion(bool isUserSetResponseRegion)
 {
     auto textPattern = ViewStackProcessor::GetInstance()->GetMainFrameNodePattern<TextPattern>();
+    CHECK_NULL_VOID(textPattern);
+    textPattern->SetIsUserSetResponseRegion(isUserSetResponseRegion);
+}
+
+void HyperlinkModelNG::SetResponseRegion(FrameNode* frameNode, bool isUserSetResponseRegion)
+{
+    auto textPattern = frameNode->GetPattern<TextPattern>();
     CHECK_NULL_VOID(textPattern);
     textPattern->SetIsUserSetResponseRegion(isUserSetResponseRegion);
 }

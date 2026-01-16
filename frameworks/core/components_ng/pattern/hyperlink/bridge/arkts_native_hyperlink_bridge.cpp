@@ -14,7 +14,10 @@
  */
 
 #include "core/components_ng/pattern/hyperlink/bridge/arkts_native_hyperlink_bridge.h"
+#include "jsnapi_expo.h"
+#include "ui/base/utils/utils.h"
 
+#include "core/components_ng/pattern/text/text_pattern.h"
 #include "base/log/ace_scoring_log.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/hyperlink/hyperlink_model_ng.h"
@@ -27,7 +30,6 @@ namespace {
 constexpr int NUM_0 = 0;
 constexpr int NUM_1 = 1;
 constexpr int NUM_2 = 2;
-constexpr uint32_t DIMENSION_LENGTH = 4;
 
 bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
 {
@@ -241,26 +243,8 @@ ArkUINativeModuleValue HyperlinkBridge::SetResponseRegion(ArkUIRuntimeCallInfo* 
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
 
     if (IsJsView(runtimeCallInfo->GetCallArgRef(NUM_0), vm)) {
-        Local<JSValueRef> valueOrArrayArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-
-        uint32_t arrayLength = 0;
-        if (valueOrArrayArg->IsArray(vm)) {
-            auto array = static_cast<Local<panda::ArrayRef>>(valueOrArrayArg);
-            arrayLength = DIMENSION_LENGTH * array->Length(vm);
-        } else if (valueOrArrayArg->IsObject(vm)) {
-            arrayLength = DIMENSION_LENGTH;
-        }
-
-        ArkUI_Float32 regionArray[arrayLength];
-        int32_t regionUnits[arrayLength];
-        auto nativeNode = nodePtr(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        if (ArkTSUtils::ParseJsResponseRegion(vm, valueOrArrayArg, regionArray, regionUnits, arrayLength)) {
-            GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkResponseRegion(
-                nativeNode, regionArray, regionUnits, arrayLength
-            );
-        } else {
-            GetArkUINodeModifiers()->getHyperlinkModifier()->resetHyperlinkResponseRegion(nativeNode);
-        }
+        bool boolValue = runtimeCallInfo->GetCallArgRef(NUM_0)->ToBoolean(vm)->Value();
+        GetArkUINodeModifiers()->getHyperlinkModifier()->setHyperlinkResponseRegionEnabled(boolValue);
     } else {
         Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
         CHECK_NULL_RETURN(nodeArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));

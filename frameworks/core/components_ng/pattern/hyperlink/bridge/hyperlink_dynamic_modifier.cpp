@@ -114,6 +114,13 @@ void ResetHyperlinkDraggable(ArkUINodeHandle node)
     HyperlinkModelNG::SetDraggable(frameNode, false);
 }
 
+void SetHyperlinkResponseRegionEnabled(ArkUINodeHandle node, ArkUI_Bool isUserSetResponseRegion)
+{
+    auto frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    HyperlinkModelNG::SetResponseRegion(frameNode, isUserSetResponseRegion);
+}
+
 void SetHyperlinkResponseRegion(
     ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length)
 {
@@ -133,7 +140,6 @@ void SetHyperlinkResponseRegion(
         DimensionRect dimenRect(widthDimen, heightDimen, offsetDimen);
         region.emplace_back(dimenRect);
     }
-    ViewAbstract::SetResponseRegion(region);
     HyperlinkModelNG::SetResponseRegion(frameNode, region, true);
 }
 
@@ -218,6 +224,7 @@ const ArkUIHyperlinkModifier* GetHyperlinkDynamicModifier()
             .resetHyperlinkDraggable = nullptr,
             .setHyperlinkResponseRegion = SetHyperlinkResponseRegionImpl,
             .resetHyperlinkResponseRegion = nullptr,
+            .setHyperlinkResponseRegionEnabled = nullptr,
             .createHyperlinkFrameNode = CreateHyperlinkFrameNode,
             .pop = PopImpl
         };
@@ -236,6 +243,7 @@ const ArkUIHyperlinkModifier* GetHyperlinkDynamicModifier()
         .resetHyperlinkDraggable = ResetHyperlinkDraggable,
         .setHyperlinkResponseRegion = SetHyperlinkResponseRegion,
         .resetHyperlinkResponseRegion = ResetHyperlinkResponseRegion,
+        .setHyperlinkResponseRegionEnabled = SetHyperlinkResponseRegionEnabled,
         .createHyperlinkFrameNode = CreateHyperlinkFrameNode,
         .pop = Pop
     };

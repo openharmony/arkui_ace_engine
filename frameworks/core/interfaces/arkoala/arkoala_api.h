@@ -6453,10 +6453,11 @@ struct ArkUIHyperlinkModifier {
     void (*setHyperlinkColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
     void (*resetHyperlinkColor)(ArkUINodeHandle node);
     void (*setHyperlinkDraggable)(ArkUINodeHandle node, ArkUI_Bool draggable);
-    void (*resetHyperlinkDraggable)(ArkUINodeHandle node);
+    void (*resetHyperlinkDraggable)(ArkUINodeHandle node, ArkUI_Bool isUserSetResponseRegion);
     void (*setHyperlinkResponseRegion)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
     void (*resetHyperlinkResponseRegion)(ArkUINodeHandle node);
+    void (*setHyperlinkResponseRegionEnabled)(ArkUINodeHandle node);
     ArkUINodeHandle (*createHyperlinkFrameNode)(ArkUI_Int32 nodeId);
     void (*pop)();
 };
