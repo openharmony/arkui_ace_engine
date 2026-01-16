@@ -1859,7 +1859,21 @@ static void OnNavDestinationUpdateWithIdContext([[maybe_unused]] ani_env* env,
 
     static std::once_flag onceFlag;
     std::call_once(onceFlag, [&env]() {
-        auto navigationStateChangeCalback = [env](const NG::NavDestinationInfo& info) {
+        ani_vm* vm = nullptr;
+        ani_status status;
+        if ((status = env->GetVM(&vm)) != ANI_OK || !vm) {
+            LOGE("failed to get vm in OnNavDestinationUpdateWithIdContext, status:%{public}d",
+                static_cast<int32_t>(status));
+            return;
+        }
+        auto navigationStateChangeCalback = [vm](const NG::NavDestinationInfo& info) {
+            ani_env* env = nullptr;
+            ani_status status;
+            if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || !env) {
+                LOGE("failed to get ani env in OnNavDestinationUpdateWithIdContext, status:%{public}d",
+                    static_cast<int32_t>(status));
+                return;
+            }
             UiObserver::HandleNavigationStateChange(env, info);
         };
         NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFuncForAni(navigationStateChangeCalback);
@@ -1930,7 +1944,20 @@ static void onNavDestinationUpdateContext([[maybe_unused]] ani_env* env, ani_fn_
 
     static std::once_flag onceFlag;
     std::call_once(onceFlag, [&env]() {
-        auto navigationStateChangeCalback = [env](const NG::NavDestinationInfo& info) {
+        ani_vm* vm = nullptr;
+        ani_status status;
+        if ((status = env->GetVM(&vm)) != ANI_OK || !vm) {
+            LOGE("failed to get vm in onNavDestinationUpdateContext, status:%{public}d", static_cast<int32_t>(status));
+            return;
+        }
+        auto navigationStateChangeCalback = [vm](const NG::NavDestinationInfo& info) {
+            ani_env* env = nullptr;
+            ani_status status;
+            if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || !env) {
+                LOGE("failed to get ani env in onNavDestinationUpdateContext, status:%{public}d",
+                    static_cast<int32_t>(status));
+                return;
+            }
             UiObserver::HandleNavigationStateChange(env, info);
         };
         NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFuncForAni(navigationStateChangeCalback);
@@ -2480,10 +2507,26 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
         observer->HandleDidClick(env);
     };
     NG::UIObserverHandler::GetInstance().SetDidClickHandleFuncForAni(didClickCallback);
-    auto navigationStateChangeCalback = [observer, env](const NG::NavDestinationInfo& info) {
-        observer->HandleNavigationStateChange(env, info);
-    };
-    NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFuncForAni(navigationStateChangeCalback);
+
+    do {
+        ani_vm* vm = nullptr;
+        ani_status status;
+        if ((status = env->GetVM(&vm)) != ANI_OK || !vm) {
+            LOGE("failed to get ani vm in CreateObserver, status:%{public}d", static_cast<int32_t>(status));
+            break;
+        }
+        auto navigationStateChangeCalback = [observer, vm](const NG::NavDestinationInfo& info) {
+            ani_env* env = nullptr;
+            ani_status status;
+            if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || !env) {
+                LOGE("failed to get ani env in CreateObserver, status:%{public}d",
+                    static_cast<int32_t>(status));
+                return;
+            }
+            observer->HandleNavigationStateChange(env, info);
+        };
+        NG::UIObserverHandler::GetInstance().SetHandleNavigationChangeFuncForAni(navigationStateChangeCalback);
+    } while (false);
 
     auto scrollEventCallback = [observer, env](const NG::ScrollEventInfo &info) {
         observer->HandleScrollEvent(env, info);
