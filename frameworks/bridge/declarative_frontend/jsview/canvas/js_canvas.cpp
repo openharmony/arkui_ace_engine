@@ -153,13 +153,9 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
                 return;
             }
             auto frameNode = node.Upgrade();
-            if (!frameNode) {
-                return;
-            }
+            CHECK_NULL_VOID(frameNode);
             auto pattern = frameNode->GetPattern<NG::CanvasPattern>();
-            if (!pattern) {
-                return;
-            }
+            CHECK_NULL_VOID(pattern);
             JSRef<JSObject> jsDrawingContext = JSClass<JSDrawingRenderingContext>::NewInstance();
             auto drawingContext = Referenced::Claim(jsDrawingContext->Unwrap<JSDrawingRenderingContext>());
             drawingContext->SetBuiltIn(true);
@@ -167,7 +163,11 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
             drawingContext->SetCanvasPattern(pattern);
             drawingContext->SetUnit(unit);
             pattern->SetUpdateContextCallback(
-                [drawingContext = drawingContext](CanvasUnit unit) { drawingContext->SetUnit(unit); });
+                [weakDrawingContext = AceType::WeakClaim(AceType::RawPtr(drawingContext))](CanvasUnit unit) {
+                    auto drawingContext = weakDrawingContext.Upgrade();
+                    CHECK_NULL_VOID(drawingContext);
+                    drawingContext->SetUnit(unit);
+                });
             pattern->SetRSCanvasForDrawingContext();
             JSRef<JSVal> params[] = { jsDrawingContext };
             func->ExecuteJS(1, params);

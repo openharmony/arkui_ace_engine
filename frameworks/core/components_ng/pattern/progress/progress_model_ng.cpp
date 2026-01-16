@@ -35,6 +35,7 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PROGRESS_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::PROGRESS_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<ProgressPattern>(); });
+    ACE_UINODE_TRACE(frameNode);
     stack->Push(frameNode);
 
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, Value, value);
@@ -649,6 +650,7 @@ void ProgressModelNG::SetBuilderFunc(FrameNode* frameNode, ProgressMakeCallback&
 void ProgressModelNG::ProgressInitialize(
     FrameNode* frameNode, double min, double value, double cachedValue, double max, NG::ProgressType type)
 {
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
 
@@ -664,11 +666,7 @@ void ProgressModelNG::ProgressInitialize(
     RefPtr<ProgressTheme> theme = pipeline->GetTheme<ProgressTheme>(frameNode->GetThemeScopeId());
     auto progressFocusNode = frameNode->GetFocusHub();
     CHECK_NULL_VOID(progressFocusNode);
-    if (type == ProgressType::CAPSULE) {
-        progressFocusNode->SetFocusable(true);
-    } else {
-        progressFocusNode->SetFocusable(false);
-    }
+    progressFocusNode->SetFocusable(type == ProgressType::CAPSULE);
 
     auto eventHub = ViewStackProcessor::GetInstance()->GetMainFrameNodeInputEventHub();
     CHECK_NULL_VOID(eventHub);

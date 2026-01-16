@@ -147,6 +147,8 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:menuitemgroup",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:sidebarcontainer",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:marquee",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:stepper",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:stepperitem",
     ]
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
@@ -167,6 +169,8 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arkmenuitemgroup.abc",
       "${out_path}/arkui/ace_engine/arksidebarcontainer.abc",
       "${out_path}/arkui/ace_engine/arkmarquee.abc",
+      "${out_path}/arkui/ace_engine/arkstepper.abc",
+      "${out_path}/arkui/ace_engine/arkstepperitem.abc"
     ]
 
     # Output path description: 

@@ -14,24 +14,31 @@
 import("//build/ohos.gni")
 import("//build/templates/abc/ohos_abc.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/npm_op/npm_op.gni")
 import("files_to_watch.gni")
 
-action("build_js_x_node") {
-    script = "build.py"
-    inputs = ark_x_node_files_to_watch
-    outputs = ["$target_out_dir/jsXNode.js"]
-    deps = [ "$ace_root/frameworks/bridge/declarative_frontend:run_state_mgmt_build" ]
-    args = [
-      rebase_path("./"),
-      rebase_path("./node_modules"),
-      rebase_path("$target_out_dir"),
-    ]
+npm_install_op("npm_install_x_node") {
+  project_path = rebase_path("./")
+}
+
+npm_run_op("npm_build_x_node") {
+  cmd = "build"
+  project_path = rebase_path("./")
+  watched_files = ark_x_node_files_to_watch
+  out_dir = "dist"
+  out_file = "jsXNode.js"
+  deps = [
+    "$ace_root/frameworks/bridge/declarative_frontend:run_state_mgmt_build",
+    # the host_toolchain is needed to avoid file corruption caused by parallel operations.
+    ":npm_install_x_node($host_toolchain)"
+  ]
 }
 
 ohos_abc("x_node") {
-  sources = [ "$target_out_dir/jsXNode.js" ]
+  sources = [ "$target_gen_dir/jsXNode.js" ]
   output_name = "node"
-  deps = [":build_js_x_node"]
+  deps = [":npm_build_x_node"]
+
   install_images = [ "system" ]
   module_install_dir = "etc/abc/arkui"
   subsystem_name = ace_engine_subsystem

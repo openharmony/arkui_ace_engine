@@ -45,6 +45,7 @@ public:
     void HandleUnregisterContentChangeCallback(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleGetCurrentImagesShowing(sptr<IUiContentService> service, std::vector<std::string> params);
     void HandleGetImagesById(sptr<IUiContentService> service, std::vector<std::string> params);
+    void HandleGetWebInfoByRequest(sptr<IUiContentService> service, std::vector<std::string> params);
 
 private:
     DECLEAR_SYSTEM_ABILITY(UiSaService);
@@ -56,7 +57,6 @@ private:
 
     std::mutex uiContentRemoteObjMapMtx_;
     std::map<int32_t, std::pair<sptr<IRemoteObject>, sptr<Ace::IUiContentService>>> uiContentRemoteObjMap_;
-    std::string visibleInspectorTreeInfo_ = "";
 };
 } // namespace OHOS::Ace
 #endif // UI_SA_SERVICE_H

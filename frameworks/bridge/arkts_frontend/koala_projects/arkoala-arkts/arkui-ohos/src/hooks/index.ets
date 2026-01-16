@@ -774,8 +774,11 @@ export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: W
   WaterFlowHandWritten.hookWaterFlowOptionsImpl(node, options)
 }
 
-export function hookListItemGroupOptionsImpl(node: ArkListItemGroupComponent, options: ListItemGroupOptions | undefined): void {
-  ListItemGroupHandWritten.hookListItemGroupOptionsImpl(node, options)
+export function hookListItemGroupOptionsImpl(
+    node: ArkListItemGroupComponent,
+    options: ListItemGroupOptions | undefined
+): void {
+    ListItemGroupHandWritten.hookListItemGroupOptionsImpl(node, options)
 }
 
 export function hookTextPickerDivider(receiver: ArkTextPickerComponent | ArkTextPickerPeer,

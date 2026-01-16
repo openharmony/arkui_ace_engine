@@ -106,12 +106,12 @@ void SpanString::RemoveCustomSpan()
 }
 void SpanString::SetFramNode(const WeakPtr<NG::FrameNode>& frameNode)
 {
-    framNode_ = frameNode;
+    frameNode_ = frameNode;
 }
 
 void SpanString::MarkDirtyFrameNode()
 {
-    auto frameNode = framNode_.Upgrade();
+    auto frameNode = frameNode_.Upgrade();
     CHECK_NULL_VOID(frameNode);
     frameNode->MarkDirtyNode(NG::PROPERTY_UPDATE_RENDER);
 }

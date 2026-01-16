@@ -29,14 +29,16 @@
 #include "interfaces/inner_api/ace_kit/include/ui/base/utils/utils.h"
 
 namespace OHOS::Ace {
-
+namespace {
 const bool REGISTER_RESULT = SystemAbility::MakeAndRegisterAbility(&UiSaService::GetInstance());
 const std::string UI_SA_PATH = "/data/service/el1/public/ui_sa/";
 constexpr int32_t PARAMS_OFFSET = 1;
 constexpr int32_t SIMPLIFYTREE_WITH_PARAMCONFIG = 5;
 constexpr int32_t SEND_COMMAND_WITH_NODEID = 3;
 constexpr int32_t SEND_COMMAND_WITHOUT_NODEID = 2;
-constexpr int32_t COMPONENT_CHANGE_EVENT_WITH_CONFIG = 3;
+constexpr int32_t CONTENT_CHANGE_EVENT_WITH_CONFIG = 3;
+constexpr int32_t GET_WEB_INFO_BY_REQUEST_PARAMS = 3;
+} // namespace
 
 const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
     { "Connect", &UiSaService::HandleConnect },
@@ -48,6 +50,7 @@ const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
     { "UnregisterContentChangeCallback", &UiSaService::HandleUnregisterContentChangeCallback },
     { "GetCurrentImagesShowing", &UiSaService::HandleGetCurrentImagesShowing },
     { "GetImagesById", &UiSaService::HandleGetImagesById },
+    { "GetWebInfoByRequest", &UiSaService::HandleGetWebInfoByRequest },
 };
 
 UiSaService::UiSaService() : SystemAbility(UI_SA_ID, true) {}
@@ -83,7 +86,7 @@ std::string GetCurrentTimestampStr()
     if (!local) {
         return "";
     }
-    std::strftime(timeStr, MAX_TIME_STR_LEN, "%Y-%m-%d %H:%M:%S", local);
+    std::strftime(timeStr, MAX_TIME_STR_LEN, "%Y-%m-%d_%H-%M-%S", local);
     std::stringstream oss;
     // milliseconds in timestr should be 3 characters length
     oss << timeStr << "." << std::setw(3) << std::setfill('0') << (timestamp % SEC_TO_MILLISEC);
@@ -102,11 +105,11 @@ sptr<Ace::IUiContentService> UiSaService::getArkUIService(int32_t windowId)
         return service;
     }
     auto ret = OHOS::Rosen::WindowManager::GetInstance().GetUIContentRemoteObj(windowId, tmpRemoteObj);
+    LOGI("through uiSa, get UIContentRemoteObj. ret=%{public}u", static_cast<uint32_t>(ret));
     if (tmpRemoteObj == nullptr) {
-        LOGI("through uiSa, tempRemoteObj is null");
+        LOGW("through uiSa, tempRemoteObj is null");
         return nullptr;
     }
-    LOGI("through uiSa, get UIContentRemoteObj. ret=%{public}u", static_cast<uint32_t>(ret));
     // add death callback
     auto uiContentProxyRecipient = new UiContentProxyRecipient([windowId, this]() {
         std::unique_lock<std::mutex> lock(uiContentRemoteObjMapMtx_);
@@ -168,14 +171,8 @@ void UiSaService::HandleConnect(sptr<IUiContentService> service, std::vector<std
 void UiSaService::HandleGetVisibleInspectorTree(sptr<IUiContentService> service, std::vector<std::string> params)
 {
     bool toFile = params.back() == "-tofile";
-    auto visibleInspectorTreeCallBack = [toFile, this](const std::string& data, int32_t index, bool isEnd) {
-        LOGI("[GetVisibleInspectorTree] index: %{public}d, isEnd: %{public}d, data = %{public}s", index, isEnd,
-            data.c_str());
-        if (index == 1) {
-            this->visibleInspectorTreeInfo_ = data;
-        } else {
-            this->visibleInspectorTreeInfo_.append(data);
-        }
+    auto visibleInspectorTreeCallBack = [toFile](const std::string& data, int32_t index, bool isEnd) {
+        LOGI("[GetVisibleInspectorTree] data = %{public}s", data.substr(0, 100).c_str());
         if (isEnd && toFile) {
             auto filePath = UI_SA_PATH + "arkui_tree_" + GetCurrentTimestampStr() + ".json";
             std::unique_ptr<std::ofstream> ostream = std::make_unique<std::ofstream>(filePath);
@@ -184,7 +181,7 @@ void UiSaService::HandleGetVisibleInspectorTree(sptr<IUiContentService> service,
                 LOGW("[GetVisibleInspectorTree] filePath is invalid");
                 return;
             }
-            ostream->write(this->visibleInspectorTreeInfo_.c_str(), this->visibleInspectorTreeInfo_.length());
+            ostream->write(data.c_str(), data.length());
             LOGI("[GetVisibleInspectorTree] tree is saved to %{public}s", filePath.c_str());
         }
     };
@@ -249,8 +246,8 @@ void UiSaService::HandleRegisterContentChangeCallback(sptr<IUiContentService> se
         }
     };
     ContentChangeConfig config;
-    int32_t time = std::atoi((params.size() >= COMPONENT_CHANGE_EVENT_WITH_CONFIG ? params[1] : "100").c_str());
-    float ratio = std::atof((params.size() >= COMPONENT_CHANGE_EVENT_WITH_CONFIG ? params[2] : "0.15").c_str());
+    int32_t time = std::atoi((params.size() >= CONTENT_CHANGE_EVENT_WITH_CONFIG ? params[1] : "100").c_str());
+    float ratio = std::atof((params.size() >= CONTENT_CHANGE_EVENT_WITH_CONFIG ? params[2] : "0.15").c_str());
     config.minReportTime = time;
     config.textContentRatio = ratio;
     service->RegisterContentChangeCallback(config, contentChangeCallback);
@@ -269,7 +266,7 @@ void UiSaService::HandleGetCurrentImagesShowing(sptr<IUiContentService> service,
     auto finishCallback = [](std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>> imageList) {
         LOGI("[GetCurrentImagesShowing] images size = %{public}zu", imageList.size());
         for (auto& [id, pixelmap] : imageList) {
-            LOGI("[GetCurrentImagesShowing] id=%{public}d, pixelmap=%{public}p", id, pixelmap.get());
+            LOGI("[GetCurrentImagesShowing] id=%{public}d, pixelmap=%{public}d", id, pixelmap != nullptr);
         }
     };
     service->GetCurrentImagesShowing(finishCallback);
@@ -293,7 +290,7 @@ void UiSaService::HandleGetImagesById(sptr<IUiContentService> service, std::vect
                                    MultiImageQueryErrorCode code) {
         LOGI("[GetImagesById] arkUIfinishCallback winId=%{public}d", winId);
         for (auto& [id, pixelmap] : arkUIRes) {
-            LOGI("[GetImagesById] arkUIfinishCallback id=%{public}d, pixelmap=%{public}p", id, pixelmap.get());
+            LOGI("[GetImagesById] arkUIfinishCallback id=%{public}d, pixelmap=%{public}d", id, pixelmap != nullptr);
         }
         LOGI("[GetImagesById] arkUIfinishCallback code=%{public}d", static_cast<int32_t>(code));
     };
@@ -319,13 +316,34 @@ void UiSaService::HandleGetImagesById(sptr<IUiContentService> service, std::vect
             LOGI("[GetImagesById] arkWebfinishCallback winId=%{public}d", winId);
             for (auto& [id, webMap] : arkWebRes) {
                 for (auto& [webImgId, pixelmap] : webMap)
-                    LOGI("[GetImagesById] arkWebfinishCallback id=%{public}d, webImgId=%{public}d, pixelmap=%{public}p",
-                        id, webImgId, pixelmap.get());
+                    LOGI("[GetImagesById] arkWebfinishCallback id=%{public}d, webImgId=%{public}d, pixelmap=%{public}d",
+                        id, webImgId, pixelmap != nullptr);
             }
             LOGI("[GetImagesById] arkWebfinishCallback code=%{public}d", static_cast<int32_t>(code));
         };
 
     service->GetImagesById(arkUIIds, arkUIfinishCallback, arkWebs, arkWebfinishCallback);
     LOGI("[GetImagesById] call GetImagesById");
+}
+
+void UiSaService::HandleGetWebInfoByRequest(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    if (params.size() >= GET_WEB_INFO_BY_REQUEST_PARAMS) {
+        int32_t webId = std::atoi(params[1].c_str());
+        std::string request = params[2];
+        if (params.back() == "-large") {
+            int32_t length = std::atoi(params[2].c_str());
+            request = std::string(length, 'A');
+        }
+        auto finishCallback = [](int32_t winId, int32_t webId, const std::string& request, const std::string& result,
+            WebRequestErrorCode code) {
+            LOGI("[GetWebInfoByRequest] finishCallback winId=%{public}d, webId=%{public}d", winId, webId);
+            LOGI("[GetWebInfoByRequest] finishCallback request=%{public}s", request.c_str());
+            LOGI("[GetWebInfoByRequest] finishCallback result=%{public}s", result.c_str());
+            LOGI("[GetWebInfoByRequest] finishCallback code=%{public}d", code);
+        };
+        service->GetWebInfoByRequest(webId, request, finishCallback);
+        LOGI("[GetWebInfoByRequest] call GetWebInfoById");
+    }
 }
 } // namespace OHOS::Ace

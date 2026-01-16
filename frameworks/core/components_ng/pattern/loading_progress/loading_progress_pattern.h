@@ -26,7 +26,7 @@
 
 namespace OHOS::Ace::NG {
 // ProgressPattern is the base class for text render node to perform paint progress.
-class LoadingProgressPattern : public Pattern {
+class ACE_FORCE_EXPORT LoadingProgressPattern : public Pattern {
     DECLARE_ACE_TYPE(LoadingProgressPattern, Pattern);
 
 public:

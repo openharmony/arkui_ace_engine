@@ -28417,6 +28417,8 @@ typedef struct GENERATED_ArkUIDragEventAccessor {
     Ark_Float64 (*getVelocityY)(Ark_DragEvent peer);
     Ark_Float64 (*getVelocity)(Ark_DragEvent peer);
     Ark_Int32 (*getDisplayId)(Ark_DragEvent peer);
+    Ark_String (*getDragSource)(Ark_DragEvent peer);
+    Ark_Boolean (*isRemote)(Ark_DragEvent peer);
     void (*executeDropAnimation)(Ark_DragEvent peer,
                                  const Callback_Void* customDropAnimation);
     void (*enableInternalDropAnimation)(Ark_DragEvent peer,
@@ -31681,6 +31683,7 @@ typedef enum {
     GENERATED_ARKUI_DIRTY_FLAG_MEASURE_BY_CHILD_REQUEST = 0b100000,
     GENERATED_ARKUI_DIRTY_FLAG_RENDER = 0b1000000,
     GENERATED_ARKUI_DIRTY_FLAG_MEASURE_SELF_AND_CHILD = 0b1000000000,
+    GENERATED_ARKUI_DIRTY_FLAG_MEASURE_SELF_WHEN_ADD_CHILD = 0b10000000000,
 } GENERATED_ArkUIDirtyFlag;
 
 union GENERATED_Ark_EventCallbackArg {

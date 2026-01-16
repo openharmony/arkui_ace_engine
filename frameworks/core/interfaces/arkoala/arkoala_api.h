@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -4720,6 +4720,7 @@ struct ArkUITabsModifier {
 };
 
 struct ArkUIStepperItemModifier {
+    void (*createModel)();
     void (*setNextLabel)(ArkUINodeHandle node, ArkUI_CharPtr rightLabel);
     void (*resetNextLabel)(ArkUINodeHandle node);
     void (*setPrevLabel)(ArkUINodeHandle node, ArkUI_CharPtr rightLabel);
@@ -4729,6 +4730,7 @@ struct ArkUIStepperItemModifier {
 };
 
 struct ArkUIStepperModifier {
+    void (*createModel)(ArkUI_Uint32 index);
     void (*setStepperOnFinish)(ArkUINodeHandle node, void* callback);
     void (*resetStepperOnFinish)(ArkUINodeHandle node);
     void (*setStepperOnSkip)(ArkUINodeHandle node, void* callback);
@@ -4739,6 +4741,7 @@ struct ArkUIStepperModifier {
     void (*resetStepperOnNext)(ArkUINodeHandle node);
     void (*setStepperOnPrevious)(ArkUINodeHandle node, void* callback);
     void (*resetStepperOnPrevious)(ArkUINodeHandle node);
+    void (*setStepperOnChangeEvent)(ArkUINodeHandle node, void* callback);
 };
 struct ArkUITabContentModifier {
     void (*setTabContentBuilder)(ArkUINodeHandle node, ArkUI_Int32 methodId);

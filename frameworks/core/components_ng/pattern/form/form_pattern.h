@@ -212,6 +212,9 @@ public:
     // FormLayoutWrapper functions
     void ProcessCheckForm() override;
 
+    void OnAttachContext([[maybe_unused]] PipelineContext *context) override;
+    void OnDetachContext([[maybe_unused]] PipelineContext *context) override;
+
 private:
     void OnAttachToFrameNode() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -378,6 +381,7 @@ private:
     std::atomic_bool accessibilityState_ = AceApplicationInfo::GetInstance().IsAccessibilityScreenReadEnabled();
     float formViewScale_ = 1.0f;
     int32_t formColorMode_ = -1; // -1: MODE_AUTO
+    bool isDetachContext_ = false;
     enum {
         VALUE_TYPE_INT = 5,
         VALUE_TYPE_DOUBLE = 8,

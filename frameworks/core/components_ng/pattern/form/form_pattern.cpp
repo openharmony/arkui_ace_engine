@@ -3199,4 +3199,24 @@ void FormPattern::InitFormRenderDiedCallback()
         pattern->UnregisterAccessibility();
     });
 }
+
+void FormPattern::OnAttachContext([[maybe_unused]] PipelineContext *context)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "OnAttachContext");
+    if (isDetachContext_) {
+        InitializeFormAccessibility();
+    }
+    isDetachContext_ = false;
+}
+
+void FormPattern::OnDetachContext([[maybe_unused]] PipelineContext *context)
+{
+    TAG_LOGI(AceLogTag::ACE_FORM, "OnDetachContext");
+    isDetachContext_ = true;
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto formNode = DynamicCast<FormNode>(host);
+    CHECK_NULL_VOID(formNode);
+    formNode->ResetAccessibilityChildTreeCallbackAndDeregister();
+}
 } // namespace OHOS::Ace::NG

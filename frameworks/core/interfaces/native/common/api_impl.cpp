@@ -251,7 +251,9 @@ void ApplyModifierFinish(Ark_NodeHandle nodePtr)
 void MarkDirty(Ark_NodeHandle nodePtr, Ark_UInt32 flag)
 {
     auto* uiNode = reinterpret_cast<UINode*>(nodePtr);
-    if (uiNode) {
+    if (uiNode && flag == PROPERTY_UPDATE_MEASURE_SELF_WHEN_ADD_CHILD && uiNode->GetParent()) {
+        uiNode->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    } else if (uiNode && flag != PROPERTY_UPDATE_MEASURE_SELF_WHEN_ADD_CHILD) {
         uiNode->MarkDirtyNode(flag);
     }
 }

@@ -45,6 +45,7 @@ void PatternLockPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
 
     auto gestureHub = host->GetOrCreateGestureEventHub();
     InitTouchEvent(gestureHub, touchDownListener_);
@@ -815,6 +816,10 @@ void PatternLockPattern::HandleMouseEvent(const MouseInfo& info)
 
 void PatternLockPattern::StartModifierConnectedAnimate(int32_t x, int32_t y)
 {
+    auto host = GetHost();
+    if (host) {
+        ACE_UINODE_TRACE(host);
+    }
     CHECK_NULL_VOID(patternLockModifier_);
     patternLockModifier_->StartConnectedCircleAnimate(x, y);
     patternLockModifier_->StartConnectedLineAnimate(x, y);
@@ -828,6 +833,10 @@ void PatternLockPattern::StartModifierAddPassPointAnimate(int32_t x, int32_t y)
 
 void PatternLockPattern::StartModifierCanceledAnimate()
 {
+    auto host = GetHost();
+    if (host) {
+        ACE_UINODE_TRACE(host);
+    }
     CHECK_NULL_VOID(patternLockModifier_);
     if (isMoveEventValid_) {
         patternLockModifier_->StartCanceledAnimate();

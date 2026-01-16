@@ -1447,10 +1447,34 @@ class StackModifier extends ArkStackComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class StepperItemModifier extends ArkStepperItemComponent {
+class LazyArkStepperItemComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkStepperItemComponent.module === undefined) {
+      LazyArkStepperItemComponent.module = globalThis.requireNapi('arkui.components.arkstepperitem');
+    }
+    this.lazyComponent = LazyArkStepperItemComponent.module.createComponent(nativePtr, classType);
+    console.log('LazyArkStepperItemComponent lazyload nativeModule');
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  prevLabel(value) {
+    this.lazyComponent.prevLabel(value);
+  }
+  nextLabel(value) {
+    this.lazyComponent.nextLabel(value);
+  }
+  status(value) {
+    this.lazyComponent.status(value);
+  }
+}
+class StepperItemModifier extends LazyArkStepperItemComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
@@ -1851,16 +1875,51 @@ class LazyVGridLayoutModifier extends ArkLazyVGridLayoutComponent {
   }
 }
 
-class StepperModifier extends ArkStepperComponent {
-    constructor(nativePtr, classType) {
-      super(nativePtr, classType);
-      this._modifiersWithKeys = new ModifierMap();
+class LazyArkStepperComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkStepperComponent.module === undefined) {
+      LazyArkStepperComponent.module = globalThis.requireNapi('arkui.components.arkstepper');
     }
-    applyNormalAttribute(instance) {
-      ModifierUtils.applySetOnChange(this);
-      ModifierUtils.applyAndMergeModifier(instance, this);
-    }
+    this.lazyComponent = LazyArkStepperComponent.module.createComponent(nativePtr, classType);
+    console.log('LazyArkStepperComponent lazyload nativeModule');
   }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  onFinish(callback) {
+    this.lazyComponent.onFinish(callback);
+    return this;
+  }
+  onSkip(callback) {
+    this.lazyComponent.onSkip(callback);
+    return this;
+  }
+  onChange(callback) {
+    this.lazyComponent.onChange(callback);
+    return this;
+  }
+  onNext(callback) {
+    this.lazyComponent.onNext(callback);
+    return this;
+  }
+  onPrevious(callback) {
+    this.lazyComponent.onPrevious(callback);
+    return this;
+  }
+}
+class StepperModifier extends LazyArkStepperComponent {
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
+  }
+  applyNormalAttribute(instance) {
+    ModifierUtils.applySetOnChange(this);
+    ModifierUtils.applyAndMergeModifier(instance, this);
+  }
+}
 
 class UIPickerComponentModifier extends ArkContainerPickerComponent {
     constructor(nativePtr, classType) {

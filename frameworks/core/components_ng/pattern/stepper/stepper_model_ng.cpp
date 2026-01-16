@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/stepper/stepper_model_ng.h"
 
+#include "core/components_ng/pattern/stepper/stepper_constants.h"
 #include "core/components_ng/pattern/stepper/stepper_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
@@ -24,9 +25,37 @@ void StepperModelNG::Create(uint32_t index)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::STEPPER_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", STEPPER_ETS_TAG, nodeId);
     auto stepperNode = StepperNode::GetOrCreateStepperNode(
-        V2::STEPPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperPattern>(); });
+        STEPPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperPattern>(); });
+    stack->Push(stepperNode);
+    bool hasSwiperNode = stepperNode->HasSwiperNode();
+    auto swiperId = stepperNode->GetSwiperId();
+    RefPtr<FrameNode> swiperNode;
+    if (!hasSwiperNode) {
+        swiperNode = CreateSwiperChild(swiperId, index);
+        swiperNode->MountToParent(stepperNode);
+        ACE_UPDATE_LAYOUT_PROPERTY(StepperLayoutProperty, Index, index);
+    } else {
+        swiperNode = AceType::DynamicCast<FrameNode>(
+            stepperNode->GetChildAtIndex(stepperNode->GetChildIndexById(stepperNode->GetSwiperId())));
+        CHECK_NULL_VOID(swiperNode);
+        auto swiperController = swiperNode->GetPattern<SwiperPattern>()->GetSwiperController();
+        swiperController->SwipeTo(index);
+    }
+    auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
+    if (swiperPaintProperty) {
+        swiperPaintProperty->UpdateCurve(Curves::LINEAR);
+    }
+}
+
+void StepperModelNG::CreateFrameNode(uint32_t index)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", STEPPER_ETS_TAG, nodeId);
+    auto stepperNode = StepperNode::GetOrCreateStepperNode(
+        STEPPER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperPattern>(); });
     stack->Push(stepperNode);
     bool hasSwiperNode = stepperNode->HasSwiperNode();
     auto swiperId = stepperNode->GetSwiperId();
@@ -136,7 +165,7 @@ void StepperModelNG::SetOnPrevious(FrameNode* frameNode, IndexCallbackEvent&& ev
 RefPtr<FrameNode> StepperModelNG::CreateSwiperChild(int32_t id, uint32_t index)
 {
     auto swiperNode =
-        FrameNode::GetOrCreateFrameNode(V2::SWIPER_ETS_TAG, id, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
+        FrameNode::GetOrCreateFrameNode(SWIPER_ETS_TAG, id, []() { return AceType::MakeRefPtr<SwiperPattern>(); });
     auto swiperPaintProperty = swiperNode->GetPaintProperty<SwiperPaintProperty>();
     CHECK_NULL_RETURN(swiperPaintProperty, nullptr);
     swiperPaintProperty->UpdateEdgeEffect(EdgeEffect::NONE);
@@ -154,6 +183,14 @@ RefPtr<FrameNode> StepperModelNG::CreateSwiperChild(int32_t id, uint32_t index)
 void StepperModelNG::SetOnChangeEvent(IndexChangeEvent&& onChangeEvent)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<StepperEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
+void StepperModelNG::SetOnChangeEvent(FrameNode* frameNode, IndexChangeEvent&& onChangeEvent)
+{
     CHECK_NULL_VOID(frameNode);
     auto eventHub = frameNode->GetEventHub<StepperEventHub>();
     CHECK_NULL_VOID(eventHub);

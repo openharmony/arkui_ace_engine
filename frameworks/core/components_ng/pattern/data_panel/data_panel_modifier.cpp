@@ -105,6 +105,11 @@ void DataPanelModifier::UpdateDate()
 {
     if (isEffect_->Get()) {
         // When the date update, the animation will repeat once.
+        auto pattern = pattern_.Upgrade();
+        auto host = pattern ? pattern->GetHost() : nullptr;
+        if (host) {
+            ACE_UINODE_TRACE(host);
+        }
         date_->Set(ANIMATION_START);
         AnimationOption option = AnimationOption();
         RefPtr<Curve> curve = AceType::MakeRefPtr<SpringCurve>(
@@ -113,8 +118,6 @@ void DataPanelModifier::UpdateDate()
         option.SetDelay(ANIMATION_DELAY);
         option.SetCurve(curve);
         option.SetIteration(ANIMATION_TIMES);
-        auto pattern = pattern_.Upgrade();
-        auto host = pattern? pattern->GetHost(): nullptr;
         auto context = host? host->GetContextRefPtr(): nullptr;
         AnimationUtils::Animate(option, [&]() { date_->Set(ANIMATION_END); }, nullptr, nullptr, context);
     } else {

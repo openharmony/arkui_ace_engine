@@ -134,23 +134,23 @@ void JSDrawingRenderingContext::SetInvalidate(const JSCallbackInfo& info)
 void JSDrawingRenderingContext::SetUnit(CanvasUnit unit)
 {
     unit_ = unit;
-    if (!context2d_->IsNull()) {
-        auto renderContext = Referenced::Claim(JSRef<JSObject>::Cast(context2d_)->Unwrap<JSRenderingContext>());
+    if (!context2d_->IsUndefined()) {
+        auto renderContext = Referenced::Claim(context2d_->Unwrap<JSRenderingContext>());
         CHECK_NULL_VOID(renderContext);
         renderContext->SetUnit(unit_);
     }
 }
 
-const JSRef<JSVal>& JSDrawingRenderingContext::GetOrCreateContext2D(bool antialias)
+const JSRef<JSObject>& JSDrawingRenderingContext::GetOrCreateContext2D(bool antialias)
 {
     if (!canvasPattern_.Upgrade()) {
         JSException::Throw(
             ERROR_CODE_CANVAS_CONTEXT_NOT_BOUND, "%s", "The drawingContext is not bound to a canvas component.");
         return context2d_;
     }
-    if (context2d_->IsNull()) {
+    if (context2d_->IsUndefined()) {
         context2d_ = JSClass<JSRenderingContext>::NewInstance();
-        auto renderContext = Referenced::Claim(JSRef<JSObject>::Cast(context2d_)->Unwrap<JSRenderingContext>());
+        auto renderContext = Referenced::Claim(context2d_->Unwrap<JSRenderingContext>());
         renderContext->SetBuiltIn(true);
         renderContext->SetInstanceId(Container::CurrentId());
         renderContext->SetCanvasPattern(canvasPattern_.Upgrade());

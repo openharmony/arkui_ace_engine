@@ -209,8 +209,6 @@
       OHOS::Ace::SliderModel::*;
       OHOS::Ace::SpanModel::*;
       OHOS::Ace::StackModel::*;
-      OHOS::Ace::StepperModel::*;
-      OHOS::Ace::StepperItemModel::*;
       OHOS::Ace::SwiperModel::*;
       OHOS::Ace::SymbolModel::*;
       OHOS::Ace::SymbolSpanModel::*;
@@ -608,8 +606,6 @@
       vtable?for?OHOS::Ace::NG::Pattern;
       vtable?for?OHOS::Ace::LoadingProgressComponent;
       vtable?for?OHOS::Ace::FocusNode;
-      vtable?for?OHOS::Ace::Framework::StepperModelImpl;
-      vtable?for?OHOS::Ace::Framework::StepperItemModelImpl;
       vtable?for?OHOS::Ace::NG::GaugeModelNG;
       vtable?for?OHOS::Ace::GaugeModel;
       vtable?for?OHOS::Ace::Framework::GaugeModelImpl;
@@ -1721,6 +1717,10 @@
  	  OHOS::Ace::RosenRenderContext::GetRSNode*;
       VTT?for?OHOS::Ace::AssetImageLoader;
       vtable?for?OHOS::Ace::AssetImageLoader;
+      OHOS::Ace::NG::SwiperPattern::TotalCount*;
+      "OHOS::Ace::NG::SwiperPattern::SwiperPattern()";
+      VTT?for?OHOS::Ace::NG::LoadingProgressPattern;
+      vtable?for?OHOS::Ace::NG::LoadingProgressPattern;
 
       OHOS::Ace::V2::HYPERLINK_ETS_TAG;
       OHOS::Ace::V2::SYMBOL_ETS_TAG;

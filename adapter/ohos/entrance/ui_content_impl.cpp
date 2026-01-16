@@ -3770,7 +3770,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str(),
                 keyboardRect.ToString().c_str());
         }
-        TAG_LOGD(ACE_LAYOUT,
+        TAG_LOGI(ACE_LAYOUT,
             "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d,"
             " is rsTransaction nullptr %{public}d, %{public}s, keyboardRect %{public}s", bundleName_.c_str(),
             moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
@@ -3783,7 +3783,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
                 bundleName_.c_str(), moduleName_.c_str(), instanceId_, config.ToString().c_str(),
                 static_cast<uint32_t>(reason), rsTransaction == nullptr, stringifiedMap.c_str());
         }
-        TAG_LOGD(ACE_LAYOUT,
+        TAG_LOGI(ACE_LAYOUT,
             "[%{public}s][%{public}s][%{public}d]: UpdateViewportConfig %{public}s, windowSizeChangeReason %{public}d,"
             " is rsTransaction nullptr %{public}d, %{public}s, keyboardInfo is null", bundleName_.c_str(),
             moduleName_.c_str(), instanceId_, config.ToString().c_str(), static_cast<uint32_t>(reason),
@@ -6318,7 +6318,7 @@ UIContentErrorCode UIContentImpl::InitializeWithAniStorage(OHOS::Rosen::Window* 
     CHECK_ERROR_CODE_RETURN(errorCode);
     AddWatchSystemParameter();
     if (content) {
-        LOGI("Initialize by buffer, size:%{public}zu", content->size());
+        LOGI("Initialize by buffer, contentName:%{public}s size:%{public}zu", contentName.c_str(), content->size());
         // run page.
         errorCode = Platform::AceContainer::RunPage(instanceId_, content, contentName);
         CHECK_ERROR_CODE_RETURN(errorCode);

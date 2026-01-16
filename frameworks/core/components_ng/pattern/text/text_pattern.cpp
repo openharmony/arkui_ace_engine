@@ -596,6 +596,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     if (SystemProperties::GetTextTraceEnabled()) {
         ACE_TEXT_SCOPED_TRACE("TextPattern::HandleLongPress[id:%d][isMousePressed:%d]", host->GetId(), isMousePressed_);
         TAG_LOGI(AceLogTag::ACE_TEXT, "HandleLongPress[id:%{public}d]", host->GetId());
@@ -630,9 +631,7 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     }
     ResetAISelected(AIResetSelectionReason::LONG_PRESS);
     gestureHub->SetIsTextDraggable(false);
-    auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
-    Offset textOffset = { localOffset.GetX() - textPaintOffset.GetX(), localOffset.GetY() - textPaintOffset.GetY() };
-    InitSelection(textOffset);
+    InitSelectionOnLongPress(localOffset);
     ReportSelectedText();
     textResponseType_ = TextResponseType::LONG_PRESS;
     UpdateSelectionSpanType(std::min(textSelector_.baseOffset, textSelector_.destinationOffset),
@@ -645,6 +644,13 @@ void TextPattern::HandleLongPress(GestureEvent& info)
     }
     StartGestureSelection(textSelector_.GetStart(), textSelector_.GetEnd(), localOffset);
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void TextPattern::InitSelectionOnLongPress(const Offset& localOffset)
+{
+    auto textPaintOffset = contentRect_.GetOffset() - OffsetF(0.0f, std::min(baselineOffset_, 0.0f));
+    Offset textOffset = { localOffset.GetX() - textPaintOffset.GetX(), localOffset.GetY() - textPaintOffset.GetY() };
+    InitSelection(textOffset);
 }
 
 void TextPattern::ShowAIEntityPreviewMenuTimer()
@@ -965,6 +971,9 @@ void TextPattern::HandleOnCopy()
         HandleSelectionChange(-1, -1);
         return;
     }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto [start, end] = GetSelectedStartAndEnd();
     auto value = GetSelectedText(start, end, false, false, true);
     if (IsSelectableAndCopy() || dataDetectorAdapter_->hasClickedMenuOption_) {
@@ -976,8 +985,6 @@ void TextPattern::HandleOnCopy()
     }
     HiddenMenu();
     CHECK_NULL_VOID(!value.empty());
-    auto host = GetHost();
-    CHECK_NULL_VOID(host);
     auto eventHub = host->GetEventHub<TextEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->FireOnCopy(value);
@@ -1448,6 +1455,9 @@ bool TextPattern::PrepareAIMenuOptions(
 
 void TextPattern::UpdateAIMenuOptions()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     if ((copyOption_ == CopyOptions::Local || copyOption_ == CopyOptions::Distributed) &&
         MaybeNeedShowSelectAIDetect()) {
         isShowAIMenuOption_ = PrepareAIMenuOptions(aiMenuOptions_);
@@ -2550,16 +2560,15 @@ void TextPattern::RecoverCopyOption()
     auto host = GetHost();
     auto contentHost = GetContentHost();
     CHECK_NULL_VOID(host && contentHost);
+    ACE_UINODE_TRACE(host);
 
     copyOption_ = textLayoutProperty->GetTextOverflowValue(TextOverflow::CLIP) == TextOverflow::MARQUEE
                       ? CopyOptions::None
                       : textLayoutProperty->GetCopyOption().value_or(CopyOptions::None);
 
     const auto& children = contentHost->GetChildren();
-    if (children.empty()) {
-        if (IsSetObscured() && !isSpanStringMode_) {
-            copyOption_ = CopyOptions::None;
-        }
+    if (children.empty() && IsSetObscured() && !isSpanStringMode_) {
+        copyOption_ = CopyOptions::None;
     }
     auto gestureEventHub = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gestureEventHub);
@@ -3958,6 +3967,7 @@ void TextPattern::OnModifyDone()
     CHECK_NULL_VOID(textLayoutProperty);
     auto contentHost = GetContentHost();
     CHECK_NULL_VOID(host && contentHost);
+    ACE_UINODE_TRACE(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto nowTime = static_cast<unsigned long long>(GetSystemTimestamp());
@@ -4593,6 +4603,7 @@ void TextPattern::BeforeCreateLayoutWrapper()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     CHECK_NULL_VOID(host->GetTag() != V2::SYMBOL_ETS_TAG);
     if (!isSpanStringMode_) {
         PreCreateLayoutWrapper();
@@ -6380,11 +6391,12 @@ bool TextPattern::IsShowMenu(MenuPolicy options, bool defaultValue)
 void TextPattern::SetStyledString(const RefPtr<SpanString>& value, bool closeSelectOverlay)
 {
     auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     FREE_NODE_CHECK(host, SetStyledString, value,
         closeSelectOverlay);  // call SetStyledStringMultiThread() by multi thread
     AllocStyledString();
     isSpanStringMode_ = true;
-    CHECK_NULL_VOID(host);
     if (closeSelectOverlay) {
         CloseSelectOverlay();
     }
@@ -6494,6 +6506,7 @@ void TextPattern::ProcessSpanString()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     textForDisplay_.clear();
     childNodes_.clear();
     // styled string perf can be optimized via create as requirement

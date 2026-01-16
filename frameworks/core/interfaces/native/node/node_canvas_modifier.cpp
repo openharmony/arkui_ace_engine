@@ -23,7 +23,7 @@ void SetCanvasOnReady(ArkUINodeHandle node, void* callback)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     if (callback) {
-        auto onReady = reinterpret_cast<std::function<void()>*>(callback);
+        auto onReady = reinterpret_cast<std::function<void(bool, CanvasUnit)>*>(callback);
         CanvasModelNG::SetOnReady(frameNode, std::move(*onReady));
     } else {
         CanvasModelNG::ResetOnReady(frameNode);

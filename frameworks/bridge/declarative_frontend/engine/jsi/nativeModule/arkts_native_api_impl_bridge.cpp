@@ -80,8 +80,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_timepicker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_rich_editor_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_video_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stepper_item_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabcontent_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_tabs_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_line_bridge.h"
@@ -504,6 +502,8 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "ColumnSplit" },
         { "RowSplit" },
         { "Marquee" },
+        { "Stepper" },
+        { "StepperItem" },
         { "Hyperlink" },
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -2047,7 +2047,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterCalendarPickerAttributes(object, vm);
     RegisterTabAttributes(object, vm);
     RegisterTabContentAttributes(object, vm);
-    RegisterStepperItemAttributes(object, vm);
     RegisterMenuItemGroupAttributes(object, vm);
     RegisterMenuItemAttributes(object, vm);
     RegisterMenuAttributes(object, vm);
@@ -2103,7 +2102,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
 #ifdef WINDOW_SCENE_SUPPORTED
     RegisterEmbeddedComponentAttributes(object, vm);
 #endif
-    RegisterStepperAttributes(object, vm);
     RegisterContainerPickerAttributes(object, vm);
     return object;
 }
@@ -3778,24 +3776,6 @@ void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, Ec
     tabs->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTabsCustomContentTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), TabsBridge::ResetTabsCustomContentTransition));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "tabs"), tabs);
-}
-
-void ArkUINativeModule::RegisterStepperItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto stepperItem = panda::ObjectRef::New(vm);
-    stepperItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setNextLabel"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::SetNextLabel));
-    stepperItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetNextLabel"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::ResetNextLabel));
-    stepperItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPrevLabel"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::SetPrevLabel));
-    stepperItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPrevLabel"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::ResetPrevLabel));
-    stepperItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setStatus"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::SetStatus));
-    stepperItem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetStatus"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperItemBridge::ResetStatus));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "stepperItem"), stepperItem);
 }
 
 void ArkUINativeModule::RegisterTabContentAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
@@ -5919,32 +5899,6 @@ void ArkUINativeModule::RegisterVideoAttributes(Local<panda::ObjectRef> object, 
     video->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTransition"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), VideoBridge::ResetTransition));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "video"), video);
-}
-
-void ArkUINativeModule::RegisterStepperAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto stepper = panda::ObjectRef::New(vm);
-    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFinish"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::SetOnFinish));
-    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFinish"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::ResetOnFinish));
-    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSkip"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::SetOnSkip));
-    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSkip"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::ResetOnSkip));
-    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::SetOnChange));
-    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::ResetOnChange));
-    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnNext"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::SetOnNext));
-    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnNext"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::ResetOnNext));
-    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPrevious"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::SetOnPrevious));
-    stepper->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPrevious"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), StepperBridge::ResetOnPrevious));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "stepper"), stepper);
 }
 
 void ArkUINativeModule::RegisterContainerPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

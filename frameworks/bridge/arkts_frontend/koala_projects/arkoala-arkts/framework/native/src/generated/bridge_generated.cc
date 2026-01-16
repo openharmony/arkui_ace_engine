@@ -31993,6 +31993,16 @@ Ark_Int32 impl_DragEvent_getDisplayId(Ark_NativePointer thisPtr) {
         return GetAccessors()->getDragEventAccessor()->getDisplayId(self);
 }
 KOALA_INTEROP_DIRECT_1(DragEvent_getDisplayId, Ark_Int32, Ark_NativePointer)
+Ark_String impl_DragEvent_getDragSource(Ark_NativePointer thisPtr) {
+        Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
+        return GetAccessors()->getDragEventAccessor()->getDragSource(self);
+}
+KOALA_INTEROP_1(DragEvent_getDragSource, KStringPtr, Ark_NativePointer)
+Ark_Boolean impl_DragEvent_isRemote(Ark_NativePointer thisPtr) {
+        Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
+        return GetAccessors()->getDragEventAccessor()->isRemote(self);
+}
+KOALA_INTEROP_DIRECT_1(DragEvent_isRemote, Ark_Boolean, Ark_NativePointer)
 void impl_DragEvent_enableInternalDropAnimation(Ark_NativePointer thisPtr, const KStringPtr& configuration) {
         Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
         GetAccessors()->getDragEventAccessor()->enableInternalDropAnimation(self, (const Ark_String*) (&configuration));
@@ -36272,7 +36282,7 @@ void impl_NavPathStack_pushPath0(Ark_NativePointer thisPtr, Ark_NativePointer in
         Opt_Boolean animatedValueTemp = animatedValueTempTmpBuf;;
         GetAccessors()->getNavPathStackAccessor()->pushPath0(self, static_cast<Ark_NavPathInfo>(info), static_cast<Opt_Boolean*>(&animatedValueTemp));
 }
-KOALA_INTEROP_DIRECT_V4(NavPathStack_pushPath0, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V4(NavPathStack_pushPath0, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavPathStack_pushPath1(Ark_NativePointer thisPtr, Ark_NativePointer info, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NavPathStack self = reinterpret_cast<Ark_NavPathStack>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -36285,7 +36295,7 @@ void impl_NavPathStack_pushPath1(Ark_NativePointer thisPtr, Ark_NativePointer in
         Opt_NavigationOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetAccessors()->getNavPathStackAccessor()->pushPath1(self, static_cast<Ark_NavPathInfo>(info), static_cast<Opt_NavigationOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V4(NavPathStack_pushPath1, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V4(NavPathStack_pushPath1, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavPathStack_pushDestination0(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_NativePointer info, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NavPathStack self = reinterpret_cast<Ark_NavPathStack>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -36392,7 +36402,7 @@ void impl_NavPathStack_replacePath0(Ark_NativePointer thisPtr, Ark_NativePointer
         Opt_Boolean animatedValueTemp = animatedValueTempTmpBuf;;
         GetAccessors()->getNavPathStackAccessor()->replacePath0(self, static_cast<Ark_NavPathInfo>(info), static_cast<Opt_Boolean*>(&animatedValueTemp));
 }
-KOALA_INTEROP_DIRECT_V4(NavPathStack_replacePath0, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V4(NavPathStack_replacePath0, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavPathStack_replacePath1(Ark_NativePointer thisPtr, Ark_NativePointer info, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NavPathStack self = reinterpret_cast<Ark_NavPathStack>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -36405,7 +36415,7 @@ void impl_NavPathStack_replacePath1(Ark_NativePointer thisPtr, Ark_NativePointer
         Opt_NavigationOptions optionsValueTemp = optionsValueTempTmpBuf;;
         GetAccessors()->getNavPathStackAccessor()->replacePath1(self, static_cast<Ark_NavPathInfo>(info), static_cast<Opt_NavigationOptions*>(&optionsValueTemp));
 }
-KOALA_INTEROP_DIRECT_V4(NavPathStack_replacePath1, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_V4(NavPathStack_replacePath1, Ark_NativePointer, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_NavPathStack_replaceDestination(KVMContext vmContext, Ark_NativePointer thisPtr, Ark_NativePointer info, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_NavPathStack self = reinterpret_cast<Ark_NavPathStack>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);
@@ -38925,7 +38935,7 @@ KOALA_INTEROP_V3(RouterExtender_runPage, Ark_NativePointer, KSerializerBuffer, i
 void impl_RouterExtender_clear() {
         GetAccessors()->getRouterExtenderAccessor()->clear();
 }
-KOALA_INTEROP_DIRECT_V0(RouterExtender_clear)
+KOALA_INTEROP_V0(RouterExtender_clear)
 void impl_RouterExtender_showAlertBeforeBackPage(const KStringPtr& message) {
         GetAccessors()->getRouterExtenderAccessor()->showAlertBeforeBackPage((const Ark_String*) (&message));
 }

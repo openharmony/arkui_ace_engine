@@ -24,6 +24,7 @@ component_modules = [
   "linear_split",
   "side_bar",
   "marquee",
+  "stepper",
 ]
 component_modules_libs = []
 

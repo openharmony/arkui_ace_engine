@@ -90,6 +90,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"ColumnSplit", "linearsplit"},
         {"RowSplit", "linearsplit"},
         {"Marquee", "marquee"},
+        { "Stepper", "stepper" },
+        { "StepperItem", "stepper" },
         { "Hyperlink", "hyperlink" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)

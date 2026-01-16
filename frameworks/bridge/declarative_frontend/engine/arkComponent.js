@@ -9627,7 +9627,7 @@ class ArkImageAnimatorComponent extends ArkComponent {
     return this;
   }
   preDecode(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'preDecode function not supported in ArkImageAnimatorComponent class.');
   }
   fillMode(value) {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorFillModeModifier.identity, ImageAnimatorFillModeModifier, value);
@@ -24854,10 +24854,10 @@ class ArkTextPickerComponent extends ArkComponent {
     return this;
   }
   onAccept(callback) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onAccept function not supported in ArkTextPickerComponent class.');
   }
   onCancel(callback) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onCancel function not supported in ArkTextPickerComponent class.');
   }
   onChange(callback) {
     modifierWithKey(
@@ -26948,7 +26948,7 @@ class ArkNavigationComponent extends ArkComponent {
     return this;
   }
   navDestination(builder) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'navDestination function not supported in Navigation class');
   }
   ignoreLayoutSafeArea(types, edges) {
     let opts = new ArkSafeAreaExpandOpts();
@@ -29765,191 +29765,6 @@ if (globalThis.ScrollBar !== undefined) {
       return new ArkScrollBarComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.CommonModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
-class ArkStepperComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  onFinish(callback) {
-    modifierWithKey(this._modifiersWithKeys, StepperOnFinishModifier.identity, StepperOnFinishModifier, callback);
-    return this;
-  }
-  onSkip(callback) {
-    modifierWithKey(this._modifiersWithKeys, StepperOnSkipModifier.identity, StepperOnSkipModifier, callback);
-    return this;
-  }
-  onChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, StepperOnChangeModifier.identity, StepperOnChangeModifier, callback);
-    return this;
-  }
-  onNext(callback) {
-    modifierWithKey(this._modifiersWithKeys, StepperOnNextModifier.identity, StepperOnNextModifier, callback);
-    return this;
-  }
-  onPrevious(callback) {
-    modifierWithKey(this._modifiersWithKeys, StepperOnPreviousModifier.identity, StepperOnPreviousModifier, callback);
-    return this;
-  }
-}
-
-class StepperOnFinishModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepper.resetOnFinish(node);
-    }
-    else {
-      getUINativeModule().stepper.setOnFinish(node, this.value);
-    }
-  }
-}
-StepperOnFinishModifier.identity = Symbol('onFinish');
-
-class StepperOnSkipModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepper.resetOnSkip(node);
-    }
-    else {
-      getUINativeModule().stepper.setOnSkip(node, this.value);
-    }
-  }
-}
-StepperOnSkipModifier.identity = Symbol('onSkip');
-
-class StepperOnChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepper.resetOnChange(node);
-    }
-    else {
-      getUINativeModule().stepper.setOnChange(node, this.value);
-    }
-  }
-}
-StepperOnChangeModifier.identity = Symbol('onChange');
-
-class StepperOnNextModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepper.resetOnNext(node);
-    }
-    else {
-      getUINativeModule().stepper.setOnNext(node, this.value);
-    }
-  }
-}
-StepperOnNextModifier.identity = Symbol('onNext');
-
-class StepperOnPreviousModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepper.resetOnPrevious(node);
-    }
-    else {
-      getUINativeModule().stepper.setOnPrevious(node, this.value);
-    }
-  }
-}
-StepperOnPreviousModifier.identity = Symbol('onPrevious');
-// @ts-ignore
-if (globalThis.Stepper !== undefined) {
-  globalThis.Stepper.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkStepperComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.StepperModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
-class ArkStepperItemComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  prevLabel(value) {
-    modifierWithKey(this._modifiersWithKeys, PrevLabelModifier.identity, PrevLabelModifier, value);
-    return this;
-  }
-  nextLabel(value) {
-    modifierWithKey(this._modifiersWithKeys, NextLabelModifier.identity, NextLabelModifier, value);
-    return this;
-  }
-  status(value) {
-    modifierWithKey(this._modifiersWithKeys, StatusModifier.identity, StatusModifier, value);
-    return this;
-  }
-}
-class NextLabelModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepperItem.resetNextLabel(node);
-    }
-    else {
-      getUINativeModule().stepperItem.setNextLabel(node, this.value);
-    }
-  }
-}
-NextLabelModifier.identity = Symbol('NextLabel');
-
-class PrevLabelModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  static identity = Symbol('prevLabel');
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepperItem.resetPrevLabel(node);
-    }
-    else {
-      getUINativeModule().stepperItem.setPrevLabel(node, this.value);
-    }
-  }
-}
-
-class StatusModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  static identity = Symbol('status');
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stepperItem.resetStatus(node);
-    }
-    else {
-      getUINativeModule().stepperItem.setStatus(node, this.value);
-    }
-  }
-}
-// @ts-ignore
-if (globalThis.StepperItem !== undefined) {
-  globalThis.StepperItem.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkStepperItemComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.StepperItemModifier(nativePtr, classType);
     });
   };
 }
@@ -32897,7 +32712,7 @@ class ArkXComponentComponent extends ArkComponent {
     });
   }
   background(builder, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'background Method not supportted in ArkXComponentComponent class.');
   }
   backgroundColor(value) {
     modifierWithKey(this._modifiersWithKeys, XComponentBackgroundColorModifier.identity, XComponentBackgroundColorModifier, value);
@@ -32932,7 +32747,7 @@ class ArkXComponentComponent extends ArkComponent {
     return this;
   }
   foregroundColor(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'foregroundColor Method not supportted in ArkXComponentComponent class.');
   }
   onClick(event) {
     if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
@@ -32983,16 +32798,16 @@ class ArkXComponentComponent extends ArkComponent {
     return this;
   }
   animation(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'animation Method not supportted in ArkXComponentComponent class.');
   }
   gesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'gesture Method not supportted in ArkXComponentComponent class.');
   }
   priorityGesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'priorityGesture Method not supportted in ArkXComponentComponent class.');
   }
   parallelGesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'parallelGesture Method not supportted in ArkXComponentComponent class.');
   }
   blur(value, options, sysOptions) {
     if (this.xComponentType !== XComponentType.NODE) {
@@ -33106,7 +32921,7 @@ class ArkXComponentComponent extends ArkComponent {
     return this;
   }
   useEffect(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'useEffect Method not supportted in ArkXComponentComponent class.');
   }
   backdropBlur(value, options, sysOptions) {
     if (this.xComponentType !== XComponentType.NODE) {
@@ -33122,7 +32937,7 @@ class ArkXComponentComponent extends ArkComponent {
     return this;
   }
   renderGroup(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'renderGroup Method not supportted in ArkXComponentComponent class.');
   }
   onAppear(event) {
     if (this.xComponentType === XComponentType.NODE || isUndefined(this.libraryname)) {
@@ -33149,49 +32964,49 @@ class ArkXComponentComponent extends ArkComponent {
     return this;
   }
   flexGrow(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'flexGrow Method not supportted in ArkXComponentComponent class.');
   }
   direction(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'direction Method not supportted in ArkXComponentComponent class.');
   }
   align(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'align Method not supportted in ArkXComponentComponent class.');
   }
   useSizeType(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'useSizeType Method not supportted in ArkXComponentComponent class.');
   }
   privacySensitive(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'privacySensitive Method not supportted in ArkXComponentComponent class.');
   }
   clip(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'clip Method not supportted in ArkXComponentComponent class.');
   }
   geometryTransition(id) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'geometryTransition Method not supportted in ArkXComponentComponent class.');
   }
   bindPopup(show, popup) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindPopup Method not supportted in ArkXComponentComponent class.');
   }
   bindMenu(content, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindMenu Method not supportted in ArkXComponentComponent class.');
   }
   bindContextMenu(content, responseType, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindContextMenu Method not supportted in ArkXComponentComponent class.');
   }
   bindContentCover(isShow, builder, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindContentCover Method not supportted in ArkXComponentComponent class.');
   }
   bindSheet(isShow, builder, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindSheet Method not supportted in ArkXComponentComponent class.');
   }
   stateStyles(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'stateStyles Method not supportted in ArkXComponentComponent class.');
   }
   restoreId(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'restoreId Method not supportted in ArkXComponentComponent class.');
   }
   onVisibleAreaChange(ratios, event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onVisibleAreaChange Method not supportted in ArkXComponentComponent class.');
   }
   sphericalEffect(value) {
     if (this.xComponentType !== XComponentType.NODE) {
@@ -33215,13 +33030,13 @@ class ArkXComponentComponent extends ArkComponent {
     return this;
   }
   accessibilityGroup(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'accessibilityGroup Method not supportted in ArkXComponentComponent class.');
   }
   obscured(reasons) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'obscured Method not supportted in ArkXComponentComponent class.');
   }
   reuseId(id) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'reuseId Method not supportted in ArkXComponentComponent class.');
   }
   renderFit(fitMode) {
     modifierWithKey(this._modifiersWithKeys, XComponentRenderFitModifier.identity, XComponentRenderFitModifier, fitMode);
@@ -35225,7 +35040,7 @@ class ArkSwiperComponent extends ArkComponent {
     return this;
   }
   indicatorStyle(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'indicatorStyle function not supported in ArkSwiper class');
   }
   prevMargin(value) {
     modifierWithKey(this._modifiersWithKeys, SwiperPrevMarginModifier.identity, SwiperPrevMarginModifier, value);
@@ -39478,6 +39293,29 @@ if (globalThis.ColumnSplit === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkcolumnsplit');
       module.exportView();
       getUINativeModule().columnSplit.create();
+    }
+  };
+}
+// @ts-ignore
+if (globalThis.Stepper === undefined) {
+  globalThis.Stepper = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('Stepper');
+      let module = globalThis.requireNapi('arkui.components.arkstepper');
+      module.exportView();
+      getUINativeModule().stepper.create(params);
+    }
+  };
+}
+
+// @ts-ignore
+if (globalThis.StepperItem === undefined) {
+  globalThis.StepperItem = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('StepperItem');
+      let module = globalThis.requireNapi('arkui.components.arkstepperitem');
+      module.exportView();
+      getUINativeModule().stepperItem.create(params);
     }
   };
 }
