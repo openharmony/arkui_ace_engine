@@ -15,6 +15,7 @@
 
 import { UIContext } from "@ohos/arkui/UIContext"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
+import { UIEventHelper } from 'arkui/component/idlize';
 import { NodePosition, NodeEdges, Size, LengthMetrics, SizeT } from "./Graphics"
 import {
     Finalizable, toPeerPtr, KPointer, MaterializedBase, nullptr, pointer, NativeThunk, InteropNativeModule
@@ -1754,7 +1755,7 @@ export namespace typeNode {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
-        const event = UIListEventInternal.construct(ptr);
+        const event = UIEventHelper.constructListEvent(ptr);
         if (event !== undefined) {
             return event
         }
@@ -1851,7 +1852,7 @@ export namespace typeNode {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
-        const event = UIScrollEventInternal.construct(ptr);
+        const event = UIEventHelper.constructScrollEvent(ptr);
         if (event !== undefined) {
             return event
         }
@@ -1902,7 +1903,7 @@ export namespace typeNode {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
-        const event = UIGridEventInternal.construct(ptr);
+        const event = UIEventHelper.constructGridEvent(ptr);
         if (event !== undefined) {
             return event
         }
@@ -1978,7 +1979,7 @@ export namespace typeNode {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
-        const event = UIWaterFlowEventInternal.construct(ptr);
+        const event = UIEventHelper.constructWaterFlowEvent(ptr);
         if (event !== undefined) {
             return event
         }

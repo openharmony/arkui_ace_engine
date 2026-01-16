@@ -22,9 +22,10 @@ import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { AlertDialogParamWithConfirm_serializer, AlertDialogParamWithButtons_serializer, AlertDialogParamWithOptions_serializer, AlertDialogParamWithConfirm, AlertDialogParamWithButtons, AlertDialogParamWithOptions, DialogAlignment } from "./alertDialog"
-import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, GeometryInfo, Measurable, Layoutable, Bindable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, Bindable_I32_serializer, TouchObject, KeyEvent, KeyEventInternal, MouseEvent, MouseEventInternal, SourceTool, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ChildrenMainSize_serializer, ChildrenMainSize, ChildrenMainSizeInternal, OnWillScrollCallback, OnScrollCallback, SheetOptions_serializer, SheetOptions, AxisEvent, InputEventType, TouchEvent_serializer, MouseEvent_serializer, AxisEvent_serializer } from "./common"
+import { AnimateParam_serializer, TranslateOptions_serializer, KeyframeAnimateParam_serializer, KeyframeState_serializer, AnimateParam, TranslateOptions, KeyframeAnimateParam, KeyframeState, TouchEvent, TouchEventInternal, ClickEvent, ClickEventInternal, UICommonEvent, UICommonEventInternal, ItemDragEventHandler_serializer, OnMoveHandler, ItemDragEventHandler, PopupCommonOptions_serializer, MenuOptions_serializer, PopupCommonOptions, MenuOptions, ThemeColorMode, UIScrollableCommonEvent, UIScrollableCommonEventInternal, GeometryInfo, Measurable, Layoutable, Bindable, Rectangle, ShadowOptions, ShadowStyle, BlurStyle, BackgroundBlurStyleOptions, BackgroundEffectOptions, KeyboardAvoidMode, HoverModeAreaType, SizeResult, Bindable_I32_serializer, TouchObject, KeyEvent, KeyEventInternal, MouseEvent, MouseEventInternal, SourceTool, Rectangle_serializer, ShadowOptions_serializer, BackgroundBlurStyleOptions_serializer, BackgroundEffectOptions_serializer, ChildrenMainSize_serializer, ChildrenMainSize, ChildrenMainSizeInternal, OnWillScrollCallback, OnScrollCallback, SheetOptions_serializer, SheetOptions, AxisEvent, InputEventType, TouchEvent_serializer, MouseEvent_serializer, AxisEvent_serializer } from "./common"
 import { ArkListOptions_serializer } from "./../framework/ohos.arkui.ArcList"
 import { ArkListOptions, ArcScrollIndexHandler } from "@ohos.arkui.ArcList"
+import { UIListEvent, UIListEventInternal } from "./list"
 import { SwipeActionOptions_serializer, SwipeActionOptions } from "./listItem"
 import { ArcScrollBarOptions_serializer } from "./../framework/ohos.arkui.ArcScrollBar"
 import { ArcScrollBarOptions } from "@ohos.arkui.ArcScrollBar"
@@ -65,13 +66,15 @@ import { MeasureOptions_serializer } from "./../framework/ohos.measure"
 import { MeasureOptions } from "@ohos.measure"
 import { TextMenuOptions_serializer, TextMenuOptions } from "./textCommon"
 import { TabsController, TabsControllerInternal } from "./tabs"
-import { Scroller, ScrollerInternal } from "./scroll"
+import { Scroller, ScrollerInternal, UIScrollEvent, UIScrollEventInternal } from "./scroll"
 import { CustomBuilder } from "./builder"
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from "./navigation"
 import { TargetInfo_serializer } from "./../framework/ohos.arkui.UIContext"
 import { TargetInfo, CustomKeyboardContinueFeature, GestureListenerType, GestureActionPhase } from "@ohos.arkui.UIContext"
 import { uiObserver_NavigationInfo_serializer } from "./../framework/ohos.arkui.observer"
 import { default as uiObserver } from "@ohos.arkui.observer"
+import { UIGridEvent, UIGridEventInternal } from "./grid"
+import { UIWaterFlowEvent, UIWaterFlowEventInternal } from "./waterFlow"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
@@ -6135,6 +6138,51 @@ export class UIObserverGestureEventOps {
         const option_casted = option as (InnerGestureObserverConfigs)
         const callback_casted = callback as (((info: InnerGestureTriggerInfo,frameNode?: FrameNode) => void))
         return UIObserverGestureEventOps.addGlobalGestureListener_serialize(type_casted, option_casted, callback_casted)
+export class UIEventHelper {
+    static constructGridEvent_serialize(node: KPointer): UIGridEvent {
+        const retval  = ArkUIGeneratedNativeModule._UIEventHelper_constructGridEvent(node)
+        const obj : UIGridEvent = UIGridEventInternal.fromPtr(retval)
+        return obj
+    }
+    static constructListEvent_serialize(node: KPointer): UIListEvent {
+        const retval  = ArkUIGeneratedNativeModule._UIEventHelper_constructListEvent(node)
+        const obj : UIListEvent = UIListEventInternal.fromPtr(retval)
+        return obj
+    }
+    static constructScrollableCommonEvent_serialize(node: KPointer): UIScrollableCommonEvent {
+        const retval  = ArkUIGeneratedNativeModule._UIEventHelper_constructScrollableCommonEvent(node)
+        const obj : UIScrollableCommonEvent = UIScrollableCommonEventInternal.fromPtr(retval)
+        return obj
+    }
+    static constructScrollEvent_serialize(node: KPointer): UIScrollEvent {
+        const retval  = ArkUIGeneratedNativeModule._UIEventHelper_constructScrollEvent(node)
+        const obj : UIScrollEvent = UIScrollEventInternal.fromPtr(retval)
+        return obj
+    }
+    static constructWaterFlowEvent_serialize(node: KPointer): UIWaterFlowEvent {
+        const retval  = ArkUIGeneratedNativeModule._UIEventHelper_constructWaterFlowEvent(node)
+        const obj : UIWaterFlowEvent = UIWaterFlowEventInternal.fromPtr(retval)
+        return obj
+    }
+    public static constructGridEvent(node: KPointer): UIGridEvent {
+        const node_casted = node as (KPointer)
+        return UIEventHelper.constructGridEvent_serialize(node_casted)
+    }
+    public static constructListEvent(node: KPointer): UIListEvent {
+        const node_casted = node as (KPointer)
+        return UIEventHelper.constructListEvent_serialize(node_casted)
+    }
+    public static constructScrollableCommonEvent(node: KPointer): UIScrollableCommonEvent {
+        const node_casted = node as (KPointer)
+        return UIEventHelper.constructScrollableCommonEvent_serialize(node_casted)
+    }
+    public static constructScrollEvent(node: KPointer): UIScrollEvent {
+        const node_casted = node as (KPointer)
+        return UIEventHelper.constructScrollEvent_serialize(node_casted)
+    }
+    public static constructWaterFlowEvent(node: KPointer): UIWaterFlowEvent {
+        const node_casted = node as (KPointer)
+        return UIEventHelper.constructWaterFlowEvent_serialize(node_casted)
     }
 }
 export class ArkRootPeer extends PeerNode {

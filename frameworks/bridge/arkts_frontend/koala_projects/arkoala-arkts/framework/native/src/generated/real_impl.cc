@@ -20231,6 +20231,38 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // UIContextAtomicServiceBarAccessor
+    namespace UIEventHelperAccessor {
+    Ark_UIGridEvent ConstructGridEventImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        return {};
+    }
+    Ark_UIListEvent ConstructListEventImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        return {};
+    }
+    Ark_UIScrollableCommonEvent ConstructScrollableCommonEventImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        return {};
+    }
+    Ark_UIScrollEvent ConstructScrollEventImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        return {};
+    }
+    Ark_UIWaterFlowEvent ConstructWaterFlowEventImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+        return {};
+    }
+    } // UIEventHelperAccessor
     namespace UIExtensionProxyAccessor {
     void DestroyPeerImpl(Ark_UIExtensionProxy peer)
     {
@@ -24788,6 +24820,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &UIContextAtomicServiceBarAccessorImpl;
     }
 
+    const GENERATED_ArkUIUIEventHelperAccessor* GetUIEventHelperAccessor()
+    {
+        static const GENERATED_ArkUIUIEventHelperAccessor UIEventHelperAccessorImpl {
+            UIEventHelperAccessor::ConstructGridEventImpl,
+            UIEventHelperAccessor::ConstructListEventImpl,
+            UIEventHelperAccessor::ConstructScrollableCommonEventImpl,
+            UIEventHelperAccessor::ConstructScrollEventImpl,
+            UIEventHelperAccessor::ConstructWaterFlowEventImpl,
+        };
+        return &UIEventHelperAccessorImpl;
+    }
+
     const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor()
     {
         static const GENERATED_ArkUIUIExtensionProxyAccessor UIExtensionProxyAccessorImpl {
@@ -25350,6 +25394,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetTransitionEffectAccessor,
             GetUICommonEventAccessor,
             GetUIContextAtomicServiceBarAccessor,
+            GetUIEventHelperAccessor,
             GetUIExtensionProxyAccessor,
             GetUIGridEventAccessor,
             GetUIListEventAccessor,

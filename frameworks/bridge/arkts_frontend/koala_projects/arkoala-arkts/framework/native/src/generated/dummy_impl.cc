@@ -49192,6 +49192,73 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return {};
     }
     } // UIContextAtomicServiceBarAccessor
+    namespace UIEventHelperAccessor {
+    Ark_UIGridEvent ConstructGridEventImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_UIGridEvent>(300);
+        }
+        string out("constructGridEvent(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_UIGridEvent>(300)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_UIGridEvent>(300);
+    }
+    Ark_UIListEvent ConstructListEventImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_UIListEvent>(300);
+        }
+        string out("constructListEvent(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_UIListEvent>(300)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_UIListEvent>(300);
+    }
+    Ark_UIScrollableCommonEvent ConstructScrollableCommonEventImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_UIScrollableCommonEvent>(300);
+        }
+        string out("constructScrollableCommonEvent(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_UIScrollableCommonEvent>(300)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_UIScrollableCommonEvent>(300);
+    }
+    Ark_UIScrollEvent ConstructScrollEventImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_UIScrollEvent>(300);
+        }
+        string out("constructScrollEvent(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_UIScrollEvent>(300)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_UIScrollEvent>(300);
+    }
+    Ark_UIWaterFlowEvent ConstructWaterFlowEventImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_UIWaterFlowEvent>(300);
+        }
+        string out("constructWaterFlowEvent(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_UIWaterFlowEvent>(300)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_UIWaterFlowEvent>(300);
+    }
+    } // UIEventHelperAccessor
     namespace UIExtensionProxyAccessor {
     void DestroyPeerImpl(Ark_UIExtensionProxy peer)
     {
@@ -55124,6 +55191,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         return &UIContextAtomicServiceBarAccessorImpl;
     }
 
+    const GENERATED_ArkUIUIEventHelperAccessor* GetUIEventHelperAccessor()
+    {
+        static const GENERATED_ArkUIUIEventHelperAccessor UIEventHelperAccessorImpl {
+            UIEventHelperAccessor::ConstructGridEventImpl,
+            UIEventHelperAccessor::ConstructListEventImpl,
+            UIEventHelperAccessor::ConstructScrollableCommonEventImpl,
+            UIEventHelperAccessor::ConstructScrollEventImpl,
+            UIEventHelperAccessor::ConstructWaterFlowEventImpl,
+        };
+        return &UIEventHelperAccessorImpl;
+    }
+
     const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor()
     {
         static const GENERATED_ArkUIUIExtensionProxyAccessor UIExtensionProxyAccessorImpl {
@@ -55688,6 +55767,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetTransitionEffectAccessor,
             GetUICommonEventAccessor,
             GetUIContextAtomicServiceBarAccessor,
+            GetUIEventHelperAccessor,
             GetUIExtensionProxyAccessor,
             GetUIGridEventAccessor,
             GetUIListEventAccessor,

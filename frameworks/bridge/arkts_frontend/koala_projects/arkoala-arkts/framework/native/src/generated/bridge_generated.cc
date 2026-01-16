@@ -43001,6 +43001,26 @@ void impl_UIContextGetInfo_enableSwipeBack(KSerializerBuffer thisArray, int32_t 
         GetAccessors()->getUIContextGetInfoAccessor()->enableSwipeBack(static_cast<Opt_Boolean*>(&enabledValueTemp));
 }
 KOALA_INTEROP_DIRECT_V2(UIContextGetInfo_enableSwipeBack, KSerializerBuffer, int32_t)
+Ark_NativePointer impl_UIEventHelper_constructGridEvent(Ark_NativePointer node) {
+        return GetAccessors()->getUIEventHelperAccessor()->constructGridEvent(node);
+}
+KOALA_INTEROP_DIRECT_1(UIEventHelper_constructGridEvent, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_UIEventHelper_constructListEvent(Ark_NativePointer node) {
+        return GetAccessors()->getUIEventHelperAccessor()->constructListEvent(node);
+}
+KOALA_INTEROP_DIRECT_1(UIEventHelper_constructListEvent, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_UIEventHelper_constructScrollableCommonEvent(Ark_NativePointer node) {
+        return GetAccessors()->getUIEventHelperAccessor()->constructScrollableCommonEvent(node);
+}
+KOALA_INTEROP_DIRECT_1(UIEventHelper_constructScrollableCommonEvent, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_UIEventHelper_constructScrollEvent(Ark_NativePointer node) {
+        return GetAccessors()->getUIEventHelperAccessor()->constructScrollEvent(node);
+}
+KOALA_INTEROP_DIRECT_1(UIEventHelper_constructScrollEvent, Ark_NativePointer, Ark_NativePointer)
+Ark_NativePointer impl_UIEventHelper_constructWaterFlowEvent(Ark_NativePointer node) {
+        return GetAccessors()->getUIEventHelperAccessor()->constructWaterFlowEvent(node);
+}
+KOALA_INTEROP_DIRECT_1(UIEventHelper_constructWaterFlowEvent, Ark_NativePointer, Ark_NativePointer)
 void impl_UIExtensionProxy_send(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
         Ark_UIExtensionProxy self = reinterpret_cast<Ark_UIExtensionProxy>(thisPtr);
         DeserializerBase thisDeserializer(thisArray, thisLength);

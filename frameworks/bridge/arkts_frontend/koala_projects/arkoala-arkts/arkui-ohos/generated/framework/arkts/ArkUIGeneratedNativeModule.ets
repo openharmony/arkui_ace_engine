@@ -6773,6 +6773,16 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Quick
     native static _UIContextGetInfo_enableSwipeBack(thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _UIEventHelper_constructGridEvent(node: KPointer): KPointer
+    @ani.unsafe.Direct
+    native static _UIEventHelper_constructListEvent(node: KPointer): KPointer
+    @ani.unsafe.Direct
+    native static _UIEventHelper_constructScrollableCommonEvent(node: KPointer): KPointer
+    @ani.unsafe.Direct
+    native static _UIEventHelper_constructScrollEvent(node: KPointer): KPointer
+    @ani.unsafe.Direct
+    native static _UIEventHelper_constructWaterFlowEvent(node: KPointer): KPointer
+    @ani.unsafe.Direct
     native static _UIExtensionProxy_construct(): KPointer
     @ani.unsafe.Direct
     native static _UIExtensionProxy_getFinalizer(): KPointer

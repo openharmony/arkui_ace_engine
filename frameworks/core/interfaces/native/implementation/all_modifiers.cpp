@@ -408,6 +408,7 @@ const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor();
 const GENERATED_ArkUIUICommonEventAccessor* GetUICommonEventAccessor();
 const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* GetUIContextAtomicServiceBarAccessor();
 const GENERATED_ArkUIUIContextGetInfoAccessor* GetUIContextGetInfoAccessor();
+const GENERATED_ArkUIUIEventHelperAccessor* GetUIEventHelperAccessor();
 const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor();
 const GENERATED_ArkUIUIGridEventAccessor* GetUIGridEventAccessor();
 const GENERATED_ArkUIUIListEventAccessor* GetUIListEventAccessor();
@@ -763,6 +764,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetUICommonEventAccessor,
         GetUIContextAtomicServiceBarAccessor,
         GetUIContextGetInfoAccessor,
+        GetUIEventHelperAccessor,
         GetUIExtensionProxyAccessor,
         GetUIGridEventAccessor,
         GetUIListEventAccessor,

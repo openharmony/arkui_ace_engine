@@ -31685,6 +31685,14 @@ typedef struct GENERATED_ArkUIUIContextGetInfoAccessor {
     void (*enableSwipeBack)(const Opt_Boolean* enabled);
 } GENERATED_ArkUIUIContextGetInfoAccessor;
 
+typedef struct GENERATED_ArkUIUIEventHelperAccessor {
+    Ark_UIGridEvent (*constructGridEvent)(Ark_NativePointer node);
+    Ark_UIListEvent (*constructListEvent)(Ark_NativePointer node);
+    Ark_UIScrollableCommonEvent (*constructScrollableCommonEvent)(Ark_NativePointer node);
+    Ark_UIScrollEvent (*constructScrollEvent)(Ark_NativePointer node);
+    Ark_UIWaterFlowEvent (*constructWaterFlowEvent)(Ark_NativePointer node);
+} GENERATED_ArkUIUIEventHelperAccessor;
+
 typedef struct GENERATED_ArkUIUIExtensionProxyAccessor {
     void (*destroyPeer)(Ark_UIExtensionProxy peer);
     Ark_UIExtensionProxy (*construct)();
@@ -32321,6 +32329,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIUICommonEventAccessor* (*getUICommonEventAccessor)();
     const GENERATED_ArkUIUIContextAtomicServiceBarAccessor* (*getUIContextAtomicServiceBarAccessor)();
     const GENERATED_ArkUIUIContextGetInfoAccessor* (*getUIContextGetInfoAccessor)();
+    const GENERATED_ArkUIUIEventHelperAccessor* (*getUIEventHelperAccessor)();
     const GENERATED_ArkUIUIExtensionProxyAccessor* (*getUIExtensionProxyAccessor)();
     const GENERATED_ArkUIUIGridEventAccessor* (*getUIGridEventAccessor)();
     const GENERATED_ArkUIUIListEventAccessor* (*getUIListEventAccessor)();
