@@ -380,6 +380,77 @@ void AddDisturbance(std::vector<ParticleDisturbance>& dataArray, const Ark_Distu
     dataArray.push_back(disturbanceField);
 }
 
+void ParseFieldRegion(const Ark_FieldRegionInner& arkFieldRegion, ParticleFieldRegion& field)
+{
+    ParticleDisturbanceShapeType shape = ParticleDisturbanceShapeType::RECT;
+    if (arkFieldRegion.shape.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        int shapeInt = static_cast<int>(arkFieldRegion.shape.value);
+        if (shapeInt >= static_cast<int>(ParticleDisturbanceShapeType::RECT) &&
+            shapeInt < static_cast<int>(ParticleDisturbanceShapeType::MAX)) {
+            shape = static_cast<ParticleDisturbanceShapeType>(shapeInt);
+        }
+    }
+    field.shape = shape;
+    std::pair<float, float> size(0.0f, 0.0f);
+    std::pair<float, float> position(0.0f, 0.0f);
+    if (arkFieldRegion.size.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        size.first = Converter::Convert<float>(arkFieldRegion.size.value.width);
+        size.second = Converter::Convert<float>(arkFieldRegion.size.value.height);
+    }
+    if (arkFieldRegion.position.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        position.first = Converter::Convert<float>(arkFieldRegion.position.value.x);
+        position.second = Converter::Convert<float>(arkFieldRegion.position.value.y);
+    }
+    float sizeX = std::max(0.0f, size.first);
+    float sizeY = std::max(0.0f, size.second);
+    float posX = position.first;
+    float posY = position.second;
+    field.size.first = Dimension(sizeX, DimensionUnit::VP);
+    field.size.second = Dimension(sizeY, DimensionUnit::VP);
+    field.position.first = Dimension(posX, DimensionUnit::VP);
+    field.position.second = Dimension(posY, DimensionUnit::VP);
+}
+
+void AddRipple(std::vector<ParticleRippleField>& dataArray, const Ark_RippleFieldOptionsInner& arkRippleField)
+{
+    ParticleRippleField rippleField;
+    float amplitude = Converter::ConvertOrDefault<float>(arkRippleField.amplitude, 0.0f);
+    rippleField.amplitude = GreatOrEqual(amplitude, 0.0f) ? amplitude : 0.0f;
+    float wavelength = Converter::ConvertOrDefault<float>(arkRippleField.wavelength, 0.0f);
+    rippleField.wavelength = GreatOrEqual(wavelength, 0.0f) ? wavelength : 0.0f;
+    float waveSpeed = Converter::ConvertOrDefault<float>(arkRippleField.waveSpeed, 0.0f);
+    rippleField.waveSpeed = GreatOrEqual(waveSpeed, 0.0f) ? waveSpeed : 0.0f;
+    float attenuation = Converter::ConvertOrDefault<float>(arkRippleField.attenuation, 0.0f);
+    rippleField.attenuation = (GreatOrEqual(attenuation, 0.0f) && LessOrEqual(attenuation, 1.0f)) ? attenuation : 0.0f;
+    if (arkRippleField.center.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        const auto& centerObj = arkRippleField.center.value;
+        float x = Converter::ConvertOrDefault<float>(centerObj.x, 0.0f);
+        rippleField.center.first = Dimension(x, DimensionUnit::VP);
+        float y = Converter::ConvertOrDefault<float>(centerObj.y, 0.0f);
+        rippleField.center.second = Dimension(y, DimensionUnit::VP);
+    }
+    if (arkRippleField.region.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        ParseFieldRegion(arkRippleField.region.value, rippleField.region);
+    }
+    dataArray.push_back(rippleField);
+}
+
+void AddVelocity(std::vector<ParticleVelocityField>& dataArray, const Ark_VelocityFieldOptionsInner& arkVelocityField)
+{
+    ParticleVelocityField velocityField;
+    if (arkVelocityField.velocity.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        const auto& vec = arkVelocityField.velocity.value;
+        float x = Converter::ConvertOrDefault<float>(vec.x, 0.0f);
+        velocityField.velocity.first = x;
+        float y = Converter::ConvertOrDefault<float>(vec.y, 0.0f);
+        velocityField.velocity.second = y;
+    }
+    if (arkVelocityField.region.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        ParseFieldRegion(arkVelocityField.region.value, velocityField.region);
+    }
+    dataArray.push_back(velocityField);
+}
+
 bool ParseParticleConfig(const ParticleType& type, const Ark_ParticleConfigs& arkConfig, ParticleConfig& result)
 {
     if (type == ParticleType::IMAGE) {
@@ -675,6 +746,36 @@ void SetParticleOptionsImpl(Ark_NativePointer node,
     auto renderContext = frameNode->GetRenderContext();
     renderContext->UpdateParticleOptionArray(options);
 }
+void SetRippleFieldsImpl(Ark_NativePointer node, const Opt_Array_RippleFieldOptionsInner* rippleFields)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(rippleFields);
+    if (rippleFields->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    std::vector<ParticleRippleField> dataArray;
+    const auto& arkRippleFieldOptions = rippleFields->value;
+    for (int32_t i = 0; i < arkRippleFieldOptions.length; ++i) {
+        AddRipple(dataArray, arkRippleFieldOptions.array[i]);
+    }
+    ParticleModelNG::RippleFields(dataArray, frameNode);
+}
+void SetVelocityFieldsImpl(Ark_NativePointer node, const Opt_Array_VelocityFieldOptionsInner* velocityFields)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(velocityFields);
+    if (velocityFields->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        return;
+    }
+    std::vector<ParticleVelocityField> dataArray;
+    const auto& arkVelocityFieldOptions = velocityFields->value;
+    for (int32_t i = 0; i < arkVelocityFieldOptions.length; ++i) {
+        AddVelocity(dataArray, arkVelocityFieldOptions.array[i]);
+    }
+    ParticleModelNG::VelocityFields(dataArray, frameNode);
+}
 } // ParticleHelperAccessor
 
 const GENERATED_ArkUIParticleHelperAccessor* GetParticleHelperAccessor()
@@ -684,6 +785,8 @@ const GENERATED_ArkUIParticleHelperAccessor* GetParticleHelperAccessor()
         ParticleHelperAccessor::SetEmitterPropertyImpl,
         ParticleHelperAccessor::ParticleConstructImpl,
         ParticleHelperAccessor::SetParticleOptionsImpl,
+        ParticleHelperAccessor::SetRippleFieldsImpl,
+        ParticleHelperAccessor::SetVelocityFieldsImpl,
     };
     return &ParticleHelperAccessorImpl;
 }

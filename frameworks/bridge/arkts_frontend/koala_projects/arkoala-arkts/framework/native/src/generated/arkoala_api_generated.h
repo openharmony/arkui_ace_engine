@@ -917,6 +917,8 @@ typedef struct Ark_Vec4 Ark_Vec4;
 typedef struct Opt_Vec4 Opt_Vec4;
 typedef struct Ark_Vector2 Ark_Vector2;
 typedef struct Opt_Vector2 Opt_Vector2;
+typedef struct Ark_Vector2F64 Ark_Vector2F64;
+typedef struct Opt_Vector2F64 Opt_Vector2F64;
 typedef struct Ark_Vector3 Ark_Vector3;
 typedef struct Opt_Vector3 Opt_Vector3;
 typedef struct Ark_VelocityOptions Ark_VelocityOptions;
@@ -1107,6 +1109,8 @@ typedef struct Array_ResourceStr Array_ResourceStr;
 typedef struct Opt_Array_ResourceStr Opt_Array_ResourceStr;
 typedef struct Array_ResponseRegion Array_ResponseRegion;
 typedef struct Opt_Array_ResponseRegion Opt_Array_ResponseRegion;
+typedef struct Array_RippleFieldOptionsInner Array_RippleFieldOptionsInner;
+typedef struct Opt_Array_RippleFieldOptionsInner Opt_Array_RippleFieldOptionsInner;
 typedef struct Array_RichEditorImageSpanResult Array_RichEditorImageSpanResult;
 typedef struct Opt_Array_RichEditorImageSpanResult Opt_Array_RichEditorImageSpanResult;
 typedef struct Array_RichEditorParagraphResult Array_RichEditorParagraphResult;
@@ -1191,6 +1195,8 @@ typedef struct Array_Union_RichEditorTextSpanResult_RichEditorImageSpanResult Ar
 typedef struct Opt_Array_Union_RichEditorTextSpanResult_RichEditorImageSpanResult Opt_Array_Union_RichEditorTextSpanResult_RichEditorImageSpanResult;
 typedef struct Array_Union_String_I32_I64_F64_Resource Array_Union_String_I32_I64_F64_Resource;
 typedef struct Opt_Array_Union_String_I32_I64_F64_Resource Opt_Array_Union_String_I32_I64_F64_Resource;
+typedef struct Array_VelocityFieldOptionsInner Array_VelocityFieldOptionsInner;
+typedef struct Opt_Array_VelocityFieldOptionsInner Opt_Array_VelocityFieldOptionsInner;
 typedef struct Array_UrlRegexRule Array_UrlRegexRule;
 typedef struct Opt_Array_UrlRegexRule Opt_Array_UrlRegexRule;
 typedef struct AsyncCallback_image_PixelMap_Void AsyncCallback_image_PixelMap_Void;
@@ -2135,6 +2141,8 @@ typedef struct Ark_EventLocationInfo Ark_EventLocationInfo;
 typedef struct Opt_EventLocationInfo Opt_EventLocationInfo;
 typedef struct Ark_ExpectedFrameRateRange Ark_ExpectedFrameRateRange;
 typedef struct Opt_ExpectedFrameRateRange Opt_ExpectedFrameRateRange;
+typedef struct Ark_FieldRegionInner Ark_FieldRegionInner;
+typedef struct Opt_FieldRegionInner Opt_FieldRegionInner;
 typedef struct Ark_FingerInfo Ark_FingerInfo;
 typedef struct Opt_FingerInfo Opt_FingerInfo;
 typedef struct Ark_FirstMeaningfulPaint Ark_FirstMeaningfulPaint;
@@ -3011,6 +3019,8 @@ typedef struct RestrictedWorkerPeer* Ark_RestrictedWorker;
 typedef struct Opt_RestrictedWorker Opt_RestrictedWorker;
 typedef struct Ark_ReuseOptions Ark_ReuseOptions;
 typedef struct Opt_ReuseOptions Opt_ReuseOptions;
+typedef struct Ark_RippleFieldOptionsInner Ark_RippleFieldOptionsInner;
+typedef struct Opt_RippleFieldOptionsInner Opt_RippleFieldOptionsInner;
 typedef struct Ark_RichEditorBuilderSpanOptions Ark_RichEditorBuilderSpanOptions;
 typedef struct Opt_RichEditorBuilderSpanOptions Opt_RichEditorBuilderSpanOptions;
 typedef struct Ark_RichEditorChangeValue Ark_RichEditorChangeValue;
@@ -3168,6 +3178,8 @@ typedef struct Ark_Union_String_Resource_PixelMap_ImageAlt Ark_Union_String_Reso
 typedef struct Opt_Union_String_Resource_PixelMap_ImageAlt Opt_Union_String_Resource_PixelMap_ImageAlt;
 typedef struct Ark_Union_TitleHeight_Length Ark_Union_TitleHeight_Length;
 typedef struct Opt_Union_TitleHeight_Length Opt_Union_TitleHeight_Length;
+typedef struct Ark_VelocityFieldOptionsInner Ark_VelocityFieldOptionsInner;
+typedef struct Opt_VelocityFieldOptionsInner Opt_VelocityFieldOptionsInner;
 typedef struct Ark_VideoOptions Ark_VideoOptions;
 typedef struct Opt_VideoOptions Opt_VideoOptions;
 typedef struct Ark_WithThemeOptions Ark_WithThemeOptions;
@@ -9632,6 +9644,15 @@ typedef struct Opt_Vector2 {
     Ark_Tag tag;
     Ark_Vector2 value;
 } Opt_Vector2;
+typedef struct Ark_Vector2F64 {
+    /* kind: Interface */
+    Ark_Float64 x;
+    Ark_Float64 y;
+} Ark_Vector2F64;
+typedef struct Opt_Vector2F64 {
+    Ark_Tag tag;
+    Ark_Vector2F64 value;
+} Opt_Vector2F64;
 typedef struct Ark_Vector3 {
     /* kind: Interface */
     Ark_Float64 x;
@@ -10372,6 +10393,15 @@ typedef struct Opt_Array_ResponseRegion {
     Ark_Tag tag;
     Array_ResponseRegion value;
 } Opt_Array_ResponseRegion;
+typedef struct Array_RippleFieldOptionsInner {
+    /* kind: ContainerType */
+    Ark_RippleFieldOptionsInner* array;
+    Ark_Int32 length;
+} Array_RippleFieldOptionsInner;
+typedef struct Opt_Array_RippleFieldOptionsInner {
+    Ark_Tag tag;
+    Array_RippleFieldOptionsInner value;
+} Opt_Array_RippleFieldOptionsInner;
 typedef struct Array_RichEditorImageSpanResult {
     /* kind: ContainerType */
     Ark_RichEditorImageSpanResult* array;
@@ -10750,6 +10780,15 @@ typedef struct Opt_Array_Union_String_I32_I64_F64_Resource {
     Ark_Tag tag;
     Array_Union_String_I32_I64_F64_Resource value;
 } Opt_Array_Union_String_I32_I64_F64_Resource;
+typedef struct Array_VelocityFieldOptionsInner {
+    /* kind: ContainerType */
+    Ark_VelocityFieldOptionsInner* array;
+    Ark_Int32 length;
+} Array_VelocityFieldOptionsInner;
+typedef struct Opt_Array_VelocityFieldOptionsInner {
+    Ark_Tag tag;
+    Array_VelocityFieldOptionsInner value;
+} Opt_Array_VelocityFieldOptionsInner;
 typedef struct Array_UrlRegexRule {
     /* kind: ContainerType */
     Ark_UrlRegexRule* array;
@@ -15260,6 +15299,16 @@ typedef struct Opt_ExpectedFrameRateRange {
     Ark_Tag tag;
     Ark_ExpectedFrameRateRange value;
 } Opt_ExpectedFrameRateRange;
+typedef struct Ark_FieldRegionInner {
+    /* kind: Interface */
+    Opt_DisturbanceFieldShape shape;
+    Opt_PositionF64Inner position;
+    Opt_SizeF64Inner size;
+} Ark_FieldRegionInner;
+typedef struct Opt_FieldRegionInner {
+    Ark_Tag tag;
+    Ark_FieldRegionInner value;
+} Opt_FieldRegionInner;
 typedef struct Ark_FingerInfo {
     /* kind: Interface */
     Ark_Int32 id;
@@ -19570,6 +19619,19 @@ typedef struct Opt_ReuseOptions {
     Ark_Tag tag;
     Ark_ReuseOptions value;
 } Opt_ReuseOptions;
+typedef struct Ark_RippleFieldOptionsInner {
+    /* kind: Interface */
+    Opt_Float64 amplitude;
+    Opt_Float64 wavelength;
+    Opt_Float64 waveSpeed;
+    Opt_Float64 attenuation;
+    Opt_PositionF64Inner center;
+    Opt_FieldRegionInner region;
+} Ark_RippleFieldOptionsInner;
+typedef struct Opt_RippleFieldOptionsInner {
+    Ark_Tag tag;
+    Ark_RippleFieldOptionsInner value;
+} Opt_RippleFieldOptionsInner;
 typedef struct Ark_RichEditorBuilderSpanOptions {
     /* kind: Interface */
     Opt_Int32 offset;
@@ -20429,6 +20491,15 @@ typedef struct Opt_Union_TitleHeight_Length {
     Ark_Tag tag;
     Ark_Union_TitleHeight_Length value;
 } Opt_Union_TitleHeight_Length;
+typedef struct Ark_VelocityFieldOptionsInner {
+    /* kind: Interface */
+    Opt_Vector2F64 velocity;
+    Opt_FieldRegionInner region;
+} Ark_VelocityFieldOptionsInner;
+typedef struct Opt_VelocityFieldOptionsInner {
+    Ark_Tag tag;
+    Ark_VelocityFieldOptionsInner value;
+} Opt_VelocityFieldOptionsInner;
 typedef struct Ark_VideoOptions {
     /* kind: Interface */
     Opt_Union_String_Resource src;
@@ -29778,6 +29849,8 @@ typedef struct GENERATED_ArkUIParticleHelperAccessor {
                                            Ark_Int32 flags);
     void (*SetParticleOptions)(Ark_NativePointer node,
                                const Ark_ParticlesInner* particles);
+    void (*SetRippleFields)(Ark_NativePointer node, const Opt_Array_RippleFieldOptionsInner* rippleFields);
+    void (*SetVelocityFields)(Ark_NativePointer node, const Opt_Array_VelocityFieldOptionsInner* velocityFields);
 } GENERATED_ArkUIParticleHelperAccessor;
 
 typedef struct GENERATED_ArkUIPath2DAccessor {

@@ -3181,6 +3181,38 @@ export class ParticleHelper {
         ArkUIGeneratedNativeModule._ParticleHelper_SetParticleOptions(node, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    static SetRippleFields_serialize(node: KPointer, rippleFields: Array<RippleFieldOptionsInner> | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (rippleFields !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const rippleFieldsTmpValue  = rippleFields!
+            thisSerializer.writeInt32((rippleFieldsTmpValue.length).toInt())
+            for (let rippleFieldsTmpValueCounterI = 0; rippleFieldsTmpValueCounterI < rippleFieldsTmpValue.length; rippleFieldsTmpValueCounterI++) {
+                const rippleFieldsTmpValueTmpElement : RippleFieldOptionsInner = rippleFieldsTmpValue[rippleFieldsTmpValueCounterI]
+                RippleFieldOptionsInner_serializer.write(thisSerializer, rippleFieldsTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ParticleHelper_SetRippleFields(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static SetVelocityFields_serialize(node: KPointer, velocityFields: Array<VelocityFieldOptionsInner> | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (velocityFields !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const velocityFieldsTmpValue  = velocityFields!
+            thisSerializer.writeInt32((velocityFieldsTmpValue.length).toInt())
+            for (let velocityFieldsTmpValueCounterI = 0; velocityFieldsTmpValueCounterI < velocityFieldsTmpValue.length; velocityFieldsTmpValueCounterI++) {
+                const velocityFieldsTmpValueTmpElement : VelocityFieldOptionsInner = velocityFieldsTmpValue[velocityFieldsTmpValueCounterI]
+                VelocityFieldOptionsInner_serializer.write(thisSerializer, velocityFieldsTmpValueTmpElement)
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ParticleHelper_SetVelocityFields(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     public static SetDisturbanceFields(node: KPointer, disturbanceFields: Array<DisturbanceFieldOptionsInner> | undefined): void {
         const node_casted = node as (KPointer)
         const disturbanceFields_casted = disturbanceFields as (Array<DisturbanceFieldOptionsInner> | undefined)
@@ -3202,6 +3234,18 @@ export class ParticleHelper {
         const node_casted = node as (KPointer)
         const particles_casted = particles as (ParticlesInner)
         ParticleHelper.SetParticleOptions_serialize(node_casted, particles_casted)
+        return
+    }
+    public static SetRippleFields(node: KPointer, rippleFields: Array<RippleFieldOptionsInner> | undefined): void {
+        const node_casted = node as (KPointer)
+        const rippleFields_casted = rippleFields as (Array<RippleFieldOptionsInner> | undefined)
+        ParticleHelper.SetRippleFields_serialize(node_casted, rippleFields_casted)
+        return
+    }
+    public static SetVelocityFields(node: KPointer, velocityFields: Array<VelocityFieldOptionsInner> | undefined): void {
+        const node_casted = node as (KPointer)
+        const velocityFields_casted = velocityFields as (Array<VelocityFieldOptionsInner> | undefined)
+        ParticleHelper.SetVelocityFields_serialize(node_casted, velocityFields_casted)
         return
     }
 }
@@ -5490,6 +5534,10 @@ export interface PositionLengthMetricsInner {
     x: LengthMetrics;
     y: LengthMetrics;
 }
+export interface Vector2F64 {
+    x: double;
+    y: double;
+}
 export interface ParticlePropertyAnimationNumberInner {
     from: number;
     to: number;
@@ -5570,6 +5618,23 @@ export interface DisturbanceFieldOptionsInner {
     noiseScale?: double;
     noiseFrequency?: double;
     noiseAmplitude?: double;
+}
+export interface FieldRegionInner {
+    shape?: DisturbanceFieldShape;
+    position?: PositionF64Inner;
+    size?: SizeF64Inner;
+}
+export interface RippleFieldOptionsInner {
+    amplitude?: double;
+    wavelength?: double;
+    waveSpeed?: double;
+    attenuation?: double;
+    center?: PositionF64Inner;
+    region?: FieldRegionInner;
+}
+export interface VelocityFieldOptionsInner {
+    velocity?: Vector2F64;
+    region?: FieldRegionInner;
 }
 export type RouterFinishCallback = (value: KPointer) => void;
 export interface RouterOptionsInner {
@@ -5944,6 +6009,22 @@ export class TranslateResult_serializer {
         const yTmpResult : number = (valueDeserializer.readNumber() as number)
         const zTmpResult : number = (valueDeserializer.readNumber() as number)
         let value : TranslateResult = ({x: xTmpResult, y: yTmpResult, z: zTmpResult} as TranslateResult)
+        return value
+    }
+}
+export class Vector2F64_serializer {
+    public static write(buffer: SerializerBase, value: Vector2F64): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        valueSerializer.writeFloat64(valueHolderForX)
+        const valueHolderForY  = value.y
+        valueSerializer.writeFloat64(valueHolderForY)
+    }
+    public static read(buffer: DeserializerBase): Vector2F64 {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpResult : double = valueDeserializer.readFloat64()
+        const yTmpResult : double = valueDeserializer.readFloat64()
+        let value : Vector2F64 = ({x: xTmpResult, y: yTmpResult} as Vector2F64)
         return value
     }
 }
@@ -6348,6 +6429,58 @@ export class Event_serializer {
         const typeTmpResult : string = (valueDeserializer.readString() as string)
         const timeStampTmpResult : int64 = valueDeserializer.readInt64()
         let value : Event = ({type: typeTmpResult, timeStamp: timeStampTmpResult} as Event)
+        return value
+    }
+}
+export class FieldRegionInner_serializer {
+    public static write(buffer: SerializerBase, value: FieldRegionInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForShape  = value.shape
+        if (valueHolderForShape !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForShapeTmpValue  = (valueHolderForShape as DisturbanceFieldShape)
+            valueSerializer.writeInt32(valueHolderForShapeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForPosition  = value.position
+        if (valueHolderForPosition !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForPositionTmpValue  = valueHolderForPosition!
+            PositionF64Inner_serializer.write(valueSerializer, valueHolderForPositionTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForSize  = value.size
+        if (valueHolderForSize !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSizeTmpValue  = valueHolderForSize!
+            SizeF64Inner_serializer.write(valueSerializer, valueHolderForSizeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): FieldRegionInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const shapeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let shapeTmpBuf : DisturbanceFieldShape | undefined = undefined
+        if ((shapeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            shapeTmpBuf = DisturbanceFieldShape.fromValue(valueDeserializer.readInt32())
+        }
+        const shapeTmpResult : DisturbanceFieldShape | undefined = shapeTmpBuf
+        const positionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let positionTmpBuf : PositionF64Inner | undefined = undefined
+        if ((positionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            positionTmpBuf = PositionF64Inner_serializer.read(valueDeserializer)
+        }
+        const positionTmpResult : PositionF64Inner | undefined = positionTmpBuf
+        const sizeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let sizeTmpBuf : SizeF64Inner | undefined = undefined
+        if ((sizeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            sizeTmpBuf = SizeF64Inner_serializer.read(valueDeserializer)
+        }
+        const sizeTmpResult : SizeF64Inner | undefined = sizeTmpBuf
+        let value : FieldRegionInner = ({shape: shapeTmpResult, position: positionTmpResult, size: sizeTmpResult} as FieldRegionInner)
         return value
     }
 }
@@ -7142,6 +7275,138 @@ export class RestrictedWorker_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return RestrictedWorkerInternal.fromPtr(ptr)
+    }
+}
+export class RippleFieldOptionsInner_serializer {
+    public static write(buffer: SerializerBase, value: RippleFieldOptionsInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForAmplitude  = value.amplitude
+        if (valueHolderForAmplitude !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAmplitudeTmpValue  = valueHolderForAmplitude!
+            valueSerializer.writeFloat64(valueHolderForAmplitudeTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForWavelength  = value.wavelength
+        if (valueHolderForWavelength !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWavelengthTmpValue  = valueHolderForWavelength!
+            valueSerializer.writeFloat64(valueHolderForWavelengthTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForWaveSpeed  = value.waveSpeed
+        if (valueHolderForWaveSpeed !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForWaveSpeedTmpValue  = valueHolderForWaveSpeed!
+            valueSerializer.writeFloat64(valueHolderForWaveSpeedTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAttenuation  = value.attenuation
+        if (valueHolderForAttenuation !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAttenuationTmpValue  = valueHolderForAttenuation!
+            valueSerializer.writeFloat64(valueHolderForAttenuationTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForCenter  = value.center
+        if (valueHolderForCenter !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForCenterTmpValue  = valueHolderForCenter!
+            PositionF64Inner_serializer.write(valueSerializer, valueHolderForCenterTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForRegion  = value.region
+        if (valueHolderForRegion !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRegionTmpValue  = valueHolderForRegion!
+            FieldRegionInner_serializer.write(valueSerializer, valueHolderForRegionTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): RippleFieldOptionsInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const amplitudeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let amplitudeTmpBuf : double | undefined = undefined
+        if ((amplitudeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            amplitudeTmpBuf = valueDeserializer.readFloat64()
+        }
+        const amplitudeTmpResult : double | undefined = amplitudeTmpBuf
+        const wavelengthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let wavelengthTmpBuf : double | undefined = undefined
+        if ((wavelengthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            wavelengthTmpBuf = valueDeserializer.readFloat64()
+        }
+        const wavelengthTmpResult : double | undefined = wavelengthTmpBuf
+        const waveSpeedTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let waveSpeedTmpBuf : double | undefined = undefined
+        if ((waveSpeedTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            waveSpeedTmpBuf = valueDeserializer.readFloat64()
+        }
+        const waveSpeedTmpResult : double | undefined = waveSpeedTmpBuf
+        const attenuationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let attenuationTmpBuf : double | undefined = undefined
+        if ((attenuationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            attenuationTmpBuf = valueDeserializer.readFloat64()
+        }
+        const attenuationTmpResult : double | undefined = attenuationTmpBuf
+        const centerTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let centerTmpBuf : PositionF64Inner | undefined = undefined
+        if ((centerTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            centerTmpBuf = PositionF64Inner_serializer.read(valueDeserializer)
+        }
+        const centerTmpResult : PositionF64Inner | undefined = centerTmpBuf
+        const regionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let regionTmpBuf : FieldRegionInner | undefined = undefined
+        if ((regionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            regionTmpBuf = FieldRegionInner_serializer.read(valueDeserializer)
+        }
+        const regionTmpResult : FieldRegionInner | undefined = regionTmpBuf
+        let value : RippleFieldOptionsInner = ({amplitude: amplitudeTmpResult, wavelength: wavelengthTmpResult, waveSpeed: waveSpeedTmpResult, attenuation: attenuationTmpResult, center: centerTmpResult, region: regionTmpResult} as RippleFieldOptionsInner)
+        return value
+    }
+}
+export class VelocityFieldOptionsInner_serializer {
+    public static write(buffer: SerializerBase, value: VelocityFieldOptionsInner): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForVelocity  = value.velocity
+        if (valueHolderForVelocity !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForVelocityTmpValue  = valueHolderForVelocity!
+            Vector2F64_serializer.write(valueSerializer, valueHolderForVelocityTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForRegion  = value.region
+        if (valueHolderForRegion !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRegionTmpValue  = valueHolderForRegion!
+            FieldRegionInner_serializer.write(valueSerializer, valueHolderForRegionTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): VelocityFieldOptionsInner {
+        let valueDeserializer : DeserializerBase = buffer
+        const velocityTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let velocityTmpBuf : Vector2F64 | undefined = undefined
+        if ((velocityTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            velocityTmpBuf = Vector2F64_serializer.read(valueDeserializer)
+        }
+        const velocityTmpResult : Vector2F64 | undefined = velocityTmpBuf
+        const regionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let regionTmpBuf : FieldRegionInner | undefined = undefined
+        if ((regionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            regionTmpBuf = FieldRegionInner_serializer.read(valueDeserializer)
+        }
+        const regionTmpResult : FieldRegionInner | undefined = regionTmpBuf
+        let value : VelocityFieldOptionsInner = ({velocity: velocityTmpResult, region: regionTmpResult} as VelocityFieldOptionsInner)
+        return value
     }
 }
 export class EmitterPropertyInner_serializer {

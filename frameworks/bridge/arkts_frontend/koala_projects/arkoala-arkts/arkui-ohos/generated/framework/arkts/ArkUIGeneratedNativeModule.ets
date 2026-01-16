@@ -5627,6 +5627,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ParticleHelper_SetParticleOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _ParticleHelper_SetRippleFields(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ParticleHelper_SetVelocityFields(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _PasteEvent_construct(): KPointer
     @ani.unsafe.Direct
     native static _PasteEvent_getFinalizer(): KPointer

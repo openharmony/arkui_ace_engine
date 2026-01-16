@@ -37316,6 +37316,44 @@ void impl_ParticleHelper_SetParticleOptions(Ark_NativePointer node, KSerializerB
         GetAccessors()->getParticleHelperAccessor()->SetParticleOptions(node, static_cast<Ark_ParticlesInner*>(&particlesValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ParticleHelper_SetParticleOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ParticleHelper_SetRippleFields(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto rippleFieldsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_RippleFieldOptionsInner rippleFieldsValueTempTmpBuf = {};
+        rippleFieldsValueTempTmpBuf.tag = rippleFieldsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((rippleFieldsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int32 rippleFieldsValueTempTmpBuf_Length = thisDeserializer.readInt32();
+            Array_RippleFieldOptionsInner rippleFieldsValueTempTmpBuf_ = {};
+            thisDeserializer.resizeArray<std::decay<decltype(rippleFieldsValueTempTmpBuf_)>::type,
+        std::decay<decltype(*rippleFieldsValueTempTmpBuf_.array)>::type>(&rippleFieldsValueTempTmpBuf_, rippleFieldsValueTempTmpBuf_Length);
+            for (int rippleFieldsValueTempTmpBuf_BufCounterI = 0; rippleFieldsValueTempTmpBuf_BufCounterI < rippleFieldsValueTempTmpBuf_Length; rippleFieldsValueTempTmpBuf_BufCounterI++) {
+                rippleFieldsValueTempTmpBuf_.array[rippleFieldsValueTempTmpBuf_BufCounterI] = RippleFieldOptionsInner_serializer::read(thisDeserializer);
+            }
+            rippleFieldsValueTempTmpBuf.value = rippleFieldsValueTempTmpBuf_;
+        }
+        Opt_Array_RippleFieldOptionsInner rippleFieldsValueTemp = rippleFieldsValueTempTmpBuf;;
+        GetAccessors()->getParticleHelperAccessor()->SetRippleFields(node, static_cast<Opt_Array_RippleFieldOptionsInner*>(&rippleFieldsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(ParticleHelper_SetRippleFields, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ParticleHelper_SetVelocityFields(Ark_NativePointer node, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto velocityFieldsValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Array_VelocityFieldOptionsInner velocityFieldsValueTempTmpBuf = {};
+        velocityFieldsValueTempTmpBuf.tag = velocityFieldsValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((velocityFieldsValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            const Ark_Int32 velocityFieldsValueTempTmpBuf_Length = thisDeserializer.readInt32();
+            Array_VelocityFieldOptionsInner velocityFieldsValueTempTmpBuf_ = {};
+            thisDeserializer.resizeArray<std::decay<decltype(velocityFieldsValueTempTmpBuf_)>::type,
+        std::decay<decltype(*velocityFieldsValueTempTmpBuf_.array)>::type>(&velocityFieldsValueTempTmpBuf_, velocityFieldsValueTempTmpBuf_Length);
+            for (int velocityFieldsValueTempTmpBuf_BufCounterI = 0; velocityFieldsValueTempTmpBuf_BufCounterI < velocityFieldsValueTempTmpBuf_Length; velocityFieldsValueTempTmpBuf_BufCounterI++) {
+                velocityFieldsValueTempTmpBuf_.array[velocityFieldsValueTempTmpBuf_BufCounterI] = VelocityFieldOptionsInner_serializer::read(thisDeserializer);
+            }
+            velocityFieldsValueTempTmpBuf.value = velocityFieldsValueTempTmpBuf_;
+        }
+        Opt_Array_VelocityFieldOptionsInner velocityFieldsValueTemp = velocityFieldsValueTempTmpBuf;;
+        GetAccessors()->getParticleHelperAccessor()->SetVelocityFields(node, static_cast<Opt_Array_VelocityFieldOptionsInner*>(&velocityFieldsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(ParticleHelper_SetVelocityFields, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_PasteEvent_construct() {
         return GetAccessors()->getPasteEventAccessor()->construct();
 }
