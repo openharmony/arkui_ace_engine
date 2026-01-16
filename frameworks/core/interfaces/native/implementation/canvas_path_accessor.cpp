@@ -182,8 +182,12 @@ void RectImpl(Ark_CanvasPath peer,
     auto ph = Converter::Convert<double>(h);
     peerImpl->Path2DRect(px, py, pw, ph);
 }
-void RoundRectImpl(Ark_CanvasPath peer, Ark_Float64 x, Ark_Float64 y, Ark_Float64 w, Ark_Float64 h,
-    const Opt_Union_F64_Array_F64* radii)
+void RoundRectImpl(Ark_CanvasPath peer,
+                   Ark_Float64 x,
+                   Ark_Float64 y,
+                   Ark_Float64 w,
+                   Ark_Float64 h,
+                   const Opt_Union_F64_Array_F64* radii)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasPathPeerImpl*>(peer);

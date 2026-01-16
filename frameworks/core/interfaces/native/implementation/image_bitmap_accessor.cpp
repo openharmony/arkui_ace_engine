@@ -25,7 +25,7 @@ void DestroyPeerImpl(Ark_ImageBitmap peer)
 {
     PeerUtils::DestroyPeer(peer);
 }
-Ark_ImageBitmap ConstructImpl(const Ark_Union_PixelMap_String* src,
+Ark_ImageBitmap ConstructImpl(const Ark_Union_image_PixelMap_String* src,
                               const Opt_LengthMetricsUnit* unit)
 {
     auto peer = PeerUtils::CreatePeer<ImageBitmapPeer>();
@@ -53,33 +53,17 @@ void CloseImpl(Ark_ImageBitmap peer)
     CHECK_NULL_VOID(peer);
     peer->OnClose();
 }
-Ark_Number GetHeightImpl(Ark_ImageBitmap peer)
+Ark_Float64 GetHeightImpl(Ark_ImageBitmap peer)
 {
     CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
     auto height = peer->OnGetHeight();
     return NG::Converter::ArkValue<Ark_Number>(static_cast<int32_t>(height));
 }
-void SetHeightImpl(Ark_ImageBitmap peer,
-                   const Ark_Number* height)
-{
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(height);
-    auto value = Converter::Convert<float>(*height);
-    peer->SetHeight(value);
-}
-Ark_Number GetWidthImpl(Ark_ImageBitmap peer)
+Ark_Float64 GetWidthImpl(Ark_ImageBitmap peer)
 {
     CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
     double width = peer->OnGetWidth();
     return NG::Converter::ArkValue<Ark_Number>(static_cast<int32_t>(width));
-}
-void SetWidthImpl(Ark_ImageBitmap peer,
-                  const Ark_Number* width)
-{
-    CHECK_NULL_VOID(peer);
-    CHECK_NULL_VOID(width);
-    auto value = Converter::Convert<float>(*width);
-    peer->SetWidth(value);
 }
 } // ImageBitmapAccessor
 const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()
@@ -90,9 +74,7 @@ const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()
         ImageBitmapAccessor::GetFinalizerImpl,
         ImageBitmapAccessor::CloseImpl,
         ImageBitmapAccessor::GetHeightImpl,
-        ImageBitmapAccessor::SetHeightImpl,
         ImageBitmapAccessor::GetWidthImpl,
-        ImageBitmapAccessor::SetWidthImpl,
     };
     return &ImageBitmapAccessorImpl;
 }

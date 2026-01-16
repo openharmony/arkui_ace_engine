@@ -178,7 +178,7 @@ void SetSelectableImpl(Ark_NativePointer node,
     ListItemModelStatic::SetSelectable(frameNode, *convValue);
 }
 void SetSelectedImpl(Ark_NativePointer node,
-                     const Opt_Union_Boolean_Bindable* value)
+                     const Opt_Union_Boolean_Bindable_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -221,7 +221,7 @@ void SetSwipeActionImpl(Ark_NativePointer node,
         std::move(onOffsetChangeCallback), edgeEffect);
 }
 void SetOnSelectImpl(Ark_NativePointer node,
-                     const Opt_Callback_Boolean_Void* value)
+                     const Opt_synthetic_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

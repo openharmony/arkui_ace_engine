@@ -259,7 +259,7 @@ void SetSwiperOptionsImpl(Ark_NativePointer node,
 } // SwiperInterfaceModifier
 namespace SwiperAttributeModifier {
 void SetIndexImpl(Ark_NativePointer node,
-                  const Opt_Union_I32_Bindable* value)
+                  const Opt_Union_I32_Bindable_I32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -454,7 +454,7 @@ void SetDisableSwipeImpl(Ark_NativePointer node,
     SwiperModelStatic::SetDisableSwipe(frameNode, *convValue);
 }
 void SetCurveImpl(Ark_NativePointer node,
-                  const Opt_Union_Curve_String_ICurve* value)
+                  const Opt_Union_curves_Curve_String_curves_ICurve* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -466,7 +466,7 @@ void SetCurveImpl(Ark_NativePointer node,
     SwiperModelStatic::SetCurve(frameNode, *curveVal);
 }
 void SetOnChangeImpl(Ark_NativePointer node,
-                     const Opt_Callback_I32_Void* value)
+                     const Opt_arkui_component_common_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -481,7 +481,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
     SwiperModelStatic::SetOnChange(frameNode, onEvent);
 }
 void SetOnSelectedImpl(Ark_NativePointer node,
-                       const Opt_Callback_I32_Void* value)
+                       const Opt_arkui_component_common_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -500,7 +500,7 @@ void SetOnSelectedImpl(Ark_NativePointer node,
     SwiperModelStatic::SetOnSelected(frameNode, onSelected);
 }
 void SetOnUnselectedImpl(Ark_NativePointer node,
-                         const Opt_Callback_I32_Void* value)
+                         const Opt_arkui_component_common_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

@@ -175,7 +175,7 @@ void SetAutoResetImpl(Ark_NativePointer node,
     PatternLockModelStatic::SetAutoReset(frameNode, convValue);
 }
 void SetOnDotConnectImpl(Ark_NativePointer node,
-                         const Opt_Callback_I32_Void* value)
+                         const Opt_arkui_component_common_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

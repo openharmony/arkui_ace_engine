@@ -288,7 +288,9 @@ void ResetContentModifierGaugeImpl(Ark_NativePointer node)
     GaugeModelNG::SetBuilderFunc(frameNode, nullptr);
 }
 
-void SetIndicatorImpl(Ark_NativePointer node, const Opt_GaugeIndicatorOptions* value)
+namespace GaugeExtenderAccessor {
+void SetIndicatorImpl(Ark_NativePointer node,
+                      const Opt_GaugeIndicatorOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -362,6 +364,50 @@ void NullTrackShadowImpl(Ark_NativePointer node)
     GaugeModelNG::SetShadowOptions(frameNode, shadow);
 }
 
+void NullIndicatorImpl(Ark_NativePointer node)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(node);
+    //auto convValue = Converter::OptConvert<type>(node); // for enums
+    //undefinedModelNG::NullIndicator(frameNode, convValue);
+}
+void SetTrackShadowImpl(Ark_NativePointer node,
+                        const Opt_GaugeShadowOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(node);
+    //auto convValue = Converter::OptConvert<type>(node); // for enums
+    //undefinedModelNG::SetTrackShadow(frameNode, convValue);
+}
+void NullTrackShadowImpl(Ark_NativePointer node)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(node);
+    //auto convValue = Converter::OptConvert<type>(node); // for enums
+    //undefinedModelNG::NullTrackShadow(frameNode, convValue);
+}
+void SetDescriptionImpl(Ark_NativePointer node,
+                        const Opt_CustomNodeBuilder* builder)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(node);
+    //auto convValue = Converter::OptConvert<type>(node); // for enums
+    //undefinedModelNG::SetDescription(frameNode, convValue);
+}
+void NullDescriptionImpl(Ark_NativePointer node)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(node);
+    //auto convValue = Converter::OptConvert<type>(node); // for enums
+    //undefinedModelNG::NullDescription(frameNode, convValue);
+}
+} // GaugeExtenderAccessor
+
 const GENERATED_ArkUIGaugeModifier* GetGaugeStaticModifier()
 {
     static const GENERATED_ArkUIGaugeModifier ArkUIGaugeModifierImpl {
@@ -384,15 +430,15 @@ const GENERATED_ArkUIGaugeContentModifier* GetGaugeStaticContentModifier()
     return &GaugeContentModifierImpl;
 }
 
-const GENERATED_ArkUIGaugeExtenderAccessor* GetGaugeStaticExtenderAccessor()
+const GENERATED_ArkUIGaugeExtenderAccessor* GetGaugeExtenderAccessor()
 {
     static const GENERATED_ArkUIGaugeExtenderAccessor GaugeExtenderAccessorImpl {
-        SetIndicatorImpl,
-        NullIndicatorImpl,
-        SetTrackShadowImpl,
-        NullTrackShadowImpl,
-        SetDescriptionImpl,
-        NullDescriptionImpl
+        GaugeExtenderAccessor::SetIndicatorImpl,
+        GaugeExtenderAccessor::NullIndicatorImpl,
+        GaugeExtenderAccessor::SetTrackShadowImpl,
+        GaugeExtenderAccessor::NullTrackShadowImpl,
+        GaugeExtenderAccessor::SetDescriptionImpl,
+        GaugeExtenderAccessor::NullDescriptionImpl
     };
     return &GaugeExtenderAccessorImpl;
 }

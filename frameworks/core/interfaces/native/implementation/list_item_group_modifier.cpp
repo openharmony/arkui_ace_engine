@@ -129,7 +129,6 @@ const GENERATED_ArkUIListItemGroupModifier* GetListItemGroupModifier()
         ListItemGroupModifier::ConstructImpl,
         ListItemGroupInterfaceModifier::SetListItemGroupOptionsImpl,
         ListItemGroupAttributeModifier::SetDividerImpl,
-        ListItemGroupAttributeModifier::SetChildrenMainSizeImpl,
     };
     return &ArkUIListItemGroupModifierImpl;
 }

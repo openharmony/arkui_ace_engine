@@ -105,7 +105,7 @@ void SetRadioOptionsImpl(Ark_NativePointer node, const Ark_RadioOptions* options
 }
 } // namespace RadioInterfaceModifier
 namespace RadioAttributeModifier {
-void SetCheckedImpl(Ark_NativePointer node, const Opt_Union_Boolean_Bindable* value)
+void SetCheckedImpl(Ark_NativePointer node, const Opt_Union_Boolean_Bindable_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

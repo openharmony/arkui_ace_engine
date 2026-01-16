@@ -32,7 +32,7 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_EventLocationInfo GetTapLocationImpl(Ark_TapGestureEvent peer)
+Opt_EventLocationInfo GetTapLocationImpl(Ark_TapGestureEvent peer)
 {
     CHECK_NULL_RETURN(peer, {});
     auto info = peer->GetBaseGestureInfo();
@@ -51,6 +51,10 @@ Ark_EventLocationInfo GetTapLocationImpl(Ark_TapGestureEvent peer)
 
     return Converter::ArkValue<Ark_EventLocationInfo>(tapLocation);
 }
+void SetTapLocationImpl(Ark_TapGestureEvent peer,
+                        const Opt_EventLocationInfo* tapLocation)
+{
+}
 } // TapGestureEventAccessor
 const GENERATED_ArkUITapGestureEventAccessor* GetTapGestureEventAccessor()
 {
@@ -59,6 +63,7 @@ const GENERATED_ArkUITapGestureEventAccessor* GetTapGestureEventAccessor()
         TapGestureEventAccessor::ConstructImpl,
         TapGestureEventAccessor::GetFinalizerImpl,
         TapGestureEventAccessor::GetTapLocationImpl,
+        TapGestureEventAccessor::SetTapLocationImpl,
     };
     return &TapGestureEventAccessorImpl;
 }

@@ -22,7 +22,6 @@
 #include "canvas_gradient_peer.h"
 #include "matrix2d_peer_impl.h"
 #include "image_bitmap_peer_impl.h"
-#include "image_data_peer.h"
 #include "base/utils/utils.h"
 #include "pixel_map_peer.h"
 #include "canvas_rendering_context2d_peer_impl.h"
@@ -71,7 +70,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void DrawImage0Impl(Ark_CanvasRenderer peer,
-                    const Ark_Union_ImageBitmap_PixelMap* image,
+                    const Ark_Union_ImageBitmap_image_PixelMap* image,
                     Ark_Float64 dx,
                     Ark_Float64 dy)
 {
@@ -100,7 +99,7 @@ void DrawImage0Impl(Ark_CanvasRenderer peer,
         []() {});
 }
 void DrawImage1Impl(Ark_CanvasRenderer peer,
-                    const Ark_Union_ImageBitmap_PixelMap* image,
+                    const Ark_Union_ImageBitmap_image_PixelMap* image,
                     Ark_Float64 dx,
                     Ark_Float64 dy,
                     Ark_Float64 dw,
@@ -133,7 +132,7 @@ void DrawImage1Impl(Ark_CanvasRenderer peer,
         []() {});
 }
 void DrawImage2Impl(Ark_CanvasRenderer peer,
-                    const Ark_Union_ImageBitmap_PixelMap* image,
+                    const Ark_Union_ImageBitmap_image_PixelMap* image,
                     Ark_Float64 sx,
                     Ark_Float64 sy,
                     Ark_Float64 sw,
@@ -334,7 +333,7 @@ Opt_image_PixelMap GetPixelMapImpl(Ark_CanvasRenderer peer,
     auto ret = Converter::ArkValue<Opt_image_PixelMap>(pixelMapPeer);
     return ret;
 }
-Array_Float64 GetLineDashImpl(Ark_CanvasRenderer peer)
+Array_F64 GetLineDashImpl(Ark_CanvasRenderer peer)
 {
     CHECK_NULL_RETURN(peer, {});
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -343,7 +342,7 @@ Array_Float64 GetLineDashImpl(Ark_CanvasRenderer peer)
     return Converter::ArkValue<Array_Float64>(lineDash, Converter::FC);
 }
 void SetLineDashImpl(Ark_CanvasRenderer peer,
-                     const Array_Float64* segments)
+                     const Array_F64* segments)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(segments);
@@ -664,7 +663,7 @@ void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
     auto compositeStr = Converter::Convert<std::string>(*globalCompositeOperation);
     peerImpl->SetGlobalCompositeOperation(compositeStr);
 }
-Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
+Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
 {
     auto defaultValue = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
         Converter::ArkValue<Ark_String>("#000000"));
@@ -689,7 +688,7 @@ Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_Can
     }
 }
 void SetFillStyleImpl(Ark_CanvasRenderer peer,
-                      const Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern* fillStyle)
+                      const Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern* fillStyle)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -719,7 +718,7 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
         },
         []() {});
 }
-Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
+Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
 {
     auto defaultValue = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
         Converter::ArkValue<Ark_String>("#000000"));
@@ -744,7 +743,7 @@ Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_C
     }
 }
 void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
-                        const Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern* strokeStyle)
+                        const Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern* strokeStyle)
 {
     CHECK_NULL_VOID(peer);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);

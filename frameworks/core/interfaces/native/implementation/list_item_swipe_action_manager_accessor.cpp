@@ -41,8 +41,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-Ark_Int32 ExpandImpl(Ark_FrameNode node,
-                     Ark_ListItemSwipeActionDirection direction)
+void ExpandImpl(Ark_FrameNode node,
+                Ark_ListItemSwipeActionDirection direction)
 {
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);
@@ -61,7 +61,7 @@ Ark_Int32 ExpandImpl(Ark_FrameNode node,
     ListItemModelStatic::ExpandSwipeAction(frameNode.GetRawPtr(), convValue);
     return ERROR_CODE_NO_ERROR;
 }
-Ark_Int32 CollapseImpl(Ark_FrameNode node)
+void CollapseImpl(Ark_FrameNode node)
 {
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(node);
     CHECK_NULL_RETURN(frameNode, ERROR_CODE_PARAM_INVALID);

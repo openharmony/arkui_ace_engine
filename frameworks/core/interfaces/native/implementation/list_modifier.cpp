@@ -374,7 +374,7 @@ void SetStackFromEndImpl(Ark_NativePointer node,
     ListModelStatic::SetStackFromEnd(frameNode, convValue);
 }
 void SetEditModeOptionsImpl(Ark_NativePointer node,
-                            const Opt_EditModeOptions* value)
+                            const Ark_EditModeOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -729,7 +729,6 @@ const GENERATED_ArkUIListModifier* GetListModifier()
         ListAttributeModifier::SetChainAnimationOptionsImpl,
         ListAttributeModifier::SetStickyImpl,
         ListAttributeModifier::SetScrollSnapAlignImpl,
-        ListAttributeModifier::SetChildrenMainSizeImpl,
         ListAttributeModifier::SetMaintainVisibleContentPositionImpl,
         ListAttributeModifier::SetSupportEmptyBranchInLazyLoadingImpl,
         ListAttributeModifier::SetStackFromEndImpl,

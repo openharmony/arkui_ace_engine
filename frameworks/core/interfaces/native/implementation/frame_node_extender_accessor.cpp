@@ -1066,8 +1066,11 @@ void AdjustPropertyValue(AnimationPropertyType type, std::vector<float>& startVa
         }
     }
 }
-Ark_Boolean CreateAnimationImpl(Ark_FrameNode peer, Ark_AnimationPropertyType property,
-    const Opt_Array_Float64* startValue, const Array_Float64* endValue, const Ark_AnimateParam* param)
+Ark_Boolean CreateAnimationImpl(Ark_FrameNode peer,
+                                Ark_AnimationPropertyType property,
+                                const Opt_Array_F64* startValue,
+                                const Array_F64* endValue,
+                                const Ark_AnimateParam* param)
 {
     CHECK_ON_UI_THREAD();
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -1126,7 +1129,8 @@ Ark_Boolean CancelAnimationsImpl(Ark_FrameNode peer, const Array_AnimationProper
     }
     return ViewAbstractModelStatic::CancelPropertyAnimations(frameNode.GetRawPtr(), propertyVec);
 }
-Array_Float64 GetNodePropertyValueImpl(Ark_FrameNode peer, Ark_AnimationPropertyType property)
+Array_F64 GetNodePropertyValueImpl(Ark_FrameNode peer,
+                                   Ark_AnimationPropertyType property)
 {
     CHECK_ON_UI_THREAD();
     auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
@@ -1230,7 +1234,7 @@ Ark_NativePointer UnWrapRawPtrImpl(Ark_NativePointer peerNode)
     auto frameNodeRaw = Referenced::RawPtr(frameNode);
     return reinterpret_cast<Ark_NativePointer>(frameNodeRaw);
 }
-Ark_UICommonEvent GetCommonEventImpl(Ark_NativePointer peer)
+Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
 {
     auto frameNodePeer = reinterpret_cast<FrameNodePeer*>(peer);
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
@@ -1489,8 +1493,8 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::CreateByRawPtrImpl,
         FrameNodeExtenderAccessor::UnWrapRawPtrImpl,
         FrameNodeExtenderAccessor::GetCommonEventImpl,
-        FrameNodeExtenderAccessor::GetRenderNodeImpl,
         FrameNodeExtenderAccessor::ConvertPointImpl,
+        FrameNodeExtenderAccessor::GetRenderNodeImpl,
         FrameNodeExtenderAccessor::AdoptChildImpl,
         FrameNodeExtenderAccessor::RemoveAdoptedChildImpl,
         FrameNodeExtenderAccessor::GetInteractionEventBindingInfoImpl,

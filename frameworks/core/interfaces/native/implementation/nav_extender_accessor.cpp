@@ -102,6 +102,15 @@ void SyncStackImpl(Ark_NavPathStack peer)
     CHECK_NULL_VOID(pattern);
     pattern->SyncWithJsStackIfNeeded();
 }
+void SetNavDestinationIdImpl(Ark_NativePointer ptr,
+                             const Opt_String* id)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(ptr);
+    //auto convValue = Converter::OptConvert<type>(ptr); // for enums
+    //undefinedModelNG::SetNavDestinationId(frameNode, convValue);
+}
 void PushPathImpl(Ark_NavPathStack pathStack,
                   Ark_NavPathInfo info,
                   const Ark_NavigationOptions* options)
@@ -144,7 +153,7 @@ Ark_String PopImpl(Ark_NavPathStack pathStack,
     return Converter::ArkValue<Ark_String>(info.navDestinationId_.value_or(""), Converter::FC);
 }
 void SetOnPopCallbackImpl(Ark_NavPathStack pathStack,
-                          const Callback_String_Void* popCallback)
+                          const synthetic_Callback_String_Void* popCallback)
 {
     auto stack = pathStack;
     CHECK_NULL_VOID(stack);
@@ -247,6 +256,7 @@ const GENERATED_ArkUINavExtenderAccessor* GetNavExtenderAccessor()
         NavExtenderAccessor::SetUpdateStackCallbackImpl,
         NavExtenderAccessor::SetNavDestinationBuilderCallbackImpl,
         NavExtenderAccessor::SyncStackImpl,
+        NavExtenderAccessor::SetNavDestinationIdImpl,
         NavExtenderAccessor::PushPathImpl,
         NavExtenderAccessor::ReplacePathImpl,
         NavExtenderAccessor::PopImpl,

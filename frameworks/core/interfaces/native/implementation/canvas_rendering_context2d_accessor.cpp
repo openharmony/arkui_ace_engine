@@ -69,8 +69,6 @@ void StartImageAnalyzerImpl(Ark_VMContext vmContext,
                             const Ark_ImageAnalyzerConfig* config,
                             const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
 {
-    CHECK_NULL_VOID(peer);
-    peer->StartImageAnalyzer(vmContext, asyncWorker, config, outputArgumentForReturningPromise);
 }
 void StopImageAnalyzerImpl(Ark_CanvasRenderingContext2D peer)
 {
@@ -148,27 +146,17 @@ Ark_Float64 GetHeightImpl(Ark_CanvasRenderingContext2D peer)
     CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
     return Converter::ArkValue<Ark_Float64>(peer->GetHeight());
 }
-void SetHeightImpl(Ark_CanvasRenderingContext2D peer,
-                   Ark_Float64 height)
-{
-}
 Ark_Float64 GetWidthImpl(Ark_CanvasRenderingContext2D peer)
 {
     CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
     return Converter::ArkValue<Ark_Float64>(peer->GetWidth());
 }
-void SetWidthImpl(Ark_CanvasRenderingContext2D peer,
-                  Ark_Float64 width)
-{
-}
+#ifdef WRONG_GEN_v140
 Ark_FrameNode GetCanvasImpl(Ark_CanvasRenderingContext2D peer)
 {
     return FrameNodePeer::Create(static_cast<Ark_UIContext>(nullptr));
 }
-void SetCanvasImpl(Ark_CanvasRenderingContext2D peer,
-                   Ark_FrameNode canvas)
-{
-}
+#endif WRONG_GEN_v140
 } // CanvasRenderingContext2DAccessor
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor()
 {
@@ -185,11 +173,7 @@ const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext
         CanvasRenderingContext2DAccessor::OffDetachImpl,
         CanvasRenderingContext2DAccessor::GetContext2DFromDrawingContextImpl,
         CanvasRenderingContext2DAccessor::GetHeightImpl,
-        CanvasRenderingContext2DAccessor::SetHeightImpl,
         CanvasRenderingContext2DAccessor::GetWidthImpl,
-        CanvasRenderingContext2DAccessor::SetWidthImpl,
-        CanvasRenderingContext2DAccessor::GetCanvasImpl,
-        CanvasRenderingContext2DAccessor::SetCanvasImpl,
     };
     return &CanvasRenderingContext2DAccessorImpl;
 }

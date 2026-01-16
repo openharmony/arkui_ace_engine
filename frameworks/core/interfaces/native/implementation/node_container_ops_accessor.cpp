@@ -58,7 +58,8 @@ void AddNodeContainerRootNodeImpl(Ark_NativePointer self, Ark_NativePointer chil
     auto child = FrameNodePeer::GetFrameNodeByPeer(childPeer);
     pattern->AddBaseNode(child);
 }
-void SetAboutToAppearImpl(Ark_NativePointer self, const Callback_Void* value)
+void SetAboutToAppearImpl(Ark_NativePointer self,
+                          const synthetic_Callback_Void* value)
 {
     auto nodeContainer = reinterpret_cast<FrameNode*>(self);
     CHECK_NULL_VOID(nodeContainer);
@@ -71,7 +72,8 @@ void SetAboutToAppearImpl(Ark_NativePointer self, const Callback_Void* value)
     };
     eventHub->SetControllerAboutToAppear(std::move(aboutToAppearFunc));
 }
-void SetAboutToDisappearImpl(Ark_NativePointer self, const Callback_Void* value)
+void SetAboutToDisappearImpl(Ark_NativePointer self,
+                             const synthetic_Callback_Void* value)
 {
     auto nodeContainer = reinterpret_cast<FrameNode*>(self);
     CHECK_NULL_VOID(nodeContainer);
@@ -97,7 +99,8 @@ void SetAboutToResizeImpl(Ark_NativePointer self, const Callback_Size_Void* valu
     };
     pattern->SetOnResize(aboutToResizeFunc);
 }
-void SetOnAttachImpl(Ark_NativePointer self, const Callback_Void* value)
+void SetOnAttachImpl(Ark_NativePointer self,
+                     const synthetic_Callback_Void* value)
 {
     auto nodeContainer = reinterpret_cast<FrameNode*>(self);
     CHECK_NULL_VOID(nodeContainer);
@@ -110,7 +113,8 @@ void SetOnAttachImpl(Ark_NativePointer self, const Callback_Void* value)
     };
     eventHub->SetControllerOnAttach(std::move(onAttachFunc));
 }
-void SetOnDetachImpl(Ark_NativePointer self, const Callback_Void* value)
+void SetOnDetachImpl(Ark_NativePointer self,
+                     const synthetic_Callback_Void* value)
 {
     auto nodeContainer = reinterpret_cast<FrameNode*>(self);
     CHECK_NULL_VOID(nodeContainer);

@@ -168,7 +168,7 @@ void SetUsingPopupImpl(Ark_NativePointer node,
     IndexerModelStatic::SetUsingPopup(frameNode, convValue);
 }
 void SetSelectedFontImpl(Ark_NativePointer node,
-                         const Opt_Font* value)
+                         const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -181,7 +181,7 @@ void SetSelectedFontImpl(Ark_NativePointer node,
     }
 }
 void SetPopupFontImpl(Ark_NativePointer node,
-                      const Opt_Font* value)
+                      const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -194,7 +194,7 @@ void SetPopupFontImpl(Ark_NativePointer node,
     }
 }
 void SetPopupItemFontImpl(Ark_NativePointer node,
-                          const Opt_Font* value)
+                          const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -219,7 +219,7 @@ void SetItemSizeImpl(Ark_NativePointer node,
     IndexerModelStatic::SetItemSize(frameNode, size);
 }
 void SetFontImpl(Ark_NativePointer node,
-                 const Opt_Font* value)
+                 const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -277,7 +277,7 @@ void SetOnPopupSelectImpl(Ark_NativePointer node,
     IndexerModelStatic::SetOnPopupSelected(frameNode, std::move(onEvent));
 }
 void SetSelectedImpl(Ark_NativePointer node,
-                     const Opt_Union_I32_Bindable* value)
+                     const Opt_Union_I32_Bindable_I32* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -421,7 +421,7 @@ Ark_NativePointer ArcAlphabetIndexerConstructImpl(Ark_Int32 id,
 }
 void SetArcAlphabetIndexerInitInfoImpl(Ark_NativePointer node,
                                        const Array_String* arrayValue,
-                                       const Ark_Union_I32_Bindable* selected)
+                                       const Ark_Union_I32_Bindable_I32* selected)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -436,7 +436,7 @@ void SetArcAlphabetIndexerInitInfoImpl(Ark_NativePointer node,
     IndexerModelStatic::SetSelected(frameNode, index);
 }
 void ColorImpl(Ark_NativePointer node,
-               const Opt_ColorMetrics* color)
+               const Opt_ColorMetricsExt* color)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -444,7 +444,7 @@ void ColorImpl(Ark_NativePointer node,
     IndexerModelStatic::SetColor(frameNode, colorOpt);
 }
 void SelectedColorImpl(Ark_NativePointer node,
-                       const Opt_ColorMetrics* color)
+                       const Opt_ColorMetricsExt* color)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -452,7 +452,7 @@ void SelectedColorImpl(Ark_NativePointer node,
     IndexerModelStatic::SetSelectedColor(frameNode, colorOpt);
 }
 void PopupColorImpl(Ark_NativePointer node,
-                    const Opt_ColorMetrics* color)
+                    const Opt_ColorMetricsExt* color)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -460,7 +460,7 @@ void PopupColorImpl(Ark_NativePointer node,
     IndexerModelStatic::SetPopupColor(frameNode, colorOpt);
 }
 void SelectedBackgroundColorImpl(Ark_NativePointer node,
-                                 const Opt_ColorMetrics* color)
+                                 const Opt_ColorMetricsExt* color)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -468,7 +468,7 @@ void SelectedBackgroundColorImpl(Ark_NativePointer node,
     IndexerModelStatic::SetSelectedBackgroundColor(frameNode, colorOpt);
 }
 void PopupBackgroundImpl(Ark_NativePointer node,
-                         const Opt_ColorMetrics* color)
+                         const Opt_ColorMetricsExt* color)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -484,7 +484,7 @@ void UsePopupImpl(Ark_NativePointer node,
     IndexerModelStatic::SetUsingPopup(frameNode, usePopupOpt);
 }
 void SelectedFontImpl(Ark_NativePointer node,
-                      const Opt_Font* font)
+                      const Opt_arkui_component_units_Font* font)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -497,7 +497,7 @@ void SelectedFontImpl(Ark_NativePointer node,
     }
 }
 void PopupFontImpl(Ark_NativePointer node,
-                   const Opt_Font* font)
+                   const Opt_arkui_component_units_Font* font)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -510,7 +510,7 @@ void PopupFontImpl(Ark_NativePointer node,
     }
 }
 void FontImpl(Ark_NativePointer node,
-              const Opt_Font* font)
+              const Opt_arkui_component_units_Font* font)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -535,7 +535,7 @@ void ItemSizeImpl(Ark_NativePointer node,
     IndexerModelStatic::SetItemSize(frameNode, DEFAULT_ITEM_SIZE);
 }
 void SelectedImpl(Ark_NativePointer node,
-                  const Opt_Union_I32_Bindable* index)
+                  const Opt_Union_I32_Bindable_I32* index)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -556,7 +556,7 @@ void AutoCollapseImpl(Ark_NativePointer node,
     IndexerModelStatic::SetAutoCollapse(frameNode, convValue.value_or(true));
 }
 void OnSelectImpl(Ark_NativePointer node,
-                  const Opt_Callback_I32_Void* handler)
+                  const Opt_arkui_component_idlize_Callback_I32_Void* handler)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

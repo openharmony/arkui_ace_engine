@@ -365,7 +365,7 @@ void SetOnUpdateImpl(Ark_NativePointer node,
     VideoModelStatic::SetOnUpdate(frameNode, onUpdate);
 }
 void SetOnErrorImpl(Ark_NativePointer node,
-                    const Opt_Callback_Void* value)
+                    const Opt_Union_VoidCallback_ErrorCallback_BusinessErrorInterface_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -423,7 +423,7 @@ void SetAnalyzerConfigImpl(Ark_NativePointer node,
     VideoModelNG::SetImageAnalyzerConfig(frameNode, reinterpret_cast<void*>(optValue->types.array));
 }
 void SetSurfaceBackgroundColorImpl(Ark_NativePointer node,
-                                   const Opt_ColorMetrics* value)
+                                   const Opt_ColorMetricsExt* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

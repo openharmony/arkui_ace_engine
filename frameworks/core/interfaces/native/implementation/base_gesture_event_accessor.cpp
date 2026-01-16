@@ -50,7 +50,7 @@ void SetFingerListImpl(Ark_BaseGestureEvent peer,
     std::list<FingerInfo> list = Converter::Convert<std::list<FingerInfo>>(*fingerList);
     eventInfo->SetFingerList(list);
 }
-Array_FingerInfo GetFingerInfosImpl(Ark_BaseGestureEvent peer)
+Opt_Array_FingerInfo GetFingerInfosImpl(Ark_BaseGestureEvent peer)
 {
     CHECK_NULL_RETURN(peer, {});
     auto info = peer->GetBaseGestureInfo();
@@ -71,6 +71,10 @@ Array_FingerInfo GetFingerInfosImpl(Ark_BaseGestureEvent peer)
     fingerInfos.splice(fingerInfos.end(), otherFingers);
     return Converter::ArkValue<Array_FingerInfo>(fingerInfos, Converter::FC);
 }
+void SetFingerInfosImpl(Ark_BaseGestureEvent peer,
+                        const Opt_Array_FingerInfo* fingerInfos)
+{
+}
 } // BaseGestureEventAccessor
 const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()
 {
@@ -81,6 +85,7 @@ const GENERATED_ArkUIBaseGestureEventAccessor* GetBaseGestureEventAccessor()
         BaseGestureEventAccessor::GetFingerListImpl,
         BaseGestureEventAccessor::SetFingerListImpl,
         BaseGestureEventAccessor::GetFingerInfosImpl,
+        BaseGestureEventAccessor::SetFingerInfosImpl,
     };
     return &BaseGestureEventAccessorImpl;
 }

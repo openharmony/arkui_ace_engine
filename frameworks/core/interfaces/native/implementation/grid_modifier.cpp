@@ -236,7 +236,7 @@ void SetScrollBarWidthImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetScrollBarWidth(frameNode, convValue);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_Union_Color_I32_String_Resource* value)
+                           const Opt_Union_arkui_component_enums_Color_I32_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -533,7 +533,7 @@ void SetAlignItemsImpl(Ark_NativePointer node,
     GridModelStatic::SetAlignItems(frameNode, Converter::OptConvertPtr<GridItemAlignment>(value));
 }
 void SetEditModeOptionsImpl(Ark_NativePointer node,
-                            const Opt_EditModeOptions* value)
+                            const Ark_EditModeOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

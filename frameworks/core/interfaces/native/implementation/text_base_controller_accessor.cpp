@@ -37,8 +37,8 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void SetSelectionImpl(Ark_TextBaseController peer,
-                      const Ark_Number* selectionStart,
-                      const Ark_Number* selectionEnd,
+                      Ark_Int32 selectionStart,
+                      Ark_Int32 selectionEnd,
                       const Opt_SelectionOptions* options)
 {
     CHECK_NULL_VOID(peer && selectionStart && selectionEnd);

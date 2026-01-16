@@ -32,13 +32,8 @@ Ark_Resource $rawfileImpl(const Ark_String* value)
 {
     return {};
 }
-void AnimateToImpl(const Ark_AnimateParam* value,
-                   const Callback_Void* event)
-{
-    AnimateToInner(value, event, false);
-}
 void AnimateToImmediatelyImpl(const Ark_AnimateParam* value,
-                              const Callback_Void* event)
+                              const VoidCallback* processor)
 {
     AnimateToInner(value, event, true);
 }
@@ -88,7 +83,7 @@ void PostCardActionImpl(const Ark_Object* component,
                         const Ark_Object* action)
 {
 }
-void Profiler_registerVsyncCallbackImpl(const Profiler_Callback_String_Void* callback_)
+void Profiler_registerVsyncCallbackImpl(const Callback_String* callback_)
 {
     CHECK_NULL_VOID(callback_);
     auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -105,18 +100,6 @@ void Profiler_unregisterVsyncCallbackImpl()
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->ResetOnVsyncProfiler();
 }
-Ark_Number Px2vpImpl(const Ark_Number* value)
-{
-    auto invalid = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(value, invalid);
-    double pxValue = Converter::Convert<double>(*value);
-    double density = PipelineBase::GetCurrentDensity();
-    if (NearZero(density) || density == 0) {
-        return Converter::ArkValue<Ark_Number>(0);
-    }
-    double vpValue = pxValue / density;
-    return Converter::ArkValue<Ark_Number>(vpValue);
-}
 void SetAppBgColorImpl(const Ark_String* value)
 {
     CHECK_NULL_VOID(value);
@@ -125,22 +108,12 @@ void SetAppBgColorImpl(const Ark_String* value)
     CHECK_NULL_VOID(pipelineContext);
     pipelineContext->SetAppBgColor(Color::ColorFromString(backgroundColorStr));
 }
-Ark_Number Vp2pxImpl(const Ark_Number* value)
-{
-    auto invalid = Converter::ArkValue<Ark_Number>(0);
-    CHECK_NULL_RETURN(value, invalid);
-    double vpValue = Converter::Convert<double>(*value);
-    double density = PipelineBase::GetCurrentDensity();
-    double pxValue = vpValue * density;
-    return Converter::ArkValue<Ark_Number>(pxValue);
-}
 } // GlobalScopeAccessor
 const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
 {
     static const GENERATED_ArkUIGlobalScopeAccessor GlobalScopeAccessorImpl {
         GlobalScopeAccessor::$rImpl,
         GlobalScopeAccessor::$rawfileImpl,
-        GlobalScopeAccessor::AnimateToImpl,
         GlobalScopeAccessor::AnimateToImmediatelyImpl,
         GlobalScopeAccessor::CursorControl_restoreDefaultImpl,
         GlobalScopeAccessor::CursorControl_setCursorImpl,
@@ -149,9 +122,7 @@ const GENERATED_ArkUIGlobalScopeAccessor* GetGlobalScopeAccessor()
         GlobalScopeAccessor::PostCardActionImpl,
         GlobalScopeAccessor::Profiler_registerVsyncCallbackImpl,
         GlobalScopeAccessor::Profiler_unregisterVsyncCallbackImpl,
-        GlobalScopeAccessor::Px2vpImpl,
         GlobalScopeAccessor::SetAppBgColorImpl,
-        GlobalScopeAccessor::Vp2pxImpl,
     };
     return &GlobalScopeAccessorImpl;
 }

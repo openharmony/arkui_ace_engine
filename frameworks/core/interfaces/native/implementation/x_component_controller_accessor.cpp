@@ -136,17 +136,6 @@ Ark_SurfaceRotationOptions GetXComponentSurfaceRotationImpl(Ark_XComponentContro
 #endif //XCOMPONENT_SUPPORTED
     return rotationOptions;
 }
-void StartImageAnalyzerImpl(Ark_VMContext vmContext,
-                            Ark_AsyncWorkerPtr asyncWorker,
-                            Ark_XComponentController peer,
-                            const Ark_ImageAnalyzerConfig* config,
-                            const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise)
-{
-#ifdef XCOMPONENT_SUPPORTED
-    CHECK_NULL_VOID(peer);
-    peer->TriggerStartImageAnalyzer(vmContext, asyncWorker, config, outputArgumentForReturningPromise);
-#endif //XCOMPONENT_SUPPORTED
-}
 void StopImageAnalyzerImpl(Ark_XComponentController peer)
 {
 #ifdef XCOMPONENT_SUPPORTED
@@ -157,7 +146,19 @@ void StopImageAnalyzerImpl(Ark_XComponentController peer)
     peerImpl->controller->StopImageAnalyzer();
 #endif //XCOMPONENT_SUPPORTED
 }
-Callback_String_Void GetOnSurfaceCreatedImpl(Ark_XComponentController peer)
+Opt_drawing_Canvas LockCanvasImpl(Ark_XComponentController peer)
+{
+    return {};
+}
+void UnlockCanvasAndPostImpl(Ark_XComponentController peer,
+                             Ark_drawing_Canvas canvas)
+{
+}
+void SetXComponentSurfaceConfigImpl(Ark_XComponentController peer,
+                                    const Ark_SurfaceConfig* config)
+{
+}
+synthetic_Callback_String_Void GetOnSurfaceCreatedImpl(Ark_XComponentController peer)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer, {});
@@ -169,7 +170,7 @@ Callback_String_Void GetOnSurfaceCreatedImpl(Ark_XComponentController peer)
 #endif //XCOMPONENT_SUPPORTED
 }
 void SetOnSurfaceCreatedImpl(Ark_XComponentController peer,
-                             const Callback_String_Void* onSurfaceCreated)
+                             const synthetic_Callback_String_Void* onSurfaceCreated)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
@@ -203,7 +204,7 @@ void SetOnSurfaceChangedImpl(Ark_XComponentController peer,
     peerImpl->SetOnSurfaceChangedEvent(*onSurfaceChanged);
 #endif //XCOMPONENT_SUPPORTED
 }
-Callback_String_Void GetOnSurfaceDestroyedImpl(Ark_XComponentController peer)
+synthetic_Callback_String_Void GetOnSurfaceDestroyedImpl(Ark_XComponentController peer)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_RETURN(peer, {});
@@ -215,7 +216,7 @@ Callback_String_Void GetOnSurfaceDestroyedImpl(Ark_XComponentController peer)
 #endif //XCOMPONENT_SUPPORTED
 }
 void SetOnSurfaceDestroyedImpl(Ark_XComponentController peer,
-                               const Callback_String_Void* onSurfaceDestroyed)
+                               const synthetic_Callback_String_Void* onSurfaceDestroyed)
 {
 #ifdef XCOMPONENT_SUPPORTED
     CHECK_NULL_VOID(peer);
@@ -277,7 +278,6 @@ const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccess
         XComponentControllerAccessor::GetXComponentSurfaceRectImpl,
         XComponentControllerAccessor::SetXComponentSurfaceRotationImpl,
         XComponentControllerAccessor::GetXComponentSurfaceRotationImpl,
-        XComponentControllerAccessor::StartImageAnalyzerImpl,
         XComponentControllerAccessor::StopImageAnalyzerImpl,
         XComponentControllerAccessor::LockCanvasImpl,
         XComponentControllerAccessor::UnlockCanvasAndPostImpl,

@@ -52,7 +52,7 @@ void SetFillImpl(Ark_NativePointer node,
     ShapeModelStatic::SetFill(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SetStrokeDashOffsetImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_String* value)
+                             const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -80,7 +80,7 @@ void SetStrokeLineJoinImpl(Ark_NativePointer node,
     ShapeModelStatic::SetStrokeLineJoin(frameNode, intLineJoinStyle);
 }
 void SetStrokeMiterLimitImpl(Ark_NativePointer node,
-                             const Opt_Union_Number_String* value)
+                             const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -89,7 +89,7 @@ void SetStrokeMiterLimitImpl(Ark_NativePointer node,
     ShapeModelStatic::SetStrokeMiterLimit(frameNode, strokeMiterLimit);
 }
 void SetStrokeOpacityImpl(Ark_NativePointer node,
-                          const Opt_Union_Number_String_Resource* value)
+                          const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -98,7 +98,7 @@ void SetStrokeOpacityImpl(Ark_NativePointer node,
     ShapeModelStatic::SetStrokeOpacity(frameNode, strokeOpacity);
 }
 void SetFillOpacityImpl(Ark_NativePointer node,
-                        const Opt_Union_Number_String_Resource* value)
+                        const Opt_Union_F64_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -148,6 +148,14 @@ void SetStrokeDashArrayImpl(Ark_NativePointer node,
     }
     ShapeModelNG::SetStrokeDashArray(frameNode, std::move(*dashArray));
 }
+void SetAllowForceDarkImpl(Ark_NativePointer node,
+                           Ark_Boolean value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::Convert<bool>(value);
+    //CommonShapeMethodModelNG::SetAllowForceDark(frameNode, convValue);
+}
 } // CommonShapeMethodModifier
 const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()
 {
@@ -164,6 +172,7 @@ const GENERATED_ArkUICommonShapeMethodModifier* GetCommonShapeMethodModifier()
         CommonShapeMethodModifier::SetStrokeWidthImpl,
         CommonShapeMethodModifier::SetAntiAliasImpl,
         CommonShapeMethodModifier::SetStrokeDashArrayImpl,
+        CommonShapeMethodModifier::SetAllowForceDarkImpl,
     };
     return &ArkUICommonShapeMethodModifierImpl;
 }

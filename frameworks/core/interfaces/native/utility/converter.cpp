@@ -238,23 +238,6 @@ RefPtr<ThemeConstants> GetThemeConstants(Ark_NodeHandle node, Ark_CharPtr bundle
 }
 
 void AssignGradientColors(Gradient *gradient,
-    const Array_Tuple_ResourceColor_Number *colors)
-{
-    for (int32_t i = 0; i < colors->length; i++) {
-        auto color = OptConvert<Color>(colors->array[i].value0);
-        auto position = Convert<float>(colors->array[i].value1);
-        if (color.has_value()) {
-            NG::GradientColor gradientColor;
-            position = std::clamp(position, 0.0f, 1.0f);
-            gradientColor.SetColor(color.value());
-            gradientColor.SetHasValue(true);
-            gradientColor.SetDimension(CalcDimension(position * Converter::PERCENT_100, DimensionUnit::PERCENT));
-            gradient->AddColor(gradientColor);
-        }
-    }
-}
-
-void AssignGradientColors(Gradient *gradient,
     const Array_Tuple_ResourceColor_F64 *colors)
 {
     for (int32_t i = 0; i < colors->length; i++) {
@@ -1578,28 +1561,6 @@ Gradient Convert(const Ark_RadialGradientOptions& src)
 }
 
 template<>
-GradientColor Convert(const Ark_Tuple_ResourceColor_Number& src)
-{
-    GradientColor gradientColor;
-    gradientColor.SetHasValue(false);
-
-    // color
-    std::optional<Color> colorOpt = Converter::OptConvert<Color>(src.value0);
-    if (colorOpt) {
-        gradientColor.SetColor(colorOpt.value());
-        gradientColor.SetHasValue(true);
-    }
-
-    // stop value
-    float value = Converter::Convert<float>(src.value1);
-    value = std::clamp(value, 0.0f, 1.0f);
-    //  [0, 1] -> [0, 100.0];
-    gradientColor.SetDimension(CalcDimension(value * Converter::PERCENT_100, DimensionUnit::PERCENT));
-
-    return gradientColor;
-}
-
-template<>
 GradientColor Convert(const Ark_Tuple_ResourceColor_F64& src)
 {
     GradientColor gradientColor;
@@ -1668,21 +1629,6 @@ std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_F64& src)
     return gradientColor;
 }
 
-template<>
-std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src)
-{
-    std::pair<Color, Dimension> gradientColor;
-    // color
-    std::optional<Color> colorOpt = Converter::OptConvert<Color>(src.value0);
-    if (colorOpt) {
-        gradientColor.first = colorOpt.value();
-    }
-    // stop value
-    float value = Converter::Convert<float>(src.value1);
-    value = std::clamp(value, 0.0f, 1.0f);
-    gradientColor.second = Dimension(value, DimensionUnit::VP);
-    return gradientColor;
-}
 
 template<>
 ACE_FORCE_EXPORT CaretStyle Convert(const Ark_CaretStyle& src)
@@ -3627,14 +3573,6 @@ LightSource Convert(const Ark_LightSource& src)
     Validator::ValidateIntensity(lightSource.intensity);
     lightSource.lightColor = Converter::OptConvert<Color>(src.color);
     return lightSource;
-}
-
-template<>
-Point Convert(const Ark_Tuple_Number_Number& src)
-{
-    auto x = Converter::Convert<double>(src.value0);
-    auto y = Converter::Convert<double>(src.value1);
-    return Point(x, y);
 }
 
 template<>

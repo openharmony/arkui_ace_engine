@@ -458,7 +458,7 @@ void SetTabContentOptionsImpl(Ark_NativePointer node)
 } // TabContentInterfaceModifier
 namespace TabContentAttributeModifier {
 void SetTabBarImpl(Ark_NativePointer node,
-                   const Opt_Union_ComponentContentBase_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomBuilder_TabBarOptions* value)
+                   const Opt_Union_ComponentContentBase_SubTabBarStyle_BottomTabBarStyle_String_Resource_CustomNodeBuilder_TabBarOptions* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

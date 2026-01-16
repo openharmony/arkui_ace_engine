@@ -135,7 +135,7 @@ void SetOnStateChangeImpl(Ark_NativePointer node,
     RefreshModelStatic::SetOnStateChange(frameNode, std::move(onStateChange));
 }
 void SetOnRefreshingImpl(Ark_NativePointer node,
-                         const Opt_Callback_Void* value)
+                         const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -171,7 +171,7 @@ void setPullUpToCancelRefreshImpl(Ark_NativePointer node, const Opt_Boolean* val
     RefreshModelStatic::SetPullUpToCancelRefresh(frameNode, convValue);
 }
 void SetOnOffsetChangeImpl(Ark_NativePointer node,
-                           const Opt_Callback_F64_Void* value)
+                           const Opt_arkui_component_common_Callback_F64_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);

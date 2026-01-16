@@ -132,7 +132,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 Opt_MeasureResult MeasureImpl(Ark_Measurable peer,
-                              const Ark_ConstraintSizeOptions* constraint)
+                              const Opt_ConstraintSizeOptions* constraint)
 {
     CHECK_NULL_RETURN(
         peer && peer->measureLayoutParam && constraint, Converter::ArkValue<Opt_MeasureResult>(Ark_Empty()));
@@ -174,7 +174,7 @@ Opt_MeasureResult MeasureImpl(Ark_Measurable peer,
     };
     return Converter::ArkValue<Opt_MeasureResult>(measureResult);
 }
-Opt_DirectionalEdgesT GetMarginImpl(Ark_Measurable peer)
+Opt_DirectionalEdgesT_F64 GetMarginImpl(Ark_Measurable peer)
 {
     CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
@@ -185,7 +185,7 @@ Opt_DirectionalEdgesT GetMarginImpl(Ark_Measurable peer)
     auto result = GenEdgesGlobalized(layoutProperty->CreateMarginWithoutCache(), direction);
     return Converter::ArkValue<Opt_DirectionalEdgesT>(result);
 }
-Opt_DirectionalEdgesT GetPaddingImpl(Ark_Measurable peer)
+Opt_DirectionalEdgesT_F64 GetPaddingImpl(Ark_Measurable peer)
 {
     CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
@@ -196,7 +196,7 @@ Opt_DirectionalEdgesT GetPaddingImpl(Ark_Measurable peer)
     auto result = GenEdgesGlobalized(layoutProperty->CreatePaddingWithoutBorder(false, false), direction);
     return Converter::ArkValue<Opt_DirectionalEdgesT>(result);
 }
-Opt_DirectionalEdgesT GetBorderWidthImpl(Ark_Measurable peer)
+Opt_DirectionalEdgesT_F64 GetBorderWidthImpl(Ark_Measurable peer)
 {
     CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
@@ -207,7 +207,7 @@ Opt_DirectionalEdgesT GetBorderWidthImpl(Ark_Measurable peer)
     auto result = GenBorderWidthGlobalized(layoutProperty->CreateBorder(), direction);
     return Converter::ArkValue<Opt_DirectionalEdgesT>(result);
 }
-Opt_Number GetUniqueIdImpl(Ark_Measurable peer)
+Opt_Int32 GetUniqueIdImpl(Ark_Measurable peer)
 {
     Opt_Number invalid = Converter::ArkValue<Opt_Number>(Ark_Empty());
     CHECK_NULL_RETURN(peer && peer->measureLayoutParam, invalid);
@@ -217,7 +217,7 @@ Opt_Number GetUniqueIdImpl(Ark_Measurable peer)
     return Converter::ArkValue<Opt_Number>(uniqueId);
 }
 void SetUniqueIdImpl(Ark_Measurable peer,
-                     const Opt_Number* uniqueId)
+                     const Opt_Int32* uniqueId)
 {
     LOGE("MeasurableAccessor::SetUniqueIdImpl is not implemented, only getter is supported");
 }

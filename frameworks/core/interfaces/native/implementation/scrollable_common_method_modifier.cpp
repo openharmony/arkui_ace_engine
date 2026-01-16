@@ -92,7 +92,7 @@ void SetScrollBarImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetScrollBarMode(frameNode, convValue);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_Union_Color_I32_String_Resource* value)
+                           const Opt_Union_arkui_component_enums_Color_I32_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -255,7 +255,7 @@ void SetOnDidStopFlingImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetOnDidStopFling(frameNode, std::move(onEvent));
 }
 void SetOnReachStartImpl(Ark_NativePointer node,
-                         const Opt_Callback_Void* value)
+                         const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -270,7 +270,7 @@ void SetOnReachStartImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetOnReachStart(frameNode, std::move(modelCallback));
 }
 void SetOnReachEndImpl(Ark_NativePointer node,
-                       const Opt_Callback_Void* value)
+                       const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -285,7 +285,7 @@ void SetOnReachEndImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetOnReachEnd(frameNode, std::move(modelCallback));
 }
 void SetOnScrollStartImpl(Ark_NativePointer node,
-                          const Opt_Callback_Void* value)
+                          const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -300,7 +300,7 @@ void SetOnScrollStartImpl(Ark_NativePointer node,
     ScrollableModelStatic::SetOnScrollStart(frameNode, std::move(modelCallback));
 }
 void SetOnScrollStopImpl(Ark_NativePointer node,
-                         const Opt_Callback_Void* value)
+                         const Opt_synthetic_Callback_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

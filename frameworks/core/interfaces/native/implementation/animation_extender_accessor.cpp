@@ -214,45 +214,6 @@ void ExecuteSharedRuntimeAnimation(const RefPtr<Container>& container, const Ref
     StartAnimationForStageMode(pipelineContextBase, option, onEventFinish, count, immediately);
 }
 
-void AnimateToImmediatelyImplImpl(const Ark_AnimateParam* param, const Callback_Void* event, Ark_Boolean arkImmediately)
-{
-    bool immediately = Converter::Convert<bool>(arkImmediately);
-    std::function<void()> onEventFinish;
-    if (event) {
-        onEventFinish = [arkCallback = CallbackHelper(*event)]() {
-            arkCallback.InvokeSync();
-        };
-    }
-
-    auto currentId = Container::CurrentIdSafelyWithCheck();
-    ContainerScope cope(currentId);
-    auto container = Container::CurrentSafely();
-    CHECK_NULL_VOID(container);
-    auto pipelineContextBase = container->GetPipelineContext();
-    CHECK_NULL_VOID(pipelineContextBase);
-    auto timeInterval = (GetMicroTickCount() - pipelineContextBase->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
-    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
-        timeInterval > DEFAULT_DURATION) {
-        TAG_LOGW(
-            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
-        return;
-    }
-
-    AnimationOption option = Converter::Convert<AnimationOption>(*param);
-    auto onFinish = Converter::OptConvert<Callback_Void>(param->onFinish);
-    std::optional<int32_t> count;
-    if (onFinish) {
-        count = GetAnimationFinishCount();
-        std::function<void()> onFinishEvent = [arkCallback = CallbackHelper(*onFinish), currentId]() mutable {
-            ContainerScope scope(currentId);
-            arkCallback.InvokeSync();
-        };
-        option.SetOnFinishEvent(onFinishEvent);
-    }
-
-    ExecuteSharedRuntimeAnimation(container, pipelineContextBase, option, onEventFinish, count, immediately);
-}
-
 void OpenImplicitAnimationImpl(const Ark_AnimateParam* param)
 {
     auto currentId = Container::CurrentIdSafelyWithCheck();
@@ -308,7 +269,8 @@ void CloseImplicitAnimationImpl()
     ViewContextModel::GetInstance()->closeAnimation(option, true);
 #endif
 }
-void OpenImplicitAnimationForAnimationImpl(Ark_NativePointer node,
+void OpenImplicitAnimationForAnimationImpl(Ark_VMContext vmContext,
+                                           Ark_NativePointer node,
                                            const Opt_AnimateParam* param)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -358,7 +320,8 @@ void OpenImplicitAnimationForAnimationImpl(Ark_NativePointer node,
     AceScopedTrace paramTrace("%s", option->ToString().c_str());
     ViewContextModelStatic::OpenAnimation(frameNode, option);
 }
-void CloseImplicitAnimationForAnimationImpl(Ark_NativePointer node)
+void CloseImplicitAnimationForAnimationImpl(Ark_VMContext vmContext,
+                                            Ark_NativePointer node)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -480,7 +443,71 @@ void StartKeyframeAnimation(const RefPtr<PipelineBase>& pipelineContext, Animati
     AnimationUtils::CloseImplicitAnimation();
 }
 
-void KeyframeAnimationImplImpl(const Ark_KeyframeAnimateParam* param, const Array_KeyframeState* keyframes)
+void AnimationTranslateImpl(Ark_NativePointer node,
+                            const Ark_TranslateOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(value);
+
+    TranslateOptions options = Converter::Convert<TranslateOptions>(*value);
+
+    if (options.x.Unit() == DimensionUnit::PERCENT) {
+        options.x = Dimension(options.x.Value() * frameNode->GetGeometryNode()->GetMarginFrameOffset().GetX(),
+                              DimensionUnit::PX);
+    }
+
+    if (options.y.Unit() == DimensionUnit::PERCENT) {
+        options.x = Dimension(options.y.Value() * frameNode->GetGeometryNode()->GetMarginFrameOffset().GetY(),
+                              DimensionUnit::PX);
+    }
+
+    ViewAbstract::SetTranslate(frameNode, options);
+}
+void AnimateToImmediatelyImplImpl(Ark_VMContext vmContext,
+                                  const Ark_AnimateParam* param,
+                                  const synthetic_Callback_Void* event,
+                                  Ark_Boolean immediately)
+{
+    bool immediately = Converter::Convert<bool>(arkImmediately);
+    std::function<void()> onEventFinish;
+    if (event) {
+        onEventFinish = [arkCallback = CallbackHelper(*event)]() {
+            arkCallback.InvokeSync();
+        };
+    }
+
+    auto currentId = Container::CurrentIdSafelyWithCheck();
+    ContainerScope cope(currentId);
+    auto container = Container::CurrentSafely();
+    CHECK_NULL_VOID(container);
+    auto pipelineContextBase = container->GetPipelineContext();
+    CHECK_NULL_VOID(pipelineContextBase);
+    auto timeInterval = (GetMicroTickCount() - pipelineContextBase->GetFormAnimationStartTime()) / MICROSEC_TO_MILLISEC;
+    if (pipelineContextBase->IsFormAnimationFinishCallback() && pipelineContextBase->IsFormRender() &&
+        timeInterval > DEFAULT_DURATION) {
+        TAG_LOGW(
+            AceLogTag::ACE_FORM, "[Form animation] Form finish callback triggered animation cannot exceed 1000ms.");
+        return;
+    }
+
+    AnimationOption option = Converter::Convert<AnimationOption>(*param);
+    auto onFinish = Converter::OptConvert<Callback_Void>(param->onFinish);
+    std::optional<int32_t> count;
+    if (onFinish) {
+        count = GetAnimationFinishCount();
+        std::function<void()> onFinishEvent = [arkCallback = CallbackHelper(*onFinish), currentId]() mutable {
+            ContainerScope scope(currentId);
+            arkCallback.InvokeSync();
+        };
+        option.SetOnFinishEvent(onFinishEvent);
+    }
+
+    ExecuteSharedRuntimeAnimation(container, pipelineContextBase, option, onEventFinish, count, immediately);
+}
+void KeyframeAnimationImplImpl(Ark_VMContext vmContext,
+                               const Ark_KeyframeAnimateParam* param,
+                               const Array_KeyframeState* keyfames)
 {
     auto scopedDelegate = Container::CurrentIdSafelyWithCheck();
     if (!scopedDelegate) {
@@ -535,28 +562,6 @@ void KeyframeAnimationImplImpl(const Ark_KeyframeAnimateParam* param, const Arra
     option.SetCurve(Curves::EASE_IN_OUT);
     StartKeyframeAnimation(pipelineContext, option, parsedKeyframes, count);
     pipelineContext->FlushAfterLayoutCallbackInImplicitAnimationTask();
-}
-
-void AnimationTranslateImpl(Ark_NativePointer node,
-                            const Ark_TranslateOptions* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(value);
-
-    TranslateOptions options = Converter::Convert<TranslateOptions>(*value);
-
-    if (options.x.Unit() == DimensionUnit::PERCENT) {
-        options.x = Dimension(options.x.Value() * frameNode->GetGeometryNode()->GetMarginFrameOffset().GetX(),
-                              DimensionUnit::PX);
-    }
-
-    if (options.y.Unit() == DimensionUnit::PERCENT) {
-        options.x = Dimension(options.y.Value() * frameNode->GetGeometryNode()->GetMarginFrameOffset().GetY(),
-                              DimensionUnit::PX);
-    }
-
-    ViewAbstract::SetTranslate(frameNode, options);
 }
 } // AnimationExtenderAccessor
 const GENERATED_ArkUIAnimationExtenderAccessor* GetAnimationExtenderAccessor()

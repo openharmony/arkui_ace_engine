@@ -103,7 +103,8 @@ void ScrollBarImpl(Ark_NativePointer node, const Opt_BarState* status)
     std::optional<DisplayMode> mode = Converter::OptConvert<DisplayMode>(*status);
     ListModelStatic::SetListScrollBar(frameNode, EnumToInt(mode));
 }
-void ScrollBarColorImpl(Ark_NativePointer node, const Opt_ColorMetrics* color)
+void ScrollBarColorImpl(Ark_NativePointer node,
+                        const Opt_ColorMetricsExt* color)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -139,20 +140,8 @@ void ChainAnimationImpl(Ark_NativePointer node, const Opt_Boolean* enable)
     }
     ListModelStatic::SetChainAnimation(frameNode, *convValue);
 }
-void ChildrenMainSizeImpl(Ark_NativePointer node, const Opt_ChildrenMainSize* size)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(size);
-    if (!optValue) {
-        return;
-    }
-    auto peer = *optValue;
-    CHECK_NULL_VOID(peer);
-    RefPtr<ListChildrenMainSize> handler = ListModelStatic::GetOrCreateListChildrenMainSize(frameNode);
-    peer->SetHandler(handler);
-}
-void EnableScrollInteractionImpl(Ark_NativePointer node, const Opt_Boolean* enable)
+void EnableScrollInteractionImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* enable)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -311,7 +300,6 @@ const GENERATED_ArkUIArcListExtenderAccessor* GetArcListExtenderAccessor()
         ArcListExtenderAccessor::ScrollBarWidthImpl,
         ArcListExtenderAccessor::CachedCountImpl,
         ArcListExtenderAccessor::ChainAnimationImpl,
-        ArcListExtenderAccessor::ChildrenMainSizeImpl,
         ArcListExtenderAccessor::EnableScrollInteractionImpl,
         ArcListExtenderAccessor::FadingEdgeImpl,
         ArcListExtenderAccessor::FrictionImpl,

@@ -210,7 +210,7 @@ void SetTextIndentImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetTextIndent(frameNode, convValue);
 }
 void SetPlaceholderFontImpl(Ark_NativePointer node,
-                            const Opt_Font* value)
+                            const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -234,7 +234,7 @@ void SetCaretColorImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetCaretColor(frameNode, convValue);
 }
 void SetOnEditChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Boolean_Void* value)
+                         const Opt_arkui_component_common_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -785,7 +785,7 @@ void SetShowPasswordImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetShowPassword(frameNode, convValue);
 }
 void SetOnSecurityStateChangeImpl(Ark_NativePointer node,
-                                  const Opt_Callback_Boolean_Void* value)
+                                  const Opt_arkui_component_common_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1011,21 +1011,6 @@ void SetKeyboardAppearanceImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<KeyboardAppearance>(value);
     TextFieldModelStatic::SetKeyboardAppearance(frameNode, convValue);
 }
-void SetTextDirectionImpl(Ark_NativePointer node,
-                          const Opt_TextDirection* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextFieldModelStatic::SetTextDirection(frameNode, Converter::OptConvertPtr<TextDirection>(value));
-}
-void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
-                                       const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
-    TextFieldModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
-}
 void SetIncludeFontPaddingImpl(Ark_NativePointer node,
                                const Opt_Boolean* value)
 {
@@ -1041,14 +1026,6 @@ void SetFallbackLineSpacingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     TextFieldModelStatic::SetFallbackLineSpacing(frameNode, convValue);
-}
-void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
-                                     const Opt_SelectedDragPreviewStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvert<Color>(value->value.color);
-    TextFieldModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
 }
 void SetEnableAutoFillAnimationImpl(Ark_NativePointer node,
                                     const Opt_Boolean* value)
@@ -1111,6 +1088,37 @@ void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
     auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
     TextFieldModelStatic::SetSelectDetectEnable(frameNode, convValue);
 }
+void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextFieldModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
+}
+void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                     const Opt_SelectedDragPreviewStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<Color>(value->value.color);
+    TextFieldModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
+}
+void SetTextDirectionImpl(Ark_NativePointer node,
+                          const Opt_TextDirection* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelStatic::SetTextDirection(frameNode, Converter::OptConvertPtr<TextDirection>(value));
+}
+void SetVoiceButtonImpl(Ark_NativePointer node,
+                        const Opt_VoiceButtonOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextInputModelNG::SetVoiceButton(frameNode, convValue);
+}
 void SetInputFilterImpl(Ark_NativePointer node,
                         const Opt_ResourceStr* value,
                         const Opt_Callback_String_Void* error)
@@ -1129,7 +1137,7 @@ void SetInputFilterImpl(Ark_NativePointer node,
     TextFieldModelNG::SetInputFilter(frameNode, valueString.value_or(""), std::move(onErrorEvent));
 }
 void SetCustomKeyboardImpl(Ark_NativePointer node,
-                           const Opt_Union_CustomBuilder_ComponentContentBase* value,
+                           const Opt_Union_CustomNodeBuilder_ComponentContentBase* value,
                            const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1271,17 +1279,18 @@ const GENERATED_ArkUITextInputModifier* GetTextInputModifier()
         TextInputAttributeModifier::SetStopBackPressImpl,
         TextInputAttributeModifier::SetOnWillChangeImpl,
         TextInputAttributeModifier::SetKeyboardAppearanceImpl,
-        TextInputAttributeModifier::SetCompressLeadingPunctuationImpl,
         TextInputAttributeModifier::SetIncludeFontPaddingImpl,
         TextInputAttributeModifier::SetFallbackLineSpacingImpl,
-        TextInputAttributeModifier::SetSelectedDragPreviewStyleImpl,
-        TextInputAttributeModifier::SetTextDirectionImpl,
         TextInputAttributeModifier::SetEnableAutoFillAnimationImpl,
         TextInputAttributeModifier::SetOnWillAttachIMEImpl,
         TextInputAttributeModifier::SetStrokeColorImpl,
         TextInputAttributeModifier::SetEnableAutoSpacingImpl,
         TextInputAttributeModifier::SetStrokeWidthImpl,
         TextInputAttributeModifier::SetEnableSelectedDataDetectorImpl,
+        TextInputAttributeModifier::SetCompressLeadingPunctuationImpl,
+        TextInputAttributeModifier::SetSelectedDragPreviewStyleImpl,
+        TextInputAttributeModifier::SetTextDirectionImpl,
+        TextInputAttributeModifier::SetVoiceButtonImpl,
         TextInputAttributeModifier::SetInputFilterImpl,
         TextInputAttributeModifier::SetCustomKeyboardImpl,
         TextInputAttributeModifier::SetShowCounterImpl,

@@ -89,7 +89,7 @@ constexpr float CHECK_BOX_GROUP_MARK_SIZE_INVALID_VALUE = -1.0f;
 const Dimension CHECK_BOX_GROUP_MARK_WIDTH_DEFAULT_VALUE = 2.0_vp;
 }
 void SetSelectAllImpl(Ark_NativePointer node,
-                      const Opt_Union_Boolean_Bindable* value)
+                      const Opt_Union_Boolean_Bindable_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

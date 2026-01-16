@@ -39,7 +39,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
  
-void DismissContentCoverImpl([[maybe_unused]] Ark_DismissContentCoverAction peer)
+void DismissImpl([[maybe_unused]] Ark_DismissContentCoverAction peer)
 {
     ViewAbstractModelStatic::DismissContentCoverStatic();
 }
@@ -61,21 +61,18 @@ void SetReasonImpl(Ark_DismissContentCoverAction peer,
         .value_or(BindSheetDismissReason::CLOSE_BUTTON);
 }
 } // namespace DismissContentCoverActionAccessor
- 
+
 const GENERATED_ArkUIDismissContentCoverActionAccessor* GetDismissContentCoverActionAccessor()
 {
     static const GENERATED_ArkUIDismissContentCoverActionAccessor DismissContentCoverActionAccessorImpl {
         DismissContentCoverActionAccessor::DestroyPeerImpl,
         DismissContentCoverActionAccessor::ConstructImpl,
         DismissContentCoverActionAccessor::GetFinalizerImpl,
-        DismissContentCoverActionAccessor::DismissContentCoverImpl,
+        DismissContentCoverActionAccessor::DismissImpl,
         DismissContentCoverActionAccessor::GetReasonImpl,
         DismissContentCoverActionAccessor::SetReasonImpl,
     };
     return &DismissContentCoverActionAccessorImpl;
 }
- 
-struct DismissContentCoverActionPeer {
-    virtual ~DismissContentCoverActionPeer() = default;
-};
+
 }

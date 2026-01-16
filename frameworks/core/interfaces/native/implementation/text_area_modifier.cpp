@@ -122,7 +122,7 @@ void SetPlaceholderColorImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetPlaceholderColor(frameNode, Converter::OptConvertPtr<Color>(value));
 }
 void SetPlaceholderFontImpl(Ark_NativePointer node,
-                            const Opt_Font* value)
+                            const Opt_arkui_component_units_Font* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -304,7 +304,7 @@ void SetOnContentScrollImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnContentScroll(frameNode, std::move(onContentScroll));
 }
 void SetOnEditChangeImpl(Ark_NativePointer node,
-                         const Opt_Callback_Boolean_Void* value)
+                         const Opt_synthetic_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -319,7 +319,7 @@ void SetOnEditChangeImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnEditChange(frameNode, std::move(onEditEvent));
 }
 void SetOnCopyImpl(Ark_NativePointer node,
-                   const Opt_Callback_String_Void* value)
+                   const Opt_synthetic_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -336,7 +336,7 @@ void SetOnCopyImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnCopy(frameNode, std::move(onCopy));
 }
 void SetOnCutImpl(Ark_NativePointer node,
-                  const Opt_Callback_String_Void* value)
+                  const Opt_synthetic_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -476,21 +476,6 @@ void SetHeightAdaptivePolicyImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<TextHeightAdaptivePolicy>(value);
     TextFieldModelStatic::SetHeightAdaptivePolicy(frameNode, convValue);
 }
-void SetMaxLinesImpl(Ark_NativePointer node,
-                     const Opt_Int32* lines,
-                     const Opt_MaxLinesOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto maxLines = Converter::OptConvertPtr<uint32_t>(lines);
-    TextFieldModelStatic::SetNormalMaxViewLines(frameNode, maxLines);
-    TextFieldModelStatic::SetMaxViewLines(frameNode, maxLines);
-    std::optional<OverflowMode> maxLinesOptions = std::nullopt;
-    if (options->tag != INTEROP_TAG_UNDEFINED) {
-        maxLinesOptions = Converter::Convert<OverflowMode>(options->value);
-    }
-    TextFieldModelStatic::SetMaxLinesMode(frameNode, maxLinesOptions);
-}
 void SetWordBreakImpl(Ark_NativePointer node,
                       const Opt_WordBreak* value)
 {
@@ -530,21 +515,6 @@ void SetLetterSpacingImpl(Ark_NativePointer node,
     Validator::ValidateNonNegative(spacing);
     Validator::ValidateNonPercent(spacing);
     TextFieldModelStatic::SetLetterSpacing(frameNode, spacing);
-}
-void SetLineSpacingImpl(Ark_NativePointer node,
-                        const Opt_LengthMetrics* value,
-                        const Opt_LineSpacingOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto lineSpacing = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(lineSpacing);
-    TextFieldModelStatic::SetLineSpacing(frameNode, lineSpacing);
-    std::optional<bool> isOnlyBetweenLines = std::nullopt;
-    if (options->tag != INTEROP_TAG_UNDEFINED) {
-        isOnlyBetweenLines = Converter::Convert<bool>(options->value);
-    }
-    TextFieldModelStatic::SetIsOnlyBetweenLines(frameNode, isOnlyBetweenLines);
 }
 void SetLineHeightImpl(Ark_NativePointer node,
                        const Opt_Union_F64_String_Resource* value)
@@ -802,21 +772,6 @@ void SetKeyboardAppearanceImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<KeyboardAppearance>(value);
     TextFieldModelStatic::SetKeyboardAppearance(frameNode, convValue);
 }
-void SetTextDirectionImpl(Ark_NativePointer node,
-                          const Opt_TextDirection* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextFieldModelStatic::SetTextDirection(frameNode, Converter::OptConvertPtr<TextDirection>(value));
-}
-void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
-                                       const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
-    TextFieldModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
-}
 void SetIncludeFontPaddingImpl(Ark_NativePointer node,
                                const Opt_Boolean* value)
 {
@@ -832,14 +787,6 @@ void SetFallbackLineSpacingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     TextFieldModelStatic::SetFallbackLineSpacing(frameNode, convValue);
-}
-void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
-                                     const Opt_SelectedDragPreviewStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
-    TextFieldModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
 }
 void SetMinLinesImpl(Ark_NativePointer node,
                      const Opt_Int32* value)
@@ -895,7 +842,7 @@ void SetOnWillAttachIMEImpl(Ark_NativePointer node,
     TextFieldModelNG::SetOnWillAttachIME(frameNode, std::move(onWillAttachIME));
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_ColorMetrics* value)
+                           const Opt_ColorMetricsExt* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -910,9 +857,48 @@ void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     TextFieldModelStatic::SetSelectDetectEnable(frameNode, convValue);
 }
+void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextFieldModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
+}
+void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                     const Opt_SelectedDragPreviewStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
+    TextFieldModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
+}
+void SetTextDirectionImpl(Ark_NativePointer node,
+                          const Opt_TextDirection* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextFieldModelStatic::SetTextDirection(frameNode, Converter::OptConvertPtr<TextDirection>(value));
+}
+void SetVoiceButtonImpl(Ark_NativePointer node,
+                        const Opt_VoiceButtonOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextAreaModelNG::SetVoiceButton(frameNode, convValue);
+}
+void SetHorizontalScrollingImpl(Ark_NativePointer node,
+                                const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TextAreaModelNG::SetHorizontalScrolling(frameNode, convValue);
+}
 void SetInputFilterImpl(Ark_NativePointer node,
                         const Opt_ResourceStr* value,
-                        const Opt_Callback_String_Void* error)
+                        const Opt_synthetic_Callback_String_Void* error)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -964,8 +950,23 @@ void SetShowCounterImpl(Ark_NativePointer node,
     TextFieldModelStatic::SetCounterTextColor(frameNode, counterTextColor);
     TextFieldModelStatic::SetCounterTextOverflowColor(frameNode, counterTextOverflowColor);
 }
+void SetMaxLinesImpl(Ark_NativePointer node,
+                     const Opt_Int32* value,
+                     const Opt_MaxLinesOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto maxLines = Converter::OptConvertPtr<uint32_t>(lines);
+    TextFieldModelStatic::SetNormalMaxViewLines(frameNode, maxLines);
+    TextFieldModelStatic::SetMaxViewLines(frameNode, maxLines);
+    std::optional<OverflowMode> maxLinesOptions = std::nullopt;
+    if (options->tag != INTEROP_TAG_UNDEFINED) {
+        maxLinesOptions = Converter::Convert<OverflowMode>(options->value);
+    }
+    TextFieldModelStatic::SetMaxLinesMode(frameNode, maxLinesOptions);
+}
 void SetCustomKeyboardImpl(Ark_NativePointer node,
-                           const Opt_Union_CustomBuilder_ComponentContentBase* value,
+                           const Opt_Union_CustomNodeBuilder_ComponentContentBase* value,
                            const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1002,6 +1003,21 @@ void SetCustomKeyboardImpl(Ark_NativePointer node,
         TextFieldModelStatic::SetCustomKeyboard(frameNode, nullptr, false);
         TextFieldModelStatic::SetCustomKeyboardWithNode(frameNode, nullptr, std::nullopt);
     }
+}
+void SetLineSpacingImpl(Ark_NativePointer node,
+                        const Opt_LengthMetrics* value,
+                        const Opt_LineSpacingOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto lineSpacing = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonNegative(lineSpacing);
+    TextFieldModelStatic::SetLineSpacing(frameNode, lineSpacing);
+    std::optional<bool> isOnlyBetweenLines = std::nullopt;
+    if (options->tag != INTEROP_TAG_UNDEFINED) {
+        isOnlyBetweenLines = Converter::Convert<bool>(options->value);
+    }
+    TextFieldModelStatic::SetIsOnlyBetweenLines(frameNode, isOnlyBetweenLines);
 }
 } // TextAreaAttributeModifier
 
@@ -1043,12 +1059,10 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::SetMinFontScaleImpl,
         TextAreaAttributeModifier::SetMaxFontScaleImpl,
         TextAreaAttributeModifier::SetHeightAdaptivePolicyImpl,
-        TextAreaAttributeModifier::SetMaxLinesImpl,
         TextAreaAttributeModifier::SetWordBreakImpl,
         TextAreaAttributeModifier::SetLineBreakStrategyImpl,
         TextAreaAttributeModifier::SetDecorationImpl,
         TextAreaAttributeModifier::SetLetterSpacingImpl,
-        TextAreaAttributeModifier::SetLineSpacingImpl,
         TextAreaAttributeModifier::SetLineHeightImpl,
         TextAreaAttributeModifier::SetTypeImpl,
         TextAreaAttributeModifier::SetEnableAutoFillImpl,
@@ -1067,11 +1081,8 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::SetStopBackPressImpl,
         TextAreaAttributeModifier::SetOnWillChangeImpl,
         TextAreaAttributeModifier::SetKeyboardAppearanceImpl,
-        TextAreaAttributeModifier::SetCompressLeadingPunctuationImpl,
         TextAreaAttributeModifier::SetIncludeFontPaddingImpl,
         TextAreaAttributeModifier::SetFallbackLineSpacingImpl,
-        TextAreaAttributeModifier::SetSelectedDragPreviewStyleImpl,
-        TextAreaAttributeModifier::SetTextDirectionImpl,
         TextAreaAttributeModifier::SetMinLinesImpl,
         TextAreaAttributeModifier::SetEnableAutoSpacingImpl,
         TextAreaAttributeModifier::SetStrokeWidthImpl,
@@ -1079,9 +1090,16 @@ const GENERATED_ArkUITextAreaModifier* GetTextAreaModifier()
         TextAreaAttributeModifier::SetOnWillAttachIMEImpl,
         TextAreaAttributeModifier::SetScrollBarColorImpl,
         TextAreaAttributeModifier::SetEnableSelectedDataDetectorImpl,
+        TextAreaAttributeModifier::SetCompressLeadingPunctuationImpl,
+        TextAreaAttributeModifier::SetSelectedDragPreviewStyleImpl,
+        TextAreaAttributeModifier::SetTextDirectionImpl,
+        TextAreaAttributeModifier::SetVoiceButtonImpl,
+        TextAreaAttributeModifier::SetHorizontalScrollingImpl,
         TextAreaAttributeModifier::SetInputFilterImpl,
         TextAreaAttributeModifier::SetShowCounterImpl,
+        TextAreaAttributeModifier::SetMaxLinesImpl,
         TextAreaAttributeModifier::SetCustomKeyboardImpl,
+        TextAreaAttributeModifier::SetLineSpacingImpl,
     };
     return &ArkUITextAreaModifierImpl;
 }

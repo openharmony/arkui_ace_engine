@@ -43,7 +43,7 @@ Ark_TransitionEffect Construct0Impl(const Ark_String* type)
     }
     return peer;
 }
-Ark_TransitionEffect Construct1Impl(const Ark_Float64 effect)
+Ark_TransitionEffect Construct1Impl(Ark_Float64 effect)
 {
     TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
     auto opacity = Converter::Convert<float>(effect);
@@ -127,7 +127,7 @@ Ark_TransitionEffect ScaleImpl(const Ark_ScaleOptions* options)
 {
     return Construct5Impl(options);
 }
-Ark_TransitionEffect OpacityImpl(const Ark_Float64 alpha)
+Ark_TransitionEffect OpacityImpl(Ark_Float64 alpha)
 {
     return Construct1Impl(alpha);
 }
@@ -173,17 +173,11 @@ Ark_TransitionEffect GetIDENTITYImpl()
     peer->handler = AceType::MakeRefPtr<ChainedIdentityEffect>();
     return peer;
 }
-void SetIDENTITYImpl(Ark_TransitionEffect IDENTITY)
-{
-}
 Ark_TransitionEffect GetOPACITYImpl()
 {
     TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
     peer->handler = AceType::MakeRefPtr<ChainedOpacityEffect>(0);
     return peer;
-}
-void SetOPACITYImpl(Ark_TransitionEffect OPACITY)
-{
 }
 Ark_TransitionEffect GetSLIDEImpl()
 {
@@ -193,17 +187,11 @@ Ark_TransitionEffect GetSLIDEImpl()
     peer->handler = AceType::MakeRefPtr<ChainedAsymmetricEffect>(appear, disappear);
     return peer;
 }
-void SetSLIDEImpl(Ark_TransitionEffect SLIDE)
-{
-}
 Ark_TransitionEffect GetSLIDE_SWITCHImpl()
 {
     TransitionEffectPeer* peer = PeerUtils::CreatePeer<TransitionEffectPeer>();
     peer->handler = AceType::MakeRefPtr<ChainedSlideSwitchEffect>();
     return peer;
-}
-void SetSLIDE_SWITCHImpl(Ark_TransitionEffect SLIDE_SWITCH)
-{
 }
 } // TransitionEffectAccessor
 const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
@@ -227,13 +215,9 @@ const GENERATED_ArkUITransitionEffectAccessor* GetTransitionEffectAccessor()
         TransitionEffectAccessor::AnimationImpl,
         TransitionEffectAccessor::CombineImpl,
         TransitionEffectAccessor::GetIDENTITYImpl,
-        TransitionEffectAccessor::SetIDENTITYImpl,
         TransitionEffectAccessor::GetOPACITYImpl,
-        TransitionEffectAccessor::SetOPACITYImpl,
         TransitionEffectAccessor::GetSLIDEImpl,
-        TransitionEffectAccessor::SetSLIDEImpl,
         TransitionEffectAccessor::GetSLIDE_SWITCHImpl,
-        TransitionEffectAccessor::SetSLIDE_SWITCHImpl,
     };
     return &TransitionEffectAccessorImpl;
 }

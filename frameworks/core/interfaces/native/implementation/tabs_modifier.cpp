@@ -279,7 +279,7 @@ void SetBarHeight0Impl(Ark_NativePointer node, const Opt_Length* value)
     TabsModelStatic::SetTabBarHeight(frameNode, valueOpt);
 }
 void SetAnimationCurveImpl(Ark_NativePointer node,
-                           const Opt_Union_Curve_ICurve* value)
+                           const Opt_Union_curves_Curve_curves_ICurve* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -317,7 +317,7 @@ void SetEdgeEffectImpl(Ark_NativePointer node,
     TabsModelStatic::SetEdgeEffect(frameNode, OHOS::Ace::NG::EnumToInt(edgeEffectOpt));
 }
 void SetOnChangeImpl(Ark_NativePointer node,
-                     const Opt_Callback_I32_Void* value)
+                     const Opt_arkui_component_common_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -338,7 +338,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
     TabsModelStatic::SetOnChange(frameNode, std::move(onChange));
 }
 void SetOnSelectedImpl(Ark_NativePointer node,
-                       const Opt_Callback_I32_Void* value)
+                       const Opt_arkui_component_common_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -361,7 +361,7 @@ void SetOnSelectedImpl(Ark_NativePointer node,
     TabsModelStatic::SetOnSelected(frameNode, std::move(onSelected));
 }
 void SetOnTabBarClickImpl(Ark_NativePointer node,
-                          const Opt_Callback_I32_Void* value)
+                          const Opt_arkui_component_common_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -382,7 +382,7 @@ void SetOnTabBarClickImpl(Ark_NativePointer node,
     TabsModelStatic::SetOnTabBarClick(frameNode, std::move(onTabBarClick));
 }
 void SetOnUnselectedImpl(Ark_NativePointer node,
-                         const Opt_Callback_I32_Void* value)
+                         const Opt_arkui_component_common_Callback_I32_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -510,6 +510,14 @@ void SetDividerImpl(Ark_NativePointer node,
     }
     TabsModelStatic::SetDivider(frameNode, divider);
     TabsModelStatic::InitDivider(frameNode);
+}
+void SetNestedScrollImpl(Ark_NativePointer node,
+                         const Opt_TabsNestedScrollMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //TabsModelNG::SetNestedScroll(frameNode, convValue);
 }
 void SetBarOverlapImpl(Ark_NativePointer node,
                        const Opt_Boolean* value)
@@ -696,7 +704,9 @@ void SetBarModeImpl(Ark_NativePointer node,
     }
     TabsModelStatic::SetTabBarMode(frameNode, mode.value_or(TabBarMode::FIXED));
 }
-void SetBarHeight1Impl(Ark_NativePointer node, const Opt_Length* height, const Opt_Boolean* noMinHeightLimit)
+void SetBarHeight1Impl(Ark_NativePointer node,
+                       const Opt_Length* value,
+                       const Opt_Boolean* noMinHeightLimit)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -769,6 +779,7 @@ const GENERATED_ArkUITabsModifier* GetTabsModifier()
         TabsAttributeModifier::SetOnGestureSwipeImpl,
         TabsAttributeModifier::SetFadingEdgeImpl,
         TabsAttributeModifier::SetDividerImpl,
+        TabsAttributeModifier::SetNestedScrollImpl,
         TabsAttributeModifier::SetBarOverlapImpl,
         TabsAttributeModifier::SetBarBackgroundColorImpl,
         TabsAttributeModifier::SetBarGridAlignImpl,

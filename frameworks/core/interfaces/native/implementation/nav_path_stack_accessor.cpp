@@ -50,7 +50,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void PushPath0Impl(Ark_NavPathStack peer,
+void PushPath0Impl(Ark_VMContext vmContext,
+                   Ark_NavPathStack peer,
                    Ark_NavPathInfo info,
                    const Opt_Boolean* animated)
 {
@@ -67,7 +68,8 @@ void PushPath0Impl(Ark_NavPathStack peer,
     peer->SetInstanceId(1);
     navStack->NavigationContext::PathStack::PushPath(navInfo, navOptions);
 }
-void PushPath1Impl(Ark_NavPathStack peer,
+void PushPath1Impl(Ark_VMContext vmContext,
+                   Ark_NavPathStack peer,
                    Ark_NavPathInfo info,
                    const Opt_NavigationOptions* options)
 {
@@ -154,7 +156,8 @@ void PushDestination1Impl(Ark_VMContext vmContext,
     };
     promise->StartAsync(vmContext, *asyncWorker, execFunc);
 }
-void PushPathByName0Impl(Ark_NavPathStack peer,
+void PushPathByName0Impl(Ark_VMContext vmContext,
+                         Ark_NavPathStack peer,
                          const Ark_String* name,
                          const Opt_Object* param,
                          const Opt_Boolean* animated)
@@ -172,7 +175,8 @@ void PushPathByName0Impl(Ark_NavPathStack peer,
     auto convAnimated = Converter::OptConvertPtr<bool>(animated);
     navStack->Nav::PathStack::PushPathByName(convName, convParam, nullptr, convAnimated);
 }
-void PushPathByName1Impl(Ark_NavPathStack peer,
+void PushPathByName1Impl(Ark_VMContext vmContext,
+                         Ark_NavPathStack peer,
                          const Ark_String* name,
                          const Ark_Object* param,
                          const Callback_PopInfo_Void* onPop,
@@ -270,7 +274,8 @@ void PushDestinationByName1Impl(Ark_VMContext vmContext,
     };
     promise->StartAsync(vmContext, *asyncWorker, execFunc);
 }
-void ReplacePath0Impl(Ark_NavPathStack peer,
+void ReplacePath0Impl(Ark_VMContext vmContext,
+                      Ark_NavPathStack peer,
                       Ark_NavPathInfo info,
                       const Opt_Boolean* animated)
 {
@@ -286,7 +291,8 @@ void ReplacePath0Impl(Ark_NavPathStack peer,
     }
     navStack->NavigationContext::PathStack::ReplacePath(navInfo, navOptions);
 }
-void ReplacePath1Impl(Ark_NavPathStack peer,
+void ReplacePath1Impl(Ark_VMContext vmContext,
+                      Ark_NavPathStack peer,
                       Ark_NavPathInfo info,
                       const Opt_NavigationOptions* options)
 {
@@ -336,7 +342,8 @@ void ReplaceDestinationImpl(Ark_VMContext vmContext,
     };
     promise->StartAsync(vmContext, *asyncWorker, execFunc);
 }
-void ReplacePathByNameImpl(Ark_NavPathStack peer,
+void ReplacePathByNameImpl(Ark_VMContext vmContext,
+                           Ark_NavPathStack peer,
                            const Ark_String* name,
                            const Ark_Object* param,
                            const Opt_Boolean* animated)
@@ -350,7 +357,7 @@ void ReplacePathByNameImpl(Ark_NavPathStack peer,
     navStack->NavigationContext::PathStack::ReplacePathByName(convName, convParam, convAnimated);
 }
 Ark_Int32 RemoveByIndexesImpl(Ark_NavPathStack peer,
-                              const Array_Int32* indexes)
+                              const Array_I32* indexes)
 {
     auto invalidVal = Converter::ArkValue<Ark_Int32>(0);
     CHECK_NULL_RETURN(peer, invalidVal);
@@ -554,8 +561,8 @@ Array_Opt_Object GetParamByNameImpl(Ark_NavPathStack peer,
     auto params = navStack->GetParamByName(paramName);
     return Converter::ArkValue<Array_Opt_Object>(params, Converter::FC);
 }
-Array_Int32 GetIndexByNameImpl(Ark_NavPathStack peer,
-                               const Ark_String* name)
+Array_I32 GetIndexByNameImpl(Ark_NavPathStack peer,
+                             const Ark_String* name)
 {
     CHECK_NULL_RETURN(peer, {});
     auto pathStack = peer->GetNavPathStack();

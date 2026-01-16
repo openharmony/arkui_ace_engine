@@ -130,6 +130,10 @@ Opt_FontStyle GetFontStyleImpl(Ark_TextStyle peer)
     CHECK_NULL_RETURN(peer->span, invalidValue);
     return Converter::ArkValue<Opt_FontStyle>(peer->span->GetFont().fontStyle);
 }
+Opt_FontConfigs GetFontConfigsImpl(Ark_TextStyle peer)
+{
+    return {};
+}
 Opt_SuperscriptStyle GetSuperscriptImpl(Ark_TextStyle peer)
 {
     auto invalidValue = Converter::ArkValue<Opt_SuperscriptStyle>();
@@ -166,6 +170,7 @@ const GENERATED_ArkUITextStyleAccessor* GetTextStyleAccessor()
         TextStyleAccessor::GetFontSizeImpl,
         TextStyleAccessor::GetFontWeightImpl,
         TextStyleAccessor::GetFontStyleImpl,
+        TextStyleAccessor::GetFontConfigsImpl,
         TextStyleAccessor::GetSuperscriptImpl,
         TextStyleAccessor::GetStrokeWidthImpl,
         TextStyleAccessor::GetStrokeColorImpl,

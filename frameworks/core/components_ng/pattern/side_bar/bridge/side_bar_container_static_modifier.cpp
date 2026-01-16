@@ -54,7 +54,7 @@ constexpr Dimension DEFAULT_DIVIDER_START_MARGIN = 0.0_vp;
 constexpr Dimension DEFAULT_DIVIDER_END_MARGIN = 0.0_vp;
 constexpr Color DEFAULT_DIVIDER_COLOR = Color(0x08000000);
 
-std::optional<bool> ProcessBindableShowSideBar(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
+std::optional<bool> ProcessBindableShowSideBar(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean* value)
 {
     std::optional<bool> result;
     Converter::VisitUnionPtr(value,
@@ -74,7 +74,7 @@ std::optional<bool> ProcessBindableShowSideBar(FrameNode* frameNode, const Opt_U
     return result;
 }
 
-std::optional<Dimension> ProcessBindableSideBarWidth(FrameNode* frameNode, const Opt_Union_Length_Bindable* value)
+std::optional<Dimension> ProcessBindableSideBarWidth(FrameNode* frameNode, const Opt_Union_Length_Bindable_Length* value)
 {
     std::optional<Dimension> result;
     Converter::VisitUnionPtr(value,
@@ -222,8 +222,7 @@ void SetSideBarContainerOptionsImpl(Ark_NativePointer node,
 }
 } // SideBarContainerInterfaceModifier
 namespace SideBarContainerAttributeModifier {
-void SetShowSideBarImpl(Ark_NativePointer node,
-                        const Opt_Union_Boolean_Bindable* value)
+void SetShowSideBarImpl(Ark_NativePointer node, const Opt_Union_Boolean_Bindable_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -272,8 +271,7 @@ void SetShowControlButtonImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     SideBarContainerModelStatic::SetShowControlButton(frameNode, Converter::OptConvertPtr<bool>(value).value_or(true));
 }
-void SetOnChangeImpl(Ark_NativePointer node,
-                     const Opt_Callback_Boolean_Void* value)
+void SetOnChangeImpl(Ark_NativePointer node, const Opt_synthetic_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -288,8 +286,7 @@ void SetOnChangeImpl(Ark_NativePointer node,
     };
     SideBarContainerModelStatic::SetOnChange(frameNode, std::move(onEvent));
 }
-void SetSideBarWidthImpl(Ark_NativePointer node,
-                         const Opt_Union_Length_Bindable* value)
+void SetSideBarWidthImpl(Ark_NativePointer node, const Opt_Union_Length_Bindable_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

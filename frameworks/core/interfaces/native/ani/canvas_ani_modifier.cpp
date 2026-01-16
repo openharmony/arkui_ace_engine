@@ -28,7 +28,6 @@
 #include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 #include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
 #include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
-#include "core/interfaces/native/implementation/image_data_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/pipeline/pipeline_base.h"

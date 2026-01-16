@@ -348,7 +348,8 @@ Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
-void FreezeUINode0Impl(const Ark_String* id, Ark_Boolean isFrozen)
+void FreezeUINode0Impl(const Ark_String* id,
+                       Ark_Boolean isFrozen)
 {
     CHECK_NULL_VOID(id);
     ViewAbstract::FreezeUINodeById(Converter::Convert<std::string>(*id), Converter::Convert<bool>(isFrozen));
@@ -357,7 +358,8 @@ void FreezeUINode1Impl(Ark_Int32 id, Ark_Boolean isFrozen)
 {
     ViewAbstract::FreezeUINodeByUniqueId(static_cast<int32_t>(id), Converter::Convert<bool>(isFrozen));
 }
-Ark_Boolean DispatchKeyEventImpl(const Ark_Union_Number_String* node, Ark_KeyEvent event)
+Ark_Boolean DispatchKeyEventImpl(const Ark_Union_I32_String* node,
+                                 Ark_KeyEvent event)
 {
     auto result = false;
     RefPtr<NG::FrameNode> frameNode = nullptr;
@@ -500,11 +502,11 @@ void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feat
     bool value = (featureVal == NG::CustomKeyboardContinueFeature::ENABLED);
     textFieldManager->SetCustomKeyboardContinueFeature(value);
 }
-Ark_Magnifier GetMagnifierImpl(Ark_IUIContext peer)
+Ark_arkui_component_idlize_Magnifier GetMagnifierImpl(Ark_IUIContext peer)
 {
     return {};
 }
-} // namespace IUIContextAccessor
+} // IUIContextAccessor
 const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
 {
     static const GENERATED_ArkUIIUIContextAccessor IUIContextAccessorImpl {

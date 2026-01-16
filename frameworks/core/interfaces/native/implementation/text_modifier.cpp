@@ -307,21 +307,6 @@ void SetFontStyleImpl(Ark_NativePointer node,
     auto fontStyle = Converter::OptConvertPtr<Ace::FontStyle>(value);
     TextModelStatic::SetItalicFontStyle(frameNode, fontStyle);
 }
-void SetLineSpacingImpl(Ark_NativePointer node,
-                        const Opt_LengthMetrics* value,
-                        const Opt_LineSpacingOptions* options)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto lineSpacing = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonNegative(lineSpacing);
-    TextModelStatic::SetLineSpacing(frameNode, lineSpacing);
-    std::optional<bool> isOnlyBetweenLines = std::nullopt;
-    if (options->tag != INTEROP_TAG_UNDEFINED) {
-        isOnlyBetweenLines = Converter::Convert<bool>(options->value);
-    }
-    TextModelStatic::SetIsOnlyBetweenLines(frameNode, isOnlyBetweenLines);
-}
 void SetTextAlignImpl(Ark_NativePointer node,
                       const Opt_TextAlign* value)
 {
@@ -329,14 +314,6 @@ void SetTextAlignImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto textAlign = Converter::OptConvertPtr<TextAlign>(value);
     TextModelStatic::SetTextAlign(frameNode, textAlign);
-}
-void SetTextVerticalAlignImpl(Ark_NativePointer node,
-                              const Opt_TextVerticalAlign* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto textVerticalAlign = Converter::OptConvertPtr<TextVerticalAlign>(value);
-    TextModelNG::SetTextVerticalAlign(frameNode, textVerticalAlign.value_or(TextVerticalAlign::BASELINE));
 }
 void SetLineHeightImpl(Ark_NativePointer node,
                        const Opt_Union_F64_String_Resource* value)
@@ -495,7 +472,7 @@ void SetLineBreakStrategyImpl(Ark_NativePointer node,
     TextModelStatic::SetLineBreakStrategy(frameNode, convValue);
 }
 void SetOnCopyImpl(Ark_NativePointer node,
-                   const Opt_Callback_String_Void* value)
+                   const Opt_synthetic_Callback_String_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -693,21 +670,6 @@ void SetEnableHapticFeedbackImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     TextModelStatic::SetEnableHapticFeedback(frameNode, convValue);
 }
-void SetTextDirectionImpl(Ark_NativePointer node,
-                          const Opt_TextDirection* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    TextModelStatic::SetTextDirection(frameNode, Converter::OptConvertPtr<TextDirection>(value));
-}
-void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
-                                       const Opt_Boolean* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
-    TextModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
-}
 void SetIncludeFontPaddingImpl(Ark_NativePointer node,
                                const Opt_Boolean* value)
 {
@@ -723,14 +685,6 @@ void SetFallbackLineSpacingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<bool>(value);
     TextModelStatic::SetFallbackLineSpacing(frameNode, convValue);
-}
-void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
-                                     const Opt_SelectedDragPreviewStyle* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
-    TextModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
 }
 void SetOptimizeTrailingSpaceImpl(Ark_NativePointer node,
                                   const Opt_Boolean* value)
@@ -784,6 +738,14 @@ void SetEnableAutoSpacingImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
     TextModelStatic::SetEnableAutoSpacing(frameNode, convValue);
+}
+void SetTextVerticalAlignImpl(Ark_NativePointer node,
+                              const Opt_TextVerticalAlign* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto textVerticalAlign = Converter::OptConvertPtr<TextVerticalAlign>(value);
+    TextModelNG::SetTextVerticalAlign(frameNode, textVerticalAlign.value_or(TextVerticalAlign::BASELINE));
 }
 void SetContentTransitionImpl(Ark_NativePointer node,
                               const Opt_ContentTransition* value)
@@ -849,8 +811,31 @@ void SetEnableSelectedDataDetectorImpl(Ark_NativePointer node,
     auto convValue = Converter::OptConvertPtr<bool>(value);
     TextModelStatic::SetSelectDetectEnable(frameNode, convValue);
 }
+void SetCompressLeadingPunctuationImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<bool>(*value) : std::nullopt;
+    TextModelStatic::SetCompressLeadingPunctuation(frameNode, convValue);
+}
+void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
+                                     const Opt_SelectedDragPreviewStyle* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = value ? Converter::OptConvert<Color>(value->value.color) : std::nullopt;
+    TextModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
+}
+void SetTextDirectionImpl(Ark_NativePointer node,
+                          const Opt_TextDirection* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    TextModelStatic::SetTextDirection(frameNode, Converter::OptConvertPtr<TextDirection>(value));
+}
 void SetFontImpl(Ark_NativePointer node,
-                 const Opt_Font* fontValue,
+                 const Opt_arkui_component_units_Font* fontValue,
                  const Opt_FontSettingOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -888,6 +873,21 @@ void SetFontWeightImpl(Ark_NativePointer node,
         enableVariableFontWeight = settings->enableVariableFontWeight;
     }
     TextModelStatic::SetEnableVariableFontWeight(frameNode, enableVariableFontWeight);
+}
+void SetLineSpacingImpl(Ark_NativePointer node,
+                        const Opt_LengthMetrics* value,
+                        const Opt_LineSpacingOptions* options)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto lineSpacing = Converter::OptConvertPtr<Dimension>(value);
+    Validator::ValidateNonNegative(lineSpacing);
+    TextModelStatic::SetLineSpacing(frameNode, lineSpacing);
+    std::optional<bool> isOnlyBetweenLines = std::nullopt;
+    if (options->tag != INTEROP_TAG_UNDEFINED) {
+        isOnlyBetweenLines = Converter::Convert<bool>(options->value);
+    }
+    TextModelStatic::SetIsOnlyBetweenLines(frameNode, isOnlyBetweenLines);
 }
 void SetSelectionImpl(Ark_NativePointer node,
                       const Opt_Int32* selectionStart,
@@ -959,9 +959,7 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetMinFontScaleImpl,
         TextAttributeModifier::SetMaxFontScaleImpl,
         TextAttributeModifier::SetFontStyleImpl,
-        TextAttributeModifier::SetLineSpacingImpl,
         TextAttributeModifier::SetTextAlignImpl,
-        TextAttributeModifier::SetTextVerticalAlignImpl,
         TextAttributeModifier::SetLineHeightImpl,
         TextAttributeModifier::SetTextOverflowImpl,
         TextAttributeModifier::SetFontFamilyImpl,
@@ -992,14 +990,12 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetEditMenuOptionsImpl,
         TextAttributeModifier::SetHalfLeadingImpl,
         TextAttributeModifier::SetEnableHapticFeedbackImpl,
-        TextAttributeModifier::SetCompressLeadingPunctuationImpl,
         TextAttributeModifier::SetIncludeFontPaddingImpl,
         TextAttributeModifier::SetFallbackLineSpacingImpl,
-        TextAttributeModifier::SetSelectedDragPreviewStyleImpl,
-        TextAttributeModifier::SetTextDirectionImpl,
         TextAttributeModifier::SetOptimizeTrailingSpaceImpl,
         TextAttributeModifier::SetShaderStyleImpl,
         TextAttributeModifier::SetEnableAutoSpacingImpl,
+        TextAttributeModifier::SetTextVerticalAlignImpl,
         TextAttributeModifier::SetContentTransitionImpl,
         TextAttributeModifier::SetTextContentAlignImpl,
         TextAttributeModifier::SetMinLinesImpl,
@@ -1007,8 +1003,12 @@ const GENERATED_ArkUITextModifier* GetTextModifier()
         TextAttributeModifier::SetMaxLineHeightImpl,
         TextAttributeModifier::SetLineHeightMultipleImpl,
         TextAttributeModifier::SetEnableSelectedDataDetectorImpl,
+        TextAttributeModifier::SetCompressLeadingPunctuationImpl,
+        TextAttributeModifier::SetSelectedDragPreviewStyleImpl,
+        TextAttributeModifier::SetTextDirectionImpl,
         TextAttributeModifier::SetFontImpl,
         TextAttributeModifier::SetFontWeightImpl,
+        TextAttributeModifier::SetLineSpacingImpl,
         TextAttributeModifier::SetSelectionImpl,
         TextAttributeModifier::SetBindSelectionMenuImpl,
     };

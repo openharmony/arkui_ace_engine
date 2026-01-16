@@ -202,43 +202,6 @@ void SetFormComponentOptionsImpl(Ark_NativePointer node,
 }
 } // FormComponentInterfaceModifier
 namespace FormComponentAttributeModifier {
-void SetWidthInternal(FrameNode *frameNode, std::optional<Dimension> value)
-{
-    Validator::ValidateNonNegative(value);
-    if (!value) {
-        LOGE("width value is null.");
-        ViewAbstract::ClearWidthOrHeight(frameNode, true);
-        return;
-    }
-    ViewAbstractModelStatic::SetWidth(frameNode, *value);
-}
-void SetHeightInternal(FrameNode *frameNode, std::optional<Dimension> value)
-{
-    Validator::ValidateNonNegative(value);
-    if (!value) {
-        LOGE("height value is null.");
-        ViewAbstract::ClearWidthOrHeight(frameNode, false);
-        return;
-    }
-    ViewAbstractModelStatic::SetHeight(frameNode, *value);
-}
-void SetSizeImpl(Ark_NativePointer node,
-                 const Opt_FormSize* value)
-{
-#ifdef FORM_SUPPORTED
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        LOGE("optValue value is null.");
-        return;
-    }
-    auto width = Dimension(Converter::Convert<double>(optValue->width));
-    auto height = Dimension(Converter::Convert<double>(optValue->height));
-    SetWidthInternal(frameNode, width);
-    SetHeightInternal(frameNode, height);
-#endif // FORM_SUPPORTED
-}
 void SetModuleNameImpl(Ark_NativePointer node,
                        const Opt_String* value)
 {
@@ -279,6 +242,14 @@ void SetVisibilityImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(opt);
     FormModelStatic::SetVisibility(frameNode, *opt);
 #endif // FORM_SUPPORTED
+}
+void SetColorModeImpl(Ark_NativePointer node,
+                      const Opt_FormColorMode* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
+    //FormComponentModelNG::SetColorMode(frameNode, convValue);
 }
 void SetOnAcquiredImpl(Ark_NativePointer node,
                        const Opt_Callback_FormCallbackInfo_Void* value)
@@ -468,11 +439,11 @@ const GENERATED_ArkUIFormComponentModifier* GetFormComponentModifier()
     static const GENERATED_ArkUIFormComponentModifier ArkUIFormComponentModifierImpl {
         FormComponentModifier::ConstructImpl,
         FormComponentInterfaceModifier::SetFormComponentOptionsImpl,
-        FormComponentAttributeModifier::SetSizeImpl,
         FormComponentAttributeModifier::SetModuleNameImpl,
         FormComponentAttributeModifier::SetDimensionImpl,
         FormComponentAttributeModifier::SetAllowUpdateImpl,
         FormComponentAttributeModifier::SetVisibilityImpl,
+        FormComponentAttributeModifier::SetColorModeImpl,
         FormComponentAttributeModifier::SetOnAcquiredImpl,
         FormComponentAttributeModifier::SetOnErrorImpl,
         FormComponentAttributeModifier::SetOnRouterImpl,

@@ -80,7 +80,7 @@ Ark_NativePointer GetFinalizerImpl()
     return reinterpret_cast<void *>(&DestroyPeerImpl);
 }
 void LayoutImpl(Ark_Layoutable peer,
-                const Ark_Position* position)
+                const Opt_Position* position)
 {
     CHECK_NULL_VOID(peer && peer->measureLayoutParam && position);
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
@@ -97,7 +97,7 @@ void LayoutImpl(Ark_Layoutable peer,
     }
     child->Layout();
 }
-Opt_DirectionalEdgesT GetMarginImpl(Ark_Layoutable peer)
+Opt_DirectionalEdgesT_F64 GetMarginImpl(Ark_Layoutable peer)
 {
     CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
@@ -108,7 +108,7 @@ Opt_DirectionalEdgesT GetMarginImpl(Ark_Layoutable peer)
     auto result = GenEdgesGlobalized(layoutProperty->CreateMarginWithoutCache(), direction);
     return Converter::ArkValue<Opt_DirectionalEdgesT>(result);
 }
-Opt_DirectionalEdgesT GetPaddingImpl(Ark_Layoutable peer)
+Opt_DirectionalEdgesT_F64 GetPaddingImpl(Ark_Layoutable peer)
 {
     CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
@@ -119,7 +119,7 @@ Opt_DirectionalEdgesT GetPaddingImpl(Ark_Layoutable peer)
     auto result = GenEdgesGlobalized(layoutProperty->CreatePaddingWithoutBorder(false, false), direction);
     return Converter::ArkValue<Opt_DirectionalEdgesT>(result);
 }
-Opt_DirectionalEdgesT GetBorderWidthImpl(Ark_Layoutable peer)
+Opt_DirectionalEdgesT_F64 GetBorderWidthImpl(Ark_Layoutable peer)
 {
     CHECK_NULL_RETURN(peer && peer->measureLayoutParam, Converter::ArkValue<Opt_DirectionalEdgesT>(Ark_Empty()));
     auto child = peer->measureLayoutParam->GetOrCreateChildByIndex(peer->index);
@@ -149,7 +149,7 @@ void SetMeasureResultImpl(Ark_Layoutable peer,
 {
     LOGE("LayoutableAccessor::SetMeasureResultImpl is not implemented, only getter is supported");
 }
-Opt_Number GetUniqueIdImpl(Ark_Layoutable peer)
+Opt_Int32 GetUniqueIdImpl(Ark_Layoutable peer)
 {
     Opt_Number invalid = Converter::ArkValue<Opt_Number>(Ark_Empty());
     CHECK_NULL_RETURN(peer && peer->measureLayoutParam, invalid);
@@ -159,7 +159,7 @@ Opt_Number GetUniqueIdImpl(Ark_Layoutable peer)
     return Converter::ArkValue<Opt_Number>(uniqueId);
 }
 void SetUniqueIdImpl(Ark_Layoutable peer,
-                     const Opt_Number* uniqueId)
+                     const Opt_Int32* uniqueId)
 {
     LOGE("LayoutableAccessor::SetUniqueIdImpl is not implemented, only getter is supported");
 }

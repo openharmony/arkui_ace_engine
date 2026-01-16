@@ -26,7 +26,6 @@
 #include "core/interfaces/native/implementation/canvas_gradient_peer.h"
 #include "core/interfaces/native/implementation/matrix2d_peer_impl.h"
 #include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
-#include "core/interfaces/native/implementation/image_data_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/path2d_peer_impl.h"
 #include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"

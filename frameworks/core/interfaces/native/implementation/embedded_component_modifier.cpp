@@ -52,13 +52,13 @@ void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
 } // EmbeddedComponentInterfaceModifier
 namespace EmbeddedComponentAttributeModifier {
 void SetOnTerminatedImpl(Ark_NativePointer node,
-                         const Opt_Callback_TerminationInfo_Void* value)
+                         const Opt_Callback_TerminationInfo* value)
 {
     ACE_UINODE_TRACE(reinterpret_cast<FrameNode *>(node));
     LOGE("EmbeddedComponentModifier::OnTerminated - is not supported");
 }
 void SetOnErrorImpl(Ark_NativePointer node,
-                    const Opt_ErrorCallback_Ohos_Base_BusinessError* value)
+                    const Opt_ErrorCallback_BusinessErrorInterface_Void* value)
 {
     ACE_UINODE_TRACE(reinterpret_cast<FrameNode *>(node));
     LOGE("EmbeddedComponentModifier::OnError - is not supported");

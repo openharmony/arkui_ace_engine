@@ -38,7 +38,7 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void AddColorStopImpl(Ark_CanvasGradient peer,
                       Ark_Float64 offset,
-                      const Ark_Union_String_ColorMetrics* color)
+                      const Ark_Union_String_ColorMetricsExt* color)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(color);

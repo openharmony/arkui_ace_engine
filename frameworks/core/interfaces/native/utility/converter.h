@@ -412,7 +412,6 @@ namespace Converter {
     }
 
     // Implementation is in cpp
-    void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_Number *colors);
     void AssignGradientColors(Gradient *gradient, const Array_Tuple_ResourceColor_F64 *colors);
     void AssignGradientMetricsColors(Gradient *gradient, const Opt_Array_Tuple_ColorMetrics_F64 *colorMetrics);
     void AssignLinearGradientDirection(std::shared_ptr<OHOS::Ace::NG::LinearGradient>& linear,
@@ -667,7 +666,6 @@ namespace Converter {
     template<> Gradient Convert(const Ark_LinearGradientOptions& value);
     template<> Gradient Convert(const Ark_RadialGradientOptions& value);
     template<> GradientColor Convert(const Ark_Tuple_ResourceColor_F64& value);
-    template<> GradientColor Convert(const Ark_Tuple_ResourceColor_Number& value);
     template<> Header Convert(const Ark_Header& src);
     template<> ImageResizableSlice Convert(const Ark_EdgeWidths& src);
     template<> ImageSpanSize Convert(const Ark_SizeOptions& value);
@@ -783,7 +781,6 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT float Convert(const Ark_Float64& src);
     template<> int Convert(const Ark_Float64& src);
     template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_F64& src);
-    template<> std::pair<Color, Dimension> Convert(const Ark_Tuple_ResourceColor_Number& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_LengthConstrain& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Position& src);
     template<> std::pair<Dimension, Dimension> Convert(const Ark_Tuple_Dimension_Dimension& src);

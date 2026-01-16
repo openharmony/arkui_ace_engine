@@ -111,11 +111,22 @@ void SetNavigationOptions1Impl(Ark_NativePointer node,
     // update path stack need to sync stack immediately
     navigationStack->InvokeOnStateChanged();
 }
+void SetNavigationOptions1Impl(Ark_NativePointer node,
+                               const Opt_NavPathStack* pathInfos,
+                               const Opt_HomePathInfo* homeDestination,
+                               const Opt_NavigationModuleInfo* moduleInfo)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    //auto convValue = Converter::Convert<type>(pathInfos);
+    //auto convValue = Converter::OptConvert<type>(pathInfos); // for enums
+    //NavigationModelNG::SetNavigationOptions1(frameNode, convValue);
+}
 } // namespace NavigationInterfaceModifier
 
 namespace NavigationAttributeModifier {
 void SetNavBarWidthImpl(Ark_NativePointer node,
-                        const Opt_Union_Length_Bindable* value)
+                        const Opt_Union_Length_Bindable_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -285,7 +296,7 @@ void SetOnTitleModeChangeImpl(Ark_NativePointer node,
     eventHub->SetOnTitleModeChange(eventChange);
 }
 void SetOnNavBarStateChangeImpl(Ark_NativePointer node,
-                                const Opt_Callback_Boolean_Void* value)
+                                const Opt_synthetic_Callback_Boolean_Void* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -393,8 +404,8 @@ void SetEnableVisibilityLifecycleWithContentCoverImpl(Ark_NativePointer node,
         frameNode, Converter::OptConvertPtr<bool>(value).value_or(false));
 }
 void SetBackButtonIconImpl(Ark_NativePointer node,
-                            const Opt_Union_String_PixelMap_Resource_SymbolGlyphModifier* icon,
-                            const Opt_ResourceStr* accessibilityText)
+                           const Opt_Union_String_image_PixelMap_Resource_SymbolGlyphModifier* icon,
+                           const Opt_ResourceStr* accessibilityText)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -457,7 +468,7 @@ void SetBackButtonIconImpl(Ark_NativePointer node,
         frameNode, iconSymbol, src, imageOption, pixMap, nameList, true, backButtonAccessibilityText);
 }
 void SetTitleImpl(Ark_NativePointer node,
-                  const Opt_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationCustomTitle* value,
+                  const Opt_Union_ResourceStr_CustomNodeBuilder_NavigationCommonTitle_NavigationCustomTitle* value,
                   const Opt_NavigationTitleOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
@@ -556,8 +567,8 @@ void SetHideTitleBar1Impl(Ark_NativePointer node,
     NavigationModelStatic::SetHideTitleBar(frameNode, isHide, isAnimated);
 }
 void SetMenusImpl(Ark_NativePointer node,
-                   const Opt_Union_Array_NavigationMenuItem_CustomBuilder* items,
-                   const Opt_NavigationMenuOptions* options)
+                  const Opt_Union_Array_NavigationMenuItem_CustomNodeBuilder* items,
+                  const Opt_NavigationMenuOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -587,7 +598,7 @@ void SetMenusImpl(Ark_NativePointer node,
     NavigationModelStatic::SetMenuOptions(frameNode, std::move(menuOptions));
 }
 void SetToolbarConfigurationImpl(Ark_NativePointer node,
-                                 const Opt_Union_Array_ToolbarItem_CustomBuilder* value,
+                                 const Opt_Union_Array_ToolbarItem_CustomNodeBuilder* value,
                                  const Opt_NavigationToolbarOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
