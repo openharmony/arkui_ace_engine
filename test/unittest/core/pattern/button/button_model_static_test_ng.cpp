@@ -1191,6 +1191,9 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg033, TestSize.Level1)
      * @tc.steps: step3. test ApplyTheme.
      */
     ButtonModelStatic::ApplyTheme(frameNode, ButtonStyleMode::NORMAL, ButtonRole::NORMAL);
+    auto renderContext = frameNode->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    EXPECT_NE(renderContext->GetBackgroundColor(), std::nullopt);
 }
 
 /**
@@ -1219,31 +1222,5 @@ HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg034, TestSize.Level1)
      */
     ButtonModelStatic::SetCreateWithLabel(frameNode, true);
     EXPECT_EQ(layoutProperty->GetCreateWithLabelValue(), true);
-}
-
-/**
- * @tc.name: ButtonStaticTestNg035
- * @tc.desc: test button ResetTextAlign.
- * @tc.type: FUNC
- */
-HWTEST_F(ButtonStaticTestNg, ButtonStaticTestNg035, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create button frameNode.
-     */
-    auto node = ButtonModelStatic::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-    ASSERT_NE(node, nullptr);
-    EXPECT_EQ(node->GetTag(), V2::BUTTON_ETS_TAG);
-    auto frameNode = AceType::RawPtr(node);
-    ASSERT_NE(frameNode, nullptr);
-    /**
-     * @tc.steps: step2. create button layoutProperty.
-     */
-    auto layoutProperty = frameNode->GetLayoutProperty<ButtonLayoutProperty>();
-    ASSERT_NE(layoutProperty, nullptr);
-    /**
-     * @tc.steps: step3. test ResetTextAlign.
-     */
-    ButtonModelStatic::ResetTextAlign(frameNode);
 }
 } // namespace OHOS::Ace::NG

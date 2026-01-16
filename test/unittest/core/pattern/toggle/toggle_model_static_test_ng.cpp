@@ -298,6 +298,8 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg007, TestSize.Level1)
      * @tc.steps: step3. test TriggerChange.
      */
     ToggleModelStatic::TriggerChange(frameNode, true);
+    auto pattern = frameNode->GetPattern<SwitchPattern>();
+    ASSERT_NE(pattern, nullptr);
 }
 
 /**
@@ -326,6 +328,8 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg008, TestSize.Level1)
      * @tc.steps: step3. test TriggerChange.
      */
     ToggleModelStatic::TriggerChange(frameNode, true);
+    auto pattern = frameNode->GetPattern<ToggleButtonPattern>();
+    ASSERT_NE(pattern, nullptr);
 }
 
 /**
@@ -354,6 +358,8 @@ HWTEST_F(ToggleStaticTestNg, ToggleStaticTestNg009, TestSize.Level1)
      * @tc.steps: step3. test TriggerChange.
      */
     ToggleModelStatic::TriggerChange(frameNode, true);
+    auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+    ASSERT_NE(pattern, nullptr);
 }
 
 } // namespace OHOS::Ace::NG
