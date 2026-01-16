@@ -154,7 +154,7 @@ ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, s
 }
 
 ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<uint8_t[]>& buffer, size_t size)
-    : srcType_(SrcType::MEMORY), buffer_(buffer), size_(size)
+    : buffer_(buffer), size_(size)
 {
     isSvg_ = true;
 }
