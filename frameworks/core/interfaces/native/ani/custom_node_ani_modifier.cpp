@@ -45,6 +45,7 @@ ani_long ConstructCustomNode(ani_int id, ArkUICustomNodeInfo&& customNodeInfo)
     customNode->SetOnDumpInspectorFunc(std::move(customNodeInfo.onDumpInspectorFunc));
     customNode->SetSetActiveFunc(std::move(customNodeInfo.setActiveFunc));
     customNode->SetDestroyFunction(std::move(customNodeInfo.onCleanupFunc));
+    customNode->SetJSViewName(customNodeInfo.onGetJsViewNameFunc());
 
     if (customNode) {
         return reinterpret_cast<ani_long>(AceType::RawPtr(customNode));
