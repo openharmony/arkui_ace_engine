@@ -16,7 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_SCOPED_RS_TRANSACTION_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_SCOPED_RS_TRANSACTION_H
 
-#include <stdint.h>
+#include <cstdint>
 #include <memory>
 #include "base/utils/noncopyable.h"
 
@@ -29,7 +29,7 @@ class RSSyncTransactionHandler;
 namespace Ace::NG {
 class FormScopedRSTransaction final {
 public:
-    FormScopedRSTransaction(int32_t scopeId);
+    explicit FormScopedRSTransaction(int32_t scopeId);
     ~FormScopedRSTransaction();
 
     ACE_DISALLOW_COPY_AND_MOVE(FormScopedRSTransaction);
