@@ -262,6 +262,45 @@ export class PanGestureOptions implements MaterializedBase {
         return retval
     }
 }
+export class TouchRecognizerInternal {
+    public static fromPtr(ptr: KPointer): TouchRecognizer {
+        return new TouchRecognizer(ptr)
+    }
+}
+export class TouchRecognizer implements MaterializedBase {
+    peer?: Finalizable | undefined = undefined
+    public getPeer(): Finalizable | undefined {
+        return this.peer
+    }
+    constructor(peerPtr: KPointer) {
+        this.peer = new Finalizable(peerPtr, TouchRecognizer.getFinalizer())
+    }
+    constructor() {
+        this(TouchRecognizer.construct())
+    }
+    static construct(): KPointer {
+        const retval  = ArkUIGeneratedNativeModule._TouchRecognizer_construct()
+        return retval
+    }
+    static getFinalizer(): KPointer {
+        return ArkUIGeneratedNativeModule._TouchRecognizer_getFinalizer()
+    }
+    public getEventTargetInfo(): EventTargetInfo {
+        return this.getEventTargetInfo_serialize()
+    }
+    public cancelTouch(): void {
+        this.cancelTouch_serialize()
+        return
+    }
+    getEventTargetInfo_serialize(): EventTargetInfo {
+        const retval  = ArkUIGeneratedNativeModule._TouchRecognizer_getEventTargetInfo(this.peer!.ptr)
+        const obj : EventTargetInfo = EventTargetInfoInternal.fromPtr(retval)
+        return obj
+    }
+    cancelTouch_serialize(): void {
+        ArkUIGeneratedNativeModule._TouchRecognizer_cancelTouch(this.peer!.ptr)
+    }
+}
 export enum PanDirection {
     NONE = 0,
     None = 0,
@@ -363,6 +402,7 @@ export interface PanGestureHandlerOptions extends BaseHandlerOptions {
     fingers?: int32;
     direction?: PanDirection;
     distance?: double;
+    distanceMap?: Map<SourceTool, double>;
 }
 export interface SwipeGestureHandlerOptions extends BaseHandlerOptions {
     fingers?: int32;
@@ -522,6 +562,17 @@ export class TapRecognizer_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return TapRecognizerInternal.fromPtr(ptr)
+    }
+}
+export class TouchRecognizer_serializer {
+    public static write(buffer: SerializerBase, value: TouchRecognizer): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(toPeerPtr(value))
+    }
+    public static read(buffer: DeserializerBase): TouchRecognizer {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return TouchRecognizerInternal.fromPtr(ptr)
     }
 }
 export class EventLocationInfo_serializer {
@@ -690,6 +741,20 @@ export class PanGestureHandlerOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForDistanceMap  = value.distanceMap
+        if (valueHolderForDistanceMap !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDistanceMapTmpValue  = valueHolderForDistanceMap!
+            valueSerializer.writeInt32((valueHolderForDistanceMapTmpValue.size).toInt())
+            for (const pair of valueHolderForDistanceMapTmpValue) {
+                const valueHolderForDistanceMapTmpValueKeyVar = pair[0]
+                const valueHolderForDistanceMapTmpValueValueVar = pair[1]
+                valueSerializer.writeInt32(valueHolderForDistanceMapTmpValueKeyVar.valueOf())
+                valueSerializer.writeFloat64(valueHolderForDistanceMapTmpValueValueVar)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): PanGestureHandlerOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -717,7 +782,21 @@ export class PanGestureHandlerOptions_serializer {
             distanceTmpBuf = valueDeserializer.readFloat64()
         }
         const distanceTmpResult : double | undefined = distanceTmpBuf
-        let value : PanGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimitedTmpResult, fingers: fingersTmpResult, direction: directionTmpResult, distance: distanceTmpResult} as PanGestureHandlerOptions)
+        const distanceMapTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let distanceMapTmpBuf : Map<SourceTool, double> | undefined = undefined
+        if ((distanceMapTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const distanceMapTmpBuf_SizeVar : int32 = valueDeserializer.readInt32()
+            let distanceMapTmpBuf_ : Map<SourceTool, double> = new Map<SourceTool, double>()
+            // TODO: TS map resize
+            for (let distanceMapTmpBuf_IVar = 0; distanceMapTmpBuf_IVar < distanceMapTmpBuf_SizeVar; distanceMapTmpBuf_IVar++) {
+                const distanceMapTmpBuf_KeyVar : SourceTool = SourceTool.fromValue(valueDeserializer.readInt32())
+                const distanceMapTmpBuf_ValueVar : double = valueDeserializer.readFloat64()
+                distanceMapTmpBuf_.set(distanceMapTmpBuf_KeyVar, distanceMapTmpBuf_ValueVar)
+            }
+            distanceMapTmpBuf = distanceMapTmpBuf_
+        }
+        const distanceMapTmpResult : Map<SourceTool, double> | undefined = distanceMapTmpBuf
+        let value : PanGestureHandlerOptions = ({isFingerCountLimited: isFingerCountLimitedTmpResult, fingers: fingersTmpResult, direction: directionTmpResult, distance: distanceTmpResult, distanceMap: distanceMapTmpResult} as PanGestureHandlerOptions)
         return value
     }
 }
@@ -1328,10 +1407,41 @@ export class PanRecognizer extends GestureRecognizer implements MaterializedBase
     public getPanGestureOptions(): PanGestureOptions {
         return this.getPanGestureOptions_serialize()
     }
+    public getDirection(): PanDirection {
+        return this.getDirection_serialize()
+    }
+    public getDistance(): double {
+        return this.getDistance_serialize()
+    }
+    public getDistanceMap(): Map<SourceTool, double> {
+        return this.getDistanceMap_serialize()
+    }
     getPanGestureOptions_serialize(): PanGestureOptions {
         const retval  = ArkUIGeneratedNativeModule._PanRecognizer_getPanGestureOptions(this.peer!.ptr)
         const obj : PanGestureOptions = PanGestureOptionsInternal.fromPtr(retval)
         return obj
+    }
+    getDirection_serialize(): PanDirection {
+        const retval  = ArkUIGeneratedNativeModule._PanRecognizer_getDirection(this.peer!.ptr)
+        return PanDirection.fromValue(retval)
+    }
+    getDistance_serialize(): double {
+        const retval  = ArkUIGeneratedNativeModule._PanRecognizer_getDistance(this.peer!.ptr)
+        return retval
+    }
+    getDistanceMap_serialize(): Map<SourceTool, double> {
+        const retval  = ArkUIGeneratedNativeModule._PanRecognizer_getDistanceMap(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const bufferSizeVar : int32 = retvalDeserializer.readInt32()
+        let buffer : Map<SourceTool, double> = new Map<SourceTool, double>()
+        // TODO: TS map resize
+        for (let bufferIVar = 0; bufferIVar < bufferSizeVar; bufferIVar++) {
+            const bufferKeyVar : SourceTool = SourceTool.fromValue(retvalDeserializer.readInt32())
+            const bufferValueVar : double = retvalDeserializer.readFloat64()
+            buffer.set(bufferKeyVar, bufferValueVar)
+        }
+        const returnResult : Map<SourceTool, double> = buffer
+        return returnResult
     }
 }
 export class PinchRecognizerInternal {

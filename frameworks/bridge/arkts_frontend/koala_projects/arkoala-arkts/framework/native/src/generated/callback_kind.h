@@ -358,6 +358,7 @@ typedef enum CallbackKind {
     Kind_Type_CommonMethod_onDragStart = -201932855,
     Kind_Type_NavigationAttribute_customNavContentTransition = -1209910992,
     Kind_Type_WebAttribute_onInterceptRequest = 1165932304,
+    Kind_UIStatesChangeHandler = 1846087828,
     Kind_UpdateTransitionCallback = -448105339,
     Kind_VisibleAreaChangeCallback = 541663396,
     Kind_VoidCallback = -2038961969,

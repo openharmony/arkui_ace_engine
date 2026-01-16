@@ -461,6 +461,12 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_drawing_FontMetrics& dst, const FontMetrics& src, ConvContext *ctx);
     void AssignArkValue(Ark_promptAction_CommonState& dst, const PromptActionCommonState& src);
 
+    template<typename T, std::enable_if_t<std::is_same_v<T, GestureRecognizerJudgeBeginCallback>, bool> = true>
+    void AssignArkValue(T& dst, const std::function<void(Ark_VMContext, Ark_Int32, Ark_BaseGestureEvent,
+        Ark_GestureRecognizer, Array_GestureRecognizer, Array_TouchRecognizer, Callback_GestureJudgeResult_Void)>& src)
+    {
+        dst = Converter::ArkValue<T>(src);
+    }
     // Long declarations
     void AssignArkValue(Ark_Tuple_Dimension_Dimension& dst, const std::pair<const Dimension, const Dimension>& src,
         ConvContext *ctx);

@@ -4512,6 +4512,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _FrameNodeExtender_disposeTree(peer: KPointer): void
     @ani.unsafe.Direct
+    native static _FrameNodeExtender_addSupportedUIStates(peer: KPointer, uiStates: KInt, thisArray: KSerializerBuffer, thisLength: int32, excludeInner: KInt): void
+    @ani.unsafe.Direct
+    native static _FrameNodeExtender_removeSupportedUIStates(peer: KPointer, uiStates: KInt): void
+    @ani.unsafe.Direct
     native static _FrameNodeExtender_setCrossLanguageOptions(peer: KPointer, options: KInt): boolean
     @ani.unsafe.Direct
     native static _FrameNodeExtender_getCrossLanguageOptions(peer: KPointer): boolean
@@ -4597,6 +4601,8 @@ export class ArkUIGeneratedNativeModule {
     native static _FrameNodeExtender_adoptChild(peer: KPointer, child: KPointer): int32
     @ani.unsafe.Direct
     native static _FrameNodeExtender_removeAdoptedChild(peer: KPointer, child: KPointer): int32
+    @ani.unsafe.Quick
+    native static _FrameNodeExtender_getInteractionEventBindingInfo(peer: KPointer, eventType: KInt): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _FrictionMotion_construct(friction: number, position: number, velocity: number): KPointer
     @ani.unsafe.Direct
@@ -5002,6 +5008,18 @@ export class ArkUIGeneratedNativeModule {
     native static _KeyEvent_getUnicode(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _KeyEvent_setUnicode(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _KeyEvent_getIsNumLockOn(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _KeyEvent_setIsNumLockOn(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _KeyEvent_getIsCapsLockOn(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _KeyEvent_setIsCapsLockOn(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Quick
+    native static _KeyEvent_getIsScrollLockOn(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _KeyEvent_setIsScrollLockOn(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _Layoutable_construct(): KPointer
     @ani.unsafe.Direct
@@ -5594,6 +5612,12 @@ export class ArkUIGeneratedNativeModule {
     native static _PanRecognizer_getFinalizer(): KPointer
     @ani.unsafe.Direct
     native static _PanRecognizer_getPanGestureOptions(ptr: KPointer): KPointer
+    @ani.unsafe.Direct
+    native static _PanRecognizer_getDirection(ptr: KPointer): int32
+    @ani.unsafe.Quick
+    native static _PanRecognizer_getDistance(ptr: KPointer): double
+    @ani.unsafe.Quick
+    native static _PanRecognizer_getDistanceMap(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _ParagraphStyle_construct(thisArray: KSerializerBuffer, thisLength: int32): KPointer
     @ani.unsafe.Direct
@@ -6478,6 +6502,14 @@ export class ArkUIGeneratedNativeModule {
     native static _TouchEvent_getChangedTouches(ptr: KPointer): KInteropReturnBuffer
     @ani.unsafe.Direct
     native static _TouchEvent_setChangedTouches(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _TouchRecognizer_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _TouchRecognizer_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _TouchRecognizer_getEventTargetInfo(ptr: KPointer): KPointer
+    @ani.unsafe.Direct
+    native static _TouchRecognizer_cancelTouch(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _TouchEvent_stopPropagation(ptr: KPointer): void
     @ani.unsafe.Direct

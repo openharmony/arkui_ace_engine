@@ -91,6 +91,7 @@
 #include "base/log/log_wrapper.h"
 
 #include "dismiss_popup_action_peer.h"
+#include "core/interfaces/native/implementation/touch_recognizer_peer.h"
 
 using namespace OHOS::Ace::NG::Converter;
 
@@ -124,6 +125,53 @@ enum class PixelroundRule {
     FORCE_FLOOR,
     FORCE_CEIL,
 };
+using TouchRecognizerMap = std::map<OHOS::Ace::WeakPtr<OHOS::Ace::TouchEventTarget>, std::unordered_set<int32_t>>;
+
+void CollectTouchEventTarget(TouchRecognizerMap& dict,
+    std::list<OHOS::Ace::RefPtr<OHOS::Ace::TouchEventTarget>>& targets,
+    OHOS::Ace::NG::FrameNode* frameNode, int32_t fingerId)
+{
+    for (auto& target : targets) {
+        if (AceType::DynamicCast<OHOS::Ace::NG::NGGestureRecognizer>(target)) {
+            continue;
+        }
+        auto weakTarget = OHOS::Ace::WeakPtr<OHOS::Ace::TouchEventTarget>(target);
+        if (dict.find(weakTarget) != dict.end() && dict[weakTarget].count(fingerId) > 0) {
+            continue;
+        }
+        auto targetNode = target->GetAttachedNode().Upgrade();
+        if (targetNode && targetNode == frameNode) {
+            dict[weakTarget].insert(fingerId);
+            return;
+        }
+        while (targetNode) {
+            if (targetNode == frameNode) {
+                dict[weakTarget].insert(fingerId);
+                break;
+            }
+            targetNode = AceType::DynamicCast<OHOS::Ace::NG::FrameNode>(targetNode->GetParent());
+        }
+    }
+}
+
+TouchRecognizerMap CreateTouchRecognizerMap(const std::shared_ptr<OHOS::Ace::BaseGestureEvent>& info,
+    const OHOS::Ace::RefPtr<OHOS::Ace::NG::NGGestureRecognizer>& current)
+{
+    TouchRecognizerMap touchRecognizerMap;
+    auto frameNode = current->GetAttachedNode().Upgrade();
+    CHECK_NULL_RETURN(frameNode, touchRecognizerMap);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_RETURN(pipeline, touchRecognizerMap);
+    auto eventManager = pipeline->GetEventManager();
+    CHECK_NULL_RETURN(eventManager, touchRecognizerMap);
+    auto& touchTestResult = eventManager->touchTestResults_;
+    const auto& fingerList = info->GetFingerList();
+    for (const auto& finger : fingerList) {
+        auto& touchTargetList = touchTestResult[finger.fingerId_];
+        CollectTouchEventTarget(touchRecognizerMap, touchTargetList, AceType::RawPtr(frameNode), finger.fingerId_);
+    }
+    return touchRecognizerMap;
+}
 }
 
 namespace OHOS::Ace::NG {
@@ -293,6 +341,20 @@ bool InitPixStretchEffect(Dimension& left, Dimension& right, Dimension& top, Dim
         }
     }
     return illegalInput;
+}
+std::vector<Ark_TouchRecognizer> CreateTouchRecognizersArkValue(const std::shared_ptr<BaseGestureEvent>& info,
+    const RefPtr<NG::NGGestureRecognizer>& current)
+{
+    auto touchRecognizerMap = CreateTouchRecognizerMap(info, current);
+    std::vector<Ark_TouchRecognizer> touchRecognizers;
+    for (auto& [target, fingerIds] : touchRecognizerMap) {
+        auto touchRecognizerPeer = PeerUtils::CreatePeer<TouchRecognizerPeer>();
+        if (touchRecognizerPeer) {
+            touchRecognizerPeer->SetTouchData(target, fingerIds);
+            touchRecognizers.push_back(touchRecognizerPeer);
+        }
+    }
+    return touchRecognizers;
 }
 } // namespace
 
@@ -5360,25 +5422,31 @@ void SetIgnoreLayoutSafeAreaImpl(Ark_NativePointer node,
     ViewAbstractModelStatic::UpdateIgnoreLayoutSafeAreaOpts(frameNode, opts);
 }
 void SetBackgroundImpl(Ark_NativePointer node,
-                       const Opt_CustomNodeBuilder* builder,
+                       const Opt_Union_CustomBuilder_ResourceColor* content,
                        const Opt_BackgroundOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto optAlign = Converter::OptConvertPtr<Alignment>(options);
-    auto optBuilder = Converter::GetOptPtr(builder);
-    if (!optBuilder) {
-        ViewAbstractModelStatic::ResetBackground(frameNode);
-        return;
-    }
-    CallbackHelper(*optBuilder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
-            CHECK_NULL_VOID(uiNode);
-            auto builder = [uiNode]() -> RefPtr<UINode> {
-                return uiNode;
-            };
-            ViewAbstract::SetIsBuilderBackground(frameNode, true);
-            ViewAbstractModelStatic::BindBackground(frameNode, builder, optAlign);
-        }, node);
+    
+    Converter::VisitUnionPtr(content,
+        [frameNode, optAlign, node](const CustomNodeBuilder& builder) {
+            CallbackHelper(builder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
+                CHECK_NULL_VOID(uiNode);
+                auto builderFunc = [uiNode]() -> RefPtr<UINode> {
+                    return uiNode;
+                };
+                ViewAbstract::SetIsBuilderBackground(frameNode, true);
+                ViewAbstractModelStatic::BindBackground(frameNode, builderFunc, optAlign);
+                }, node);
+        },
+        [frameNode](const Ark_ResourceColor& resourceColor) {
+            auto colorValue = Converter::OptConvertPtr<Color>(&resourceColor);
+            ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue.value_or(Color::TRANSPARENT));
+        },
+        [frameNode]() {
+            ViewAbstractModelStatic::ResetBackground(frameNode);
+        });
 }
 void SetBackgroundImage0Impl(Ark_NativePointer node,
                              const Opt_Union_ResourceStr_PixelMap* src)
@@ -6528,8 +6596,10 @@ void SetOnGestureRecognizerJudgeBegin1Impl(Ark_NativePointer node,
             othersRecognizer.emplace_back(item.Upgrade());
         }
         auto arkValOthers = Converter::ArkValue<Array_GestureRecognizer>(othersRecognizer, Converter::FC);
+        auto touchRecognizers = CreateTouchRecognizersArkValue(info, current);
+        auto arkValTouchRecognizers = Converter::ArkValue<Opt_Array_TouchRecognizer>(touchRecognizers, Converter::FC);
         auto resultOpt = callback.InvokeWithOptConvertResult<GestureJudgeResult, Ark_GestureJudgeResult,
-            Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers);
+            Callback_GestureJudgeResult_Void>(arkGestEvent, arkValCurrent, arkValOthers, arkValTouchRecognizers);
         return resultOpt.value_or(defVal);
     };
     auto convValue = Converter::OptConvertPtr<bool>(exposeInnerGesture);

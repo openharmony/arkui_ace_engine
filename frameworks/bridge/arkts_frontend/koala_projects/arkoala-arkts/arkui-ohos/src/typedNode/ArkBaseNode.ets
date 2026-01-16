@@ -633,7 +633,8 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public expandSafeArea(types?: Array<SafeAreaType> | undefined, edges?: Array<SafeAreaEdge> | undefined): this {
         return this
     }
-    public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
+    public background(content: CustomBuilder | ResourceColor | undefined, options?: BackgroundOptions): this {
+        this.getPeer().setBackgroundAttribute(content);
         return this
     }
     public backgroundImage(value: ResourceStr | PixelMap | undefined): this {

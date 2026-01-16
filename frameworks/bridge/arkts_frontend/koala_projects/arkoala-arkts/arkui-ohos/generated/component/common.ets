@@ -49,7 +49,7 @@ import { default as matrix4 } from "@ohos.matrix4"
 import { CustomBuilder } from "./builder"
 import { default as uniformTypeDescriptor } from "@ohos.data.uniformTypeDescriptor"
 import { CircleShape, EllipseShape, PathShape, RectShape } from "@ohos.arkui.shape"
-import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, GestureType, GestureMask, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
+import { GestureInfo, BaseGestureEvent, GestureJudgeResult, GestureRecognizer, TouchRecognizer, GestureType, GestureMask, FingerInfo, GestureControl, GestureRecognizerState, EventTargetInfo } from "./gesture"
 import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
 import { dragController } from "@ohos.arkui.dragController"
 import { default as image } from "@ohos.multimedia.image"
@@ -977,6 +977,9 @@ export interface KeyEvent {
     getModifierKeyState?: ModifierKeyStateGetter | undefined
     unicode?: int64 | undefined
     stopPropagation(): void
+    isNumLockOn?: boolean | undefined
+    isCapsLockOn?: boolean | undefined
+    isScrollLockOn?: boolean | undefined
 }
 export class KeyEventInternal implements MaterializedBase,KeyEvent {
     peer?: Finalizable | undefined = undefined
@@ -1049,6 +1052,27 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     set unicode(unicode: int64 | undefined) {
         const unicode_NonNull  = (unicode as int64)
         this.setUnicode(unicode_NonNull)
+    }
+    get isNumLockOn(): boolean | undefined {
+        return this.getIsNumLockOn()
+    }
+    set isNumLockOn(isNumLockOn: boolean | undefined) {
+        const isNumLockOn_NonNull  = (isNumLockOn as boolean)
+        this.setIsNumLockOn(isNumLockOn_NonNull)
+    }
+    get isCapsLockOn(): boolean | undefined {
+        return this.getIsCapsLockOn()
+    }
+    set isCapsLockOn(isCapsLockOn: boolean | undefined) {
+        const isCapsLockOn_NonNull  = (isCapsLockOn as boolean)
+        this.setIsCapsLockOn(isCapsLockOn_NonNull)
+    }
+    get isScrollLockOn(): boolean | undefined {
+        return this.getIsScrollLockOn()
+    }
+    set isScrollLockOn(isScrollLockOn: boolean | undefined) {
+        const isScrollLockOn_NonNull  = (isScrollLockOn as boolean)
+        this.setIsScrollLockOn(isScrollLockOn_NonNull)
     }
     constructor(peerPtr: KPointer) {
         this.peer = new Finalizable(peerPtr, KeyEventInternal.getFinalizer())
@@ -1152,6 +1176,30 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
     }
     stopPropagation_serialize(): void {
         ArkUIGeneratedNativeModule._KeyEvent_stopPropagation(this.peer!.ptr)
+    }
+    private getIsNumLockOn(): boolean | undefined {
+        return this.getIsNumLockOn_serialize()
+    }
+    private setIsNumLockOn(isNumLockOn: boolean | undefined): void {
+        const isNumLockOn_casted = isNumLockOn as (boolean | undefined)
+        this.setIsNumLockOn_serialize(isNumLockOn_casted)
+        return
+    }
+    private getIsCapsLockOn(): boolean | undefined {
+        return this.getIsCapsLockOn_serialize()
+    }
+    private setIsCapsLockOn(isCapsLockOn: boolean | undefined): void {
+        const isCapsLockOn_casted = isCapsLockOn as (boolean | undefined)
+        this.setIsCapsLockOn_serialize(isCapsLockOn_casted)
+        return
+    }
+    private getIsScrollLockOn(): boolean | undefined {
+        return this.getIsScrollLockOn_serialize()
+    }
+    private setIsScrollLockOn(isScrollLockOn: boolean | undefined): void {
+        const isScrollLockOn_casted = isScrollLockOn as (boolean | undefined)
+        this.setIsScrollLockOn_serialize(isScrollLockOn_casted)
+        return
     }
     private getType_serialize(): KeyType {
         const retval  = ArkUIGeneratedNativeModule._KeyEvent_getType(this.peer!.ptr)
@@ -1274,6 +1322,75 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._KeyEvent_setUnicode(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getIsNumLockOn_serialize(): boolean | undefined {
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getIsNumLockOn(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
+    }
+    private setIsNumLockOn_serialize(isNumLockOn: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (isNumLockOn !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isNumLockOnTmpValue  = isNumLockOn!
+            thisSerializer.writeBoolean(isNumLockOnTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._KeyEvent_setIsNumLockOn(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getIsCapsLockOn_serialize(): boolean | undefined {
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getIsCapsLockOn(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
+    }
+    private setIsCapsLockOn_serialize(isCapsLockOn: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (isCapsLockOn !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isCapsLockOnTmpValue  = isCapsLockOn!
+            thisSerializer.writeBoolean(isCapsLockOnTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._KeyEvent_setIsCapsLockOn(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    private getIsScrollLockOn_serialize(): boolean | undefined {
+        const retval  = ArkUIGeneratedNativeModule._KeyEvent_getIsScrollLockOn(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : boolean | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = retvalDeserializer.readBoolean()
+        }
+        const returnResult : boolean | undefined = buffer
+        return returnResult
+    }
+    private setIsScrollLockOn_serialize(isScrollLockOn: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (isScrollLockOn !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const isScrollLockOnTmpValue  = isScrollLockOn!
+            thisSerializer.writeBoolean(isScrollLockOnTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._KeyEvent_setIsScrollLockOn(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
 }
@@ -4946,12 +5063,36 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setIgnoreLayoutSafeArea(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBackgroundAttribute(builder: CustomBuilder | undefined, options?: BackgroundOptions): void {
+    setBackgroundAttribute(content: CustomBuilder | ResourceColor | undefined, options?: BackgroundOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (builder !== undefined) {
+        if (content !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const builderTmpValue  = builder!
-            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builderTmpValue))
+            const contentTmpValue  = content!
+            if (contentTmpValue instanceof CustomBuilder) {
+                thisSerializer.writeInt8((0).toByte())
+                const contentTmpValueForIdx0  = contentTmpValue as CustomBuilder
+                thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(contentTmpValueForIdx0))
+            } else if (contentTmpValue instanceof ResourceColor) {
+                thisSerializer.writeInt8((1).toByte())
+                const contentTmpValueForIdx1  = contentTmpValue as ResourceColor
+                if (contentTmpValueForIdx1 instanceof Color) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const contentTmpValueForIdx1ForIdx0  = contentTmpValueForIdx1 as Color
+                    thisSerializer.writeInt32(contentTmpValueForIdx1ForIdx0.getOrdinal())
+                } else if (contentTmpValueForIdx1 instanceof int32) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const contentTmpValueForIdx1ForIdx1  = contentTmpValueForIdx1 as int32
+                    thisSerializer.writeInt32(contentTmpValueForIdx1ForIdx1)
+                } else if (contentTmpValueForIdx1 instanceof string) {
+                    thisSerializer.writeInt8((2).toByte())
+                    const contentTmpValueForIdx1ForIdx2  = contentTmpValueForIdx1 as string
+                    thisSerializer.writeString(contentTmpValueForIdx1ForIdx2)
+                } else if (contentTmpValueForIdx1 instanceof Resource) {
+                    thisSerializer.writeInt8((3).toByte())
+                    const contentTmpValueForIdx1ForIdx3  = contentTmpValueForIdx1 as Resource
+                    Resource_serializer.write(thisSerializer, contentTmpValueForIdx1ForIdx3)
+                }
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -7149,7 +7290,7 @@ export interface HistoricalPoint {
     timestamp: int64;
 }
 export type SizeChangeCallback = (oldValue: SizeOptions, newValue: SizeOptions) => void;
-export type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>) => GestureJudgeResult;
+export type GestureRecognizerJudgeBeginCallback = (event: BaseGestureEvent, current: GestureRecognizer, recognizers: Array<GestureRecognizer>, touchRecognizers?: Array<TouchRecognizer>) => GestureJudgeResult;
 export type ShouldBuiltInRecognizerParallelWithCallback = (current: GestureRecognizer, others: Array<GestureRecognizer>) => GestureRecognizer;
 export type TransitionFinishCallback = (transitionIn: boolean) => void;
 export type TouchTestDoneCallback = (event: BaseGestureEvent, recognizers: Array<GestureRecognizer>) => void;
@@ -7652,6 +7793,7 @@ export interface BackgroundImageOptions {
 }
 export interface BackgroundOptions {
     align?: Alignment;
+    ignoresLayoutSafeAreaEdges?: Array<LayoutSafeAreaEdge>;
 }
 export interface ResponseRegion {
     tool?: ResponseRegionSupportedTool;
@@ -8194,7 +8336,7 @@ export interface CommonMethod {
     ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
         throw new Error("Unimplemented method ignoreLayoutSafeArea")
     }
-    background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
+    background(content: CustomBuilder | ResourceColor | undefined, options?: BackgroundOptions): this {
         throw new Error("Unimplemented method background")
     }
     backgroundImage(value: ResourceStr | image.PixelMap | undefined): this {
@@ -9034,7 +9176,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     ignoreLayoutSafeArea(types?: Array<LayoutSafeAreaType>, edges?: Array<LayoutSafeAreaEdge>): this {
         return this
     }
-    background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
+    background(content: CustomBuilder | ResourceColor | undefined, options?: BackgroundOptions): this {
         return this
     }
     backgroundImage(value: ResourceStr | image.PixelMap | undefined): this {
@@ -11013,11 +11155,11 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public background(builder: CustomBuilder | undefined, options?: BackgroundOptions): this {
+    public background(content: CustomBuilder | ResourceColor | undefined, options?: BackgroundOptions): this {
         if (this.checkPriority("background")) {
-            const builder_casted = builder as (CustomBuilder | undefined)
+            const content_casted = content as (CustomBuilder | ResourceColor | undefined)
             const options_casted = options as (BackgroundOptions | undefined)
-            this.getPeer()?.setBackgroundAttribute(builder_casted, options_casted)
+            this.getPeer()?.setBackgroundAttribute(content_casted, options_casted)
             return this
         }
         return this
@@ -12136,6 +12278,18 @@ export class BackgroundOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForIgnoresLayoutSafeAreaEdges  = value.ignoresLayoutSafeAreaEdges
+        if (valueHolderForIgnoresLayoutSafeAreaEdges !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIgnoresLayoutSafeAreaEdgesTmpValue  = valueHolderForIgnoresLayoutSafeAreaEdges!
+            valueSerializer.writeInt32((valueHolderForIgnoresLayoutSafeAreaEdgesTmpValue.length).toInt())
+            for (let valueHolderForIgnoresLayoutSafeAreaEdgesTmpValueCounterI = 0; valueHolderForIgnoresLayoutSafeAreaEdgesTmpValueCounterI < valueHolderForIgnoresLayoutSafeAreaEdgesTmpValue.length; valueHolderForIgnoresLayoutSafeAreaEdgesTmpValueCounterI++) {
+                const valueHolderForIgnoresLayoutSafeAreaEdgesTmpValueTmpElement : LayoutSafeAreaEdge = valueHolderForIgnoresLayoutSafeAreaEdgesTmpValue[valueHolderForIgnoresLayoutSafeAreaEdgesTmpValueCounterI]
+                valueSerializer.writeInt32(valueHolderForIgnoresLayoutSafeAreaEdgesTmpValueTmpElement.valueOf())
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): BackgroundOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -12145,7 +12299,18 @@ export class BackgroundOptions_serializer {
             alignTmpBuf = Alignment.fromValue(valueDeserializer.readInt32())
         }
         const alignTmpResult : Alignment | undefined = alignTmpBuf
-        let value : BackgroundOptions = ({align: alignTmpResult} as BackgroundOptions)
+        const ignoresLayoutSafeAreaEdgesTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let ignoresLayoutSafeAreaEdgesTmpBuf : Array<LayoutSafeAreaEdge> | undefined = undefined
+        if ((ignoresLayoutSafeAreaEdgesTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const ignoresLayoutSafeAreaEdgesTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let ignoresLayoutSafeAreaEdgesTmpBuf_ : Array<LayoutSafeAreaEdge> = new Array<LayoutSafeAreaEdge>(ignoresLayoutSafeAreaEdgesTmpBuf_Length)
+            for (let ignoresLayoutSafeAreaEdgesTmpBuf_BufCounterI = 0; ignoresLayoutSafeAreaEdgesTmpBuf_BufCounterI < ignoresLayoutSafeAreaEdgesTmpBuf_Length; ignoresLayoutSafeAreaEdgesTmpBuf_BufCounterI++) {
+                ignoresLayoutSafeAreaEdgesTmpBuf_[ignoresLayoutSafeAreaEdgesTmpBuf_BufCounterI] = LayoutSafeAreaEdge.fromValue(valueDeserializer.readInt32())
+            }
+            ignoresLayoutSafeAreaEdgesTmpBuf = ignoresLayoutSafeAreaEdgesTmpBuf_
+        }
+        const ignoresLayoutSafeAreaEdgesTmpResult : Array<LayoutSafeAreaEdge> | undefined = ignoresLayoutSafeAreaEdgesTmpBuf
+        let value : BackgroundOptions = ({align: alignTmpResult, ignoresLayoutSafeAreaEdges: ignoresLayoutSafeAreaEdgesTmpResult} as BackgroundOptions)
         return value
     }
 }

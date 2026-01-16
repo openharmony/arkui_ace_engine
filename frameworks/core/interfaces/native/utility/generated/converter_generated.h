@@ -997,6 +997,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_CustomBuilder_ResourceColor& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Date_Bindable& src)
 {
     switch (src.selector) {
@@ -3650,6 +3665,7 @@ ASSIGN_OPT(Opt_EmbeddedType)
 ASSIGN_OPT(Opt_EnterKeyType)
 ASSIGN_OPT(Opt_EnvironmentBackgroundType)
 ASSIGN_OPT(Opt_EventHub)
+ASSIGN_OPT(Opt_EventQueryType)
 ASSIGN_OPT(Opt_EventResult)
 ASSIGN_OPT(Opt_EventTargetInfo)
 ASSIGN_OPT(Opt_ExtendableComponent)
@@ -3724,6 +3740,7 @@ ASSIGN_OPT(Opt_IndicatorComponentController)
 ASSIGN_OPT(Opt_InputType)
 ASSIGN_OPT(Opt_Int64)
 ASSIGN_OPT(Opt_IntentionCode)
+ASSIGN_OPT(Opt_InteractionEventBindingInfo)
 ASSIGN_OPT(Opt_InteractionHand)
 ASSIGN_OPT(Opt_InvertOptions)
 ASSIGN_OPT(Opt_ItemAlign)
@@ -4042,6 +4059,7 @@ ASSIGN_OPT(Opt_TitleHeight)
 ASSIGN_OPT(Opt_ToggleType)
 ASSIGN_OPT(Opt_ToolBarItemPlacement)
 ASSIGN_OPT(Opt_ToolbarItemStatus)
+ASSIGN_OPT(Opt_TouchRecognizer)
 ASSIGN_OPT(Opt_TouchTestInfo)
 ASSIGN_OPT(Opt_TouchTestStrategy)
 ASSIGN_OPT(Opt_TouchType)
@@ -4237,6 +4255,7 @@ ASSIGN_OPT(Opt_Array_TextMenuItem)
 ASSIGN_OPT(Opt_Array_TextPickerRangeContent)
 ASSIGN_OPT(Opt_Array_ToolbarItem)
 ASSIGN_OPT(Opt_Array_TouchObject)
+ASSIGN_OPT(Opt_Array_TouchRecognizer)
 ASSIGN_OPT(Opt_Array_TouchTestInfo)
 ASSIGN_OPT(Opt_Array_Tuple_ColorMetrics_F64)
 ASSIGN_OPT(Opt_Array_Tuple_ResourceColor_F64)
@@ -4469,6 +4488,7 @@ ASSIGN_OPT(Opt_InterceptionShowCallback)
 ASSIGN_OPT(Opt_LoadingProgressModifierBuilder)
 ASSIGN_OPT(Opt_Map_AxisModel_Float64)
 ASSIGN_OPT(Opt_Map_Int32_text_RunMetrics)
+ASSIGN_OPT(Opt_Map_SourceTool_Float64)
 ASSIGN_OPT(Opt_Map_String_ComponentContent)
 ASSIGN_OPT(Opt_Map_String_Int32)
 ASSIGN_OPT(Opt_Map_String_Number)
@@ -4588,6 +4608,7 @@ ASSIGN_OPT(Opt_TransitionFinishCallback)
 ASSIGN_OPT(Opt_Type_CommonMethod_onDragStart)
 ASSIGN_OPT(Opt_Type_NavigationAttribute_customNavContentTransition)
 ASSIGN_OPT(Opt_Type_WebAttribute_onInterceptRequest)
+ASSIGN_OPT(Opt_UIStatesChangeHandler)
 ASSIGN_OPT(Opt_UpdateTransitionCallback)
 ASSIGN_OPT(Opt_VisibleAreaChangeCallback)
 ASSIGN_OPT(Opt_VoidCallback)
@@ -4943,6 +4964,7 @@ ASSIGN_OPT(Opt_Union_CustomBuilder_ComponentContent)
 ASSIGN_OPT(Opt_Union_CustomBuilder_DragItemInfo)
 ASSIGN_OPT(Opt_Union_CustomBuilder_DragItemInfo_String)
 ASSIGN_OPT(Opt_Union_CustomBuilder_ExtendableComponent)
+ASSIGN_OPT(Opt_Union_CustomBuilder_ResourceColor)
 ASSIGN_OPT(Opt_Union_Date_Bindable)
 ASSIGN_OPT(Opt_Union_DragPreviewMode_Array_DragPreviewMode)
 ASSIGN_OPT(Opt_Union_EdgeOutlineStyles_OutlineStyle)
