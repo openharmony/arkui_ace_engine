@@ -17,11 +17,16 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_SCOPED_RS_TRANSACTION_H
 
 #include <stdint.h>
-#include "transaction/rs_sync_transaction_handler.h"
-#include "transaction/rs_transaction.h"
+#include <memory>
 #include "base/utils/noncopyable.h"
 
-namespace OHOS::Ace::NG {
+namespace OHOS {
+namespace Rosen {
+class RSTransaction;
+class RSSyncTransactionHandler;
+}  // namespace Rosen
+
+namespace Ace::NG {
 class FormScopedRSTransaction final {
 public:
     FormScopedRSTransaction(int32_t scopeId);
@@ -38,5 +43,6 @@ private:
     bool needCloseSync_ = false;
     bool isMultiInstanceEnabled_ = false;
 };
-} // namespace OHOS::Ace::NG
+}  // namespace Ace::NG
+}  // namespace OHOS
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_SCOPED_RS_TRANSACTION_H

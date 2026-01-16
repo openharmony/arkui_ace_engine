@@ -22,6 +22,8 @@
 #include "render_service_client/core/ui/rs_ui_context.h"
 #include "render_service_client/core/ui/rs_ui_director.h"
 #include "transaction/rs_sync_transaction_controller.h"
+#include "transaction/rs_sync_transaction_handler.h"
+#include "transaction/rs_transaction.h"
 
 namespace OHOS::Ace::NG {
 FormScopedRSTransaction::FormScopedRSTransaction(int32_t scopeId)
@@ -86,8 +88,10 @@ void FormScopedRSTransaction::CloseSyncTransaction()
         return;
     }
 
+    needCloseSync_ = false;
     if (isMultiInstanceEnabled_) {
         transactionHandler_->CloseSyncTransaction();
+        transactionHandler_ = nullptr;
         return;
     }
 
