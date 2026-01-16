@@ -76,6 +76,7 @@ public:
 protected:
     std::vector<MenuOptionsParam> GetMenuOptionItems();
     DrawingContext GetDrawingContext(Testing::MockCanvas& canvas);
+    static RefPtr<Theme> GetMockThemeForTest(ThemeType type);
 };
 
 void SelectOverlayTestTwoNg::SetUpTestCase()
@@ -133,6 +134,17 @@ DrawingContext SelectOverlayTestTwoNg::GetDrawingContext(Testing::MockCanvas& ca
     EXPECT_CALL(canvas, Restore()).Times(AnyNumber());
     EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
     return context;
+}
+
+RefPtr<Theme> SelectOverlayTestTwoNg::GetMockThemeForTest(ThemeType type)
+{
+    if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    }
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    textOverlayTheme->showShortcut_ = true;
+    textOverlayTheme->pasteLabel_ = "pasteLabel";
+    return textOverlayTheme;
 }
 
 /**
@@ -1913,7 +1925,7 @@ HWTEST_F(SelectOverlayTestTwoNg, GetCreateMenuOptionsParams001, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(textOverlayTheme))
         .WillOnce(Return(textOverlayTheme))
-        .WillRepeatedly(Return(selectTheme));
+        .WillRepeatedly(SelectOverlayTestTwoNg::GetMockThemeForTest);
     auto menuWrapper =  selectOverlayNode->CreateMenuNode(info_);
     EXPECT_NE(menuWrapper, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
@@ -1965,7 +1977,7 @@ HWTEST_F(SelectOverlayTestTwoNg, GetCreateMenuOptionsParams002, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(textOverlayTheme))
         .WillOnce(Return(textOverlayTheme))
-        .WillRepeatedly(Return(selectTheme));
+        .WillRepeatedly(SelectOverlayTestTwoNg::GetMockThemeForTest);
     auto menuWrapper =  selectOverlayNode->CreateMenuNode(info_);
     EXPECT_NE(menuWrapper, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);
@@ -2076,7 +2088,7 @@ HWTEST_F(SelectOverlayTestTwoNg, GetCreateMenuOptionsParams005, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(textOverlayTheme))
         .WillOnce(Return(textOverlayTheme))
-        .WillRepeatedly(Return(selectTheme));
+        .WillRepeatedly(SelectOverlayTestTwoNg::GetMockThemeForTest);
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
     auto menuWrapper = selectOverlayNode->CreateMenuNode(info_);
     EXPECT_NE(menuWrapper, nullptr);
