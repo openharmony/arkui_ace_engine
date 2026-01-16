@@ -6633,6 +6633,22 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _UIListEvent_setOnScrollVisibleContentChange(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _UIObserverGestureEventOps_setOnBeforePanStart(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Direct
+    native static _UIObserverGestureEventOps_setOnBeforePanEnd(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Direct
+    native static _UIObserverGestureEventOps_setOnAfterPanStart(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Direct
+    native static _UIObserverGestureEventOps_setOnAfterPanEnd(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Direct
+    native static _UIObserverGestureEventOps_setOnWillClick(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Direct
+    native static _UIObserverGestureEventOps_setOnDidClick(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Direct
+    native static _UIObserverGestureEventOps_setOnWillTap(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Direct
+    native static _UIObserverGestureEventOps_setOnDidTap(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Direct
     native static _UIScrollableCommonEvent_construct(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _UIScrollableCommonEvent_getFinalizer(): KPointer

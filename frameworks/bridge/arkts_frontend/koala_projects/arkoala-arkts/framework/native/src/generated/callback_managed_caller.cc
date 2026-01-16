@@ -5230,6 +5230,116 @@ void callManagedUIStatesChangeHandlerSync(Ark_VMContext vmContext, Ark_Int32 res
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedUIObserver_ClickEventListenerCallback(Ark_Int32 resourceId, Ark_ClickEvent event, Opt_FrameNode node)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_UIObserver_ClickEventListenerCallback);
+    argsSerializer.writeInt32(resourceId);
+    ClickEvent_serializer::write(argsSerializer, event);
+    if (runtimeType(node) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto nodeTmpValue = node.value;
+        FrameNode_serializer::write(argsSerializer, nodeTmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedUIObserver_ClickEventListenerCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_ClickEvent event, Opt_FrameNode node)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_UIObserver_ClickEventListenerCallback);
+    argsSerializer.writeInt32(resourceId);
+    ClickEvent_serializer::write(argsSerializer, event);
+    if (runtimeType(node) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto nodeTmpValue = node.value;
+        FrameNode_serializer::write(argsSerializer, nodeTmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
+void callManagedUIObserver_GestureEventListenerCallback(Ark_Int32 resourceId, Ark_GestureEvent event, Opt_FrameNode node)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_UIObserver_GestureEventListenerCallback);
+    argsSerializer.writeInt32(resourceId);
+    GestureEvent_serializer::write(argsSerializer, event);
+    if (runtimeType(node) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto nodeTmpValue = node.value;
+        FrameNode_serializer::write(argsSerializer, nodeTmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedUIObserver_GestureEventListenerCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_GestureEvent event, Opt_FrameNode node)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_UIObserver_GestureEventListenerCallback);
+    argsSerializer.writeInt32(resourceId);
+    GestureEvent_serializer::write(argsSerializer, event);
+    if (runtimeType(node) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto nodeTmpValue = node.value;
+        FrameNode_serializer::write(argsSerializer, nodeTmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
+void callManagedUIObserver_PanListenerCallback(Ark_Int32 resourceId, Ark_GestureEvent event, Ark_GestureRecognizer current, Opt_FrameNode node)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_UIObserver_PanListenerCallback);
+    argsSerializer.writeInt32(resourceId);
+    GestureEvent_serializer::write(argsSerializer, event);
+    GestureRecognizer_serializer::write(argsSerializer, current);
+    if (runtimeType(node) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto nodeTmpValue = node.value;
+        FrameNode_serializer::write(argsSerializer, nodeTmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedUIObserver_PanListenerCallbackSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_GestureEvent event, Ark_GestureRecognizer current, Opt_FrameNode node)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_UIObserver_PanListenerCallback);
+    argsSerializer.writeInt32(resourceId);
+    GestureEvent_serializer::write(argsSerializer, event);
+    GestureRecognizer_serializer::write(argsSerializer, current);
+    if (runtimeType(node) != INTEROP_RUNTIME_UNDEFINED) {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+        const auto nodeTmpValue = node.value;
+        FrameNode_serializer::write(argsSerializer, nodeTmpValue);
+    } else {
+        argsSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+    }
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedCheckBoxModifierBuilder(Ark_Int32 resourceId, Ark_NativePointer parentNode, Ark_CheckBoxConfiguration config, Callback_Pointer_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -9435,6 +9545,9 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_Type_CommonMethod_onDragStart: return reinterpret_cast<Ark_NativePointer>(callManagedType_CommonMethod_onDragStart);
         case Kind_Type_NavigationAttribute_customNavContentTransition: return reinterpret_cast<Ark_NativePointer>(callManagedType_NavigationAttribute_customNavContentTransition);
         case Kind_Type_WebAttribute_onInterceptRequest: return reinterpret_cast<Ark_NativePointer>(callManagedType_WebAttribute_onInterceptRequest);
+        case Kind_UIObserver_ClickEventListenerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUIObserver_ClickEventListenerCallback);
+        case Kind_UIObserver_GestureEventListenerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUIObserver_GestureEventListenerCallback);
+        case Kind_UIObserver_PanListenerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUIObserver_PanListenerCallback);
         case Kind_UIStatesChangeHandler: return reinterpret_cast<Ark_NativePointer>(callManagedUIStatesChangeHandler);
         case Kind_UpdateTransitionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUpdateTransitionCallback);
         case Kind_VisibleAreaChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedVisibleAreaChangeCallback);
@@ -9786,6 +9899,9 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_Type_CommonMethod_onDragStart: return reinterpret_cast<Ark_NativePointer>(callManagedType_CommonMethod_onDragStartSync);
         case Kind_Type_NavigationAttribute_customNavContentTransition: return reinterpret_cast<Ark_NativePointer>(callManagedType_NavigationAttribute_customNavContentTransitionSync);
         case Kind_Type_WebAttribute_onInterceptRequest: return reinterpret_cast<Ark_NativePointer>(callManagedType_WebAttribute_onInterceptRequestSync);
+        case Kind_UIObserver_ClickEventListenerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUIObserver_ClickEventListenerCallbackSync);
+        case Kind_UIObserver_GestureEventListenerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUIObserver_GestureEventListenerCallbackSync);
+        case Kind_UIObserver_PanListenerCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUIObserver_PanListenerCallbackSync);
         case Kind_UIStatesChangeHandler: return reinterpret_cast<Ark_NativePointer>(callManagedUIStatesChangeHandlerSync);
         case Kind_UpdateTransitionCallback: return reinterpret_cast<Ark_NativePointer>(callManagedUpdateTransitionCallbackSync);
         case Kind_VisibleAreaChangeCallback: return reinterpret_cast<Ark_NativePointer>(callManagedVisibleAreaChangeCallbackSync);

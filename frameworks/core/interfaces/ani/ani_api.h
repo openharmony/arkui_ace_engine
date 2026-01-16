@@ -863,6 +863,15 @@ struct ArkUIAniDetachedFreeRootModifier {
     ani_long (*constructDetachedFreeRoot)(ani_int);
 };
 
+struct ArkUIAniGestureEventUIObserverModifier {
+    void (*removePanListenerCallback)(
+        const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
+    void (*removeClickListenerCallback)(
+        const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
+    void (*removeTapListenerCallback)(
+        const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -905,6 +914,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniSaveButtonModifier* (*getSaveButtonAniModifier)();
     const ArkUIAniPasteButtonModifier* (*getPasteButtonAniModifier)();
     const ArkUIAniDetachedFreeRootModifier* (*getArkUIAniDetachedFreeRootModifier)();
+    const ArkUIAniGestureEventUIObserverModifier* (*getArkUIAniGestureEventUIObserverModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

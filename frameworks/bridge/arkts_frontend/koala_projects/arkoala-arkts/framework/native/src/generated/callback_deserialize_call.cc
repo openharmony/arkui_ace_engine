@@ -7603,6 +7603,104 @@ void deserializeAndCallSyncType_WebAttribute_onInterceptRequest(Ark_VMContext vm
     Callback_Opt_WebResourceResponse_Void continuationResult = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Opt_WebResourceResponse value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_Opt_WebResourceResponse_Void)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Opt_WebResourceResponse value)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_Opt_WebResourceResponse_Void))))};
     callSyncMethod(vmContext, resourceId, value0, continuationResult);
 }
+void deserializeAndCallUIObserver_ClickEventListenerCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_ClickEvent event, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_UIObserver_ClickEventListenerCallback))));
+    thisDeserializer.readPointer();
+    Ark_ClickEvent event = static_cast<Ark_ClickEvent>(ClickEvent_serializer::read(thisDeserializer));
+    const auto nodeTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_FrameNode nodeTmpBuf = {};
+    nodeTmpBuf.tag = nodeTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((nodeTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        nodeTmpBuf.value = static_cast<Ark_FrameNode>(FrameNode_serializer::read(thisDeserializer));
+    }
+    Opt_FrameNode node = nodeTmpBuf;
+    _call(_resourceId, event, node);
+}
+void deserializeAndCallSyncUIObserver_ClickEventListenerCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ClickEvent event, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_UIObserver_ClickEventListenerCallback))));
+    Ark_ClickEvent event = static_cast<Ark_ClickEvent>(ClickEvent_serializer::read(thisDeserializer));
+    const auto nodeTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_FrameNode nodeTmpBuf = {};
+    nodeTmpBuf.tag = nodeTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((nodeTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        nodeTmpBuf.value = static_cast<Ark_FrameNode>(FrameNode_serializer::read(thisDeserializer));
+    }
+    Opt_FrameNode node = nodeTmpBuf;
+    callSyncMethod(vmContext, resourceId, event, node);
+}
+void deserializeAndCallUIObserver_GestureEventListenerCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent event, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_UIObserver_GestureEventListenerCallback))));
+    thisDeserializer.readPointer();
+    Ark_GestureEvent event = static_cast<Ark_GestureEvent>(GestureEvent_serializer::read(thisDeserializer));
+    const auto nodeTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_FrameNode nodeTmpBuf = {};
+    nodeTmpBuf.tag = nodeTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((nodeTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        nodeTmpBuf.value = static_cast<Ark_FrameNode>(FrameNode_serializer::read(thisDeserializer));
+    }
+    Opt_FrameNode node = nodeTmpBuf;
+    _call(_resourceId, event, node);
+}
+void deserializeAndCallSyncUIObserver_GestureEventListenerCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent event, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_UIObserver_GestureEventListenerCallback))));
+    Ark_GestureEvent event = static_cast<Ark_GestureEvent>(GestureEvent_serializer::read(thisDeserializer));
+    const auto nodeTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_FrameNode nodeTmpBuf = {};
+    nodeTmpBuf.tag = nodeTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((nodeTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        nodeTmpBuf.value = static_cast<Ark_FrameNode>(FrameNode_serializer::read(thisDeserializer));
+    }
+    Opt_FrameNode node = nodeTmpBuf;
+    callSyncMethod(vmContext, resourceId, event, node);
+}
+void deserializeAndCallUIObserver_PanListenerCallback(KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 _resourceId = thisDeserializer.readInt32();
+    const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent event, const Ark_GestureRecognizer current, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_UIObserver_PanListenerCallback))));
+    thisDeserializer.readPointer();
+    Ark_GestureEvent event = static_cast<Ark_GestureEvent>(GestureEvent_serializer::read(thisDeserializer));
+    Ark_GestureRecognizer current = static_cast<Ark_GestureRecognizer>(GestureRecognizer_serializer::read(thisDeserializer));
+    const auto nodeTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_FrameNode nodeTmpBuf = {};
+    nodeTmpBuf.tag = nodeTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((nodeTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        nodeTmpBuf.value = static_cast<Ark_FrameNode>(FrameNode_serializer::read(thisDeserializer));
+    }
+    Opt_FrameNode node = nodeTmpBuf;
+    _call(_resourceId, event, current, node);
+}
+void deserializeAndCallSyncUIObserver_PanListenerCallback(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
+{
+    DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
+    const Ark_Int32 resourceId = thisDeserializer.readInt32();
+    thisDeserializer.readPointer();
+    const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent event, const Ark_GestureRecognizer current, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_UIObserver_PanListenerCallback))));
+    Ark_GestureEvent event = static_cast<Ark_GestureEvent>(GestureEvent_serializer::read(thisDeserializer));
+    Ark_GestureRecognizer current = static_cast<Ark_GestureRecognizer>(GestureRecognizer_serializer::read(thisDeserializer));
+    const auto nodeTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+    Opt_FrameNode nodeTmpBuf = {};
+    nodeTmpBuf.tag = nodeTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+    if ((nodeTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+        nodeTmpBuf.value = static_cast<Ark_FrameNode>(FrameNode_serializer::read(thisDeserializer));
+    }
+    Opt_FrameNode node = nodeTmpBuf;
+    callSyncMethod(vmContext, resourceId, event, current, node);
+}
 void deserializeAndCallUIStatesChangeHandler(KSerializerBuffer thisArray, Ark_Int32 thisLength)
 {
     DeserializerBase thisDeserializer = DeserializerBase(thisArray, thisLength);
@@ -8057,6 +8155,9 @@ void deserializeAndCallCallback(Ark_Int32 kind, KSerializerBuffer thisArray, Ark
         case Kind_Type_CommonMethod_onDragStart: return deserializeAndCallType_CommonMethod_onDragStart(thisArray, thisLength);
         case Kind_Type_NavigationAttribute_customNavContentTransition: return deserializeAndCallType_NavigationAttribute_customNavContentTransition(thisArray, thisLength);
         case Kind_Type_WebAttribute_onInterceptRequest: return deserializeAndCallType_WebAttribute_onInterceptRequest(thisArray, thisLength);
+        case Kind_UIObserver_ClickEventListenerCallback: return deserializeAndCallUIObserver_ClickEventListenerCallback(thisArray, thisLength);
+        case Kind_UIObserver_GestureEventListenerCallback: return deserializeAndCallUIObserver_GestureEventListenerCallback(thisArray, thisLength);
+        case Kind_UIObserver_PanListenerCallback: return deserializeAndCallUIObserver_PanListenerCallback(thisArray, thisLength);
         case Kind_UIStatesChangeHandler: return deserializeAndCallUIStatesChangeHandler(thisArray, thisLength);
         case Kind_UpdateTransitionCallback: return deserializeAndCallUpdateTransitionCallback(thisArray, thisLength);
         case Kind_VisibleAreaChangeCallback: return deserializeAndCallVisibleAreaChangeCallback(thisArray, thisLength);
@@ -8409,6 +8510,9 @@ void deserializeAndCallCallbackSync(Ark_VMContext vmContext, Ark_Int32 kind, KSe
         case Kind_Type_CommonMethod_onDragStart: return deserializeAndCallSyncType_CommonMethod_onDragStart(vmContext, thisArray, thisLength);
         case Kind_Type_NavigationAttribute_customNavContentTransition: return deserializeAndCallSyncType_NavigationAttribute_customNavContentTransition(vmContext, thisArray, thisLength);
         case Kind_Type_WebAttribute_onInterceptRequest: return deserializeAndCallSyncType_WebAttribute_onInterceptRequest(vmContext, thisArray, thisLength);
+        case Kind_UIObserver_ClickEventListenerCallback: return deserializeAndCallSyncUIObserver_ClickEventListenerCallback(vmContext, thisArray, thisLength);
+        case Kind_UIObserver_GestureEventListenerCallback: return deserializeAndCallSyncUIObserver_GestureEventListenerCallback(vmContext, thisArray, thisLength);
+        case Kind_UIObserver_PanListenerCallback: return deserializeAndCallSyncUIObserver_PanListenerCallback(vmContext, thisArray, thisLength);
         case Kind_UIStatesChangeHandler: return deserializeAndCallSyncUIStatesChangeHandler(vmContext, thisArray, thisLength);
         case Kind_UpdateTransitionCallback: return deserializeAndCallSyncUpdateTransitionCallback(vmContext, thisArray, thisLength);
         case Kind_VisibleAreaChangeCallback: return deserializeAndCallSyncVisibleAreaChangeCallback(vmContext, thisArray, thisLength);

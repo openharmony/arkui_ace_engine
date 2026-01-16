@@ -1895,6 +1895,12 @@ typedef struct Type_NavigationAttribute_customNavContentTransition Type_Navigati
 typedef struct Opt_Type_NavigationAttribute_customNavContentTransition Opt_Type_NavigationAttribute_customNavContentTransition;
 typedef struct Type_WebAttribute_onInterceptRequest Type_WebAttribute_onInterceptRequest;
 typedef struct Opt_Type_WebAttribute_onInterceptRequest Opt_Type_WebAttribute_onInterceptRequest;
+typedef struct UIObserver_ClickEventListenerCallback UIObserver_ClickEventListenerCallback;
+typedef struct Opt_UIObserver_ClickEventListenerCallback Opt_UIObserver_ClickEventListenerCallback;
+typedef struct UIObserver_GestureEventListenerCallback UIObserver_GestureEventListenerCallback;
+typedef struct Opt_UIObserver_GestureEventListenerCallback Opt_UIObserver_GestureEventListenerCallback;
+typedef struct UIObserver_PanListenerCallback UIObserver_PanListenerCallback;
+typedef struct Opt_UIObserver_PanListenerCallback Opt_UIObserver_PanListenerCallback;
 typedef struct UIStatesChangeHandler UIStatesChangeHandler;
 typedef struct Opt_UIStatesChangeHandler Opt_UIStatesChangeHandler;
 typedef struct UpdateTransitionCallback UpdateTransitionCallback;
@@ -14328,6 +14334,36 @@ typedef struct Opt_Type_WebAttribute_onInterceptRequest {
     Ark_Tag tag;
     Type_WebAttribute_onInterceptRequest value;
 } Opt_Type_WebAttribute_onInterceptRequest;
+typedef struct UIObserver_ClickEventListenerCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_ClickEvent event, const Opt_FrameNode node);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ClickEvent event, const Opt_FrameNode node);
+} UIObserver_ClickEventListenerCallback;
+typedef struct Opt_UIObserver_ClickEventListenerCallback {
+    Ark_Tag tag;
+    UIObserver_ClickEventListenerCallback value;
+} Opt_UIObserver_ClickEventListenerCallback;
+typedef struct UIObserver_GestureEventListenerCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_GestureEvent event, const Opt_FrameNode node);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent event, const Opt_FrameNode node);
+} UIObserver_GestureEventListenerCallback;
+typedef struct Opt_UIObserver_GestureEventListenerCallback {
+    Ark_Tag tag;
+    UIObserver_GestureEventListenerCallback value;
+} Opt_UIObserver_GestureEventListenerCallback;
+typedef struct UIObserver_PanListenerCallback {
+    /* kind: Callback */
+    Ark_CallbackResource resource;
+    void (*call)(const Ark_Int32 resourceId, const Ark_GestureEvent event, const Ark_GestureRecognizer current, const Opt_FrameNode node);
+    void (*callSync)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent event, const Ark_GestureRecognizer current, const Opt_FrameNode node);
+} UIObserver_PanListenerCallback;
+typedef struct Opt_UIObserver_PanListenerCallback {
+    Ark_Tag tag;
+    UIObserver_PanListenerCallback value;
+} Opt_UIObserver_PanListenerCallback;
 typedef struct UIStatesChangeHandler {
     /* kind: Callback */
     Ark_CallbackResource resource;
@@ -31171,6 +31207,25 @@ typedef struct GENERATED_ArkUIUIListEventAccessor {
                                             const Opt_OnScrollVisibleContentChangeCallback* callback_);
 } GENERATED_ArkUIUIListEventAccessor;
 
+typedef struct GENERATED_ArkUIUIObserverGestureEventOpsAccessor {
+    Ark_Int32 (*setOnBeforePanStart)(Ark_Int32 instanceId,
+                                     const UIObserver_PanListenerCallback* callback);
+    Ark_Int32 (*setOnBeforePanEnd)(Ark_Int32 instanceId,
+                                   const UIObserver_PanListenerCallback* callback);
+    Ark_Int32 (*setOnAfterPanStart)(Ark_Int32 instanceId,
+                                    const UIObserver_PanListenerCallback* callback);
+    Ark_Int32 (*setOnAfterPanEnd)(Ark_Int32 instanceId,
+                                  const UIObserver_PanListenerCallback* callback);
+    Ark_Int32 (*setOnWillClick)(Ark_Int32 instanceId,
+                                const UIObserver_ClickEventListenerCallback* callback);
+    Ark_Int32 (*setOnDidClick)(Ark_Int32 instanceId,
+                               const UIObserver_ClickEventListenerCallback* callback);
+    Ark_Int32 (*setOnWillTap)(Ark_Int32 instanceId,
+                              const UIObserver_GestureEventListenerCallback* callback);
+    Ark_Int32 (*setOnDidTap)(Ark_Int32 instanceId,
+                             const UIObserver_GestureEventListenerCallback* callback);
+} GENERATED_ArkUIUIObserverGestureEventOpsAccessor;
+
 typedef struct GENERATED_ArkUIUIScrollableCommonEventAccessor {
     void (*destroyPeer)(Ark_UIScrollableCommonEvent peer);
     Ark_UIScrollableCommonEvent (*construct)(Ark_NativePointer node);
@@ -31731,6 +31786,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUIUIExtensionProxyAccessor* (*getUIExtensionProxyAccessor)();
     const GENERATED_ArkUIUIGridEventAccessor* (*getUIGridEventAccessor)();
     const GENERATED_ArkUIUIListEventAccessor* (*getUIListEventAccessor)();
+    const GENERATED_ArkUIUIObserverGestureEventOpsAccessor* (*getUIObserverGestureEventOpsAccessor)();
     const GENERATED_ArkUIUIScrollableCommonEventAccessor* (*getUIScrollableCommonEventAccessor)();
     const GENERATED_ArkUIUIScrollEventAccessor* (*getUIScrollEventAccessor)();
     const GENERATED_ArkUIUIWaterFlowEventAccessor* (*getUIWaterFlowEventAccessor)();

@@ -403,6 +403,7 @@ const GENERATED_ArkUIUIContextGetInfoAccessor* GetUIContextGetInfoAccessor();
 const GENERATED_ArkUIUIExtensionProxyAccessor* GetUIExtensionProxyAccessor();
 const GENERATED_ArkUIUIGridEventAccessor* GetUIGridEventAccessor();
 const GENERATED_ArkUIUIListEventAccessor* GetUIListEventAccessor();
+const GENERATED_ArkUIUIObserverGestureEventOpsAccessor* GetUIObserverGestureEventOpsAccessor();
 const GENERATED_ArkUIUIScrollableCommonEventAccessor* GetUIScrollableCommonEventAccessor();
 const GENERATED_ArkUIUIScrollEventAccessor* GetUIScrollEventAccessor();
 const GENERATED_ArkUIUIWaterFlowEventAccessor* GetUIWaterFlowEventAccessor();
@@ -749,6 +750,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetUIExtensionProxyAccessor,
         GetUIGridEventAccessor,
         GetUIListEventAccessor,
+        GetUIObserverGestureEventOpsAccessor,
         GetUIScrollableCommonEventAccessor,
         GetUIScrollEventAccessor,
         GetUIWaterFlowEventAccessor,

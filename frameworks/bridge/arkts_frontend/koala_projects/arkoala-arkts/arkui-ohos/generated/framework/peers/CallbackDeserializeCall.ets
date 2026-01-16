@@ -3795,6 +3795,43 @@ export function deserializeAndCallType_WebAttribute_onInterceptRequest(thisDeser
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
+export function deserializeAndCallUIObserver_ClickEventListenerCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: ClickEvent,node?: FrameNode) => void))
+    let event : ClickEvent = (ClickEvent_serializer.read(thisDeserializer) as ClickEvent)
+    const nodeTmpBuf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let nodeTmpBuf : FrameNode | undefined = undefined
+    if ((nodeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+        nodeTmpBuf = (FrameNode_serializer.read(thisDeserializer) as FrameNode)
+    }
+    let node : FrameNode | undefined = nodeTmpBuf
+    _call(event, node)
+}
+export function deserializeAndCallUIObserver_GestureEventListenerCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: GestureEvent,node?: FrameNode) => void))
+    let event : GestureEvent = (GestureEvent_serializer.read(thisDeserializer) as GestureEvent)
+    const nodeTmpBuf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let nodeTmpBuf : FrameNode | undefined = undefined
+    if ((nodeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+        nodeTmpBuf = (FrameNode_serializer.read(thisDeserializer) as FrameNode)
+    }
+    let node : FrameNode | undefined = nodeTmpBuf
+    _call(event, node)
+}
+export function deserializeAndCallUIObserver_PanListenerCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void))
+    let event : GestureEvent = (GestureEvent_serializer.read(thisDeserializer) as GestureEvent)
+    let current : GestureRecognizer = (GestureRecognizer_serializer.read(thisDeserializer) as GestureRecognizer)
+    const nodeTmpBuf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let nodeTmpBuf : FrameNode | undefined = undefined
+    if ((nodeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+        nodeTmpBuf = (FrameNode_serializer.read(thisDeserializer) as FrameNode)
+    }
+    let node : FrameNode | undefined = nodeTmpBuf
+    _call(event, current, node)
+}
 export function deserializeAndCallUIStatesChangeHandler(thisDeserializer: DeserializerBase): void {
         const _resourceId : int32 = thisDeserializer.readInt32()
         const _call  = (ResourceHolder.instance().get(_resourceId) as UIStatesChangeHandler)
@@ -4188,6 +4225,9 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Type_CommonMethod_onDragStart: return deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer);
         case CallbackKind.Kind_Type_NavigationAttribute_customNavContentTransition: return deserializeAndCallType_NavigationAttribute_customNavContentTransition(thisDeserializer);
         case CallbackKind.Kind_Type_WebAttribute_onInterceptRequest: return deserializeAndCallType_WebAttribute_onInterceptRequest(thisDeserializer);
+        case CallbackKind.Kind_UIObserver_ClickEventListenerCallback: return deserializeAndCallUIObserver_ClickEventListenerCallback(thisDeserializer);
+        case CallbackKind.Kind_UIObserver_GestureEventListenerCallback: return deserializeAndCallUIObserver_GestureEventListenerCallback(thisDeserializer);
+        case CallbackKind.Kind_UIObserver_PanListenerCallback: return deserializeAndCallUIObserver_PanListenerCallback(thisDeserializer);
         case CallbackKind.Kind_UIStatesChangeHandler: return deserializeAndCallUIStatesChangeHandler(thisDeserializer);
         case CallbackKind.Kind_UpdateTransitionCallback: return deserializeAndCallUpdateTransitionCallback(thisDeserializer);
         case CallbackKind.Kind_VisibleAreaChangeCallback: return deserializeAndCallVisibleAreaChangeCallback(thisDeserializer);

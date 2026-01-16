@@ -53,6 +53,7 @@
 #include "condition_scope/condition_scope.h"
 #include "utils/ani_trace.h"
 #include "UINode/uinode_module_methods.h"
+#include "uiobserver/gesture_event_uiobserver_module.h"
 #include "node_adapter/node_adapter_module.h"
 #include "visual_effect/visual_effect_module.h"
 #include "security_component/paste_button_module.h"
@@ -1643,6 +1644,36 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_TouchEvent_preventDefault",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetTouchEventPreventDefault)
+        },
+        ani_native_function {
+            "_GestureEventUIObserver_SetPanListenerCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetPanListenerCallback)
+        },
+        ani_native_function {
+            "_GestureEventUIObserver_RemovePanListenerCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RemovePanListenerCallback)
+        },
+        ani_native_function {
+            "_GestureEventUIObserver_SetClickListenerCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetClickListenerCallback)
+        },
+        ani_native_function {
+            "_GestureEventUIObserver_RemoveClickListenerCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveClickListenerCallback)
+        },
+        ani_native_function {
+            "_GestureEventUIObserver_SetTapListenerCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::SetTapListenerCallback)
+        },
+        ani_native_function {
+            "_GestureEventUIObserver_RemoveTapListenerCallback",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveTapListenerCallback)
         },
         ani_native_function {
             "_SetCustomCallbackWithCheck",

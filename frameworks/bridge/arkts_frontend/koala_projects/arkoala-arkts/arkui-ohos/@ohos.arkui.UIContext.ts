@@ -19,12 +19,12 @@
 import { FrameNode } from 'arkui/FrameNode';
 import { default as font } from '@ohos/font';
 import { MeasureOptions } from '@ohos/measure';
-import { SizeOptions } from 'arkui/framework';
+import { SizeOptions, GestureEvent, GestureRecognizer, ClickEvent } from 'arkui/framework';
 import { AnimateParam } from 'arkui/framework';
 import { AnimatorResult, AnimatorOptions, Animator, SimpleAnimatorOptions} from '@ohos/animator';
 import { Context, PointerStyle, PixelMap } from '#external';
 import { UIAbilityContext, ExtensionContext } from "#external"
-import { UIContextImpl } from "arkui/base/UIContextImpl"
+import { UIContextImpl, UIObserverGestureEventOps } from "arkui/base/UIContextImpl"
 import { componentUtils } from '@ohos/arkui/componentUtils';
 import { componentSnapshot, NodeIdentity } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';
@@ -857,6 +857,10 @@ export abstract class FrameCallback {
     onIdle(timeLeftInNano: long): void {}
 }
 
+export declare type PanListenerCallback = (event: GestureEvent, current: GestureRecognizer, node?: FrameNode) => void;
+export declare type ClickEventListenerCallback = (event: ClickEvent, node?: FrameNode) => void;
+export declare type GestureEventListenerCallback = (event: GestureEvent, node?: FrameNode) => void;
+
 export class UIObserver {
     private instanceId_: number = 100000;
     private observerImpl: uiObserver.UIObserver | null = null;
@@ -1143,6 +1147,78 @@ export class UIObserver {
         if (this.observerImpl) {
             this.observerImpl!.offTextChange(callback);
         }
+    }
+
+    public onBeforePanStart(callback: PanListenerCallback): void {
+        let resourceId = UIObserverGestureEventOps.setOnBeforePanStart(this.instanceId_ as int, callback);
+        ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_ as int, resourceId, 'beforePanStart', callback);
+ 	}
+
+    public offBeforePanStart(callback?: PanListenerCallback): void {
+        ArkUIAniModule._GestureEventUIObserver_RemovePanListenerCallback(this.instanceId_ as int, 'beforePanStart', callback);
+    }
+
+    public onBeforePanEnd(callback: PanListenerCallback): void {
+        let resourceId = UIObserverGestureEventOps.setOnBeforePanEnd(this.instanceId_ as int, callback);
+        ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_ as int, resourceId, 'beforePanEnd', callback);
+ 	}
+
+    public offBeforePanEnd(callback?: PanListenerCallback): void {
+        ArkUIAniModule._GestureEventUIObserver_RemovePanListenerCallback(this.instanceId_ as int, 'beforePanEnd', callback);
+    }
+
+    public onAfterPanStart(callback: PanListenerCallback): void {
+        let resourceId = UIObserverGestureEventOps.setOnAfterPanStart(this.instanceId_ as int, callback);
+        ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_ as int, resourceId, 'afterPanStart', callback);
+ 	}
+
+    public offAfterPanStart(callback?: PanListenerCallback): void {
+        ArkUIAniModule._GestureEventUIObserver_RemovePanListenerCallback(this.instanceId_ as int, 'afterPanStart', callback);
+    }
+
+    public onAfterPanEnd(callback: PanListenerCallback): void {
+        let resourceId = UIObserverGestureEventOps.setOnAfterPanEnd(this.instanceId_ as int, callback);
+        ArkUIAniModule._GestureEventUIObserver_SetPanListenerCallback(this.instanceId_ as int, resourceId, 'afterPanEnd', callback);
+ 	}
+
+    public offAfterPanEnd(callback?: PanListenerCallback): void {
+        ArkUIAniModule._GestureEventUIObserver_RemovePanListenerCallback(this.instanceId_ as int, 'afterPanEnd', callback);
+    }
+
+    public onWillClick(callback: ClickEventListenerCallback): void {
+        let resourceId = UIObserverGestureEventOps.setOnWillClick(this.instanceId_ as int, callback);
+        ArkUIAniModule._GestureEventUIObserver_SetClickListenerCallback(this.instanceId_ as int, resourceId, 'willClick', callback);
+ 	}
+
+    public offWillClick(callback?: ClickEventListenerCallback): void {
+        ArkUIAniModule._GestureEventUIObserver_RemoveClickListenerCallback(this.instanceId_ as int, 'willClick', callback);
+    }
+
+    public onDidClick(callback: ClickEventListenerCallback): void {
+        let resourceId = UIObserverGestureEventOps.setOnDidClick(this.instanceId_ as int, callback);
+        ArkUIAniModule._GestureEventUIObserver_SetClickListenerCallback(this.instanceId_ as int, resourceId, 'didClick', callback);
+ 	}
+
+    public offDidClick(callback?: ClickEventListenerCallback): void {
+        ArkUIAniModule._GestureEventUIObserver_RemoveClickListenerCallback(this.instanceId_ as int, 'didClick', callback);
+    }
+
+    public onWillTap(callback: GestureEventListenerCallback): void {
+        let resourceId = UIObserverGestureEventOps.setOnWillTap(this.instanceId_ as int, callback);
+        ArkUIAniModule._GestureEventUIObserver_SetTapListenerCallback(this.instanceId_ as int, resourceId, 'willTap', callback);
+ 	}
+
+    public offWillTap(callback?: GestureEventListenerCallback): void {
+        ArkUIAniModule._GestureEventUIObserver_RemoveTapListenerCallback(this.instanceId_ as int, 'willTap', callback);
+    }
+
+    public onDidTap(callback: GestureEventListenerCallback): void {
+        let resourceId = UIObserverGestureEventOps.setOnDidTap(this.instanceId_ as int, callback);
+        ArkUIAniModule._GestureEventUIObserver_SetTapListenerCallback(this.instanceId_ as int, resourceId, 'didTap', callback);
+ 	}
+
+    public offDidTap(callback?: GestureEventListenerCallback): void {
+        ArkUIAniModule._GestureEventUIObserver_RemoveTapListenerCallback(this.instanceId_ as int, 'didTap', callback);
     }
 }
 export interface PageInfo {

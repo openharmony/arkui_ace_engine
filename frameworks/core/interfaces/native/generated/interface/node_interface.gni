@@ -131,6 +131,7 @@ generated_sources = [
   "implementation/global_scope_ohos_measure_utils_accessor.cpp",
   "implementation/global_scope_uicontext_font_scale_accessor.cpp",
   "implementation/global_scope_uicontext_text_menu_accessor.cpp",
+  "implementation/ui_observer_gesture_event_ops_accessor.cpp",
   "implementation/grid_col_modifier.cpp",
   "implementation/grid_item_modifier.cpp",
   "implementation/grid_modifier.cpp",

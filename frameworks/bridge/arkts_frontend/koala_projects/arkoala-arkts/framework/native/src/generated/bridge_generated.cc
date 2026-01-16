@@ -42197,6 +42197,54 @@ void impl_UIListEvent_setOnScrollVisibleContentChange(Ark_NativePointer thisPtr,
         GetAccessors()->getUIListEventAccessor()->setOnScrollVisibleContentChange(self, static_cast<Opt_OnScrollVisibleContentChangeCallback*>(&callback_ValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(UIListEvent_setOnScrollVisibleContentChange, Ark_NativePointer, KSerializerBuffer, int32_t)
+Ark_Int32 impl_UIObserverGestureEventOps_setOnBeforePanStart(Ark_Int32 instanceId, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        UIObserver_PanListenerCallback callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent event, const Ark_GestureRecognizer current, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_UIObserver_PanListenerCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent event, const Ark_GestureRecognizer current, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_UIObserver_PanListenerCallback))))};;
+        return GetAccessors()->getUIObserverGestureEventOpsAccessor()->setOnBeforePanStart(instanceId, static_cast<UIObserver_PanListenerCallback*>(&callbackValueTemp));
+}
+KOALA_INTEROP_DIRECT_3(UIObserverGestureEventOps_setOnBeforePanStart, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
+Ark_Int32 impl_UIObserverGestureEventOps_setOnBeforePanEnd(Ark_Int32 instanceId, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        UIObserver_PanListenerCallback callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent event, const Ark_GestureRecognizer current, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_UIObserver_PanListenerCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent event, const Ark_GestureRecognizer current, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_UIObserver_PanListenerCallback))))};;
+        return GetAccessors()->getUIObserverGestureEventOpsAccessor()->setOnBeforePanEnd(instanceId, static_cast<UIObserver_PanListenerCallback*>(&callbackValueTemp));
+}
+KOALA_INTEROP_DIRECT_3(UIObserverGestureEventOps_setOnBeforePanEnd, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
+Ark_Int32 impl_UIObserverGestureEventOps_setOnAfterPanStart(Ark_Int32 instanceId, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        UIObserver_PanListenerCallback callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent event, const Ark_GestureRecognizer current, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_UIObserver_PanListenerCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent event, const Ark_GestureRecognizer current, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_UIObserver_PanListenerCallback))))};;
+        return GetAccessors()->getUIObserverGestureEventOpsAccessor()->setOnAfterPanStart(instanceId, static_cast<UIObserver_PanListenerCallback*>(&callbackValueTemp));
+}
+KOALA_INTEROP_DIRECT_3(UIObserverGestureEventOps_setOnAfterPanStart, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
+Ark_Int32 impl_UIObserverGestureEventOps_setOnAfterPanEnd(Ark_Int32 instanceId, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        UIObserver_PanListenerCallback callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent event, const Ark_GestureRecognizer current, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_UIObserver_PanListenerCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent event, const Ark_GestureRecognizer current, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_UIObserver_PanListenerCallback))))};;
+        return GetAccessors()->getUIObserverGestureEventOpsAccessor()->setOnAfterPanEnd(instanceId, static_cast<UIObserver_PanListenerCallback*>(&callbackValueTemp));
+}
+KOALA_INTEROP_DIRECT_3(UIObserverGestureEventOps_setOnAfterPanEnd, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
+Ark_Int32 impl_UIObserverGestureEventOps_setOnWillClick(Ark_Int32 instanceId, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        UIObserver_ClickEventListenerCallback callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_ClickEvent event, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_UIObserver_ClickEventListenerCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ClickEvent event, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_UIObserver_ClickEventListenerCallback))))};;
+        return GetAccessors()->getUIObserverGestureEventOpsAccessor()->setOnWillClick(instanceId, static_cast<UIObserver_ClickEventListenerCallback*>(&callbackValueTemp));
+}
+KOALA_INTEROP_DIRECT_3(UIObserverGestureEventOps_setOnWillClick, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
+Ark_Int32 impl_UIObserverGestureEventOps_setOnDidClick(Ark_Int32 instanceId, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        UIObserver_ClickEventListenerCallback callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_ClickEvent event, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_UIObserver_ClickEventListenerCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_ClickEvent event, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_UIObserver_ClickEventListenerCallback))))};;
+        return GetAccessors()->getUIObserverGestureEventOpsAccessor()->setOnDidClick(instanceId, static_cast<UIObserver_ClickEventListenerCallback*>(&callbackValueTemp));
+}
+KOALA_INTEROP_DIRECT_3(UIObserverGestureEventOps_setOnDidClick, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
+Ark_Int32 impl_UIObserverGestureEventOps_setOnWillTap(Ark_Int32 instanceId, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        UIObserver_GestureEventListenerCallback callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent event, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_UIObserver_GestureEventListenerCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent event, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_UIObserver_GestureEventListenerCallback))))};;
+        return GetAccessors()->getUIObserverGestureEventOpsAccessor()->setOnWillTap(instanceId, static_cast<UIObserver_GestureEventListenerCallback*>(&callbackValueTemp));
+}
+KOALA_INTEROP_DIRECT_3(UIObserverGestureEventOps_setOnWillTap, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
+Ark_Int32 impl_UIObserverGestureEventOps_setOnDidTap(Ark_Int32 instanceId, KSerializerBuffer thisArray, int32_t thisLength) {
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        UIObserver_GestureEventListenerCallback callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_GestureEvent event, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_UIObserver_GestureEventListenerCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_GestureEvent event, const Opt_FrameNode node)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_UIObserver_GestureEventListenerCallback))))};;
+        return GetAccessors()->getUIObserverGestureEventOpsAccessor()->setOnDidTap(instanceId, static_cast<UIObserver_GestureEventListenerCallback*>(&callbackValueTemp));
+}
+KOALA_INTEROP_DIRECT_3(UIObserverGestureEventOps_setOnDidTap, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_UIScrollableCommonEvent_construct(Ark_NativePointer thisPtr) {
         return GetAccessors()->getUIScrollableCommonEventAccessor()->construct(thisPtr);
 }
