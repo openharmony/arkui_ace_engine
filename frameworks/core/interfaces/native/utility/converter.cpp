@@ -1180,12 +1180,6 @@ double Convert(const Ark_Float64& src)
 }
 
 template<>
-size_t Convert(const Ark_Float64& src)
-{
-    return static_cast<size_t>(src);
-}
-
-template<>
 EdgesParam Convert(const Ark_Edges& src)
 {
     EdgesParam edges;
