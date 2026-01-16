@@ -1438,7 +1438,7 @@ void UINode::DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr
     }
 
     DumpSimplifyTreeBase(current);
-    auto nodeChildren = GetChildren();
+    auto nodeChildren = GetChildren(true);
     DumpSimplifyInfoWithParamConfig(current, config);
     std::list<RefPtr<UINode>> cacheChildren;
     if (GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG || GetTag() == V2::JS_REPEAT_ETS_TAG) {
