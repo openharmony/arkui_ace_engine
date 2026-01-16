@@ -44,10 +44,10 @@ class ArkTextPickerComponent extends ArkComponent implements TextPickerAttribute
     return this;
   }
   onAccept(callback: (value: string, index: number) => void): this {
-    throw new BusinessError(100201, 'onAccept function not supported in ArkTextPickerComponent class.');
+    throw new BusinessError(100201, 'onAccept function not supported in attributeModifier scenario.');
   }
   onCancel(callback: () => void): this {
-    throw new BusinessError(100201, 'onCancel function not supported in ArkTextPickerComponent class.');
+    throw new BusinessError(100201, 'onCancel function not supported in attributeModifier scenario.');
   }
   onChange(callback: Optional<OnTextPickerChangeCallback>): this {
     modifierWithKey(

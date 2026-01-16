@@ -9627,7 +9627,7 @@ class ArkImageAnimatorComponent extends ArkComponent {
     return this;
   }
   preDecode(value) {
-    throw new BusinessError(100201, 'preDecode function not supported in ArkImageAnimatorComponent class.');
+    throw new BusinessError(100201, 'preDecode function not supported in attributeModifier scenario.');
   }
   fillMode(value) {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorFillModeModifier.identity, ImageAnimatorFillModeModifier, value);
@@ -24854,10 +24854,10 @@ class ArkTextPickerComponent extends ArkComponent {
     return this;
   }
   onAccept(callback) {
-    throw new BusinessError(100201, 'onAccept function not supported in ArkTextPickerComponent class.');
+    throw new BusinessError(100201, 'onAccept function not supported in attributeModifier scenario.');
   }
   onCancel(callback) {
-    throw new BusinessError(100201, 'onCancel function not supported in ArkTextPickerComponent class.');
+    throw new BusinessError(100201, 'onCancel function not supported in attributeModifier scenario.');
   }
   onChange(callback) {
     modifierWithKey(
