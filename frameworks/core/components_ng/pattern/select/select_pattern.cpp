@@ -275,7 +275,8 @@ void SelectPattern::ShowSelectMenu()
     CHECK_NULL_VOID(selectLayoutProps);
     auto theme = context->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
-    if (theme->GetExpandDisplay() && selectLayoutProps->GetShowInSubWindowValue(false)) {
+    if ((theme->GetExpandDisplay() || SystemProperties::IsPCMode()) &&
+        selectLayoutProps->GetShowInSubWindowValue(false)) {
         ShowSelectMenuInSubWindow();
         return;
     }
