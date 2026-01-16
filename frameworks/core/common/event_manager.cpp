@@ -2867,6 +2867,7 @@ std::string EventManager::GetLastHitTestNodeInfosForTouch(bool isTopMost)
 void EventManager::AddHitTestInfoRecord(const RefPtr<NG::FrameNode>& frameNode)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     CHECK_NULL_VOID(hitTestRecordInfo_);
     CHECK_NULL_VOID((*hitTestRecordInfo_).type == TouchType::DOWN && (*hitTestRecordInfo_).isRealTouch);
     auto fingerId = (*hitTestRecordInfo_).fingerId;
