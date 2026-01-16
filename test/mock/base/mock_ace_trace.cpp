@@ -15,7 +15,8 @@
 
 #include "base/log/ace_trace.h"
 #include "core/common/container.h"
-#include "core/components_ng/base/ui_node.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/pattern.h"
 
 #include <iostream>
 
@@ -111,10 +112,37 @@ ContainerTracer::ContainerTracer()
     : ContainerTracer(Container::CurrentId())
 {}
 
+static void UINodeTracerLog(int32_t nodeId, const std::string_view& nodeTag, const std::string_view& nodePattern,
+    const std::string_view& nodeType = "")
+{
+    std::clog << "UINodeTracer: nodeId=" << nodeId << " nodeTag=" << nodeTag << " nodePattern=" << nodePattern;
+    if (!nodeType.empty()) {
+        std::clog << " nodeType=" << nodeType;
+    }
+    std::clog << std::endl;
+}
+
+UINodeTracer::UINodeTracer(int32_t nodeId, const std::string_view& nodeTag, const std::string_view& nodePattern)
+    : UINodeTracer(nodeId)
+{
+    UINodeTracerLog(nodeId, nodeTag, nodePattern);
+}
+
 UINodeTracer::UINodeTracer(const NG::UINode* uiNode)
     : UINodeTracer(uiNode ? uiNode->GetId() : ElementRegister::UndefinedElementId)
 {
-    std::clog << "UINodeTracer: nodeTag=" << (uiNode ? uiNode->GetTag() : "")
-              << " nodeId=" << (uiNode ? uiNode->GetId() : ElementRegister::UndefinedElementId) << std::endl;
+    int32_t nodeId = ElementRegister::UndefinedElementId;
+    std::string nodeTag;
+    std::string nodePattern;
+    std::string nodeType;
+    if (uiNode) {
+        nodeId = uiNode->GetId();
+        nodeTag = uiNode->GetTag();
+        nodeType = TypeInfoHelper::TypeName(uiNode);
+        if (auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode)) {
+            nodePattern = TypeInfoHelper::TypeName(AceType::RawPtr(frameNode->GetPattern()));
+        }
+    }
+    UINodeTracerLog(nodeId, nodeTag, nodePattern, nodeType);
 }
 } // namespace OHOS::Ace

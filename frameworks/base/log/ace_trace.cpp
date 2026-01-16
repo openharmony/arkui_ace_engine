@@ -175,4 +175,8 @@ ContainerTracer::ContainerTracer()
 UINodeTracer::UINodeTracer(const NG::UINode* uiNode)
     : UINodeTracer(uiNode ? uiNode->GetId() : ElementRegister::UndefinedElementId)
 {}
+
+UINodeTracer::UINodeTracer(int32_t nodeId, const std::string_view& nodeTag, const std::string_view& nodePattern)
+    : UINodeTracer(nodeId)
+{}
 } // namespace OHOS::Ace
