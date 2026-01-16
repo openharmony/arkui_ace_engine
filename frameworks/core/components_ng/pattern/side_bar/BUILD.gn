@@ -37,7 +37,9 @@ build_component_ng("side_bar_pattern_ng") {
   }
 
   if (!build_ohos_sdk) {
-    deps = [ "${ace_root}/interfaces/inner_api/ui_session:ui_session" ]
+    if (!is_arkui_x) {
+      deps = [ "${ace_root}/interfaces/inner_api/ui_session:ui_session" ]
+    }
     if (is_ohos_standard_system) {
       external_deps = [ "accessibility:accessibility_common" ]
     }
