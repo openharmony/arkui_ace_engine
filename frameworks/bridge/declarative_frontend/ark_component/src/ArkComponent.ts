@@ -5083,15 +5083,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   gesture(gesture: GestureType, mask?: GestureMask): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'gesture not supportted in attributeModifier scenario.');
   }
 
   priorityGesture(gesture: GestureType, mask?: GestureMask): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'priorityGesture not supportted in attributeModifier scenario.');
   }
 
   parallelGesture(gesture: GestureType, mask?: GestureMask): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'priorityGesture not supportted in attributeModifier scenario.');
   }
 
   blur(value: number, options?: BlurOptions): this {
@@ -5757,7 +5757,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   stateStyles(value: StateStyles): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'stateStyles not supportted in attributeModifier scenario.');
   }
 
   restoreId(value: number): this {

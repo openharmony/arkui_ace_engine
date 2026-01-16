@@ -306,7 +306,7 @@ public:
         napi_value promiseResult = nullptr;
         napi_status status = napi_create_promise(env, &dragAction->asyncCtx_->deferred, &promiseResult);
         if (status != napi_ok) {
-            NapiThrow(env, "ace engine delegate is null", ERROR_CODE_INTERNAL_ERROR);
+            NapiThrow(env, "create promise failed.", ERROR_CODE_INTERNAL_ERROR);
             napi_close_escapable_handle_scope(env, scope);
             return nullptr;
         }
