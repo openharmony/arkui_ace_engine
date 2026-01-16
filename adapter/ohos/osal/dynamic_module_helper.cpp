@@ -71,6 +71,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Marquee", "marquee"},
         { "Stepper", "stepper" },
         { "StepperItem", "stepper" },
+        {"Radio", "radio"},
+        { "Slider", "slider" },
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {

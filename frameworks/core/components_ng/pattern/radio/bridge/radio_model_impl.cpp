@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,31 @@
  * limitations under the License.
  */
 
-#include "bridge/declarative_frontend/jsview/models/radio_model_impl.h"
+#include "core/components_ng/pattern/radio/bridge/radio_model_impl.h"
 
 #include <utility>
-
-#include "bridge/declarative_frontend/jsview/js_view_common_def.h"
+#include "base/memory/referenced.h"
+#include "bridge/declarative_frontend/view_stack_processor.h"
 
 namespace OHOS::Ace::Framework {
+RefPtr<RadioTheme> GetRadioTheme()
+{
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, nullptr);
+    auto themeManager = pipelineContext->GetThemeManager();
+    CHECK_NULL_RETURN(themeManager, nullptr);
+    auto node = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto radioTheme =
+        node ? themeManager->GetTheme<RadioTheme>(node->GetThemeScopeId()) : themeManager->GetTheme<RadioTheme>();
+    return radioTheme;
+}
 
 void RadioModelImpl::Create(const std::optional<std::string>& value, const std::optional<std::string>& group,
     const std::optional<int32_t>& indicator)
 {
-    RefPtr<RadioTheme> radioTheme = JSViewAbstract::GetTheme<RadioTheme>();
+    auto radioTheme = GetRadioTheme();
     auto radioComponent = AceType::MakeRefPtr<OHOS::Ace::RadioComponent<std::string>>(radioTheme);
 
     if (value.has_value()) {
@@ -66,7 +79,16 @@ void RadioModelImpl::SetChecked(bool isChecked)
 
 void RadioModelImpl::SetOnChange(NG::ChangeEvent&& onChange)
 {
-    JSViewSetProperty(&CheckableComponent::SetOnChange, std::move(onChange));
+#ifndef NG_BUILD
+    auto component = AceType::DynamicCast<CheckableComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
+    if (!component) {
+        LOGW("Failed to get '%{public}s' in view stack", AceType::TypeName<CheckableComponent>());
+        return;
+    }
+    component->SetOnChange(std::move(onChange));
+#else
+    LOGE("do not support JSViewSetProperty in new pipeline");
+#endif
 }
 
 void RadioModelImpl::SetWidth(const Dimension& width)

@@ -1139,10 +1139,77 @@ class QRCodeModifier extends ArkQRCodeComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class RadioModifier extends ArkRadioComponent {
+
+class LazyArkRadioComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkRadioComponent.module === undefined) {
+      LazyArkRadioComponent.module = globalThis.requireNapi('arkui.components.arkradio');
+    }
+    this.lazyComponent = LazyArkRadioComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    this.lazyComponent.initialize(value);
+    return this;
+  }
+  checked(value) {
+    this.lazyComponent.checked(value);
+    return this;
+  }
+  onChange(callback) {
+    this.lazyComponent.onChange(callback);
+    return this;
+  }
+  radioStyle(value) {
+    this.lazyComponent.radioStyle(value);
+    return this;
+  }
+  width(value) {
+    this.lazyComponent.width(value);
+    return this;
+  }
+  height(value) {
+    this.lazyComponent.height(value);
+    return this;
+  }
+  size(value) {
+    this.lazyComponent.size(value);
+    return this;
+  }
+  hoverEffect(value) {
+    this.lazyComponent.hoverEffect(value);
+    return this;
+  }
+  padding(value) {
+    this.lazyComponent.padding(value);
+    return this;
+  }
+  responseRegion(value) {
+    this.lazyComponent.responseRegion(value);
+    return this;
+  }
+  margin(value) {
+    this.lazyComponent.margin(value);
+    return this;
+  }
+  contentModifier(value) {
+    this.lazyComponent.contentModifier(value);
+    return this;
+  }
+}
+
+class RadioModifier extends LazyArkRadioComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
@@ -1387,10 +1454,135 @@ class SideBarContainerModifier extends LazyArkSideBarContainerComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class SliderModifier extends ArkSliderComponent {
+
+class LazyArkSliderComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkSliderComponent.module === undefined) {
+      LazyArkSliderComponent.module = globalThis.requireNapi('arkui.components.arkslider');
+    }
+    this.lazyComponent = LazyArkSliderComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  allowChildCount() {
+    return 0;
+  }
+  initialize(value) {
+    if (!isUndefined(value[0]) && !isNull(value[0]) && isObject(value[0])) {
+      this.lazyComponent.initialize(value[0]);
+    } else {
+      this.lazyComponent.initialize(undefined);
+    }
+    return this;
+  }
+  blockColor(value) {
+    this.lazyComponent.blockColor(value);
+    return this;
+  }
+  trackColor(value) {
+    this.lazyComponent.trackColor(value);
+    return this;
+  }
+  trackColorMetrics(value) {
+    this.lazyComponent.trackColorMetrics(value);
+    return this;
+  }
+  selectedColor(value) {
+    this.lazyComponent.selectedColor(value);
+    return this;
+  }
+  minLabel(value) {
+    throw new Error('Method not implemented.');
+  }
+  maxLabel(value) {
+    throw new Error('Method not implemented.');
+  }
+  showSteps(value, options) {
+    this.lazyComponent.showSteps(value, options);
+    return this;
+  }
+  showTips(value, content) {
+    this.lazyComponent.showTips(value, content);
+    return this;
+  }
+  trackThickness(value) {
+    this.lazyComponent.trackThickness(value);
+    return this;
+  }
+  onChange(callback) {
+    this.lazyComponent.onChange(callback);
+    return this;
+  }
+  blockBorderColor(value) {
+    this.lazyComponent.blockBorderColor(value);
+    return this;
+  }
+  blockBorderWidth(value) {
+    this.lazyComponent.blockBorderWidth(value);
+    return this;
+  }
+  stepColor(value) {
+    this.lazyComponent.stepColor(value);
+    return this;
+  }
+  trackBorderRadius(value) {
+    this.lazyComponent.trackBorderRadius(value);
+    return this;
+  }
+  selectedBorderRadius(value) {
+    this.lazyComponent.selectedBorderRadius(value);
+    return this;
+  }
+  blockSize(value) {
+    this.lazyComponent.blockSize(value);
+    return this;
+  }
+  blockStyle(value) {
+    this.lazyComponent.blockStyle(value);
+    return this;
+  }
+  stepSize(value) {
+    this.lazyComponent.stepSize(value);
+    return this;
+  }
+  sliderInteractionMode(value) {
+    this.lazyComponent.sliderInteractionMode(value);
+    return this;
+  }
+  minResponsiveDistance(value) {
+    this.lazyComponent.minResponsiveDistance(value);
+    return this;
+  }
+  contentModifier(value) {
+    this.lazyComponent.contentModifier(value);
+    return this;
+  }
+  slideRange(value) {
+    this.lazyComponent.slideRange(value);
+    return this;
+  }
+  enableHapticFeedback(value) {
+    this.lazyComponent.enableHapticFeedback(value);
+    return this;
+  }
+  prefix(value, options) {
+    this.lazyComponent.prefix(value, options);
+    return this;
+  }
+  suffix(value, options) {
+    this.lazyComponent.suffix(value, options);
+    return this;
+  }
+}
+
+class SliderModifier extends LazyArkSliderComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

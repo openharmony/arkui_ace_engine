@@ -50,8 +50,8 @@ public:
     virtual void FromJson(const std::unique_ptr<JsonValue>& json) {}
 
     void SetHost(const WeakPtr<FrameNode>& host);
-    RefPtr<FrameNode> GetHost() const;
-    void UpdatePaintPropertyHost(const PaintProperty* renderProperty);
+    ACE_FORCE_EXPORT RefPtr<FrameNode> GetHost() const;
+    ACE_FORCE_EXPORT void UpdatePaintPropertyHost(const PaintProperty* renderProperty);
 
 protected:
     void UpdatePaintProperty(const PaintProperty* renderProperty) {}

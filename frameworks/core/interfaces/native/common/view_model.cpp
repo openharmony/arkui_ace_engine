@@ -112,7 +112,6 @@
 #include "core/components_ng/pattern/security_component/location_button/location_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/paste_button/paste_button_model_ng.h"
 #include "core/components_ng/pattern/security_component/save_button/save_button_model_ng.h"
-#include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/counter/counter_model_ng.h"
@@ -128,9 +127,11 @@
 #endif // WINDOW_SCENE_SUPPORTED
 #include "core/interfaces/native/node/node_api.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
+#include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "core/interfaces/native/node/extension_companion_node.h"
 #include "core/interfaces/native/node/flow_item_modifier.h"
+#include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
@@ -354,10 +355,14 @@ void* createListItemGroupNode(ArkUI_Int32 nodeId)
 
 void* createSliderNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = SliderModelNG::CreateFrameNode(nodeId);
+    auto arkUISliderModifier = NG::NodeModifier::GetSliderModifier();
+    CHECK_NULL_RETURN(arkUISliderModifier, nullptr);
+    auto arkUINodeHandle = arkUISliderModifier->createSliderFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createCanvasNode(ArkUI_Int32 nodeId)
@@ -532,10 +537,14 @@ void* createImageAnimatorNode(ArkUI_Int32 nodeId)
 
 void* createRadioNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = RadioModelNG::CreateFrameNode(nodeId);
+    auto arkUIRadioModifier = NG::NodeModifier::GetRadioModifier();
+    CHECK_NULL_RETURN(arkUIRadioModifier, nullptr);
+    auto arkUINodeHandle = arkUIRadioModifier->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createSelectNode(ArkUI_Int32 nodeId)

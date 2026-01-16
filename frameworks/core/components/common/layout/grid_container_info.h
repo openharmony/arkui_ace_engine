@@ -135,7 +135,7 @@ public:
     /*
      * Use system screen width build column width.
      */
-    void ACE_EXPORT BuildColumnWidth();
+    void ACE_FORCE_EXPORT BuildColumnWidth();
     ACE_FORCE_EXPORT void BuildColumnWidth(double width);
 
 private:

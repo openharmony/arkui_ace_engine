@@ -114,7 +114,7 @@ public:
         return renderContext->GetForegroundColor().value_or(Color::FOREGROUND);
     }
 
-    void FlushOverlayModifier();
+    ACE_FORCE_EXPORT void FlushOverlayModifier();
 
     void FlushContentModifier();
 

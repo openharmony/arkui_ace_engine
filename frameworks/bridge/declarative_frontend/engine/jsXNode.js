@@ -2080,7 +2080,9 @@ const __creatorMap__ = new Map([
         }],
     ['Radio', (context) => {
             return new TypedFrameNode(context, 'Radio', (node, type) => {
-                return new ArkRadioComponent(node, type);
+                getUINativeModule().loadNativeModule('Radio');
+                let module = globalThis.requireNapi('arkui.components.arkradio');
+                return module.createComponent(node, type);
             });
         }],
     ['Rating', (context) => {
@@ -2092,7 +2094,9 @@ const __creatorMap__ = new Map([
         }],
     ['Slider', (context) => {
             return new TypedFrameNode(context, 'Slider', (node, type) => {
-                return new ArkSliderComponent(node, type);
+                getUINativeModule().loadNativeModule('Slider');
+                let module = globalThis.requireNapi('arkui.components.arkslider');
+                return module.createComponent(node, type);
             });
         }],
     ['Select', (context) => {
@@ -2260,7 +2264,9 @@ const __attributeMap__ = new Map([
         if (!node.getNodePtr()) {
             return undefined;
         }
-        node._componentAttribute = new ArkRadioComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        getUINativeModule().loadNativeModule('Radio');
+        let module = globalThis.requireNapi('arkui.components.arkradio');
+        node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
     }],
     ['Slider', (node) => {
@@ -2270,7 +2276,9 @@ const __attributeMap__ = new Map([
         if (!node.getNodePtr()) {
             return undefined;
         }
-        node._componentAttribute = new ArkSliderComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
+        getUINativeModule().loadNativeModule('Slider');
+        let module = globalThis.requireNapi('arkui.components.arkslider');
+        node._componentAttribute = module.createComponent(node.getNodePtr(), ModifierType.FRAME_NODE);
         return node._componentAttribute;
     }],
     ['Toggle', (node) => {

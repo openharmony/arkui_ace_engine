@@ -28,7 +28,7 @@ ACE_FORCE_EXPORT RSPoint ToRSPoint(const NG::PointF& point);
 RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
 ACE_FORCE_EXPORT RSColor ToRSColor(const Color& color);
 ACE_FORCE_EXPORT RSColor ToRSColor(const LinearColor& color);
-RSRect ToRSRect(const NG::RectF& rect);
+ACE_FORCE_EXPORT RSRect ToRSRect(const NG::RectF& rect);
 RSTextDirection ToRSTextDirection(const TextDirection& txtDir);
 RSTextAlign ToRSTextAlign(const TextAlign& align);
 RSWordBreakType ToRSWordBreakType(const WordBreak& wordBreak);

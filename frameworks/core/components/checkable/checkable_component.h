@@ -525,7 +525,9 @@ private:
 };
 
 template<class VALUE_TYPE>
-class ACE_EXPORT RadioComponent : public CheckableComponent, public CheckableValue<VALUE_TYPE>, public LabelTarget {
+class ACE_FORCE_EXPORT RadioComponent : public CheckableComponent,
+                                        public CheckableValue<VALUE_TYPE>,
+                                        public LabelTarget {
     DECLARE_ACE_TYPE(RadioComponent<VALUE_TYPE>, CheckableComponent, LabelTarget);
 
 public:

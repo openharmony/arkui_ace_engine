@@ -21,6 +21,7 @@
 #include "bridge/declarative_frontend/engine/jsi/jsi_view_register.h"
 #include "bridge/declarative_frontend/engine/js_execution_scope_defines.h"
 #include "bridge/declarative_frontend/jsview/js_linear_gradient_binding.h"
+#include "bridge/declarative_frontend/jsview/js_color_metrics_linear_gradient_binding.h"
 #ifdef NG_BUILD
 #include "bridge/declarative_frontend/ng/declarative_frontend_ng.h"
 #else
@@ -115,7 +116,6 @@
 #ifdef QRCODEGEN_SUPPORT
 #include "bridge/declarative_frontend/jsview/js_qrcode.h"
 #endif
-#include "bridge/declarative_frontend/jsview/js_radio.h"
 #include "bridge/declarative_frontend/jsview/js_rect.h"
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "bridge/declarative_frontend/jsview/js_recycle_view.h"
@@ -134,7 +134,6 @@
 #include "bridge/declarative_frontend/jsview/js_select.h"
 #include "bridge/declarative_frontend/jsview/js_shape.h"
 #include "bridge/declarative_frontend/jsview/js_sheet.h"
-#include "bridge/declarative_frontend/jsview/js_slider.h"
 #include "bridge/declarative_frontend/jsview/js_sliding_panel.h"
 #include "bridge/declarative_frontend/jsview/js_span.h"
 #include "bridge/declarative_frontend/jsview/js_stack.h"
@@ -468,7 +467,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
-    { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
 #ifndef ARKUI_WEARABLE
     { "FolderStack", JSFolderStack::JSBind},
@@ -490,7 +488,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polygon", JSPolygon::JSBind },
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
-    { "Radio", JSRadio::JSBind },
 #ifdef QRCODEGEN_SUPPORT
     { "QRCode", JSQRCode::JSBind },
 #endif
@@ -514,7 +511,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "RelativeContainer", JSRelativeContainer::JSBind },
     { "__Common__", JSCommonView::JSBind },
     { "LinearGradient", JSLinearGradientBinding::JSBind },
-    { "ColorMetricsLinearGradient", JSColorMetricsLinearGradient::JSBind },
+    { "ColorMetricsLinearGradient", JSColorMetricsLinearGradientBinding::JSBind },
     { "FormLink", JSFormLink::JSBind },
 #ifdef FORM_BUTTON_COMPONENT_SUPPORT
     { "FormButton", JSFormButton::JSBind },
@@ -569,7 +566,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Grid", JSGrid::JSBind },
     { "GridItem", JSGridItem::JSBind },
     { "GridContainer", JSGridContainer::JSBind },
-    { "Slider", JSSlider::JSBind },
     { "Stack", JSStack::JSBind },
 #ifndef ARKUI_WEARABLE
     { "FolderStack", JSFolderStack::JSBind},
@@ -624,7 +620,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "PageTransitionExit", JSPageTransition::JSBind },
     { "AlphabetIndexer", JSIndexer::JSBind },
     { "Hyperlink", JSHyperlink::JSBind },
-    { "Radio", JSRadio::JSBind },
     { "ActionSheet", JSActionSheet::JSBind },
     { "AlertDialog", JSAlertDialog::JSBind },
     { "ContextMenu", JSContextMenu::JSBind },
@@ -735,7 +730,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "__Common__", JSCommonView::JSBind },
     { "__Recycle__", JSRecycleView::JSBind },
     { "LinearGradient", JSLinearGradientBinding::JSBind },
-    { "ColorMetricsLinearGradient", JSColorMetricsLinearGradient::JSBind },
+    { "ColorMetricsLinearGradient", JSColorMetricsLinearGradientBinding::JSBind },
     { "ImageSpan", JSImageSpan::JSBind },
 #ifdef PREVIEW
     { "AbilityComponent", JSAbilityComponent::JSBind },
@@ -864,7 +859,7 @@ void RegisterAllModule(BindingTarget globalObj, void* nativeEngine, bool isCusto
     JSTextClockController::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
     JSLinearGradientBinding::JSBind(globalObj);
-    JSColorMetricsLinearGradient::JSBind(globalObj);
+    JSColorMetricsLinearGradientBinding::JSBind(globalObj);
 #ifdef WEB_SUPPORTED
 #if !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
     JSWebController::JSBind(globalObj);
@@ -904,7 +899,7 @@ void RegisterAllFormModule(BindingTarget globalObj, void* nativeEngine)
     JSRenderingContextSettings::JSBind(globalObj);
     JSTextTimerController::JSBind(globalObj);
     JSLinearGradientBinding::JSBind(globalObj);
-    JSColorMetricsLinearGradient::JSBind(globalObj);
+    JSColorMetricsLinearGradientBinding::JSBind(globalObj);
     for (auto& iter : formBindFuncs) {
         iter.second(globalObj);
     }
@@ -1043,7 +1038,7 @@ void JsBindFormViews(
         JSProfiler::JSBind(globalObj);
         JSCommonView::JSBind(globalObj);
         JSLinearGradientBinding::JSBind(globalObj);
-        JSColorMetricsLinearGradient::JSBind(globalObj);
+        JSColorMetricsLinearGradientBinding::JSBind(globalObj);
         JSPath2D::JSBind(globalObj);
         JSOffscreenRenderingContext::JSBind(globalObj);
         JSRenderingContextSettings::JSBind(globalObj);

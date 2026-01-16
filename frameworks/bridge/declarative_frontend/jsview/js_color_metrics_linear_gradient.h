@@ -17,7 +17,9 @@
 #define FOUNDATION_ACE_FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JSVIEW_JS_COLOR_METRICS_LINEAR_GRADIENT_H
 
 #include "base/memory/referenced.h"
-#include "bridge/declarative_frontend/engine/bindings.h"
+#include "ui/base/geometry/dimension.h"
+#include "ui/properties/color.h"
+
 #include "core/components/common/properties/color.h"
 
 namespace OHOS::Ace::Framework {
@@ -29,9 +31,8 @@ struct ColorMetricsStop {
 
 class JSColorMetricsLinearGradient : public Referenced {
 public:
-    static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& args);
-    static void Destructor(JSColorMetricsLinearGradient* jsColorMetricsLinearGradientPtr);
+    JSColorMetricsLinearGradient() = default;
+    ~JSColorMetricsLinearGradient() override = default;
 
     const std::vector<ColorMetricsStop>& GetColorMetricsGradient() const
     {
@@ -39,9 +40,9 @@ public:
     }
 
 private:
-    static bool ParseColorMetricsStop(const JSRef<JSObject>& itemObject, ColorMetricsStop& stop);
-
+    friend class JSColorMetricsLinearGradientBinding;
     std::vector<ColorMetricsStop> colorMetricsGradient_;
+    ACE_DISALLOW_COPY_AND_MOVE(JSColorMetricsLinearGradient);
 };
 } // namespace OHOS::Ace::Framework
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_COLOR_METRICS_LINEAR_GRADIENT_H

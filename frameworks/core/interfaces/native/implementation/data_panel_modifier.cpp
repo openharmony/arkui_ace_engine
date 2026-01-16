@@ -16,11 +16,13 @@
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_ng.h"
 #include "core/components_ng/pattern/data_panel/data_panel_model_static.h"
-#include "core/components_ng/pattern/slider/slider_model_ng.h"
+#include "core/components_ng/pattern/slider/bridge/slider_dynamic_module.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/converter_union.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
+#include "core/common/dynamic_module_helper.h"
 
 namespace {
 constexpr float DATA_PANEL_VALUE_MIN = 0.0;
@@ -39,6 +41,19 @@ void ValidateDataPanelValues(float& value)
 }
 
 namespace OHOS::Ace::NG::Converter {
+namespace {
+const ArkUISliderModifier* GetSliderModifier()
+{
+    static const ArkUISliderModifier* cachedModifier = nullptr;
+    if (!cachedModifier) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Slider");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUISliderModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
+}
+}
+
 struct DataPanelOptions {
     std::optional<std::vector<double>> values;
     std::optional<double> max;
@@ -84,12 +99,9 @@ Gradient Convert(const Ark_Union_ResourceColor_LinearGradient& src)
     Gradient dst;
     Converter::VisitUnion(src,
         [&dst](const Ark_ResourceColor& value) {
+            auto arkUISliderModifier = GetSliderModifier();
+            CHECK_NULL_VOID(arkUISliderModifier);
             auto colorOpt = Converter::OptConvert<Color>(value);
-            auto gradientOpt = colorOpt.has_value() ?
-                std::optional<Gradient>{SliderModelNG::CreateSolidGradient(colorOpt.value())} : std::nullopt;
-            if (gradientOpt.has_value()) {
-                dst = gradientOpt.value();
-            }
         },
         [&dst](const Ark_LinearGradient& value) {
             auto gradientOpt = Converter::OptConvert<Gradient>(value);

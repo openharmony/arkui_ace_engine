@@ -17,37 +17,56 @@
 
 #include "cj_lambda.h"
 
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 
 using namespace OHOS::Ace;
 
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::RadioModelNG* GetRadioModel()
+{
+    static NG::RadioModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Radio");
+        if (module  == nullptr) {
+            LOGF("Can't find radio dynamic module");
+            abort();
+        }
+        model = reinterpret_cast<NG::RadioModelNG*>(module->GetModel());
+    }
+    return model;
+}
+} // namespace OHOS::Ace
+
 extern "C" {
 void FfiOHOSAceFrameworkRadioCreate(const char* group, const char* value)
 {
     std::optional<int32_t> indicator;
-    RadioModel::GetInstance()->Create(std::optional<std::string>(value), std::optional<std::string>(group), indicator);
+    GetRadioModel()->Create(std::optional<std::string>(value), std::optional<std::string>(group), indicator);
 }
 
 void FfiOHOSAceFrameworkRadioWithIndicatorCreate(
     const char* group, const char* value, int32_t indicatorType, void (*indicatorBuilder)())
 {
     std::optional<int32_t> indicator(indicatorType);
-    RadioModel::GetInstance()->Create(std::optional<std::string>(value), std::optional<std::string>(group), indicator);
-    RadioModel::GetInstance()->SetBuilder(CJLambda::Create(indicatorBuilder));
+    GetRadioModel()->Create(std::optional<std::string>(value), std::optional<std::string>(group), indicator);
+    GetRadioModel()->SetBuilder(CJLambda::Create(indicatorBuilder));
 }
 
 void FfiOHOSAceFrameworkRadioChecked(bool value)
 {
-    RadioModel::GetInstance()->SetChecked(value);
+    GetRadioModel()->SetChecked(value);
 }
 
 void FfiOHOSAceFrameworkRadioSetStyle(
     uint32_t checkedBackgroundColor, uint32_t uncheckedBorderColor, uint32_t indicatorColor)
 {
-    RadioModel::GetInstance()->SetCheckedBackgroundColor(Color(checkedBackgroundColor));
-    RadioModel::GetInstance()->SetUncheckedBorderColor(Color(uncheckedBorderColor));
-    RadioModel::GetInstance()->SetIndicatorColor(Color(indicatorColor));
+    GetRadioModel()->SetCheckedBackgroundColor(Color(checkedBackgroundColor));
+    GetRadioModel()->SetUncheckedBorderColor(Color(uncheckedBorderColor));
+    GetRadioModel()->SetIndicatorColor(Color(indicatorColor));
 }
 
 void FfiOHOSAceFrameworkRadioSetSize(double width, int32_t widthUnit, double height, int32_t heightUnit)
@@ -66,7 +85,7 @@ void FfiOHOSAceFrameworkRadioSetPaddings(CJEdge params)
     paddings.right = NG::CalcLength(Dimension(params.right, static_cast<DimensionUnit>(params.rightUnit)));
     paddings.bottom = NG::CalcLength(Dimension(params.bottom, static_cast<DimensionUnit>(params.bottomUnit)));
     paddings.left = NG::CalcLength(Dimension(params.left, static_cast<DimensionUnit>(params.leftUnit)));
-    RadioModel::GetInstance()->SetPadding(oldPaddings, paddings);
+    GetRadioModel()->SetPadding(oldPaddings, paddings);
 }
 
 void FfiOHOSAceFrameworkRadioSetPadding(double padding, uint32_t unit)
@@ -77,25 +96,25 @@ void FfiOHOSAceFrameworkRadioSetPadding(double padding, uint32_t unit)
 
 void FfiOHOSAceFrameworkRadioSetHoverEffect(int32_t value)
 {
-    RadioModel::GetInstance()->SetHoverEffect(static_cast<HoverEffectType>(value));
+    GetRadioModel()->SetHoverEffect(static_cast<HoverEffectType>(value));
 }
 
 void FfiOHOSAceFrameworkRadioOnChange(void (*callback)(bool isChecked))
 {
-    RadioModel::GetInstance()->SetOnChange(CJLambda::Create(callback));
+    GetRadioModel()->SetOnChange(CJLambda::Create(callback));
 }
 
 void FfiRadioSetResponseRegion(CJResponseRegion value)
 {
     std::vector<DimensionRect> result;
     ParseCJResponseRegion(value, result);
-    RadioModel::GetInstance()->SetResponseRegion(result);
+    GetRadioModel()->SetResponseRegion(result);
 }
 
 void FfiRadioSetResponseRegionArray(VectorStringPtr vecContent)
 {
     std::vector<DimensionRect> result;
     ParseVectorStringPtr(vecContent, result);
-    RadioModel::GetInstance()->SetResponseRegion(result);
+    GetRadioModel()->SetResponseRegion(result);
 }
 }

@@ -25,11 +25,13 @@
 #include "core/components_ng/pattern/loading_progress/loading_progress_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_layout_property.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
+#include "core/components_ng/pattern/radio/bridge/radio_content_modifier_helper.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/rating/bridge/rating_content_modifier_helper.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 #include "core/components_ng/pattern/rating/rating_model_static.h"
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
+#include "core/components_ng/pattern/slider/bridge/slider_content_modifier_helper.h"
 #include "core/components_ng/pattern/text_clock/text_clock_model_ng.h"
 #include "core/components_ng/pattern/texttimer/text_timer_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
@@ -72,6 +74,21 @@ const GENERATED_ArkUICheckboxGroupContentModifier* GetCheckboxGroupContentModifi
         }
         cachedModifier = reinterpret_cast<const GENERATED_ArkUICheckboxGroupContentModifier*>(
             module->GetCustomModifier("contentModifier"));
+    }
+    return cachedModifier;
+}
+
+const GENERATED_ArkUIRadioContentModifier* GetRadioContentModifier()
+{
+    static const GENERATED_ArkUIRadioContentModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Radio");
+        if (module == nullptr) {
+            LOGF("Can't find radio dynamic module");
+            abort();
+        }
+        cachedModifier =
+            reinterpret_cast<const GENERATED_ArkUIRadioContentModifier*>(module->GetCustomModifier("contentModifier"));
     }
     return cachedModifier;
 }
@@ -244,35 +261,17 @@ void ContentModifierRadioImpl(Ark_NativePointer node,
                               const Ark_Object* contentModifier,
                               const RadioModifierBuilder* builder)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
-    auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-        RadioConfiguration config) -> RefPtr<FrameNode> {
-        Ark_ContentModifier contentModifier = (*objectKeeper).get();
-        Ark_RadioConfiguration arkConfig;
-        arkConfig.contentModifier = contentModifier;
-        arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.value = Converter::ArkValue<Ark_String>(config.value_, Converter::FC);
-        arkConfig.checked = Converter::ArkValue<Ark_Boolean>(config.checked_);
-        auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>([frameNode](bool change) {
-            RadioModelNG::SetChangeValue(frameNode, change);
-        });
-        arkConfig.triggerChange = triggerCallback.ArkValue();
-        auto radioNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-        arkBuilder.BuildAsync([radioNode](const RefPtr<UINode>& uiNode) mutable {
-            radioNode->AddChild(uiNode);
-            radioNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
-            }, node, arkConfig);
-        return radioNode;
-    };
-    RadioModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    CHECK_NULL_VOID(node);
+    auto modifier = GetRadioContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->contentModifierRadioImpl(node, contentModifier, builder);
 }
 void ResetContentModifierRadioImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    RadioModelNG::SetBuilderFunc(frameNode, nullptr);
+    CHECK_NULL_VOID(node);
+    auto modifier = GetRadioContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->resetContentModifierRadioImpl(node);
 }
 const GENERATED_ArkUIRatingContentModifier* GetRatingContentModifier()
 {
@@ -336,43 +335,31 @@ void ResetContentModifierMenuItemImpl(Ark_NativePointer node)
     CHECK_NULL_VOID(frameNode);
     SelectModelNG::ResetBuilderFunc(frameNode);
 }
-void ContentModifierSliderImpl(Ark_NativePointer node,
-                               const Ark_Object* contentModifier,
-                               const SliderModifierBuilder* builder)
+const GENERATED_ArkUISliderContentModifier* GetSliderContentModifier()
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
-    auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
-        const SliderConfiguration& config) -> RefPtr<FrameNode> {
-        Ark_ContentModifier contentModifier = (*objectKeeper).get();
-        Ark_SliderConfiguration arkConfig;
-        arkConfig.contentModifier = contentModifier;
-        arkConfig.value = Converter::ArkValue<Ark_Float64>(config.value_);
-        arkConfig.min = Converter::ArkValue<Ark_Float64>(config.min_);
-        arkConfig.max = Converter::ArkValue<Ark_Float64>(config.max_);
-        arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
-        arkConfig.step = Converter::ArkValue<Ark_Float64>(config.step_);
-        auto triggerCallback = CallbackKeeper::Claim<SliderTriggerChangeCallback>(
-            [frameNode](Ark_Float64 value, Ark_SliderChangeMode mode) {
-                SliderModelNG::SetChangeValue(frameNode, Converter::Convert<double>(value), mode);
-        });
-        arkConfig.triggerChange = triggerCallback.ArkValue();
-
-        auto sliderNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
-        arkBuilder.BuildAsync([sliderNode](const RefPtr<UINode>& uiNode) mutable {
-            sliderNode->AddChild(uiNode);
-            sliderNode->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);
-            }, node, arkConfig);
-        return sliderNode;
-    };
-    SliderModelNG::SetBuilderFunc(frameNode, std::move(builderFunc));
+    static const GENERATED_ArkUISliderContentModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Slider");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier =
+            reinterpret_cast<const GENERATED_ArkUISliderContentModifier*>(module->GetCustomModifier("contentModifier"));
+    }
+    return cachedModifier;
+}
+void ContentModifierSliderImpl(
+    Ark_NativePointer node, const Ark_Object* contentModifier, const SliderModifierBuilder* builder)
+{
+    CHECK_NULL_VOID(node);
+    auto modifier = GetSliderContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->contentModifierSliderImpl(node, contentModifier, builder);
 }
 void ResetContentModifierSliderImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    SliderModelNG::SetBuilderFunc(frameNode, nullptr);
+    CHECK_NULL_VOID(node);
+    auto modifier = GetSliderContentModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->resetContentModifierSliderImpl(node);
 }
 void ContentModifierTextClockImpl(Ark_NativePointer node,
                                   const Ark_Object* contentModifier,

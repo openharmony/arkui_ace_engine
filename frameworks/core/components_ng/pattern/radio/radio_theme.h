@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_RADIO_THEME_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_RADIO_THEME_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_THEME_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_THEME_H
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
-#include "core/components_ng/pattern/radio/radio_model.h"
 #include "core/components_ng/base/view_abstract_model.h"
+#include "core/components_ng/pattern/radio/radio_model_ng.h"
 
 namespace OHOS::Ace::Framework {
 class JSRadioTheme {
@@ -31,9 +31,10 @@ public:
             // no need to apply custom theme colors
             return;
         }
-        RadioModel::GetInstance()->SetCheckedBackgroundColor(themeColors->CompBackgroundEmphasize());
-        RadioModel::GetInstance()->SetUncheckedBorderColor(themeColors->IconFourth());
-        RadioModel::GetInstance()->SetIndicatorColor(themeColors->IconOnPrimary());
+        NG::RadioModelNG model;
+        model.SetCheckedBackgroundColor(themeColors->CompBackgroundEmphasize());
+        model.SetUncheckedBorderColor(themeColors->IconFourth());
+        model.SetIndicatorColor(themeColors->IconOnPrimary());
     }
 
     static bool ObtainCheckedBackgroundColor(Color &color)
@@ -64,4 +65,4 @@ public:
     }
 };
 } // namespace OHOS::Ace::Framework
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_THEME_JS_RADIO_THEME_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_RADIO_RADIO_THEME_H
