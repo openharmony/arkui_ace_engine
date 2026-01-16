@@ -1688,7 +1688,10 @@ HWTEST_F(FormPatternTest, FormPatternTest_042, TestSize.Level1)
     EXPECT_NE(pattern, nullptr);
 
     pattern->isUnTrust_ = true;
-    pattern->FireFormSurfaceChangeCallback(0, 0, 0);
+    float width = 100;
+    float height = 100;
+    float borderWidth = 100;
+    pattern->FireFormSurfaceChangeCallback(width, height, borderWidth);
     EXPECT_EQ(pattern->isUnTrust_, false);
 }
 
