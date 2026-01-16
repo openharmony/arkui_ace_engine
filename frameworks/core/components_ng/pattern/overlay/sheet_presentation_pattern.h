@@ -1102,6 +1102,16 @@ public:
         return sheetHeightForTranslate_;
     }
 
+    void SetNeedDoubleAvoidAfterLayout(bool needDoubleAvoidAfterLayout)
+    {
+        needDoubleAvoidAfterLayout_ = needDoubleAvoidAfterLayout;
+    }
+
+    bool GetNeedDoubleAvoidAfterLayout() const
+    {
+        return needDoubleAvoidAfterLayout_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
@@ -1277,6 +1287,7 @@ private:
     RefPtr<SheetObject> sheetObject_;
     WeakPtr<FrameNode> dragBarNode_;
     float sheetHeightForTranslate_ { 0.0 };
+    bool needDoubleAvoidAfterLayout_ = false;
 };
 } // namespace OHOS::Ace::NG
 
