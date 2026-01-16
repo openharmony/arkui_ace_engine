@@ -416,6 +416,7 @@ void GridScrollLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
     }
     UpdateOverlay(layoutWrapper);
     isLayouted_ = true;
+    layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
 }
 
 void GridScrollLayoutAlgorithm::ClearUnlayoutedItems(LayoutWrapper* layoutWrapper)
@@ -534,7 +535,6 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
             if (canOverScrollStart_) {
                 info_.UpdateEndIndex(offset, mainSize, mainGap_);
             }
-            layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
             return;
         }
         // we need lastline if blank at start is not fully filled when start line is shorter
@@ -549,7 +549,6 @@ void GridScrollLayoutAlgorithm::FillGridViewportAndMeasureChildren(
     } else {
         info_.UpdateEndIndex(info_.currentOffset_, mainSize, mainGap_);
     }
-    layoutWrapper->GetHostNode()->ChildrenUpdatedFrom(-1);
     if (info_.targetIndex_.has_value()) {
         info_.targetIndex_.reset();
     } else {

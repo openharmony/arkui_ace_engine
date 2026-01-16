@@ -105,12 +105,17 @@ HWTEST_F(GridScrollLayoutTestNg, Remeasure001, TestSize.Level1)
     CreateFixedItems(20);
     CreateDone();
 
+    // children update from 0
+    frameNode_->ChildrenUpdatedFrom(0);
     auto layoutAlgorithmWrapper = AceType::DynamicCast<LayoutAlgorithmWrapper>(frameNode_->GetLayoutAlgorithm());
     auto algo = AceType::DynamicCast<GridScrollLayoutAlgorithm>(layoutAlgorithmWrapper->GetLayoutAlgorithm());
     ASSERT_TRUE(algo);
     algo->Measure(AceType::RawPtr(frameNode_));
     EXPECT_TRUE(algo->unLayoutedItems_.empty());
     EXPECT_EQ(algo->info_.lastMainSize_, HEIGHT);
+
+    // children update from 0 after measure
+    EXPECT_EQ(frameNode_->childrenUpdatedFrom_, 0);
 
     auto layoutProperty = AceType::DynamicCast<GridLayoutProperty>(frameNode_->GetLayoutProperty());
     layoutProperty->layoutConstraint_->selfIdealSize.SetHeight(HEIGHT - 100);
@@ -119,6 +124,9 @@ HWTEST_F(GridScrollLayoutTestNg, Remeasure001, TestSize.Level1)
     EXPECT_EQ(algo->unLayoutedItems_.size(), 2);
     EXPECT_EQ(algo->unLayoutedItems_.count(7), 1);
     EXPECT_EQ(algo->unLayoutedItems_.count(6), 1);
+
+    algo->Layout(AceType::RawPtr(frameNode_));
+    EXPECT_EQ(frameNode_->childrenUpdatedFrom_, -1);
 }
 
 /**
