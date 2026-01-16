@@ -114,7 +114,7 @@ class JSHyperlink extends JSViewAbstract {
   }
 
   static responseRegion(region) {
-    JSViewAbstract.responseRegion(region)
+    JSViewAbstract.responseRegion(region);
     getUINativeModule().hyperlink.setResponseRegion(true);
   }
 
