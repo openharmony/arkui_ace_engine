@@ -53,10 +53,10 @@ class ArkSliderComponent extends ArkComponent implements SliderAttribute {
     return this;
   }
   minLabel(value: string): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'minLabel not supported in attributeModifier scenario.');
   }
   maxLabel(value: string): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'maxLabel not supported in attributeModifier scenario.');
   }
   showSteps(value: boolean, options?: SliderShowStepOptions): this {
     let stepOptions = new ArkSliderStepOptions(value, options);
