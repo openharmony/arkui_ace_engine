@@ -186,18 +186,6 @@ const ComponentAppear = __componentAppear__Internal;
 const ComponentBuilt = __componentBuilt__Internal;
 
 /**
- * The function decorated by the decorator is executed when a custom component is 
- * attached to the main tree.
- */
-const ComponentAttach = __componentAttach__Internal;
-
-/**
- * The function decorated by the decorator is executed when a custom component is 
- * detached from the main tree.
- */
-const ComponentDetach = __componentDetach__Internal;
-
-/**
  * The function decorated by the decorator is invoked when a reusable custom component 
  * is re-added to the node tree from the reuse cache to receive construction parameters
  * of the component.
@@ -436,8 +424,6 @@ export default {
   ComponentInit,
   ComponentAppear,
   ComponentBuilt,
-  ComponentAttach,
-  ComponentDetach,
   ComponentReuse,
   ComponentRecycle,
   ComponentDisappear,
