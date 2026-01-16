@@ -203,6 +203,23 @@ Ark_Int32 GetDisplayIdImpl(Ark_DragEvent peer)
     const auto value = info->GetDisplayId();
     return Converter::ArkValue<Ark_Int32>(value);
 }
+Ark_String GetDragSourceImpl(Ark_DragEvent peer)
+{
+    std::string errStr = "";
+    const auto errValue = Converter::ArkValue<Ark_String>(errStr);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(peer->dragInfo, errValue);
+    auto& value = peer->dragInfo->GetDragSource();
+    return Converter::ArkValue<Ark_String>(value);
+}
+Ark_Boolean IsRemoteImpl(Ark_DragEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Boolean>(false);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(peer->dragInfo, errValue);
+    auto isRemote = peer->dragInfo->isRemoteDev();
+    return Converter::ArkValue<Ark_Boolean>(isRemote);
+}
 void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
                                      const Ark_String* configuration)
 {
@@ -299,6 +316,8 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
         DragEventAccessor::GetVelocityYImpl,
         DragEventAccessor::GetVelocityImpl,
         DragEventAccessor::GetDisplayIdImpl,
+        DragEventAccessor::GetDragSourceImpl,
+        DragEventAccessor::IsRemoteImpl,
         DragEventAccessor::ExecuteDropAnimationImpl,
         DragEventAccessor::EnableInternalDropAnimationImpl,
         DragEventAccessor::GetGlobalDisplayXImpl,
