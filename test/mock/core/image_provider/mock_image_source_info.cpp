@@ -153,8 +153,8 @@ ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, s
     isSvg_ = IsSVGSource(src_, srcType_, resourceId_);
 }
 
-ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<uint8_t[]>& buffer, size_t size)
-    : buffer_(buffer), size_(size)
+ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<uint8_t[]>& buffer, size_t bufferSize)
+    : buffer_(buffer), bufferSize_(bufferSize)
 {
     isSvg_ = true;
 }
