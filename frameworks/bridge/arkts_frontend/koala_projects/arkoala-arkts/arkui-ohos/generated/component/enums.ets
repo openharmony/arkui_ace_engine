@@ -655,7 +655,9 @@ export enum IlluminatedType {
 export enum EllipsisMode {
     START = 0,
     CENTER = 1,
-    END = 2
+    END = 2,
+    MULTILINE_START = 3,
+    MULTILINE_CENTER = 4
 }
 export type Nullable<T = void> = T | undefined;
 export enum OptionWidthMode {

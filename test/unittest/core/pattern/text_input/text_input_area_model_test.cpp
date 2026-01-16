@@ -2184,4 +2184,72 @@ HWTEST_F(TextInputAreaTest, SetCompressLeadingPunctuation002, TestSize.Level1)
     layoutProperty->UpdateCompressLeadingPunctuation(false);
     EXPECT_EQ(layoutProperty->GetCompressLeadingPunctuation(), false);
 }
+
+/**
+ * @tc.name: GetTextOverflow001
+ * @tc.desc: Test GetTextOverflow by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetTextOverflow001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    textFieldModelNG.SetTextOverflow(frameNode, TextOverflow::MARQUEE);
+    TextOverflow result = textFieldModelNG.GetTextOverflow(frameNode);
+    EXPECT_EQ(result, TextOverflow::MARQUEE);
+}
+
+/**
+ * @tc.name: GetTextOverflow002
+ * @tc.desc: Test GetTextOverflow by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetTextOverflow002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    textFieldModelNG.SetTextOverflow(frameNode, TextOverflow::MARQUEE);
+    TextOverflow result = textFieldModelNG.GetTextOverflow(frameNode);
+    EXPECT_EQ(result, TextOverflow::MARQUEE);
+}
+
+/**
+ * @tc.name: GetEllipsisMode001
+ * @tc.desc: Test GetEllipsisMode by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetEllipsisMode001, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextArea(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    textFieldModelNG.SetEllipsisMode(frameNode, EllipsisMode::HEAD);
+    EllipsisMode result = textFieldModelNG.GetEllipsisMode(frameNode);
+    EXPECT_EQ(result, EllipsisMode::HEAD);
+}
+
+/**
+ * @tc.name: GetEllipsisMode002
+ * @tc.desc: Test GetEllipsisMode by frameNode..
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, GetEllipsisMode002, TestSize.Level1)
+{
+    TextFieldModelNG textFieldModelNG;
+    textFieldModelNG.CreateTextInput(DEFAULT_TEXT_U16, u"");
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    textFieldModelNG.SetEllipsisMode(frameNode, EllipsisMode::HEAD);
+    EllipsisMode result = textFieldModelNG.GetEllipsisMode(frameNode);
+    EXPECT_EQ(result, EllipsisMode::HEAD);
+}
 } // namespace OHOS::Ace::NG

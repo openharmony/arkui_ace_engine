@@ -4814,6 +4814,8 @@ typedef enum Ark_EllipsisMode {
     ARK_ELLIPSIS_MODE_START = 0,
     ARK_ELLIPSIS_MODE_CENTER = 1,
     ARK_ELLIPSIS_MODE_END = 2,
+    ARK_ELLIPSIS_MODE_MULTILINE_START = 3,
+    ARK_ELLIPSIS_MODE_MULTILINE_CENTER = 4,
 } Ark_EllipsisMode;
 typedef struct Opt_EllipsisMode {
     Ark_Tag tag;

@@ -145,6 +145,8 @@ let EllipsisMode;
   EllipsisMode[EllipsisMode.START = 0] = 'start';
   EllipsisMode[EllipsisMode.CENTER = 1] = 'center';
   EllipsisMode[EllipsisMode.END = 2] = 'end';
+  EllipsisMode[EllipsisMode.MULTILINE_START = 3] = 'multiline-start';
+  EllipsisMode[EllipsisMode.MULTILINE_CENTER = 4] = 'multiline-center';
 })(EllipsisMode || (EllipsisMode = {}));
 
 let LineBreakStrategy;

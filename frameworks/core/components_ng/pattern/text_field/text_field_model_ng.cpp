@@ -1219,6 +1219,13 @@ void TextFieldModelNG::SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow v
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextOverflow, value, frameNode);
 }
 
+TextOverflow TextFieldModelNG::GetTextOverflow(FrameNode* frameNode)
+{
+    TextOverflow value = TextOverflow::DEFAULT;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, TextOverflow, value, frameNode, value);
+    return value;
+}
+
 void TextFieldModelNG::SetTextIndent(FrameNode* frameNode, const Dimension& value)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, TextIndent, value, frameNode);
@@ -2669,6 +2676,13 @@ void TextFieldModelNG::SetEllipsisMode(FrameNode* frameNode, EllipsisMode value)
 {
     CHECK_NULL_VOID(frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextFieldLayoutProperty, EllipsisMode, value, frameNode);
+}
+
+EllipsisMode TextFieldModelNG::GetEllipsisMode(FrameNode* frameNode)
+{
+    EllipsisMode value = EllipsisMode::TAIL;
+    ACE_GET_NODE_LAYOUT_PROPERTY_WITH_DEFAULT_VALUE(TextFieldLayoutProperty, EllipsisMode, value, frameNode, value);
+    return value;
 }
 
 void TextFieldModelNG::SetStopBackPress(bool isStopBackPress)
