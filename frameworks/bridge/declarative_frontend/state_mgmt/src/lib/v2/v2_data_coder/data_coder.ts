@@ -28,7 +28,11 @@ class DataCoder {
   /**
    * Serialize an object to a JSON2
    */
-  public static stringify<T>(value: T): string {
+  public static stringify<T>(value: T, forceLegacyFormat: boolean = false): string {
+    if (forceLegacyFormat) {
+      return JSONCoder.stringify(value);
+    }
+
     const origValue = ObserveV2.IsMakeObserved(value)
       ? UIUtilsImpl.instance().getTarget(value)
       : value;

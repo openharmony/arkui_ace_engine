@@ -534,7 +534,7 @@ class PersistenceV2Impl extends StorageHelper {
       const areaMode = this.globalMapAreaMode_.get(key);
       try {
         const data = this.globalMap_.get(key);
-        const stringified = DataCoder.stringify(data);
+        const stringified = DataCoder.stringify(data, false);
         PersistenceV2Impl.storage_.set(key, stringified, areaMode);
       } catch (err) {
         this.errorHelper(key, PersistError.Serialization, err);
@@ -543,7 +543,7 @@ class PersistenceV2Impl extends StorageHelper {
       // find in module path
       try {
         const data = this.map_.get(key);
-        const stringified = DataCoder.stringify(data);
+        const stringified = DataCoder.stringify(data, true);
         PersistenceV2Impl.storage_.set(key, stringified);
       } catch (err) {
         this.errorHelper(key, PersistError.Serialization, err);
@@ -754,7 +754,7 @@ class PersistenceV2Impl extends StorageHelper {
           const value: object = keyType === MapType.GLOBAL_MAP ? this.globalMap_.get(key) : this.map_.get(key);
 
           ObserveV2.getObserve().startRecordDependencies(this, id);
-          const json = DataCoder.stringify(value);
+          const json = DataCoder.stringify(value, keyType !== MapType.GLOBAL_MAP);
           ObserveV2.getObserve().stopRecordDependencies();
 
           if (keyType === MapType.GLOBAL_MAP) {
