@@ -54,8 +54,7 @@ void HyperlinkBridge::RegisterHyperlinkAttributes(Local<panda::ObjectRef> object
     };
 
     auto hyperlink = panda::ObjectRef::NewWithNamedProperties(
-        vm, ArraySize(functionNames), functionNames, functionValues
-    );
+        vm, ArraySize(functionNames), functionNames, functionValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "hyperlink"), hyperlink);
 }
 
@@ -104,7 +103,8 @@ ArkUINativeModuleValue HyperlinkBridge::Create(ArkUIRuntimeCallInfo* runtimeCall
 void HyperlinkBridge::PopNew()
 {
     if (ViewStackModel::GetInstance()->IsPrebuilding()) {
-        return ViewStackModel::GetInstance()->PushPrebuildCompCmd("[HyperlinkBridge][popNew]", &HyperlinkBridge::PopNew);
+        return ViewStackModel::GetInstance()->PushPrebuildCompCmd(
+            "[HyperlinkBridge][popNew]", &HyperlinkBridge::PopNew);
     }
 
     if (Container::IsCurrentUseNewPipeline()) {
@@ -141,10 +141,8 @@ ArkUINativeModuleValue HyperlinkBridge::SetColor(ArkUIRuntimeCallInfo* runtimeCa
         Local<JSValueRef> colorArg = runtimeCallInfo->GetCallArgRef(NUM_1);
         class Color color;
         RefPtr<ResourceObject> resourceObject;
-
         auto nativeNode = nodePtr(frameNode);
         auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-
         if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, resourceObject, nodeInfo)) {
             pattern->RegisterResource<class Color>("Color", resourceObject, color);
         } else {
