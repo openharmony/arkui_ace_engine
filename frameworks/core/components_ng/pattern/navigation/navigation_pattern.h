@@ -453,7 +453,7 @@ public:
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible);
 
     bool IsLastStdChange();
-    void ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+    bool ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination);
     void TransitionWithDialogAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
