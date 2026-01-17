@@ -265,8 +265,8 @@ void ArkTSUtils::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
         return;
     }
     bool hasDarkRes = CheckDarkResource(resObj);
-    if (nodeInfo.localColorMode == ColorMode::DARK && nodeInfo.allowForceDark) {
-        if (!hasDarkRes) {
+    if (nodeInfo.localColorMode == ColorMode::DARK) {
+        if (!hasDarkRes && nodeInfo.allowForceDark) {
             color = Color(invertFunc(color.GetValue()));
         }
         resObj = nullptr;
@@ -274,7 +274,7 @@ void ArkTSUtils::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
     }
     auto colorMode = Container::CurrentColorMode();
     Color curColor = color;
-    if ((colorMode == ColorMode::DARK) && !hasDarkRes) {
+    if ((colorMode == ColorMode::DARK) && !hasDarkRes && nodeInfo.allowForceDark) {
         color = Color(invertFunc(color.GetValue()));
     }
     if (!resObj) {
