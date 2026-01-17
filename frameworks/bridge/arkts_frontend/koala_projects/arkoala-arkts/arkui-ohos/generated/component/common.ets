@@ -20,7 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, DrawModifier, GestureModifier, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDrop, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary, hookEnableInternalDropAnimation } from "#handwritten"
+import { extractors, DrawModifier, GestureModifier, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDrop, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary, hookDragEventSetDataLoadParams, hookEnableInternalDropAnimation } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
@@ -83,7 +83,7 @@ import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
 import { Want_serializer } from "./../framework/ohos.app.ability.Want"
 import { UIContext_serializer } from "./../framework/ohos.arkui.UIContext"
-import { unifiedDataChannel_UnifiedData_serializer, unifiedDataChannel_Summary_serializer } from "./../framework/ohos.data.unifiedDataChannel"
+import { unifiedDataChannel_UnifiedData_serializer, unifiedDataChannel_Summary_serializer, unifiedDataChannel_DataLoadParams_serializer } from "./../framework/ohos.data.unifiedDataChannel"
 import { OnScrollFrameBeginCallback } from "./scroll"
 // instructive change start
 import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
@@ -677,6 +677,7 @@ export interface DragEvent {
     getDisplayId(): int32
     getDragSource(): string
     isRemote(): boolean
+    setDataLoadParams(dataLoadParams: unifiedDataChannel.DataLoadParams): void
     enableInternalDropAnimation(configuration: string): void
     getGlobalDisplayX(): double
     getGlobalDisplayY(): double
@@ -786,6 +787,10 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     public isRemote(): boolean {
         return this.isRemote_serialize()
     }
+    public setDataLoadParams(dataLoadParams: unifiedDataChannel.DataLoadParams): void {
+        hookDragEventSetDataLoadParams(this, dataLoadParams)
+        return
+    }
     public enableInternalDropAnimation(configuration: string): void {
         hookEnableInternalDropAnimation(this, configuration)
         return
@@ -892,6 +897,12 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     isRemote_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_isRemote(this.peer!.ptr)
         return retval
+    }
+    setDataLoadParams_serialize(dataLoadParams: unifiedDataChannel.DataLoadParams): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        unifiedDataChannel_DataLoadParams_serializer.write(thisSerializer, dataLoadParams)
+        ArkUIGeneratedNativeModule._DragEvent_setDataLoadParams(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     enableInternalDropAnimation_serialize(configuration: string): void {
         ArkUIGeneratedNativeModule._DragEvent_enableInternalDropAnimation(this.peer!.ptr, configuration)
@@ -7302,6 +7313,7 @@ export type UnifiedData = unifiedDataChannel.UnifiedData;
 export type Summary = unifiedDataChannel.Summary;
 export type UniformDataType = uniformTypeDescriptor.UniformDataType;
 export type DataSyncOptions = unifiedDataChannel.GetDataParams;
+export type DataLoadParams = unifiedDataChannel.DataLoadParams;
 export type SpringLoadingContext = dragController.SpringLoadingContext;
 export type DragSpringLoadingConfiguration = dragController.DragSpringLoadingConfiguration;
 export enum DragResult {

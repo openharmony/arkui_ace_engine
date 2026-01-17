@@ -706,6 +706,15 @@ RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataFromANI(void* rawData)
     return udData;
 }
 
+RefPtr<DataLoadParams> UdmfClientImpl::TransformDataLoadParamsFromANI(void* rawData)
+{
+    CHECK_NULL_RETURN(rawData, nullptr);
+    auto dataLoadParams = reinterpret_cast<UDMF::DataLoadParams*>(rawData);
+    auto dataLoadParamsPtr = std::make_shared<UDMF::DataLoadParams>(*dataLoadParams);
+    auto dataLP = AceType::AceType::MakeRefPtr<DataLoadParamsImpl>();
+    dataLP->SetDataLoadParams(dataLoadParamsPtr);
+    return dataLP;
+}
 
 void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, std::shared_ptr<void> summaryPtr)
 {

@@ -98,6 +98,7 @@ public:
     virtual std::vector<uint8_t> GetSpanStringEntry(const RefPtr<UnifiedData>& unifiedData) = 0;
     virtual bool IsAppropriateType(DragSummaryInfo& dragSummaryInfo, const std::set<std::string>& allowTypes) = 0;
     virtual RefPtr<UnifiedData> TransformUnifiedDataFromANI(void* rawData) = 0;
+    virtual RefPtr<DataLoadParams> TransformDataLoadParamsFromANI(void* rawData) = 0;
     virtual void TransformSummaryANI(std::map<std::string, int64_t>& summary, std::shared_ptr<void> summaryPtr) = 0;
 };
 } // namespace OHOS::Ace

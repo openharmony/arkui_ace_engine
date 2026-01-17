@@ -495,6 +495,7 @@ struct ArkUIAniDragModifier {
     void (*setDragData)(ani_ref event, ani_ref data);
     ani_ref (*getDragData)(ani_ref event);
     void (*getDragSummary)(ani_ref event, SharedPointerWrapper& summaryPtr);
+    void (*setDragDataLoadParams)(ani_ref event, void* dataLoadParams);
     void (*setDragDropInfoPixelMap)(ani_ref event, ani_ref pixelMap);
     void (*setDragDropInfoCustomNode)(ani_ref event, ArkUINodeHandle node);
     void (*setDragDropInfoExtraInfo)(ani_ref event, const char* ptr);
@@ -507,6 +508,7 @@ struct ArkUIAniDragModifier {
     const char* (*getUdKey)(ani_ref event);
     ani_long (*createUnifiedDataPeer)(void* data);
     SharedPointerWrapper (*getUnifiedData)(ani_long peer);
+    ani_long (*createDataLoadParamsPeer)(void* dataLoadParams);
     void (*getPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
 };
 struct ArkUIAniXBarModifier {

@@ -841,6 +841,9 @@ typedef struct Opt_UIScrollEvent Opt_UIScrollEvent;
 typedef struct UIWaterFlowEventPeer UIWaterFlowEventPeer;
 typedef struct UIWaterFlowEventPeer* Ark_UIWaterFlowEvent;
 typedef struct Opt_UIWaterFlowEvent Opt_UIWaterFlowEvent;
+typedef struct unifiedDataChannel_DataLoadParamsPeer unifiedDataChannel_DataLoadParamsPeer;
+typedef struct unifiedDataChannel_DataLoadParamsPeer* Ark_unifiedDataChannel_DataLoadParams;
+typedef struct Opt_unifiedDataChannel_DataLoadParams Opt_unifiedDataChannel_DataLoadParams;
 typedef struct unifiedDataChannel_UnifiedDataPeer unifiedDataChannel_UnifiedDataPeer;
 typedef struct unifiedDataChannel_UnifiedDataPeer* Ark_unifiedDataChannel_UnifiedData;
 typedef struct Opt_unifiedDataChannel_UnifiedData Opt_unifiedDataChannel_UnifiedData;
@@ -9218,6 +9221,10 @@ typedef struct Opt_UIWaterFlowEvent {
     Ark_Tag tag;
     Ark_UIWaterFlowEvent value;
 } Opt_UIWaterFlowEvent;
+typedef struct Opt_unifiedDataChannel_DataLoadParams {
+    Ark_Tag tag;
+    Ark_unifiedDataChannel_DataLoadParams value;
+} Opt_unifiedDataChannel_DataLoadParams;
 typedef struct Opt_unifiedDataChannel_UnifiedData {
     Ark_Tag tag;
     Ark_unifiedDataChannel_UnifiedData value;
@@ -28582,6 +28589,8 @@ typedef struct GENERATED_ArkUIDragEventAccessor {
     Ark_Int32 (*getDisplayId)(Ark_DragEvent peer);
     Ark_String (*getDragSource)(Ark_DragEvent peer);
     Ark_Boolean (*isRemote)(Ark_DragEvent peer);
+    void (*setDataLoadParams)(Ark_DragEvent peer,
+                              const Ark_unifiedDataChannel_DataLoadParams* dataLoadParams);
     void (*executeDropAnimation)(Ark_DragEvent peer,
                                  const Callback_Void* customDropAnimation);
     void (*enableInternalDropAnimation)(Ark_DragEvent peer,

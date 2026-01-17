@@ -613,6 +613,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEveStartDataLoading)
         },
         ani_native_function {
+            "_DragEvent_Set_Data_LoadParams",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventSetDataLoadParams)
+        },
+        ani_native_function {
             "_DragEvent_Enable_InternalDropAnimation",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::DragEventEnableInternalDropAnimation)
@@ -1164,6 +1169,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             "_Extractors_fromUnifiedDataChannelUnifiedDataPtr",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorFromPtrToUnifiedData)
+        },
+        ani_native_function {
+            "_Extractors_toUnifiedDataChannelDataLoadParamsPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorFromDataLoadParamsToPtr)
+        },
+        ani_native_function {
+            "_Extractors_fromUnifiedDataChannelDataLoadParamsPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorFromPtrToDataLoadParams)
         },
         ani_native_function {
             "_Extractors_fromPtrToDragSpringLoadingContext",

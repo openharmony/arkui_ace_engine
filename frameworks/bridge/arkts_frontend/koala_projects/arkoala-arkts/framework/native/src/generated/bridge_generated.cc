@@ -32033,6 +32033,13 @@ Ark_Boolean impl_DragEvent_isRemote(Ark_NativePointer thisPtr) {
         return GetAccessors()->getDragEventAccessor()->isRemote(self);
 }
 KOALA_INTEROP_DIRECT_1(DragEvent_isRemote, Ark_Boolean, Ark_NativePointer)
+void impl_DragEvent_setDataLoadParams(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_unifiedDataChannel_DataLoadParams dataLoadParamsValueTemp = unifiedDataChannel_DataLoadParams_serializer::read(thisDeserializer);;
+        GetAccessors()->getDragEventAccessor()->setDataLoadParams(self, static_cast<Ark_unifiedDataChannel_DataLoadParams*>(&dataLoadParamsValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(DragEvent_setDataLoadParams, Ark_NativePointer, KSerializerBuffer, int32_t)
 void impl_DragEvent_enableInternalDropAnimation(Ark_NativePointer thisPtr, const KStringPtr& configuration) {
         Ark_DragEvent self = reinterpret_cast<Ark_DragEvent>(thisPtr);
         GetAccessors()->getDragEventAccessor()->enableInternalDropAnimation(self, (const Ark_String*) (&configuration));

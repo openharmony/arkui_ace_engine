@@ -220,6 +220,10 @@ export function hookDragEventGetSummary(event: DragEventInternal) : unifiedDataC
   return ArkUIAniModule._DragEvent_Get_Summary(event.peer!.ptr)
 }
 
+export function hookDragEventSetDataLoadParams(event: DragEventInternal, dataLoadParams: unifiedDataChannel.DataLoadParams) {
+  ArkUIAniModule._DragEvent_Set_Data_LoadParams(event.peer!.ptr, dataLoadParams)
+}
+
 export function hookEnableInternalDropAnimation(event: DragEventInternal, configuration: string) {
   return ArkUIAniModule._DragEvent_Enable_InternalDropAnimation(event.peer!.ptr, configuration)
 }
