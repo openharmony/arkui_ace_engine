@@ -49,6 +49,7 @@ arkui_modules = [
   "stepperitem",
   "radio",
   "slider",
+  "hyperlink",
 ]
 
 module_targets = []

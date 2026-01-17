@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT HyperlinkComponent : public ComponentGroup {
+class ACE_FORCE_EXPORT HyperlinkComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(HyperlinkComponent, ComponentGroup);
 
 public:
