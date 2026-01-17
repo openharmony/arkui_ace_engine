@@ -142,7 +142,7 @@ class ArkGridItemComponent extends ArkComponent implements GridItemAttribute {
     return this;
   }
   forceRebuild(value: boolean): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'forceRebuild not supported in attributeModifier scenario.');
   }
   selectable(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, GridItemSelectableModifier.identity, GridItemSelectableModifier, value);

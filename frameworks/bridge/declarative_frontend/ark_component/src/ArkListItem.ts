@@ -100,10 +100,10 @@ class ArkListItemComponent extends ArkComponent implements ListItemAttribute {
     return this;
   }
   sticky(value: Sticky): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'sticky not supported in attributeModifier scenario.');
   }
   editable(value: boolean | EditMode): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'editable not supported in attributeModifier scenario.');
   }
   selectable(value: boolean): this {
     modifierWithKey(this._modifiersWithKeys, ListItemSelectableModifier.identity, ListItemSelectableModifier, value);

@@ -7612,7 +7612,7 @@ class ArkGridComponent extends ArkScrollable {
     return this;
   }
   onScroll(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onScroll not supported in attributeModifier scenario.');
   }
   onReachStart(event) {
     modifierWithKey(this._modifiersWithKeys, GridOnReachStartModifier.identity, GridOnReachStartModifier, event);
@@ -32668,7 +32668,7 @@ class ArkGridItemComponent extends ArkComponent {
     return this;
   }
   forceRebuild(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'forceRebuild not supported in attributeModifier scenario.');
   }
   selectable(value) {
     modifierWithKey(this._modifiersWithKeys, GridItemSelectableModifier.identity, GridItemSelectableModifier, value);
@@ -33473,7 +33473,7 @@ class ArkListComponent extends ArkScrollable {
     return this;
   }
   onScroll(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onScroll not supported in attributeModifier scenario.');
   }
   onScrollIndex(event) {
     modifierWithKey(this._modifiersWithKeys, ListOnScrollIndexModifier.identity, ListOnScrollIndexModifier, event);
@@ -33484,7 +33484,7 @@ class ArkListComponent extends ArkScrollable {
     return this;
   }
   onItemDelete(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onItemDelete not supported in attributeModifier scenario.');
   }
   onItemMove(event) {
     modifierWithKey(this._modifiersWithKeys, ListOnItemMoveModifier.identity, ListOnItemMoveModifier, event);
@@ -33672,10 +33672,10 @@ class ArkListItemComponent extends ArkComponent {
     return this;
   }
   sticky(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'sticky not supported in attributeModifier scenario.');
   }
   editable(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'editable not supported in attributeModifier scenario.');
   }
   selectable(value) {
     modifierWithKey(this._modifiersWithKeys, ListItemSelectableModifier.identity, ListItemSelectableModifier, value);
