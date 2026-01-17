@@ -811,6 +811,9 @@ HWTEST_F(BadgeTestNg, BadgeModelNG001, TestSize.Level1)
     EXPECT_EQ(layoutProperty->GetBadgeTextColorValue(), Color::WHITE);
     EXPECT_EQ(layoutProperty->GetBadgeValueValue(), VALUE);
     EXPECT_EQ(layoutProperty->GetBadgePosition(), BadgePosition::LEFT);
+    EXPECT_EQ(layoutProperty->GetBadgeFontSize(), 0.0_vp);
+    EXPECT_EQ(layoutProperty->GetBadgeCircleSize(), 16.0_vp);
+
     /**
      * @tc.steps: step3. Set Value with Number.
      */
@@ -859,6 +862,9 @@ HWTEST_F(BadgeTestNg, BadgeModelNG002, TestSize.Level1)
     ASSERT_NE(layoutProperty, nullptr);
     EXPECT_EQ(layoutProperty->GetBadgeOuterBorderWidthValue(), BADGE_OUTER_BORDER_WIDTH);
     EXPECT_EQ(layoutProperty->GetBadgeOuterBorderColorValue(), Color::RED);
+    EXPECT_EQ(layoutProperty->GetBadgeFontSize(), 0.0_vp);
+    EXPECT_EQ(layoutProperty->GetBadgeCircleSize(), 16.0_vp);
+
     /**
      * @tc.steps: step3. Set Value with Number.
      */

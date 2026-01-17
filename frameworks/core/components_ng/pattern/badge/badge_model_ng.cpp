@@ -134,9 +134,13 @@ void BadgeModelNG::UpdateBadgeStyle(BadgeParameters& badgeParameters, const RefP
     }
     if (badgeParameters.badgeFontSize.has_value()) {
         layoutProperty->UpdateBadgeFontSize(badgeParameters.badgeFontSize.value());
+    } else {
+        layoutProperty->UpdateBadgeFontSize(badgeTheme->GetBadgeFontSize());
     }
     if (badgeParameters.badgeCircleSize.has_value()) {
         layoutProperty->UpdateBadgeCircleSize(badgeParameters.badgeCircleSize.value());
+    } else {
+        layoutProperty->UpdateBadgeCircleSize(badgeTheme->GetBadgeCircleSize());
     }
     if (badgeParameters.badgeBorderColor.has_value()) {
         layoutProperty->UpdateBadgeBorderColor(badgeParameters.badgeBorderColor.value());
