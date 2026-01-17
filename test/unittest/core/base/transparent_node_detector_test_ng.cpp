@@ -17,6 +17,7 @@
 #define protected public
 #define private public
 
+#include "test/mock/base/mock_task_executor.h"
 #include "test/mock/core/common/mock_container.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_render_context.h"
@@ -42,10 +43,13 @@ void TransparentNodeDetectorTestNg::SetUpTestSuite()
     MockPipelineContext::SetUp();
     MockContainer::SetUp();
     MockContainer::Current()->pipelineContext_ = NG::MockPipelineContext::GetCurrentContext();
+    auto taskExecutor = AceType::MakeRefPtr<MockTaskExecutor>(true);
+    MockPipelineContext::GetCurrent()->SetTaskExecutor(taskExecutor);
 }
 
 void TransparentNodeDetectorTestNg::TearDownTestSuite()
 {
+    MockPipelineContext::GetCurrent()->SetTaskExecutor(nullptr);
     MockPipelineContext::TearDown();
     MockContainer::TearDown();
 }
@@ -232,5 +236,74 @@ HWTEST_F(TransparentNodeDetectorTestNg, TransparentNodeDetectorTestNg004, TestSi
     layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
     EXPECT_FALSE(TransparentNodeDetector::GetInstance().CheckWindowTransparent(root, containerId,
         0, 0, 0, isNavigation));
+}
+
+/**
+ * @tc.name: TransparentNodeDetectorTestNg005
+ * @tc.desc: PostCheckNodeTransparentTask test
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransparentNodeDetectorTestNg, TransparentNodeDetectorTestNg005, TestSize.Level1)
+{
+    const RefPtr<FrameNode> root = AceType::MakeRefPtr<FrameNode>("root", 0, AceType::MakeRefPtr<Pattern>(), true);
+    auto stageNode = FrameNode::CreateFrameNode("stageNode", 0, AceType::MakeRefPtr<StagePattern>());
+    auto pageNode = FrameNode::CreateFrameNode("pageNode", 0, AceType::MakeRefPtr<StagePattern>());
+    auto jsViewNode = FrameNode::CreateFrameNode("jsview", 0, AceType::MakeRefPtr<StagePattern>());
+    auto columnNode = FrameNode::CreateFrameNode("column", 0, AceType::MakeRefPtr<StagePattern>());
+    auto TextNode = FrameNode::CreateFrameNode("text", 0, AceType::MakeRefPtr<StagePattern>());
+
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    root->AddChild(stageNode);
+    stageNode->AddChild(pageNode);
+    pageNode->AddChild(jsViewNode);
+    jsViewNode->AddChild(columnNode);
+    columnNode->AddChild(TextNode);
+
+    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(root, "startUrl");
+    EXPECT_NE(context->GetTaskExecutor(), nullptr);
+}
+
+
+/**
+ * @tc.name: TransparentNodeDetectorTestNg006
+ * @tc.desc: PostCheckNodeTransparentTask test post task
+ * @tc.type: FUNC
+ */
+HWTEST_F(TransparentNodeDetectorTestNg, TransparentNodeDetectorTestNg006, TestSize.Level1)
+{
+    const RefPtr<FrameNode> root = AceType::MakeRefPtr<FrameNode>("root", 0, AceType::MakeRefPtr<Pattern>(), true);
+    auto stageNode = FrameNode::CreateFrameNode("stageNode", 0, AceType::MakeRefPtr<StagePattern>());
+    auto pageNode = FrameNode::CreateFrameNode("pageNode", 0, AceType::MakeRefPtr<StagePattern>());
+    auto jsViewNode = FrameNode::CreateFrameNode("jsview", 0, AceType::MakeRefPtr<StagePattern>());
+    auto columnNode = FrameNode::CreateFrameNode("column", 0, AceType::MakeRefPtr<StagePattern>());
+    auto TextNode = FrameNode::CreateFrameNode("text", 0, AceType::MakeRefPtr<StagePattern>());
+
+    auto container = Container::Current();
+    ASSERT_NE(container, nullptr);
+    auto pipelineContext = container->GetPipelineContext();
+    ASSERT_NE(pipelineContext, nullptr);
+    auto context = AceType::DynamicCast<NG::PipelineContext>(pipelineContext);
+    ASSERT_NE(context, nullptr);
+    root->AddChild(stageNode);
+    stageNode->AddChild(pageNode);
+    pageNode->AddChild(jsViewNode);
+    jsViewNode->AddChild(columnNode);
+    columnNode->AddChild(TextNode);
+
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->rect_ = { 10.0f, 10.0f, 10.0f, 10.0f };
+    columnNode->renderContext_ = renderContext;
+    auto layoutProperty = columnNode->GetLayoutProperty();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateVisibility(VisibleType::VISIBLE);
+    context->onFocus_ = true;
+    NG::TransparentNodeDetector::GetInstance().PostCheckNodeTransparentTask(root, "startUr2");
+    EXPECT_EQ(context->GetTaskExecutor(), 1);
 }
 } // namespace OHOS::Ace::NG
