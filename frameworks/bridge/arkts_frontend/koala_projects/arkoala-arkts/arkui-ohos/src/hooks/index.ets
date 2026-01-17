@@ -220,6 +220,10 @@ export function hookDragEventGetSummary(event: DragEventInternal) : unifiedDataC
   return ArkUIAniModule._DragEvent_Get_Summary(event.peer!.ptr)
 }
 
+export function hookEnableInternalDropAnimation(event: DragEventInternal, configuration: string) {
+  return ArkUIAniModule._DragEvent_Enable_InternalDropAnimation(event.peer!.ptr, configuration)
+}
+
 class StateStyleModifierState extends ModifierState {
     fireChange(): void {
         return;
