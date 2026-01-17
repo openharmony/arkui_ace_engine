@@ -17,6 +17,7 @@
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/manager/event/json_child_report.h"
 #include "core/components_ng/manager/event/json_report.h"
+#include "core/common/click_effect/click_sound_effect_manager.h"
 #include "core/common/reporter/reporter.h"
 #include "core/components_ng/event/event_constants.h"
 
@@ -226,6 +227,7 @@ void ClickRecognizer::OnAccepted()
         remoteMessage_(info);
     }
     UpdateFingerListInfo();
+    PlayClickSoundEffect(localOffset);
     SendCallbackMsg(onAction_, GestureCallbackType::ACTION);
 
     int64_t overTime = GetSysTimestamp();
@@ -241,6 +243,27 @@ void ClickRecognizer::OnAccepted()
     }
     if (lastRefereeState != RefereeState::SUCCEED_BLOCKED) {
         ResetStateVoluntarily();
+    }
+}
+
+void ClickRecognizer::PlayClickSoundEffect(Offset clickPoint)
+{
+    auto frameNode = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetEnableClickSoundEffect()) {
+        if (!ClickSoundEffectManager::GetInstance().LoadProductPolicy()) {
+            return;
+        }
+        auto container = Container::GetContainer(Container::CurrentId());
+        CHECK_NULL_VOID(container);
+        auto taskExecutor = container->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
+        taskExecutor->PostTask(
+            [clickPoint]() {
+                ClickSoundEffectManager::GetInstance().PlayClickSoundEffect(
+                    static_cast<int32_t>(clickPoint.GetX()), static_cast<int32_t>(clickPoint.GetY()));
+            },
+            TaskExecutor::TaskType::BACKGROUND, "ArkUIPlayClickSoundEffect");
     }
 }
 

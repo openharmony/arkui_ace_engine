@@ -3710,6 +3710,20 @@ class ClickEffectModifier extends ModifierWithKey<ClickEffect | null> {
   }
 }
 
+class EnableClickSoundEffectModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableClickSoundEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetEnableClickSoundEffect(node);
+    } else {
+      getUINativeModule().common.setEnableClickSoundEffect(node, this.value);
+    }
+  }
+}
+
 class KeyBoardShortCutModifier extends ModifierWithKey<Array<ArkKeyBoardShortCut>> {
   constructor(value: Array<ArkKeyBoardShortCut>) {
     super(value);
@@ -5483,6 +5497,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
 
   clickEffect(value: ClickEffect | null): this {
     modifierWithKey(this._modifiersWithKeys, ClickEffectModifier.identity, ClickEffectModifier, value);
+    return this;
+  }
+
+  enableClickSoundEffect(value: boolean | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, EnableClickSoundEffectModifier.identity, EnableClickSoundEffectModifier, value);
     return this;
   }
 

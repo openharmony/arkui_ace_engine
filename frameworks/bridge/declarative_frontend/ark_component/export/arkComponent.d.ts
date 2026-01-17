@@ -169,6 +169,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     alignRules(value: AlignRuleOption): this;
     aspectRatio(value: number): this;
     clickEffect(value: ClickEffect | null): this;
+    enableClickSoundEffect(enabled: boolean | undefined): this;
     onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
@@ -634,6 +635,7 @@ declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     alignRules(value: AlignRuleOption): this;
     aspectRatio(value: number): this;
     clickEffect(value: ClickEffect | null): this;
+    enableClickSoundEffect(enabled: boolean | undefined): this;
     onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
@@ -1765,6 +1767,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     alignRules(value: AlignRuleOption): this;
     aspectRatio(value: number): this;
     clickEffect(value: ClickEffect): this;
+    enableClickSoundEffect(enabled: boolean | undefined): this;
     onDragStart(event: (event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event: DragEvent, extraParams?: string) => void): this;
     onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;

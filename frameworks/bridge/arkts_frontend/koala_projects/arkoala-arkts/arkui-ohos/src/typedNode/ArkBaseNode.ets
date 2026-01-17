@@ -438,6 +438,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public clickEffect(value: ClickEffect | undefined): this {
         return this
     }
+    public enableClickSoundEffect(value: boolean | undefined): this {
+        this.getPeer()?.setEnableClickSoundEffectAttribute(value);
+        return this
+    }
     public onDragStart(value: ((event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
         this.getPeer()?.setOnDragStartAttribute(value);
         return this
