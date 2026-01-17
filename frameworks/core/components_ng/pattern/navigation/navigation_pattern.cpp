@@ -2142,6 +2142,12 @@ void NavigationPattern::TransitionWithAnimation(RefPtr<NavDestinationGroupNode> 
         ClearRecoveryList();
         OnStartOneTransitionAnimation();
         OnFinishOneTransitionAnimation();
+        if (newTopNavDestination) {
+            navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE,
+                newTopNavDestination->GetAccessibilityId(), WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
+        } else {
+            navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+        }
         return;
     }
     if (isCustomAnimation_ && TriggerCustomAnimation(preTopNavDestination, newTopNavDestination, isPopPage)) {
@@ -4491,6 +4497,9 @@ void NavigationPattern::FollowStdNavdestinationAnimation(const RefPtr<NavDestina
     }
     if (newTopNavDestination && navigationMode_ == NavigationMode::SPLIT) {
         ContentChangeReport(newTopNavDestination);
+        auto id = newTopNavDestination->GetAccessibilityId();
+        navigationNode->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
     }
     if (preTopNavDestination) {
         if (navigationMode_ == NavigationMode::SPLIT) {
@@ -4515,6 +4524,9 @@ void NavigationPattern::TransitionWithDialogAnimation(const RefPtr<NavDestinatio
     if (!isPopPage && !IsLastStdChange() && newTopNavDestination &&
         newTopNavDestination->GetNavDestinationMode() == NavDestinationMode::STANDARD) {
         ContentChangeReport(newTopNavDestination);
+        auto id = newTopNavDestination->GetAccessibilityId();
+        navigationNode->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
         return;
     }
     auto replaceVal = navigationStack_->GetReplaceValue();
@@ -4532,6 +4544,9 @@ void NavigationPattern::TransitionWithDialogAnimation(const RefPtr<NavDestinatio
             if (!preTopNavDestination && navigationMode_ == NavigationMode::SPLIT) {
                 // if split mode and push one dialog at the first time, no animation
                 ContentChangeReport(newTopNavDestination);
+                auto id = newTopNavDestination ? newTopNavDestination->GetAccessibilityId() : -1;
+                navigationNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE, id,
+                    WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
                 return;
             }
             navigationNode->StartDialogtransition(preTopNavDestination, newTopNavDestination, true);
