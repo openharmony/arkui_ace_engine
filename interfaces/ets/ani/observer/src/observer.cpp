@@ -50,7 +50,7 @@ constexpr char ANI_TABCONTENT_WITH_OPTIONS_CLS[] =
     "C{@ohos.arkui.observer.uiObserver.ObserverOptions}C{std.core.Function1}:";
 constexpr char ANI_TABCONTENT_CLS[] = "C{std.core.Function1}:";
 constexpr char ANI_SIZE_INNER_CLS[] = "@ohos.arkui.observer.uiObserver.SizeInner";
-constexpr char ANI_WINDOW_SIZE_BREAKPOINT_INFO_CLS[] = "arkui.component.enums.WindowSizeLayoutBreakpointInfo";
+constexpr char ANI_WINDOW_SIZE_BREAKPOINT_INFO_CLS[] = "@ohos.arkui.observer.uiObserver.WindowSizeLayoutBreakpointInfo";
 constexpr char ANI_WIDTHBREAKPOINT_TYPE[] = "arkui.component.enums.WidthBreakpoint";
 constexpr char ANI_HEIGHTBREAKPOINT_TYPE[] = "arkui.component.enums.HeightBreakpoint";
 } // namespace

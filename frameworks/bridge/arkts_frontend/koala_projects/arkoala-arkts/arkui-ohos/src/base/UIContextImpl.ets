@@ -1495,7 +1495,11 @@ export class UIContextImpl extends UIContext {
         }
         return contextArray;
     }
+    static availableInstanceIds_: Set<int32> = new Set<int32>();
 
+    public isAvailable() : boolean {
+        return UIContextImpl.availableInstanceIds_.has(this.instanceId_);
+    }
     public getFont() : Font {
         return this.font_;
     }

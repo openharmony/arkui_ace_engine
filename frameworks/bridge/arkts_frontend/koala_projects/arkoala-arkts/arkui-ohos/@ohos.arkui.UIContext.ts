@@ -567,6 +567,10 @@ export class UIContext {
         }
         return UIContextUtil.getOrCreateUIContextById(instanceId);
     }
+    public isAvailable() : boolean {
+        throw Error("isAvailable not implemented in UIContext!")
+    }
+
     public getFont() : Font {
         throw Error("getFont not implemented in UIContext!")
     }
