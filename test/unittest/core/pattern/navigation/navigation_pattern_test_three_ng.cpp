@@ -1014,6 +1014,10 @@ HWTEST_F(NavigationPatternTestThreeNg, GetNavdestinationJsonArray004, TestSize.L
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
     auto navdestinationPattern = navDestinationNode->GetPattern<NavDestinationPattern>();
     ASSERT_NE(navdestinationPattern, nullptr);
+    navdestinationPattern->navDestinationContext_ = AceType::MakeRefPtr<NavDestinationContext>();
+    ASSERT_NE(navdestinationPattern->navDestinationContext_, nullptr);
+    navdestinationPattern->navDestinationContext_->pathInfo_ = AceType::MakeRefPtr<NavPathInfo>();
+    ASSERT_NE(navdestinationPattern->navDestinationContext_->pathInfo_, nullptr);
     navdestinationPattern->name_ = PAGE01;
     navigationStack->navPathList_.emplace_back(std::make_pair(PAGE01, navDestinationNode));
 

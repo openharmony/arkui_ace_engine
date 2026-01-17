@@ -79,6 +79,11 @@ public:
         return std::make_shared<NavPathInfoScope>();
     }
 
+    virtual std::string GetInitParamString() const
+    {
+        return "";
+    }
+
 protected:
     std::string name_;
     bool isEntry_ = false;

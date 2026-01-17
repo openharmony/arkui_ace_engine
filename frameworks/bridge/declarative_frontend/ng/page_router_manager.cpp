@@ -596,7 +596,7 @@ void PageRouterManager::StartRestore(const RouterPageInfo& target)
         }
     }
     info.url = tempStack.back().url;
-    info.params = target.params;
+    info.params = tempStack.back().params;
     info.recoverable = true;
     info.isNamedRouterMode = tempStack.back().isNamedRouter;
     tempStack.pop_back();
@@ -1038,7 +1038,7 @@ std::unique_ptr<JsonValue> PageRouterManager::GetStackInfo(ContentInfoType type)
         auto jsonItem = JsonUtil::Create(true);
         jsonItem->Put("url", url.c_str());
         if (type == ContentInfoType::RESOURCESCHEDULE_RECOVERY) {
-            jsonItem->Put("params", pageInfo->GetPageParams().c_str());
+            jsonItem->Put("params", pageInfo->GetPageInitParams().c_str());
             jsonItem->Put("isNamedRoute", pageInfo->IsCreateByNamedRouter());
         }
         jsonRouterStack->Put(jsonItem);

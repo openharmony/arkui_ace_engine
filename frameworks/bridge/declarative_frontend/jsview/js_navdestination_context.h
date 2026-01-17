@@ -75,13 +75,26 @@ public:
         return navDestinationPopCallback_;
     }
 
+    void SetInitParam(const JSRef<JSVal>& initParam)
+    {
+        initParam_ = initParam;
+    }
+
+    JSRef<JSVal> GetInitParam() const
+    {
+        return initParam_;
+    }
+
     void UpdateNavPathInfo(const RefPtr<NG::NavPathInfo>& info) override;
 
     virtual std::shared_ptr<NG::NavPathInfoScope> Scope() override;
 
+    std::string GetInitParamString() const override;
+
 private:
     JSRef<JSVal> param_;
     JSRef<JSVal> onPop_;
+    JSRef<JSVal> initParam_;
     JSRef<JSFunc> navDestinationPopCallback_;
 };
 

@@ -592,6 +592,7 @@ bool JSNavigationStack::CreateNodeByIndex(int32_t index, const WeakPtr<NG::UINod
         if (pattern->GetIsStatic()) {
             pattern->UpdateSerializedParam(ConvertParamToString(param, true));
         }
+        pathInfo->SetInitParam(param);
         pattern->SetNavPathInfo(pathInfo);
         pattern->SetNavigationStack(WeakClaim(this));
     }
