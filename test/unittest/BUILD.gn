@@ -1433,6 +1433,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_pattern_multi_thread.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_ui_session_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_paint_method.cpp",
