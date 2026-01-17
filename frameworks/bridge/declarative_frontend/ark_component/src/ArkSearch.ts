@@ -1056,7 +1056,7 @@ class ArkSearchComponent extends ArkComponent implements CommonMethod<SearchAttr
     return this;
   }
   showUnit(event: () => void): SearchAttribute {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'showUnit function not supported in SearchModifier class.');
   }
   onContentScroll(callback: (totalOffsetX: number, totalOffsetY: number) => void): SearchAttribute {
     modifierWithKey(this._modifiersWithKeys, SearchOnContentScrollModifier.identity,
