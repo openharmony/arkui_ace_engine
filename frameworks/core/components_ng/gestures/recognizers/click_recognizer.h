@@ -132,7 +132,7 @@ private:
     GestureJudgeResult TriggerGestureJudgeCallback();
     bool ExceedSlop();
     void InitGlobalValue(SourceType deviceId);
-
+    void HandleReportClick(const GestureEvent& info);
     bool CheckNeedReceiveEvent();
 
     bool IsFormRenderClickRejected(const TouchEvent& event);
