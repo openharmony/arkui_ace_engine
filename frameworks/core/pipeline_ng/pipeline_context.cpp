@@ -4037,6 +4037,16 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
         GetAppInfo(root);
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, { true, true, true, false });
         DumpLog::GetInstance().Print(root->ToString());
+    } else if (params[0] == "-visibleInfoFromTopPageNodeWithWeb") {
+        auto root = JsonUtil::CreateSharedPtrJson(true);
+        GetAppInfo(root);
+        RefPtr<NG::FrameNode> topNavNode = nullptr;
+        auto lastPageNode = stageManager_->GetLastPage();
+        if (lastPageNode != nullptr) {
+            lastPageNode->FindTopNavDestination(topNavNode);
+            DumpSimplifyTreeJsonFromTopNavNode(root, topNavNode, { true, true, true, true });
+            DumpLog::GetInstance().Print(root->ToString());
+        }
     } else if (params[0] == "-infoOfRootNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
@@ -6683,7 +6693,7 @@ void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, Para
 }
 
 void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(
-    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> topNavNode, ParamConfig& config)
+    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> topNavNode, const ParamConfig& config) const
 {
     if (topNavNode != nullptr) {
         GetOverlayInspector(root, config);
@@ -6720,8 +6730,15 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
                         "[config.accessibilityInfo:%d][config.cacheNodes:%d][config.withWeb:%d]",
         onlyNeedVisible, config.interactionInfo, config.accessibilityInfo, config.cacheNodes, config.withWeb);
     if (onlyNeedVisible) {
+        // step1: Get the topPageNode if onlyNeedVisible, avoid fetching hidden page.
+        auto lastPageNode = stageManager_->GetLastPage();
+        CHECK_NULL_VOID(lastPageNode);
+        /*
+         * step2: Get topNavNode from topPageNode. If top Page doesn't has a navigation child,
+         * following dump will start at root node, inactive and hidden node will be ignored.
+         */
         RefPtr<NG::FrameNode> topNavNode = nullptr;
-        rootNode_->FindTopNavDestination(topNavNode);
+        lastPageNode->FindTopNavDestination(topNavNode);
         DumpSimplifyTreeJsonFromTopNavNode(root, topNavNode, config);
         taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
     } else {

@@ -2666,12 +2666,17 @@ void UINode::SetAncestor(const WeakPtr<UINode>& parent)
 void UINode::FindTopNavDestination(RefPtr<FrameNode>& result)
 {
     auto currentNode = AceType::DynamicCast<FrameNode>(this);
-    if (currentNode && currentNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
-        auto navigationGroupNode = AceType::DynamicCast<NG::NavigationGroupNode>(currentNode);
-        CHECK_NULL_VOID(navigationGroupNode);
-        result = navigationGroupNode->GetTopDestination();
-        return;
+    if (currentNode) {
+        if (!currentNode->CheckVisibleAndActive()) {
+            return;
+        } else if (currentNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            auto navigationGroupNode = AceType::DynamicCast<NG::NavigationGroupNode>(currentNode);
+            CHECK_NULL_VOID(navigationGroupNode);
+            result = navigationGroupNode->GetTopDestination();
+            return;
+        }
     }
+    
     for (const auto& item : GetChildren()) {
         item->FindTopNavDestination(result);
         if (result) {
