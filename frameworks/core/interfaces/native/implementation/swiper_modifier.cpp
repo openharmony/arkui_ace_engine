@@ -163,12 +163,20 @@ bool IsCustom(std::optional<Dimension> &dimOpt)
 
 bool CheckSwiperParameters(SwiperParameters& p)
 {
-    p.dimLeft = p.dimLeft && (*p.dimLeft).Value() >= 0 ? p.dimLeft : 0.0_vp;
-    p.dimTop = p.dimTop && (*p.dimTop).Value() >= 0 ? p.dimTop : 0.0_vp;
-    p.dimRight = p.dimRight && (*p.dimRight).Value() >= 0 ? p.dimRight : 0.0_vp;
-    p.dimBottom = p.dimBottom && (*p.dimBottom).Value() >= 0 ? p.dimBottom : 0.0_vp;
-    p.dimStart = p.dimStart && (*p.dimStart).Value() >= 0 ? p.dimStart : 0.0_vp;
-    p.dimEnd = p.dimEnd && (*p.dimEnd).Value() >= 0 ? p.dimEnd : 0.0_vp;
+    if (p.dimLeft) {
+        p.dimLeft = (*p.dimLeft).Value() >= 0 ? p.dimLeft : 0.0_vp;
+    }
+    if (p.dimTop) {
+        p.dimTop = (*p.dimTop).Value() >= 0 ? p.dimTop : 0.0_vp;
+    }
+    if (p.dimRight) {
+        p.dimRight = (*p.dimRight).Value() >= 0 ? p.dimRight : 0.0_vp;
+    }
+    if (p.dimBottom) {
+        p.dimBottom = (*p.dimBottom).Value() >= 0 ? p.dimBottom : 0.0_vp;
+    }
+    ResetIfInvalid(p.dimStart);
+    ResetIfInvalid(p.dimEnd);
 
     p.itemWidth = p.itemWidth && (*p.itemWidth).Value() > 0 ? p.itemWidth : 6.0_vp;
     p.itemHeight = p.itemHeight && (*p.itemHeight).Value() > 0 ? p.itemHeight : 6.0_vp;
@@ -186,12 +194,20 @@ bool CheckSwiperParameters(SwiperParameters& p)
 
 void CheckSwiperDigitalParameters(SwiperDigitalParameters& p)
 {
-    p.dimLeft = p.dimLeft && (*p.dimLeft).Value() >= 0 ? p.dimLeft : 0.0_vp;
-    p.dimTop = p.dimTop && (*p.dimTop).Value() >= 0 ? p.dimTop : 0.0_vp;
-    p.dimRight = p.dimRight && (*p.dimRight).Value() >= 0 ? p.dimRight : 0.0_vp;
-    p.dimBottom = p.dimBottom && (*p.dimBottom).Value() >= 0 ? p.dimBottom : 0.0_vp;
-    p.dimStart = p.dimStart && (*p.dimStart).Value() >= 0 ? p.dimStart : 0.0_vp;
-    p.dimEnd = p.dimEnd && (*p.dimEnd).Value() >= 0 ? p.dimEnd : 0.0_vp;
+    if (p.dimLeft) {
+        p.dimLeft = (*p.dimLeft).Value() >= 0 ? p.dimLeft : 0.0_vp;
+    }
+    if (p.dimTop) {
+        p.dimTop = (*p.dimTop).Value() >= 0 ? p.dimTop : 0.0_vp;
+    }
+    if (p.dimRight) {
+        p.dimRight = (*p.dimRight).Value() >= 0 ? p.dimRight : 0.0_vp;
+    }
+    if (p.dimBottom) {
+        p.dimBottom = (*p.dimBottom).Value() >= 0 ? p.dimBottom : 0.0_vp;
+    }
+    ResetIfInvalid(p.dimStart);
+    ResetIfInvalid(p.dimEnd);
 
     p.fontSize = p.fontSize && (*p.fontSize).Value() > 0 ? p.fontSize : 14.0_vp;
     p.selectedFontSize = p.selectedFontSize && (*p.selectedFontSize).Value() > 0 ? p.selectedFontSize : 14.0_vp;
