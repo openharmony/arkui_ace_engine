@@ -589,6 +589,11 @@ void TextFieldPattern::HandleInputOperations()
                 ExecuteInputCommand(inputCommands_.front());
                 inputCommands_.pop();
                 break;
+            case InputOperation::PERFORM_ACTION: {
+                PerformActionOperation(performActionOperations_.front());
+                performActionOperations_.pop();
+                break;
+            }
         }
     }
 }
@@ -6378,17 +6383,15 @@ bool TextFieldPattern::ProcessFocusIndexAction()
     return true;
 }
 
-void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
+void TextFieldPattern::PerformActionOperation(PerformActionInfo info)
 {
-    if (!HasFocus()) {
-        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Not Trigger OnSubmit because field blur");
+    if (!HasFocus() || !ProcessFocusIndexAction()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Not Trigger OnSubmit because field blur or focusIndex not on text");
         return;
     }
-    if (!ProcessFocusIndexAction()) {
-        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Not Trigger OnSubmit because focus index not on text");
-        return;
-    }
-    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField PerformAction %{public}d", static_cast<int32_t>(action));
+    auto action = info.action;
+    auto forceCloseKeyboard = info.forceCloseKeyboard;
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField PerformActionOp %{public}d", static_cast<int32_t>(action));
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     // If the parent node is a Search, the Search callback is executed.
@@ -6428,6 +6431,23 @@ void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyb
     }
     UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Textfield.onSubmit",
         ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
+}
+
+void TextFieldPattern::PerformAction(TextInputAction action, bool forceCloseKeyboard)
+{
+    if (!HasFocus() || !ProcessFocusIndexAction()) {
+        TAG_LOGW(AceLogTag::ACE_TEXT_FIELD, "Not Trigger OnSubmit because field blur or focusIndex not on text");
+        return;
+    }
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "TextField Will PerformAction %{public}d", static_cast<int32_t>(action));
+    inputOperations_.emplace(InputOperation::PERFORM_ACTION);
+    PerformActionInfo info;
+    info.action = action;
+    info.forceCloseKeyboard = forceCloseKeyboard;
+    performActionOperations_.emplace(info);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
 }
 
 void TextFieldPattern::TextFieldLostFocusToViewRoot()
