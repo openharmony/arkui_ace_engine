@@ -582,10 +582,21 @@ void ClickRecognizer::SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& o
         auto onActionFunction = *onAction;
         HandleGestureAccept(info, type, GestureListenerType::TAP);
         ACE_BENCH_MARK_TRACE("TapGesture_end");
+        HandleReportClick(info);
         onActionFunction(info);
         HandleReports(info, type);
         RecordClickEventIfNeed(info);
     }
+}
+
+void ClickRecognizer::HandleReportClick(const GestureEvent& info)
+{
+    auto frameNode = GetAttachedNode().Upgrade();
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = frameNode->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    CHECK_NULL_VOID(pipeline->GetClickOptimizer());
+    pipeline->GetClickOptimizer()->ReportClick(frameNode, info);
 }
 
 void ClickRecognizer::HandleReports(const GestureEvent& info, GestureCallbackType type)
@@ -611,10 +622,6 @@ void ClickRecognizer::HandleReports(const GestureEvent& info, GestureCallbackTyp
         tapReport.SetFingerList(info.GetFingerList());
         Reporter::GetInstance().HandleUISessionReporting(tapReport);
     }
-    auto pipeline = frameNode->GetContext();
-    CHECK_NULL_VOID(pipeline);
-    CHECK_NULL_VOID(pipeline->GetClickOptimizer());
-    pipeline->GetClickOptimizer()->ReportClick(GetAttachedNode(), info);
 }
 
 void ClickRecognizer::RecordClickEventIfNeed(const GestureEvent& info) const

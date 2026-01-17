@@ -890,6 +890,55 @@ HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: GestureRecognizerTest015
+ * @tc.desc: Test ClickRecognizer function: HandleReportClick
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest015, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer. touchEvent
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->refereeState_ = RefereeState::SUCCEED;
+    TouchEvent touchEvent;
+
+    /**
+     * @tc.steps: step2. call TouchEvent function and compare result.
+     * @tc.expected: step2. result equals.
+     */
+    touchEvent.type = TouchType::MOVE;
+    clickRecognizer->HandleEvent(touchEvent);
+    GestureEvent info = clickRecognizer->GetGestureEventInfo();
+    clickRecognizer->HandleReportClick(info);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
+
+    touchEvent.type = TouchType::DOWN;
+    clickRecognizer->HandleEvent(touchEvent);
+    info = clickRecognizer->GetGestureEventInfo();
+    clickRecognizer->HandleReportClick(info);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
+
+    touchEvent.type = TouchType::UP;
+    clickRecognizer->HandleEvent(touchEvent);
+    info = clickRecognizer->GetGestureEventInfo();
+    clickRecognizer->HandleReportClick(info);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
+
+    touchEvent.type = TouchType::CANCEL;
+    clickRecognizer->HandleEvent(touchEvent);
+    info = clickRecognizer->GetGestureEventInfo();
+    clickRecognizer->HandleReportClick(info);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
+
+    touchEvent.type = TouchType::UNKNOWN;
+    clickRecognizer->HandleEvent(touchEvent);
+    info = clickRecognizer->GetGestureEventInfo();
+    clickRecognizer->HandleReportClick(info);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
+}
+
+/**
  * @tc.name: GestureRecognizerHandleTouchMoveEventTest001
  * @tc.desc: Test ClickRecognizer function: HandleTouchMoveEvent
  * @tc.type: FUNC
