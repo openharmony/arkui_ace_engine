@@ -4524,6 +4524,48 @@ HWTEST_F(JsAccessibilityManagerTest, SendEventToAccessibilityWithNodeInnerAfterR
      */
     AccessibilityEvent accessibilityEvent;
     accessibilityEvent.type = AccessibilityEventType::CLICK;
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+
+    EXPECT_EQ(jsAccessibilityManager->GetPipelineContext().Upgrade(), nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    EXPECT_NE(jsAccessibilityManager->GetPipelineContext().Upgrade(), nullptr);
+
+    jsAccessibilityManager->SendEventToAccessibilityWithNodeInnerAfterRender(accessibilityEvent, frameNode, context);
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityStateDescription());
+    accessibilityProperty->SetAccessibilityStateDescription("test");
+    jsAccessibilityManager->SendEventToAccessibilityWithNodeInnerAfterRender(accessibilityEvent, frameNode, context);
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityStateDescription());
+}
+
+/**
+ * @tc.name: SendAccessibilityAsyncEventInnerAfterRender001
+ * @tc.desc: SendAccessibilityAsyncEventInnerAfterRender
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, SendAccessibilityAsyncEventInnerAfterRender001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto rootNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(rootNode, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    rootNode->AddChild(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+    accessibilityProperty->SetAccessibilityLevel("yes");
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test SendAccessibilityAsyncEventInnerAfterRender
+     */
+    AccessibilityEvent accessibilityEvent;
+    accessibilityEvent.type = AccessibilityEventType::CLICK;
     accessibilityEvent.nodeId = 1;
     auto context = NG::PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
@@ -4538,5 +4580,43 @@ HWTEST_F(JsAccessibilityManagerTest, SendEventToAccessibilityWithNodeInnerAfterR
     EXPECT_EQ(jsAccessibilityManager->GetDelayTimeBeforeSendEvent(accessibilityEvent, nullptr), 0);
     jsAccessibilityManager->SendAccessibilityAsyncEvent(accessibilityEvent);
     EXPECT_TRUE(jsAccessibilityManager->CheckWhiteList(1));
+}
+
+/**
+ * @tc.name: SendAccessibilityAsyncEventInnerAfterRender002
+ * @tc.desc: SendAccessibilityAsyncEventInnerAfterRender
+ * @tc.type: FUNC
+ */
+HWTEST_F(JsAccessibilityManagerTest, SendAccessibilityAsyncEventInnerAfterRender002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct JsAccessibilityManager
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<Framework::JsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+    auto context = NG::PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    jsAccessibilityManager->SetPipelineContext(context);
+    ASSERT_NE(jsAccessibilityManager->GetPipelineContext().Upgrade(), nullptr);
+    auto root = context->GetRootElement();
+    ASSERT_NE(root, nullptr);
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), false);
+    ASSERT_NE(frameNode, nullptr);
+    root->AddChild(frameNode);
+    auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    ASSERT_NE(accessibilityProperty, nullptr);
+
+    /**
+     * @tc.steps: step2. test SendAccessibilityAsyncEventInnerAfterRender
+     */
+    AccessibilityEvent accessibilityEvent;
+    accessibilityEvent.type = AccessibilityEventType::CLICK;
+    accessibilityEvent.nodeId = 1;
+
+    jsAccessibilityManager->SendAccessibilityAsyncEventInnerAfterRender(accessibilityEvent);
+    EXPECT_FALSE(accessibilityProperty->HasAccessibilityStateDescription());
+    accessibilityProperty->SetAccessibilityStateDescription("test");
+    jsAccessibilityManager->SendAccessibilityAsyncEventInnerAfterRender(accessibilityEvent);
+    EXPECT_TRUE(accessibilityProperty->HasAccessibilityStateDescription());
 }
 } // namespace OHOS::Ace::NG

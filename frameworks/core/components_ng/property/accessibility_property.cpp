@@ -825,7 +825,7 @@ void AccessibilityProperty::SetAccessibilityStateDescription(const std::string& 
     const size_t STATE_DESCRIPTION_MAX_LENGTH = 1000;
     auto strValue = stateDescription.length() > STATE_DESCRIPTION_MAX_LENGTH ?
                     stateDescription.substr(0, STATE_DESCRIPTION_MAX_LENGTH) : stateDescription;
-    if (strValue == accessibilityStateDescription_.value_or("")) {
+    if (accessibilityStateDescription_.has_value() && (strValue == accessibilityStateDescription_.value())) {
         return;
     }
     accessibilityStateDescription_ = strValue;
@@ -834,6 +834,11 @@ void AccessibilityProperty::SetAccessibilityStateDescription(const std::string& 
 std::string AccessibilityProperty::GetAccessibilityStateDescription() const
 {
     return accessibilityStateDescription_.value_or("");
+}
+
+bool AccessibilityProperty::HasAccessibilityStateDescription() const
+{
+    return accessibilityStateDescription_.has_value();
 }
 
 void AccessibilityProperty::SetActions(const ActionsImpl& actionsImpl)
