@@ -66,6 +66,54 @@ struct NodeInfo {
     std::string nodeTag;
     ColorMode localColorMode;
 };
+
+struct BorderRadiusOption {
+    CalcDimension topLeft;
+    CalcDimension topRight;
+    CalcDimension bottomLeft;
+    CalcDimension bottomRight;
+};
+
+struct BorderStyleOption {
+    std::optional<BorderStyle> styleLeft;
+    std::optional<BorderStyle> styleRight;
+    std::optional<BorderStyle> styleTop;
+    std::optional<BorderStyle> styleBottom;
+};
+
+struct CommonColor {
+    std::optional<Color> left;
+    std::optional<Color> right;
+    std::optional<Color> top;
+    std::optional<Color> bottom;
+    RefPtr<ResourceObject> leftResObj;
+    RefPtr<ResourceObject> rightResObj;
+    RefPtr<ResourceObject> topResObj;
+    RefPtr<ResourceObject> bottomResObj;
+};
+
+struct CommonCalcDimension {
+    std::optional<OHOS::Ace::CalcDimension> left;
+    std::optional<OHOS::Ace::CalcDimension> right;
+    std::optional<OHOS::Ace::CalcDimension> top;
+    std::optional<OHOS::Ace::CalcDimension> bottom;
+    OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> leftResObj;
+    OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> rightResObj;
+    OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> topResObj;
+    OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> bottomResObj;
+};
+
+struct LocalizedCalcDimension {
+    std::optional<OHOS::Ace::CalcDimension> start;
+    std::optional<OHOS::Ace::CalcDimension> end;
+    std::optional<OHOS::Ace::CalcDimension> top;
+    std::optional<OHOS::Ace::CalcDimension> bottom;
+    OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> leftResObj;
+    OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> rightResObj;
+    OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> topResObj;
+    OHOS::Ace::RefPtr<OHOS::Ace::ResourceObject> bottomResObj;
+};
+
 class ACE_FORCE_EXPORT ArkTSUtils {
 public:
     static uint32_t ColorAlphaAdapt(uint32_t origin);
@@ -328,6 +376,9 @@ public:
         }
         return false;
     }
+    // The Array decorated with the @State modifier has a proxy,
+    // so its length cannot be obtained directly, and this method should be used instead.
+    static double GetArrayLength(const EcmaVM* vm, Local<panda::ArrayRef> array);
     static BorderStyle ConvertBorderStyle(int32_t value);
     static void PushOuterBorderDimensionVector(
         const std::optional<CalcDimension>& valueDim, std::vector<ArkUI_Float32> &options);
@@ -478,12 +529,37 @@ public:
     static RefPtr<BasicShape> GetBasicShape(const EcmaVM* vm, const Local<panda::ObjectRef>& jsObj);
     static bool IsJsView(const EcmaVM* vm, const Local<JSValueRef>& value);
     static bool GetNativeNode(const EcmaVM* vm, const Local<JSValueRef>& value, ArkUINodeHandle& nativeNode);
+    static RefPtr<ResourceObject> GetResourceObject(const EcmaVM* vm, const Local<JSValueRef>& jsObj);
+    static RefPtr<ResourceObject> GetResourceObject(const EcmaVM* vm, const Local<panda::ObjectRef>& obj);
+    static bool ParseAllBorderRadiuses(
+        EcmaVM* vm, panda::Local<panda::ObjectRef> object, BorderRadiusOption& borderRadius);
+    static NG::BorderRadiusProperty BorderRadiusProperty(
+        EcmaVM* vm, panda::Local<panda::ObjectRef> object, BorderRadiusOption& borderRadius);
+    static BorderStyleOption ParseBorderStyle(EcmaVM* vm, panda::Local<panda::ObjectRef> object);
+    static LayoutCalPolicy ParseLayoutPolicy(const std::string& layoutPolicy);
+    static bool ParseCommonEdgeWidths(EcmaVM* vm, const panda::Local<panda::ObjectRef>& object,
+        CommonCalcDimension& commonCalcDimension, bool notNegative);
+    static void ParseEdgeWidthsResObj(EcmaVM* vm, const panda::Local<panda::ObjectRef>& object,
+        NG::BorderWidthProperty& borderWidth, bool notNegative);
+    static void ParseLocalizedEdgeWidths(EcmaVM* vm, const panda::Local<panda::ObjectRef>& object,
+        LocalizedCalcDimension& localizedCalcDimension, bool notNegative);
+    static bool IsBorderWidthObjUndefined(EcmaVM* vm, const panda::Local<panda::JSValueRef>& args);
+    static NG::BorderColorProperty GetLocalizedBorderColor(const CommonColor& commonColor);
+    static bool ParseCommonEdgeColors(
+        EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, CommonColor& commonColor);
+    static NG::BorderColorProperty GetBorderColor(const CommonColor& commonColor);
+    static bool ParseCommonMarginOrPaddingCorner(
+        EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, CommonCalcDimension& commonCalcDimension);
 
     template<typename T>
     static T GetPropertyValue(
         const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t propertyIndex, T defaultValue);
 private:
     static bool CheckDarkResource(const RefPtr<ResourceObject>& resObj);
+    static bool ParseAllBorderRadiuses(EcmaVM* vm, panda::Local<panda::ObjectRef> object,
+        BorderRadiusOption& borderRadius, std::shared_ptr<TextBackgroundStyle>& textBackgroundStyle);
+    void static ParseMarginOrPaddingCorner(
+        EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj, CommonCalcDimension& commonCalcDimension);
 };
 } // namespace OHOS::Ace::NG
 #endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H

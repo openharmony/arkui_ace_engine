@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 
 template<typename T>
-struct BorderRadiusPropertyT {
+struct ACE_FORCE_EXPORT BorderRadiusPropertyT {
     std::optional<T> radiusTopLeft;
     std::optional<T> radiusTopRight;
     std::optional<T> radiusBottomRight;

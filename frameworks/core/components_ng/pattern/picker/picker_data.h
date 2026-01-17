@@ -178,7 +178,7 @@ private:
     uint32_t second_ = 0;
 };
 
-class PickerDateTime final {
+class ACE_FORCE_EXPORT PickerDateTime final {
 public:
     PickerDateTime() = default;
     PickerDateTime(const PickerDate& date, const PickerTime& time) : date_(date), time_(time) {}

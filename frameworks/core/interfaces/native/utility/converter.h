@@ -135,7 +135,7 @@ namespace Converter {
     template<typename To, typename From>
     ACE_FORCE_EXPORT To Convert(const From& src);
     template<typename To, typename From>
-    std::optional<To> OptConvert(const From& value);
+    ACE_FORCE_EXPORT std::optional<To> OptConvert(const From& value);
 
      //Allow conversion for Ark_Xxx type to same Ark_Xxx type
     template<typename T>
@@ -782,7 +782,7 @@ namespace Converter {
     template<> std::vector<NG::BarItem> Convert(const Array_NavigationMenuItem& src);
     template<> std::vector<NG::BarItem> Convert(const Array_ToolbarItem& src);
     template<> ACE_FORCE_EXPORT std::vector<Shadow> Convert(const Ark_ShadowOptions& src);
-    template<> std::vector<std::pair<PickerDate, PickerDate>> Convert(const Array_DateRange& src);
+    template<> ACE_FORCE_EXPORT std::vector<std::pair<PickerDate, PickerDate>> Convert(const Array_DateRange& src);
     template<> std::vector<uint32_t> Convert(const Ark_Buffer& src);
     template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaEdge& src);
     template<> std::vector<uint32_t> Convert(const Array_LayoutSafeAreaType& src);

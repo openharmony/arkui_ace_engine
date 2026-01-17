@@ -897,8 +897,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blan
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.cpp @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.h @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.cpp @arkui001
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.h @arkui001
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp @arkui_framework_xnode
@@ -1112,8 +1110,6 @@ frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.cpp @arkui0
 frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_calendar.cpp @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_calendar.h @arkui001
-frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.cpp @arkui001
-frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_camera.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_camera.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_circle.cpp @arkuieco3

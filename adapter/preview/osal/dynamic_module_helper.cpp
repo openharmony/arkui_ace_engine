@@ -99,6 +99,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "FolderStack", "folderstack" },
         { "TimePicker", "timepicker" },
         { "TimePickerDialog", "timepicker" },
+        {"CalendarPicker", "calendarpicker"},
+        {"CalendarPickerDialog", "calendarpicker"},
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);

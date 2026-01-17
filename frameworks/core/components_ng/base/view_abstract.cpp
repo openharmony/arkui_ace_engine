@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1704,6 +1704,40 @@ void ViewAbstract::SetBorderWidth(const RefPtr<ResourceObject>& resObj)
     }
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string borderWidthString = pattern->GetResCacheMapByKey("borderWidth");
+        CalcDimension borderWidth;
+        if (borderWidthString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, borderWidth);
+            pattern->AddResCache("borderWidth", borderWidth.ToString());
+        } else {
+            borderWidth = StringUtils::StringToCalcDimension(borderWidthString);
+        }
+        BorderWidthProperty borderWidthProperty;
+        if (Negative(borderWidth.Value())) {
+            borderWidthProperty.SetBorderWidth(Dimension(0));
+        } else {
+            borderWidthProperty.SetBorderWidth(borderWidth);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, BorderWidth, borderWidthProperty, frameNode);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidthProperty, frameNode);
+        pattern->UpdateBorderResource();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("borderWidth", resObj, std::move(updateFunc));
+}
+
+void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    if (!ViewStackProcessor::GetInstance()->IsCurrentVisualStateProcess()) {
+        return;
+    }
     auto pattern = frameNode->GetPattern<Pattern>();
     CHECK_NULL_VOID(pattern);
     auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
@@ -6182,6 +6216,47 @@ void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const Dimension& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadius, frameNode);
 }
 
+void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
+    const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+    const std::optional<Dimension>& radiusBottomRight)
+{
+    NG::BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = radiusTopLeft;
+    borderRadius.radiusTopRight = radiusTopRight;
+    borderRadius.radiusBottomLeft = radiusBottomLeft;
+    borderRadius.radiusBottomRight = radiusBottomRight;
+    borderRadius.multiValued = true;
+    ViewAbstract::SetBorderRadius(frameNode, borderRadius);
+}
+
+void ViewAbstract::SetBorderRadius(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string borderRadiusString = pattern->GetResCacheMapByKey("borderRadius");
+        CalcDimension borderRadius;
+        if (borderRadiusString.empty()) {
+            ResourceParseUtils::ParseResDimensionVp(resObj, borderRadius);
+            pattern->AddResCache("borderRadius", borderRadius.ToString());
+        } else {
+            borderRadius = StringUtils::StringToCalcDimension(borderRadiusString);
+        }
+        BorderRadiusProperty borderRadiusProperty;
+        borderRadiusProperty.SetRadius(borderRadius);
+        borderRadiusProperty.multiValued = false;
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderRadius, borderRadiusProperty, frameNode);
+        pattern->UpdateBorderResource();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("borderRadius", resObj, std::move(updateFunc));
+}
+
 void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -6221,6 +6296,19 @@ void ViewAbstract::SetBorderWidth(FrameNode* frameNode, const Dimension& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderWidth, borderWidth, frameNode);
 }
 
+void ViewAbstract::SetBorderWidth(NG::FrameNode* frameNode, const std::optional<Dimension>& left,
+    const std::optional<Dimension>& right, const std::optional<Dimension>& top,
+    const std::optional<Dimension>& bottom)
+{
+    NG::BorderWidthProperty borderWidth;
+    borderWidth.leftDimen = left;
+    borderWidth.rightDimen = right;
+    borderWidth.topDimen = top;
+    borderWidth.bottomDimen = bottom;
+    borderWidth.multiValued = true;
+    ViewAbstract::SetBorderWidth(frameNode, borderWidth);
+}
+
 void ViewAbstract::SetBorderColor(FrameNode* frameNode, const BorderColorProperty& value)
 {
     CHECK_NULL_VOID(frameNode);
@@ -6252,6 +6340,33 @@ void ViewAbstract::SetBorderColor(FrameNode* frameNode, const Color& value)
     ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColor, frameNode);
 }
 
+void ViewAbstract::SetBorderColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<Pattern>();
+    CHECK_NULL_VOID(pattern);
+    auto&& updateFunc = [weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        auto pattern = frameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        std::string borderColorString = pattern->GetResCacheMapByKey("borderColor");
+        Color borderColor;
+        if (borderColorString.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, borderColor);
+            pattern->AddResCache("borderColor", borderColor.ColorToString());
+        } else {
+            borderColor = Color::ColorFromString(borderColorString);
+        }
+        BorderColorProperty borderColorProperty;
+        borderColorProperty.SetColor(borderColor);
+        ACE_UPDATE_NODE_RENDER_CONTEXT(BorderColor, borderColorProperty, frameNode);
+        pattern->UpdateBorderResource();
+    };
+    updateFunc(resObj);
+    pattern->AddResObj("borderColor", resObj, std::move(updateFunc));
+}
+
 void ViewAbstract::SetWidth(FrameNode* frameNode, const CalcLength& width)
 {
     CHECK_NULL_VOID(frameNode);
@@ -6273,6 +6388,15 @@ void ViewAbstract::UpdateLayoutPolicyProperty(FrameNode* frameNode, const Layout
     if (layoutProperty) {
         layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isWidth);
         layoutProperty->ClearUserDefinedIdealSize(isWidth, !isWidth);
+    }
+}
+
+void ViewAbstract::UpdateOnlyLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto layoutProperty = frameNode->GetLayoutProperty();
+    if (layoutProperty) {
+        layoutProperty->UpdateLayoutPolicyProperty(layoutPolicy, isWidth);
     }
 }
 

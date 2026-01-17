@@ -16,8 +16,8 @@
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
+#include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
-
 #include "core/interfaces/native/node/flow_item_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
@@ -401,7 +401,9 @@ void* createTextPickerNode(ArkUI_Int32 nodeId)
 
 void* createCalendarPickerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = CalendarPickerModelNG::CreateFrameNode(nodeId);
+    auto modifier = NodeModifier::GetCalendarPickerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->jsCreateById(nodeId)));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

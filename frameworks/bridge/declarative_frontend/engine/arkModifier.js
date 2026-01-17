@@ -291,10 +291,66 @@ class ButtonModifier extends ArkButtonComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class CalendarPickerModifier extends ArkCalendarPickerComponent {
+
+class LazyArkCalendarPickerComponent extends ArkComponent {
+    static module = undefined;
+    constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkCalendarPickerComponent.module === undefined) {
+      LazyArkCalendarPickerComponent.module = globalThis.requireNapi('arkui.components.arkCalendarpicker');
+    }
+    this.lazyComponent = LazyArkCalendarPickerComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  value(value) {
+    this.lazyComponent.value(value);
+    return this;
+  }
+  edgeAlign(alignType, offset) {
+    this.lazyComponent.edgeAlign(alignType, offset);
+    return this;
+  }
+  textStyle(value) {
+    this.lazyComponent.textStyle(value);
+    return this;
+  }
+  onChange(value) {
+    this.lazyComponent.onChange(value);
+    return this;
+  }
+  padding(value) {
+    this.lazyComponent.padding(value);
+    return this;
+  }
+  border(value) {
+    this.lazyComponent.border(value);
+    return this;
+  }
+  height(value) {
+    this.lazyComponent.height(value);
+    return this;
+  }
+  borderRadius(value) {
+    this.lazyComponent.borderRadius(value);
+    return this;
+  }
+  borderColor(value) {
+    this.lazyComponent.borderColor(value);
+    return this;
+  }
+  markToday(value) {
+    this.lazyComponent.markToday(value);
+    return this;
+  }
+}
+
+class CalendarPickerModifier extends LazyArkCalendarPickerComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

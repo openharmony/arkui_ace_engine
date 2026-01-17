@@ -27,6 +27,7 @@
 #include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components/slider/slider_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
+#include "core/components_ng/pattern/calendar/calendar_utils.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -138,7 +139,7 @@ Dimension CalendarMonthPattern::GetDaySize(const RefPtr<CalendarTheme>& theme)
     CHECK_NULL_RETURN(pipeline, theme->GetCalendarPickerDayWidthOrHeight());
     auto fontSizeScale = pipeline->GetFontScale();
 #ifndef ARKUI_WEARABLE
-    if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarUtils::CheckOrientationChange()) {
 #else
     if (fontSizeScale < theme->GetCalendarPickerLargeScale()) {
 #endif
@@ -154,7 +155,7 @@ bool CalendarMonthPattern::IsLargeSize(const RefPtr<CalendarTheme>& theme)
     CHECK_NULL_RETURN(pipeline, false);
     auto fontSizeScale = pipeline->GetFontScale();
 #ifndef ARKUI_WEARABLE
-    if ((fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange())
+    if ((fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarUtils::CheckOrientationChange())
         && theme->GetCalendarPickerDayLargeWidthOrHeight() > theme->GetCalendarPickerDayWidthOrHeight()) {
 #else
     if (fontSizeScale < theme->GetCalendarPickerLargeScale()

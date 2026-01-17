@@ -55,7 +55,17 @@
       "OHOS::Ace::Backend::Create()";
       "OHOS::Ace::Backend::TypeId()::myTypeId";
       "OHOS::Ace::BaseId::BaseId()";
+      OHOS::Ace::NG::CalendarMonthPattern::GetDaySize*;
+      OHOS::Ace::NG::CalendarMonthPattern::IsLargeSize*;
+      OHOS::Ace::NG::CalendarMonthPattern::FireIsFoldStatusChanged*;
+      OHOS::Ace::NG::CalendarMonthPattern::SetColRowSpace*;
+      OHOS::Ace::NG::CalendarMonthPattern::UpdateDayRadius*;
+      OHOS::Ace::NG::CalendarPattern::UpdateTitleNode*;
+      OHOS::Ace::NG::CalendarPattern::UpdateDayRadius*;
       OHOS::Ace::CalendarPickerModel::*;
+      OHOS::Ace::NG::CalendarPickerModelNG::*;
+      OHOS::Ace::NG::BorderRadiusPropertyT*;
+      OHOS::Ace::NG::BorderWidthPropertyT*;
       OHOS::Ace::ConnectServerManager::*;
       OHOS::Ace::Container::*;
       *OHOS::Ace::Container::IsCurrentUseNewPipeline*;
@@ -135,6 +145,7 @@
       OHOS::Ace::NG::BuildTitleNodeForCj*;
       OHOS::Ace::NG::AddControlButtonsForCj*;
       OHOS::Ace::DynamicModuleHelper::*;
+      OHOS::Ace::NG::DialogView::CreateDialogNode*;
       OHOS::Ace::PixelMap::*;
       OHOS::Ace::MeasureUtil::*;
       OHOS::Ace::ViewPartialUpdateModel::*;
@@ -577,9 +588,15 @@
       "OHOS::Ace::NG::PaintProperty::GetHost() const";
       "OHOS::Ace::NG::PaintProperty::UpdatePaintPropertyHost(OHOS::Ace::NG::PaintProperty const*)";
       OHOS::Ace::NG::InputEventActuator*;
+      OHOS::Ace::V2::BUTTON_ETS_TAG*;
       OHOS::Ace::V2::STACK_ETS_TAG*;
       OHOS::Ace::V2::TEXT_ETS_TAG*;
       OHOS::Ace::V2::ROW_ETS_TAG*;
+      OHOS::Ace::V2::CALENDAR_ETS_TAG*;
+      OHOS::Ace::V2::SCROLL_ETS_TAG*;
+      OHOS::Ace::V2::CALENDAR_PICKER_ETS_TAG*;
+      OHOS::Ace::V2::DIVIDER_ETS_TAG*;
+      OHOS::Ace::V2::SWIPER_ETS_TAG*;
       "OHOS::Ace::NG::PaintWrapper::FlushOverlayModifier()";
       OHOS::Ace::V2::SLIDER_ETS_TAG*;
       OHOS::Ace::ToRSRect*;
@@ -743,6 +760,12 @@
       VTT?for?OHOS::Ace::NG::ViewAdvancedRegister;
       VTT?for?OHOS::Ace::NG::ContainerModalView;
       VTT?for?OHOS::Ace::NG::Pattern;
+      VTT?for?OHOS::Ace::NG::ButtonPattern;
+      VTT?for?OHOS::Ace::NG::CalendarPattern;
+      VTT?for?OHOS::Ace::NG::CalendarMonthPattern;
+      VTT?for?OHOS::Ace::NG::DividerPattern;
+      VTT?for?OHOS::Ace::NG::ScrollablePattern;
+      VTT?for?OHOS::Ace::NG::ScrollPattern;
       VTT?for?OHOS::Ace::DrawableDescriptor;
       VTT?for?OHOS::Ace::LayeredDrawableDescriptor;
       VTT?for?OHOS::Ace::PixelMapDrawableDescriptor;
@@ -984,7 +1007,11 @@
       vtable?for?OHOS::Ace::ProgressDataPanelComponent;
       vtable?for?OHOS::Ace::PercentageDataPanelComponent;
       vtable?for?OHOS::Ace::Framework::ArkJSValue;
-
+      vtable?for?OHOS::Ace::NG::ButtonPattern;
+      vtable?for?OHOS::Ace::NG::CalendarPattern;
+      vtable?for?OHOS::Ace::NG::CalendarMonthPattern;
+      vtable?for?OHOS::Ace::NG::DividerPattern;
+      vtable?for?OHOS::Ace::NG::ScrollPattern;
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::NG::EventHub;
@@ -1638,10 +1665,20 @@
       "OHOS::Ace::RoundToMaxPrecision(double)";
       OHOS::Ace::NG::SwiperPattern::IsAtStart*;
       OHOS::Ace::NG::SwiperPattern::IsAtEnd*;
+      OHOS::Ace::NG::SwiperPattern::GetCurrentIndex*;
+      OHOS::Ace::NG::SwiperPattern::ShowNext*;
+      OHOS::Ace::NG::SwiperPattern::ShowPrevious*;
+      OHOS::Ace::NG::SwiperPattern::SwiperPattern*;
+      OHOS::Ace::NG::ScrollPattern::ScrollPattern*;
+      OHOS::Ace::NG::ScrollablePattern::ScrollablePattern*;
       OHOS::Ace::PipelineBase::GetImageCache*;
+      OHOS::Ace::NG::ContainerModalPattern::GetContainerModalTitleHeight*;
+      OHOS::Ace::Date::CalculateWeekDay*;
+      OHOS::Ace::Date::GetMilliSecondsByDateTime*;
       "OHOS::Ace::ACE_PI";
       "OHOS::Ace::ACE_E";
       "OHOS::Ace::Framework::ArkJSRuntime::GetThreadVm() const";
+      OHOS::Ace::IconTheme::GetIconPath*;
       OHOS::Ace::PipelineBase::GetImageCache*;
 
       #sidebar
@@ -2001,6 +2038,8 @@
       vtable?for?OHOS::Ace::HyperlinkComponent*;
       VTT?for?OHOS::Ace::NG::TextAccessibilityProperty*;
       VTT?for?OHOS::Ace::HyperlinkComponent*;
+      OHOS::Ace::NG::CommonBridge::SetBorder*;
+      OHOS::Ace::NG::CommonBridge::ParseLayoutPolicy*;
     };
   local:
     *;

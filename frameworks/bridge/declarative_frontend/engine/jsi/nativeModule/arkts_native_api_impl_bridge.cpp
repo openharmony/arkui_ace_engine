@@ -83,7 +83,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polyline_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_alphabet_indexer_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_data_panel_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scroll_bridge.h"
@@ -503,6 +502,8 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "Hyperlink" },
         { "TimePicker" },
         { "TimePickerDialog" },
+        { "CalendarPicker" },
+        { "CalendarPickerDialog" },
 #ifndef ARKUI_WEARABLE
         { "FolderStack" },
 #endif
@@ -2024,7 +2025,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterPathAttributes(object, vm);
     RegisterPolygonAttributes(object, vm);
     RegisterPolylineAttributes(object, vm);
-    RegisterCalendarPickerAttributes(object, vm);
     RegisterTabAttributes(object, vm);
     RegisterTabContentAttributes(object, vm);
     RegisterMenuItemGroupAttributes(object, vm);
@@ -3259,50 +3259,6 @@ void ArkUINativeModule::RegisterPolylineAttributes(Local<panda::ObjectRef> objec
     polyline->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPoints"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PolylineBridge::ResetPoints));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "polyline"), polyline);
-}
-
-void ArkUINativeModule::RegisterCalendarPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-#ifndef ARKUI_WEARABLE
-    auto calendarPicker = panda::ObjectRef::New(vm);
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetTextStyle));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetTextStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetTextStyle));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEdgeAlign"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetEdgeAlign));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEdgeAlign"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetEdgeAlign));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCalendarPickerPadding"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetCalendarPickerPadding));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCalendarPickerPadding"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetCalendarPickerPadding));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCalendarPickerBorder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetCalendarPickerBorder));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCalendarPickerBorder"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetCalendarPickerBorder));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCalendarPickerHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetCalendarPickerHeight));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCalendarPickerHeight"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetCalendarPickerHeight));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCalendarPickerBorderColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetCalendarPickerBorderColor));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCalendarPickerBorderColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetCalendarPickerBorderColor));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCalendarPickerBorderRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetCalendarPickerBorderRadius));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCalendarPickerBorderRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetCalendarPickerBorderRadius));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCalendarPickerMarkToday"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetCalendarPickerMarkToday));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCalendarPickerMarkToday"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetCalendarPickerMarkToday));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "setCalendarPickerOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::SetCalendarPickerOnChange));
-    calendarPicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCalendarPickerOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CalendarPickerBridge::ResetCalendarPickerOnChange));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "calendarPicker"), calendarPicker);
-#endif
 }
 
 void ArkUINativeModule::RegisterMenuItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

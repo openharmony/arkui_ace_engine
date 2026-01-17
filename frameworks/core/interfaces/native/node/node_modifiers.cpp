@@ -19,6 +19,7 @@
 #include "core/interfaces/native/node/blank_modifier.h"
 #include "core/interfaces/native/node/button_modifier.h"
 #include "core/interfaces/native/node/calendar_picker_modifier.h"
+#include "core/interfaces/native/node/calendar_picker_dialog_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "core/interfaces/native/node/column_modifier.h"
 #include "core/interfaces/native/node/column_split_modifier.h"
@@ -143,8 +144,8 @@
 
 using namespace OHOS::Ace::NG;
 
-#define MODIFIER_COUNTS 9
-#define MODIFIER_COUNTS_CJ 8
+#define MODIFIER_COUNTS 10
+#define MODIFIER_COUNTS_CJ 9
 #define BLANK_LINES 6
 
 extern "C" {
@@ -206,6 +207,11 @@ ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getCalendarPickerModifier = NodeModifier::GetCalendarPickerModifier,
     #else
         .getCalendarPickerModifier = nullptr,
+    #endif
+    #ifndef ARKUI_WEARABLE
+        .getCalendarPickerDialogModifier = NodeModifier::GetCalendarPickerDialogModifier,
+    #else
+        .getCalendarPickerDialogModifier = nullptr,
     #endif
         .getTextInputModifier = NodeModifier::GetTextInputModifier,
         .getTabsModifier = NodeModifier::GetTabsModifier,
@@ -369,6 +375,11 @@ const CJUINodeModifiers* GetCJUINodeModifiers()
         .getCalendarPickerModifier = NodeModifier::GetCJUICalendarPickerModifier,
     #else
         .getCalendarPickerModifier = nullptr,
+    #endif
+    #ifndef ARKUI_WEARABLE
+        .getCalendarPickerDialogModifier = NodeModifier::GetCJUICalendarPickerDialogModifier,
+    #else
+        .getCalendarPickerDialogModifier = nullptr,
     #endif
         .getTextInputModifier = NodeModifier::GetCJUITextInputModifier,
         .getTabsModifier = NodeModifier::GetCJUITabsModifier,

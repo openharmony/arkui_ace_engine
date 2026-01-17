@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -25,11 +25,11 @@
 #include "core/components_ng/base/inspector_filter.h"
 #include "core/components_ng/pattern/badge/badge_layout_property.h"
 #include "core/components_ng/pattern/calendar/calendar_month_pattern.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/swiper/swiper_event_hub.h"
 #include "core/components_ng/pattern/swiper/swiper_layout_property.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
+#include "core/components_ng/pattern/calendar/calendar_utils.h"
 
 namespace OHOS::Ace::NG {
 constexpr uint8_t TOTAL_COUNT = 3;
@@ -472,7 +472,7 @@ void CalendarPattern::UpdateTitleNode()
     auto fontSizeScale = pipelineContext->GetFontScale();
     auto fontSize = theme->GetCalendarTitleFontSize();
 #ifndef ARKUI_WEARABLE
-    if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarDialogView::CheckOrientationChange()) {
+    if (fontSizeScale < theme->GetCalendarPickerLargeScale() || CalendarUtils::CheckOrientationChange()) {
 #else
     if (fontSizeScale < theme->GetCalendarPickerLargeScale()) {
 #endif

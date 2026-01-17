@@ -42,7 +42,6 @@
 #include "bridge/declarative_frontend/jsview/js_button.h"
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
-#include "bridge/declarative_frontend/jsview/js_calendar_picker.h"
 #include "bridge/declarative_frontend/jsview/js_circle.h"
 #include "bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "bridge/declarative_frontend/jsview/js_clipboard.h"
@@ -456,9 +455,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "NativeChildrenMainSize", JSListChildrenMainSize::JSBind },
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "CalendarPicker", JSCalendarPicker::JSBind },
-#endif
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -546,9 +542,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "ImageAnimator", JSImageAnimator::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "CalendarPicker", JSCalendarPicker::JSBind },
-#endif
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -578,9 +571,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ToolBarItem", JSToolBarItem::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "CalendarPickerDialog", JSCalendarPickerDialog::JSBind },
-#endif
     { "Rect", JSRect::JSBind },
     { "Shape", JSShape::JSBind },
     { "Path", JSPath::JSBind },

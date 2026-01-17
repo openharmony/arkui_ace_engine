@@ -41,7 +41,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
@@ -359,10 +358,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
-    JSCalendarPicker::JSBind(globalObj);
-    JSCalendarPickerDialog::JSBind(globalObj);
-#endif
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
     JSRepeatVirtualScroll::JSBind(globalObj);
@@ -529,7 +524,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     // add missing binds to ng build
     JSContextMenu::JSBind(globalObj);
 #ifndef CROSS_PLATFORM
-    JSCalendarPicker::JSBind(globalObj);
     JSTextMenu::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED
     JSEffectComponent::JSBind(globalObj);

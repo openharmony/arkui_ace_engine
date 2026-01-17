@@ -228,7 +228,6 @@ template("declarative_js_engine_ark") {
       "nativeModule/arkts_native_badge_bridge.cpp",
       "nativeModule/arkts_native_blank_bridge.cpp",
       "nativeModule/arkts_native_button_bridge.cpp",
-      "nativeModule/arkts_native_calendar_picker_bridge.cpp",
       "nativeModule/arkts_native_canvas_bridge.cpp",
       "nativeModule/arkts_native_column_bridge.cpp",
       "nativeModule/arkts_native_common_bridge.cpp",
