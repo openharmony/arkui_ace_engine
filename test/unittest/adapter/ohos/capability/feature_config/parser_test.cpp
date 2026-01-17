@@ -85,11 +85,13 @@ HWTEST_F(ParserTest, ATC_IsValidDigits_ShouldReturnTrue_WhenStringIsValidDigits,
 HWTEST_F(ParserTest, STATIC_VALUE, TestSize.Level1)
 {
     auto& instance = FeatureParamManager::GetInstance();
-    instance.SetSyncLoadEnableParam(true, 80);
+    instance.SetSyncLoadEnableParam(true, 80, 10000);
     auto enable = instance.IsSyncLoadEnabled();
     auto time = instance.GetSyncloadResponseDeadline();
+    auto startupDelay = instance.GetSyncLoadStartupDelay();
     EXPECT_EQ(enable, true);
     EXPECT_EQ(time, 80);
+    EXPECT_EQ(startupDelay, 10000);
 
     instance.SetUINodeGcEnabled(true);
     enable = instance.IsUINodeGcEnabled();
@@ -116,6 +118,70 @@ HWTEST_F(ParserTest, ParseFeatureParam, TestSize.Level1)
 
     ret = uiNodeGcParamParser.ParseFeatureParam(node);
     EXPECT_EQ(ret, PARSE_EXEC_SUCCESS);
+}
+
+/**
+ * @tc.name: ParseFeatureParam002
+ * @tc.desc: test startupDelay whit valid value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParserTest, ParseFeatureParam002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create xmlNode
+     */
+    xmlNode node;
+    node.type = xmlElementType::XML_ELEMENT_NODE;
+    const std::string valueKeyStr = "value";
+    const std::string valueValStr = "50";
+    xmlSetProp(&node, (const xmlChar*)(valueKeyStr.c_str()), (const xmlChar*)(valueValStr.c_str()));
+
+    /**
+     * @tc.steps: step2. set startupDelay property with valid value.
+     */
+    const std::string startupDelayKeyStr = "startupDelay";
+    const std::string startupDelayValStr = "10000";
+    xmlSetProp(&node, (const xmlChar*)(startupDelayKeyStr.c_str()), (const xmlChar*)(startupDelayValStr.c_str()));
+
+    /**
+     * @tc.steps: step3. set startupDelay property with valid value.
+     * @tc.expected: SyncLoadStartupDelay is valid.
+     */
+    auto ret = syncLoadParser.ParseFeatureParam(node);
+    EXPECT_EQ(ret, PARSE_EXEC_SUCCESS);
+    EXPECT_EQ(FeatureParamManager::GetInstance().GetSyncLoadStartupDelay(), 10000000000);
+}
+
+/**
+ * @tc.name: ParseFeatureParam003
+ * @tc.desc: test startupDelay whit invalid value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ParserTest, ParseFeatureParam003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create xmlNode
+     */
+    xmlNode node;
+    node.type = xmlElementType::XML_ELEMENT_NODE;
+    const std::string valueKeyStr = "value";
+    const std::string valueValStr = "50";
+    xmlSetProp(&node, (const xmlChar*)(valueKeyStr.c_str()), (const xmlChar*)(valueValStr.c_str()));
+
+    /**
+     * @tc.steps: step2. set startupDelay property with invalid value.
+     */
+    const std::string startupDelayKeyStr = "startupDelay";
+    const std::string startupDelayValStr = "xxxx";
+    xmlSetProp(&node, (const xmlChar*)(startupDelayKeyStr.c_str()), (const xmlChar*)(startupDelayValStr.c_str()));
+
+    /**
+     * @tc.steps: step3. set startupDelay property with valid value.
+     * @tc.expected: SyncLoadStartupDelay is default.
+     */
+    auto ret = syncLoadParser.ParseFeatureParam(node);
+    EXPECT_EQ(ret, PARSE_EXEC_SUCCESS);
+    EXPECT_EQ(FeatureParamManager::GetInstance().GetSyncLoadStartupDelay(), 0);
 }
 
 /**

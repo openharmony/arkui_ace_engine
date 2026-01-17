@@ -46,6 +46,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
       weakFrontend_(frontend), instanceId_(instanceId)
 {
     CHECK_NULL_VOID(frontend);
+    pipelineCreateTime_ = GetSysTimestamp();
     frontendType_ = frontend->GetType();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
     windowManager_ = AceType::MakeRefPtr<WindowManager>();
@@ -72,6 +73,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
       weakFrontend_(frontend), instanceId_(instanceId), platformResRegister_(std::move(platformResRegister))
 {
     CHECK_NULL_VOID(frontend);
+    pipelineCreateTime_ = GetSysTimestamp();
     frontendType_ = frontend->GetType();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
     windowManager_ = AceType::MakeRefPtr<WindowManager>();
@@ -783,9 +785,13 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount)
 
 bool PipelineBase::ReachResponseDeadline() const
 {
+    auto currTime = GetSysTimestamp();
+    if (pipelineCreateTime_ + FeatureParam::GetSyncLoadStartupDelay() > currTime) {
+        return false;
+    }
     if (currRecvTime_ >= 0) {
-        auto deadline = FeatureParam::GetSyncloadResponseDeadline();
-        return currRecvTime_ + deadline < GetSysTimestamp();
+        int64_t deadline = FeatureParam::GetSyncloadResponseDeadline();
+        return currRecvTime_ + deadline < currTime;
     }
     return false;
 }

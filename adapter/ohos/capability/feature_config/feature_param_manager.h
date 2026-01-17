@@ -35,9 +35,10 @@ public:
     void Init(const std::string& bundleName, std::vector<OHOS::AppExecFwk::Metadata>& metaData);
 
     // SyncLoadParser
-    void SetSyncLoadEnableParam(bool enabled, uint32_t deadline);
+    void SetSyncLoadEnableParam(bool enabled, uint32_t deadline, int64_t startupDelay);
     bool IsSyncLoadEnabled() const;
     uint32_t GetSyncloadResponseDeadline() const;
+    int64_t GetSyncLoadStartupDelay() const;
     // UINodeGcParamParser
     void SetUINodeGcEnabled(bool enabled);
     bool IsUINodeGcEnabled() const;
@@ -60,6 +61,7 @@ private:
     // SyncLoadParser
     bool syncLoadEnabled_ = false;
     uint32_t syncloadResponseDeadline_ = DEFAULT_SYNCLOAD_DEADLINE * MS_TO_NS;
+    int64_t syncLoadStartupDelay_ = 0;
     // UINodeGcParamParser
     bool uiNodeGcEnabled_ = false;
     bool pageOverflowEnabled_ = false;

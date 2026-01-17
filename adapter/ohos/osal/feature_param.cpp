@@ -29,6 +29,11 @@ uint32_t FeatureParam::GetSyncloadResponseDeadline()
     return FeatureParamManager::GetInstance().GetSyncloadResponseDeadline();
 }
 
+int64_t FeatureParam::GetSyncLoadStartupDelay()
+{
+    return FeatureParamManager::GetInstance().GetSyncLoadStartupDelay();
+}
+
 bool FeatureParam::IsUINodeGcEnabled()
 {
     return FeatureParamManager::GetInstance().IsUINodeGcEnabled();
