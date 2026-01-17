@@ -6708,7 +6708,6 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
     GetAppInfo(root);
     auto cb = [root, onlyNeedVisible]() {
         auto json = root->ToString();
-        json.erase(std::remove(json.begin(), json.end(), ' '), json.end());
         auto res = JsonUtil::Create(true);
         res->Put("0", json.c_str());
         UiSessionManager::GetInstance()->ReportInspectorTreeValue(res->ToString());
