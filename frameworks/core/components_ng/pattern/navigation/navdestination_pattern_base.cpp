@@ -478,7 +478,6 @@ void NavDestinationPatternBase::InitOnTouchEvent(const RefPtr<FrameNode>& host)
             return;
         }
         auto dest = AceType::DynamicCast<NavDestinationGroupNode>(host);
-        CHECK_NULL_VOID(dest);
         navPattern->SetIsHomeNodeTouched(dest && dest->GetNavDestinationType() == NavDestinationType::HOME);
     });
 }
