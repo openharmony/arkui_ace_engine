@@ -881,4 +881,191 @@ HWTEST_F(TextPickerColumnTestThreeNg, TextPickerColumnGetSelectedObject005, Test
     expectValue = R"({"newValue":"text2","newSelected":1,"status":0})";
     EXPECT_EQ(result, expectValue);
 }
+
+/**
+ * @tc.name: HandleEnterSelectedArea_NoOptions
+ * @tc.desc: Test HandleEnterSelectedArea early returns when there are no options.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestThreeNg, HandleEnterSelectedArea_NoOptions, TestSize.Level1)
+{
+    InitTextPickerColumnTestThreeNg();
+    auto columnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    // Ensure no options
+    std::vector<NG::RangeContent> emptyOptions;
+    columnPattern->SetOptions(emptyOptions);
+    columnPattern->FlushCurrentOptions(false, true);
+
+    auto before = columnPattern->GetEnterIndex();
+    columnPattern->HandleEnterSelectedArea(10.0, 5.0, ScrollDirection::DOWN);
+    EXPECT_EQ(columnPattern->GetEnterIndex(), before);
+}
+
+/**
+ * @tc.name: HandleEnterSelectedArea_OverScrollNoChange
+ * @tc.desc: When NotLoopOptions and overscroller is over-scroll, function should early return.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestThreeNg, HandleEnterSelectedArea_OverScrollNoChange, TestSize.Level1)
+{
+    InitTextPickerColumnTestThreeNg();
+    auto columnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
+    columnPattern->SetOptions(range);
+    columnPattern->FlushCurrentOptions(false, true);
+
+    // Set NotLoopOptions via layout
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+    pickerNodeLayout->UpdateCanLoop(false);
+
+    // Force overscroll
+    columnPattern->overscroller_.SetOverScroll(1.0);
+
+    auto before = columnPattern->GetEnterIndex();
+    columnPattern->HandleEnterSelectedArea(100.0, 10.0, ScrollDirection::DOWN);
+    EXPECT_EQ(columnPattern->GetEnterIndex(), before);
+}
+
+/**
+ * @tc.name: HandleEnterSelectedArea_UPBranch
+ * @tc.desc: Test UP direction branch sets enter index to (current+1) when exceeding threshold.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestThreeNg, HandleEnterSelectedArea_UPBranch, TestSize.Level1)
+{
+    InitTextPickerColumnTestThreeNg();
+    auto columnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
+    columnPattern->SetOptions(range);
+    columnPattern->FlushCurrentOptions(false, true);
+
+    uint32_t totalCount = columnPattern->GetOptionCount();
+    ASSERT_GE(totalCount, 3u);
+
+    uint32_t currentIndex = columnPattern->GetCurrentIndex();
+    // Use a safe constant shiftDistance to avoid accessing optionProperties_ which
+    // may not be initialized in some test setups.
+    double shiftDistance = 10.0;
+    double shiftThreshold = shiftDistance / HALF_NUMBER;
+
+    double scrollDelta = std::abs(shiftThreshold) + 1.0;
+    columnPattern->HandleEnterSelectedArea(scrollDelta, shiftDistance, ScrollDirection::UP);
+
+    // For ScrollDirection::UP the enter index moves to the next option (increment modulo totalCount).
+    uint32_t expectedIndex = (currentIndex + 1) % totalCount;
+    EXPECT_EQ(columnPattern->GetEnterIndex(), expectedIndex);
+}
+
+/**
+ * @tc.name: HandleEnterSelectedArea_NotLoopBoundaryReturn
+ * @tc.desc: For NotLoopOptions at boundary, function should early return without changing enter index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestThreeNg, HandleEnterSelectedArea_NotLoopBoundaryReturn, TestSize.Level1)
+{
+    InitTextPickerColumnTestThreeNg();
+    auto columnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
+    columnPattern->SetOptions(range);
+    columnPattern->FlushCurrentOptions(false, true);
+
+    auto pickerNodeLayout = frameNode_->GetLayoutProperty<TextPickerLayoutProperty>();
+    ASSERT_NE(pickerNodeLayout, nullptr);
+    pickerNodeLayout->UpdateCanLoop(false);
+
+    // Put currentIndex at last so UP would wrap to 0 and cause early return for NotLoop
+    uint32_t lastIndex = columnPattern->GetOptionCount() - 1;
+    columnPattern->SetCurrentIndex(lastIndex);
+    columnPattern->SetEnterIndex(lastIndex);
+
+    auto before = columnPattern->GetEnterIndex();
+    // UP would compute newEnterIndex == 0 and should return without change
+    columnPattern->HandleEnterSelectedArea(100.0, 10.0, ScrollDirection::UP);
+    EXPECT_EQ(columnPattern->GetEnterIndex(), before);
+}
+
+/**
+ * @tc.name: HandleEnterSelectedArea001
+ * @tc.desc: Test HandleEnterSelectedArea sets enter index when scrollDelta exceeds threshold.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestThreeNg, HandleEnterSelectedArea001, TestSize.Level1)
+{
+    InitTextPickerColumnTestThreeNg();
+    auto columnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    // Prepare options and initialize properties
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
+    columnPattern->SetOptions(range);
+    columnPattern->FlushCurrentOptions(false, true);
+
+    uint32_t totalCount = columnPattern->GetOptionCount();
+    ASSERT_GE(totalCount, 3u);
+
+    uint32_t currentIndex = columnPattern->GetCurrentIndex();
+    uint32_t midIndex = columnPattern->GetShowOptionCount() / HALF_NUMBER;
+    double shiftDistance = 10.0;
+    if (midIndex < columnPattern->optionProperties_.size()) {
+        shiftDistance = columnPattern->optionProperties_[midIndex].nextDistance;
+    }
+    double shiftThreshold = shiftDistance / HALF_NUMBER;
+
+    // Call with scrollDelta greater than threshold to move enter index backward (DOWN)
+    double scrollDelta = std::abs(shiftThreshold) + 1.0;
+    columnPattern->HandleEnterSelectedArea(scrollDelta, shiftDistance, ScrollDirection::DOWN);
+
+    // For ScrollDirection::DOWN the enter index moves to the previous option (decrement modulo totalCount).
+    uint32_t expectedIndex = (currentIndex + totalCount - 1) % totalCount;
+    EXPECT_EQ(columnPattern->GetEnterIndex(), expectedIndex);
+}
+
+/**
+ * @tc.name: HandleEnterSelectedArea002
+ * @tc.desc: Test HandleEnterSelectedArea reverses to current index when drag is reversed and small.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextPickerColumnTestThreeNg, HandleEnterSelectedArea002, TestSize.Level1)
+{
+    InitTextPickerColumnTestThreeNg();
+    auto columnPattern = columnNode_->GetPattern<TextPickerColumnPattern>();
+    ASSERT_NE(columnPattern, nullptr);
+
+    // Prepare options and initialize properties
+    std::vector<NG::RangeContent> range = { { "", "1" }, { "", "2" }, { "", "3" } };
+    columnPattern->SetOptions(range);
+    columnPattern->FlushCurrentOptions(false, true);
+
+    uint32_t totalCount = columnPattern->GetOptionCount();
+    ASSERT_GE(totalCount, 3u);
+
+    uint32_t currentIndex = columnPattern->GetCurrentIndex();
+    uint32_t midIndex = columnPattern->GetShowOptionCount() / HALF_NUMBER;
+    double shiftDistance = 10.0;
+    if (midIndex < columnPattern->optionProperties_.size()) {
+        shiftDistance = columnPattern->optionProperties_[midIndex].nextDistance;
+    }
+    double shiftThreshold = shiftDistance / HALF_NUMBER;
+
+    // Simulate previous enter index different from current
+    uint32_t prevEnter = (currentIndex + 1) % totalCount;
+    columnPattern->SetEnterIndex(prevEnter);
+
+    // Make enterDelta_ large so isDragReverse becomes true, then call with small scrollDelta
+    columnPattern->enterDelta_ = 100.0;
+    double smallScroll = std::abs(shiftThreshold) / 2.0;
+    columnPattern->HandleEnterSelectedArea(smallScroll, shiftDistance, ScrollDirection::DOWN);
+
+    // Expect enter index reset to current index
+    EXPECT_EQ(columnPattern->GetEnterIndex(), currentIndex);
+}
 } // namespace OHOS::Ace::NG
