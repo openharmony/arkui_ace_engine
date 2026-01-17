@@ -15,8 +15,8 @@ import("//build/test.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("media_query_test_ng") {
+  module_name = "UIEngine-Mediaquery"
   type = "new"
-  module_output = bridge_test_output_path
   sources = [
     "$ace_root/frameworks/bridge/common/media_query/media_query_info.cpp",
     "media_query_test.cpp",

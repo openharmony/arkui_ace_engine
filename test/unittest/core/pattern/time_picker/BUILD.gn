@@ -15,13 +15,12 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("time_picker_test_ng") {
   type = "new"
-  module_name = "Component-Picker"
-  module_output = ""
+  module_name = "C-API-Render"
   sources = [
-    "time_picker_display_12hour_test_ng.cpp",
-    "time_picker_display_24hour_test_ng.cpp",
     "time_picker_display12_test_ng.cpp",
     "time_picker_display24_test_ng.cpp",
+    "time_picker_display_12hour_test_ng.cpp",
+    "time_picker_display_24hour_test_ng.cpp",
     "time_picker_order_test_ng.cpp",
     "time_picker_paint_test_ng.cpp",
     "time_picker_resource_test.cpp",
@@ -33,15 +32,14 @@ ace_unittest("time_picker_test_ng") {
 
 ace_unittest("time_picker_dialog_test_ng") {
   type = "new"
-  module_name = "Component-Picker"
-  module_output = ""
+  module_name = "DialogSet-bindSheet"
   sources = [
     "time_picker_accessibility_test_ng.cpp",
     "time_picker_algorithm_test_ng.cpp",
     "time_picker_column_layout_algorithm_test_ng.cpp",
     "time_picker_column_pattern_test_ng.cpp",
-    "time_picker_dialog_view_show_test_ng.cpp",
     "time_picker_dialog_view_show_test.cpp",
+    "time_picker_dialog_view_show_test_ng.cpp",
     "time_picker_dialog_view_test_ng.cpp",
     "time_picker_row_pattern_test.cpp",
     "time_picker_row_pattern_test_ng.cpp",

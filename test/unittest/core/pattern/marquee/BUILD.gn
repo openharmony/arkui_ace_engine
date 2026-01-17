@@ -14,8 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("marquee_test_ng") {
-  module_name = "Component-Text"
-  module_output = ""
+  module_name = "InfoShowSet-Marquee"
   type = "new"
   sources = [
     "marquee_pattern_test_ng.cpp",

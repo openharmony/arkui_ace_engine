@@ -14,6 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("xcomponent_test_ng") {
+  module_name = "DrawingSet-Path"
   type = "new"
   sources = [
     "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",
@@ -21,8 +22,8 @@ ace_unittest("xcomponent_test_ng") {
     "xcomponent_property_test_two_ng.cpp",
     "xcomponent_static_test_ng.cpp",
     "xcomponent_test_ng.cpp",
-    "xcomponent_testtwo_ng.cpp",
     "xcomponent_test_three_ng.cpp",
+    "xcomponent_testtwo_ng.cpp",
     "xcomponent_utils_test_ng.cpp",
     "xcomponent_v2_test_ng.cpp",
   ]
@@ -34,6 +35,7 @@ ace_unittest("xcomponent_test_ng") {
 }
 
 ace_unittest("xcomponent_test_set_rate_range") {
+  module_name = "CommonEvent-VisiableAreaChange"
   type = "new"
   sources = [
     "$ace_root/frameworks/core/components/xcomponent/native_interface_xcomponent_impl.cpp",

@@ -14,8 +14,8 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("painter_test") {
+  module_name = "DrawingSet-Polygon"
   type = "new"
-  module_output = "render"
   sources = [
     "border_image_painter_test_ng.cpp",
     "circle_painter_test_ng.cpp",
@@ -31,20 +31,20 @@ ace_unittest("painter_test") {
 }
 
 ace_unittest("drawing_prop_convertor_test_ng") {
+  module_name = "TextSet-Text"
   type = "new"
-  module_output = "render"
   sources = [ "drawing_prop_convertor_test_ng.cpp" ]
 }
 
 ace_unittest("render_context_test_ng") {
+  module_name = "UIEngine-UIContext"
   type = "new"
-  module_output = "render"
   sources = [ "render_context_test_ng.cpp" ]
 }
 
 ace_unittest("render_property_test_ng") {
+  module_name = "CommonProperties-Background"
   type = "new"
-  module_output = "render"
   sources = [ "render_property_test_ng.cpp" ]
 }
 

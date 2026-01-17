@@ -14,6 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("dialog_test_ng") {
+  module_name = "DialogSet-bindContentCover"
   type = "new"
   sources = [
     "dialog_layout_test_ng.cpp",

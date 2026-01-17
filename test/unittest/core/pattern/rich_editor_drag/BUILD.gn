@@ -14,9 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("rich_editor_drag_test_ng") {
-  module_out_path = "ace_engine/Component-RichEditor"
-  module_name = "Component-RichEditor"
-  module_output = ""
+  module_name = "TextSet-RichEditor"
   type = "new"
   sources = [
     "rich_editor_drag_paint_method_test_ng.cpp",

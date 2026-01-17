@@ -14,8 +14,8 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("capi_all_utils_test") {
+  module_name = "DialogSet-Toast"
   type = "new"
-  module_output = "capi"
   sources = [
     # place here your UT source code
     "converter_test.cpp",

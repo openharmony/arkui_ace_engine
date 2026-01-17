@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("key_event_manager_test") {
+  module_name = "FormAndSelection-Button"
   type = "new"
-  module_output = "events"
   sources = [ "key_event_manager_test.cpp" ]
 }

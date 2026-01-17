@@ -14,6 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("window_scene_test") {
+  module_name = "DrawingSet-Ellipse"
   type = "new"
   render = true
   sources = [
@@ -54,6 +55,7 @@ ace_unittest("window_scene_test") {
     "c_utils:utils",
     "ffrt:libffrt",
     "hilog:libhilog",
+    "init:libbegetutil",
     "input:libmmi-client",
     "ipc:ipc_single",
     "napi:ace_napi",
@@ -64,6 +66,5 @@ ace_unittest("window_scene_test") {
     "window_manager:scene_session_manager",
     "window_manager:screen_session",
     "window_manager:screen_session_manager",
-    "init:libbegetutil",
   ]
 }

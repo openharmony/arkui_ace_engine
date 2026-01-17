@@ -16,20 +16,20 @@ import("//foundation/arkui/ace_engine/build/ace_ext.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("view_stack_processor_test_ng") {
+  module_name = "EmbeddedDisPlayCrossProcess-EmbeddedComponent"
   type = "new"
-  module_output = "basic"
   sources = [ "view_stack_processor_test_ng.cpp" ]
 }
 
 ace_unittest("distributed_ui_test_ng") {
+  module_name = "Modifier-AttributeModifier"
   type = "new"
-  module_output = "basic"
   sources = [ "distributed_ui_test_ng.cpp" ]
 }
 
 ace_unittest("frame_node_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "basic"
   sources = [
     "frame_node_test_ng.cpp",
     "frame_node_test_ng_coverage.cpp",
@@ -41,38 +41,38 @@ ace_unittest("frame_node_test_ng") {
 }
 
 ace_unittest("frame_node_drop_test_ng") {
+  module_name = "ImperativeFramework-NodeAdapter"
   type = "new"
-  module_output = "basic"
   sources = [ "frame_node_drop_test_ng.cpp" ]
 }
 
 ace_unittest("geometry_node_test_ng") {
+  module_name = "CommonEvent-NodeMount"
   type = "new"
-  module_output = "basic"
   sources = [ "geometry_node_test_ng.cpp" ]
 }
 
 ace_unittest("inspector_test_ng") {
+  module_name = "Debugger-inspector"
   type = "new"
-  module_output = "basic"
   sources = [ "inspector_test_ng.cpp" ]
 }
 
 ace_unittest("simplified_inspector_test_ng") {
+  module_name = "Debugger-inspector"
   type = "new"
-  module_output = "basic"
   sources = [ "simplified_inspector_test_ng.cpp" ]
 }
 
 ace_unittest("ui_node_gc_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "basic"
   sources = [ "ui_node_gc_test_ng.cpp" ]
 }
 
 ace_unittest("ui_node_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "basic"
   sources = [
     "ui_node_test_ng.cpp",
     "ui_node_test_ng_two.cpp",
@@ -80,49 +80,49 @@ ace_unittest("ui_node_test_ng") {
 }
 
 ace_unittest("view_abstract_test_ng") {
+  module_name = "DialogSet-OverlayManager"
   type = "new"
-  module_output = "basic"
   sources = [
+    "view_abstract_test_five_ng.cpp",
+    "view_abstract_test_four_ng.cpp",
     "view_abstract_test_ng.cpp",
     "view_abstract_test_ng_for_property_config.cpp",
     "view_abstract_test_ng_for_visual_effect.cpp",
     "view_abstract_test_ng_new.cpp",
     "view_abstract_test_ng_two.cpp",
-    "view_abstract_test_three_ng.cpp",
-    "view_abstract_test_four_ng.cpp",
-    "view_abstract_test_five_ng.cpp",
     "view_abstract_test_six_ng.cpp",
+    "view_abstract_test_three_ng.cpp",
     "view_abstract_test_two_ng_for_property_config.cpp",
   ]
 }
 
 ace_unittest("view_abstract_test_resetposition_ng") {
+  module_name = "PickerSet-TimePicker/TimePickerDialog"
   type = "new"
-  module_output = "basic"
   sources = [ "view_abstract_test_resetposition_ng.cpp" ]
 }
 
 ace_unittest("view_full_update_model_ng_test") {
+  module_name = "ImperativeFramework-NodeContainer"
   type = "new"
-  module_output = "basic"
   sources = [ "view_full_update_model_ng_test.cpp" ]
 }
 
 ace_unittest("view_partial_update_model_test_ng") {
+  module_name = "CommonProperties-LayoutAndBorder"
   type = "new"
-  module_output = "basic"
   sources = [ "view_partial_update_model_test_ng.cpp" ]
 }
 
 ace_unittest("observer_test_ng") {
+  module_name = "NavigationSet-NavigationAndNavDestination"
   type = "new"
-  module_output = "basic"
   sources = [ "observer_test_ng.cpp" ]
 }
 
 ace_unittest("view_abstract_model_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "basic"
   sources = [
     "view_abstract_model_test_ng.cpp",
     "view_abstract_model_test_two_ng.cpp",
@@ -130,50 +130,50 @@ ace_unittest("view_abstract_model_test_ng") {
 }
 
 ace_unittest("view_abstract_model_static_test_ng") {
+  module_name = "DialogSet-Menu"
   type = "new"
-  module_output = "basic"
   sources = [ "view_abstract_model_static_test_two_ng.cpp" ]
 }
 
 ace_unittest("short_cuts_little_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "basic"
   sources = [ "short_cuts_little_test_ng.cpp" ]
 }
 
 ace_unittest("short_cuts_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "basic"
   sources = [ "short_cuts_test_ng.cpp" ]
 }
 
 ace_unittest("extension_handler_test_ng") {
+  module_name = "CommonProperties-DrawModifier"
   type = "new"
-  module_output = "basic"
   sources = [ "extension_handler_test_ng.cpp" ]
 }
 
 ace_unittest("node_render_status_monitor_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "basic"
   sources = [ "node_render_status_monitor_test_ng.cpp" ]
 }
 
 ace_unittest("force_split_base_test_ng") {
+  module_name = "FormAndSelection-Rating"
   type = "new"
-  module_output = "basic"
   sources = [ "force_split_base_test_ng.cpp" ]
 }
 
 ace_unittest("thread_safe_node_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "basic"
   sources = [ "thread_safe_node_test_ng.cpp" ]
 }
 
 ace_unittest("transparent_node_detector_test_ng") {
+  module_name = "NavigationSet-NavigationAndNavDestination"
   type = "new"
-  module_output = "basic"
   sources = [
     "$ace_root/frameworks/core/components_ng/base/transparent_node_detector.cpp",
     "transparent_node_detector_test_ng.cpp",
@@ -195,16 +195,16 @@ group("core_base_unittest") {
     ":short_cuts_test_ng",
     ":simplified_inspector_test_ng",
     ":thread_safe_node_test_ng",
+    ":transparent_node_detector_test_ng",
     ":ui_node_gc_test_ng",
     ":ui_node_test_ng",
+    ":view_abstract_model_static_test_ng",
     ":view_abstract_model_test_ng",
     ":view_abstract_test_ng",
     ":view_abstract_test_resetposition_ng",
     ":view_full_update_model_ng_test",
     ":view_partial_update_model_test_ng",
     ":view_stack_processor_test_ng",
-    ":view_abstract_model_static_test_ng",
-    ":transparent_node_detector_test_ng",
   ]
 
   if (ace_engine_feature_enable_split_mode) {

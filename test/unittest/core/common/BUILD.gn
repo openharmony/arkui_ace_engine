@@ -14,8 +14,8 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("common_test") {
+  module_name = "CommonEvent-NodeMount"
   type = "new"
-  module_output = "common"
   sources = [
     "$ace_root/adapter/ohos/entrance/file_asset_provider_impl.cpp",
     "$ace_root/adapter/ohos/osal/input_compatible_manager.cpp",

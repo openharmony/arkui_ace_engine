@@ -14,8 +14,8 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("gestures_test_ng") {
+  module_name = "DrawingSet-Rect"
   type = "new"
-  module_output = "gestures"
   sources = [
     "click_recognizer_test_ng.cpp",
     "exclusive_recognizer_base_test_ng.cpp",

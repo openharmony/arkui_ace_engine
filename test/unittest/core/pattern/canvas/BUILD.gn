@@ -14,6 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("canvas_test_ng") {
+  module_name = "DrawingSet-Canvas"
   type = "new"
   sources = [
     "canvas_custom_paint_method_test_ng.cpp",

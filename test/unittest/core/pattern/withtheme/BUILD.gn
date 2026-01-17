@@ -14,6 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("withtheme_test_ng") {
+  module_name = "CommonProperties-Background"
   type = "new"
   sources = [ "withtheme_test_ng.cpp" ]
 }
