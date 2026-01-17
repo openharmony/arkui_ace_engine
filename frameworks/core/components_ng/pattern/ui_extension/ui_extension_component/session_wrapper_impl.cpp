@@ -1311,6 +1311,7 @@ void SessionWrapperImpl::NotifyDisplayArea(const RectF& displayArea)
     session_->UpdateRect({ std::round(displayArea_.Left()), std::round(displayArea_.Top()),
         std::round(displayArea_.Width()), std::round(displayArea_.Height()) }, reason, "NotifyDisplayArea",
         transaction);
+    RefreshOccupiedAreaChangeInfo();
 }
 
 void SessionWrapperImpl::NotifySizeChangeReason(
@@ -1341,6 +1342,33 @@ void SessionWrapperImpl::NotifyOriginAvoidArea(const Rosen::AvoidArea& avoidArea
     session_->UpdateAvoidArea(sptr<Rosen::AvoidArea>::MakeSptr(avoidArea), static_cast<Rosen::AvoidAreaType>(type));
 }
 
+bool SessionWrapperImpl::RefreshOccupiedAreaChangeInfo()
+{
+    static std::once_flag onceFlag;
+    static bool isDeviceTypeDefault = false;
+    std::call_once(onceFlag, []() {
+        std::string deviceType = OHOS::system::GetParameter(PROPERTY_DEVICE_TYPE, PROPERTY_DEVICE_TYPE_DEFAULT);
+        isDeviceTypeDefault = deviceType == PROPERTY_DEVICE_TYPE_DEFAULT;
+    });
+    CHECK_NULL_RETURN(taskExecutor_, false);
+    CHECK_NULL_RETURN(occupiedAreaChangeInfo_, false);
+    int32_t keyboardHeight = static_cast<int32_t>(occupiedAreaChangeInfo_->rect_.height_);
+    if (keyboardHeight > 0 && isDeviceTypeDefault) {
+        int64_t curTime = GetCurrentTimestamp();
+        taskExecutor_->PostTask(
+            [weak = AceType::WeakClaim(this), curTime] {
+                auto session = weak.Upgrade();
+                if (session) {
+                    session->InnerNotifyOccupiedAreaChangeInfo(session->occupiedAreaChangeInfo_, false, curTime);
+                }
+            },
+            TaskExecutor::TaskType::UI, "ArkUIVirtualKeyboardAreaRefresh",
+            TaskExecutor::GetPriorityTypeWithCheck(PriorityType::VIP));
+        return true;
+    }
+    return false;
+}
+
 bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
     sptr<Rosen::OccupiedAreaChangeInfo> info, bool needWaitLayout)
 {
@@ -1353,13 +1381,7 @@ bool SessionWrapperImpl::NotifyOccupiedAreaChangeInfo(
     CHECK_NULL_RETURN(pipeline, false);
     auto curWindow = pipeline->GetCurrentWindowRect();
     int64_t curTime = GetCurrentTimestamp();
-    static bool isDeviceTypeDefault = false;
-    static std::once_flag onceFlag;
-    std::call_once(onceFlag, []() {
-        std::string deviceType = OHOS::system::GetParameter(PROPERTY_DEVICE_TYPE, PROPERTY_DEVICE_TYPE_DEFAULT);
-        isDeviceTypeDefault = deviceType == PROPERTY_DEVICE_TYPE_DEFAULT;
-    });
-    if ((displayAreaWindow_ != curWindow && needWaitLayout) || isDeviceTypeDefault) {
+    if ((displayAreaWindow_ != curWindow && needWaitLayout)) {
         UIEXT_LOGI("OccupiedArea wait layout, displayAreaWindow: %{public}s,"
             " curWindow=%{public}s, componentId=%{public}d.",
             displayAreaWindow_.ToString().c_str(), curWindow.ToString().c_str(), GetFrameNodeId());
@@ -1422,6 +1444,7 @@ bool SessionWrapperImpl::InnerNotifyOccupiedAreaChangeInfo(
     sptr<Rosen::OccupiedAreaChangeInfo> newInfo = new Rosen::OccupiedAreaChangeInfo(
         info->type_, info->rect_, info->safeHeight_, info->textFieldPositionY_, info->textFieldHeight_);
     newInfo->rect_.height_ = static_cast<uint32_t>(keyboardHeight);
+    occupiedAreaChangeInfo_ = static_cast<int32_t>(info->rect_.height_) == 0 ? nullptr : info;
     UIEXT_LOGI("OccupiedArea keyboardHeight = %{public}d, displayOffset = %{public}s, displayArea = %{public}s, "
                "curWindow = %{public}s, persistentid = %{public}d, componentId=%{public}d.",
         keyboardHeight, displayArea.GetOffset().ToString().c_str(), displayArea_.ToString().c_str(),
