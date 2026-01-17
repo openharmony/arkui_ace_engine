@@ -490,11 +490,11 @@ void NavDestinationPatternBase::RemoveOnTouchEvent(FrameNode* frameNode)
     CHECK_NULL_VOID(context);
     auto forceSplitMgr = context->GetForceSplitManager();
     CHECK_NULL_VOID(forceSplitMgr);
-    auto eventManager = context->GetEventManager();
-    CHECK_NULL_VOID(eventManager);
     if (!forceSplitMgr->IsForceSplitSupported(false)) {
         return;
     }
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
     eventManager->UnRegisterHitTestFrameNodeListener(frameNode->GetId());
 }
 
