@@ -26,6 +26,7 @@
 #include "core/animation/velocity_motion.h"
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
+#include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/scrollable_event.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
@@ -1090,6 +1091,7 @@ private:
     float GetScrollDelta(float offset, bool& stopAnimation);
 
     void InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub);
+    void RegisterTouchpadInteractionCallback();
     void RegisterWindowStateChangedCallback();
     void OnTouchTestDone(const std::shared_ptr<BaseGestureEvent>& baseGestureEvent,
         const std::list<WeakPtr<NGGestureRecognizer>>& activeRecognizers);

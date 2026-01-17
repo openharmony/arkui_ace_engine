@@ -23,6 +23,7 @@
 #include "core/common/event_dump.h"
 #include "core/common/key_event_manager.h"
 #include "core/components/common/layout/constants.h"
+#include "core/components_ng/event/input_event_hub.h"
 #include "core/components_ng/event/response_ctrl.h"
 #include "core/components_ng/gestures/gesture_referee.h"
 #include "core/components_ng/gestures/recognizers/gesture_recognizer.h"
@@ -449,6 +450,9 @@ public:
     void RegisterHitTestFrameNodeListener(int32_t uniqueIdentify, std::function<void(const TouchEvent&)> callback);
     void UnRegisterHitTestFrameNodeListener(int32_t uniqueIdentify);
     void NotifyHitTestFrameNodeListener(const TouchEvent& touchEvent);
+    void AddTouchpadInteractionListenerInner(int32_t frameNodeId, NG::TouchpadInteractionListener&& listener);
+    void UnregisterTouchpadInteractionListenerInner(int32_t frameNodeId);
+    void NotifyTouchpadInteraction();
 
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
@@ -546,6 +550,7 @@ private:
     MarkProcessedEventInfo lastConsumedEvent_;
     int32_t lastDownFingerNumber_ = 0;
     SourceTool lastSourceTool_ = SourceTool::UNKNOWN;
+    std::unordered_map<int32_t, NG::TouchpadInteractionListener> touchpadInteractionListeners_;
     // used to pseudo cancel event.
     TouchEvent lastTouchEvent_;
     // used to pseudo hover out event.
