@@ -80,9 +80,7 @@ DragDropEventActuator::DragDropEventActuator(const WeakPtr<GestureEventHub>& ges
 void DragDropEventActuator::InitPanAction()
 {
     auto frameNode = GetFrameNode();
-    if (frameNode) {
-        ACE_UINODE_TRACE(frameNode);
-    }
+    ACE_UINODE_TRACE(frameNode);
     if (panRecognizer_ == nullptr) {
         panRecognizer_ = MakeRefPtr<PanRecognizer>(
             DEFAULT_DRAG_FINGERS, DEFAULT_DRAG_DIRECTION, DEFAULT_DRAG_DISTANCE.ConvertToPx());
@@ -147,9 +145,7 @@ RefPtr<FrameNode> DragDropEventActuator::GetFrameNode() const
 void DragDropEventActuator::InitLongPressAction()
 {
     auto frameNode = GetFrameNode();
-    if (frameNode) {
-        ACE_UINODE_TRACE(frameNode);
-    }
+    ACE_UINODE_TRACE(frameNode);
     if (longPressRecognizer_ == nullptr) {
         longPressRecognizer_ =
             AceType::MakeRefPtr<LongPressRecognizer>(LONG_PRESS_DURATION, DEFAULT_DRAG_FINGERS, false, true);

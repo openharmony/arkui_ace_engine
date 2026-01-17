@@ -2918,4 +2918,47 @@ HWTEST_F(FrameNodeTestNg, FrameNodeOnDelteTest, TestSize.Level1)
     frameNode->OnDelete();
     EXPECT_EQ(kitNode->GetAceNodePtr(), nullptr);
 }
+
+/**
+ * @tc.name: AceUINodeTrace001
+ * @tc.desc: Test ace uinode trace
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, AceUINodeTrace001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. callback DumpInfo
+     * @tc.expected: expect The function is run ok.
+     */
+    LayoutProperty layoutProperty;
+    FRAME_NODE->DumpInfo();
+
+    FRAME_NODE->layoutProperty_->UpdatePadding(PaddingPropertyT<CalcLength>());
+    FRAME_NODE->layoutProperty_->GetPaddingProperty();
+    FRAME_NODE->DumpInfo();
+    EXPECT_EQ(layoutProperty.padding_, nullptr);
+
+    FRAME_NODE->layoutProperty_->UpdateMargin(PaddingProperty());
+    FRAME_NODE->layoutProperty_->GetMarginProperty();
+    FRAME_NODE->DumpInfo();
+    EXPECT_EQ(layoutProperty.margin_, nullptr);
+
+    FRAME_NODE->layoutProperty_->UpdateBorderWidth(BorderWidthPropertyT<Dimension>());
+    FRAME_NODE->layoutProperty_->GetBorderWidthProperty();
+    FRAME_NODE->DumpInfo();
+    FRAME_NODE->CreateEventHubInner();
+    EXPECT_EQ(layoutProperty.borderWidth_, nullptr);
+
+    /**
+     * @tc.steps: step2. set layoutConstraintF_ an geometryNode_'sParentLayoutConstraint
+                and call DumpInfo
+     * @tc.expected: expect The function is run ok.
+     */
+    FRAME_NODE->layoutProperty_->calcLayoutConstraint_ = std::make_unique<MeasureProperty>();
+    auto layoutConstraintF_ = LayoutConstraintF();
+    FRAME_NODE->geometryNode_->SetParentLayoutConstraint(layoutConstraintF_);
+    FRAME_NODE->DumpInfo();
+    FRAME_NODE->GetOrCreateFocusHub();
+    EXPECT_EQ(layoutProperty.calcLayoutConstraint_, nullptr);
+}
 } // namespace OHOS::Ace::NG

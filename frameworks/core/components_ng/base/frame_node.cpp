@@ -573,7 +573,8 @@ FrameNode::~FrameNode()
 
 void FrameNode::CreateEventHubInner()
 {
-    ACE_UINODE_TRACE(this);
+    auto nodeId = GetId();
+    ACE_UINODE_TRACE(nodeId);
     if (eventHub_ || !pattern_) {
         return;
     }
@@ -4103,7 +4104,8 @@ void FrameNode::OnHoverWithHightLight(bool isHover) const
 
 RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub()
 {
-    ACE_UINODE_TRACE(this);
+    auto nodeId = GetId();
+    ACE_UINODE_TRACE(nodeId);
     if (focusHub_) {
         return focusHub_;
     }
@@ -4118,7 +4120,8 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub()
 
 const RefPtr<DragDropRelatedConfigurations>& FrameNode::GetOrCreateDragDropRelatedConfigurations()
 {
-    ACE_UINODE_TRACE(this);
+    auto nodeId = GetId();
+    ACE_UINODE_TRACE(nodeId);
     if (dragDropRelatedConfigurations_) {
         return dragDropRelatedConfigurations_;
     }

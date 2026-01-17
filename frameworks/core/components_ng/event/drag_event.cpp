@@ -75,9 +75,7 @@ DragEventActuator::DragEventActuator(
     : gestureEventHub_(gestureEventHub), direction_(direction), fingers_(fingers), distance_(distance)
 {
     auto frameNode = GetFrameNode();
-    if (frameNode) {
-        ACE_UINODE_TRACE(frameNode);
-    }
+    ACE_UINODE_TRACE(frameNode);
     if (fingers_ < PAN_FINGER) {
         fingers_ = PAN_FINGER;
     }
