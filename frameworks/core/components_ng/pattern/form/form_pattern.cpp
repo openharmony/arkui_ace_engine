@@ -35,10 +35,11 @@
 #include "core/common/udmf/udmf_client.h"
 #include "core/common/form_manager.h"
 #include "core/components/form/resource/form_manager_delegate.h"
-#include "core/components_ng/pattern/form/form_node.h"
 #include "core/components_ng/pattern/shape/rect_pattern.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/render/adapter/rosen_render_context.h"
+#include "core/components_ng/pattern/form/form_node.h"
+#include "core/components_ng/pattern/form/form_scoped_rs_transaction.h"
 #include "core/components_ng/pattern/form/form_snapshot_check.h"
 #include "core/components_ng/pattern/form/form_snapshot_util.h"
 
@@ -129,23 +130,38 @@ private:
     WeakPtr<FormPattern> weakFormPattern_ = nullptr;
 };
 
-void PostTask(const TaskExecutor::Task& task, TaskExecutor::TaskType type, const std::string& name)
+void PostDelayedTask(
+    const TaskExecutor::Task &task, TaskExecutor::TaskType type, int32_t delayTime, const std::string &name)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipeline);
     auto taskExecutor = pipeline->GetTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
-    taskExecutor->PostTask(task, type, name, PriorityType::HIGH);
+    taskExecutor->PostDelayedTask(task, type, delayTime, name, PriorityType::HIGH);
 }
 
-void PostUITask(const TaskExecutor::Task& task, const std::string& name)
+void PostDelayedUITask(const TaskExecutor::Task &task, int32_t delayTime, const std::string &name)
 {
-    PostTask(task, TaskExecutor::TaskType::UI, name);
+    PostDelayedTask(task, TaskExecutor::TaskType::UI, delayTime, name);
 }
 
-void PostBgTask(const TaskExecutor::Task& task, const std::string& name)
+void PostUITask(const TaskExecutor::Task &task, const std::string &name)
 {
-    PostTask(task, TaskExecutor::TaskType::BACKGROUND, name);
+    PostDelayedTask(task, TaskExecutor::TaskType::UI, 0, name);
+}
+
+void PostBgTask(const TaskExecutor::Task &task, const std::string &name)
+{
+    PostDelayedTask(task, TaskExecutor::TaskType::BACKGROUND, 0, name);
+}
+
+void RemoveUITask(const std::string &name)
+{
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto taskExecutor = pipeline->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->RemoveTask(TaskExecutor::TaskType::UI, name);
 }
 
 int64_t GetCurrentTimestamp()
@@ -178,21 +194,16 @@ void FormPattern::OnAttachToFrameNode()
     InitFormManagerDelegate();
     auto eventHub = host->GetEventHub<FormEventHub>();
     CHECK_NULL_VOID(eventHub);
-    eventHub->SetOnCache([weak = WeakClaim(this)]() {
+    eventHub->SetOnCache([weak = WeakClaim(this), scopeId = Container::CurrentId()]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        auto host = pattern->GetHost();
-        CHECK_NULL_VOID(host);
-        auto context = host->GetContextRefPtr();
-        CHECK_NULL_VOID(context);
         auto subContainer = pattern->GetSubContainer();
         CHECK_NULL_VOID(subContainer);
-        auto uiTaskExecutor =
-            SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         auto id = subContainer->GetRunningCardId();
         TAG_LOGI(AceLogTag::ACE_FORM, "FormPattern::OnAttachToFrameNode, cardId: %{public}" PRId64, id);
         FormManager::GetInstance().AddSubContainer(id, subContainer);
-        uiTaskExecutor.PostDelayedTask(
+        ContainerScope containerScope(scopeId);
+        PostDelayedUITask(
             [id, nodeId = subContainer->GetNodeId()] {
                 auto cachedSubContainer = FormManager::GetInstance().GetSubContainer(id);
                 if (cachedSubContainer != nullptr && cachedSubContainer->GetNodeId() == nodeId) {
@@ -305,17 +316,13 @@ void FormPattern::UpdateBackgroundColorWhenUnTrustForm()
 
 void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdStr)
 {
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto executor = pipeline->GetTaskExecutor();
-    CHECK_NULL_VOID(executor);
     snapshotTimestamp_ = GetCurrentTimestamp();
+
+    ContainerScope containerScope(scopeId_);
     if (isDynamic_) {
         if (formChildrenNodeMap_.find(FormChildNodeType::FORM_STATIC_IMAGE_NODE) != formChildrenNodeMap_.end()) {
-            executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormSetNonTransparentAfterRecover_" + nodeIdStr);
-            executor->RemoveTask(TaskExecutor::TaskType::UI, "ArkUIFormDeleteImageNodeAfterRecover_" + nodeIdStr);
-            auto uiTaskExecutor = SingleTaskExecutor::Make(executor, TaskExecutor::TaskType::UI);
-            uiTaskExecutor.PostTask([weak = WeakClaim(this)] {
+            RemoveUITask("ArkUIFormDeleteImageNodeAfterRecover_" + nodeIdStr);
+            PostUITask([weak = WeakClaim(this)] {
                 auto formPattern = weak.Upgrade();
                 CHECK_NULL_VOID(formPattern);
                 formPattern->RemoveFrsNode();
@@ -323,7 +330,7 @@ void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdSt
                 formPattern->UnregisterAccessibility();
                 formPattern->isSnapshot_ = true;
                 formPattern->needSnapshotAgain_ = false;
-                }, "ArkUIFormRemoveFrsNode", PriorityType::HIGH);
+                }, "ArkUIFormRemoveFrsNode");
             return;
         }
     }
@@ -332,7 +339,7 @@ void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdSt
         return;
     }
     isStaticFormSnaping_ = true;
-    executor->PostDelayedTask(
+    PostDelayedUITask(
         [weak = WeakClaim(this), delayTime]() mutable {
             auto form = weak.Upgrade();
             CHECK_NULL_VOID(form);
@@ -343,8 +350,7 @@ void FormPattern::HandleSnapshot(uint32_t delayTime, const std::string& nodeIdSt
             }
             form->isStaticFormSnaping_ = false;
             form->TakeSurfaceCaptureForUI();
-        },
-        TaskExecutor::TaskType::UI, delayTime, "ArkUIFormTakeSurfaceCapture_" + nodeIdStr);
+        }, delayTime, "ArkUIFormTakeSurfaceCapture_" + nodeIdStr);
 }
 
 void FormPattern::HandleStaticFormEvent(const PointF& touchPoint)
@@ -450,10 +456,9 @@ void FormPattern::TakeSurfaceCaptureForUI()
         TAG_LOGW(AceLogTag::ACE_FORM, "IsAccessibilityState, static form not recycled");
         return;
     }
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostDelayedTask(
+
+    ContainerScope containerScope(scopeId_);
+    PostDelayedUITask(
         [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -515,8 +520,6 @@ void FormPattern::HandleOnSnapshot(std::shared_ptr<Media::PixelMap> pixelMap)
     std::string nodeIdStr = std::to_string(host->GetId());
     executor->RemoveTask(TaskExecutor::TaskType::UI, std::string("DelayRemoveFormChildNode").append(nodeIdStr));
 
-    executor->RemoveTask(
-        TaskExecutor::TaskType::UI, std::string("ArkUIFormSetNonTransparentAfterRecover_").append(nodeIdStr));
     executor->RemoveTask(
         TaskExecutor::TaskType::UI, std::string("ArkUIFormDeleteImageNodeAfterRecover_").append(nodeIdStr));
 
@@ -1750,17 +1753,15 @@ void FormPattern::DelayRemoveFormChildNode(FormChildNodeType formChildNodeType, 
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
     std::string nodeIdStr = std::to_string(host->GetId());
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostDelayedTask(
+
+    ContainerScope containerScope(scopeId_);
+    PostDelayedUITask(
         [weak = WeakClaim(this), formChildNodeType] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->RemoveFormChildNode(formChildNodeType);
-        },
-        delay, "DelayRemoveFormChildNode" + nodeIdStr);
+        }, delay, "DelayRemoveFormChildNode" + nodeIdStr);
 }
 
 void FormPattern::AttachRSNode(const std::shared_ptr<Rosen::RSSurfaceNode>& node, const AAFwk::Want& want)
@@ -1853,21 +1854,20 @@ void FormPattern::FireFormSurfaceNodeCallback(
     if (isEnableSkeleton && !isTransparencyEnable_) {
         TAG_LOGI(AceLogTag::ACE_FORM, "FireFormSurfaceNodeCallback delay %{public}d,%{public}d",
             isTransparencyEnable_, isEnableSkeleton);
-        auto context = host->GetContext();
-        CHECK_NULL_VOID(context);
         if (!ShouldDoSkeletonAnimation()) {
             TAG_LOGE(AceLogTag::ACE_FORM, "not do skeleton animation");
             SetExternalRenderOpacity(NON_TRANSPARENT_VAL);
             return;
         }
         std::string nodeIdStr = std::to_string(host->GetId());
-        auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-        uiTaskExecutor.PostDelayedTask(
+        ContainerScope containerScope(scopeId_);
+        PostDelayedUITask(
             [weak = WeakClaim(this)] {
                 auto pattern = weak.Upgrade();
                 CHECK_NULL_VOID(pattern);
                 pattern->DoSkeletonAnimation();
-            }, FORM_UNLOCK_ANIMATION_DELAY, "DoSkeletonAnimation_" + nodeIdStr);
+            },
+            FORM_UNLOCK_ANIMATION_DELAY, "DoSkeletonAnimation_" + nodeIdStr);
     }
 }
 
@@ -1875,11 +1875,9 @@ void FormPattern::DelayDeleteImageNode(bool needHandleCachedClick)
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
     std::string nodeIdStr = std::to_string(host->GetId());
-    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
-    uiTaskExecutor.PostDelayedTask(
+    ContainerScope containerScope(scopeId_);
+    PostDelayedUITask(
         [weak = WeakClaim(this), needHandleCachedClick] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
@@ -2321,7 +2319,7 @@ void FormPattern::SwitchRenderGroup(bool isRenderGroup)
     CHECK_NULL_VOID(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
-    ACE_SCOPED_TRACE("%s id:%d isRenderGroup:%d", __func__, host->GetId(), isRenderGroup);
+    ACE_SCOPED_TRACE("%s id:%" PRIu64 " isRenderGroup:%d", __func__, renderContext->GetNodeId(), isRenderGroup);
     renderContext->UpdateRenderGroup(isRenderGroup);
     renderContext->RequestNextFrame();
 }
@@ -2407,19 +2405,16 @@ void FormPattern::DelayResetManuallyClickFlag()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto context = host->GetContext();
-    CHECK_NULL_VOID(context);
-    auto executor = context->GetTaskExecutor();
-    CHECK_NULL_VOID(executor);
     std::string nodeIdStr = std::to_string(host->GetId());
-    executor->RemoveTask(TaskExecutor::TaskType::UI, std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
-    executor->PostDelayedTask(
+    ContainerScope containerScope(scopeId_);
+    RemoveUITask(std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
+    PostDelayedUITask(
         [weak = WeakClaim(this)] {
             auto pattern = weak.Upgrade();
             CHECK_NULL_VOID(pattern);
             pattern->isManuallyClick_ = false;
         },
-        TaskExecutor::TaskType::UI, DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG,
+        DELAY_TIME_FOR_RESET_MANUALLY_CLICK_FLAG,
         std::string("ArkUIFormResetManuallyClickFlag").append(nodeIdStr));
 }
 
@@ -2508,6 +2503,18 @@ void FormPattern::DoSkeletonAnimation()
         return;
     }
 
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
+    CHECK_NULL_VOID(externalRenderContext);
+    auto rsNode = externalRenderContext->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    auto lastFrameChild = AceType::DynamicCast<FrameNode>(skeletonNode);
+    CHECK_NULL_VOID(lastFrameChild);
+    RefPtr<OHOS::Ace::NG::RenderContext> childRenderContext = lastFrameChild->GetRenderContext();
+    CHECK_NULL_VOID(childRenderContext);
+
+    FormScopedRSTransaction formScopedRSTransaction(scopeId_);
     // Switch off render group of the form node before doing animation
     SwitchRenderGroup(false);
     std::function<void()> finishCallback = [weak = WeakClaim(this)]() {
@@ -2518,8 +2525,6 @@ void FormPattern::DoSkeletonAnimation()
         TAG_LOGD(AceLogTag::ACE_FORM, "DoSkeletonAnimation finishCallBack");
     };
 
-    auto context = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(context);
     AnimationOption option = AnimationOption();
     option.SetDuration(FORM_UNLOCK_ANIMATION_DUATION);
     option.SetCurve(Curves::FRICTION);
@@ -2531,19 +2536,11 @@ void FormPattern::DoSkeletonAnimation()
     context->FlushUITasks();
 
     optionAlpha.SetDuration(FORM_UNLOCK_ANIMATION_DUATION);
-    auto externalRenderContext = DynamicCast<NG::RosenRenderContext>(GetExternalRenderContext());
-    CHECK_NULL_VOID(externalRenderContext);
     // Before executing the animation, restore alpha to opacity.
     externalRenderContext->SetOpacity(TRANSPARENT_VAL);
-    auto rsNode = externalRenderContext->GetRSNode();
-    CHECK_NULL_VOID(rsNode);
     rsNode->SetAlpha(NON_TRANSPARENT_VAL);
     externalRenderContext->OpacityAnimation(optionAlpha, 0, 1);
 
-    auto lastFrameChild = AceType::DynamicCast<FrameNode>(skeletonNode);
-    CHECK_NULL_VOID(lastFrameChild);
-    RefPtr<OHOS::Ace::NG::RenderContext> childRenderContext = lastFrameChild->GetRenderContext();
-    CHECK_NULL_VOID(childRenderContext);
     childRenderContext->OpacityAnimation(optionAlpha, 1, 0);
     context->CloseImplicitAnimation();
 }
