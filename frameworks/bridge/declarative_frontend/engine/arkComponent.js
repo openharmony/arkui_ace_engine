@@ -5299,7 +5299,7 @@ class ArkComponent {
     return this;
   }
   bindContextMenu(content, responseType, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindContextMenu not supported in attributeModifier scenario.');
   }
   bindContentCover(isShow, builder, type) {
     throw new Error('Method not implemented.');
