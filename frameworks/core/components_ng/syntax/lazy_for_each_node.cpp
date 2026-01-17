@@ -495,6 +495,7 @@ void LazyForEachNode::DoSetActiveChildRange(
         MarkNeedSyncRenderTree();
         PostIdleTask(LazyForEachIdleTaskSource::SET_ACTIVE_RANGE);
     }
+    builder_->ReorganizeOffscreenNode();
 }
 
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildren(bool notDetach) const
@@ -549,8 +550,6 @@ void LazyForEachNode::LoadChildren(bool notDetach) const
             children_.push_back(item.second);
         }
     }
-
-    builder_->ReorganizeOffscreenNode();
 }
 
 const std::list<RefPtr<UINode>>& LazyForEachNode::GetChildrenForInspector(bool needCacheNode) const
