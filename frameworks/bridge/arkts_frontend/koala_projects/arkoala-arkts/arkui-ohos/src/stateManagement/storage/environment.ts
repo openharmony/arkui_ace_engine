@@ -14,10 +14,11 @@
  */
 import { AppStorage } from './appStorage';
 import { ArkUIAniModule } from 'arkui.ani';
+import { LayoutDirection, ColorMode } from './storageProperty';
 
 interface IAniEnvironment {
     getAccessibilityEnabled(): boolean;
-    getColorMode(): number;
+    getColorMode(): int;
     getFontScale(): number;
     getFontWeightScale(): number;
     getLayoutDirection(): string;
@@ -28,8 +29,8 @@ class AniEnvironment implements IAniEnvironment {
     getAccessibilityEnabled(): boolean {
         return ArkUIAniModule._Env_GetAccessibilityEnabled();
     }
-    getColorMode(): number {
-        return ArkUIAniModule._Env_GetColorMode();
+    getColorMode(): int {
+        return ArkUIAniModule._Env_GetColorMode() as int;
     }
     getFontScale(): number {
         return ArkUIAniModule._Env_GetFontScale();
@@ -68,6 +69,15 @@ class Environment {
         'fontScale',
         'fontWeightScale',
     ]);
+    private LayoutDirectionMap: Map<string, LayoutDirection> = new Map<string, LayoutDirection>([
+        ['0', LayoutDirection.RTL],
+        ['1', LayoutDirection.LTR],
+        ['2', LayoutDirection.Auto]
+    ]);
+    private ColorModeMap: Map<int, ColorMode> = new Map<int, ColorMode>([
+        [0, ColorMode.LIGHT],
+        [1, ColorMode.DARK]
+    ]);
 
     public aboutToBeDeleted(): void {
         Environment.getOrCreate().props_.forEach((_, key) => {
@@ -101,7 +111,8 @@ class Environment {
                 tmp = Environment.getOrCreate().aniEnvironment.getAccessibilityEnabled();
                 break;
             case 'colorMode':
-                tmp = Environment.getOrCreate().aniEnvironment.getColorMode();
+                const ColorModeKey = Environment.getOrCreate().aniEnvironment.getColorMode();
+                tmp = this.ColorModeMap.get(ColorModeKey);
                 break;
             case 'fontScale':
                 tmp = Environment.getOrCreate().aniEnvironment.getFontScale();
@@ -110,7 +121,8 @@ class Environment {
                 tmp = Math.round(Environment.getOrCreate().aniEnvironment.getFontWeightScale() * 100) / 100;
                 break;
             case 'layoutDirection':
-                tmp = Environment.getOrCreate().aniEnvironment.getLayoutDirection();
+                const LayoutDirectionKey = Environment.getOrCreate().aniEnvironment.getLayoutDirection();
+                tmp = this.LayoutDirectionMap.get(LayoutDirectionKey);
                 break;
             case 'languageCode':
                 tmp = Environment.getOrCreate().aniEnvironment.getLanguageCode();
