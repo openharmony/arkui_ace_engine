@@ -449,7 +449,7 @@ public:
         }
         SysScale sysScale{ ctx->GetDipScale(), ctx->GetLogicScale(), ctx->GetFontScale(), ctx->GetFontWeightScale() };
         if (sysScale != lastSysScale_) {
-            TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "sys scale changed, %{public}s -> %{public}s",
+            TAG_LOGD(AceLogTag::ACE_RICH_TEXT, "sys scale changed, %{public}s -> %{public}s",
                 lastSysScale_.ToString().c_str(), sysScale.ToString().c_str());
             lastSysScale_ = sysScale;
             paragraphCache_.Clear();

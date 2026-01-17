@@ -1186,7 +1186,7 @@ void RichEditorPattern::OnDetachFromMainTree()
 
 void RichEditorPattern::OnAttachToFrameNode()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnAttachToFrameNode");
+    ACE_SCOPED_TRACE("RichEditorPattern::OnAttachToFrameNode");
     auto frameNode = GetHost();
     THREAD_SAFE_NODE_CHECK(frameNode, OnAttachToFrameNode);
     CHECK_NULL_VOID(frameNode);
@@ -7502,13 +7502,9 @@ void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
 
 void RichEditorPattern::ClearOperationRecords()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ClearOperationRecords");
     undoManager_->ClearUndoRedoRecords();
     previewInputRecord_.Reset();
     ClearRedoOperationRecords();
-    if (operationRecords_.empty()) {
-        return;
-    }
     operationRecords_.clear();
 }
 

@@ -161,9 +161,15 @@ HWTEST_F(RichEditorCaretTestNg, CaretColorTest001, TestSize.Level0)
     model.Create();
     auto host = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     ASSERT_NE(host, nullptr);
+    /**
+     * @tc.steps: step1. get system caret color.
+     */
     auto richEditorPattern = host->GetPattern<RichEditorPattern>();
     Color patternCaretColor = richEditorPattern->GetCaretColor();
     EXPECT_EQ(patternCaretColor, SYSTEM_CARET_COLOR);
+    /**
+     * @tc.steps: step2. set blue color.
+     */
     model.SetCaretColor(Color::BLUE);
     patternCaretColor = richEditorPattern->GetCaretColor();
     EXPECT_EQ(patternCaretColor, Color::BLUE);
