@@ -263,6 +263,15 @@ void XComponentPattern::Initialize()
 void XComponentPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
+    if (type_ == XComponentType::SURFACE) {
+        CHECK_NULL_VOID(host);
+        auto renderContext = host->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        CHECK_NULL_VOID(handlingSurfaceRenderContext_);
+        auto bkColor = renderContext->GetBackgroundColor().value_or(Color::BLACK);
+        handlingSurfaceRenderContext_->UpdateBackgroundColor(
+            (bkColor.GetAlpha() < UINT8_MAX) ? Color::TRANSPARENT : bkColor);
+    }
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree", GetId().c_str());
