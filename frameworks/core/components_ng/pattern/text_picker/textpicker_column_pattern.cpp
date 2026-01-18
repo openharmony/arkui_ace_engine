@@ -367,6 +367,10 @@ void TextPickerColumnPattern::StopHaptic()
 
 RefPtr<TouchEventImpl> TextPickerColumnPattern::CreateItemTouchEventListener()
 {
+    auto host = GetHost();
+    if (host) {
+        ACE_UINODE_TRACE(host);
+    }
     auto toss = GetToss();
     CHECK_NULL_RETURN(toss, nullptr);
     auto touchCallback = [weak = WeakClaim(this), toss](const TouchEventInfo& info) {
@@ -410,6 +414,10 @@ RefPtr<TouchEventImpl> TextPickerColumnPattern::CreateItemTouchEventListener()
 
 RefPtr<ClickEvent> TextPickerColumnPattern::CreateItemClickEventListener(RefPtr<EventParam> param)
 {
+    auto host = GetHost();
+    if (host) {
+        ACE_UINODE_TRACE(host);
+    }
     auto clickEventHandler = [param, weak = WeakClaim(this)](const GestureEvent& /* info */) {
         auto pattern = weak.Upgrade();
         pattern->OnAroundButtonClick(param);
@@ -421,6 +429,10 @@ RefPtr<ClickEvent> TextPickerColumnPattern::CreateItemClickEventListener(RefPtr<
 
 RefPtr<InputEvent> TextPickerColumnPattern::CreateMouseHoverEventListener(RefPtr<EventParam> param)
 {
+    auto host = GetHost();
+    if (host) {
+        ACE_UINODE_TRACE(host);
+    }
     auto mouseTask = [weak = WeakClaim(this)](bool isHover) {
         auto pattern = weak.Upgrade();
         if (pattern) {
@@ -919,6 +931,10 @@ void TextPickerColumnPattern::FlushCurrentMixtureOptions(
 
 void TextPickerColumnPattern::FlushAnimationTextProperties(bool isDown)
 {
+    auto host = GetHost();
+    if (host) {
+        ACE_UINODE_TRACE(host);
+    }
     const size_t size = animationProperties_.size();
     if (size == 0) {
         return;
@@ -1352,6 +1368,10 @@ Dimension TextPickerColumnPattern::LinearFontSize(
 
 void TextPickerColumnPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
 {
+    auto host = GetHost();
+    if (host) {
+        ACE_UINODE_TRACE(host);
+    }
     CHECK_NULL_VOID(!panEvent_);
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
@@ -1517,6 +1537,7 @@ void TextPickerColumnPattern::CreateAnimation()
     CHECK_NULL_VOID(!animationCreated_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     auto propertyCallback = [weak = AceType::WeakClaim(this)](float value) {
