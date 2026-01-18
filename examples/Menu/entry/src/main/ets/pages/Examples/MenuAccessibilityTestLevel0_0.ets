@@ -12,17 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {MyComponent} from "../../common/MyComponent"
+import {MyComponent} from '../../common/MyComponent'
 import { SymbolGlyphModifier } from '@kit.ArkUI'
 
 @Extend(Text) function  paramTextStyle() {
   .fontSize(9)
-  .width("100%")
+  .width('100%')
 }
 @Extend(Column) function columnStyle() {
   .borderWidth(1.0)
   .padding(5)
-  .width("100%")
+  .width('100%')
   .backgroundColor(Color.Pink)
 }
 
@@ -36,22 +36,22 @@ struct MenuAccessibilityTestLevel0_0 {
   @State menuElement: MenuElement[] =
     [
       {
-        value: "图文菜单选项 ".repeat(1),
+        value: '图文菜单选项 '.repeat(1),
         enabled: true,
-        icon: $r("sys.media.ohos_app_icon"),
+        icon: $r('sys.media.ohos_app_icon'),
         action: () => {},
         symbolIcon: new SymbolGlyphModifier($r('sys.symbol.menu_TV'))
       },
       {
-        value: "图文菜单选项 ".repeat(3),
+        value: '图文菜单选项 '.repeat(3),
         enabled: true,
-        icon: $r("sys.media.ohos_app_icon"),
+        icon: $r('sys.media.ohos_app_icon'),
         action: () => {},
       },
       {
-        value: "图文菜单选项 ".repeat(10),
+        value: '图文菜单选项 '.repeat(10),
         enabled: false,
-        icon: $r("sys.media.ohos_app_icon"),
+        icon: $r('sys.media.ohos_app_icon'),
         action: () => {},
         symbolIcon: new SymbolGlyphModifier($r('sys.symbol.menu_TV'))
       },
@@ -82,7 +82,7 @@ struct MenuAccessibilityTestLevel0_0 {
     }
     .padding(12)
     .align(Alignment.TopStart)
-    .width("100%").height("100%")
+    .width('100%').height('100%')
     .scrollBar(BarState.Off)
   }
 }

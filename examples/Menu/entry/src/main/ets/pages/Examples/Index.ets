@@ -46,14 +46,14 @@ struct Index {
     { title: "示例20：菜单基本功能_12_预览图scale/hoverScale", url: "pages/Examples/MenuTestLevel0_17" },
     { title: "示例21：菜单基本功能_13_预览图尺寸/圆角", url: "pages/Examples/MenuTestLevel0_18" },
     { title: "示例22：菜单基本功能_18_预览图缩放/布局", url: "pages/Examples/MenuTestLevel0_24" },
-    { title: "示例23：菜单基本功能_19_生命周期通知target/BindMenu_NonIsShow", url: "pages/Examples/BindMenu_NonIsShow" },
-    { title: "示例24：菜单基本功能_19_生命周期通知target/BindMenu_IsShow", url: "pages/Examples/BindMenu_IsShow" },
-    { title: "示例25：菜单基本功能_19_生命周期通知target/BindContextMenu_RightClick", url: "pages/Examples/BindContextMenu_RightClick" },
-    { title: "示例26：菜单基本功能_19_生命周期通知target/BindContextMenu_LongPress", url: "pages/Examples/BindContextMenu_LongPress" },
-    { title: "示例27：菜单基本功能_20_bindMenu图文菜单无障碍功能/MenuAccessibilityTestLevel0_0", url: "pages/Examples/MenuAccessibilityTestLevel0_0" },
-    { title: "示例28：菜单基本功能_20_bindMenu菜单无障碍功能/MenuAccessibilityTestLevel0_1", url: "pages/Examples/MenuAccessibilityTestLevel0_1" },
-    { title: "示例29：菜单基本功能_20_bindMenuContextMenu菜单无障碍功能/MenuAccessibilityTestLevel0_2", url: "pages/Examples/MenuAccessibilityTestLevel0_2" },
-    { title: "示例30：菜单基本功能_21_MenuItem入参_MenuItem自有属性_MenuItemGroup入参/MenuTestLevel0_10", url: "pages/Examples/MenuTestLevel0_10" },
+    { title: '示例23：菜单基本功能_19_生命周期通知target/BindMenu_NonIsShow', url: 'pages/Examples/BindMenu_NonIsShow' },
+    { title: '示例24：菜单基本功能_19_生命周期通知target/BindMenu_IsShow', url: 'pages/Examples/BindMenu_IsShow' },
+    { title: '示例25：菜单基本功能_19_生命周期通知target/BindContextMenu_RightClick', url: 'pages/Examples/BindContextMenu_RightClick' },
+    { title: '示例26：菜单基本功能_19_生命周期通知target/BindContextMenu_LongPress', url: 'pages/Examples/BindContextMenu_LongPress' },
+    { title: '示例27：菜单基本功能_20_bindMenu图文菜单无障碍功能/MenuAccessibilityTestLevel0_0', url: 'pages/Examples/MenuAccessibilityTestLevel0_0' },
+    { title: '示例28：菜单基本功能_20_bindMenu菜单无障碍功能/MenuAccessibilityTestLevel0_1', url: 'pages/Examples/MenuAccessibilityTestLevel0_1' },
+    { title: '示例29：菜单基本功能_20_bindMenuContextMenu菜单无障碍功能/MenuAccessibilityTestLevel0_2', url: 'pages/Examples/MenuAccessibilityTestLevel0_2' },
+    { title: '示例30：菜单基本功能_21_MenuItem入参_MenuItem自有属性_MenuItemGroup入参/MenuTestLevel0_10', url: 'pages/Examples/MenuTestLevel0_10' },
   ]
 
   build() {

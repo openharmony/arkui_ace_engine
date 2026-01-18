@@ -12,17 +12,17 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import {MyComponent} from "../../common/MyComponent"
-import {MenuBuilder, MenuAttrOptions } from "../../customBuilder/MenuBuilder"
+import {MyComponent} from '../../common/MyComponent'
+import {MenuBuilder, MenuAttrOptions } from '../../customBuilder/MenuBuilder'
 
 @Extend(Text) function  paramTextStyle() {
   .fontSize(9)
-  .width("100%")
+  .width('100%')
 }
 @Extend(Column) function columnStyle() {
   .borderWidth(1.0)
   .padding(5)
-  .width("100%")
+  .width('100%')
   .backgroundColor(Color.Pink)
 }
 
@@ -109,7 +109,7 @@ struct MenuAccessibilityTestLevel0_2 {
     }
     .padding(12)
     .align(Alignment.TopStart)
-    .width("100%").height("100%")
+    .width('100%').height('100%')
     .scrollBar(BarState.Off)
   }
 }
