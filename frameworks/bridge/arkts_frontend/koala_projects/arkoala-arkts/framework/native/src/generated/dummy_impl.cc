@@ -31825,6 +31825,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
+    void SetDataLoadParamsImpl(Ark_DragEvent peer,
+                               const Ark_unifiedDataChannel_DataLoadParams* dataLoadParams)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setDataLoadParams(");
+        WriteToString(&out, dataLoadParams);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
                                          const Ark_String* configuration)
     {
@@ -50978,6 +50990,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DragEventAccessor::GetDisplayIdImpl,
             DragEventAccessor::GetDragSourceImpl,
             DragEventAccessor::IsRemoteImpl,
+            DragEventAccessor::SetDataLoadParamsImpl,
             DragEventAccessor::EnableInternalDropAnimationImpl,
             DragEventAccessor::GetGlobalDisplayXImpl,
             DragEventAccessor::GetGlobalDisplayYImpl,

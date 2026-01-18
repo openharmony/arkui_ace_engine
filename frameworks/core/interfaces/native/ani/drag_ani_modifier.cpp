@@ -26,6 +26,7 @@
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/unified_data_peer.h"
+#include "core/interfaces/native/implementation/data_load_params_peer.h"
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "pixel_map.h"
 #include "base/image/pixel_map.h"
@@ -66,6 +67,19 @@ void GetDragSummary(ani_ref event, SharedPointerWrapper& summaryPtr)
     CHECK_NULL_VOID(dragEvent);
     auto summary = dragEvent->GetSummary();
     UdmfClient::GetInstance()->TransformSummaryANI(summary, summaryPtr.GetSharedPtr());
+}
+
+void SetDragDataLoadParams(ani_ref event, void* dataLoadParams)
+{
+    auto peer = reinterpret_cast<Ark_DragEvent>(event);
+    CHECK_NULL_VOID(peer);
+    auto dragEvent = peer->dragInfo;
+    CHECK_NULL_VOID(dragEvent);
+    CHECK_NULL_VOID(dataLoadParams);
+    RefPtr<DataLoadParams> dataLP = UdmfClient::GetInstance()->TransformDataLoadParamsFromANI(dataLoadParams);
+    CHECK_NULL_VOID(dataLP);
+    dragEvent->SetUseDataLoadParams(true);
+    dragEvent->SetDataLoadParams(dataLP);
 }
 
 void SetDragDropInfoPixelMap(ani_ref event, ani_ref pixelMapPtr)
@@ -233,6 +247,17 @@ SharedPointerWrapper GetUnifiedData(ani_long peer)
     return SharedPointerWrapper(UdmfClient::GetInstance()->TransformUnifiedDataSharedPtr(unifiedData));
 }
 
+ani_long CreateDataLoadParamsPeer(void* dataLoadParams)
+{
+    CHECK_NULL_RETURN(dataLoadParams, 0);
+    RefPtr<DataLoadParams> dataLP = UdmfClient::GetInstance()->TransformDataLoadParamsFromANI(dataLoadParams);
+    CHECK_NULL_RETURN(dataLP, 0);
+    auto peerPtr = PeerUtils::CreatePeer<unifiedDataChannel_DataLoadParamsPeer>();
+    CHECK_NULL_RETURN(peerPtr, 0);
+    peerPtr->dataLoadParams = dataLP;
+    return reinterpret_cast<ani_long>(peerPtr);
+}
+
 void GetPressedModifierKey(ani_long nativePtr, char*** keys, ani_int* length)
 {
     CHECK_NULL_VOID(nativePtr);
@@ -289,6 +314,7 @@ const ArkUIAniDragModifier* GetDragAniModifier()
         .setDragData = OHOS::Ace::NG::SetDragData,
         .getDragData = OHOS::Ace::NG::GetDragData,
         .getDragSummary = OHOS::Ace::NG::GetDragSummary,
+        .setDragDataLoadParams = OHOS::Ace::NG::SetDragDataLoadParams,
         .setDragDropInfoPixelMap = OHOS::Ace::NG::SetDragDropInfoPixelMap,
         .setDragDropInfoCustomNode = OHOS::Ace::NG::SetDragDropInfoCustomNode,
         .setDragDropInfoExtraInfo = OHOS::Ace::NG::SetDragDropInfoExtraInfo,
@@ -301,6 +327,7 @@ const ArkUIAniDragModifier* GetDragAniModifier()
         .getUdKey = OHOS::Ace::NG::GetUdKey,
         .createUnifiedDataPeer = OHOS::Ace::NG::CreateUnifiedDataPeer,
         .getUnifiedData = OHOS::Ace::NG::GetUnifiedData,
+        .createDataLoadParamsPeer = OHOS::Ace::NG::CreateDataLoadParamsPeer,
         .getPressedModifierKey = OHOS::Ace::NG::GetPressedModifierKey
     };
     return &impl;

@@ -200,6 +200,7 @@ export class ArkUIAniModule {
     native static _DragEvent_Get_Data(ptr: KLong) : unifiedDataChannel.UnifiedData
     native static _DragEvent_Get_Summary(ptr: KLong) : unifiedDataChannel.Summary | undefined
     native static _DragEvent_Start_Data_Loading(ptr: KLong, data : unifiedDataChannel.GetDataParams) : string | undefined
+    native static _DragEvent_Set_Data_LoadParams(ptr: KLong, data : unifiedDataChannel.DataLoadParams) : void
     native static _DragEvent_Enable_InternalDropAnimation(ptr: KLong, configuration: string) : void
     native static _DragEvent_Set_PixelMap(ptr: KLong, pixelMap: image.PixelMap) : void
     native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
@@ -210,6 +211,8 @@ export class ArkUIAniModule {
     native static _Drag_Set_DragPreviewOptions(ptr: KPointer, value: DragPreviewOptions | undefined, options?: DragInteractionOptions): void
     native static _Extractors_toUnifiedDataChannelUnifiedDataPtr(value: unifiedDataChannel.UnifiedData) : KPointer
     native static _Extractors_fromUnifiedDataChannelUnifiedDataPtr(ptr: KPointer) : unifiedDataChannel.UnifiedData
+    native static _Extractors_toUnifiedDataChannelDataLoadParamsPtr(value: unifiedDataChannel.DataLoadParams) : KPointer
+    native static _Extractors_fromUnifiedDataChannelDataLoadParamsPtr(ptr: KPointer) : unifiedDataChannel.DataLoadParams
 
     native static _createDragEventAccessorWithPointer(input: KPointer) : KPointer
     native static _getDragEventPointer(input: KPointer): KPointer

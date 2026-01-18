@@ -138,6 +138,22 @@ ani_string DragEveStartDataLoading([[maybe_unused]] ani_env* env, [[maybe_unused
     return result.value_or(value);
 }
 
+void DragEventSetDataLoadParams([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object data)
+{
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    auto dataValue = OHOS::UDMF::AniConverter::UnwrapDataLoadParams(env, data);
+    auto dataLoadParams = reinterpret_cast<void*>(&dataValue);
+    if (!dragEvent || !dataLoadParams) {
+        return;
+    }
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return;
+    }
+    modifier->getDragAniModifier()->setDragDataLoadParams(dragEvent, dataLoadParams);
+}
+
 void DragEventEnableInternalDropAnimation([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_string configuration)
 {
@@ -658,5 +674,17 @@ ani_object ExtractorFromPtrToUnifiedData(ani_env* env, [[maybe_unused]] ani_obje
         return result_obj;
     }
     return unifiedData_obj;
+}
+
+ani_long ExtractorFromDataLoadParamsToPtr(ani_env* env, [[maybe_unused]] ani_object object, ani_long dataLoadParams)
+{
+    ani_long result_obj = {};
+    return result_obj;
+}
+
+ani_object ExtractorFromPtrToDataLoadParams(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer)
+{
+    ani_object result_obj = {};
+    return result_obj;
 }
 } // namespace OHOS::Ace::Ani

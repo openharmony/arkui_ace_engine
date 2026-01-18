@@ -3679,6 +3679,9 @@ export class TypeChecker {
     static isUndoStyle(value: Object | string | number | undefined): boolean {
         return value instanceof UndoStyle
     }
+    static isunifiedDataChannel_DataLoadParams(value: Object | string | number | undefined): boolean {
+        return value instanceof unifiedDataChannel.DataLoadParams
+    }
     static isunifiedDataChannel_Summary(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
         return value instanceof unifiedDataChannel.Summary
     }

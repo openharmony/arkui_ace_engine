@@ -13710,6 +13710,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    void SetDataLoadParamsImpl(Ark_DragEvent peer,
+                               const Ark_unifiedDataChannel_DataLoadParams* dataLoadParams)
+    {
+    }
     void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
                                          const Ark_String* configuration)
     {
@@ -21434,6 +21438,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DragEventAccessor::GetDisplayIdImpl,
             DragEventAccessor::GetDragSourceImpl,
             DragEventAccessor::IsRemoteImpl,
+            DragEventAccessor::SetDataLoadParamsImpl,
             DragEventAccessor::EnableInternalDropAnimationImpl,
             DragEventAccessor::GetGlobalDisplayXImpl,
             DragEventAccessor::GetGlobalDisplayYImpl,
