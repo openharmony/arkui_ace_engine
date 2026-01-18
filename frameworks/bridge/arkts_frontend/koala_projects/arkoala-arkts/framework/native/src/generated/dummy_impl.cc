@@ -23416,7 +23416,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DataPanelAttributeModifier::SetValueColorsImpl,
             DataPanelAttributeModifier::SetTrackBackgroundColorImpl,
             DataPanelAttributeModifier::SetStrokeWidthImpl,
-            DataPanelAttributeModifier::SetTrackShadowImpl,
         };
         return &ArkUIDataPanelModifierImpl;
     }
@@ -23551,8 +23550,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GaugeAttributeModifier::SetEndAngleImpl,
             GaugeAttributeModifier::SetColorsImpl,
             GaugeAttributeModifier::SetStrokeWidthImpl,
-            GaugeAttributeModifier::SetDescriptionImpl,
-            GaugeAttributeModifier::SetTrackShadowImpl,
             GaugeAttributeModifier::SetPrivacySensitiveImpl,
         };
         return &ArkUIGaugeModifierImpl;
@@ -31185,6 +31182,33 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // CutEventAccessor
+    namespace DataPanelExtenderAccessor {
+    void SetTrackShadowImpl(Ark_NativePointer node,
+                            const Opt_DataPanelShadowOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setTrackShadow(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void NullTrackShadowImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("nullTrackShadow(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // DataPanelExtenderAccessor
     namespace DataResubmissionHandlerAccessor {
     void DestroyPeerImpl(Ark_DataResubmissionHandler peer)
     {
@@ -33672,6 +33696,67 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         WriteToString(&out, node);
         out.append(", ");
         WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void NullIndicatorImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("nullIndicator(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetTrackShadowImpl(Ark_NativePointer node,
+                            const Opt_GaugeShadowOptions* options)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setTrackShadow(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, options);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void NullTrackShadowImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("nullTrackShadow(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SetDescriptionImpl(Ark_NativePointer node,
+                            const Opt_CustomNodeBuilder* builder)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setDescription(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, builder);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void NullDescriptionImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("nullDescription(");
+        WriteToString(&out, node);
         out.append(") \n");
         appendGroupedLog(1, out);
     }
@@ -50807,6 +50892,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct CutEventPeer {
         virtual ~CutEventPeer() = default;
     };
+    const GENERATED_ArkUIDataPanelExtenderAccessor* GetDataPanelExtenderAccessor()
+    {
+        static const GENERATED_ArkUIDataPanelExtenderAccessor DataPanelExtenderAccessorImpl {
+            DataPanelExtenderAccessor::SetTrackShadowImpl,
+            DataPanelExtenderAccessor::NullTrackShadowImpl,
+        };
+        return &DataPanelExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor()
     {
         static const GENERATED_ArkUIDataResubmissionHandlerAccessor DataResubmissionHandlerAccessorImpl {
@@ -51269,6 +51363,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIGaugeExtenderAccessor GaugeExtenderAccessorImpl {
             GaugeExtenderAccessor::SetIndicatorImpl,
+            GaugeExtenderAccessor::NullIndicatorImpl,
+            GaugeExtenderAccessor::SetTrackShadowImpl,
+            GaugeExtenderAccessor::NullTrackShadowImpl,
+            GaugeExtenderAccessor::SetDescriptionImpl,
+            GaugeExtenderAccessor::NullDescriptionImpl,
         };
         return &GaugeExtenderAccessorImpl;
     }
@@ -54012,6 +54111,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetCustomDialogControllerExtenderAccessor,
             GetCustomSpanAccessor,
             GetCutEventAccessor,
+            GetDataPanelExtenderAccessor,
             GetDataResubmissionHandlerAccessor,
             GetDatePickerDialogAccessor,
             GetDecorationStyleAccessor,

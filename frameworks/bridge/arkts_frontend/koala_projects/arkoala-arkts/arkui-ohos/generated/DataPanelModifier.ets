@@ -18,7 +18,7 @@
 
 import { CommonMethodModifier } from "./CommonMethodModifier"
 import { ModifierState } from './CommonModifier'
-import { AttributeModifier, ContentModifier, hookDataPanelContentModifier } from "#handwritten"
+import { AttributeModifier, ContentModifier, hookDataPanelTrackShadow, hookDataPanelContentModifier } from '#handwritten'
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
 import { ArkDataPanelPeer, LinearGradient, DataPanelShadowOptions, DataPanelConfiguration, DataPanelAttribute } from "./component/dataPanel"
@@ -131,7 +131,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
         {
             switch (this._trackShadow_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setTrackShadowAttribute((this._trackShadow_0_0value as DataPanelShadowOptions | null | undefined));
+                    hookDataPanelTrackShadow(peer, (this._trackShadow_0_0value as DataPanelShadowOptions | null | undefined));
                     this._trackShadow_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -141,7 +141,7 @@ export class DataPanelModifier extends CommonMethodModifier implements DataPanel
                 }
                 default: {
                     this._trackShadow_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setTrackShadowAttribute((undefined as DataPanelShadowOptions | null | undefined));
+                    hookDataPanelTrackShadow(peer, (undefined as DataPanelShadowOptions | null | undefined));
                 }
             }
         }

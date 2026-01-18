@@ -36,8 +36,8 @@ import { ContentModifier, extractors, hookRootAttributeModifier, AttributeModifi
 import { ModifierStateManager } from '../CommonModifier';
 import { ButtonConfiguration } from "./button"
 import { CheckBoxConfiguration } from "./checkbox"
-import { DataPanelConfiguration } from "./dataPanel"
-import { GaugeConfiguration, GaugeIndicatorOptions_serializer, GaugeIndicatorOptions } from "./gauge"
+import { DataPanelConfiguration, DataPanelShadowOptions_serializer, DataPanelShadowOptions } from "./dataPanel"
+import { GaugeConfiguration, GaugeIndicatorOptions_serializer, GaugeShadowOptions_serializer, GaugeIndicatorOptions, GaugeShadowOptions } from "./gauge"
 import { LoadingProgressConfiguration } from "./loadingProgress"
 import { ProgressConfiguration } from "./progress"
 import { RadioConfiguration } from "./radio"
@@ -1403,6 +1403,34 @@ export class CustomDialogControllerExtender implements MaterializedBase {
         return promptAction.CommonState.fromValue(retval)
     }
 }
+export class DataPanelExtender {
+    static setTrackShadow_serialize(node: KPointer, options?: DataPanelShadowOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            DataPanelShadowOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._DataPanelExtender_setTrackShadow(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static nullTrackShadow_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._DataPanelExtender_nullTrackShadow(node)
+    }
+    public static setTrackShadow(node: KPointer, options?: DataPanelShadowOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (DataPanelShadowOptions | undefined)
+        DataPanelExtender.setTrackShadow_serialize(node_casted, options_casted)
+        return
+    }
+    public static nullTrackShadow(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        DataPanelExtender.nullTrackShadow_serialize(node_casted)
+        return
+    }
+}
 export class EventEmulator {
     static emitClickEvent_serialize(node: KPointer, event: ClickEvent): void {
         ArkUIGeneratedNativeModule._EventEmulator_emitClickEvent(node, toPeerPtr(event))
@@ -2198,6 +2226,86 @@ export class FrameNodeExtender {
     public static applyAttributesFinish(peer: FrameNode): void {
         const peer_casted = peer as (FrameNode)
         FrameNodeExtender.applyAttributesFinish_serialize(peer_casted)
+    }
+}
+export class GaugeExtender {
+    static setIndicator_serialize(node: KPointer, options?: GaugeIndicatorOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            GaugeIndicatorOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GaugeExtender_setIndicator(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static nullIndicator_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._GaugeExtender_nullIndicator(node)
+    }
+    static setTrackShadow_serialize(node: KPointer, options?: GaugeShadowOptions): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (options !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const optionsTmpValue  = options!
+            GaugeShadowOptions_serializer.write(thisSerializer, optionsTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GaugeExtender_setTrackShadow(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static nullTrackShadow_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._GaugeExtender_nullTrackShadow(node)
+    }
+    static setDescription_serialize(node: KPointer, builder?: CustomBuilder): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (builder !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const builderTmpValue  = builder!
+            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(builderTmpValue))
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._GaugeExtender_setDescription(node, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
+    static nullDescription_serialize(node: KPointer): void {
+        ArkUIGeneratedNativeModule._GaugeExtender_nullDescription(node)
+    }
+    public static setIndicator(node: KPointer, options?: GaugeIndicatorOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (GaugeIndicatorOptions | undefined)
+        GaugeExtender.setIndicator_serialize(node_casted, options_casted)
+        return
+    }
+    public static nullIndicator(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        GaugeExtender.nullIndicator_serialize(node_casted)
+        return
+    }
+    public static setTrackShadow(node: KPointer, options?: GaugeShadowOptions): void {
+        const node_casted = node as (KPointer)
+        const options_casted = options as (GaugeShadowOptions | undefined)
+        GaugeExtender.setTrackShadow_serialize(node_casted, options_casted)
+        return
+    }
+    public static nullTrackShadow(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        GaugeExtender.nullTrackShadow_serialize(node_casted)
+        return
+    }
+    public static setDescription(node: KPointer, builder?: CustomBuilder): void {
+        const node_casted = node as (KPointer)
+        const builder_casted = builder as (CustomBuilder | undefined)
+        GaugeExtender.setDescription_serialize(node_casted, builder_casted)
+        return
+    }
+    public static nullDescription(node: KPointer): void {
+        const node_casted = node as (KPointer)
+        GaugeExtender.nullDescription_serialize(node_casted)
+        return
     }
 }
 export class GestureOps {
@@ -4792,26 +4900,6 @@ export class SelectExtender {
         const node_casted = node as (KPointer)
         const options_casted = options as (DividerOptions | undefined)
         SelectExtender.setDivider_serialize(node_casted, options_casted)
-        return
-    }
-}
-export class GaugeExtender {
-    static setIndicator_serialize(node: KPointer, options?: GaugeIndicatorOptions): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (options !== undefined) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const optionsTmpValue  = options!
-            GaugeIndicatorOptions_serializer.write(thisSerializer, optionsTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._GaugeExtender_setIndicator(node, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    public static setIndicator(node: KPointer, options?: GaugeIndicatorOptions): void {
-        const node_casted = node as (KPointer)
-        const options_casted = options as (GaugeIndicatorOptions | undefined)
-        GaugeExtender.setIndicator_serialize(node_casted, options_casted)
         return
     }
 }
