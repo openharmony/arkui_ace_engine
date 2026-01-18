@@ -3502,6 +3502,20 @@ class ClickEffectModifier extends ModifierWithKey {
   }
 }
 ClickEffectModifier.identity = Symbol('clickEffect');
+class EnableClickSoundEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetEnableClickSoundEffect(node);
+    }
+    else {
+      getUINativeModule().common.setEnableClickSoundEffect(node, this.value);
+    }
+  }
+}
+EnableClickSoundEffectModifier.identity = Symbol('enableClickSoundEffect');
 class KeyBoardShortCutModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -5121,6 +5135,10 @@ class ArkComponent {
   }
   clickEffect(value) {
     modifierWithKey(this._modifiersWithKeys, ClickEffectModifier.identity, ClickEffectModifier, value);
+    return this;
+  }
+  enableClickSoundEffect(value) {
+    modifierWithKey(this._modifiersWithKeys, EnableClickSoundEffectModifier.identity, EnableClickSoundEffectModifier, value);
     return this;
   }
   onDragStart(event) {
@@ -13358,6 +13376,9 @@ class ArkSpanComponent {
     throw new Error('Method not implemented.');
   }
   clickEffect(value) {
+    throw new Error('Method not implemented.');
+  }
+  enableClickSoundEffect(value) {
     throw new Error('Method not implemented.');
   }
   onDragStart(event) {

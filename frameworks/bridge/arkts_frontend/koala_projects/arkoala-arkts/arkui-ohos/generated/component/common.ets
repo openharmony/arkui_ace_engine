@@ -4258,6 +4258,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setClickEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableClickSoundEffectAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setEnableClickSoundEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnDragStartAttribute(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -8155,6 +8167,9 @@ export interface CommonMethod {
     clickEffect(value: ClickEffect | null | undefined): this {
         throw new Error("Unimplemented method clickEffect")
     }
+    enableClickSoundEffect(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableClickSoundEffect")
+    }
     onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
         throw new Error("Unimplemented method onDragStart")
     }
@@ -8606,6 +8621,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     alignRules_value?: AlignRuleOption | LocalizedAlignRuleOptions | undefined
     aspectRatio_value?: number | undefined
     clickEffect_value?: ClickEffect | null | undefined
+    enableClickSoundEffect_value?: boolean | undefined
     onDragStart_value?: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined
     onDragEnter_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     onDragMove_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
@@ -8993,6 +9009,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
         return this
     }
     clickEffect(value: ClickEffect | null | undefined): this {
+        return this
+    }
+    enableClickSoundEffect(value: boolean | undefined): this {
         return this
     }
     onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
@@ -10626,6 +10645,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         if (this.checkPriority("clickEffect")) {
             const value_casted = value as (ClickEffect | null | undefined)
             this.getPeer()?.setClickEffectAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public enableClickSoundEffect(value: boolean | undefined): this {
+        if (this.checkPriority("enableClickSoundEffect")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableClickSoundEffectAttribute(value_casted)
             return this
         }
         return this

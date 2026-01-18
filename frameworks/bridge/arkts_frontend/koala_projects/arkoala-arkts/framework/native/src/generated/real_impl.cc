@@ -1987,6 +1987,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                             const Opt_ClickEffect* value)
     {
     }
+    void SetEnableClickSoundEffectImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+    }
     void SetOnDragStartImpl(Ark_NativePointer node,
                             const Opt_Type_CommonMethod_onDragStart* value)
     {
@@ -9016,6 +9020,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetAlignRulesImpl,
             CommonMethodModifier::SetAspectRatioImpl,
             CommonMethodModifier::SetClickEffectImpl,
+            CommonMethodModifier::SetEnableClickSoundEffectImpl,
             CommonMethodModifier::SetOnDragStartImpl,
             CommonMethodModifier::SetOnDragEnterImpl,
             CommonMethodModifier::SetOnDragMoveImpl,

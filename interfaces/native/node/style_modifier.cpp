@@ -18900,6 +18900,32 @@ void ResetBorderRadiusType(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getCommonModifier()->resetRenderStrategy(node->uiNodeHandle);
 }
 
+int32_t SetEnableClickSoundEffect(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto fullImpl = GetFullImpl();
+    if (!item || !CheckAttributeIsBool(item->value[0].i32)) {
+        fullImpl->getNodeModifiers()->getCommonModifier()->setEnableClickSoundEffect(node->uiNodeHandle, 1);
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getCommonModifier()->setEnableClickSoundEffect(
+        node->uiNodeHandle, item->value[NUM_0].i32);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetEnableClickSoundEffect(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getCommonModifier()->resetEnableClickSoundEffect(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetEnableClickSoundEffect(ArkUI_NodeHandle node)
+{
+    ArkUI_Bool value =
+        GetFullImpl()->getNodeModifiers()->getCommonModifier()->getEnableClickSoundEffect(node->uiNodeHandle);
+    g_numberValues[0].i32 = value;
+    return &g_attributeItem;
+}
+
 const ArkUI_AttributeItem* GetBorderRadiusType(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
@@ -19172,7 +19198,7 @@ int32_t SetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const ArkUI
         SetPositionEdges,
         SetAllowForceDark,
         SetPixelRound,
-        nullptr,
+        SetEnableClickSoundEffect,
         SetMotionPath,
         SetHoverEffect,
         SetFocusScopeId,
@@ -19307,7 +19333,7 @@ const ArkUI_AttributeItem* GetCommonAttribute(ArkUI_NodeHandle node, int32_t sub
         GetPositionEdges,
         GetAllowForceDark,
         GetPixelRound,
-        nullptr,
+        GetEnableClickSoundEffect,
         GetMotionPath,
         GetHoverEffect,
         GetFocusScopeId,
@@ -19446,7 +19472,7 @@ void ResetCommonAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetPositionEdges,
         ResetAllowForceDark,
         ResetPixelRound,
-        nullptr,
+        ResetEnableClickSoundEffect,
         ResetMotionPath,
         ResetHoverEffect,
         ResetFocusScopeId,

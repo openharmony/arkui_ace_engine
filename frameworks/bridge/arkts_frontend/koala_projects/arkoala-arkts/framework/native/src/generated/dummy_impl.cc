@@ -3724,6 +3724,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetEnableClickSoundEffectImpl(Ark_NativePointer node,
+                                       const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setEnableClickSoundEffect(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetOnDragStartImpl(Ark_NativePointer node,
                             const Opt_Type_CommonMethod_onDragStart* value)
     {
@@ -23216,6 +23228,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CommonMethodModifier::SetAlignRulesImpl,
             CommonMethodModifier::SetAspectRatioImpl,
             CommonMethodModifier::SetClickEffectImpl,
+            CommonMethodModifier::SetEnableClickSoundEffectImpl,
             CommonMethodModifier::SetOnDragStartImpl,
             CommonMethodModifier::SetOnDragEnterImpl,
             CommonMethodModifier::SetOnDragMoveImpl,
