@@ -317,7 +317,7 @@ class ArkImageAnimatorComponent extends ArkComponent implements CommonMethod<Ima
     return this;
   }
   preDecode(value: number): ImageAnimatorAttribute {
-    throw new BusinessError(100201, 'preDecode function not supported in ArkImageAnimatorComponent class.');
+    throw new BusinessError(100201, 'preDecode function not supported in attributeModifier scenario.');
   }
   fillMode(value: FillMode): ImageAnimatorAttribute {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorFillModeModifier.identity,

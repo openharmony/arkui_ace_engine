@@ -21,13 +21,13 @@ function copyImageAnimatorModifierWithKey(obj: ModifierWithKey<string | number |
   let newObj: ModifierWithKey<string | number | boolean | object> | ImageAnimatorImagesModifier = {
     ...obj,
     applyStage: function (node: number): boolean {
-      throw new BusinessError(100201, 'applyStage function not supported in ImageAnimatorModifier class.');
+      throw new Error('Function not implemented.');
     },
     applyPeer: function (node: number, reset: boolean): void {
-      throw new BusinessError(100201, 'applyPeer function not supported in ImageAnimatorModifier class.');
+      throw new Error('Function not implemented.');
     },
     checkObjectDiff: function (): boolean {
-      throw new BusinessError(100201, 'checkObjectDiff function not supported in ImageAnimatorModifier class.');
+      throw new Error('Function not implemented.');
     },
   };
 
