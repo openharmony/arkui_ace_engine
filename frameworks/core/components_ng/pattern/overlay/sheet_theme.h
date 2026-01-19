@@ -161,6 +161,7 @@ public:
                 sheetPattern->GetAttr<Dimension>("operation_area_height_double", SHEET_OPERATION_AREA_HEIGHT_DOUBLE);
             theme->bigWindowMinHeight_ =
                 sheetPattern->GetAttr<Dimension>("big_window_min_height", SHEET_BIG_WINDOW_MIN_HEIGHT);
+            theme->sheetHeightPercentMax_ = sheetPattern->GetAttr<double>("sheet_height_percent_max", 0.9f);
         }
     };
     ~SheetTheme() override = default;
@@ -363,6 +364,11 @@ public:
         return largePercent_;
     }
 
+    double GetSheetHeightPercentMax() const
+    {
+        return sheetHeightPercentMax_;
+    }
+
     double GetMediumPercent() const
     {
         return mediumPercent_;
@@ -460,6 +466,7 @@ private:
     double mediumPercent_ = 0.6; // 0.6 is default value
     bool heightApplyFullScreen_ = false;
     bool showCloseIcon_ = true;
+    double sheetHeightPercentMax_ = 0.9; // 0.9 is default value
 
     Dimension operationAreaHeightDouble_ = SHEET_OPERATION_AREA_HEIGHT_DOUBLE;
     Dimension bigWindowMinHeight_ = SHEET_BIG_WINDOW_MIN_HEIGHT;

@@ -1656,6 +1656,9 @@ HWTEST_F(SheetShowInSubwindowTestNg, ComputeMaxHeight001, TestSize.Level1)
     ASSERT_NE(sheetNode, nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
+    sheetTheme->sheetHeightPercentMax_ = 0.9f;
     auto* layoutWrapper =
         new LayoutWrapperNode(sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
@@ -1689,6 +1692,9 @@ HWTEST_F(SheetShowInSubwindowTestNg, ComputePopupStyleOffset002, TestSize.Level1
     ASSERT_NE(sheetNode, nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
+    sheetTheme->sheetHeightPercentMax_ = 0.9f;
     auto* layoutWrapper =
         new LayoutWrapperNode(sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);
@@ -1714,6 +1720,9 @@ HWTEST_F(SheetShowInSubwindowTestNg, ComputePopupStyleOffset003, TestSize.Level1
     ASSERT_NE(sheetNode, nullptr);
     auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
     ASSERT_NE(sheetPattern, nullptr);
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    SheetShowInSubwindowTestNg::SetSheetTheme(sheetTheme);
+    sheetTheme->sheetHeightPercentMax_ = 0.9f;
     auto* layoutWrapper =
         new LayoutWrapperNode(sheetNode, sheetNode->GetGeometryNode(), sheetNode->GetLayoutProperty());
     ASSERT_NE(layoutWrapper, nullptr);

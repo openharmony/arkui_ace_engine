@@ -245,9 +245,9 @@ void SheetPresentationLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
             auto sheetTheme = pipeline->GetTheme<SheetTheme>();
             CHECK_NULL_VOID(sheetTheme);
             auto bigWindowMinHeight = sheetTheme->GetBigWindowMinHeight();
-            auto maxHeight = std::min(sheetMaxHeight, sheetMaxWidth_) * POPUP_LARGE_SIZE;
+            auto maxHeight = std::min(sheetMaxHeight, sheetMaxWidth_) * sheetTheme->GetSheetHeightPercentMax();
             maxHeight = SheetInSplitWindow()
-                ? maxHeight : std::max(maxHeight, static_cast<float>(bigWindowMinHeight.ConvertToPx()));
+                ? maxHeight : std::max(maxHeight, bigWindowMinHeight.ConvertToPx());
             bool isExistMinHightRestriction =
                 sheetStyle_.showInSubWindow.value_or(false)
                 && LessOrEqual(sheetHeight_, bigWindowMinHeight.ConvertToPx()) && !SheetInSplitWindow();
@@ -697,7 +697,11 @@ float SheetPresentationLayoutAlgorithm::ComputeMaxHeight(const float parentConst
     CHECK_NULL_RETURN(host, 0.0f);
     auto sheetPattern = host->GetPattern<SheetPresentationPattern>();
     CHECK_NULL_RETURN(sheetPattern, 0.0f);
-    auto maxHeight = (std::min(sheetMaxHeight, parentConstraintWidth)) * POPUP_LARGE_SIZE;
+    auto pipeline = host->GetContext();
+    CHECK_NULL_RETURN(pipeline, 0.0f);
+    auto sheetTheme = pipeline->GetTheme<SheetTheme>();
+    CHECK_NULL_RETURN(sheetTheme, 0.0f);
+    auto maxHeight = (std::min(sheetMaxHeight, parentConstraintWidth)) * sheetTheme->GetSheetHeightPercentMax();
     if (sheetPattern->GetWindowButtonRect(floatButtons)) {
         maxHeight = sheetMaxHeight - DOUBLE_SIZE *
             (floatButtons.Height() + SHEET_BLANK_MINI_HEIGHT.ConvertToPx());
@@ -714,7 +718,7 @@ float SheetPresentationLayoutAlgorithm::ComputeMaxHeight(const float parentConst
         auto mainWindowContext = PipelineContext::GetContextByContainerId(currentId);
         if (mainWindowContext && mainWindowContext->GetContainerModalButtonsRect(containerModal, buttonsRect)) {
             maxHeight = (std::min(parentConstraintHeight - buttonsRect.Height(),
-                parentConstraintWidth)) * POPUP_LARGE_SIZE;
+                parentConstraintWidth)) * sheetTheme->GetSheetHeightPercentMax();
         }
     }
     return maxHeight;
