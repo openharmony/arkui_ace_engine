@@ -922,4 +922,27 @@ HWTEST_F(InputEventHubTestNg, InputEventHubProcessAxisTestHitTest001, TestSize.L
     EXPECT_FALSE(inputEventHub->ProcessAxisTestHit(COORDINATE_OFFSET, result, false));
     EXPECT_EQ(result.size(), AXIS_RESULT_SIZE);
 }
+
+/**
+ * @tc.name: InputEventHubBindContextMenuTest055
+ * @tc.desc: Create InputEventHub and invoke BindContextMenu functions.
+ * @tc.type: FUNC
+ */
+HWTEST_F(InputEventHubTestNg, InputEventHubBindContextMenuTest055, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create InputEventHub.
+     */
+    auto eventHub = AceType::MakeRefPtr<EventHub>();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    eventHub->AttachHost(frameNode);
+    auto inputEventHub = AceType::MakeRefPtr<InputEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
+    EXPECT_NE(inputEventHub, nullptr);
+
+    auto inputEventActuator =
+        AceType::MakeRefPtr<InputEventActuator>(AceType::WeakClaim(AceType::RawPtr(inputEventHub)));
+    AxisTestResult result;
+    inputEventActuator->OnCollectCoastingAxisEvent(result);
+    EXPECT_EQ(result.size(), 0);
+}
 } // namespace OHOS::Ace::NG
