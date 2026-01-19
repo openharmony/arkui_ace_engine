@@ -227,6 +227,7 @@ private:
     void FireBuilder();
     void ReportProgressEvent();
     void OnColorConfigurationUpdate() override;
+    void ProcessColorOnColorConfigurationUpdate();
     RefPtr<FrameNode> BuildContentModifierNode();
     std::optional<ProgressMakeCallback> makeFunc_;
     RefPtr<FrameNode> contentModifierNode_;

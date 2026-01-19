@@ -58,6 +58,7 @@ public:
     virtual void SetColor(const Color& value) = 0;
     virtual void ResetColor() = 0;
     virtual void SetBackgroundColor(const Color& value) = 0;
+    virtual void SetBackgroundColorByUser(bool value) = 0;
     virtual void ResetBackgroundColor() = 0;
     virtual void SetStrokeWidth(const Dimension& value) = 0;
     virtual void SetScaleCount(int32_t value) = 0;

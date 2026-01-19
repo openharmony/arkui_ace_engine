@@ -2456,4 +2456,30 @@ HWTEST_F(ProgressTestNg, ProgressModelStaticSetText, TestSize.Level0)
     ProgressModelStatic::SetText(Referenced::RawPtr(frameNode_), std::nullopt);
     EXPECT_TRUE(pattern_->IsTextFromUser());
 }
+
+/**
+ * @tc.name: SetBackgroundColorByUserTest001
+ * @tc.desc: Test SetBackgroundColorByUser method of ProgressModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ProgressTestNg, SetBackgroundColorByUserTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Set ConfigChangePerform to true, create progress and SetBackgroundColorByUser to true.
+     * @tc.expected: step1. GetBackgroundColorSetByUser is set to true.
+     */
+    CreateProgress(VALUE_OF_PROGRESS, MAX_VALUE_OF_PROGRESS, PROGRESS_TYPE_LINEAR);
+    OHOS::Ace::g_isConfigChangePerform = true;
+
+    ProgressModelNG model;
+    model.SetBackgroundColorByUser(true);
+    EXPECT_EQ(paintProperty_->GetBackgroundColorSetByUser(), true);
+
+    /**
+     * @tc.steps: step2. SetBackgroundColorByUser to false when ConfigChangePerform is true.
+     * @tc.expected: step2. GetBackgroundColorSetByUser is set to false.
+     */
+    model.SetBackgroundColorByUser(false);
+    EXPECT_EQ(paintProperty_->GetBackgroundColorSetByUser(), false);
+}
 } // namespace OHOS::Ace::NG

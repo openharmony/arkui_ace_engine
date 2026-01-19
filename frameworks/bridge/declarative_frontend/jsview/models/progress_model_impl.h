@@ -28,6 +28,7 @@ public:
     void SetColor(const Color& value) override;
     void ResetColor() override {}
     void SetBackgroundColor(const Color& value) override;
+    void SetBackgroundColorByUser(bool value) override {};
     void ResetBackgroundColor() override {}
     void SetStrokeWidth(const Dimension& value) override;
     void SetScaleCount(int32_t value) override;
