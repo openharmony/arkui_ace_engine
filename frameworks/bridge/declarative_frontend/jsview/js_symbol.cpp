@@ -435,13 +435,52 @@ void JSSymbol::ParseSymbolShadow(const JSRef<JSObject>& symbolShadowObj, SymbolS
 {
     auto colorValue = symbolShadowObj->GetProperty(static_cast<int32_t>(ArkUIIndex::COLOR));
     Color color;
-    if (ParseJsColor(colorValue, color)) {
+    RefPtr<ResourceObject> colorResObj;
+    if (ParseJsColor(colorValue, color, colorResObj)) {
         symbolShadow.color = color;
     }
-
-    ParseJsValueToFloat(symbolShadowObj, static_cast<int32_t>(ArkUIIndex::RADIUS), symbolShadow.radius);
-    ParseJsValueToFloat(symbolShadowObj, static_cast<int32_t>(ArkUIIndex::OFFSET_X), symbolShadow.offset.first);
-    ParseJsValueToFloat(symbolShadowObj, static_cast<int32_t>(ArkUIIndex::OFFSET_Y), symbolShadow.offset.second);
+    RefPtr<ResourceObject> radiusResObj;
+    RefPtr<ResourceObject> xResObj;
+    RefPtr<ResourceObject> yResObj;
+    ParseJsValueToFloat(symbolShadowObj, static_cast<int32_t>(ArkUIIndex::RADIUS), symbolShadow.radius, radiusResObj);
+    ParseJsValueToFloat(
+        symbolShadowObj, static_cast<int32_t>(ArkUIIndex::OFFSET_X), symbolShadow.offset.first, xResObj);
+    ParseJsValueToFloat(
+        symbolShadowObj, static_cast<int32_t>(ArkUIIndex::OFFSET_Y), symbolShadow.offset.second, yResObj);
+    if ((SystemProperties::ConfigChangePerform())) {
+        if (colorResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, SymbolShadow& symbolShadow) {
+                Color colorValue;
+                ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+                symbolShadow.color = colorValue;
+            };
+            symbolShadow.AddResource("symbolShadow.colorValue", colorResObj, std::move(updateFunc));
+        }
+        if (radiusResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, SymbolShadow& symbolShadow) {
+                CalcDimension radius;
+                ResourceParseUtils::ParseResResource(radiusResObj, radius);
+                symbolShadow.radius = static_cast<float>(radius.GetNativeValue(DimensionUnit::PX));
+            };
+            symbolShadow.AddResource("symbolShadow.radius", radiusResObj, std::move(updateFunc));
+        }
+        if (xResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& xResObj, SymbolShadow& symbolShadow) {
+                CalcDimension xValue;
+                ResourceParseUtils::ParseResResource(xResObj, xValue);
+                symbolShadow.offset.first = static_cast<float>(xValue.GetNativeValue(DimensionUnit::PX));
+            };
+            symbolShadow.AddResource("symbolShadow.offsetX", xResObj, std::move(updateFunc));
+        }
+        if (yResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& yResObj, SymbolShadow& symbolShadow) {
+                CalcDimension yValue;
+                ResourceParseUtils::ParseResResource(yResObj, yValue);
+                symbolShadow.offset.second = static_cast<float>(yValue.GetNativeValue(DimensionUnit::PX));
+            };
+            symbolShadow.AddResource("symbolShadow.offsetY", yResObj, std::move(updateFunc));
+        }
+    }
 }
 
 void JSSymbol::ParseGradientCenter(const JSRef<JSArray>& center, SymbolGradient& gradient)
@@ -458,11 +497,12 @@ void JSSymbol::ParseGradientCenter(const JSRef<JSArray>& center, SymbolGradient&
     }
 }
 
-void JSSymbol::ParseJsValueToFloat(const JSRef<JSObject>& jsObj, int32_t key, float& output)
+void JSSymbol::ParseJsValueToFloat(
+    const JSRef<JSObject>& jsObj, int32_t key, float& output, RefPtr<ResourceObject>& radiusResObj)
 {
     CalcDimension offset;
     auto jsOffset = jsObj->GetProperty(key);
-    if (ParseJsDimensionVp(jsOffset, offset) || ParseJsResource(jsOffset, offset)) {
+    if (ParseJsDimensionVp(jsOffset, offset, radiusResObj) || ParseJsResource(jsOffset, offset, radiusResObj)) {
         output = static_cast<float>(offset.GetNativeValue(DimensionUnit::PX));
     }
 }
