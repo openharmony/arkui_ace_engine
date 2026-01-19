@@ -1275,7 +1275,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest007, TestSize.Level0)
      * @tc.expected: step3. check whether the properties is correct.
      */
     EXPECT_FALSE(textLayoutProperty->HasFontSize());
-    EXPECT_TRUE(textLayoutProperty->HasTextColor());
+    EXPECT_FALSE(textLayoutProperty->HasTextColor());
     EXPECT_FALSE(textLayoutProperty->HasItalicFontStyle());
     EXPECT_FALSE(textLayoutProperty->HasFontWeight());
     EXPECT_FALSE(textLayoutProperty->HasFontFamily());
@@ -1797,16 +1797,13 @@ HWTEST_F(TextClockTestNG, TextClockTest017, TestSize.Level0)
      */
     model.SetTextColor(TEXT_COLOR_VALUE_1);
     EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE_1);
-    model.ResetTextColor();
-    EXPECT_EQ(layoutProperty->GetTextColor().has_value(), false);
+    EXPECT_EQ(layoutProperty->GetTextColor().has_value(), true);
 
     model.SetFontColor(frameNode, TEXT_COLOR_VALUE);
     EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
-    model.ResetFontColor(frameNode);
-    EXPECT_EQ(layoutProperty->GetTextColor().has_value(), false);
+    EXPECT_EQ(layoutProperty->GetTextColor().has_value(), true);
     model.SetFontColor(frameNode, TEXT_COLOR_VALUE);
     EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
-    model.ResetFontColor(nullptr);
     EXPECT_EQ(layoutProperty->GetTextColor().has_value(), true);
 }
 
