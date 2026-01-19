@@ -20,7 +20,7 @@
 #include "core/components_ng/pattern/qrcode/qrcode_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT QRCodeModelNG : public OHOS::Ace::QRCodeModel {
+class ACE_FORCE_EXPORT QRCodeModelNG : public OHOS::Ace::QRCodeModel {
 public:
     void Create(const std::string& value) override;
     void SetQRCodeColor(const Color& color) override;
@@ -35,6 +35,7 @@ public:
     static void SetContentOpacity(FrameNode* frameNode, const double opacity);
     static void CreateWithResourceObj(
         FrameNode* frameNode, QRCodeResourceType jsResourceType, const RefPtr<ResourceObject>& resObj);
+    static void CreateQRCodeModelNG(const std::string& value);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_QRCODE_QRCODE_MODEL_NG_H

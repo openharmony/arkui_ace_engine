@@ -30,9 +30,9 @@ void QRCodeModelNG::Create(const std::string& value)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::QRCODE_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", QRCODE_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::QRCODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<QRCodePattern>(); });
+        QRCODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<QRCodePattern>(); });
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
     auto pros = frameNode->GetPaintProperty<QRCodePaintProperty>();
@@ -66,7 +66,7 @@ void QRCodeModelNG::SetContentOpacity(const double opacity)
 
 RefPtr<FrameNode> QRCodeModelNG::CreateFrameNode(int32_t nodeId)
 {
-    auto frameNode = FrameNode::CreateFrameNode(V2::QRCODE_ETS_TAG, nodeId, AceType::MakeRefPtr<QRCodePattern>());
+    auto frameNode = FrameNode::CreateFrameNode(QRCODE_ETS_TAG, nodeId, AceType::MakeRefPtr<QRCodePattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     return frameNode;
 }
@@ -207,5 +207,22 @@ void QRCodeModelNG::CreateWithResourceObj(
         default:
             break;
     }
+}
+
+void QRCodeModelNG::CreateQRCodeModelNG(const std::string& value)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", QRCODE_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        QRCODE_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<QRCodePattern>(); });
+    ViewStackProcessor::GetInstance()->Push(frameNode);
+
+    auto pros = frameNode->GetPaintProperty<QRCodePaintProperty>();
+    if (pros) {
+        pros->ResetQRCodeColorSetByUser();
+        pros->ResetQRBackgroundColorSetByUser();
+    }
+    ACE_UPDATE_PAINT_PROPERTY(QRCodePaintProperty, Value, value);
 }
 } // namespace OHOS::Ace::NG

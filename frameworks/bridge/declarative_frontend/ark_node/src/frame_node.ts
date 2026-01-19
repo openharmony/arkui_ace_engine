@@ -1216,7 +1216,9 @@ const __creatorMap__ = new Map<string, (context: UIContext, options?: object) =>
     }],
     ['QRCode', (context: UIContext): FrameNode => {
       return new TypedFrameNode(context, 'QRCode', (node: NodePtr, type: ModifierType): ArkQRCodeComponent => {
-        return new ArkQRCodeComponent(node, type);
+        getUINativeModule().loadNativeModule('QRCode');
+ 	    let module = globalThis.requireNapi('arkui.components.arkqrcode');
+ 	    return module.createComponent(node, type);
       })
     }],
     ['Badge', (context: UIContext): FrameNode => {

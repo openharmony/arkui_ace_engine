@@ -20,8 +20,8 @@
 
 #include "core/interfaces/native/node/flow_item_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
-
 #include "core/interfaces/native/node/radio_modifier.h"
+#include "core/interfaces/native/node/qrcode_modifier.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
@@ -89,7 +89,6 @@
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.h"
-
 namespace OHOS::Ace::NG::ViewModel {
 
 ArkUIAPICallbackMethod* callbacks = nullptr;
@@ -590,10 +589,13 @@ void* createCustomSpanNode(ArkUI_Int32 nodeId)
 #ifdef QRCODEGEN_SUPPORT
 void* createQRcodeNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = QRCodeModelNG::CreateFrameNode(nodeId);
+    auto arkUIQRCodeModifier = NG::NodeModifier::GetQRCodeModifier();
+    CHECK_NULL_RETURN(arkUIQRCodeModifier->createFrameNode, nullptr);
+    auto arkUINodeHandle = arkUIQRCodeModifier->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 #endif
 

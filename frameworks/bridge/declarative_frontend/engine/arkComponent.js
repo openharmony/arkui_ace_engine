@@ -28588,104 +28588,6 @@ if (globalThis.Progress !== undefined) {
   };
 }
 
-/// <reference path='./import.ts' />
-class ArkQRCodeComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  allowChildCount() {
-    return 0;
-  }
-  initialize(value) {
-    modifierWithKey(this._modifiersWithKeys, QRValueModifier.identity, QRValueModifier, value[0]);
-    return this;
-  }
-  color(value) {
-    modifierWithKey(this._modifiersWithKeys, QRColorModifier.identity, QRColorModifier, value);
-    return this;
-  }
-  backgroundColor(value) {
-    modifierWithKey(this._modifiersWithKeys, QRBackgroundColorModifier.identity, QRBackgroundColorModifier, value);
-    return this;
-  }
-  contentOpacity(value) {
-    modifierWithKey(this._modifiersWithKeys, QRContentOpacityModifier.identity, QRContentOpacityModifier, value);
-    return this;
-  }
-}
-class QRValueModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    getUINativeModule().qrcode.setQRValue(node, this.value);
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-QRValueModifier.identity = Symbol('QRCodeValue');
-class QRColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().qrcode.resetQRColor(node);
-    }
-    else {
-      getUINativeModule().qrcode.setQRColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-QRColorModifier.identity = Symbol('color');
-class QRBackgroundColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().qrcode.resetQRBackgroundColor(node);
-    }
-    else {
-      getUINativeModule().qrcode.setQRBackgroundColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-QRBackgroundColorModifier.identity = Symbol('qrBackgroundColor');
-class QRContentOpacityModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().qrcode.resetContentOpacity(node);
-    }
-    else {
-      getUINativeModule().qrcode.setContentOpacity(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-QRContentOpacityModifier.identity = Symbol('qrContentOpacity');
-// @ts-ignore
-if (globalThis.QRCode !== undefined) {
-  globalThis.QRCode.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkQRCodeComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.QRCodeModifier(nativePtr, classType);
-    });
-  };
-}
 
 /// <reference path='./import.ts' />
 class ArkRichTextComponent extends ArkComponent {
@@ -38348,6 +38250,17 @@ if (globalThis.Slider === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkslider');
       module.exportView();
       getUINativeModule().slider.create(params);
+    }
+  }
+}
+
+if (globalThis.QRCode === undefined) {
+  globalThis.QRCode = {
+    create: function(value) {
+      getUINativeModule().loadNativeModule("QRCode");
+      let module = globalThis.requireNapi('arkui.components.arkqrcode');
+      module.exportView();
+      getUINativeModule().qrcode.create(value);
     }
   }
 }

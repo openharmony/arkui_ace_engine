@@ -193,7 +193,7 @@
       OHOS::Ace::PatternLockModel::*;
       OHOS::Ace::PolygonModel::*;
       OHOS::Ace::ProgressModel::*;
-      OHOS::Ace::QRCodeModel::*;
+      OHOS::Ace::QRCodeModelNG::*;
       OHOS::Ace::RadioModel::*;
       OHOS::Ace::RectModel::*;
       OHOS::Ace::RefreshModel::*;
@@ -404,6 +404,7 @@
       OHOS::Ace::ParseFontFeatureSettings*;
       OHOS::Ace::UnParseFontFeatureSetting*;
       OHOS::Ace::NG::ConvertToCalcPaddingProperty*;
+      OHOS::Ace::NG::CreateIdealSize*;
       OHOS::Ace::StorageProxy::*;
       OHOS::Ace::EnvironmentProxy::*;
       OHOS::Ace::AceScoringLog::*;
@@ -650,6 +651,7 @@
       vtable?for?OHOS::Ace::NG::TextPattern;
       vtable?for?OHOS::Ace::NG::TextSelectOverlay;
       vtable?for?OHOS::Ace::NG::ParagraphManager;
+      vtable?for?OHOS::Ace::NG::QRCodeModelNG;
 
       OHOS::Ace::NG::ColorSampler::*;
 

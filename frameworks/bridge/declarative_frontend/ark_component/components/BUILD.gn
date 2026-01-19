@@ -52,6 +52,9 @@ arkui_modules = [
   "hyperlink",
 ]
 
+if (qrcodegen_support) {
+    arkui_modules += [ "qrcode" ]
+}
 module_targets = []
 
 foreach(item, arkui_modules) {
