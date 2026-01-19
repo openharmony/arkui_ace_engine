@@ -339,6 +339,7 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
 void* createXComponentNode(ArkUI_Int32 nodeId)
 {
 #ifdef XCOMPONENT_SUPPORTED
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = XComponentModelStatic::CreateFrameNode(nodeId, true);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -727,6 +728,7 @@ void* createEllipseNode(ArkUI_Int32 nodeId)
 void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
+    ACE_UINODE_TRACE(nodeId);
     return nullptr;
 #else
     return nullptr;
@@ -873,6 +875,7 @@ void* createPatternLockNode(ArkUI_Int32 nodeId)
 void* createPluginComponentNode(ArkUI_Int32 nodeId)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = PluginModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();

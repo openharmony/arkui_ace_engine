@@ -275,6 +275,7 @@ ArkUINativeModuleValue XComponentBridge::SetXComponentInitialize(ArkUIRuntimeCal
     Local<JSValueRef> typeArg = runtimeCallInfo->GetCallArgRef(ARG_TYPE);
     Local<JSValueRef> librarynameArg = runtimeCallInfo->GetCallArgRef(ARG_LIBRARY_NAME);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     if (!idArg->IsString(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
@@ -361,6 +362,7 @@ ArkUINativeModuleValue XComponentBridge::SetBackgroundColor(ArkUIRuntimeCallInfo
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     Color color;
     if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
         GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentBackgroundColor(nativeNode);
@@ -377,6 +379,7 @@ ArkUINativeModuleValue XComponentBridge::ResetBackgroundColor(ArkUIRuntimeCallIn
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentBackgroundColor(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -388,6 +391,7 @@ ArkUINativeModuleValue XComponentBridge::SetOpacity(ArkUIRuntimeCallInfo *runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     double opacity;
     if (!ArkTSUtils::ParseJsDouble(vm, secondArg, opacity)) {
         GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentOpacity(nativeNode);
@@ -403,6 +407,7 @@ ArkUINativeModuleValue XComponentBridge::ResetOpacity(ArkUIRuntimeCallInfo *runt
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentOpacity(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -428,10 +433,12 @@ ArkUINativeModuleValue XComponentBridge::SetOnLoad(ArkUIRuntimeCallInfo *runtime
     CHECK_NULL_RETURN(secondArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ACE_UINODE_TRACE(frameNode);
     auto obj = secondArg->ToObject(vm);
     panda::Local<panda::FunctionRef> func = obj;
     auto onLoad = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
                       const std::string& xcomponentId) {
+        ACE_UINODE_TRACE(node);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(node);
@@ -462,10 +469,12 @@ ArkUINativeModuleValue XComponentBridge::SetOnDestroy(ArkUIRuntimeCallInfo *runt
     CHECK_NULL_RETURN(secondArg->IsFunction(vm), panda::JSValueRef::Undefined(vm));
     auto* frameNode = reinterpret_cast<FrameNode*>(firstArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
+    ACE_UINODE_TRACE(frameNode);
     auto obj = secondArg->ToObject(vm);
     panda::Local<panda::FunctionRef> func = obj;
     auto onDestroy = [vm, func = panda::CopyableGlobal(vm, func), node = AceType::WeakClaim(frameNode)](
                          const std::string& xcomponentId) {
+        ACE_UINODE_TRACE(node);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(node);
@@ -489,6 +498,7 @@ ArkUINativeModuleValue XComponentBridge::SetEnableAnalyzer(ArkUIRuntimeCallInfo 
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     if (secondArg->IsBoolean()) {
         bool boolValue = secondArg->ToBoolean(vm)->Value();
         GetArkUINodeModifiers()->getXComponentModifier()->setXComponentEnableAnalyzer(nativeNode, boolValue);
@@ -504,6 +514,7 @@ ArkUINativeModuleValue XComponentBridge::ResetEnableAnalyzer(ArkUIRuntimeCallInf
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableAnalyzer(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -515,6 +526,7 @@ ArkUINativeModuleValue XComponentBridge::SetEnableSecure(ArkUIRuntimeCallInfo *r
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     if (secondArg->IsBoolean()) {
         bool boolValue = secondArg->ToBoolean(vm)->Value();
         GetArkUINodeModifiers()->getXComponentModifier()->setXComponentEnableSecure(nativeNode, boolValue);
@@ -530,6 +542,7 @@ ArkUINativeModuleValue XComponentBridge::ResetEnableSecure(ArkUIRuntimeCallInfo 
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableSecure(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -541,6 +554,7 @@ ArkUINativeModuleValue XComponentBridge::SetHdrBrightness(ArkUIRuntimeCallInfo *
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     if (secondArg->IsNumber()) {
         float hdrBrightness = secondArg->ToNumber(vm)->Value();
         GetArkUINodeModifiers()->getXComponentModifier()->setXComponentHdrBrightness(nativeNode, hdrBrightness);
@@ -556,6 +570,7 @@ ArkUINativeModuleValue XComponentBridge::ResetHdrBrightness(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentHdrBrightness(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -568,6 +583,7 @@ ArkUINativeModuleValue XComponentBridge::SetEnableTransparentLayer(ArkUIRuntimeC
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     if (secondArg->IsBoolean()) {
         bool enableTransparentLayer = secondArg->ToBoolean(vm)->Value();
         GetArkUINodeModifiers()->getXComponentModifier()->setXComponentEnableTransparentLayer(
@@ -585,6 +601,7 @@ ArkUINativeModuleValue XComponentBridge::ResetEnableTransparentLayer(ArkUIRuntim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentEnableTransparentLayer(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -596,6 +613,7 @@ ArkUINativeModuleValue XComponentBridge::SetRenderFit(ArkUIRuntimeCallInfo* runt
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     auto fitModeArg = runtimeCallInfo->GetCallArgRef(ARG_ID);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     auto renderFit = static_cast<int32_t>(RenderFit::TOP_LEFT);
     if (fitModeArg->IsNumber()) {
         renderFit = fitModeArg->Int32Value(vm);
@@ -610,6 +628,7 @@ ArkUINativeModuleValue XComponentBridge::ResetRenderFit(ArkUIRuntimeCallInfo* ru
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(ARG_FIRST);
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     GetArkUINodeModifiers()->getXComponentModifier()->resetXComponentRenderFit(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

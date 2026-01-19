@@ -24,6 +24,7 @@ namespace OHOS::Ace::NG {
 RefPtr<FrameNode> SecurityUIExtensionStatic::CreateSecurityUIExtensionComponent(
     int32_t nodeId, NG::SessionType sessionType)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<SecurityUIExtensionPattern>(); });
     auto* stack = ViewStackProcessor::GetInstance();

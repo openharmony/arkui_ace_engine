@@ -459,10 +459,12 @@ void JSUIExtension::OnRemoteReady(const JSCallbackInfo& info)
         return;
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onRemoteReady = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
         (const RefPtr<NG::UIExtensionProxy>& session) {
+        ACE_UINODE_TRACE(node);
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -485,10 +487,12 @@ void JSUIExtension::OnReceive(const JSCallbackInfo& info)
         return;
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onReceive = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
         (const AAFwk::WantParams& wantParams) {
+        ACE_UINODE_TRACE(node);
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("UIExtensionComponent.UIExtensionDataSession.onReceive");
@@ -513,10 +517,12 @@ void JSUIExtension::OnRelease(const JSCallbackInfo& info)
         return;
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onRelease = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
         (int32_t releaseCode) {
+        ACE_UINODE_TRACE(node);
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("UIExtensionComponent.onRelease");
@@ -535,10 +541,12 @@ void JSUIExtension::OnResult(const JSCallbackInfo& info)
         return;
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onResult = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
         (int32_t code, const AAFwk::Want& want) {
+            ACE_UINODE_TRACE(node);
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("UIExtensionComponent.onResult");
@@ -566,10 +574,12 @@ void JSUIExtension::OnError(const JSCallbackInfo& info)
         return;
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
         (int32_t code, const std::string& name, const std::string& message) {
+            ACE_UINODE_TRACE(node);
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("UIExtensionComponent.onError");
@@ -592,10 +602,12 @@ void JSUIExtension::OnTerminated(const JSCallbackInfo& info)
         return;
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onTerminated = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                             int32_t code, const RefPtr<WantWrap>& wantWrap) {
+        ACE_UINODE_TRACE(node);
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("EmbeddedComponent.onTerminated");
@@ -626,10 +638,12 @@ void JSUIExtension::OnDrawReady(const JSCallbackInfo& info)
         return;
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onDrawReady = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode]
         () {
+            ACE_UINODE_TRACE(node);
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("UIExtensionComponent.onDrawReady");

@@ -26,6 +26,7 @@ void XComponentModelNG::Create(XComponentType type)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     ACE_LAYOUT_SCOPED_TRACE("Create[%sNative][self:%d]", V2::XCOMPONENT_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::XCOMPONENT_ETS_TAG, nodeId,
         [type]() { return AceType::MakeRefPtr<XComponentPatternV2>(type, XComponentNodeType::DECLARATIVE_NODE); });
@@ -39,6 +40,7 @@ void XComponentModelNG::Create(const std::optional<std::string>& id, XComponentT
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::XCOMPONENT_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::XCOMPONENT_ETS_TAG, nodeId, [id, type, libraryname, xcomponentController]() {
@@ -52,6 +54,7 @@ RefPtr<AceType> XComponentModelNG::Create(int32_t nodeId, float width, float hei
     XComponentType type, const std::string& libraryname,
     const std::shared_ptr<InnerXComponentController>& xcomponentController)
 {
+    ACE_UINODE_TRACE(nodeId);
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::XCOMPONENT_ETS_TAG, nodeId);
     auto calcWidth = CalcLength(width, DimensionUnit::VP);
     auto calcHeight = CalcLength(height, DimensionUnit::VP);

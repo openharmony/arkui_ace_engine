@@ -31,6 +31,7 @@ ArkUINativeModuleValue EmbeddedComponentBridge::SetOnTerminated(ArkUIRuntimeCall
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
+    ACE_UINODE_TRACE(frameNode);
     Local<JSValueRef> callbackArg = runtimeCallInfo->GetCallArgRef(1);
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
@@ -43,6 +44,7 @@ ArkUINativeModuleValue EmbeddedComponentBridge::SetOnTerminated(ArkUIRuntimeCall
     std::function<void(int32_t, const RefPtr<WantWrap>&)> onTerminated = [vm, func = panda::CopyableGlobal(vm, func),
                                                                              instanceId, frameNode](int32_t code,
                                                                              const RefPtr<WantWrap>& wantWrap) {
+        ACE_UINODE_TRACE(frameNode);
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         ContainerScope scope(instanceId);
@@ -76,6 +78,7 @@ ArkUINativeModuleValue EmbeddedComponentBridge::ResetOnTerminated(ArkUIRuntimeCa
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     GetArkUINodeModifiers()->getEmbeddedComponentModifier()->resetOnTerminated(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
@@ -92,6 +95,7 @@ ArkUINativeModuleValue EmbeddedComponentBridge::SetOnError(ArkUIRuntimeCallInfo*
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
+    ACE_UINODE_TRACE(frameNode);
     CHECK_NULL_RETURN(frameNode, panda::NativePointerRef::New(vm, nullptr));
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
@@ -104,6 +108,7 @@ ArkUINativeModuleValue EmbeddedComponentBridge::SetOnError(ArkUIRuntimeCallInfo*
     std::function<void(int32_t, const std::string&, const std::string&)> onError =
         [vm, func = panda::CopyableGlobal(vm, func), instanceId, frameNode](
             int32_t code, const std::string& name, const std::string& message) {
+            ACE_UINODE_TRACE(frameNode);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             ContainerScope scope(instanceId);
@@ -130,6 +135,7 @@ ArkUINativeModuleValue EmbeddedComponentBridge::ResetOnError(ArkUIRuntimeCallInf
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode*>(nativeNode));
     GetArkUINodeModifiers()->getEmbeddedComponentModifier()->resetOnError(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }

@@ -82,6 +82,9 @@ ArkUINativeModuleValue XComponentNodeBridge::Create(ArkUIRuntimeCallInfo* runtim
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Framework::XComponentParams params = SetXComponentNodeParams(runtimeCallInfo, vm);
     void* jsXComponent = Framework::JSXComponent::Create(params);
+    ACE_UINODE_TRACE(jsXComponent ? AceType::DynamicCast<FrameNode>(
+                                        reinterpret_cast<Framework::JSXComponent*>(jsXComponent)->GetFrameNode())
+                                  : nullptr);
     auto nativeModule = panda::NativePointerRef::New(
         vm, reinterpret_cast<void*>(jsXComponent),
         [](void *env, void* data, [[maybe_unused]] void* hint) {
@@ -107,6 +110,7 @@ ArkUINativeModuleValue XComponentNodeBridge::GetFrameNode(ArkUIRuntimeCallInfo* 
         reinterpret_cast<Framework::JSXComponent*>(firstArg->ToNativePointer(vm)->Value());
     if (jsXComponent) {
         auto frameNode = jsXComponent->GetFrameNode();
+        ACE_UINODE_TRACE(AceType::DynamicCast<FrameNode>(frameNode));
         auto nativeModule = panda::NativePointerRef::New(vm, reinterpret_cast<void*>(AceType::RawPtr(frameNode)));
         return nativeModule;
     }
@@ -125,6 +129,7 @@ ArkUINativeModuleValue XComponentNodeBridge::RegisterOnCreateCallback(ArkUIRunti
         reinterpret_cast<Framework::JSXComponent*>(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     if (jsXComponent && secondArg->IsFunction(vm)) {
+        ACE_UINODE_TRACE(AceType::DynamicCast<FrameNode>(jsXComponent->GetFrameNode()));
         Framework::JsiExecutionContext execCtx = { vm };
         jsXComponent->RegisterOnCreate(execCtx, secondArg);
     }
@@ -143,6 +148,7 @@ ArkUINativeModuleValue XComponentNodeBridge::RegisterOnDestroyCallback(ArkUIRunt
         reinterpret_cast<Framework::JSXComponent*>(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     if (jsXComponent && secondArg->IsFunction(vm)) {
+        ACE_UINODE_TRACE(AceType::DynamicCast<FrameNode>(jsXComponent->GetFrameNode()));
         Framework::JsiExecutionContext execCtx = { vm };
         jsXComponent->RegisterOnDestroy(execCtx, secondArg);
     }
@@ -162,6 +168,7 @@ ArkUINativeModuleValue XComponentNodeBridge::ChangeRenderType(ArkUIRuntimeCallIn
         reinterpret_cast<Framework::JSXComponent*>(firstArg->ToNativePointer(vm)->Value());
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     if (jsXComponent && secondArg->IsNumber()) {
+        ACE_UINODE_TRACE(AceType::DynamicCast<FrameNode>(jsXComponent->GetFrameNode()));
         auto ret = jsXComponent->ChangeRenderType(secondArg->Int32Value(vm));
         auto nativeModule = panda::BooleanRef::New(vm, ret);
         return nativeModule;

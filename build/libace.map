@@ -49,6 +49,9 @@
       OHOS::Ace::AceScopedTrace::*;
       OHOS::Ace::ActionSheetModel::*;
       OHOS::Ace::Animator::*;
+      OHOS::Ace::ResTracer::*;
+      OHOS::Ace::UINodeTracer::*;
+      OHOS::Ace::ContainerTracer::*;
       "OHOS::Ace::Backend::Create()";
       "OHOS::Ace::Backend::TypeId()::myTypeId";
       "OHOS::Ace::BaseId::BaseId()";

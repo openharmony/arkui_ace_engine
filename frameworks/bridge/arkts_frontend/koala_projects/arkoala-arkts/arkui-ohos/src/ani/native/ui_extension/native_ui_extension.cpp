@@ -183,6 +183,7 @@ ani_long NativeUiExtension::UiextensionConstruct(
     TAG_LOGI(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
         "UiextensionConstruct, type: %{public}d", type);
     NG::SessionType sessionType = static_cast<NG::SessionType>(type);
+    ACE_UINODE_TRACE(id);
     auto frameNode = NG::UIExtensionStatic::CreateFrameNode(id, sessionType);
     if (frameNode == nullptr) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
@@ -208,6 +209,7 @@ ani_status NativeUiExtension::SetUiextensionOption(
             "frameNode is null when SetUiextensionOption");
         return ANI_ERROR;
     }
+    ACE_UINODE_TRACE(frameNode);
 
     std::string optionClassName =
         "arkui.ani.arkts.ui_extension.ArkUIAniUiextensionModal.ArkUIAniUIExtensionOptions";
@@ -275,6 +277,7 @@ ani_status NativeUiExtension::SetUiextensionWant(
             "frameNode is null when SetUiextensionWant");
         return ANI_ERROR;
     }
+    ACE_UINODE_TRACE(frameNode);
 
     std::string wantClassName =
         "@ohos.app.ability.Want.Want";
@@ -308,6 +311,7 @@ ani_status NativeUiExtension::SetOnResult(
             "frameNode is null when SetOnResult");
         return ANI_ERROR;
     }
+    ACE_UINODE_TRACE(frameNode);
     if (IsNullishObject(env, callbackObj)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnResult callback.");
     #ifdef WINDOW_SCENE_SUPPORTED
@@ -322,7 +326,9 @@ ani_status NativeUiExtension::SetOnResult(
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
     auto onResultAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onResultGlobalRef);
-    auto onResultCallback = [onResultAniReadyCallbackInfo] (int32_t code, const AAFwk::Want& want) {
+    auto onResultCallback = [onResultAniReadyCallbackInfo, node = AceType::WeakClaim(frameNode)] (
+        int32_t code, const AAFwk::Want& want) {
+        ACE_UINODE_TRACE(node);
         if (onResultAniReadyCallbackInfo == nullptr) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
                 "onResultAniReadyCallbackInfo is nullptr");
@@ -374,6 +380,7 @@ ani_status NativeUiExtension::SetOnRelease(
             "frameNode is null when SetOnRelease");
         return ANI_ERROR;
     }
+    ACE_UINODE_TRACE(frameNode);
     if (IsNullishObject(env, callbackObj)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnRelease callback.");
     #ifdef WINDOW_SCENE_SUPPORTED
@@ -388,7 +395,8 @@ ani_status NativeUiExtension::SetOnRelease(
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
     auto onReleaseAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onReleaseGlobalRef);
-    auto onReleaseCallback = [onReleaseAniReadyCallbackInfo] (int32_t code) {
+    auto onReleaseCallback = [onReleaseAniReadyCallbackInfo, node = AceType::WeakClaim(frameNode)] (int32_t code) {
+        ACE_UINODE_TRACE(node);
         if (onReleaseAniReadyCallbackInfo == nullptr) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
                 "onReleaseAniReadyCallbackInfo is nullptr");
@@ -434,6 +442,7 @@ ani_status NativeUiExtension::SetOnDrawReady(
             "frameNode is null when SetOnDrawReady");
         return ANI_ERROR;
     }
+    ACE_UINODE_TRACE(frameNode);
 
     ani_ref onDrawReadyRef = reinterpret_cast<ani_ref>(callbackObj);
     ani_ref onDrawReadyGlobalRef;
@@ -441,7 +450,8 @@ ani_status NativeUiExtension::SetOnDrawReady(
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
     auto onDrawAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onDrawReadyGlobalRef);
-    auto onDrawReadyCallback = [onDrawAniReadyCallbackInfo] () {
+    auto onDrawReadyCallback = [onDrawAniReadyCallbackInfo, node = AceType::WeakClaim(frameNode)] () {
+        ACE_UINODE_TRACE(node);
         if (onDrawAniReadyCallbackInfo == nullptr) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
                 "onDrawAniReadyCallbackInfo is nullptr");
@@ -478,6 +488,7 @@ ani_status NativeUiExtension::SetOnError(
             "frameNode is null when SetOnError");
         return ANI_ERROR;
     }
+    ACE_UINODE_TRACE(frameNode);
     if (IsNullishObject(env, callbackObj)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnError callback.");
     #ifdef WINDOW_SCENE_SUPPORTED
@@ -492,8 +503,9 @@ ani_status NativeUiExtension::SetOnError(
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
     auto onErrorAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onErrorGlobalRef);
-    auto onErrorCallback = [onErrorAniReadyCallbackInfo] (
+    auto onErrorCallback = [onErrorAniReadyCallbackInfo, node = AceType::WeakClaim(frameNode)] (
         int32_t code, const std::string& name, const std::string& message) {
+        ACE_UINODE_TRACE(node);
         if (onErrorAniReadyCallbackInfo == nullptr) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
                 "onErrorAniReadyCallbackInfo is nullptr");
@@ -546,6 +558,7 @@ ani_status NativeUiExtension::SetOnRecive(
             "frameNode is null when SetOnRecive");
         return ANI_ERROR;
     }
+    ACE_UINODE_TRACE(frameNode);
     if (IsNullishObject(env, callbackObj)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnReceive callback.");
     #ifdef WINDOW_SCENE_SUPPORTED
@@ -560,7 +573,9 @@ ani_status NativeUiExtension::SetOnRecive(
     ani_vm* vm = nullptr;
     env->GetVM(&vm);
     auto onReciveAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onReciveGlobalRef);
-    auto onReciveCallback = [onReciveAniReadyCallbackInfo] (const AAFwk::WantParams& params) {
+    auto onReciveCallback = [onReciveAniReadyCallbackInfo, node = AceType::WeakClaim(frameNode)] (
+        const AAFwk::WantParams& params) {
+        ACE_UINODE_TRACE(node);
         if (onReciveAniReadyCallbackInfo == nullptr) {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
                 "onReciveAniReadyCallbackInfo is nullptr");
@@ -606,6 +621,7 @@ ani_status NativeUiExtension::SetOnTerminate(
             "frameNode is null when SetOnTerminate");
         return ANI_ERROR;
     }
+    ACE_UINODE_TRACE(frameNode);
     if (IsNullishObject(env, callbackObj)) {
         TAG_LOGW(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT, "unset the OnTerminated callback.");
     #ifdef WINDOW_SCENE_SUPPORTED
@@ -621,7 +637,9 @@ ani_status NativeUiExtension::SetOnTerminate(
     env->GetVM(&vm);
     auto onTerminateAniReadyCallbackInfo = std::make_shared<AniCallbackInfo>(vm, onTerminateGlobalRef);
     auto onTerminateCallback =
-        [env, onTerminateAniReadyCallbackInfo] (int32_t code, const RefPtr<WantWrap>& wantWrap) {
+        [env, onTerminateAniReadyCallbackInfo, node = AceType::WeakClaim(frameNode)] (
+            int32_t code, const RefPtr<WantWrap>& wantWrap) {
+            ACE_UINODE_TRACE(node);
             if (onTerminateAniReadyCallbackInfo == nullptr) {
                 TAG_LOGE(OHOS::Ace::AceLogTag::ACE_UIEXTENSIONCOMPONENT,
                     "onTerminateAniReadyCallbackInfo is nullptr");
