@@ -4755,13 +4755,13 @@ class ArkComponent {
     return this;
   }
   gesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'gesture not supportted in attributeModifier scenario.');
   }
   priorityGesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'priorityGesture not supportted in attributeModifier scenario.');
   }
   parallelGesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'parallelGesture not supportted in attributeModifier scenario.');
   }
 
   chainMode(direction, style) {
@@ -5349,7 +5349,7 @@ class ArkComponent {
     throw new Error('Method not implemented.');
   }
   stateStyles(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'stateStyles not supportted in attributeModifier scenario.');
   }
   restoreId(value) {
     if (typeof value !== 'number') {
