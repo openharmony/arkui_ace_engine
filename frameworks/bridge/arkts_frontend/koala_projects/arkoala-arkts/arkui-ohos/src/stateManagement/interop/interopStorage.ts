@@ -16,7 +16,7 @@
 import { DecoratedVariableBase } from '../decoratorImpl/decoratorBase';
 import { LocalStorage } from '../storage/localStorage';
 import { StorageBase } from '../storage/storageBase';
-import { SubscribedAbstractProperty } from '../storage/storageProperty';
+import { SubscribedAbstractProperty, AbstractProperty } from '../storage/storageProperty';
 import { StorageProperty } from '../storage/storageBase';
 import { IVariableOwner, WatchFuncType } from '../decorator';
 import { StorageLinkDecoratedVariable } from '../decoratorImpl/decoratorStorageLink';
@@ -293,15 +293,15 @@ export class InteropStorageBase extends StorageBase {
     }
 
     /**
-     *  Create an SubscribedAbstractProperty if property with given name already exists in storage
+     *  Create an AbstractProperty if property with given name already exists in storage
      *
      * @param { string } propName LocalStorage property name
-     * @returns { SubscribedAbstractProperty<T> | undefined } SubscribedAbstractProperty object if aforementioned conditions are
+     * @returns { AbstractProperty<T> | undefined } AbstractProperty object if aforementioned conditions are
      * satisfied.
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public ref<T>(key: string): SubscribedAbstractProperty<T> | undefined {
+    public ref<T>(key: string): AbstractProperty<T> | undefined {
         let value = super.ref<T>(key);
         if (value !== undefined) {
             return value;
@@ -317,9 +317,38 @@ export class InteropStorageBase extends StorageBase {
         }
         const state = interopValue.value as StorageProperty<T>;
         const reference = state.mkRef(key);
+        return reference;
+    }
+
+    /**
+     *  Create an SubscribedAbstractProperty if property with given name already exists in storage
+     *
+     * @param { string } propName LocalStorage property name
+     * @returns { SubscribedAbstractProperty<T> | undefined } SubscribedAbstractProperty object if aforementioned conditions are
+     * satisfied.
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 20
+     */
+    public link<T>(key: string): SubscribedAbstractProperty<T> | undefined {
+        let value = super.link<T>(key);
+        if (value !== undefined) {
+            return value;
+        }
+        // search ArkTS1.1 Storage.
+        let interopValue = this.interopStorage_.get(key);
+        if (interopValue === undefined) {
+            return undefined;
+        }
+        if (!interopValue.value) {
+            // initialize interop value by ArkTS1.1
+            interopValue.value = this.getStoragePropertyFromDynamic<T>(key);
+        }
+        const state = interopValue.value as StorageProperty<T>;
+        const reference = state.mkNewLink(key);
         state.registerWatchToSource(reference);
         return reference;
     }
+
     /**
      * Update value of existing property with given name.
      * update only if new value is assignable to type for this property configured in storage
@@ -388,25 +417,25 @@ export class InteropStorageBase extends StorageBase {
      * case A: if property with given name does not exists in storage, yet:
      * if given defaultValue is assignable to given type, then
      * - create new property with given name in storage
-     * - create a SubscribedAbstractProperty that refers to this storage property
+     * - create a AbstractProperty that refers to this storage property
      *   and return it
      * otherwise create no new property in storage, and return undefined.
      *
      * case B: if property with given name already exists in storage
      * (defaultValue is not used):
      * if given type equals the type configured for this property in storage
-     * - create a SubscribedAbstractProperty that refers to this storage property.
+     * - create a AbstractProperty that refers to this storage property.
      *   and return it.
      * otherwise do not touch the storage property, return undefined.
      *
      * @param { string } propName LocalStorage property name
      * @param { T } defaultValue If property does not exist in LocalStorage,
      *        create it with given default value.
-     * @returns { SubscribedAbstractProperty<T> } SubscribedAbstractProperty object or undefined as defined above
+     * @returns { AbstractProperty<T> } AbstractProperty object or undefined as defined above
      * @syscap SystemCapability.ArkUI.ArkUI.Full
      * @since 20
      */
-    public setAndRef<T>(key: string, defaultValue: T): SubscribedAbstractProperty<T> | undefined {
+    public setAndRef<T>(key: string, defaultValue: T): AbstractProperty<T> | undefined {
         if (!super.has(key)) {
             // search ArkTS1.1 Storage.
             let interopValue = this.interopStorage_.get(key);
@@ -425,10 +454,58 @@ export class InteropStorageBase extends StorageBase {
             }
             const state = interopValue.value as StorageProperty<T>;
             const reference = state.mkRef(key);
-            state.registerWatchToSource(reference);
             return reference;
         }
         const link = super.ref<T>(key);
+        // TODO finalization reg link
+        return link;
+    }
+
+    /**
+     * case A: if property with given name does not exists in storage, yet:
+     * if given defaultValue is assignable to given type, then
+     * - create new property with given name in storage
+     * - create a SubscribedAbstractProperty that refers to this storage property
+     *   and return it
+     * otherwise create no new property in storage, and return undefined.
+     *
+     * case B: if property with given name already exists in storage
+     * (defaultValue is not used):
+     * if given type equals the type configured for this property in storage
+     * - create a SubscribedAbstractProperty that refers to this storage property.
+     *   and return it.
+     * otherwise do not touch the storage property, return undefined.
+     *
+     * @param { string } propName LocalStorage property name
+     * @param { T } defaultValue If property does not exist in LocalStorage,
+     *        create it with given default value.
+     * @returns { SubscribedAbstractProperty<T> } SubscribedAbstractProperty object or undefined as defined above
+     * @syscap SystemCapability.ArkUI.ArkUI.Full
+     * @since 20
+     */
+    public setAndLink<T>(key: string, defaultValue: T): SubscribedAbstractProperty<T> | undefined {
+        if (!super.has(key)) {
+            // search ArkTS1.1 Storage.
+            let interopValue = this.interopStorage_.get(key);
+            if (interopValue === undefined) {
+                // create new entry, set with defaultValue
+                if (!super.createAndSet<T>(key, defaultValue)) {
+                    // creation failed
+                    return undefined;
+                }
+                const link = super.link<T>(key);
+                return link;
+            }
+            if (!interopValue.value) {
+                // initialize interop value by ArkTS1.1
+                interopValue.value = this.getStoragePropertyFromDynamic<T>(key);
+            }
+            const state = interopValue.value as StorageProperty<T>;
+            const reference = state.mkNewLink(key);
+            state.registerWatchToSource(reference);
+            return reference;
+        }
+        const link = super.link<T>(key);
         // TODO finalization reg link
         return link;
     }

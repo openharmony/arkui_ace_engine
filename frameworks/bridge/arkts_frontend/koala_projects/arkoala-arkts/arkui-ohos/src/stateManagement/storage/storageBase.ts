@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { SubscribedAbstractProperty } from './storageProperty';
+import { SubscribedAbstractProperty, AbstractProperty } from './storageProperty';
 import { WatchFuncType, WatchIdType, IDecoratedV1Variable, IVariableOwner } from '../decorator';
 import { DecoratedV1VariableBase, DecoratedVariableBase } from '../decoratorImpl/decoratorBase';
 import { StateDecoratedVariable } from '../decoratorImpl/decoratorState';
@@ -37,7 +37,17 @@ export class StorageProperty<T> extends StateDecoratedVariable<T> implements IDe
         super(undefined, propName, initValue);
     }
 
-    public mkRef(propertyNameInAppStorage: string): SubscribedAbstractProperty<T> {
+    public mkRef(propertyNameInAppStorage: string): AbstractProperty<T> {
+        const get = (): T => {
+            return this.get() as T;
+        };
+        const set = (newValue: T): void => {
+            this.set(newValue);
+        };
+        return new AbstractProperty<T>(propertyNameInAppStorage, get, set, this);
+    }
+
+    public mkNewLink(propertyNameInAppStorage: string): SubscribedAbstractProperty<T> {
         const get = (): T => {
             return this.get() as T;
         };
@@ -132,14 +142,23 @@ export class StorageBase {
         return storageProperty.get();
     }
 
-    public ref<T>(key: string): SubscribedAbstractProperty<T> | undefined {
+    public ref<T>(key: string): AbstractProperty<T> | undefined {
         const sp = this.repoAllTypes.get(key);
         if (sp === undefined) {
             return undefined;
         }
         const storageProperty = sp as StorageProperty<T>;
         const ap = storageProperty.mkRef(key);
+        return ap;
+    }
 
+    public link<T>(key: string): SubscribedAbstractProperty<T> | undefined {
+        const sp = this.repoAllTypes.get(key);
+        if (sp === undefined) {
+            return undefined;
+        }
+        const storageProperty = sp as StorageProperty<T>;
+        const ap = storageProperty.mkNewLink(key);
         storageProperty.registerWatchToStorageSource(ap);
         return ap;
     }
