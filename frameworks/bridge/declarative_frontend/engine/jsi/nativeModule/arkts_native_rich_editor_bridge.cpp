@@ -986,6 +986,7 @@ void ParsePlaceholderStyle(EcmaVM* vm, const Local<JSValueRef>& styleArg, Placeh
         Color fontColor;
         auto richEditorTheme = pipeline->GetTheme<OHOS::Ace::NG::RichEditorTheme>();
         options.fontColor = richEditorTheme ? richEditorTheme->GetPlaceholderColor() : fontColor;
+        resObj.Reset();
     }
 }
 
