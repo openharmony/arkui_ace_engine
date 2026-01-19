@@ -1472,8 +1472,8 @@ bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue
     return ParseJsMedia(vm, jsValue, result, resourceObject);
 }
 
-bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result,
-    RefPtr<ResourceObject>& resourceObject)
+bool ArkTSUtils::ParseJsMedia(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+    RefPtr<ResourceObject>& resourceObject, bool isJsView)
 {
     if (!jsValue->IsObject(vm) && !jsValue->IsString(vm)) {
         return false;
@@ -1490,13 +1490,13 @@ bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue
         if (!resId->IsNumber()) {
             return false;
         }
-        return ParseJsMediaFromResource(vm, jsValue, result, resourceObject);
+        return ParseJsMediaFromResource(vm, jsValue, result, resourceObject, isJsView);
     }
     return false;
 }
 
-bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result,
-    RefPtr<ResourceObject>& resourceObject)
+bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+    RefPtr<ResourceObject>& resourceObject, bool isJsView)
 {
     auto jsObj = jsValue->ToObject(vm);
     auto type = jsObj->Get(vm,
@@ -1542,6 +1542,10 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
         }
         if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
             result = resourceWrapper->GetMediaPath(resId->Uint32Value(vm));
+            return true;
+        }
+        if (isJsView && resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
+            result = resourceWrapper->GetString(resId->Int32Value(vm));
             return true;
         }
         return false;

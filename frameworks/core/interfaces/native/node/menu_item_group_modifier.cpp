@@ -33,13 +33,6 @@ void SetMenuItemGroupHeaderNode(ArkUINodeHandle node, ArkUINodeHandle headerNode
     MenuItemGroupView::SetHeader(frameNode, header);
 }
 
-void SetMenuItemGroupHeader(ArkUINodeHandle node, ArkUI_CharPtr value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    MenuItemGroupView::SetHeader(frameNode, value);
-}
-
 void SetMenuItemGroupHeaderStrRes(ArkUINodeHandle node, ArkUI_CharPtr value, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -64,13 +57,6 @@ void SetMenuItemGroupFooterNode(ArkUINodeHandle node, ArkUINodeHandle footerNode
     auto* footerUINode = reinterpret_cast<UINode*>(footerNode);
     RefPtr<UINode> footer = AceType::Claim(footerUINode);
     MenuItemGroupView::SetFooter(frameNode, footer);
-}
-
-void SetMenuItemGroupFooter(ArkUINodeHandle node, ArkUI_CharPtr value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    MenuItemGroupView::SetFooter(frameNode, value);
 }
 
 void SetMenuItemGroupFooterStrRes(ArkUINodeHandle node, ArkUI_CharPtr value, void* resRawPtr)

@@ -158,10 +158,10 @@ public:
     static bool ParseJsDimensionVpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         RefPtr<ResourceObject>& resourceObject, bool isSupportPercent = true);
     static bool ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result);
-    static bool ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result,
-        RefPtr<ResourceObject>& resourceObject);
-    static bool ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result,
-        RefPtr<ResourceObject>& resourceObject);
+    static bool ParseJsMedia(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+        RefPtr<ResourceObject>& resourceObject, bool isJsView = false);
+    static bool ParseJsMediaFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+        RefPtr<ResourceObject>& resourceObject, bool isJsView = false);
     static bool ParseResourceToDouble(const EcmaVM* vm, const Local<JSValueRef>& jsValue, double& result,
         RefPtr<ResourceObject>& resourceObject);
     static bool ParseJsIntegerArray(const EcmaVM* vm, Local<JSValueRef> values, std::vector<uint32_t>& result);
