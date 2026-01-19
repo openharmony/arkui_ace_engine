@@ -921,6 +921,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._navBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._navBarWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._navBarWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -932,6 +933,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._navBarPosition_0_flag = AttributeUpdaterFlag.UPDATE
             this._navBarPosition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._navBarPosition_0_flag = AttributeUpdaterFlag.SKIP
@@ -943,6 +945,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._navBarWidthRange_0_flag = AttributeUpdaterFlag.UPDATE
             this._navBarWidthRange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._navBarWidthRange_0_flag = AttributeUpdaterFlag.SKIP
@@ -954,6 +957,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._minContentWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._minContentWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._minContentWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -965,6 +969,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._mode_0_flag = AttributeUpdaterFlag.UPDATE
             this._mode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._mode_0_flag = AttributeUpdaterFlag.SKIP
@@ -976,6 +981,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._hideNavBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._hideNavBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._hideNavBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -987,6 +993,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._hideTitleBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._hideTitleBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._hideTitleBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -998,6 +1005,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._hideBackButton_0_flag = AttributeUpdaterFlag.UPDATE
             this._hideBackButton_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._hideBackButton_0_flag = AttributeUpdaterFlag.SKIP
@@ -1009,6 +1017,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._titleMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._titleMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._titleMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1020,6 +1029,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._hideToolBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._hideToolBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._hideToolBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -1031,6 +1041,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._enableToolBarAdaptation_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableToolBarAdaptation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableToolBarAdaptation_0_flag = AttributeUpdaterFlag.SKIP
@@ -1042,6 +1053,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._onTitleModeChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onTitleModeChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onTitleModeChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1053,6 +1065,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._onNavBarStateChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onNavBarStateChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onNavBarStateChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1064,6 +1077,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._onNavigationModeChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onNavigationModeChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onNavigationModeChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1075,6 +1089,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._customNavContentTransition_0_flag = AttributeUpdaterFlag.UPDATE
             this._customNavContentTransition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._customNavContentTransition_0_flag = AttributeUpdaterFlag.SKIP
@@ -1086,6 +1101,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._systemBarStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._systemBarStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._systemBarStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -1097,6 +1113,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._recoverable_0_flag = AttributeUpdaterFlag.UPDATE
             this._recoverable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._recoverable_0_flag = AttributeUpdaterFlag.SKIP
@@ -1108,6 +1125,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._enableDragBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableDragBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableDragBar_0_flag = AttributeUpdaterFlag.SKIP
@@ -1119,6 +1137,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
         {
             this._enableModeChangeAnimation_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableModeChangeAnimation_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableModeChangeAnimation_0_flag = AttributeUpdaterFlag.SKIP
@@ -1131,6 +1150,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
             this._backButtonIcon_0_flag = AttributeUpdaterFlag.UPDATE
             this._backButtonIcon_0_0value = icon
             this._backButtonIcon_0_1value = accessibilityText
+            this._state.fireChange()
         } else
         {
             this._backButtonIcon_0_flag = AttributeUpdaterFlag.SKIP
@@ -1143,6 +1163,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
             this._title_0_flag = AttributeUpdaterFlag.UPDATE
             this._title_0_0value = value
             this._title_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._title_0_flag = AttributeUpdaterFlag.SKIP
@@ -1155,6 +1176,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
             this._hideTitleBar_1_flag = AttributeUpdaterFlag.UPDATE
             this._hideTitleBar_1_0value = hide
             this._hideTitleBar_1_1value = animated
+            this._state.fireChange()
         } else
         {
             this._hideTitleBar_1_flag = AttributeUpdaterFlag.SKIP
@@ -1167,6 +1189,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
             this._menus_0_flag = AttributeUpdaterFlag.UPDATE
             this._menus_0_0value = items
             this._menus_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._menus_0_flag = AttributeUpdaterFlag.SKIP
@@ -1179,6 +1202,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
             this._toolbarConfiguration_0_flag = AttributeUpdaterFlag.UPDATE
             this._toolbarConfiguration_0_0value = value
             this._toolbarConfiguration_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._toolbarConfiguration_0_flag = AttributeUpdaterFlag.SKIP
@@ -1191,6 +1215,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
             this._hideToolBar_1_flag = AttributeUpdaterFlag.UPDATE
             this._hideToolBar_1_0value = hide
             this._hideToolBar_1_1value = animated
+            this._state.fireChange()
         } else
         {
             this._hideToolBar_1_flag = AttributeUpdaterFlag.SKIP
@@ -1203,6 +1228,7 @@ export class NavigationModifier extends CommonMethodModifier implements Navigati
             this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.UPDATE
             this._ignoreLayoutSafeArea_0_0value = types
             this._ignoreLayoutSafeArea_0_1value = edges
+            this._state.fireChange()
         } else
         {
             this._ignoreLayoutSafeArea_0_flag = AttributeUpdaterFlag.SKIP

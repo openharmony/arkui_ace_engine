@@ -1129,6 +1129,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._animationCurve_0_flag = AttributeUpdaterFlag.UPDATE
             this._animationCurve_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._animationCurve_0_flag = AttributeUpdaterFlag.SKIP
@@ -1380,6 +1381,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         {
             this._onContentDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onContentDidScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onContentDidScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1417,6 +1419,7 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
             this._barHeight_1_flag = AttributeUpdaterFlag.UPDATE
             this._barHeight_1_0value = height
             this._barHeight_1_1value = noMinHeightLimit
+            this._state.fireChange()
         } else
         {
             this._barHeight_1_flag = AttributeUpdaterFlag.SKIP
