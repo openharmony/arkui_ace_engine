@@ -101,6 +101,7 @@ const GENERATED_ArkUIContainerSpanModifier* GetContainerSpanModifier();
 const GENERATED_ArkUICounterModifier* GetCounterModifier();
 const GENERATED_ArkUICustomBuilderRootModifier* GetCustomBuilderRootModifier();
 const GENERATED_ArkUICustomLayoutRootModifier* GetCustomLayoutRootModifier();
+const GENERATED_ArkUIDataPanelExtenderAccessor* GetDataPanelExtenderAccessor();
 const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier();
 const GENERATED_ArkUIDatePickerModifier* GetDatePickerModifier();
 const GENERATED_ArkUIDividerModifier* GetDividerModifier();
@@ -583,6 +584,7 @@ const GENERATED_ArkUIAccessors* GENERATED_GetArkUIAccessors()
         GetCustomDialogControllerExtenderAccessor,
         GetCustomSpanAccessor,
         GetCutEventAccessor,
+        GetDataPanelExtenderAccessor,
         GetDataResubmissionHandlerAccessor,
         GetDatePickerDialogAccessor,
         GetDecorationStyleAccessor,

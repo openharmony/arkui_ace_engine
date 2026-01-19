@@ -56,7 +56,7 @@ import { InteropNativeModule } from "@koalaui/interop"
 import { ErrorCallback } from "@ohos.base";
 import { NavPathStack, NavigationModuleInfo, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent } from "../component/navigation"
 import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
-import { PageMapBuilder } from "../component/builder";
+import { CustomBuilder, PageMapBuilder } from '../component/builder';
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
 import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkImagePeer, ImageErrorCallback, ArkTabsComponent } from "#generated";
 import { ArkWaterFlowComponent, WaterFlowOptions } from '#generated';
@@ -87,8 +87,8 @@ import { WebHandWritten } from "./WebHandWritten";
 import { ArkSaveButtonComponent, ArkSaveButtonPeer, SaveButtonCallback, ArkPasteButtonComponent, ArkPasteButtonPeer, PasteButtonCallback } from '#generated';
 import { SaveButtonOpsHandWritten } from './SaveButtonOpsHandWritten';
 import { PasteButtonOpsHandWritten } from './PasteButtonOpsHandWritten';
-import { ArkGaugeComponent, ArkGaugePeer, GaugeIndicatorOptions } from "#generated";
-import { GaugeExtender } from "#generated"
+import { ArkDataPanelComponent, ArkDataPanelPeer, DataPanelShadowOptions, ArkGaugeComponent, ArkGaugePeer, GaugeIndicatorOptions, GaugeShadowOptions } from '#generated';
+import { DataPanelExtender, GaugeExtender } from '#generated';
 
 export function hookId(component: object, value?: string) {}
 
@@ -847,20 +847,65 @@ export function hookGaugeIndicator(receiver: ArkGaugeComponent | ArkGaugePeer,
   const gaugePeer: ArkGaugePeer =
     receiver instanceof ArkGaugeComponent ? (receiver as ArkGaugeComponent).getPeer() :
       (receiver as ArkGaugePeer);
-  if (!gaugePeer) {
+  if (!gaugePeer || !gaugePeer.peer || !gaugePeer.peer.ptr) {
     return;
   }
 
   let value_casted: GaugeIndicatorOptions | undefined;
-  if (value === undefined) {
-    value_casted = {
-      icon: undefined,
-      space: undefined
-    }
-  } else if (value === null) {
-    value_casted = undefined;
+  if (value === null) {
+    GaugeExtender.nullIndicator(gaugePeer.peer.ptr);
   } else {
-    value_casted = value as (GaugeIndicatorOptions | undefined)
+    GaugeExtender.setIndicator(gaugePeer.peer.ptr, value);
   }
-  GaugeExtender.setIndicator(gaugePeer.peer.ptr, value_casted)
+}
+
+export function hookGaugeTrackShadow(receiver: ArkGaugeComponent | ArkGaugePeer,
+  value: GaugeShadowOptions | null | undefined): void {
+
+  const gaugePeer: ArkGaugePeer =
+    receiver instanceof ArkGaugeComponent ? (receiver as ArkGaugeComponent).getPeer() :
+      (receiver as ArkGaugePeer);
+  if (!gaugePeer || !gaugePeer.peer || !gaugePeer.peer.ptr) {
+    return;
+  }
+
+  if (value === null) {
+    GaugeExtender.nullTrackShadow(gaugePeer.peer.ptr);
+  } else {
+    GaugeExtender.setTrackShadow(gaugePeer.peer.ptr, value);
+  }
+}
+
+export function hookGaugeDescription(receiver: ArkGaugeComponent | ArkGaugePeer,
+  value: CustomBuilder | null | undefined): void {
+
+  const gaugePeer: ArkGaugePeer =
+    receiver instanceof ArkGaugeComponent ? (receiver as ArkGaugeComponent).getPeer() :
+      (receiver as ArkGaugePeer);
+  if (!gaugePeer || !gaugePeer.peer || !gaugePeer.peer.ptr) {
+    return;
+  }
+
+  if (value === null) {
+    GaugeExtender.nullDescription(gaugePeer.peer.ptr);
+  } else {
+    GaugeExtender.setDescription(gaugePeer.peer.ptr, value)
+  }
+}
+
+export function hookDataPanelTrackShadow(receiver: ArkDataPanelComponent | ArkDataPanelPeer,
+  value: DataPanelShadowOptions | null | undefined): void {
+
+  const dataPanelPeer: ArkDataPanelPeer =
+    receiver instanceof ArkDataPanelComponent ? (receiver as ArkDataPanelComponent).getPeer() :
+      (receiver as ArkDataPanelPeer);
+  if (!dataPanelPeer || !dataPanelPeer.peer || !dataPanelPeer.peer.ptr) {
+    return;
+  }
+
+  if (value === null) {
+    DataPanelExtender.nullTrackShadow(dataPanelPeer.peer.ptr);
+  } else {
+    DataPanelExtender.setTrackShadow(dataPanelPeer.peer.ptr, value);
+  }
 }

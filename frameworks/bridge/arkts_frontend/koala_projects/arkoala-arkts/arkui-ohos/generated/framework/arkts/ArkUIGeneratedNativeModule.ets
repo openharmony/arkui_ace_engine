@@ -773,8 +773,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _DataPanelAttribute_setStrokeWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _DataPanelAttribute_setTrackShadow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _DatePicker_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _DatePickerInterface_setDatePickerOptions(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -888,10 +886,6 @@ export class ArkUIGeneratedNativeModule {
     native static _GaugeAttribute_setColors(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _GaugeAttribute_setStrokeWidth(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _GaugeAttribute_setDescription(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
-    native static _GaugeAttribute_setTrackShadow(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _GaugeAttribute_setPrivacySensitive(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
@@ -4208,6 +4202,10 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _CutEvent_preventDefault(ptr: KPointer): void
     @ani.unsafe.Direct
+    native static _DataPanelExtender_setTrackShadow(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _DataPanelExtender_nullTrackShadow(node: KPointer): void
+    @ani.unsafe.Direct
     native static _DataResubmissionHandler_construct(): KPointer
     @ani.unsafe.Direct
     native static _DataResubmissionHandler_getFinalizer(): KPointer
@@ -4621,6 +4619,16 @@ export class ArkUIGeneratedNativeModule {
     native static _FullScreenExitHandler_exitFullScreen(ptr: KPointer): void
     @ani.unsafe.Direct
     native static _GaugeExtender_setIndicator(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _GaugeExtender_nullIndicator(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _GaugeExtender_setTrackShadow(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _GaugeExtender_nullTrackShadow(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _GaugeExtender_setDescription(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _GaugeExtender_nullDescription(node: KPointer): void
     @ani.unsafe.Direct
     native static _GestureEvent_construct(): KPointer
     @ani.unsafe.Direct

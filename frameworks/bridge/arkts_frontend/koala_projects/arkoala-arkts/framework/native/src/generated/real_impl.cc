@@ -9225,7 +9225,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DataPanelAttributeModifier::SetValueColorsImpl,
             DataPanelAttributeModifier::SetTrackBackgroundColorImpl,
             DataPanelAttributeModifier::SetStrokeWidthImpl,
-            DataPanelAttributeModifier::SetTrackShadowImpl,
         };
         return &ArkUIDataPanelModifierImpl;
     }
@@ -9360,8 +9359,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GaugeAttributeModifier::SetEndAngleImpl,
             GaugeAttributeModifier::SetColorsImpl,
             GaugeAttributeModifier::SetStrokeWidthImpl,
-            GaugeAttributeModifier::SetDescriptionImpl,
-            GaugeAttributeModifier::SetTrackShadowImpl,
             GaugeAttributeModifier::SetPrivacySensitiveImpl,
         };
         return &ArkUIGaugeModifierImpl;
@@ -13475,6 +13472,19 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // CutEventAccessor
+    namespace DataPanelExtenderAccessor {
+    void SetTrackShadowImpl(Ark_NativePointer node,
+                            const Opt_DataPanelShadowOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void NullTrackShadowImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    } // DataPanelExtenderAccessor
     namespace DataResubmissionHandlerAccessor {
     void DestroyPeerImpl(Ark_DataResubmissionHandler peer)
     {
@@ -14405,6 +14415,33 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     namespace GaugeExtenderAccessor {
     void SetIndicatorImpl(Ark_NativePointer node,
                           const Opt_GaugeIndicatorOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void NullIndicatorImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void SetTrackShadowImpl(Ark_NativePointer node,
+                            const Opt_GaugeShadowOptions* options)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void NullTrackShadowImpl(Ark_NativePointer node)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void SetDescriptionImpl(Ark_NativePointer node,
+                            const Opt_CustomNodeBuilder* builder)
+    {
+        auto frameNode = reinterpret_cast<FrameNode *>(node);
+        CHECK_NULL_VOID(frameNode);
+    }
+    void NullDescriptionImpl(Ark_NativePointer node)
     {
         auto frameNode = reinterpret_cast<FrameNode *>(node);
         CHECK_NULL_VOID(frameNode);
@@ -21336,6 +21373,15 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct CutEventPeer {
         virtual ~CutEventPeer() = default;
     };
+    const GENERATED_ArkUIDataPanelExtenderAccessor* GetDataPanelExtenderAccessor()
+    {
+        static const GENERATED_ArkUIDataPanelExtenderAccessor DataPanelExtenderAccessorImpl {
+            DataPanelExtenderAccessor::SetTrackShadowImpl,
+            DataPanelExtenderAccessor::NullTrackShadowImpl,
+        };
+        return &DataPanelExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIDataResubmissionHandlerAccessor* GetDataResubmissionHandlerAccessor()
     {
         static const GENERATED_ArkUIDataResubmissionHandlerAccessor DataResubmissionHandlerAccessorImpl {
@@ -21750,6 +21796,11 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         static const GENERATED_ArkUIGaugeExtenderAccessor GaugeExtenderAccessorImpl {
             GaugeExtenderAccessor::SetIndicatorImpl,
+            GaugeExtenderAccessor::NullIndicatorImpl,
+            GaugeExtenderAccessor::SetTrackShadowImpl,
+            GaugeExtenderAccessor::NullTrackShadowImpl,
+            GaugeExtenderAccessor::SetDescriptionImpl,
+            GaugeExtenderAccessor::NullDescriptionImpl,
         };
         return &GaugeExtenderAccessorImpl;
     }
@@ -24503,6 +24554,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetCustomDialogControllerExtenderAccessor,
             GetCustomSpanAccessor,
             GetCutEventAccessor,
+            GetDataPanelExtenderAccessor,
             GetDataResubmissionHandlerAccessor,
             GetDatePickerDialogAccessor,
             GetDecorationStyleAccessor,

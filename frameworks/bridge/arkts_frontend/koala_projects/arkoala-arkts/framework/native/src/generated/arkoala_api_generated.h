@@ -24572,8 +24572,6 @@ typedef struct GENERATED_ArkUIDataPanelModifier {
                                     const Opt_ResourceColor* value);
     void (*setStrokeWidth)(Ark_NativePointer node,
                            const Opt_Length* value);
-    void (*setTrackShadow)(Ark_NativePointer node,
-                           const Opt_DataPanelShadowOptions* value);
 } GENERATED_ArkUIDataPanelModifier;
 
 typedef struct GENERATED_ArkUIDatePickerModifier {
@@ -24720,10 +24718,6 @@ typedef struct GENERATED_ArkUIGaugeModifier {
                       const Opt_Union_ResourceColor_LinearGradient_Array_Tuple_Union_ResourceColor_LinearGradient_F64* value);
     void (*setStrokeWidth)(Ark_NativePointer node,
                            const Opt_Length* value);
-    void (*setDescription)(Ark_NativePointer node,
-                           const Opt_CustomNodeBuilder* value);
-    void (*setTrackShadow)(Ark_NativePointer node,
-                           const Opt_GaugeShadowOptions* value);
     void (*setPrivacySensitive)(Ark_NativePointer node,
                                 const Opt_Boolean* value);
 } GENERATED_ArkUIGaugeModifier;
@@ -28471,6 +28465,12 @@ typedef struct GENERATED_ArkUICutEventAccessor {
     void (*preventDefault)(Ark_CutEvent peer);
 } GENERATED_ArkUICutEventAccessor;
 
+typedef struct GENERATED_ArkUIDataPanelExtenderAccessor {
+    void (*setTrackShadow)(Ark_NativePointer node,
+                           const Opt_DataPanelShadowOptions* options);
+    void (*nullTrackShadow)(Ark_NativePointer node);
+} GENERATED_ArkUIDataPanelExtenderAccessor;
+
 typedef struct GENERATED_ArkUIDataResubmissionHandlerAccessor {
     void (*destroyPeer)(Ark_DataResubmissionHandler peer);
     Ark_DataResubmissionHandler (*construct)();
@@ -28845,7 +28845,14 @@ typedef struct GENERATED_ArkUIFullScreenExitHandlerAccessor {
 
 typedef struct GENERATED_ArkUIGaugeExtenderAccessor {
     void (*setIndicator)(Ark_NativePointer node,
-                       const Opt_GaugeIndicatorOptions* options);
+                         const Opt_GaugeIndicatorOptions* options);
+    void (*nullIndicator)(Ark_NativePointer node);
+    void (*setTrackShadow)(Ark_NativePointer node,
+                           const Opt_GaugeShadowOptions* options);
+    void (*nullTrackShadow)(Ark_NativePointer node);
+    void (*setDescription)(Ark_NativePointer node,
+                           const Opt_CustomNodeBuilder* builder);
+    void (*nullDescription)(Ark_NativePointer node);
 } GENERATED_ArkUIGaugeExtenderAccessor;
 
 typedef struct GENERATED_ArkUIGestureEventAccessor {
@@ -31576,6 +31583,7 @@ typedef struct GENERATED_ArkUIAccessors {
     const GENERATED_ArkUICustomDialogControllerExtenderAccessor* (*getCustomDialogControllerExtenderAccessor)();
     const GENERATED_ArkUICustomSpanAccessor* (*getCustomSpanAccessor)();
     const GENERATED_ArkUICutEventAccessor* (*getCutEventAccessor)();
+    const GENERATED_ArkUIDataPanelExtenderAccessor* (*getDataPanelExtenderAccessor)();
     const GENERATED_ArkUIDataResubmissionHandlerAccessor* (*getDataResubmissionHandlerAccessor)();
     const GENERATED_ArkUIDatePickerDialogAccessor* (*getDatePickerDialogAccessor)();
     const GENERATED_ArkUIDecorationStyleAccessor* (*getDecorationStyleAccessor)();

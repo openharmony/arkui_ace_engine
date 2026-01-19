@@ -239,28 +239,6 @@ void SetStrokeWidthImpl(Ark_NativePointer node, const Opt_Length* value)
     Validator::ValidateNonPercent(strokeWidth);
     GaugeModelStatic::SetGaugeStrokeWidth(frameNode, strokeWidth);
 }
-void SetDescriptionImpl(Ark_NativePointer node, const Opt_CustomNodeBuilder* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto optValue = Converter::GetOptPtr(value);
-    if (!optValue) {
-        GaugeModelStatic::ReSetDescription(frameNode);
-        return;
-    }
-    CallbackHelper(*optValue).BuildAsync(
-        [frameNode](const RefPtr<UINode>& uiNode) { GaugeModelStatic::SetDescription(frameNode, uiNode); }, node);
-}
-void SetTrackShadowImpl(Ark_NativePointer node, const Opt_GaugeShadowOptions* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<GaugeShadowOptions>(value);
-    GaugeShadowOptions defaultOptions;
-    defaultOptions.isShadowVisible = false;
-    auto shadow = convValue.value_or(defaultOptions);
-    GaugeModelNG::SetShadowOptions(frameNode, shadow);
-}
 void SetPrivacySensitiveImpl(Ark_NativePointer node, const Opt_Boolean* value)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -309,7 +287,6 @@ void SetIndicatorImpl(Ark_NativePointer node, const Opt_GaugeIndicatorOptions* v
     CHECK_NULL_VOID(frameNode);
     auto indicator = Converter::OptConvertPtr<Converter::GaugeIndicatorOptions>(value);
     if (indicator) {
-        GaugeModelNG::SetIsShowIndicator(frameNode, true);
         if (indicator->icon) {
             GaugeModelNG::SetIndicatorIconPath(frameNode, indicator->icon->GetSrc(), indicator->icon->GetBundleName(),
                 indicator->icon->GetModuleName());
@@ -320,8 +297,62 @@ void SetIndicatorImpl(Ark_NativePointer node, const Opt_GaugeIndicatorOptions* v
         Validator::ValidateNonPercent(indicator->space);
         GaugeModelStatic::SetIndicatorSpace(frameNode, indicator->space);
     } else {
-        GaugeModelNG::SetIsShowIndicator(frameNode, false);
+        GaugeModelNG::ResetIndicatorIconPath(frameNode);
+        GaugeModelNG::ResetIndicatorSpace(frameNode);
     }
+    GaugeModelNG::SetIsShowIndicator(frameNode, true);
+}
+
+void NullIndicatorImpl(Ark_NativePointer node)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GaugeModelNG::SetIsShowIndicator(frameNode, false);
+}
+
+void SetDescriptionImpl(Ark_NativePointer node, const Opt_CustomNodeBuilder* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        GaugeModelNG::SetIsShowLimitValue(frameNode, true);
+        GaugeModelNG::SetIsShowDescription(frameNode, false);
+        return;
+    }
+    CallbackHelper(*optValue).BuildAsync(
+        [frameNode](const RefPtr<UINode>& uiNode) {
+            GaugeModelStatic::SetDescription(frameNode, uiNode);
+            GaugeModelNG::SetIsShowLimitValue(frameNode, false);
+            GaugeModelNG::SetIsShowDescription(frameNode, true);
+        }, node);
+}
+
+void NullDescriptionImpl(Ark_NativePointer node)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GaugeModelNG::SetIsShowLimitValue(frameNode, false);
+    GaugeModelNG::SetIsShowDescription(frameNode, false);
+}
+
+void SetTrackShadowImpl(Ark_NativePointer node, const Opt_GaugeShadowOptions* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<GaugeShadowOptions>(value);
+    GaugeShadowOptions defaultOptions;
+    auto shadow = convValue.value_or(defaultOptions);
+    GaugeModelNG::SetShadowOptions(frameNode, shadow);
+}
+
+void NullTrackShadowImpl(Ark_NativePointer node)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    GaugeShadowOptions shadow;
+    shadow.isShadowVisible = false;
+    GaugeModelNG::SetShadowOptions(frameNode, shadow);
 }
 
 const GENERATED_ArkUIGaugeModifier* GetGaugeStaticModifier()
@@ -334,8 +365,6 @@ const GENERATED_ArkUIGaugeModifier* GetGaugeStaticModifier()
         GaugeAttributeModifier::SetEndAngleImpl,
         GaugeAttributeModifier::SetColorsImpl,
         GaugeAttributeModifier::SetStrokeWidthImpl,
-        GaugeAttributeModifier::SetDescriptionImpl,
-        GaugeAttributeModifier::SetTrackShadowImpl,
         GaugeAttributeModifier::SetPrivacySensitiveImpl,
     };
     return &ArkUIGaugeModifierImpl;
@@ -350,7 +379,14 @@ const GENERATED_ArkUIGaugeContentModifier* GetGaugeStaticContentModifier()
 
 const GENERATED_ArkUIGaugeExtenderAccessor* GetGaugeStaticExtenderAccessor()
 {
-    static const GENERATED_ArkUIGaugeExtenderAccessor GaugeExtenderAccessorImpl { SetIndicatorImpl };
+    static const GENERATED_ArkUIGaugeExtenderAccessor GaugeExtenderAccessorImpl {
+        SetIndicatorImpl,
+        NullIndicatorImpl,
+        SetTrackShadowImpl,
+        NullTrackShadowImpl,
+        SetDescriptionImpl,
+        NullDescriptionImpl
+    };
     return &GaugeExtenderAccessorImpl;
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier

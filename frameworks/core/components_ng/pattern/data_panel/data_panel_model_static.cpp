@@ -100,4 +100,18 @@ void DataPanelModelStatic::SetType(FrameNode* frameNode, const std::optional<int
         ACE_RESET_NODE_PAINT_PROPERTY(DataPanelPaintProperty, DataPanelType, frameNode);
     }
 }
+
+Gradient DataPanelModelStatic::CreateSolidGradient(Color value)
+{
+    Gradient gradient;
+    GradientColor gradientColorBegin;
+    gradientColorBegin.SetLinearColor(LinearColor(value));
+    gradientColorBegin.SetDimension(Dimension(0.0));
+    gradient.AddColor(gradientColorBegin);
+    OHOS::Ace::NG::GradientColor gradientColorEnd;
+    gradientColorEnd.SetLinearColor(LinearColor(value));
+    gradientColorEnd.SetDimension(Dimension(1.0));
+    gradient.AddColor(gradientColorEnd);
+    return gradient;
+}
 } // namespace OHOS::Ace::NG
