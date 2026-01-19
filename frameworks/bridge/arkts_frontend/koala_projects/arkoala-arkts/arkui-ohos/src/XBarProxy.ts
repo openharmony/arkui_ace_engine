@@ -97,7 +97,7 @@ export function createXBarCustomComponent<T extends CustomComponent<T, T_Options
             if (!reflectedType || !reflectedType.getStaticMethod("_invoke")) {
                 throw new Error("Required method or type is missing");
             }
-            let invokeArgs: FixedArray<Any> = new Any[7];
+            let invokeArgs: FixedArray<Any> = new FixedArray<Any>(7);
             invokeArgs[0] = __context();
             invokeArgs[1] = __id();
             invokeArgs[2] = /** @memo */(instance: T) => { componentInstance = instance; };
