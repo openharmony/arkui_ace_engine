@@ -9138,6 +9138,19 @@ void impl_ImageAttribute_setContentTransition(Ark_NativePointer thisPtr, KSerial
         GetNodeModifiers()->getImageModifier()->setContentTransition(self, static_cast<Opt_ContentTransitionEffect*>(&valueValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(ImageAttribute_setContentTransition, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_ImageAttribute_setAntialiased(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getImageModifier()->setAntialiased(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(ImageAttribute_setAntialiased, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_ImageAnimator_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getImageAnimatorModifier()->construct(id, flags);
 }

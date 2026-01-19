@@ -24919,6 +24919,8 @@ typedef struct GENERATED_ArkUIImageModifier {
                            const Opt_Boolean* value);
     void (*setContentTransition)(Ark_NativePointer node,
                                  const Opt_ContentTransitionEffect* value);
+    void (*setAntialiased)(Ark_NativePointer node,
+                           const Opt_Boolean* value);
 } GENERATED_ArkUIImageModifier;
 
 typedef struct GENERATED_ArkUIImageAnimatorModifier {

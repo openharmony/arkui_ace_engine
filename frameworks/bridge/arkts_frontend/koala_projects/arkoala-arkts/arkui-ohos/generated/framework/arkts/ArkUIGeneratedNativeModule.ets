@@ -1075,6 +1075,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _ImageAttribute_setContentTransition(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _ImageAttribute_setAntialiased(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _ImageAnimator_construct(id: KInt, flags: KInt): KPointer
     @ani.unsafe.Direct
     native static _ImageAnimatorInterface_setImageAnimatorOptions(ptr: KPointer): void

@@ -7667,6 +7667,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetAntialiasedImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setAntialiased(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     } // ImageAttributeModifier
     namespace ImageAnimatorModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -23698,6 +23710,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ImageAttributeModifier::SetOrientationImpl,
             ImageAttributeModifier::SetSupportSvg2Impl,
             ImageAttributeModifier::SetContentTransitionImpl,
+            ImageAttributeModifier::SetAntialiasedImpl,
         };
         return &ArkUIImageModifierImpl;
     }

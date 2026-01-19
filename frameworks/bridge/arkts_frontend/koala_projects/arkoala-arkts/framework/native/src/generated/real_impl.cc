@@ -3374,6 +3374,10 @@ namespace OHOS::Ace::NG::GeneratedModifier {
                                   const Opt_ContentTransitionEffect* value)
     {
     }
+    void SetAntialiasedImpl(Ark_NativePointer node,
+                            const Opt_Boolean* value)
+    {
+    }
     } // ImageAttributeModifier
     namespace ImageAnimatorModifier {
     Ark_NativePointer ConstructImpl(Ark_Int32 id,
@@ -9490,6 +9494,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ImageAttributeModifier::SetOrientationImpl,
             ImageAttributeModifier::SetSupportSvg2Impl,
             ImageAttributeModifier::SetContentTransitionImpl,
+            ImageAttributeModifier::SetAntialiasedImpl,
         };
         return &ArkUIImageModifierImpl;
     }

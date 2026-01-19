@@ -192,6 +192,11 @@ export class ArkImageNode extends ArkBaseNode implements ImageAttribute {
         this.markDirty()
         return this
     }
+    public antialiased(value: boolean | undefined): this {
+        this.component.antialiased(value)
+        this.markDirty()
+        return this
+    }
     public markDirty(): void {
         // we call this function outside of class, so need to make it public
         super.markDirty()

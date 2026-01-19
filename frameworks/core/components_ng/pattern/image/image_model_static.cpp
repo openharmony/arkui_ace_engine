@@ -182,6 +182,16 @@ void ImageModelStatic::SetContentTransition(FrameNode* frameNode, ContentTransit
     ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, ContentTransition, contentTransition, frameNode);
 }
 
+void ImageModelStatic::SetAntialiased(FrameNode* frameNode, const std::optional<bool>& antialiased)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (antialiased) {
+        ACE_UPDATE_NODE_PAINT_PROPERTY(ImageRenderProperty, AntiAlias, antialiased.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_PAINT_PROPERTY(ImageRenderProperty, AntiAlias, frameNode);
+    }
+}
+
 void ImageModelStatic::SetImageInterpolation(
     FrameNode* frameNode, const std::optional<ImageInterpolation>& interpolation)
 {
