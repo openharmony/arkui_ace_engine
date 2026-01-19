@@ -168,7 +168,7 @@ RefPtr<ScrollProxy> ListModelStatic::GetOrCreateScrollBarProxy(FrameNode* frameN
 
 void ListModelStatic::SetInitialIndex(FrameNode* frameNode, const std::optional<int32_t>& initialIndex)
 {
-    if (initialIndex.has_value()) {
+    if (initialIndex.has_value() && initialIndex.value() >= 0) {
         ACE_UPDATE_NODE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, initialIndex.value(), frameNode);
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(ListLayoutProperty, InitialIndex, frameNode);
