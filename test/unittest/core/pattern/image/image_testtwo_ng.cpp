@@ -1952,4 +1952,26 @@ HWTEST_F(ImageTestTwoNg, HandleBorderRadiusResource002, TestSize.Level1)
     pattern->OnColorModeChange(colorMode);
     EXPECT_TRUE(pattern->needBorderRadius_);
 }
+
+/**
+ * @tc.name: SetImageFillSetByUser001
+ * @tc.desc: Verify SetImageFillSetByUser updates layout property on a frame node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImageTestTwoNg, SetImageFillSetByUser001, TestSize.Level1)
+{
+    auto frameNode = ImageTestTwoNg::CreateImageNode(IMAGE_SRC_URL, ALT_SRC_URL);
+    ASSERT_NE(frameNode, nullptr);
+    EXPECT_EQ(frameNode->GetTag(), V2::IMAGE_ETS_TAG);
+
+    auto layoutProperty = frameNode->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    EXPECT_FALSE(layoutProperty->GetImageFillSetByUserValue(false));
+
+    ImageModelNG::SetImageFillSetByUser(AceType::RawPtr(frameNode), true);
+    EXPECT_TRUE(layoutProperty->GetImageFillSetByUserValue(false));
+
+    ImageModelNG::SetImageFillSetByUser(AceType::RawPtr(frameNode), false);
+    EXPECT_FALSE(layoutProperty->GetImageFillSetByUserValue(false));
+}
 } // namespace OHOS::Ace::NG

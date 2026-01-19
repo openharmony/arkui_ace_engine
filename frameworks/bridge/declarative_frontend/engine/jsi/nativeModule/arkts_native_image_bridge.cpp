@@ -756,7 +756,8 @@ ArkUINativeModuleValue ImageBridge::SetFillColor(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     RefPtr<ResourceObject> colorResObj;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
-    if (ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo)) {
+    bool colorAlphaParseStatus = ArkTSUtils::ParseJsColorAlpha(vm, colorArg, color, colorResObj, nodeInfo);
+    if (colorAlphaParseStatus) {
         auto colorRawPtr = AceType::RawPtr(colorResObj);
         nodeModifiers->getImageModifier()->setFillColorWithColorSpace(
             nativeNode, color.GetValue(), color.GetColorSpace(), colorRawPtr);
@@ -765,6 +766,7 @@ ArkUINativeModuleValue ImageBridge::SetFillColor(ArkUIRuntimeCallInfo* runtimeCa
     } else {
         nodeModifiers->getImageModifier()->resetFillColor(nativeNode);
     }
+    nodeModifiers->getImageModifier()->setImageFillSetByUser(nativeNode, !colorAlphaParseStatus);
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -778,6 +780,7 @@ ArkUINativeModuleValue ImageBridge::ResetFillColor(ArkUIRuntimeCallInfo* runtime
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getImageModifier()->resetFillColor(nativeNode);
+    nodeModifiers->getImageModifier()->setImageFillSetByUser(nativeNode, true);
     return panda::JSValueRef::Undefined(vm);
 }
 

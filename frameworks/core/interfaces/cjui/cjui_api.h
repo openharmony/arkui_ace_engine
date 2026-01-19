@@ -883,6 +883,7 @@ struct CJUIImageModifier {
     void (*resetOnError)(ArkUINodeHandle node);
     void (*setImageOnFinish)(ArkUINodeHandle node, void* callback);
     void (*resetImageOnFinish)(ArkUINodeHandle node);
+    void (*setImageFillSetByUser)(ArkUINodeHandle node, ArkUI_Bool value);
 };
 
 struct CJUIColumnModifier {
