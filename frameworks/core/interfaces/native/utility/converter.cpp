@@ -890,12 +890,12 @@ SysOptions Convert(const Ark_SystemAdaptiveOptions& src)
 template<>
 std::u16string Convert(const Ark_String& src)
 {
-    if (src.chars == nullptr) return u"";
+    if (src.chars == nullptr || src.length == 0) return u"";
     const char16_t* data = reinterpret_cast<const char16_t*>(src.chars);
-    if (data[0] == UTF16_BOM) {
+    if (src.length >= sizeof(data[0]) && data[0] == UTF16_BOM) {
         // Handle utf16 strings
         ++data;
-        return std::u16string(data, src.length);
+        return std::u16string(data, src.length - sizeof(data[0]));
     }
     auto str8 =  Converter::Convert<std::string>(src);
     return UtfUtils::Str8ToStr16(str8);
@@ -909,7 +909,7 @@ std::string Convert(const Ark_String& src)
     if (src.length >= sizeof(data[0]) && data[0] == UTF16_BOM) {
         // Handle utf16 strings
         ++data;
-        return UtfUtils::Str16ToStr8(std::u16string(data, src.length));
+        return UtfUtils::Str16ToStr8(std::u16string(data, src.length - sizeof(data[0])));
     }
     return std::string(src.chars, src.length);
 }
