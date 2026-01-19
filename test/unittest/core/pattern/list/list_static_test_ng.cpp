@@ -63,4 +63,18 @@ HWTEST_F(ListScrollerTestNg, SetCachedCount002, TestSize.Level1)
     ListModelStatic::SetCachedCount(AceType::RawPtr(frameNode_), cachedCount, true);
     EXPECT_FALSE(layoutProperty_->GetCachedCount().has_value());
 }
+
+/**
+ * @tc.name: SetInitialIndex
+ * @tc.desc: Test SetInitialIndex
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListScrollerTestNg, SetInitialIndex, TestSize.Level1)
+{
+    CreateList();
+    std::optional<int32_t> initialIndex = -1;
+    ListModelStatic::SetInitialIndex(AceType::RawPtr(frameNode_), initialIndex);
+    ASSERT_NE(layoutProperty_, nullptr);
+    EXPECT_FALSE(layoutProperty_->GetInitialIndex().has_value());
+}
 } // namespace OHOS::Ace::NG
