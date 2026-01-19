@@ -146,7 +146,6 @@ void ParseMenuDividerStrokeWidth(EcmaVM* vm, std::vector<Local<JSValueRef>>& arg
             }
         }
     } else {
-        CalcDimension strokeWidth;
         if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_0], strokeWidth)) {
             strokeWidth = Dimension(0.0);
         }
@@ -192,7 +191,6 @@ void ParseMenuDividerStartMargin(EcmaVM* vm, std::vector<Local<JSValueRef>>& arg
             }
         }
     } else {
-        CalcDimension startMargin;
         if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_2], startMargin)) {
             startMargin = Dimension(0.0);
         }
@@ -227,7 +225,6 @@ void ParseMenuDividerEndMargin(EcmaVM* vm, std::vector<Local<JSValueRef>>& args,
             }
         }
     } else {
-        CalcDimension endMargin;
         if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_3], endMargin)) {
             endMargin = Dimension(0.0);
         }
