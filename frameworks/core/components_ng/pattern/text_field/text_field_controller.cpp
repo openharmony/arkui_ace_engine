@@ -239,6 +239,11 @@ void TextFieldController::DeleteBackward()
 {
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
+    if (textFieldPattern->IsPreviewTextInputting()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Skipping delete operation: preview text inputting");
+        return;
+    }
+
     textFieldPattern->HandleOnDelete(true);
 }
 

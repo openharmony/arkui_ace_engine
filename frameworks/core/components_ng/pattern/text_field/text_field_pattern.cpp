@@ -12837,4 +12837,9 @@ void TextFieldPattern::ScrollToVisible(const TextScrollOptions& options)
         });
     }
 }
+
+bool TextFieldPattern::IsPreviewTextInputting() const
+{
+    return GetIsPreviewText() && 0 <= previewTextStart_ && previewTextStart_ <= previewTextEnd_;
+}
 } // namespace OHOS::Ace::NG

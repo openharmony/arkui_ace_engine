@@ -1811,6 +1811,8 @@ public:
         }
         placeholderColorInfo_.append("[" + info + "]");
     }
+    bool IsPreviewTextInputting() const;
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
