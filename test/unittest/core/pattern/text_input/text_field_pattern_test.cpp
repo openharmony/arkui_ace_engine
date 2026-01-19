@@ -69,7 +69,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern002, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern003
- * @tc.desc: Test TextPattern OnIsFocusActiveUpdate.
+ * @tc.desc: Test TextPattern OnIsFocusActiveUpdate
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
@@ -89,7 +89,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern003, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern004
- * @tc.desc: Test TextPattern HandleExtendAction.
+ * @tc.desc: Test TextPattern HandleExtendAction
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
@@ -109,7 +109,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern004, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern005
- * @tc.desc: Test TextPattern HandleBlurEvent.
+ * @tc.desc: Test TextPattern HandleBlurEvent
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
@@ -125,6 +125,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
     RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->isCustomKeyboardAttached_ = true;
+    /**
+     * @tc.steps: step2. get main frameNode
+     */
     auto func1 = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     auto func2 = [] {};
     pattern->customKeyboard_ = AceType::Claim<UINode>(func1);
@@ -134,7 +137,7 @@ HWTEST_F(TextFieldPatternTest, TextPattern005, TestSize.Level1)
 
 /**
  * @tc.name: TextPattern006
- * @tc.desc: Test TextPattern HandleOnUndoAction.
+ * @tc.desc: Test TextPattern HandleOnUndoAction
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTest, TextPattern006, TestSize.Level1)

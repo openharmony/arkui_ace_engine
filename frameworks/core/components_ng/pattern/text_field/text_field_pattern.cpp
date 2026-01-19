@@ -1277,7 +1277,7 @@ void TextFieldPattern::ProcessAutoFillOnFocus()
         requestFocusReason_ == RequestFocusReason::DRAG_SELECT ||
         requestFocusReason_ == RequestFocusReason::SWITCH_EDITABLE;
     if (needToRequestKeyboardOnFocus_ && !isIgnoreFocusReason && !IsModalCovered() && IsTriggerAutoFillPassword()) {
-        DoProcessAutoFill();
+        DoProcessAutoFill(RequestAutoFillReason::FIELD_FOCUS_EVENT);
     }
 }
 
@@ -1932,7 +1932,8 @@ void TextFieldPattern::HandleOnSelectAll(bool isKeyEvent, bool inlineStyle, bool
 void TextFieldPattern::HandleOnPasswordVault()
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnPasswordVault");
-    ProcessAutoFillAndKeyboard(SourceType::NONE, true, false, AceAutoFillTriggerType::MANUAL_REQUEST);
+    ProcessAutoFillAndKeyboard(RequestAutoFillReason::TEXT_MENU_MANUAL_REQUEST, SourceType::NONE, true, false,
+        AceAutoFillTriggerType::MANUAL_REQUEST);
 }
 
 void TextFieldPattern::HandleOnCopy(bool isUsingExternalKeyboard)
@@ -3077,7 +3078,7 @@ void TextFieldPattern::HandleSingleClickEvent(GestureEvent& info, bool firstGetF
         CloseSelectOverlay(true);
         StartTwinkling();
     }
-    DoProcessAutoFill(info.GetSourceDevice());
+    DoProcessAutoFill(RequestAutoFillReason::SINGLE_CLICK, info.GetSourceDevice());
     // emulate clicking bottom of the textField
     UpdateTextFieldManager(Offset(parentGlobalOffset_.GetX(), parentGlobalOffset_.GetY()), frameRect_.Height());
     TriggerAvoidOnCaretChange();
@@ -3091,19 +3092,31 @@ void TextFieldPattern::ProcessAutoFillOnPaste()
     ProcessAutoFill(isPopup, true, false, AceAutoFillTriggerType::PASTE_REQUEST);
 }
 
-void TextFieldPattern::ProcessAutoFillAndKeyboard(SourceType sourceType, bool ignoreFillType, bool isNewPassWord,
-    AceAutoFillTriggerType triggerType)
+void TextFieldPattern::ProcessAutoFillAndKeyboard(RequestAutoFillReason autoFillReason, SourceType sourceType,
+    bool ignoreFillType, bool isNewPassWord, AceAutoFillTriggerType triggerType)
 {
+    TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "ProcessAutoFillAndKeyboard, autoFillReason:%{public}d", autoFillReason);
     bool isPopup = false;
     auto isSuccess = ProcessAutoFill(isPopup, ignoreFillType, isNewPassWord, triggerType);
     if (!isPopup && isSuccess) {
+        if (autoFillReason == RequestAutoFillReason::FIELD_FOCUS_EVENT) {
+            SetAutoFillRequestSuccessOnFocus(true);
+        }
         SetNeedToRequestKeyboardInner(false, RequestKeyboardInnerChangeReason::AUTOFILL_PROCESS);
-    } else if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK, sourceType)) {
+        return;
+    }
+    if (!isPopup && triggerType == AceAutoFillTriggerType::AUTO_REQUEST &&
+        autoFillReason == RequestAutoFillReason::SINGLE_CLICK && IsAutoFillRequestSuccessOnFocus()) {
+        TAG_LOGI(AceLogTag::ACE_AUTO_FILL, "don't need to request keyboard if focus event has requested autofill");
+        SetAutoFillRequestSuccessOnFocus(false);
+        return;
+    }
+    if (RequestKeyboardNotByFocusSwitch(RequestKeyboardReason::SINGLE_CLICK, sourceType)) {
         NotifyOnEditChanged(true);
     }
 }
 
-void TextFieldPattern::DoProcessAutoFill(SourceType sourceType)
+void TextFieldPattern::DoProcessAutoFill(RequestAutoFillReason autoFillReason, SourceType sourceType)
 {
     TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "DoProcessAutoFill");
     if (!IsNeedProcessAutoFill()) {
@@ -3112,7 +3125,7 @@ void TextFieldPattern::DoProcessAutoFill(SourceType sourceType)
         }
         return;
     }
-    ProcessAutoFillAndKeyboard(sourceType);
+    ProcessAutoFillAndKeyboard(autoFillReason, sourceType);
 }
 
 bool TextFieldPattern::IsAutoFillPasswordType(const AceAutoFillType& autoFillType)
@@ -9026,7 +9039,7 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWra
     auto isFocus = nodeWrap->GetIsFocus();
     if (isFocus && !HasFocus()) {
         TextFieldRequestFocus(RequestFocusReason::AUTO_FILL);
-        DoProcessAutoFill();
+        DoProcessAutoFill(RequestAutoFillReason::REQUEST_AGAIN_NOT_FOCUS);
     }
     auto type = GetAutoFillType();
     bool fromOtherAccount = viewDataWrap->GetOtherAccount();
