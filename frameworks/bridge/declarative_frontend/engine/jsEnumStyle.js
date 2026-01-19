@@ -5080,6 +5080,14 @@ let ScrollSnapAnimationSpeed;
   ScrollSnapAnimationSpeed[ScrollSnapAnimationSpeed.SLOW = 1] = 'SLOW';
 })(ScrollSnapAnimationSpeed || (ScrollSnapAnimationSpeed = {}));
 
+let NavigationPolicy;
+(function (NavigationPolicy) {
+  NavigationPolicy[NavigationPolicy.NEW_POPUP = 0] = 'NEW_POPUP';
+  NavigationPolicy[NavigationPolicy.NEW_WINDOW = 1] = 'NEW_WINDOW';
+  NavigationPolicy[NavigationPolicy.NEW_BACKGROUND_TAB = 2] = 'NEW_BACKGROUND_TAB';
+  NavigationPolicy[NavigationPolicy.NEW_FOREGROUND_TAB = 3] = 'NEW_FOREGROUND_TAB';
+})(NavigationPolicy || (NavigationPolicy = {}));
+
 let NativeEmbedParamStatus;
 (function (NativeEmbedParamStatus) {
   NativeEmbedParamStatus.ADD = 0;
