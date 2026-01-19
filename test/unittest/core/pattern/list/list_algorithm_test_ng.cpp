@@ -23,7 +23,7 @@
 #include "core/components_ng/pattern/list/list_item_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 using namespace testing;

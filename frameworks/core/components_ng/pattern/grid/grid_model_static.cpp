@@ -42,6 +42,7 @@ void GridModelStatic::SetLayoutOptions(FrameNode* frameNode, GridLayoutOptions& 
 
 void GridModelStatic::SetColumnsTemplate(FrameNode* frameNode, const std::optional<std::string>& columnsTemplate)
 {
+    ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ItemFillPolicy, frameNode);
     if (!columnsTemplate) {
         CHECK_NULL_VOID(frameNode);
         auto layout = frameNode->GetLayoutPropertyPtr<GridLayoutProperty>();
@@ -108,6 +109,14 @@ void GridModelStatic::SetEditable(FrameNode* frameNode, const std::optional<bool
     } else {
         ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, Editable, frameNode);
     }
+}
+
+void GridModelStatic::SetEditModeOptions(FrameNode* frameNode, const EditModeOptions& editModeOptions)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<GridPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetEditModeOptions(editModeOptions);
 }
 
 void GridModelStatic::SetMultiSelectable(FrameNode* frameNode, bool multiSelectable)
@@ -263,6 +272,26 @@ void GridModelStatic::SetAlignItems(FrameNode* frameNode, const std::optional<Gr
         layout->ResetAlignItems();
         layout->OnAlignItemsUpdate(GridItemAlignment::DEFAULT);
     }
+}
+
+void GridModelStatic::SetItemFillPolicy(FrameNode* frameNode, PresetFillType policy)
+{
+    ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ColumnsTemplate, frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, ItemFillPolicy, policy, frameNode);
+}
+
+void GridModelStatic::SetFocusWrapMode(FrameNode* frameNode, const std::optional<FocusWrapMode>& focusWrapMode)
+{
+    if (focusWrapMode) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, FocusWrapMode, focusWrapMode.value(), frameNode);
+    } else {
+        ACE_RESET_NODE_LAYOUT_PROPERTY(GridLayoutProperty, FocusWrapMode, frameNode);
+    }
+}
+
+void GridModelStatic::SetSyncLoad(FrameNode* frameNode, bool syncLoad)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(GridLayoutProperty, SyncLoad, syncLoad, frameNode);
 }
 
 void GridModelStatic::SetOnItemDragStart(

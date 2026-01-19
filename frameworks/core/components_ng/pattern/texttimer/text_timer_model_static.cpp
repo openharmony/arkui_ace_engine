@@ -105,4 +105,33 @@ void TextTimerModelStatic::SetTextShadow(FrameNode* frameNode, const std::option
         ACE_RESET_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextShadow, frameNode);
     }
 }
+
+void TextTimerModelStatic::SetTextColorByUser(FrameNode* frameNode, bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextColorSetByUser, isSetByUser, frameNode);
+    }
+}
+
+void TextTimerModelStatic::SetFontWeightByUser(FrameNode* frameNode, bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontWeightSetByUser, isSetByUser, frameNode);
+    }
+}
+
+void TextTimerModelStatic::SetFontFamilyByUser(FrameNode* frameNode, bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontFamilySetByUser, isSetByUser, frameNode);
+    }
+}
+
+void TextTimerModelStatic::SetFontSizeByUser(FrameNode* frameNode, bool isSetByUser)
+{
+    if (SystemProperties::ConfigChangePerform()) {
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextTimerLayoutProperty, TextFontSizeSetByUser, isSetByUser, frameNode);
+    }
+}
+
 } // namespace OHOS::Ace::NG

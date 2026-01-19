@@ -934,6 +934,7 @@ void NavigationModelStatic::SetCustomToolBar(FrameNode* frameNode, const RefPtr<
     CHECK_NULL_VOID(navigationGroupNode);
     auto navBarNode = AceType::DynamicCast<NavBarNode>(navigationGroupNode->GetNavBarNode());
     NavigationToolbarUtil::SetCustomToolBar(navBarNode, customNode);
+    navBarNode->MarkModifyDone();
 }
 
 void NavigationModelStatic::SetTitleHeight(FrameNode* frameNode, const Dimension& height, bool isValid)
@@ -993,5 +994,15 @@ void NavigationModelStatic::SetRecoverable(FrameNode* frameNode, const std::opti
 void NavigationModelStatic::SetEnableToolBarAdaptation(FrameNode* frameNode, bool enable)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, EnableToolBarAdaptation, enable, frameNode);
+}
+
+void NavigationModelStatic::UpdateDefineColor(FrameNode* frameNode, bool isDefined)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DefinedDividerColor, isDefined, frameNode);
+}
+
+void NavigationModelStatic::UpdateDividerColor(FrameNode* frameNode, const Color& color)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(NavigationLayoutProperty, DividerColor, color, frameNode);
 }
 } // namespace OHOS::Ace::NG

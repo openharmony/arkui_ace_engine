@@ -27,6 +27,7 @@ class RosenRenderContext : public RenderContext {
 public:
     const std::shared_ptr<Rosen::RSNode>& GetRSNode();
     void SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode);
+    void SetUnionSpacing(float spacing);
 };
 } // namespace OHOS::Ace::NG
 

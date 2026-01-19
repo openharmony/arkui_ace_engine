@@ -998,6 +998,7 @@ HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm5, TestSize.Level1)
      * @tc.steps: step1. create sheet node.
      */
     SheetStyle style;
+    style.isTitleBuilder = false;
     style.sheetTitle = "mainTitle";
     auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -1011,6 +1012,7 @@ HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm5, TestSize.Level1)
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = { 1000, 1000 };
     geometryNode->SetParentLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateSheetStyle(style);
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     layoutProperty->UpdateContentConstraint();
     /**
@@ -1042,7 +1044,8 @@ HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm5, TestSize.Level1)
     auto buildGeometryNode = builderNode->GetGeometryNode();
     ASSERT_NE(buildGeometryNode, nullptr);
     EXPECT_FLOAT_EQ(buildGeometryNode->GetMarginFrameOffset().GetX(), 0.0f);
-    EXPECT_FLOAT_EQ(buildGeometryNode->GetMarginFrameOffset().GetY(), padding.top.value_or(0.0f));
+    EXPECT_FLOAT_EQ(buildGeometryNode->GetMarginFrameOffset().GetY(),
+        padding.top.value_or(0.0f) + SHEET_DRAG_BAR_HEIGHT.ConvertToPx());
 }
 
 /**
@@ -1066,6 +1069,7 @@ HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm6, TestSize.Level1)
      * @tc.steps: step1. create sheet node.
      */
     SheetStyle style;
+    style.isTitleBuilder = false;
     style.sheetTitle = "mainTitle";
     auto builder = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<LinearLayoutPattern>(true));
@@ -1079,6 +1083,7 @@ HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm6, TestSize.Level1)
     LayoutConstraintF layoutConstraint;
     layoutConstraint.maxSize = { 1000, 1000 };
     geometryNode->SetParentLayoutConstraint(layoutConstraint);
+    layoutProperty->UpdateSheetStyle(style);
     layoutProperty->UpdateLayoutConstraint(layoutConstraint);
     layoutProperty->UpdateContentConstraint();
     /**
@@ -1114,7 +1119,8 @@ HWTEST_F(SheetShowInSubwindowTestNg, SideSheetLayoutAlgorithm6, TestSize.Level1)
     auto buildGeometryNode = builderNode->GetGeometryNode();
     ASSERT_NE(buildGeometryNode, nullptr);
     EXPECT_FLOAT_EQ(buildGeometryNode->GetMarginFrameOffset().GetX(), padding.left.value_or(0.0f));
-    EXPECT_FLOAT_EQ(buildGeometryNode->GetMarginFrameOffset().GetY(), padding.top.value_or(0.0f));
+    EXPECT_FLOAT_EQ(buildGeometryNode->GetMarginFrameOffset().GetY(),
+        padding.top.value_or(0.0f) + SHEET_DRAG_BAR_HEIGHT.ConvertToPx());
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
 }
 

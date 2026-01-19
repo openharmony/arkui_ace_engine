@@ -20,9 +20,6 @@
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_function.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
-#include "frameworks/core/components/tab_bar/tab_content_component.h"
-#include "frameworks/core/components_v2/tabs/tab_content_item_component.h"
-#include "frameworks/core/components_v2/tabs/tabs_component.h"
 #include "frameworks/core/components_ng/pattern/tabs/tab_content_model.h"
 #include "frameworks/core/components_ng/pattern/tabs/tabs_model_ng.h"
 

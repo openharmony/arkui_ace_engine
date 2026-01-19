@@ -15,6 +15,10 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_engine.h"
 
+#include "bridge/js_frontend/engine/common/base_canvas_bridge.h"
+#include "compatible/components/component_loader.h"
+#include "core/common/dynamic_module_helper.h"
+
 #ifndef WINDOWS_PLATFORM
 #include <dlfcn.h>
 #endif
@@ -27,14 +31,15 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_animation_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_animator_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_badge_bridge.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_canvas_bridge.h"
+#include "frameworks/compatible/components/canvas/bridge/jsi_canvas_bridge.h"
+#include "frameworks/compatible/components/canvas/canvas_modifier_compatible.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_chart_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_clock_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_component_api_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_image_animator_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_input_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_list_bridge.h"
-#include "frameworks/bridge/js_frontend/engine/jsi/jsi_offscreen_canvas_bridge.h"
+#include "frameworks/compatible/components/canvas/bridge/jsi_offscreen_canvas_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_stepper_bridge.h"
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_xcomponent_bridge.h"
 
@@ -53,6 +58,23 @@ extern const uint8_t* _binary_jsMockSystemPlugin_abc_end;
 #endif
 
 namespace OHOS::Ace::Framework {
+
+namespace {
+
+const ArkUICanvasModifierCompatible* GetCanvasInnerModifier()
+{
+    static const ArkUICanvasModifierCompatible* canvasModifier_ = nullptr;
+    if (canvasModifier_) {
+        return canvasModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("canvas");
+    if (loader) {
+        canvasModifier_ = reinterpret_cast<const ArkUICanvasModifierCompatible*>(loader->GetCustomModifier());
+        return canvasModifier_;
+    }
+    return nullptr;
+}
+}
 
 const int SYSTEM_BASE = 10;
 
@@ -353,7 +375,7 @@ void SetDomAttributesWithObject(const shared_ptr<JsRuntime>& runtime, const std:
         auto chartBridge = AceType::MakeRefPtr<JsiChartBridge>();
         chartBridge->ParseAttrSingleSegment(runtime, value);
         command.SetSegments(chartBridge->GetSegments());
-    } else if (keyStr == DOM_CLOCK_CONFIG) {
+    } else if (keyStr == "clockconfig") {
         auto clockBridge = AceType::MakeRefPtr<JsiClockBridge>();
         clockBridge->ParseClockConfig(runtime, value);
         command.SetClockConfig(clockBridge->GetClockConfig());
@@ -447,7 +469,7 @@ void SetDomStyle(
             std::string valStr = value->ToString(runtime);
             styles.emplace_back(keyStr, valStr);
         } else if (value->IsArray(runtime)) {
-            if (strcmp(keyStr.c_str(), DOM_TEXT_FONT_FAMILY) == 0) {
+            if (strcmp(keyStr.c_str(), OHOS::Ace::DOM_TEXT_FONT_FAMILY) == 0) {
                 // Deal with special case such as fontFamily, suppose all the keys in the array are the same.
                 std::string familyStyle;
                 GetStyleFamilyValue(runtime, value, familyStyle);
@@ -1330,7 +1352,21 @@ shared_ptr<JsValue> JsHandleOffscreenCanvas(
         int32_t height = ParseIntParams(runtime, arg, "height");
 
         auto pipelineContext = GetFrontendDelegate(runtime)->GetPipelineContext();
-        auto bridge = AceType::MakeRefPtr<JsiOffscreenCanvasBridge>(pipelineContext, width, height);
+        CanvasBridgeParams params = {
+            .pipeline = pipelineContext, .width = width, .height = height, .isOffscreen = true
+        };
+        const auto* modifier = GetCanvasInnerModifier();
+        void* bridgePtr = modifier->createCanvasBridge(params);
+        if (!bridgePtr) {
+            LOGE("Failed to create OffscreenCanvasBridge");
+            return runtime->NewUndefined();
+        }
+
+        auto bridge = AceType::Claim(reinterpret_cast<BaseCanvasBridge*>(bridgePtr));
+        if (!bridge) {
+            LOGE("Failed to claim BaseCanvasBridge");
+            return runtime->NewUndefined();
+        }
         page->PushOffscreenCanvasBridge(bridge->GetBridgeId(), bridge);
         return bridge->GetBridge(runtime);
     }

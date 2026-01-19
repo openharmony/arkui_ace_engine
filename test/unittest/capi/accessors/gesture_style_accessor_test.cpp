@@ -37,19 +37,20 @@ public:
     void* CreatePeerInstance() override
     {
         Ark_Int32 resId = 1;
+        Ark_GestureStyleInterface param;
         auto onClick = [](const Ark_Int32 resourceId, const Ark_ClickEvent event) {
             g_onClick = true;
         };
-        param_.value.onClick.value = Converter::ArkValue<Callback_ClickEvent_Void>(onClick, resId);
+        param.onClick = Converter::ArkCallback<Opt_Callback_ClickEvent_Void>(onClick, resId);
 
         auto onLongPress = [](const Ark_Int32 resourceId, const Ark_GestureEvent event) {
             g_onLongPress = true;
         };
-        param_.value.onLongPress.value = Converter::ArkValue<Callback_GestureEvent_Void>(onLongPress, resId);
-        return accessor_->construct(&param_);
+        param.onLongPress = Converter::ArkCallback<Opt_Callback_GestureEvent_Void>(onLongPress, resId);
+        param.onTouch = Converter::ArkValue<Opt_Callback_TouchEvent_Void>();
+        auto optParam = Converter::ArkValue<Opt_GestureStyleInterface>(param);
+        return accessor_->construct(&optParam);
     }
-
-    Opt_GestureStyleInterface param_;
 };
 
 /**

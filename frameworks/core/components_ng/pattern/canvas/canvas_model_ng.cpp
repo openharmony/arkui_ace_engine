@@ -135,4 +135,35 @@ void CanvasModelNG::UpdateUnit(CanvasUnit unit)
     CHECK_NULL_VOID(pattern);
     pattern->UpdateUnit(unit);
 }
+
+void CanvasModelNG::SetImmediateRender(FrameNode* frameNode, bool immediateRender)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetImmediateRender(immediateRender);
+}
+
+void CanvasModelNG::SetOnReady(FrameNode* frameNode, std::function<void(bool, CanvasUnit)>&& onReady)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetOnReady(std::move(onReady));
+}
+
+void CanvasModelNG::ResetOnReady(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->ResetOnReady();
+}
+void CanvasModelNG::UpdateUnit(FrameNode* frameNode, CanvasUnit unit)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<CanvasPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->UpdateUnit(unit);
+}
 } // namespace OHOS::Ace::NG

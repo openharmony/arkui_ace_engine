@@ -29,7 +29,7 @@ void FormGestureManager::LinkGesture(const AxisEvent& event, PipelineContext* pi
         auto recognizer = rebirth.CreateRecognizer();
         if (recognizer) {
             recognizer->SetInnerFlag(true);
-            recognizer->BeginReferee(event.id, true);
+            recognizer->BeginReferee(event.id, event.originalId, true);
             std::list<RefPtr<NGGestureRecognizer>> combined;
             combined.emplace_back(recognizer);
             for (auto iter = axisTouchTestResults[event.id].begin();
@@ -43,7 +43,7 @@ void FormGestureManager::LinkGesture(const AxisEvent& event, PipelineContext* pi
             }
             auto exclusiveRecognizer = AceType::MakeRefPtr<ExclusiveRecognizer>(std::move(combined));
             exclusiveRecognizer->AttachFrameNode(node);
-            exclusiveRecognizer->BeginReferee(event.id);
+            exclusiveRecognizer->BeginReferee(event.id, event.originalId);
             axisTouchTestResults[event.id].emplace_back(exclusiveRecognizer);
             eventManager->SetAxisTouchTestResults(axisTouchTestResults);
             eventManager->SetInnerFlag(true);

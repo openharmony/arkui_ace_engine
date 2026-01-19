@@ -191,7 +191,7 @@ public:
         return false;
     }
     bool ScrollPageCheck(float delta, int32_t source);
-    void AdjustOffset(float& delta, int32_t source);
+    void AdjustOffset(float& delta, int32_t source) override;
     Rect GetItemRect(int32_t index) const override;
 
     // scrollSnap
@@ -405,6 +405,12 @@ public:
         return contentStartOffset_;
     }
 
+    bool FreeOverScrollWithDelta(Axis axis, double delta) override;
+
+    void ProcessFreeScrollOverDrag(const OffsetF velocity) override;
+
+    bool TryFreeScroll(double offset, Axis axis) override;
+
 protected:
     void DoJump(float position, int32_t source = SCROLL_FROM_JUMP);
 
@@ -490,7 +496,7 @@ public:
     }
 
     Offset GetFreeScrollOffset() const final;
-    bool FreeScrollBy(const OffsetF& delta) final;
+    bool FreeScrollBy(const OffsetF& delta, bool canOverScroll = false) final;
     bool FreeScrollPage(bool reverse, bool smooth) final;
     bool FreeScrollToEdge(ScrollEdgeType type, bool smooth, std::optional<float> velocity) final;
     void FreeScrollTo(const ScrollControllerBase::ScrollToParam& param) final;

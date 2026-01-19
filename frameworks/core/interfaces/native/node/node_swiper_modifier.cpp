@@ -18,9 +18,9 @@
 
 #include "bridge/common/utils/utils.h"
 #include "core/common/resource/resource_parse_utils.h"
-#include "core/components/swiper/swiper_component.h"
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/interfaces/native/node/node_adapter_impl.h"
+#include "core/components_ng/pattern/swiper/swiper_change_event.h"
 
 namespace OHOS::Ace::NG {
 namespace {

@@ -58,6 +58,7 @@ constexpr int32_t ABILITY_OR_PAGE_SWITCH_START_EVENT = 0;
 constexpr int32_t ABILITY_OR_PAGE_SWITCH_END_EVENT = 1;
 constexpr int32_t MODULE_SERIALIZER_COUNT = 3;
 constexpr int32_t RSS_TAIHANG_APP_WHITE_LIST_TYPE = 2;
+constexpr int32_t RSS_VSYNC_SCENE_LIST_VAULE = 2;
 #ifdef FFRT_EXISTS
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
 constexpr int32_t LONG_FRAME_END_EVENT = 1;
@@ -165,14 +166,14 @@ void ResSchedReport::TriggerModuleSerializer()
         container->TriggerModuleSerializer();
     };
     if (createPageCount == MODULE_SERIALIZER_COUNT) {
-        taskExecutor->PostTask(serializerTask, TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
+        taskExecutor->PostTask(std::move(serializerTask), TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
         triggerExecuted = true;
         delayTask_.Cancel();
         return;
     }
-    auto task = [taskExecutor, serializerTask]() {
+    auto task = [taskExecutor, originTask = std::move(serializerTask)]() {
         if (!triggerExecuted) {
-            taskExecutor->PostTask(serializerTask, TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
+            taskExecutor->PostTask(originTask, TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
             triggerExecuted = true;
         }
     };
@@ -335,6 +336,12 @@ bool ResSchedReport::AppWhiteListCheck(const std::unordered_map<std::string, std
     return reply["result"] == "\"true\"";
 }
 
+void ResSchedReport::AppVsyncEnableScene(const std::unordered_map<std::string, std::string>& payload,
+    std::unordered_map<std::string, std::string>& reply)
+{
+    ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, RSS_VSYNC_SCENE_LIST_VAULE, payload, reply);
+}
+
 bool ResSchedReport::AppRVSEnableCheck(const std::unordered_map<std::string, std::string>& payload,
     std::unordered_map<std::string, std::string>& reply)
 {
@@ -353,7 +360,9 @@ void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConf
 {
     if (!triggerExecuted) {
         auto curContainer = Container::Current();
+        CHECK_NULL_VOID(curContainer);
         auto taskExecutor = curContainer->GetTaskExecutor();
+        CHECK_NULL_VOID(taskExecutor);
         auto serializerTask = [weak = WeakPtr<Container>(curContainer)]() {
             auto container = weak.Upgrade();
             if (!container) {
@@ -362,7 +371,7 @@ void ResSchedReport::OnTouchEvent(const TouchEvent& touchEvent, const ReportConf
             }
             container->TriggerModuleSerializer();
         };
-        taskExecutor->PostTask(serializerTask, TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
+        taskExecutor->PostTask(std::move(serializerTask), TaskExecutor::TaskType::UI, "TriggerModuleSerializer");
         triggerExecuted = true;
     }
     switch (touchEvent.type) {

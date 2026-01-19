@@ -163,6 +163,7 @@ constexpr float PIXELMAP_DRAG_WGR_TEXT_SCALE = 2.0f;
 constexpr float PIXELMAP_DRAG_WGR_SCALE = 3.0f;
 constexpr float DEFALUT_DRAG_PPIXELMAP_SCALE = 1.05f;
 constexpr float PIXELMAP_DRAG_DEFAULT_HEIGHT = -28.0f;
+constexpr float DEFAULT_PAN_ANGLE = 45.0f;
 
 class EventHub;
 class PipelineContext;
@@ -243,7 +244,11 @@ public:
     void SetRedirectClick(bool redirectClick);
     bool ActLongClick();
     void SetLongPressEvent(const RefPtr<LongPressEvent>& event, bool isForDrag = false, bool isDisableMouseLeft = false,
-        int32_t duration = 500, bool withMultiSelect = false);
+        int32_t duration = 500);
+    void ReplaceLongPressEventActuator(RefPtr<LongPressEventActuator> longPressEventActuator)
+    {
+        longPressEventActuator_ = longPressEventActuator;
+    }
     RefPtr<LongPressEventActuator> GetLongPressEventActuator()
     {
         return longPressEventActuator_;
@@ -252,11 +257,12 @@ public:
     void SetPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
     void SetPanEvent(
         const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap);
-    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance);
-    void AddPanEvent(
-        const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, PanDistanceMap distanceMap);
-    void AddPanEvent(const RefPtr<PanEvent>& panEvent,
-        PanDirection direction, int32_t fingers, const PanDistanceMapDimension& distanceMap);
+    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers,
+        Dimension distance, double angle = DEFAULT_PAN_ANGLE);
+    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers,
+        PanDistanceMap distanceMap, double angle = DEFAULT_PAN_ANGLE);
+    void AddPanEvent(const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers,
+        const PanDistanceMapDimension& distanceMap, double angle = DEFAULT_PAN_ANGLE);
     void RemovePanEvent(const RefPtr<PanEvent>& panEvent);
     void SetPanEventType(GestureTypeName typeName);
     void SetLongPressEventType(GestureTypeName typeName);
@@ -283,8 +289,8 @@ public:
     HitTestMode GetHitTestMode() const;
     void SetHitTestMode(HitTestMode hitTestMode);
     void RemoveDragEvent();
-    void CombineIntoExclusiveRecognizer(
-        const PointF& globalPoint, const PointF& localPoint, TouchTestResult& result, int32_t touchId);
+    void CombineIntoExclusiveRecognizer(const PointF& globalPoint, const PointF& localPoint,
+        TouchTestResult& result, int32_t touchId, int32_t originalId);
     const std::vector<DimensionRect>& GetResponseRegion() const;
     const std::vector<DimensionRect>& GetMouseResponseRegion() const;
     std::vector<CalcDimensionRect> GetFingerResponseRegionFromMap();
@@ -359,7 +365,7 @@ public:
     void SetMonopolizeEvents(bool monopolizeEvents);
     virtual RefPtr<NGGestureRecognizer> PackInnerRecognizer(
         const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
-        const RefPtr<TargetComponent>& targetComponent);
+        int32_t originalId, const RefPtr<TargetComponent>& targetComponent);
     void CleanExternalRecognizers();
     void CleanInnerRecognizer();
     void CleanNodeRecognizer();
@@ -455,12 +461,12 @@ private:
     template<typename T>
     const RefPtr<T> AccessibilityRecursionSearchRecognizer(const RefPtr<NGGestureRecognizer>& recognizer);
 
-    void ProcessParallelPriorityGesture(const Offset& offset, int32_t touchId,
+    void ProcessParallelPriorityGesture(const Offset& offset, int32_t touchId, int32_t originalId,
         const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host,
         RefPtr<NGGestureRecognizer>& current, std::list<RefPtr<NGGestureRecognizer>>& recognizers,
         int32_t& parallelIndex, bool needRebuildForCurrent = false);
 
-    void ProcessExternalExclusiveRecognizer(const Offset& offset, int32_t touchId,
+    void ProcessExternalExclusiveRecognizer(const Offset& offset, int32_t touchId, int32_t originalId,
         const RefPtr<TargetComponent>& targetComponent, const RefPtr<FrameNode>& host, GesturePriority priority,
         RefPtr<NGGestureRecognizer>& current, std::list<RefPtr<NGGestureRecognizer>>& recognizers,
         int32_t& exclusiveIndex, bool needRebuildForCurrent = false);
@@ -547,6 +553,13 @@ private:
     bool isDragNewFwk_ = false;
 };
 
+#ifdef ENABLE_ROSEN_BACKEND
+class DragRSTransactionGuard : public AceType {
+    DECLARE_ACE_TYPE(DragRSTransactionGuard, AceType);
+public:
+    ~DragRSTransactionGuard();
+};
+#endif
 } // namespace OHOS::Ace::NG
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_EVENT_GESTURE_EVENT_HUB_H

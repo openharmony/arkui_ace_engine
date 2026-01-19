@@ -13,45 +13,15 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "test/mock/core/render/mock_rosen_render_context.h"
 
 namespace OHOS::Ace::NG {
-void RenderContext::SetRequestFrame(const std::function<void(bool)>& requestFrame)
-{
-    requestFrame_ = requestFrame;
-}
-
-void RenderContext::RequestNextFrame(bool isOffScreenNode) const
-{
-    if (requestFrame_) {
-        requestFrame_(isOffScreenNode);
-    }
-}
-
-void RenderContext::SetHostNode(const WeakPtr<FrameNode>& host)
-{
-    host_ = host;
-}
-
-RefPtr<FrameNode> RenderContext::GetHost() const
-{
-    return host_.Upgrade();
-}
-
-void RenderContext::ToJsonValue(std::unique_ptr<JsonValue>& json) const {}
-
-void RenderContext::FromJson(const std::unique_ptr<JsonValue>& json) {}
-
-RefPtr<RenderContext> RenderContext::Create()
-{
-    return MakeRefPtr<RosenRenderContext>();
-}
-
 const std::shared_ptr<Rosen::RSNode>& RosenRenderContext::GetRSNode()
 {
     return nullptr;
 }
 
 void RosenRenderContext::SetRSNode(const std::shared_ptr<Rosen::RSNode>& rsNode) {}
+
+void RosenRenderContext::SetUnionSpacing(float spacing) {}
 } // namespace OHOS::Ace::NG

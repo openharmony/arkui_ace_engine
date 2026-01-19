@@ -15,7 +15,7 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model_ng.h"
 #include "core/components_ng/pattern/time_picker/timepicker_event_hub.h"
 #include "core/components_ng/pattern/time_picker/timepicker_row_pattern.h"

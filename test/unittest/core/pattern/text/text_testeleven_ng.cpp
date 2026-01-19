@@ -23,6 +23,7 @@
 #define private public
 #include "core/components_ng/pattern/text_field/content_controller.h"
 #undef private
+#include "test/mock/core/common/mock_theme_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -761,7 +762,13 @@ HWTEST_F(TextTestNg, DumpSimplifyInfo001, TestSize.Level1)
     auto pattern = frameNode->GetPattern<TextPattern>();
     ASSERT_NE(pattern, nullptr);
     auto textLayoutProp = pattern->GetLayoutProperty<TextLayoutProperty>();
-    ASSERT_NE(pattern, nullptr);
+    ASSERT_NE(textLayoutProp, nullptr);
+
+    auto pipeline = PipelineContext::GetCurrentContext();
+    ASSERT_NE(pipeline, nullptr);
+    auto theme = AceType::MakeRefPtr<MockThemeManager>();
+    pipeline->SetThemeManager(theme);
+    EXPECT_CALL(*theme, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<TextTheme>()));
 
     /**
      * @tc.steps: step2. make !textvalue.empty() true
@@ -776,8 +783,10 @@ HWTEST_F(TextTestNg, DumpSimplifyInfo001, TestSize.Level1)
      * @expect json is not ""
      */
     EXPECT_TRUE(json->Contains("content"));
-    std::string  result = json->ToString();
-    EXPECT_EQ(result, "{\"content\":\"Hello World\"}");
+    std::string result = json->ToString();
+    EXPECT_EQ(result, "{\"content\":\"Hello "
+                      "World\",\"fontColor\":\"#FF000000\",\"fontFamily\":\"Na\",\"fontSize\":\"16.00fp\","
+                      "\"fontWeight\":\"FontWeight.Normal\",\"ForegroundColor\":\"Na\"}");
 }
 
 /**

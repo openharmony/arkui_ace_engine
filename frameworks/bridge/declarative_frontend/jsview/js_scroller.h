@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -17,10 +17,11 @@
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_JS_VIEW_JS_SCROLLER_H
 
 #include "base/memory/referenced.h"
-#include "bridge/declarative_frontend/engine/bindings.h"
+#include "core/common/container_consts.h"
 #include "core/components/scroll/scroll_controller_base.h"
 #include "core/components/scroll_bar/scroll_proxy.h"
 #include "core/components_ng/pattern/scrollable/scroller_observer_manager.h"
+#include "ecmascript/napi/include/jsnapi.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -28,23 +29,6 @@ class JSScroller : public Referenced {
 public:
     JSScroller() = default;
     ~JSScroller() override = default;
-
-    static void JSBind(BindingTarget globalObj);
-    static void Constructor(const JSCallbackInfo& args);
-    static void Destructor(JSScroller* scroller);
-
-    void ScrollTo(const JSCallbackInfo& args);
-    void ScrollEdge(const JSCallbackInfo& args);
-    void Fling(const JSCallbackInfo& args);
-    void ScrollPage(const JSCallbackInfo& args);
-    void CurrentOffset(const JSCallbackInfo& args);
-    void Offset(const JSCallbackInfo& args);
-    void ScrollToIndex(const JSCallbackInfo& args);
-    void ScrollBy(const JSCallbackInfo& args);
-    void IsAtEnd(const JSCallbackInfo& args);
-    void GetItemRect(const JSCallbackInfo& args);
-    void GetItemIndex(const JSCallbackInfo& args);
-    void ContentSize(const JSCallbackInfo& args);
 
     const WeakPtr<ScrollControllerBase>& GetController() const
     {
@@ -76,7 +60,7 @@ public:
         return scrollBarProxyWeak_.Upgrade();
     }
 
-    JSRef<JSObject> CreateRectangle(const Rect& info);
+    panda::Local<panda::ObjectRef> CreateRectangle(const Rect& info);
 
     void SetInstanceId(int32_t instanceId)
     {
@@ -108,7 +92,6 @@ public:
     }
 
 private:
-    bool ParseCurveParams(RefPtr<Curve>& curve, const JSRef<JSVal>& jsValue);
 
     WeakPtr<ScrollControllerBase> controllerWeak_;
     WeakPtr<ScrollProxy> scrollBarProxyWeak_;

@@ -27,6 +27,7 @@ RefPtr<V2::PatternLockController> PatternLockModelNG::Create()
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::PATTERN_LOCK_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::PATTERN_LOCK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<PatternLockPattern>(); });
+    ACE_UINODE_TRACE(frameNode);
     ViewStackProcessor::GetInstance()->Push(frameNode);
 
     auto pattern = frameNode->GetPattern<PatternLockPattern>();

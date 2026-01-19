@@ -2281,4 +2281,83 @@ HWTEST_F(WaterFlowSegmentTest, ContentOffsetTest002, TestSize.Level1)
     EXPECT_EQ(pattern_->layoutInfo_->contentStartOffset_, 0.0f);
     EXPECT_EQ(pattern_->layoutInfo_->contentEndOffset_, 0.0f);
 }
+
+/**
+ * @tc.name: WaterFlowSegmentNaNTest001
+ * @tc.desc: Test SegmentedLayout with direct NaN height setting on item
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, WaterFlowSegmentNaNTest001, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+    CreateWaterFlowItems(37);
+
+    // Set section configuration, remove callback to use directly set height
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    auto sections = SECTION_7;
+    sections[0].onGetItemMainSizeByIndex = nullptr;
+    secObj->ChangeData(0, 0, sections);
+
+    MockPipelineContext::GetCurrent()->FlushBuildFinishCallbacks();
+    CreateDone();
+
+    // Directly set NaN height on item
+    auto item = GetChildFrameNode(frameNode_, 3);
+    item->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(100.0f), CalcLength(Dimension(std::numeric_limits<float>::quiet_NaN()))));
+
+    // Trigger layout update
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_BY_CHILD_REQUEST);
+    FlushUITasks();
+
+    // Verify index 3 is NaN
+    EXPECT_TRUE(std::isnan(GetChildHeight(frameNode_, 3)));
+
+    // Verify other item heights are normal
+    EXPECT_EQ(GetChildHeight(frameNode_, 2), 100.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 4), 100.0f);
+
+    // Verify position is correct
+    EXPECT_GE(GetChildY(frameNode_, 4), GetChildY(frameNode_, 3));
+}
+
+/**
+ * @tc.name: WaterFlowSegmentNaNTest002
+ * @tc.desc: Test onGetItemMainSizeByIndex returns NaN and gets converted to 0 in TopDown mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSegmentTest, WaterFlowSegmentNaNTest002, TestSize.Level1)
+{
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+
+    CreateWaterFlowItems(60);
+
+    // Create custom Section with onGetItemMainSizeByIndex returning NaN for specific index
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    std::vector<WaterFlowSections::Section> sections = {
+        {.itemsCount = 60, .crossCount = 3, .onGetItemMainSizeByIndex = [](int32_t index) -> float {
+            if (index == 5) {
+                return std::numeric_limits<float>::quiet_NaN();  // Index 5 returns NaN
+            }
+            // Other indices return normal values
+            return (index & 1) ? 200.0f : 100.0f;
+        }}
+    };
+    secObj->ChangeData(0, 0, sections);
+
+    CreateDone();
+    FlushUITasks();
+
+    EXPECT_EQ(pattern_->layoutInfo_->Mode(), WaterFlowLayoutMode::TOP_DOWN);
+
+    // Verify other item heights are normal
+    EXPECT_EQ(GetChildHeight(frameNode_, 4), 100.0f);  // Even index
+    EXPECT_EQ(GetChildHeight(frameNode_, 5), 0.0f);
+    EXPECT_EQ(GetChildHeight(frameNode_, 6), 100.0f);  // Even index
+    EXPECT_EQ(GetChildHeight(frameNode_, 7), 200.0f);  // Odd index
+}
 } // namespace OHOS::Ace::NG

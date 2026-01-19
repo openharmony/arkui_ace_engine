@@ -14,20 +14,33 @@
  */
 
 export function className(object?: Object): string {
-    return object ? (Type.of(object) as ClassType).getName() : 'null'
+    return object ? Class.of(object).getName() : 'null'
 }
 
 export function isFunction(object?: Object): boolean {
-    return Type.of(object) instanceof FunctionType
+    return object instanceof Function
 }
 
 // Improve: This is an very ad hoc function,
 // but I could not find in ArkTS stdlib enough functionality
 // for a more generic way.
 export function functionOverValue<Value>(value: Value | (() => Value)): boolean {
-    return Type.of(value) instanceof FunctionType
+    return value instanceof Function
 }
 
 export function isNotPrimitive(value: Object): boolean {
-    return !Type.of(value).isPrimitive()
+    const ttype = Class.of(value)
+    return !(ttype === Class.from<void>() ||
+            ttype === Class.from<null>() ||
+            ttype === Class.from<undefined>() ||
+            ttype === Class.from<Boolean>() ||
+            ttype === Class.from<Byte>() ||
+            ttype === Class.from<Short>() ||
+            ttype === Class.from<Int>() ||
+            ttype === Class.from<Long>() ||
+            ttype === Class.from<Char>() ||
+            ttype === Class.from<Float>() ||
+            ttype === Class.from<Double>() ||
+            ttype === Class.from<Number>() ||
+            ttype === Class.from<String>())
 }

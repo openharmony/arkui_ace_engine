@@ -194,6 +194,7 @@ private:
     void CalculateStrokeWidth(const SizeF& contentSize);
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromMainTree() override;
     void OnModifyDone() override;
     void DumpInfo() override;
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;

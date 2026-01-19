@@ -38,8 +38,8 @@
 #include "base/resource/internal_resource.h"
 #include "core/common/ai/image_analyzer_mgr.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/video/video_theme.h"
-#include "core/components/video/video_utils.h"
+#include "core/components_ng/pattern/video/video_theme.h"
+#include "core/components_ng/pattern/video/video_utils.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/layout/layout_algorithm.h"
@@ -925,6 +925,9 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest021, TestSize.Level1)
         .WillOnce(Return(true))
         .WillOnce(Return(false))
         .WillOnce(Return(true));
+    EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), PrepareAsync())
+        .WillOnce(Return(0))
+        .WillOnce(Return(-1));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetRenderFirstFrame(false))
         .WillOnce(Return(0));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), SetRenderFirstFrame(true))
@@ -1273,9 +1276,6 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest029, TestSize.Level1)
      * @tc.steps: step2. Call OnColorConfigurationUpdate with different childNode in controlBar_.
      * @tc.expected: BackgroundColor of renderContext is set.
      */
-    EXPECT_CALL(*(AceType::DynamicCast<MockRenderSurface>(videoPattern->renderSurface_)), IsSurfaceValid())
-        .Times(1)
-        .WillOnce(Return(true));
     EXPECT_CALL(*(AceType::DynamicCast<MockMediaPlayer>(videoPattern->mediaPlayer_)), IsMediaPlayerValid())
         .WillRepeatedly(Return(false));
     ASSERT_NE(videoPattern->controlBar_, nullptr);

@@ -941,6 +941,20 @@ void WebModelStatic::SetOnDetectedBlankScreen(
     webEventHub->SetOnDetectedBlankScreenEvent(std::move(uiCallback));
 }
 
+void WebModelStatic::SetOnFirstScreenPaint(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto func = callback;
+    auto uiCallback = [func](const std::shared_ptr<BaseEventInfo> &info) {
+        CHECK_NULL_VOID(info);
+        func(info.get());
+    };
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnFirstScreenPaintEvent(std::move(uiCallback));
+}
+
 void WebModelStatic::SetBlankScreenDetectionConfig(
     FrameNode* frameNode, const BlankScreenDetectionConfig& detectConfig)
 {
@@ -1032,6 +1046,16 @@ void WebModelStatic::SetPermissionRequestEventId(
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnPermissionRequestEvent(std::move(uiCallback));
+}
+
+void WebModelStatic::SetPermissionClipboard(
+    FrameNode* frameNode, std::function<void(const BaseEventInfo* info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto uiCallback = [func = callback](const std::shared_ptr<BaseEventInfo>& info) { func(info.get()); };
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->SetPermissionClipboardCallback(std::move(uiCallback));
 }
 
 void WebModelStatic::SetScreenCaptureRequestEventId(
@@ -1129,6 +1153,15 @@ void WebModelStatic::SetWindowNewEvent(
     auto webEventHub = frameNode->GetEventHub<WebEventHub>();
     CHECK_NULL_VOID(webEventHub);
     webEventHub->SetOnWindowNewEvent(std::move(callback));
+}
+
+void WebModelStatic::SetWindowNewExtEvent(
+    FrameNode* frameNode, std::function<void(const std::shared_ptr<BaseEventInfo>& info)>&& callback)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webEventHub = frameNode->GetEventHub<WebEventHub>();
+    CHECK_NULL_VOID(webEventHub);
+    webEventHub->SetOnWindowNewExtEvent(std::move(callback));
 }
 
 void WebModelStatic::SetWindowExitEventId(
@@ -1491,6 +1524,14 @@ void WebModelStatic::SetEnableImageAnalyzer(FrameNode* frameNode, bool isEnabled
     auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
     CHECK_NULL_VOID(webPatternStatic);
     webPatternStatic->UpdateEnableImageAnalyzer(isEnabled);
+}
+
+void WebModelStatic::SetEnableAutoFill(FrameNode* frameNode, bool isEnabled)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto webPatternStatic = AceType::DynamicCast<WebPatternStatic>(frameNode->GetPattern());
+    CHECK_NULL_VOID(webPatternStatic);
+    webPatternStatic->UpdateEnableAutoFill(isEnabled);
 }
 
 void WebModelStatic::NotifyPopupWindowResultStatic(int32_t webId, bool result)

@@ -66,7 +66,7 @@ Opt_drawing_Canvas GetCanvasImpl(Ark_DrawingRenderingContext peer)
     auto peerImpl = reinterpret_cast<DrawingRenderingContextPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, invalid);
     auto canvas = peerImpl->GetCanvas();
-    return Converter::ArkValue<Opt_drawing_Canvas>(canvas);
+    return Converter::ArkValue<Opt_drawing_Canvas>(canvas.get());
 }
 void SetCanvasImpl(Ark_DrawingRenderingContext peer,
                    const Opt_drawing_Canvas* canvas)

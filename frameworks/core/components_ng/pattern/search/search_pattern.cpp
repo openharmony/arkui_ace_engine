@@ -297,6 +297,7 @@ void SearchPattern::OnModifyDone()
     Pattern::OnModifyDone();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto layoutProperty = host->GetLayoutProperty<SearchLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     InitMargin(layoutProperty);
@@ -829,7 +830,8 @@ void SearchPattern::OnClickButtonAndImage()
     if (!event.IsKeepEditable()) {
         textFieldPattern->StopEditing();
     }
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onSubmit");
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Search.onSubmit",
+        ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     TAG_LOGI(AceLogTag::ACE_SEARCH, "nodeId:[%{public}d] Search reportComponentChangeEvent onSubmit", host->GetId());
 }
 
@@ -2102,6 +2104,8 @@ void SearchPattern::OnColorConfigurationUpdate()
         UpdateImageIconNode(SEARCH_IMAGE_INDEX);
         UpdateImageIconNode(CANCEL_IMAGE_INDEX);
     }
+    ImageIconColorConfigurationUpdate(SEARCH_IMAGE_INDEX);
+    ImageIconColorConfigurationUpdate(CANCEL_IMAGE_INDEX);
     UpdateDividerColorMode();
     if (SystemProperties::ConfigChangePerform()) {
         auto searchTheme = GetTheme();
@@ -2212,10 +2216,11 @@ void SearchPattern::UpdateTextFieldColor()
         CHECK_NULL_VOID(textFrameNode);
         auto textLayoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
         CHECK_NULL_VOID(textLayoutProperty);
-        auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
-        CHECK_NULL_VOID(buttonLayoutProperty);
-        if (!buttonLayoutProperty->HasFontColor()) {
-            textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+        textLayoutProperty->UpdateTextColor(searchTheme->GetSearchButtonTextColor());
+        if (IsSearchButtonUsingThemeColor()) {
+            auto buttonLayoutProperty = buttonNode->GetLayoutProperty<ButtonLayoutProperty>();
+            CHECK_NULL_VOID(buttonLayoutProperty);
+            buttonLayoutProperty->UpdateFontColor(searchTheme->GetSearchButtonTextColor());
         }
         buttonNode->MarkModifyDone();
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
@@ -2466,6 +2471,7 @@ void SearchPattern::CreateOrUpdateSymbol(int32_t index, bool isCreateNode, bool 
     imageClickListener_ = nullptr;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
@@ -2519,6 +2525,7 @@ void SearchPattern::CreateOrUpdateImage(int32_t index, bool isCreateNode)
     imageClickListener_ = nullptr;
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
     auto iconFrameNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG,
@@ -2764,6 +2771,21 @@ void SearchPattern::UpdateImageIconNode(int32_t index)
         UpdateImageIconProperties(iconFrameNode, index);
         iconFrameNode->MarkModifyDone();
         iconFrameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    }
+}
+
+void SearchPattern::ImageIconColorConfigurationUpdate(int32_t index)
+{
+    if (!IsSymbolIcon(index)) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto iconFrameNode = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(index));
+        CHECK_NULL_VOID(iconFrameNode);
+        auto pattern = iconFrameNode->GetPattern<Pattern>();
+        CHECK_NULL_VOID(pattern);
+        auto imagePattern = AceType::DynamicCast<ImagePattern>(pattern);
+        CHECK_NULL_VOID(imagePattern);
+        pattern->OnColorConfigurationUpdate();
     }
 }
 

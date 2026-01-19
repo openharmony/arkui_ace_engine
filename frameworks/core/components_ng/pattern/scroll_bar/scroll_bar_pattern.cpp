@@ -340,7 +340,7 @@ void ScrollBarPattern::RegisterScrollBarEventTask()
     auto scrollCallback = [weak = WeakClaim(this)](double offset, int32_t source, bool isMouseWheelScroll) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_RETURN(pattern, false);
-        pattern->scrollBarProxy_->NotifyScrollBarNode(offset, source, isMouseWheelScroll);
+        pattern->scrollBarProxy_->NotifyScrollBarNode(offset, source, pattern->GetAxis(), isMouseWheelScroll);
         if (source == SCROLL_FROM_START) {
             pattern->ScrollPositionCallback(0.0, SCROLL_FROM_START);
         }
@@ -402,6 +402,26 @@ void ScrollBarPattern::InitScrollBarGestureEvent()
 void ScrollBarPattern::RegisterScrollBarOverDragEventTask()
 {
     CHECK_NULL_VOID(scrollBar_);
+    if (scrollBarProxy_->IsFreeScroll()) {
+        auto overScrollWithDelta = [weak = WeakClaim(this)](double delta) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_RETURN(pattern, false);
+            CHECK_NULL_RETURN(pattern->scrollBarProxy_, false);
+            return pattern->scrollBarProxy_->CanFreeOverScrollWithDelta(pattern->GetAxis(), delta);
+        };
+        scrollBar_->SetCanOverScrollWithDeltaFunc(overScrollWithDelta);
+        auto reachBarEdgeOverScroll = [weak = WeakClaim(this)](double velocity) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            CHECK_NULL_VOID(pattern->scrollBarProxy_);
+            OffsetF velocity2D = pattern->GetAxis() == Axis::VERTICAL ?
+                                    OffsetF { 0.0f, velocity } : OffsetF { velocity, 0.0f };
+            pattern->scrollBarProxy_->NotifyFreeScrollOverDrag(velocity2D);
+        };
+        scrollBar_->SetReachBarEdgeOverScroll(reachBarEdgeOverScroll);
+        return;
+    }
+
     scrollBar_->SetReachBarEdgeOverScroll([weak = WeakClaim(this)](double velocity) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
@@ -528,7 +548,7 @@ bool ScrollBarPattern::UpdateCurrentOffset(float delta, int32_t source, bool isM
     lastOffset_ = currentOffset_;
     currentOffset_ += delta;
     if (scrollBarProxy_ && lastOffset_ != currentOffset_) {
-        scrollBarProxy_->NotifyScrollableNode(-delta, source, AceType::WeakClaim(this), isMouseWheelScroll,
+        scrollBarProxy_->NotifyScrollableNode(-delta, source, AceType::WeakClaim(this), axis_, isMouseWheelScroll,
             isTouchScreen_ && CanOverScrollWithDelta(delta));
     }
     AddScrollBarLayoutInfo();
@@ -834,7 +854,7 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     ACE_SCOPED_TRACE("outer scrollBar HandleDragEnd velocity:%f", velocity);
     SetDragEndPosition(GetMainOffset(Offset(info.GetGlobalPoint().GetX(), info.GetGlobalPoint().GetY())));
     if (NearZero(velocity) || info.GetInputEventType() == InputEventType::AXIS) {
-        if (scrollEndCallback_) {
+        if (!DragEndOverScroll() && scrollEndCallback_) {
             if (scrollBarProxy_) {
                 scrollBarProxy_->NotifyScrollStop();
                 scrollBarProxy_->SetScrollSnapTrigger_(false);
@@ -849,7 +869,6 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
                 0, 0, GetScrollableDistance(), static_cast<float>(GetDragOffset()), isTouchScreen_);
         }
         scrollBarProxy_->NotifyScrollBarOnDidStopDragging(isWillFling);
-        DragEndOverScroll();
         return;
     }
     frictionPosition_ = 0.0;
@@ -892,15 +911,27 @@ void ScrollBarPattern::HandleDragEnd(const GestureEvent& info)
     }
 }
 
+void ScrollBarPattern::ProcessScrollOverDrag()
+{
+    CHECK_NULL_VOID(scrollBarProxy_);
+    if (scrollBarProxy_->IsFreeScroll()) {
+        frictionMotion_->Reset(friction_, 0, 0);
+        OffsetF velocity2D = axis_ == Axis::VERTICAL ?
+                            OffsetF { 0.0f, scrollBarFlingVelocity_ } :
+                            OffsetF { scrollBarFlingVelocity_, 0.0f };
+        scrollBarProxy_->NotifyFreeScrollOverDrag(velocity2D);
+    } else {
+        scrollBarProxy_->NotifyScrollOverDrag(scrollBarFlingVelocity_);
+    }
+}
+
 void ScrollBarPattern::ProcessFrictionMotion(double value)
 {
     auto offset = value - frictionPosition_;
     CalcFlingVelocity(offset);
     if (isTouchScreen_ && firstAtEdge_ && CanOverScrollWithDelta(.0f)) {
         firstAtEdge_ = false;
-        if (scrollBarProxy_) {
-            scrollBarProxy_->NotifyScrollOverDrag(scrollBarFlingVelocity_);
-        }
+        ProcessScrollOverDrag();
     } else {
         ScrollPositionCallback(offset, SCROLL_FROM_BAR_FLING);
     }
@@ -909,7 +940,7 @@ void ScrollBarPattern::ProcessFrictionMotion(double value)
 
 void ScrollBarPattern::ProcessFrictionMotionStop()
 {
-    if (scrollEndCallback_) {
+    if (scrollEndCallback_ && firstAtEdge_) {
         if (scrollBarProxy_) {
             scrollBarProxy_->NotifyScrollStop();
         }
@@ -1245,17 +1276,27 @@ void ScrollBarPattern::CalcFlingVelocity(float offset)
     lastVsyncTime_ = currentVsync;
 }
 
-void ScrollBarPattern::DragEndOverScroll()
+bool ScrollBarPattern::DragEndOverScroll()
 {
-    if (isTouchScreen_ && scrollBarProxy_ && CanOverScrollWithDelta(.0f)) {
-        scrollBarProxy_->NotifyScrollOverDrag(.0f);
+    CHECK_NULL_RETURN(scrollBarProxy_, false);
+    bool isFreeScroll = scrollBarProxy_->IsFreeScroll();
+    if (isTouchScreen_ && CanOverScrollWithDelta(.0f)) {
+        if (isFreeScroll) {
+            scrollBarProxy_->NotifyFreeScrollOverDrag({ .0f, .0f });
+        } else {
+            scrollBarProxy_->NotifyScrollOverDrag(.0f);
+        }
+        return true;
     }
+    return false;
 }
 
 bool ScrollBarPattern::CanOverScrollWithDelta(double delta) const
 {
     CHECK_NULL_RETURN(scrollBarProxy_, false);
-    return scrollBarProxy_->CanOverScrollWithDelta(delta);
+    bool isFreeScroll = scrollBarProxy_->IsFreeScroll();
+    return isFreeScroll ? scrollBarProxy_->CanFreeOverScrollWithDelta(axis_, delta) :
+        scrollBarProxy_->CanOverScrollWithDelta(delta);
 }
 
 bool ScrollBarPattern::Idle()

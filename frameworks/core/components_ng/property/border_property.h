@@ -88,7 +88,7 @@ struct BorderRadiusPropertyT {
 };
 
 template<>
-struct BorderRadiusPropertyT<Dimension> {
+struct ACE_FORCE_EXPORT BorderRadiusPropertyT<Dimension> {
     std::optional<Dimension> radiusTopLeft;
     std::optional<Dimension> radiusTopRight;
     std::optional<Dimension> radiusBottomRight;
@@ -114,7 +114,7 @@ struct BorderRadiusPropertyT<Dimension> {
           radiusBottomLeft(radiusBottomLeft)
     {}
 
-    bool operator==(const BorderRadiusPropertyT<Dimension>& value) const;
+    ACE_FORCE_EXPORT bool operator==(const BorderRadiusPropertyT<Dimension>& value) const;
     bool operator!=(const BorderRadiusPropertyT<Dimension>& value) const;
 
     void SetRadius(const Dimension& borderRadius);
@@ -443,7 +443,7 @@ struct BorderWidthPropertyT<float> {
     }
 };
 
-struct BorderStyleProperty {
+struct ACE_FORCE_EXPORT BorderStyleProperty {
     std::optional<BorderStyle> styleLeft;
     std::optional<BorderStyle> styleRight;
     std::optional<BorderStyle> styleTop;

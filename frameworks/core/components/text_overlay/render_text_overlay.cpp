@@ -19,6 +19,8 @@
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/focus_collaboration/render_focus_collaboration.h"
 #include "core/components/stack/stack_element.h"
+#include "core/common/dynamic_module_helper.h"
+#include "compatible/components/text_field/modifier/text_field_modifier.h"
 #ifdef WEB_SUPPORTED
 #include "core/components/web/render_web.h"
 #endif
@@ -46,6 +48,19 @@ constexpr float KEYFRAME_ENDING = 1.0f;
 constexpr int32_t MORE_ANIMATION_DURATION = 300; // Duration of more icon animation.
 constexpr int32_t ANIMATION_DURATION = 350;      // Duration of clip and translate animation
 
+const ArkUITextFieldModifierCompatible* GetTextFieldInnerModifier()
+{
+    static const ArkUITextFieldModifierCompatible* textFieldModifier_ = nullptr;
+    if (textFieldModifier_) {
+        return textFieldModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("textarea");
+    if (loader) {
+        textFieldModifier_ = reinterpret_cast<const ArkUITextFieldModifierCompatible*>(loader->GetCustomModifier());
+        return textFieldModifier_;
+    }
+    return nullptr;
+}
 } // namespace
 
 RenderTextOverlay::RenderTextOverlay()
@@ -109,8 +124,9 @@ RenderTextOverlay::RenderTextOverlay()
 RenderTextOverlay::~RenderTextOverlay()
 {
     auto renderTextField = weakTextField_.Upgrade();
-    if (renderTextField) {
-        renderTextField->SetIsOverlayShowed(false, needStartTwinkling_);
+    auto* modifier = GetTextFieldInnerModifier();
+    if (renderTextField && modifier) {
+        modifier->setIsOverlayShowed(renderTextField, false, needStartTwinkling_);
     }
     auto spOverlayComponent = overlayComponent_.Upgrade();
     if (spOverlayComponent) {
@@ -298,6 +314,8 @@ void RenderTextOverlay::UpdateWeakTextField(const RefPtr<TextOverlayComponent>& 
     if (!renderTextField) {
         return;
     }
+    auto* modifier = GetTextFieldInnerModifier();
+    CHECK_NULL_VOID(modifier);
     auto callback = [weak = WeakClaim(this)](const OverlayShowOption& option) {
         auto overlay = weak.Upgrade();
         if (!overlay) {
@@ -324,7 +342,7 @@ void RenderTextOverlay::UpdateWeakTextField(const RefPtr<TextOverlayComponent>& 
             }
         }
     };
-    renderTextField->SetUpdateHandlePosition(callback);
+    modifier->setUpdateHandlePosition(renderTextField, callback);
 
     auto callbackDiameter = [weak = WeakClaim(this)](const double& value) {
         auto overlay = weak.Upgrade();
@@ -341,7 +359,7 @@ void RenderTextOverlay::UpdateWeakTextField(const RefPtr<TextOverlayComponent>& 
         overlay->handleDiameter_ = Dimension(value, DimensionUnit::VP);
         overlay->handleRadius_ = overlay->handleDiameter_ * FIFTY_PERCENT;
     };
-    renderTextField->SetUpdateHandleDiameter(callbackDiameter);
+    modifier->setUpdateHandleDiameter(renderTextField, callbackDiameter);
 
     auto callbackDiameterInner = [weak = WeakClaim(this)](const double& value) {
         auto overlay = weak.Upgrade();
@@ -358,7 +376,7 @@ void RenderTextOverlay::UpdateWeakTextField(const RefPtr<TextOverlayComponent>& 
         overlay->handleDiameterInner_ = Dimension(value, DimensionUnit::VP);
         overlay->handleRadiusInner_ = overlay->handleDiameterInner_ * FIFTY_PERCENT;
     };
-    renderTextField->SetUpdateHandleDiameterInner(callbackDiameterInner);
+    modifier->setUpdateHandleDiameterInner(renderTextField, callbackDiameterInner);
 
     auto onValueChange = [weak = WeakClaim(this)] {
         auto overlay = weak.Upgrade();
@@ -367,7 +385,7 @@ void RenderTextOverlay::UpdateWeakTextField(const RefPtr<TextOverlayComponent>& 
             overlay->PopOverlay();
         }
     };
-    renderTextField->SetOnValueChange(onValueChange);
+    modifier->setOnValueChange(renderTextField, onValueChange);
 
     auto onKeyboardClose = [weak = WeakClaim(this)](bool forceCloseKeyboard) {
         auto overlay = weak.Upgrade();
@@ -377,7 +395,7 @@ void RenderTextOverlay::UpdateWeakTextField(const RefPtr<TextOverlayComponent>& 
             overlay->PopOverlay();
         }
     };
-    renderTextField->SetOnKeyboardClose(onKeyboardClose);
+    modifier->setOnKeyboardClose(renderTextField, onKeyboardClose);
 
     auto onClipRectChanged = [weak = WeakClaim(this)](const Rect& clipRect) {
         auto overlay = weak.Upgrade();
@@ -386,7 +404,7 @@ void RenderTextOverlay::UpdateWeakTextField(const RefPtr<TextOverlayComponent>& 
             overlay->MarkNeedLayout();
         }
     };
-    renderTextField->SetOnClipRectChanged(onClipRectChanged);
+    modifier->setOnClipRectChanged(renderTextField, onClipRectChanged);
 }
 
 void RenderTextOverlay::UpdateWeakText(const RefPtr<TextOverlayComponent>& overlay)
@@ -873,8 +891,9 @@ void RenderTextOverlay::HandleClick(const Offset& clickOffset)
         childRightBoundary_ = 0.0;
         showOption_.showMenu = true;
         auto textField = weakTextField_.Upgrade();
-        if (textField) {
-            textField->SetIsOverlayShowed(true, false);
+        auto* modifier = GetTextFieldInnerModifier();
+        if (textField && modifier) {
+            modifier->setIsOverlayShowed(textField, true, false);
         }
         if (onRebuild_) {
             OnFocusChange(RenderStatus::FOCUS);
@@ -895,9 +914,10 @@ void RenderTextOverlay::HandleDragStart(const Offset& startOffset)
     }
 
     // Mark start and end index
-    if (textField) {
-        startIndex_ = textField->GetEditingValue().selection.GetStart();
-        endIndex_ = textField->GetEditingValue().selection.GetEnd();
+    auto* modifier = GetTextFieldInnerModifier();
+    if (textField && modifier) {
+        startIndex_ = modifier->getEditingStart(textField);
+        endIndex_ = modifier->getEditingEnd(textField);
         if (startHandleRegion_.ContainsInRegion(startOffset.GetX(), startOffset.GetY())) {
             textField->SetInitIndex(endIndex_);
         } else {
@@ -1202,8 +1222,8 @@ void RenderTextOverlay::PopOverlay()
         hasPoped_ = true;
         stack->PopTextOverlay();
     }
-    textField->SetIsOverlayShowed(false, needStartTwinkling_);
-    textField->SetTextOverlayPushed(false);
+    auto* modifier = GetTextFieldInnerModifier();
+    modifier->setIsOverlayShowed(textField, false, needStartTwinkling_);
 }
 
 void RenderTextOverlay::OnFocusChange(RenderStatus renderStatus)

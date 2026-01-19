@@ -23,7 +23,6 @@
 
 #include "base/error/error_code.h"
 #include "base/log/ace_scoring_log.h"
-#include "base/memory/referenced.h"
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/bindings.h"
@@ -32,8 +31,9 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_drawing_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_offscreen_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "bridge/declarative_frontend/jsview/models/canvas/canvas_rendering_context_2d_model_impl.h"
+#include "compatible/components/canvas/canvas_modifier_compatible.h"
 #include "core/common/container_scope.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/canvas/canvas_rendering_context_2d_model_ng.h"
 
 namespace OHOS::Ace {
@@ -44,6 +44,24 @@ struct CanvasAsyncCxt {
 } // namespace OHOS::Ace
 
 namespace OHOS::Ace::Framework {
+
+namespace {
+#ifndef NG_BUILD
+const ArkUICanvasModifierCompatible* GetCanvasInnerModifier()
+{
+    static const ArkUICanvasModifierCompatible* canvasModifier_ = nullptr;
+    if (canvasModifier_) {
+        return canvasModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("canvas");
+    if (loader) {
+        canvasModifier_ = reinterpret_cast<const ArkUICanvasModifierCompatible*>(loader->GetCustomModifier());
+        return canvasModifier_;
+    }
+    return nullptr;
+}
+#endif
+}
 
 JSRenderingContext::JSRenderingContext()
 {
@@ -68,7 +86,15 @@ JSRenderingContext::JSRenderingContext()
         canvasRenderingContext2DModel->SetOnAttach(onAttach);
         canvasRenderingContext2DModel->SetOnDetach(onDetach);
     } else {
-        renderingContext2DModel_ = AceType::MakeRefPtr<Framework::CanvasRenderingContext2DModelImpl>();
+        const auto* modifier = GetCanvasInnerModifier();
+        if (modifier == nullptr) {
+            LOGF("Cannot find video modifier");
+            abort();
+        }
+        void* renderContext = modifier->createCanvasRenderingContextModel(false);
+        if (renderContext != nullptr) {
+            renderingContext2DModel_ = AceType::Claim(reinterpret_cast<RenderingContext2DModel*>(renderContext));
+        }
     }
 #endif
 }
@@ -525,9 +551,13 @@ void JSRenderingContext::JsOn(const JSCallbackInfo& info)
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter error.");
         return;
     }
+    TAG_LOGI(AceLogTag::ACE_CANVAS, "Add %{public}s callback to Canvas.",
+        type == CanvasCallbackType::ON_ATTACH ? "onAttach" : "onDetach");
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
-    std::function<void()> onFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
-                                       id = instanceId_]() {
+    std::function<void()> onFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), id = instanceId_,
+                                       callbackType = type]() {
+        TAG_LOGI(AceLogTag::ACE_CANVAS, "Canvas is executing %{public}s callback.",
+            callbackType == CanvasCallbackType::ON_ATTACH ? "onAttach" : "onDetach");
         ContainerScope scope(id);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute();

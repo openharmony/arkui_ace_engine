@@ -14,13 +14,14 @@
  */
 /// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
 /// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
-/// <reference path="./disposable.ts" />
-class BuilderNodeCommonBase extends Disposable {
+class BuilderNodeCommonBase {
   protected _JSBuilderNode: JSBuilderNode | ReactiveBuilderNodeBase;
   // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.
   protected nodePtr_: NodePtr;
+  protected _isDisposed: boolean;
+
   constructor() {
-    super();
+    this._isDisposed = false;
   }
   public update(params: Object) {
     this._JSBuilderNode.update(params);
@@ -50,11 +51,11 @@ class BuilderNodeCommonBase extends Disposable {
     if (this.isDisposed()) {
       return;
     }
-    super.dispose();
+    this._isDisposed = true;
     this._JSBuilderNode.dispose();
   }
   public isDisposed(): boolean {
-    return super.isDisposed() && (this._JSBuilderNode?.isDisposed() ?? true);
+    return this._isDisposed && (this._JSBuilderNode?.isDisposed() ?? true);
   }
   public reuse(param?: Object): void {
     this._JSBuilderNode.reuse(param);
@@ -90,7 +91,7 @@ class BuilderNode extends BuilderNodeCommonBase {
   }
 }
 
-class JSBuilderNode extends BaseNode implements IDisposable {
+class JSBuilderNode extends BaseNode {
   protected params_: Object;
   private uiContext_: UIContext;
   private frameNode_: FrameNode;
@@ -98,7 +99,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
   private _supportNestingBuilder: boolean;
   private _proxyObjectParam: Object;
   private bindedViewOfBuilderNode: ViewPU;
-  private disposable_: Disposable;
+  private _isDisposed: boolean;
   private inheritFreeze: boolean;
   private allowFreezeWhenInactive: boolean;
   private parentallowFreeze: boolean;
@@ -113,7 +114,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.uiContext_ = uiContext;
     this.updateFuncByElmtId = new UpdateFuncsByElmtId();
     this._supportNestingBuilder = false;
-    this.disposable_ = new Disposable();
+    this._isDisposed = false;
     this.inheritFreeze = false;
     this.allowFreezeWhenInactive = false;
     this.parentallowFreeze = false;
@@ -139,7 +140,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
           }
           else {
             // FIXME fix for mixed V2 - V3 Hierarchies
-            throw new Error('aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
+            throw new BusinessError(100029, 'aboutToReuseInternal: Recycle not implemented for ViewV2, yet');
           }
         } // if child
       });
@@ -158,7 +159,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
         }
         else {
           // FIXME fix for mixed V2 - V3 Hierarchies
-          throw new Error('aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
+          throw new BusinessError(100029, 'aboutToRecycleInternal: Recycle not yet implemented for ViewV2');
         }
       } // if child
     });
@@ -215,7 +216,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     if (this._supportNestingBuilder && this.isObject(this.params_)) {
       this._proxyObjectParam = new Proxy(this.params_, {
         set(target, property, val): boolean {
-          throw Error(`@Builder : Invalid attempt to set(write to) parameter '${property.toString()}' error!`);
+          throw new BusinessError(140109, `@Builder : Invalid attempt to set(write to) parameter '${property.toString()}' error!`);
         },
         get: (target, property, receiver): Object => { return this.params_?.[property] }
       });
@@ -227,7 +228,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     }
   }
   public clearChildBuilderNodeWeakMap(): void {
-    this.builderNodeWeakrefMap_.forEach((weakRefChild) => {
+    this.builderNodeWeakrefMap_?.forEach((weakRefChild) => {
       const child = weakRefChild?.deref();
       if (child instanceof JSBuilderNode) {
         child.__parentViewOfBuildNode = undefined;
@@ -468,9 +469,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
         try {
           return `${index}__${JSON.stringify(item)}`;
         } catch (e) {
-          throw new Error(
-            ` ForEach id ${elmtId}: use of default id generator function not possible on provided data structure. Need to specify id generator function (ForEach 3rd parameter). Application Error!`
-          );
+          throw new BusinessError(103801, ` ForEach id ${elmtId}: use of default id generator function not possible on provided data structure. Need to specify id generator function (ForEach 3rd parameter). Application Error!`);
         }
       };
     }
@@ -525,7 +524,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     if (this.isDisposed()) {
       return;
     }
-    this.disposable_.dispose();
+    this._isDisposed = true;
     if (this.nodePtr_) {
       getUINativeModule().frameNode.fireArkUIObjectLifecycleCallback(new WeakRef(this),
         'BuilderNode', this.getFrameNode()?.getNodeType() || 'BuilderNode', this.nodePtr_);
@@ -533,7 +532,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
     this.frameNode_?.dispose();
   }
   public isDisposed(): boolean {
-    return this.disposable_.isDisposed() && (this._nativeRef === undefined || this._nativeRef === null);
+    return this._isDisposed && (this._nativeRef === undefined || this._nativeRef === null);
   }
   public disposeNode(): void {
     super.disposeNode();
@@ -568,7 +567,7 @@ class JSBuilderNode extends BaseNode implements IDisposable {
   }
 
   public observeRecycleComponentCreation(name: string, recycleUpdateFunc: RecycleUpdateFunc): void {
-    throw new Error('custom component in @Builder used by BuilderNode does not support @Reusable');
+    throw new BusinessError(100030, 'custom component in @Builder used by BuilderNode does not support @Reusable');
   }
   public ifElseBranchUpdateFunctionDirtyRetaken(): void { }
   public forceCompleteRerender(deep: boolean): void { }

@@ -43,6 +43,7 @@ bool InputEventHub::ProcessMouseTestHit(const OffsetF& coordinateOffset, TouchTe
     }
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, false);
+    ACE_UINODE_TRACE(host);
     if (accessibilityHoverEventActuator_) {
         accessibilityHoverEventActuator_->OnCollectAccessibilityHoverEvent(
             coordinateOffset, getEventTargetImpl, result, host);

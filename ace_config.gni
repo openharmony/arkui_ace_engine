@@ -206,6 +206,7 @@ if (enable_glfw_window) {
 
 if (use_clang_coverage) {
   ace_common_defines += [ "USE_CLANG_COVERAGE" ]
+  ace_engine_feature_enable_codemerge = false
 }
 
 if (enable_ace_debug) {
@@ -259,13 +260,6 @@ if (defined(global_parts_info) &&
   ffrt_support = true
 } else {
   ffrt_support = false
-}
-
-if (defined(global_parts_info.multimedia_camera_framework)) {
-  enable_camera_framework = true
-  ace_common_defines += [ "CAMERA_FRAMEWORK_EXISTS" ]
-} else {
-  enable_camera_framework = false
 }
 
 if (defined(global_parts_info.multimedia_player_framework) || is_arkui_x) {

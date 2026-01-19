@@ -511,6 +511,9 @@ HWTEST_F(FocusHubTestNg, DumpFocusTree001, TestSize.Level1)
      * @tc.steps: step3. test function DumpFocusNodeTree.
      * @tc.expected: After DumpFocusTree, the DumpLog.description_ is empty.
      */
+    auto ss = std::make_unique<std::ostringstream>();
+    DumpLog::GetInstance().SetDumpFile(std::move(ss));
+
     int32_t depth = 1;
     focusHub->focusScopeId_ = "TEST";
     focusHub->isFocusScope_ = true;

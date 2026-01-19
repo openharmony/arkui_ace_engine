@@ -2793,7 +2793,6 @@ void SetTextInputSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 col
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextFieldModelNG::SetSelectedDragPreviewStyle(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
@@ -2809,18 +2808,19 @@ void SetTextInputSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 col
             pattern->UnRegisterResource("selectedDragPreviewStyleColor");
         }
     }
+    TextFieldModelNG::SetSelectedDragPreviewStyle(frameNode, result);
 }
 
 void ResetTextInputSelectedDragPreviewStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::ResetSelectedDragPreviewStyle(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         pattern->UnRegisterResource("selectedDragPreviewStyle");
     }
+    TextFieldModelNG::ResetSelectedDragPreviewStyle(frameNode);
 }
 
 ArkUI_Uint32 GetTextInputSelectedDragPreviewStyle(ArkUINodeHandle node)

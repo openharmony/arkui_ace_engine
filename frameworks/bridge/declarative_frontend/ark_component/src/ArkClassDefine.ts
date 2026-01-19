@@ -78,6 +78,25 @@ class ArkOnVisibleAreaChange {
   }
 }
 
+class ArkOnVisibleAreaApproximateChange {
+  ratios: Array<number>;
+  event: (isVisible: boolean, currentRatio: number) => void;
+  expectedUpdateInterval?: number;
+  measureFromViewport?: boolean;
+
+  constructor(ratios: Array<number> | undefined, event: (isVisible: boolean, currentRatio: number) => void | undefined,
+    expectedUpdateInterval?: number | undefined, measureFromViewport?: boolean | undefined) {
+    this.ratios = ratios;
+    this.event = event;
+    this.expectedUpdateInterval = expectedUpdateInterval;
+    this.measureFromViewport = measureFromViewport;
+  }
+  isEqual(another: ArkOnVisibleAreaApproximateChange) {
+    return this.ratios === another.ratios && this.event === another.event && this.expectedUpdateInterval === another.expectedUpdateInterval
+      && this.measureFromViewport === another.measureFromViewport;
+  }
+}
+
 class ArkBorderColor {
   startColor: LocalizedEdgeColors;
   endColor: LocalizedEdgeColors;

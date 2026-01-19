@@ -15,7 +15,7 @@
 
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 
-#include "core/components/video/video_theme.h"
+#include "core/components_ng/pattern/video/video_theme.h"
 #include "core/components_ng/layout/drawing_layout_utils.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 

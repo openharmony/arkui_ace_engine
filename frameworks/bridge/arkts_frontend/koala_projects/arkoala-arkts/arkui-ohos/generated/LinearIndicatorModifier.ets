@@ -149,6 +149,7 @@ export class LinearIndicatorModifier extends CommonMethodModifier implements Lin
         {
             this._indicatorStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._indicatorStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._indicatorStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -160,6 +161,7 @@ export class LinearIndicatorModifier extends CommonMethodModifier implements Lin
         {
             this._indicatorLoop_0_flag = AttributeUpdaterFlag.UPDATE
             this._indicatorLoop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._indicatorLoop_0_flag = AttributeUpdaterFlag.SKIP
@@ -171,6 +173,7 @@ export class LinearIndicatorModifier extends CommonMethodModifier implements Lin
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP

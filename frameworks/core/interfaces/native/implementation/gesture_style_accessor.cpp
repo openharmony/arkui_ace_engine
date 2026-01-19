@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/text/span/span_object.h"
 #include "core/interfaces/native/implementation/click_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_event_peer.h"
+#include "core/interfaces/native/implementation/touch_event_peer.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -32,10 +33,11 @@ void DestroyPeerImpl(Ark_GestureStyle peer)
 Ark_GestureStyle ConstructImpl(const Opt_GestureStyleInterface* value)
 {
     auto peer = PeerUtils::CreatePeer<GestureStylePeer>();
-    CHECK_NULL_RETURN(value, peer);
+    auto optValue = Converter::GetOptPtr(value);
 
-    auto onClickOpt = Converter::OptConvert<Callback_ClickEvent_Void>(value->value.onClick);
-    auto onLongClickOpt = Converter::OptConvert<Callback_GestureEvent_Void>(value->value.onLongPress);
+    auto onClickOpt = GET_OPT_FIELD(optValue, onClick);
+    auto onLongClickOpt = GET_OPT_FIELD(optValue, onLongPress);
+    auto onTouchOpt = GET_OPT_FIELD(optValue, onTouch);
     GestureStyle gestureInfo {};
     if (onClickOpt) {
         auto onClick = [arkCallback = CallbackHelper(*onClickOpt)](GestureEvent& info) -> void {
@@ -51,6 +53,14 @@ Ark_GestureStyle ConstructImpl(const Opt_GestureStyleInterface* value)
             arkCallback.Invoke(event.ArkValue());
         };
         gestureInfo.onLongPress = std::move(onLongClick);
+    }
+
+    if (onTouchOpt) {
+        auto onTouch = [arkCallback = CallbackHelper(*onTouchOpt)](TouchEventInfo& info) -> void {
+            const auto event = Converter::SyncEvent<Ark_TouchEvent>(info);
+            arkCallback.Invoke(event.ArkValue());
+        };
+        gestureInfo.onTouch = std::move(onTouch);
     }
 
     peer->span = AceType::MakeRefPtr<GestureSpan>(gestureInfo);

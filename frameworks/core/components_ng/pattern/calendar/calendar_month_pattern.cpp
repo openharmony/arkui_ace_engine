@@ -46,6 +46,10 @@ constexpr int32_t WEEK_ROW_INDEX = 1;
 
 RefPtr<NodePaintMethod> CalendarMonthPattern::CreateNodePaintMethod()
 {
+    auto host = GetHost();
+    if (host) {
+        ACE_UINODE_TRACE(host);
+    }
     if (AceApplicationInfo::GetInstance().IsAccessibilityEnabled()) {
         InitCurrentVirtualNode();
     }
@@ -288,6 +292,7 @@ void CalendarMonthPattern::SetVirtualNodeUserSelected(int32_t index)
 void CalendarMonthPattern::InitVirtualButtonClickEvent(RefPtr<FrameNode> frameNode, int32_t index)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto gesture = frameNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto clickCallback = [weak = WeakClaim(this), index](GestureEvent& info) {
@@ -307,6 +312,7 @@ void CalendarMonthPattern::InitClickEvent()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto gesture = host->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     auto obtainedMonth = obtainedMonth_;

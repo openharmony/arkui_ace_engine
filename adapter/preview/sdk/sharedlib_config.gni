@@ -1,4 +1,4 @@
-# Copyright (c) 2023-2024 Huawei Device Co., Ltd.
+# Copyright (c) 2023-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -174,13 +174,73 @@ common_bin = [
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
-    {
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_hyperlink"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
     label = "//foundation/arkui/ace_engine/build:libace_compatible_components"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },
   {
     label = "//foundation/arkui/ace_engine/frameworks/core:ace_container_scope"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_counter"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_gauge"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_sidebar"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_checkbox"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_rating"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_waterflow"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_linearsplit"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_stepper"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_marquee"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_radio"
+    subsystem_name = "arkui"
+    part_name = "ace_engine"
+  },
+  {
+    label = "//foundation/arkui/ace_engine/adapter/ohos/build:arkui_slider"
     subsystem_name = "arkui"
     part_name = "ace_engine"
   },

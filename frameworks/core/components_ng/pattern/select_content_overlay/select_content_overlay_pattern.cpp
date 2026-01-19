@@ -22,7 +22,7 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
-void SelectContentOverlayPattern::UpdateMenuIsShow(bool menuIsShow, bool noAnimation)
+void SelectContentOverlayPattern::UpdateMenuIsShow(bool menuIsShow, bool noAnimation, bool showSubMenu)
 {
     if (info_->menuInfo.menuIsShow == menuIsShow) {
         return;
@@ -40,7 +40,9 @@ void SelectContentOverlayPattern::UpdateMenuIsShow(bool menuIsShow, bool noAnima
     } else {
         selectOverlayNode->UpdateToolBar(false, noAnimation);
     }
-    UpdateMenuAccessibility(menuIsShow);
+    if (!showSubMenu) {
+        UpdateMenuAccessibility(menuIsShow);
+    }
 }
 
 void SelectContentOverlayPattern::UpdateMenuInfo(const SelectMenuInfo& info)

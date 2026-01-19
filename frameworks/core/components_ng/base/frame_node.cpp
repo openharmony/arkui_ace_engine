@@ -17,6 +17,7 @@
 #include "core/components_ng/base/frame_node.h"
 
 #include "core/components_ng/base/node_render_status_monitor.h"
+#include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/event/event_constants.h"
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper_node.h"
@@ -497,7 +498,15 @@ FrameNode::FrameNode(
 {
     isLayoutNode_ = isLayoutNode;
     frameProxy_ = std::make_unique<FrameProxy>(this);
-    renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam(), isLayoutNode);
+    if (IsFree()) {
+        renderContext_->SetIsFree(IsFree());
+        renderContext_->SetHostNode(WeakClaim(this));
+    }
+    if (tag == V2::XCOMPONENT_ETS_TAG) {
+        renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam(), isLayoutNode);
+    } else {
+        renderContext_->InitContext(IsRootNode(), pattern_->GetContextParam(), isLayoutNode, this);
+    }
     paintProperty_ = pattern->CreatePaintProperty();
     layoutProperty_ = pattern->CreateLayoutProperty();
     // first create make layout property dirty.
@@ -522,8 +531,21 @@ void FrameNode::OnDelete()
     UINode::OnDelete();
 }
 
+void FrameNode::DetachRsNodeInAdoptedChildren()
+{
+    for (auto& adoptedChild : adoptedChildren_) {
+        CHECK_NULL_CONTINUE(adoptedChild);
+        adoptedChild->SetIsAdopted(false);
+        adoptedChild->SetAdoptParent(nullptr);
+        auto rsContext = adoptedChild->GetRenderContext();
+        CHECK_NULL_CONTINUE(rsContext);
+        rsContext->RemoveFromTree();
+    }
+}
+
 FrameNode::~FrameNode()
 {
+    DetachRsNodeInAdoptedChildren();
     ResetPredictNodes();
     for (const auto& destroyCallback : destroyCallbacksMap_) {
         if (destroyCallback.second) {
@@ -534,7 +556,7 @@ FrameNode::~FrameNode()
         removeCustomProperties_();
         removeCustomProperties_ = nullptr;
     }
-
+    CleanRenderTreeLifeCycle();
     pattern_->DetachFromFrameNode(this);
     if (IsOnMainTree()) {
         OnDetachFromMainTree(false, GetContextWithCheck());
@@ -551,6 +573,8 @@ FrameNode::~FrameNode()
 
 void FrameNode::CreateEventHubInner()
 {
+    auto nodeId = GetId();
+    ACE_UINODE_TRACE(nodeId);
     if (eventHub_ || !pattern_) {
         return;
     }
@@ -619,6 +643,7 @@ RefPtr<FrameNode> FrameNode::GetFrameNodeOnly(const std::string& tag, int32_t no
 RefPtr<FrameNode> FrameNode::CreateFrameNode(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern, bool isRoot)
 {
+    ACE_UINODE_TRACE(nodeId, tag, TypeInfoHelper::TypeName(AceType::RawPtr(pattern)));
     auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot);
     ElementRegister::GetInstance()->AddUINode(frameNode);
     frameNode->InitializePatternAndContext();
@@ -628,6 +653,7 @@ RefPtr<FrameNode> FrameNode::CreateFrameNode(
 RefPtr<FrameNode> FrameNode::CreateCommonNode(
     const std::string& tag, int32_t nodeId, bool isLayoutNode, const RefPtr<Pattern>& pattern, bool isRoot)
 {
+    ACE_UINODE_TRACE(nodeId, tag, TypeInfoHelper::TypeName(AceType::RawPtr(pattern)));
     auto frameNode = MakeRefPtr<FrameNode>(tag, nodeId, pattern, isRoot, isLayoutNode);
     ElementRegister::GetInstance()->AddUINode(frameNode);
     frameNode->InitializePatternAndContext();
@@ -693,6 +719,7 @@ void FrameNode::ProcessOffscreenNode(const RefPtr<FrameNode>& node, bool needRem
         auto node = weak.Upgrade();
         CHECK_NULL_VOID(node);
         node->ProcessOffscreenTask();
+        node->ProcessOffscreenResource();
         node->MarkModifyDone();
         node->UpdateLayoutPropertyFlag();
         bool isActive = node->IsActive();
@@ -982,6 +1009,8 @@ void FrameNode::DumpCommonInfo()
                             : "NA"));
     }
     DumpLog::GetInstance().AddDesc(std::string("IsOnMaintree: ").append(std::to_string(IsOnMainTree())));
+    DumpLog::GetInstance().AddDesc(
+        std::string("IsPendingOnMainRenderTree: ").append(IsPendingOnMainRenderTree() ? "true" : "false"));
     if (!NearZero(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))) {
         DumpLog::GetInstance().AddDesc(
             std::string("zIndex: ").append(std::to_string(renderContext_->GetZIndexValue(ZINDEX_DEFAULT_VALUE))));
@@ -1105,6 +1134,12 @@ void FrameNode::DumpSimplifyCommonInfo(std::shared_ptr<JsonValue>& json)
     if (!propInspectorId_->empty()) {
         json->Put("compid", propInspectorId_.value_or("").c_str());
     }
+    if (!IsActive()) {
+        json->Put("active", "false");
+    }
+    if (layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        json->Put("visible", "false");
+    }
 }
 
 void FrameNode::DumpSimplifyCommonInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json, ParamConfig config)
@@ -1197,13 +1232,9 @@ void FrameNode::DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json)
     json->Put("OverlayOffset", (offsetX.ToString() + "," + offsetY.ToString()).c_str());
 }
 
-bool FrameNode::CheckVisibleOrActive()
+bool FrameNode::CheckVisibleAndActive()
 {
-    if (layoutTags_.find(tag_) != layoutTags_.end()) {
-        return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE && IsActive();
-    } else {
-        return true;
-    }
+    return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE && IsActive();
 }
 
 void FrameNode::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
@@ -1240,6 +1271,7 @@ void FrameNode::DumpSimplifyInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& j
     if (pattern_) {
         auto child = JsonUtil::CreateSharedPtrJson();
         pattern_->DumpSimplifyInfoOnlyForParamConfig(child, config);
+        pattern_->AddExtraInfoWithParamConfig(json, config);
         MergeAttributesIntoJson(json, child);
     }
 }
@@ -1585,10 +1617,15 @@ bool FrameNode::RenderCustomChild(int64_t deadline)
 
 void FrameNode::NotifyColorModeChange(uint32_t colorMode)
 {
+    NotifyColorModeChange(colorMode, true);
+}
+
+void FrameNode::NotifyColorModeChange(uint32_t colorMode, bool recursive)
+{
     FireColorNDKCallback();
 
     if (GetLocalColorMode() != ColorMode::COLOR_MODE_UNDEFINED) {
-        UINode::NotifyColorModeChange(colorMode);
+        UINode::NotifyColorModeChange(colorMode, recursive);
         return;
     }
 
@@ -1618,7 +1655,7 @@ void FrameNode::NotifyColorModeChange(uint32_t colorMode)
     }
 
     ResourceParseUtils::SetNeedReload(needReload);
-    UINode::NotifyColorModeChange(colorMode);
+    UINode::NotifyColorModeChange(colorMode, recursive);
 }
 
 void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationChange)
@@ -1932,6 +1969,8 @@ void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
 
 void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t areaChangeMinDepth)
 {
+    ACE_BENCH_MARK_TRACE("TriggerOnAreaChange_node(%s/%d/%s/%s) active:%d isOnMainTree:%d", tag_.c_str(), nodeId_,
+        std::to_string(accessibilityId_).c_str(), GetInspectorId().value_or("").c_str(), isActive_, IsOnMainTree());
     if (!IsActive()) {
         if (IsDebugInspectorId()) {
             TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnAreaChange Node(%{public}s/%{public}d) is inActive", tag_.c_str(),
@@ -2158,6 +2197,9 @@ void FrameNode::TriggerVisibleAreaChangeCallback(
     ProcessThrottledVisibleCallback(forceDisappear);
     auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
     auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
+    ACE_BENCH_MARK_TRACE("TriggerVisibleAreaChange_node(%s/%d/%s/%s) [%d/%d/%d/%d]", tag_.c_str(), nodeId_,
+        std::to_string(accessibilityId_).c_str(), GetInspectorId().value_or("").c_str(), isActive_, IsOnMainTree(),
+        hasInnerCallback, hasUserCallback);
     if (!hasInnerCallback && !hasUserCallback) {
         ClearCachedIsFrameDisappear();
         return;
@@ -2517,6 +2559,11 @@ std::optional<UITask> FrameNode::CreateRenderTask(bool forceUseMainThread)
             CHECK_NULL_VOID(pipeline);
             pipeline->SetNeedRenderNode(weak);
         }
+        {
+            auto pipeline = self->GetContextRefPtr();
+            CHECK_NULL_VOID(pipeline);
+            pipeline->SetNeedRenderNodeByUniqueId(weak);
+        }
         if (self->IsObservedByDrawChildren()) {
             auto pipeline = self->GetContextRefPtr();
             CHECK_NULL_VOID(pipeline);
@@ -2740,6 +2787,7 @@ void FrameNode::RebuildRenderContextTree()
     if (pipeline && !pipeline->CheckThreadSafe()) {
         LOGW("RebuildRenderContextTree doesn't run on UI thread!");
     }
+    auto oldFrameChildren = std::move(frameChildren_);
     frameChildren_.clear();
     std::list<RefPtr<FrameNode>> children;
     // generate full children list, including disappear children.
@@ -2756,6 +2804,11 @@ void FrameNode::RebuildRenderContextTree()
     for (const auto& child : children) {
         frameChildren_.emplace(child);
     }
+
+    // Notify AttachToRenderTree / DetachFromRenderTree.
+    ProcessRenderTreeDiff(children, oldFrameChildren);
+    oldFrameChildren.clear();
+
     renderContext_->RebuildFrame(this, children);
     pattern_->OnRebuildFrame();
     if (isDeleteRsNode_) {
@@ -2766,6 +2819,99 @@ void FrameNode::RebuildRenderContextTree()
         }
     }
     needSyncRenderTree_ = false;
+}
+
+void FrameNode::ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChildren,
+    const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& oldChildren)
+{
+    if (!renderContext_) {
+        return;
+    }
+    ACE_LAYOUT_SCOPED_TRACE("ProcessRenderTreeDiff");
+    std::unordered_set<FrameNode*> oldChildrenSet;
+    for (const auto& item : oldChildren) {
+        auto child = item.Upgrade();
+        if (child) {
+            oldChildrenSet.emplace(AceType::RawPtr(child));
+        }
+    }
+    bool isOnMainTree = renderContext_->IsOnRenderTree();
+    for (const auto& item: newChildren) {
+        auto* childPtr = AceType::RawPtr(item);
+        if (oldChildrenSet.find(childPtr) == oldChildrenSet.end()) {
+            item->AttachToRenderTree(isOnMainTree);
+        } else {
+            oldChildrenSet.erase(childPtr);
+        }
+    }
+
+    for (auto* item : oldChildrenSet) {
+        item->DetachFromRenderTree(isOnMainTree);
+    }
+}
+
+// Cleans up the render tree lifecycle by detaching the node if it is still in a pending attached state.
+void FrameNode::CleanRenderTreeLifeCycle()
+{
+    if (isPendingState_) {
+        DetachFromRenderTree(true, true);
+    }
+}
+
+void FrameNode::DetachFromRenderTree(bool isOnMainTree, bool recursive)
+{
+    if (!isOnMainTree || !isPendingState_) {
+        return;
+    }
+    isPendingState_ = false;
+    if (recursive) {
+        for (const auto& item : frameChildren_) {
+            auto child = item.Upgrade();
+            if (child) {
+                child->DetachFromRenderTree(isOnMainTree);
+            }
+        }
+    }
+    OnDetachFromMainRenderTree();
+}
+
+void FrameNode::AttachToRenderTree(bool isOnMainTree, bool recursive)
+{
+    if (!isOnMainTree || isPendingState_) {
+        return;
+    }
+    isPendingState_ = true;
+    OnAttachToMainRenderTree();
+    if (recursive) {
+        for (const auto& item : frameChildren_) {
+            auto child = item.Upgrade();
+            if (child) {
+                child->AttachToRenderTree(isOnMainTree);
+            }
+        }
+    }
+}
+
+void FrameNode::OnDetachFromMainRenderTree()
+{
+    if (pattern_) {
+        pattern_->OnDetachFromMainRenderTree();
+    }
+}
+
+void FrameNode::OnAttachToMainRenderTree()
+{
+    if (pattern_) {
+        pattern_->OnAttachToMainRenderTree();
+    }
+}
+
+void FrameNode::OnOffscreenProcessResource()
+{
+    UINode::OnOffscreenProcessResource();
+    if (pattern_) {
+        pattern_->OnOffscreenProcessResource();
+    }
 }
 
 void FrameNode::MarkModifyDone()
@@ -3473,7 +3619,8 @@ HitTestResult FrameNode::TouchTest(const PointF& globalPoint, const PointF& pare
         // combine into exclusive recognizer group.
         auto gestureHub = GetOrCreateGestureEventHub();
         if (gestureHub) {
-            gestureHub->CombineIntoExclusiveRecognizer(globalPoint, localPoint, result, touchId);
+            gestureHub->CombineIntoExclusiveRecognizer(
+                globalPoint, localPoint, result, touchId, touchRestrict.touchEvent.originalId);
         }
     }
 
@@ -3957,6 +4104,8 @@ void FrameNode::OnHoverWithHightLight(bool isHover) const
 
 RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub()
 {
+    auto nodeId = GetId();
+    ACE_UINODE_TRACE(nodeId);
     if (focusHub_) {
         return focusHub_;
     }
@@ -3971,6 +4120,8 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub()
 
 const RefPtr<DragDropRelatedConfigurations>& FrameNode::GetOrCreateDragDropRelatedConfigurations()
 {
+    auto nodeId = GetId();
+    ACE_UINODE_TRACE(nodeId);
     if (dragDropRelatedConfigurations_) {
         return dragDropRelatedConfigurations_;
     }
@@ -4787,6 +4938,7 @@ bool FrameNode::OnRemoveFromParent(bool allowTransition)
     if (!allowTransition || RemoveImmediately()) {
         // directly remove, reset parent and depth
         ResetParent();
+        MarkNodeTreeFree(!allowTransition);
         return true;
     }
     // delayed remove, will move self into disappearing children
@@ -5698,6 +5850,7 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
         if (GetInspectorId()) {
             context->OnLayoutCompleted(GetInspectorId()->c_str());
         }
+        context->OnLayoutCompleted(GetId());
         if (eventHub_) {
             eventHub_->FireLayoutNDKCallback(context);
         }
@@ -5721,6 +5874,12 @@ bool FrameNode::OnLayoutFinish(bool& needSyncRsNode, DirtySwapConfig& config)
     ProcessAccessibilityVirtualNode();
     CHECK_NULL_RETURN(context, false);
     context->SendUpdateVirtualNodeFocusEvent();
+
+    if (IsObservedByLayoutChildren() && !config.skipMeasure && !config.skipLayout) {
+        auto pipeline = GetContextRefPtr();
+        CHECK_NULL_RETURN(pipeline, true);
+        pipeline->SetNeedRenderForLayoutChildrenNode(GetObserverParentForLayoutChildren());
+    }
     return true;
 }
 
@@ -6043,6 +6202,7 @@ void FrameNode::DoSetActiveChildRange(int32_t start, int32_t end, int32_t cacheS
 
 void FrameNode::OnInspectorIdUpdate(const std::string& id)
 {
+    FREE_NODE_CHECK(this, OnInspectorIdUpdate, id);
     renderContext_->UpdateNodeName(id);
     ElementRegister::GetInstance()->AddFrameNodeByInspectorId(id, AceType::WeakClaim(this), this->GetId());
     auto parent = GetAncestorNodeOfFrame(true);
@@ -7887,6 +8047,27 @@ void FrameNode::OnContentChangeUnregister()
     }
 }
 
+void FrameNode::SetIsFree(bool isFree)
+{
+    if (renderContext_) {
+        renderContext_->SetIsFree(isFree);
+    }
+    UINode::SetIsFree(isFree);
+    SetOverlayNodeIsFree(isFree);
+}
+
+void FrameNode::SetOverlayNodeIsFree(bool isFree)
+{
+    if (!overlayNode_) {
+        return;
+    }
+    if (isFree) {
+        overlayNode_->MarkNodeTreeFree();
+    } else {
+        overlayNode_->MarkNodeTreeNotFree();
+    }
+}
+
 std::vector<std::pair<float, float>> FrameNode::GetSpecifiedContentOffsets(const std::string& content)
 {
     std::vector<std::pair<float, float>> offsets;
@@ -7903,10 +8084,10 @@ void FrameNode::HighlightSpecifiedContent(
     pattern->HighlightSpecifiedContent(content, nodeIds, configs);
 }
 
-void FrameNode::ReportSelectedText()
+void FrameNode::ReportSelectedText(bool isRegister)
 {
     auto pattern = GetPattern();
     CHECK_NULL_VOID(pattern);
-    pattern->ReportSelectedText();
+    pattern->ReportSelectedText(isRegister);
 }
 } // namespace OHOS::Ace::NG

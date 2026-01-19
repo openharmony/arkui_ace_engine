@@ -18,7 +18,7 @@
 #include "core/components/scroll/render_scroll.h"
 #include "core/components/scroll_bar/render_scroll_bar.h"
 #include "core/components_v2/grid/render_grid_scroll.h"
-#include "core/components_v2/list/render_list.h"
+#include "compatible/components/list_v2/render_list.h"
 #include "core/components_v2/water_flow/render_water_flow.h"
 
 namespace OHOS::Ace {

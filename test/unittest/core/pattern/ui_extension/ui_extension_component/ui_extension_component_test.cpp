@@ -332,7 +332,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternCallbackTest, TestSize.Le
     ASSERT_NE(pattern, nullptr);
 
     pattern->AttachToFrameNode(uiExtNode);
-    auto sessionWrapper = AceType::DynamicCast<SessionWrapperImpl>(pattern->sessionWrapper_);
+    auto sessionWrapper =
+        AceType::DynamicCast<SessionWrapperImpl>(pattern->sessionWrapper_);
     ASSERT_NE(sessionWrapper, nullptr);
     EXPECT_EQ(pattern->instanceId_, Container::CurrentId());
     EXPECT_EQ(pattern->instanceId_, sessionWrapper->instanceId_);
@@ -1646,7 +1647,8 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentTest010, TestSize.Level
     ASSERT_EQ(pattern->accessibilityChildTreeCallback_, nullptr);
     pattern->OnUeaAccessibilityEventAsync();
 
-    pattern->accessibilityChildTreeCallback_ = std::make_shared<UIExtensionAccessibilityChildTreeCallback>(pattern, 1);
+    pattern->accessibilityChildTreeCallback_ =
+        std::make_shared<UIExtensionAccessibilityChildTreeCallback>(pattern, 1);
     ASSERT_NE(pattern->accessibilityChildTreeCallback_, nullptr);
 
     auto frameNode = pattern->frameNode_.Upgrade();
@@ -2142,5 +2144,39 @@ HWTEST_F(UIExtensionComponentTestNg, UIExtensionPatternVisibleTest, TestSize.Lev
     EXPECT_EQ(pattern->isVisible_, false);
     pattern->OnVisibleChange(true);
     EXPECT_EQ(pattern->isVisible_, true);
+}
+
+/**
+ * @tc.name: UIExtensionComponentUpdateWMSUIExtPropertyTest
+ * @tc.desc: Test the method of pattern UpdateWMSUIExtProperty
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestNg, UIExtensionComponentUpdateWMSUIExtPropertyTest, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    /**
+     * @tc.steps: step1. construct a UIExtensionComponent Node
+     */
+    auto uiExtensionNodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto uiExtensionNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, uiExtensionNodeId,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiExtensionNode, nullptr);
+    EXPECT_EQ(uiExtensionNode->GetTag(), V2::UI_EXTENSION_COMPONENT_ETS_TAG);
+    auto pattern = uiExtensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. test UpdateWMSUIExtProperty
+     */
+    UIContentBusinessCode code = UIContentBusinessCode::UNDEFINED;
+    AAFwk::Want data;
+    RSSubsystemId id = RSSubsystemId::ARKUI_UIEXT;
+    pattern->UpdateWMSUIExtProperty(code, data, id);
+    auto options = UIExtOptions();
+    options.isSendBackground = true;
+    pattern->UpdateWMSUIExtProperty(code, data, id, options);
+    pattern->state_ = UIExtensionPattern::AbilityState::FOREGROUND;
+    pattern->UpdateWMSUIExtProperty(code, data, id);
+#endif
 }
 } // namespace OHOS::Ace::NG

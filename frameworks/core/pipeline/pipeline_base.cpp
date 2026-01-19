@@ -27,7 +27,6 @@
 #include "core/common/window.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components/container_modal/container_modal_constants.h"
-#include "core/components/custom_paint/render_custom_paint.h"
 #include "core/components_ng/base/ui_node_gc.h"
 #include "core/components_ng/render/animation_utils.h"
 #include "core/image/image_provider.h"
@@ -47,6 +46,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
       weakFrontend_(frontend), instanceId_(instanceId)
 {
     CHECK_NULL_VOID(frontend);
+    pipelineCreateTime_ = GetSysTimestamp();
     frontendType_ = frontend->GetType();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
     windowManager_ = AceType::MakeRefPtr<WindowManager>();
@@ -73,6 +73,7 @@ PipelineBase::PipelineBase(std::shared_ptr<Window> window, RefPtr<TaskExecutor> 
       weakFrontend_(frontend), instanceId_(instanceId), platformResRegister_(std::move(platformResRegister))
 {
     CHECK_NULL_VOID(frontend);
+    pipelineCreateTime_ = GetSysTimestamp();
     frontendType_ = frontend->GetType();
     eventManager_ = AceType::MakeRefPtr<EventManager>();
     windowManager_ = AceType::MakeRefPtr<WindowManager>();
@@ -504,11 +505,6 @@ void PipelineBase::TryLoadImageInfo(const std::string& src, std::function<void(b
     ImageProvider::TryLoadImageInfo(AceType::Claim(this), src, std::move(loadCallback));
 }
 
-RefPtr<OffscreenCanvas> PipelineBase::CreateOffscreenCanvas(int32_t width, int32_t height)
-{
-    return RenderOffscreenCanvas::Create(AceType::WeakClaim(this), width, height);
-}
-
 void PipelineBase::PostAsyncEvent(TaskExecutor::Task&& task, const std::string& name, TaskExecutor::TaskType type)
 {
     if (taskExecutor_) {
@@ -789,9 +785,13 @@ void PipelineBase::OnVsyncEvent(uint64_t nanoTimestamp, uint64_t frameCount)
 
 bool PipelineBase::ReachResponseDeadline() const
 {
+    auto currTime = GetSysTimestamp();
+    if (pipelineCreateTime_ + FeatureParam::GetSyncLoadStartupDelay() > currTime) {
+        return false;
+    }
     if (currRecvTime_ >= 0) {
-        auto deadline = FeatureParam::GetSyncloadResponseDeadline();
-        return currRecvTime_ + deadline < GetSysTimestamp();
+        int64_t deadline = FeatureParam::GetSyncloadResponseDeadline();
+        return currRecvTime_ + deadline < currTime;
     }
     return false;
 }

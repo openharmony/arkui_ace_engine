@@ -19,11 +19,11 @@
 #include <functional>
 #include <memory>
 
+#include "core/common/resource/resource_object.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/container_picker/container_picker_event_hub.h"
 #include "core/components_ng/pattern/container_picker/container_picker_layout_property.h"
-#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
 
@@ -49,6 +49,7 @@ public:
     static PickerIndicatorStyle GetIndicatorStyle(FrameNode* frameNode);
     static void ProcessResourceObj(const std::string& key, const RefPtr<ResourceObject>& resObj);
     static void ProcessResourceObj(FrameNode* frameNode, const std::string& key, const RefPtr<ResourceObject>& resObj);
+    static void SetChangeEvent(ContainerPickerChangeEvent&& onChange);
 };
 } // namespace OHOS::Ace::NG
 

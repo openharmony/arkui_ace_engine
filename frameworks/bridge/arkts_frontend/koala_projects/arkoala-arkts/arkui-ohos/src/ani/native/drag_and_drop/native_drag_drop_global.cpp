@@ -96,10 +96,11 @@ ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] a
     if (!modifier || !modifier->getDragAniModifier() || !env) {
         return result_obj;
     }
-    auto summary = std::make_shared<OHOS::UDMF::Summary>();
-    modifier->getDragAniModifier()->getDragSummary(dragEvent, reinterpret_cast<ani_ref>(summary.get()));
-
-    auto summary_obj = OHOS::UDMF::AniConverter::WrapSummary(env, summary);
+    auto summary = SharedPointerWrapper(std::make_shared<OHOS::UDMF::Summary>());
+    modifier->getDragAniModifier()->getDragSummary(dragEvent, summary);
+    std::shared_ptr<OHOS::UDMF::Summary> udmfSummary =
+        std::static_pointer_cast<OHOS::UDMF::Summary>(summary.GetSharedPtr());
+    auto summary_obj = OHOS::UDMF::AniConverter::WrapSummary(env, udmfSummary);
     ani_boolean isSummary;
     ani_class summaryClass;
     env->FindClass("@ohos.data.unifiedDataChannel.unifiedDataChannel.Summary", &summaryClass);
@@ -108,7 +109,6 @@ ani_object DragEventGetSummary([[maybe_unused]] ani_env* env, [[maybe_unused]] a
         return result_obj;
     }
     return summary_obj;
-    return {};
 }
 
 ani_string DragEveStartDataLoading([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -136,7 +136,57 @@ ani_string DragEveStartDataLoading([[maybe_unused]] ani_env* env, [[maybe_unused
     }
     auto result = AniUtils::StdStringToANIString(env, key);
     return result.value_or(value);
-    return value;
+}
+
+void DragEventSetDataLoadParams([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object data)
+{
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    auto dataValue = OHOS::UDMF::AniConverter::UnwrapDataLoadParams(env, data);
+    auto dataLoadParams = reinterpret_cast<void*>(&dataValue);
+    if (!dragEvent || !dataLoadParams) {
+        return;
+    }
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return;
+    }
+    modifier->getDragAniModifier()->setDragDataLoadParams(dragEvent, dataLoadParams);
+}
+
+void DragEventEnableInternalDropAnimation([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_string configuration)
+{
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    const auto* modifier = GetNodeAniModifier();
+    if (!dragEvent || !modifier || !modifier->getDragAniModifier() || !env) {
+        return;
+    }
+
+    auto isOnDrop = modifier->getDragAniModifier()->isOnDropPhase();
+    if (!isOnDrop) {
+        AniUtils::AniThrow(env, "Operation not allowed for current phase.", ERROR_CODE_DRAG_DATA_NOT_ONDROP);
+        return;
+    }
+
+    auto configStr = AniUtils::ANIStringToStdString(env, configuration);
+    int32_t ret;
+    modifier->getDragAniModifier()->enableInternalDropAnimation(dragEvent, configStr, ret);
+    switch (ret) {
+        case ERROR_CODE_NO_ERROR:
+            break;
+        case ERROR_CODE_PARAM_INVALID:
+            AniUtils::AniThrow(env, "Invalid input parameter.", ERROR_CODE_PARAM_INVALID);
+            break;
+        case ERROR_CODE_VERIFICATION_FAILED:
+            AniUtils::AniThrow(env, "Permission verification failed.", ERROR_CODE_VERIFICATION_FAILED);
+            break;
+        case ERROR_CODE_SYSTEMCAP_ERROR:
+            AniUtils::AniThrow(env, "Capability not supported.", ERROR_CODE_SYSTEMCAP_ERROR);
+            break;
+        default:
+            HILOGE("AceDrag Enable internal drop animation failed, return value is %{public}d", ret);
+    }
 }
 
 void DragEventSetPixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
@@ -203,7 +253,7 @@ std::string GetAniStringEnum(ani_env* env, ani_array array, ani_int index, bool&
 {
     ani_ref modeRef;
     if (ANI_OK != env->Object_CallMethodByName_Ref(
-        array, "$_get", "i:C{std.core.Object}", &modeRef, index)) {
+        array, "$_get", "i:Y", &modeRef, index)) {
         isSuccess = false;
         return "";
     }
@@ -233,7 +283,7 @@ void DragSetAllowDrop([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object
         return;
     }
 
-    if (!AniUtils::IsClassObject(env, array, "escompat.Array")) {
+    if (!AniUtils::IsClassObject(env, array, "std.core.Array")) {
         modifier->getDragAniModifier()->setDragAllowDrop(frameNode, nullptr, 0);
         return;
     }
@@ -305,7 +355,7 @@ void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
         if (isUndef != ANI_TRUE) {
             ani_object value = static_cast<ani_object>(onlyForLifting);
             ani_boolean onlyForLiftingValue;
-            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "unboxed", ":z", &onlyForLiftingValue)) {
+            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "toBoolean", ":z", &onlyForLiftingValue)) {
                 info.onlyForLifting = static_cast<bool>(onlyForLiftingValue);
             }
         }
@@ -317,7 +367,7 @@ void DragSetDragPreview([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_obje
         if (isUndef != ANI_TRUE) {
             ani_object value = static_cast<ani_object>(delayCreating);
             ani_boolean delayCreatingValue;
-            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "unboxed", ":z", &delayCreatingValue)) {
+            if (ANI_OK == env->Object_CallMethodByName_Boolean(value, "toBoolean", ":z", &delayCreatingValue)) {
                 info.delayCreating = static_cast<bool>(delayCreatingValue);
             }
         }
@@ -383,7 +433,7 @@ bool ParseDragPreviewMode(ani_env* env, ArkUIDragPreviewOption& previewOptions, 
         return true;
     }
     bool isAuto = false;
-    if (AniUtils::IsClassObject(env, modeObj, "escompat.Array")) {
+    if (AniUtils::IsClassObject(env, modeObj, "std.core.Array")) {
         ani_size length;
         ani_array arrayObj = static_cast<ani_array>(modeObj);
         if (ANI_OK != env->Array_GetLength(arrayObj, &length)) {
@@ -393,7 +443,7 @@ bool ParseDragPreviewMode(ani_env* env, ArkUIDragPreviewOption& previewOptions, 
         for (int32_t i = 0; i < lengthInt; i++) {
             ani_ref modeRef;
             if (ANI_OK != env->Object_CallMethodByName_Ref(
-                modeObj, "$_get", "i:C{std.core.Object}", &modeRef, (ani_int)i)) {
+                modeObj, "$_get", "i:Y", &modeRef, (ani_int)i)) {
                 return false;
             }
             if (AniUtils::IsUndefined(env, static_cast<ani_object>(modeRef))) {
@@ -571,7 +621,6 @@ void ParseDragInteractionOptions(ani_env* env, ArkUIDragPreviewOption& previewOp
     SetPropertyValueByName(env, dragInteractionOptions, "defaultAnimationBeforeLifting",
         previewOptions.defaultAnimationBeforeLifting);
     SetPropertyValueByName(env, dragInteractionOptions, "enableHapticFeedback", previewOptions.enableHapticFeedback);
-    SetPropertyValueByName(env, dragInteractionOptions, "isDragPreviewEnabled", previewOptions.isDragPreviewEnabled);
     SetPropertyValueByName(env, dragInteractionOptions, "enableEdgeAutoScroll", previewOptions.enableEdgeAutoScroll);
     SetPropertyValueByName(env, dragInteractionOptions, "isLiftingDisabled", previewOptions.isLiftingDisabled);
 }
@@ -610,12 +659,12 @@ ani_object ExtractorFromPtrToUnifiedData(ani_env* env, [[maybe_unused]] ani_obje
     if (!modifier || !modifier->getDragAniModifier() || !env) {
         return result_obj;
     }
-    auto unifiedDataPtr = reinterpret_cast<OHOS::UDMF::UnifiedData*>(
-        modifier->getDragAniModifier()->getUnifiedData(pointer));
+    auto unifiedDataPtr = modifier->getDragAniModifier()->getUnifiedData(pointer).GetSharedPtr();
     if (!unifiedDataPtr) {
         return result_obj;
     }
-    std::shared_ptr<OHOS::UDMF::UnifiedData> unifiedData(unifiedDataPtr);
+    std::shared_ptr<OHOS::UDMF::UnifiedData> unifiedData =
+        std::static_pointer_cast<OHOS::UDMF::UnifiedData>(unifiedDataPtr);
     auto unifiedData_obj = OHOS::UDMF::AniConverter::WrapUnifiedData(env, unifiedData);
     ani_boolean isUnifiedData;
     ani_class dataClass;
@@ -625,5 +674,17 @@ ani_object ExtractorFromPtrToUnifiedData(ani_env* env, [[maybe_unused]] ani_obje
         return result_obj;
     }
     return unifiedData_obj;
+}
+
+ani_long ExtractorFromDataLoadParamsToPtr(ani_env* env, [[maybe_unused]] ani_object object, ani_long dataLoadParams)
+{
+    ani_long result_obj = {};
+    return result_obj;
+}
+
+ani_object ExtractorFromPtrToDataLoadParams(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer)
+{
+    ani_object result_obj = {};
+    return result_obj;
 }
 } // namespace OHOS::Ace::Ani

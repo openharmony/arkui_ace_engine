@@ -1038,7 +1038,9 @@ class TextInputBorderModifier extends ModifierWithKey<ArkBorder> {
     }
   }
   checkObjectDiff(): boolean {
-    return this.value.checkObjectDiff(this.stageValue);
+    let emptyColor = new ArkBorderColor();
+    let hasBorderColor = !this.stageValue.arkColor.isEqual(emptyColor) || !this.value.arkColor.isEqual(emptyColor);
+    return hasBorderColor || this.value.checkObjectDiff(this.stageValue);
   }
 }
 
@@ -1096,6 +1098,16 @@ class TextInputBorderColorModifier extends ModifierWithKey<ResourceColor | EdgeC
     super(value);
   }
   static identity: Symbol = Symbol('textInputBorderColor');
+  applyStage(node: KNode, component?: ArkComponent): boolean {
+    if (this.stageValue === undefined || this.stageValue === null) {
+      this.value = this.stageValue;
+      this.applyPeer(node, true, component);
+      return true;
+    }
+    this.value = this.stageValue;
+    this.applyPeer(node, false, component);
+    return false;
+  }
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().textInput.resetBorderColor(node);
@@ -1600,6 +1612,23 @@ class TextInputSelectedDragPreviewStyleModifier extends ModifierWithKey<ArkSelec
       return !isBaseOrResourceEqual(this.stageValue.color, this.value.color);
   }
 }
+class TextInputDirectionModifier extends ModifierWithKey<TextDirection> {
+  constructor(value: TextDirection) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('textInputDirection');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().textInput.resetTextDirection(node);
+    }
+    else {
+      getUINativeModule().textInput.setTextDirection(node, this.value);
+    }
+  }
+  checkObjectDiff(): boolean {
+    return !isBaseOrResourceEqual(this.stageValue, this.value);
+  }
+}
 
 class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInputAttribute> {
   constructor(nativePtr: KNode, classType?: ModifierType) {
@@ -1841,7 +1870,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     return this;
   }
   showUnit(event: () => void): TextInputAttribute {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'showUnit function not supported in TextinputModifier class.');
   }
   showUnderline(value: boolean): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputShowUnderlineModifier.identity,
@@ -2092,6 +2121,10 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     arkSelectedDragPreviewStyle.color = value?.color;
     modifierWithKey(this._modifiersWithKeys, TextInputSelectedDragPreviewStyleModifier.identity,
         TextInputSelectedDragPreviewStyleModifier, arkSelectedDragPreviewStyle);
+    return this;
+  }
+  textDirection(value: TextDirection): this {
+    modifierWithKey(this._modifiersWithKeys, TextInputDirectionModifier.identity, TextInputDirectionModifier, value);
     return this;
   }
 }

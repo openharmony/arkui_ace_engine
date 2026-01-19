@@ -220,6 +220,7 @@ export class d1 extends ViewPU {
         this.__firstButtonBackgroundColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "firstButtonBackgroundColor");
         this.__secondButtonBackgroundColor = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.ohos_id_color_background_transparent'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "secondButtonBackgroundColor");
         this.__closeButtonFillColorWithTheme = new ObservedPropertyObjectPU({ "id": -1, "type": 10001, params: ['sys.color.icon_secondary'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" }, this, "closeButtonFillColorWithTheme");
+        this.__scrollMaxHeight = new ObservedPropertyObjectPU(undefined, this, "scrollMaxHeight");
         this.listener = mediaquery.matchMediaSync('(orientation: landscape)');
         this.setInitiallyProvidedValue(params);
         this.finalizeConstruction();
@@ -291,6 +292,9 @@ export class d1 extends ViewPU {
         if (params.closeButtonFillColorWithTheme !== undefined) {
             this.closeButtonFillColorWithTheme = params.closeButtonFillColorWithTheme;
         }
+        if (params.scrollMaxHeight !== undefined) {
+            this.scrollMaxHeight = params.scrollMaxHeight;
+        }
         if (params.listener !== undefined) {
             this.listener = params.listener;
         }
@@ -325,6 +329,7 @@ export class d1 extends ViewPU {
         this.__firstButtonBackgroundColor.purgeDependencyOnElmtId(rmElmtId);
         this.__secondButtonBackgroundColor.purgeDependencyOnElmtId(rmElmtId);
         this.__closeButtonFillColorWithTheme.purgeDependencyOnElmtId(rmElmtId);
+        this.__scrollMaxHeight.purgeDependencyOnElmtId(rmElmtId);
     }
     aboutToBeDeleted() {
         this.__icon.aboutToBeDeleted();
@@ -346,6 +351,7 @@ export class d1 extends ViewPU {
         this.__firstButtonBackgroundColor.aboutToBeDeleted();
         this.__secondButtonBackgroundColor.aboutToBeDeleted();
         this.__closeButtonFillColorWithTheme.aboutToBeDeleted();
+        this.__scrollMaxHeight.aboutToBeDeleted();
         SubscriberManager.Get().delete(this.id__());
         this.aboutToBeDeletedInternal();
     }
@@ -462,6 +468,12 @@ export class d1 extends ViewPU {
     }
     set closeButtonFillColorWithTheme(newValue) {
         this.__closeButtonFillColorWithTheme.set(newValue);
+    }
+    get scrollMaxHeight() {
+        return this.__scrollMaxHeight.get();
+    }
+    set scrollMaxHeight(newValue) {
+        this.__scrollMaxHeight.set(newValue);
     }
     getIconWidth() {
         return this.icon?.width ?? this.theme.icon.size.width;
@@ -668,20 +680,28 @@ export class d1 extends ViewPU {
         this.listener.on("change", (w1) => {
             setTimeout(() => {
                 this.currentScreenStatus = w1.matches;
+                this.setScrollMaxHeight(undefined, true);
             }, 10);
         });
     }
     aboutToDisappear() {
         this.listener.off("change");
     }
-    getScrollMaxHeight() {
+    setScrollMaxHeight(maxHeight, forceChange = false) {
         let v1 = undefined;
-        if (this.beforeScreenStatus === undefined ||
-            this.currentScreenStatus !== this.beforeScreenStatus) {
-            this.applySizeOptions = this.getApplyMaxSize();
-            this.beforeScreenStatus = this.currentScreenStatus;
+        if (maxHeight) {
+            v1 = maxHeight;
         }
-        v1 = px2vp(componentUtils.getRectangleById(this.applycontentKey).size?.height);
+        else {
+            this.applySizeOptions = this.getApplyMaxSize();
+            let maxHeightInDisplay = this.applySizeOptions?.maxHeight;
+            if (this.applyHeight && !forceChange) {
+                v1 = Math.min(this.applyHeight, maxHeightInDisplay);
+            }
+            else {
+                v1 = maxHeightInDisplay;
+            }
+        }
         v1 -= this.titleHeight;
         v1 -= this.buttonHeight;
         v1 -= this.theme.h2.padding.top.value;
@@ -690,11 +710,10 @@ export class d1 extends ViewPU {
         v1 -= (this.theme.h2.padding.bottom.value -
             (this.theme.button.e2.bottom.value / 2));
         if (Math.floor(this.textHeight) > Math.floor(v1 + 1)) {
-            return v1;
+            this.scrollMaxHeight = v1;
         }
         else {
-            v1 = undefined;
-            return v1;
+            this.scrollMaxHeight = undefined;
         }
     }
     getLayoutWeight() {
@@ -848,6 +867,7 @@ export class d1 extends ViewPU {
             Row.key(this.applycontentKey);
             Row.onAreaChange((k1, rect) => {
                 this.applyHeight = rect.height;
+                this.setScrollMaxHeight(this.applyHeight);
             });
         }, Row);
         this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -888,6 +908,7 @@ export class d1 extends ViewPU {
                         Flex.margin(this.getTitleMargin());
                         Flex.onAreaChange((j1, rect) => {
                             this.titleHeight = rect.height;
+                            this.setScrollMaxHeight(undefined);
                         });
                     }, Flex);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -960,7 +981,7 @@ export class d1 extends ViewPU {
                         Scroll.padding(this.getMessagePadding());
                         Scroll.scrollBar(BarState.Auto);
                         Scroll.scrollable(ScrollDirection.Vertical);
-                        Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
+                        Scroll.constraintSize({ maxHeight: this.scrollMaxHeight });
                         Scroll.edgeEffect(EdgeEffect.Spring, { alwaysEnabled: false });
                     }, Scroll);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -972,6 +993,7 @@ export class d1 extends ViewPU {
                         Text.constraintSize({ minHeight: this.getCloseButtonHeight() });
                         Text.onAreaChange((i1, rect) => {
                             this.textHeight = rect.height;
+                            this.setScrollMaxHeight(undefined);
                         });
                     }, Text);
                     Text.pop();
@@ -989,6 +1011,7 @@ export class d1 extends ViewPU {
                             else {
                                 this.buttonHeight = 0;
                             }
+                            this.setScrollMaxHeight(undefined);
                         });
                     }, Flex);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1101,6 +1124,7 @@ export class d1 extends ViewPU {
                         Flex.height(0);
                         Flex.onAreaChange((g1, rect) => {
                             this.titleHeight = rect.height;
+                            this.setScrollMaxHeight(undefined);
                         });
                     }, Flex);
                     Flex.pop();
@@ -1118,7 +1142,7 @@ export class d1 extends ViewPU {
                         Scroll.padding(this.getMessagePadding());
                         Scroll.scrollBar(BarState.Auto);
                         Scroll.scrollable(ScrollDirection.Vertical);
-                        Scroll.constraintSize({ maxHeight: this.getScrollMaxHeight() });
+                        Scroll.constraintSize({ maxHeight: this.scrollMaxHeight });
                     }, Scroll);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         Text.create(this.getMessageText());
@@ -1129,6 +1153,7 @@ export class d1 extends ViewPU {
                         Text.constraintSize({ maxWidth: this.messageMaxWeight, minHeight: this.getCloseButtonHeight() });
                         Text.onAreaChange((f1, rect) => {
                             this.textHeight = rect.height;
+                            this.setScrollMaxHeight(undefined);
                         });
                     }, Text);
                     Text.pop();
@@ -1192,6 +1217,7 @@ export class d1 extends ViewPU {
                             else {
                                 this.buttonHeight = 0;
                             }
+                            this.setScrollMaxHeight(undefined);
                         });
                     }, Flex);
                     this.observeComponentCreation2((elmtId, isInitialRender) => {

@@ -24,7 +24,7 @@
 
 namespace OHOS::Ace {
 
-class VelocityTracker final {
+class ACE_FORCE_EXPORT VelocityTracker final {
 public:
     VelocityTracker()
     {

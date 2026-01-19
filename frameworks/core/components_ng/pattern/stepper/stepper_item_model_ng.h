@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,6 +29,7 @@ public:
     void SetStatus(const std::string& labelStatus) override;
     void ResetPrevLabel() override;
     void ResetNextLabel() override;
+    static void CreateFrameNode();
     static void SetNextLabel(FrameNode* frameNode, const std::string& rightLabel);
     static void ResetNextLabel(FrameNode* frameNode);
     static void SetPrevLabel(FrameNode* frameNode, const std::string& leftLabel);

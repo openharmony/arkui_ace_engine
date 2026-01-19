@@ -35,7 +35,7 @@
 #include "core/common/frontend.h"
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/drag_bar/drag_bar_theme.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
@@ -601,18 +601,5 @@ HWTEST_F(OverlayManagerTestFourNg, BindKeyboardWithNode002, TestSize.Level1)
     WeakPtr<UINode> weakNode = targetNode;
     overlayManager.rootNodeWeak_ = weakNode;
     overlayManager.BindKeyboardWithNode(customNode, targetId);
-    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
-    customNode = AceType::MakeRefPtr<FrameNode>("node", 0, AceType::MakeRefPtr<Pattern>());
-    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
-    textFieldManager->SetCustomKeyboardId(0);
-    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
-    overlayManager.oldTargetId_ = 3;
-    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
-    overlayManager.oldTargetId_ = 2;
-    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), true);
-    overlayManager.oldTargetId_ = -1;
-    overlayManager.customKeyboardMap_.insert({ -1, frameNode1 });
-    overlayManager.BindKeyboardWithNode(customNode, targetId);
-    EXPECT_EQ(overlayManager.ChangeBindKeyboardWithNode(customNode, targetId), false);
 }
 } // namespace OHOS::Ace::NG

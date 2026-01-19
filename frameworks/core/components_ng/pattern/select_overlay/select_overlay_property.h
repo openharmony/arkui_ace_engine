@@ -139,6 +139,7 @@ inline constexpr SelectOverlayDirtyFlag DIRTY_AI_MENU_ITEM = 1 << 8;
 inline constexpr SelectOverlayDirtyFlag DIRTY_ASK_CELIA = 1 << 9;
 inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_AI_DETECT = 1 << 10;
 inline constexpr SelectOverlayDirtyFlag DIRTY_SELECT_AI_MENU = 1 << 11;
+inline constexpr SelectOverlayDirtyFlag DIRTY_PASTE_MENU = 1 << 12;
 inline constexpr SelectOverlayDirtyFlag DIRTY_DOUBLE_HANDLE = DIRTY_FIRST_HANDLE | DIRTY_SECOND_HANDLE;
 inline constexpr SelectOverlayDirtyFlag DIRTY_ALL =
     DIRTY_DOUBLE_HANDLE | DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AREA | DIRTY_SELECT_TEXT | DIRTY_VIEWPORT;
@@ -209,7 +210,8 @@ enum class CloseReason {
     CLOSE_REASON_CLICK_OUTSIDE,
     CLOSE_REASON_DRAG_FLOATING,
     CLOSE_REASON_WINDOW_SIZE_CHANGE,
-    CLOSE_REASON_SELECT_ALL
+    CLOSE_REASON_SELECT_ALL,
+    CLOSE_REASON_PASTE
 };
 enum class NativeMenuId : int32_t {
     ID_CUT = 0,

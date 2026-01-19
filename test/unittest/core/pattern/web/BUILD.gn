@@ -61,6 +61,7 @@ ohos_unittest("web_pattern_unit_test_ohos") {
     "web_model_test_ng.cpp",
     "web_paint_method_test.cpp",
     "web_pattern_add_test_ng.cpp",
+    "web_pattern_agent_test.cpp",
     "web_pattern_event_test.cpp",
     "web_pattern_focus_test_ng.cpp",
     "web_pattern_keyboard_test_ng.cpp",
@@ -81,7 +82,6 @@ ohos_unittest("web_pattern_unit_test_ohos") {
   ]
 
   deps = [
-    "$ace_root/frameworks/core/components/custom_paint:ace_core_components_custom_paint_ohos",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",
@@ -191,7 +191,6 @@ ohos_unittest("web_accessibility_event_report_unit_test_ohos") {
   ]
 
   deps = [
-    "$ace_root/frameworks/core/components/custom_paint:ace_core_components_custom_paint_ohos",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",
@@ -284,6 +283,7 @@ ohos_unittest("web_pattern_unit_test_ohos_part_one") {
     "$ace_root/frameworks/core/components_ng/pattern/web/web_accessibility_child_tree_callback.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_accessibility_session_adapter.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/web/web_agent_event_reporter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_content_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_context_select_overlay.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/web/web_data_detector_adapter.cpp",
@@ -297,10 +297,10 @@ ohos_unittest("web_pattern_unit_test_ohos_part_one") {
     "mock_rosen_render_surface.cpp",
     "mock_web_delegate.cpp",
     "web_pattern_test_ng_part_one.cpp",
+    "web_agent_event_reporter_test.cpp"
   ]
 
   deps = [
-    "$ace_root/frameworks/core/components/custom_paint:ace_core_components_custom_paint_ohos",
     "$ace_root/test/unittest:ace_base",
     "$ace_root/test/unittest:ace_components_base",
     "$ace_root/test/unittest:ace_components_event",

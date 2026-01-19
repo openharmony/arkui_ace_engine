@@ -229,6 +229,22 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
     return { componentName: this.owningView_?.constructor.name, id: this.owningView_?.id__() };
   }
 
+  public getPropertyElementInfo(): Map<string, Array<ElementInfo>> {
+    const resMap = new Map<string, Array<ElementInfo>>();
+    const elmtMap = this.dependentElmtIdsByProperty_.getPropertyElementId();
+    elmtMap.forEach((idArr: number[], name: string) => {
+      resMap.set(name, idArr.map(id => this.getElementById(id)));
+    });
+    return resMap;
+  }
+
+  public getElementById(elmtId: number): ElementInfo {
+    return { 
+      elementName: this.owningView_?.getElementNameById(elmtId) ?? 'unknown component name',
+      elementId: elmtId
+    } as ElementInfo;
+  }
+
   public dumpSyncPeers(isProfiler: boolean, changedTrackPropertyName?: string): ObservedPropertyInfo<T>[] {
     let res: ObservedPropertyInfo<T>[] = [];
     this.getSubscriberRefs()?.forEach((subscriber: IPropertySubscriber) => {
@@ -542,11 +558,6 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
       // not access recording 
       return;
     }
-    if (elmtId === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
-      const error = `${this.debugInfo()}: recordPropertyDependentUpdate trying to use V1 state to init/update child V2 @Component. Application error`;
-      stateMgmtConsole.applicationError(error);
-      throw new TypeError(error);
-    }
 
     stateMgmtConsole.debug(`${this.debugInfo()}: recordPropertyDependentUpdate: add (state) variable dependency for elmtId ${elmtId}.`);
     this.dependentElmtIdsByProperty_.addPropertyDependency(elmtId);
@@ -572,12 +583,14 @@ implements ISinglePropertyChangeSubscriber<T>, IMultiPropertiesChangeSubscriber,
   // unified Appstorage, what classes to use, and the API
   public createLink(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstractPU<T> {
-      throw new Error(`${this.debugInfo()}: createLink: Can not create a AppStorage 'Link' from this property.`);
+      // method implemented in FU, will never be invoke in PU
+      throw new BusinessError(NOT_IMPLEMENT, `${this.debugInfo()}: createLink does not implemented in ObservedPropertyAbstractPU`);
   }
 
   public createProp(subscribeOwner?: IPropertySubscriber,
     linkPropName?: PropertyInfo): ObservedPropertyAbstractPU<T> {
-      throw new Error(`${this.debugInfo()}: createProp: Can not create a AppStorage 'Prop' from a @State property. `);
+      // method implemented in FU, will never be invoke in PU
+      throw new BusinessError(NOT_IMPLEMENT, `${this.debugInfo()}: createProp does not implemented in ObservedPropertyAbstractPU `);
   }
 
   /*
@@ -747,6 +760,14 @@ class PropertyDependencies {
       propertyDependencies: this.getPropertyDependencies() ? Array.from(this.getOrCreatePropertyDependencies()).map(formatElmtId) : [],
     }
     return PropertyDependenciesInfo;
+  }
+
+  public getPropertyElementId(): Map<string, Array<number>> {
+    const infoMap = new Map<string, Array<number>>();
+    this.getInnerTrackedObjectPropertyDependencies()?.forEach((propertyElmtId, propertyName) => {
+      infoMap.set(propertyName, Array.from(propertyElmtId));
+    });
+    return infoMap;
   }
 
   public hasDependencies() : boolean {

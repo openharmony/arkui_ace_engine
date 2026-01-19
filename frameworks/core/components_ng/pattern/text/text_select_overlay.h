@@ -25,7 +25,7 @@
 #include "core/components_ng/pattern/text/text_base.h"
 
 namespace OHOS::Ace::NG {
-class TextSelectOverlay : public BaseTextSelectOverlay {
+class ACE_FORCE_EXPORT TextSelectOverlay : public BaseTextSelectOverlay {
     DECLARE_ACE_TYPE(TextSelectOverlay, BaseTextSelectOverlay);
 
 public:

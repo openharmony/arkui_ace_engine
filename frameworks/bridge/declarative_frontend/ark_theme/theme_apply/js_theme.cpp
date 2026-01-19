@@ -18,20 +18,9 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
-void JSThemeColors::SetColors(const JSRef<JSArray>& colors)
+void JSThemeColors::SetColors(const std::vector<ResourceValue>& colors)
 {
-    for (int i = 0; i < COLORS_NUMBER; i++) {
-        RefPtr<ResourceObject> resObj;
-        Color value;
-        JSViewAbstract::ParseJsColor(colors->GetValueAt(i), value, resObj);
-        if (resObj && colors->GetValueAt(i)->IsObject()) {
-            JSRef<JSObject> jsObj = JSRef<JSObject>::Cast(colors->GetValueAt(i));
-            JSViewAbstract::CompleteResourceObject(jsObj);
-            resObj = JSViewAbstract::GetResourceObject(jsObj);
-        }
-        ResourceValue resValue = { resObj, value };
-        colors_.push_back(resValue);
-    }
+    colors_ = colors;
 }
 
 } // namespace OHOS::Ace::Framework

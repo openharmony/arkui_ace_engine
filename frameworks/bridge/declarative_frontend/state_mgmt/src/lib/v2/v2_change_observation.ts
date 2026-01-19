@@ -85,8 +85,11 @@ class ObserveV2 {
   // bindId: UINode elmtId or watchId, depending on what is being observed
   private stackOfRenderedComponents_: StackOfRenderedComponents = new StackOfRenderedComponents();
 
-  // Map bindId to WeakRef<ViewBuildNodeBase>
+  // Map bindId to WeakRef<ViewBuildNodeBase>, bindId -> owning View instance
   public id2cmp_: { number: WeakRef<ViewBuildNodeBase> } = {} as { number: WeakRef<ViewBuildNodeBase> };
+
+  // Map ViewV2 elmtId -> ViewV2 instance
+  public id2ViewV2_: { number: WeakRef<ViewV2> } = {} as { number: WeakRef<ViewV2> };
 
   // Map bindId to WeakRef<MonitorV2 | ComputedV2 | PersistenceV2Impl>
   public id2Others_: { number: WeakRef<MonitorV2 | ComputedV2 | PersistenceV2Impl> } = {} as { number: WeakRef<MonitorV2 | ComputedV2 | PersistenceV2Impl> };
@@ -377,11 +380,6 @@ class ObserveV2 {
     if (!bound) {
       return;
     }
-    if (bound[0] === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
-      const error = `${attrName}: ObserveV2.addRef: trying to use V2 state '${attrName}' to init/update child V2 @Component. Application error`;
-      stateMgmtConsole.applicationError(error);
-      throw new TypeError(error);
-    }
 
     stateMgmtConsole.propertyAccess(`ObserveV2.addRef '${attrName}' for id ${bound[0]}...`);
 
@@ -401,11 +399,6 @@ class ObserveV2 {
     const bound = this.stackOfRenderedComponents_.top();
     if (bound && bound[1]) {
       if (!(bound[1] instanceof ViewPU)) {
-        if (bound[0] === UINodeRegisterProxy.monitorIllegalV1V2StateAccess) {
-          const error = `${attrName}: ObserveV2.addRefV2Compatibility: trying to use V2 state '${attrName}' to init/update child V2 @Component. Application error`;
-          stateMgmtConsole.applicationError(error);
-          throw new TypeError(error);
-        }
         stateMgmtConsole.propertyAccess(`ObserveV2.addRefV2Compatibility '${attrName}' for id ${bound[0]}...`);
         this.addRef4Id(bound[0], target, attrName);
       } else {
@@ -569,6 +562,7 @@ class ObserveV2 {
       const prop = bound ? (bound[1] as ComputedV2).getProp() : 'unknown computed property';
       const error = `Usage of ILLEGAL @Computed function detected for ${prop}! The @Computed function MUST NOT change the state of any observed state variable!`;
       stateMgmtConsole.applicationError(error);
+      // used code, can be removed
       throw new Error(error);
     }
 
@@ -1423,6 +1417,13 @@ class ObserveV2 {
     let weak: WeakRef<ViewBuildNodeBase> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
     let view;
     return (weak && (view = weak.deref()) && (view instanceof PUV2ViewBase)) ? view.debugInfoElmtId(elmtId, isProfiler) : `unknown component type[${elmtId}]`;
+  }
+
+  public getElementNameById(elmtId: number): string {
+    const weak: WeakRef<ViewBuildNodeBase> | undefined = UINodeRegisterProxy.ElementIdToOwningViewPU_.get(elmtId);
+    let view;
+    return (weak && (view = weak.deref()) && (view instanceof PUV2ViewBase)) ?
+      view.getElementNameById(elmtId) : 'unknown component name';
   }
 
   /**

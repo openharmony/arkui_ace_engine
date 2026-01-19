@@ -30,7 +30,8 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
-
+const char COLUMN_SPLIT_ETS_TAG[] = "ColumnSplit";
+const char ROW_SPLIT_ETS_TAG[] = "RowSplit";
 class LinearSplitPattern : public Pattern {
     DECLARE_ACE_TYPE(LinearSplitPattern, Pattern);
 

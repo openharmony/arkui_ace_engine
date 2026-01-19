@@ -2035,7 +2035,13 @@ class ListNodeDataSource extends BasicDataSource {
                     'moduleName': '__harDefaultModuleName__',
                 }
             },
-            backgroundColor: COLOR_IMAGE_EDIT,
+            backgroundColor: {
+                'id': -1,
+                'type': 10001,
+                params: ['sys.color.comp_background_primary'],
+                'bundleName': '__harDefaultBundleName__',
+                'moduleName': '__harDefaultModuleName__'
+            },
             height: GRAG_POP_UP_HEIGHT,
             shadow: {
                 radius: {

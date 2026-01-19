@@ -43,6 +43,7 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
     TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH,
         "TRACE DoSetActiveChildRange(%{public}d, %{public}d, %{public}d, %{public}d, %{public}d)",
         start, end, cacheStart, cacheEnd, static_cast<int32_t>(showCache));
+    SetNeedBuildAll(false);
     activeRangeParam_ = newParam;
     if (updateRange_) {
         // trigger TS-side
@@ -54,7 +55,6 @@ void ArkoalaLazyNode::DoSetActiveChildRange(
 
 void ArkoalaLazyNode::RebuildCache()
 {
-    bool needSync = false;
     std::list<RefPtr<UINode>> toRemove;
     for (const auto& [index, node] : node4Index_) {
         CHECK_NULL_CONTINUE(node);
@@ -73,7 +73,6 @@ void ArkoalaLazyNode::RebuildCache()
             } else {
                 AddDisappearingChild(node);
             }
-            needSync = true;
         }
         node->SetActive(isInActiveRange);
         if (isRepeat_) {
@@ -88,9 +87,8 @@ void ArkoalaLazyNode::RebuildCache()
         const auto indexMapped = arkoalaLazyNode->ConvertFromToIndexRevert(static_cast<int32_t>(k));
         return !arkoalaLazyNode->IsInCacheRange(indexMapped, arkoalaLazyNode->activeRangeParam_);
     });
-    if (needSync) {  // order a resync from layout
-        RequestSyncTree();
-    }
+    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "RebuildCache DONE. Cache nodes count: %{public}zu", node4Index_.Size());
+    RequestSyncTree(); // order a resync from layout
 }
 
 void ArkoalaLazyNode::UpdateIsCache(const RefPtr<UINode>& node, bool isCache, bool shouldTrigger)
@@ -193,8 +191,6 @@ const std::list<RefPtr<UINode>>& ArkoalaLazyNode::GetChildren(bool /* notDetach 
         TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "GetChildren just returns non-empty children_");
         return children_;
     }
-    
-    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "GetChildren rebuild starting ...");
     // can not modify l1_cache while iterating
     // GetChildren is overloaded, can not change it to non-const
     // need to order the child.
@@ -203,7 +199,7 @@ const std::list<RefPtr<UINode>>& ArkoalaLazyNode::GetChildren(bool /* notDetach 
     } else {
         ForEachL1NodeWithOnMove([&](const RefPtr<UINode>& node) -> void { children_.emplace_back(node); });
     }
-
+    TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "GetChildren rebuilt children_, size=%{public}zu", children_.size());
     return children_;
 }
 
@@ -243,10 +239,14 @@ void ArkoalaLazyNode::OnDataChange(int32_t changeIndex, int32_t count, Notificat
         RequestSyncTree();
     }
 
-    auto parent = GetParent();
+    auto parent = GetParentFrameNode();
     int64_t accessibilityId = GetAccessibilityId();
     if (parent) {
-        parent->NotifyChange(changeIndex, count, accessibilityId, type);
+        if (isRepeat_ && parent->GetHostTag() == V2::LIST_ETS_TAG) {
+            parent->NotifyChange(changeIndex, count, accessibilityId, NotificationType::START_AND_END_CHANGE_POSITION);
+        } else {
+            parent->NotifyChange(changeIndex, count, accessibilityId, type);
+        }
         MarkNeedSyncRenderTree(true);
         MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE_SELF_AND_PARENT);
     }
@@ -575,7 +575,8 @@ void ArkoalaLazyNode::ForEachL1Node(
         const auto index = it->first;
         const RefPtr<UINode> node = it->second;
         CHECK_NULL_CONTINUE(node);
-        if (isRepeat_ || IsInActiveRange(index, activeRangeParam_)) { // LazyForEach only return active nodes
+        if (needBuildAll_ || isRepeat_ || IsInActiveRange(index, activeRangeParam_)) {
+            // LazyForEach only return nodes in container
             cbFunc(index, node);
         }
     }
@@ -587,9 +588,8 @@ void ArkoalaLazyNode::ForEachL1NodeWithOnMove(const std::function<void(const Ref
     for (auto it = node4Index_.begin(); it != node4Index_.end(); ++it) {
         const auto index = it->first;
         const auto mappedIndex = ConvertFromToIndexRevert(index);
-        const RefPtr<UINode> node = it->second;
-        CHECK_NULL_CONTINUE(node);
-        if (isRepeat_ || IsInActiveRange(index, activeRangeParam_)) { // LazyForEach only return active nodes
+        if (needBuildAll_ || isRepeat_ || IsInActiveRange(mappedIndex, activeRangeParam_)) {
+            // LazyForEach only return nodes in container
             mappedNode4Index.emplace(mappedIndex, index);
         }
     }

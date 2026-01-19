@@ -137,6 +137,7 @@ HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue003, TestSize.Level1)
      */
     TouchEvent downEvent;
     downEvent.SetId(0)
+        .SetOriginalId(0)
         .SetType(TouchType::DOWN)
         .SetX(100.0f)
         .SetY(100.0f)
@@ -145,6 +146,7 @@ HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue003, TestSize.Level1)
     longPressRecognizer->HandleEvent(downEvent);
     TouchEvent downFingerOneEvent;
     downFingerOneEvent.SetId(1)
+        .SetOriginalId(1)
         .SetType(TouchType::DOWN)
         .SetX(100.0f)
         .SetY(100.0f)
@@ -155,6 +157,7 @@ HWTEST_F(RecognizerTestNgIssue, LongPressRecognizerIssue003, TestSize.Level1)
     auto moveTime = GetSysTimestamp();
     std::chrono::nanoseconds nanoseconds(moveTime);
     moveEvent.SetId(0)
+        .SetOriginalId(0)
         .SetType(TouchType::MOVE)
         .SetX(100.0f)
         .SetY(100.0f)
@@ -365,6 +368,7 @@ HWTEST_F(RecognizerTestNgIssue, ClickRecognizerIssue001, TestSize.Level1)
      */
     TouchEvent downEvent;
     downEvent.SetId(0)
+        .SetOriginalId(0)
         .SetType(TouchType::DOWN)
         .SetX(100.0f)
         .SetY(100.0f)
@@ -373,6 +377,7 @@ HWTEST_F(RecognizerTestNgIssue, ClickRecognizerIssue001, TestSize.Level1)
     clickRecognizer->HandleEvent(downEvent);
     TouchEvent downFingerOneEvent;
     downFingerOneEvent.SetId(1)
+        .SetOriginalId(1)
         .SetType(TouchType::DOWN)
         .SetX(120.0f)
         .SetY(120.0f)
@@ -383,6 +388,7 @@ HWTEST_F(RecognizerTestNgIssue, ClickRecognizerIssue001, TestSize.Level1)
     auto upTime = GetSysTimestamp();
     std::chrono::nanoseconds nanoseconds(upTime);
     upEvent.SetId(0)
+        .SetOriginalId(0)
         .SetType(TouchType::UP)
         .SetX(100.0f)
         .SetY(100.0f)
@@ -402,6 +408,7 @@ HWTEST_F(RecognizerTestNgIssue, ClickRecognizerIssue001, TestSize.Level1)
     auto upFingerOneTime = GetSysTimestamp();
     std::chrono::nanoseconds fingerOneNanoseconds(upFingerOneTime);
     upFingerOneEvent.SetId(1)
+        .SetOriginalId(1)
         .SetType(TouchType::UP)
         .SetX(120.0f)
         .SetY(120.0f)

@@ -1706,7 +1706,7 @@ import {
   
   function setButtonProperties(this: ButtonAttribute, buttonOptions?: AdvancedDialogV2Button,
     isHasDefaultFocus?: boolean, isAllFocusFalse?: boolean,
-    controller?: PromptActionDialogController): this {
+    controller?: PromptActionDialogController) {
     this.onKeyEvent((event: KeyEvent) => {
       if (!event) {
         return false;

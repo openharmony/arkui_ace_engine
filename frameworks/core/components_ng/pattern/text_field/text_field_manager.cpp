@@ -289,6 +289,10 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
     CHECK_NULL_RETURN(diffBot < 0, false);
     TAG_LOGI(ACE_KEYBOARD, "scrollRect:%{public}s caretRect:%{public}s totalOffset()=%{public}f diffBot=%{public}f",
         scrollableRect.ToString().c_str(), caretRect.ToString().c_str(), scrollPattern->GetTotalOffset(), diffBot);
+    if (caretRect.Height() >= scrollableRect.Height()) {
+        TAG_LOGI(ACE_KEYBOARD, "caret height higher then whole scroll, don't scroll");
+        return false;
+    }
     scrollPattern->ScrollTo(scrollPattern->GetTotalOffset() - diffBot);
     return true;
 }

@@ -18,7 +18,7 @@ import {
   Text, LocalizedPadding, applyStyles, Length, Flex, FontWeight, Select, Margin, Column, HorizontalAlign, KeyEvent, Row,
   ClickEvent, Array, TouchType, GeometryInfo, SymbolGlyph, Measurable, ConstraintSizeOptions, SizeResult, Button, Stack,
   ButtonType, ButtonOptions, VerticalAlign, TouchEvent, FlexAlign, ForEach, HoverEffect, LoadingProgress, Padding,
-  Rectangle, Layoutable, Component, MeasureResult, CustomLayout, ClassCastError
+  Rectangle, Layoutable, Component, MeasureResult, CustomLayout, ClassCastError, AccessibilityRoleType
 } from '@ohos.arkui.component';
 import {
   ObservedV2, Trace, Param, Local, Provider, Monitor, IMonitor, IMonitorValue, Require, Event, Consumer
@@ -68,6 +68,7 @@ export interface SubHeaderV2TitleOptions {
   primaryTitleModifier?: TextModifier;
   secondaryTitle?: ResourceStr;
   secondaryTitleModifier?: TextModifier;
+  titleAccessibilityText?: ResourceStr;
 }
 
 @ObservedV2
@@ -80,12 +81,15 @@ export class SubHeaderV2Title {
   public secondaryTitle?: ResourceStr;
   @Trace
   public secondaryTitleModifier?: TextModifier;
+  @Trace
+  public titleAccessibilityText?: ResourceStr;
 
   constructor(options: SubHeaderV2TitleOptions) {
     this.primaryTitle = options.primaryTitle;
     this.primaryTitleModifier = options.primaryTitleModifier;
     this.secondaryTitle = options.secondaryTitle;
     this.secondaryTitleModifier = options.secondaryTitleModifier;
+    this.titleAccessibilityText = options.titleAccessibilityText;
   }
 }
 
@@ -213,7 +217,7 @@ class SubHeaderTheme {
   public rightIconColor: ResourceColor = $r('sys.color.icon_primary');
 }
 
-function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): this {
+function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle) {
   this.fontSize(`${getResourceValue('sys.float.Subtitle_S')}fp`)
   this.fontColor(fontStyle?.fontColor ?? $r('sys.color.font_secondary'))
   this.fontWeight(fontStyle?.fontWeight)
@@ -223,7 +227,7 @@ function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): this {
   return this
 }
 
-function primaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): this {
+function primaryTitleStyles(this: TextAttribute, fontStyle: FontStyle) {
   this.fontSize(`${getResourceValue('sys.float.subheader_title_font_size')}fp`)
   this.fontColor(fontStyle?.fontColor ?? $r('sys.color.font_primary'))
   this.fontWeight(fontStyle?.fontWeight)
@@ -345,7 +349,7 @@ export struct SubHeaderV2 {
     Flex({ direction: FlexDirection.Row, alignItems: ItemAlign.Center }) {
       if (Util.isSymbolResource($$.iconOptions)) {
         SymbolGlyphChild({
-          icon: $$.iconOptions,
+          icon: $$.iconOptions!,
           fontColor: this.subHeaderV2Theme.leftIconColor,
           changeSymbolWidth: (result: SizeResult) => {
             this.symbolWidth = result.width;
@@ -648,9 +652,9 @@ export struct SubHeaderV2 {
       this.ageing = false;
       this.subHeaderModifier.isAgeing = this.ageing;
     }
-    children.forEach((child) => {
+    children.forEach((child: Measurable) => {
       constraint.minHeight = Math.min(Number(this.getMinHeight() as number), Number(constraint.maxHeight as number));
-      result.height = child.measure(constraint).height;
+      result.height = (child.measure(constraint) as MeasureResult).height;
       result.width = Number(constraint.maxWidth as number);
     })
     return result;
@@ -1052,6 +1056,17 @@ export struct SubHeaderV2 {
     return padding;
   }
 
+  private getTitleAccessibilityText(): string {
+    if (this.select || !this.title || !this.title?.titleAccessibilityText) {
+      return '';
+    }
+    if (Util.isResourceType(this.title?.titleAccessibilityText)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync((this.title?.titleAccessibilityText as Resource).id);
+    }
+    return this.title?.titleAccessibilityText as string;
+  }
+
   build() {
     if (this.isSuitableAging()) {
       Column() {
@@ -1068,7 +1083,8 @@ export struct SubHeaderV2 {
         } as LocalizedPadding)
         .width('100%')
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        .accessibilityDescription(this.select ? '' : Util.getStringByResource(125834353, ''))
+        .accessibilityText(this.getTitleAccessibilityText())
+        .accessibilityRole(this.title ? AccessibilityRoleType.TITLE_BAR : undefined)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParentAging();
@@ -1089,7 +1105,8 @@ export struct SubHeaderV2 {
         .width('100%')
         .flexShrink(1)
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        .accessibilityDescription(this.select ? '' : Util.getStringByResource(125834353, ''))
+        .accessibilityText(this.getTitleAccessibilityText())
+        .accessibilityRole(this.title ? AccessibilityRoleType.TITLE_BAR : undefined)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParent();
@@ -1514,7 +1531,7 @@ struct TextArrowLayout {
       minHeight: Math.max(textArrowHeight, Number(constraint.minHeight as number)),
       maxHeight: constraint.maxHeight,
     };
-    let textMeasureResult: MeasureResult = textChild.measure(textConstraint);
+    let textMeasureResult: MeasureResult = textChild.measure(textConstraint) as MeasureResult;
     textArrowWidth = Math.max(textArrowWidth, textMeasureResult.width);
     textArrowHeight = Math.max(textArrowHeight, textMeasureResult.height);
 

@@ -270,7 +270,8 @@ public:
     void NotifyTextChangeEvent(const TextChangeEventInfo& info);
     void NotifyRouterPageSizeChange(const RefPtr<PageInfo>& pageInfo,
         RouterPageState state, const std::optional<SizeF>& size);
-    void NotifyNavDestinationSizeChange(const WeakPtr<AceType>& weakPattern, NavDestinationState state);
+    void NotifyNavDestinationSizeChange(const WeakPtr<AceType>& weakPattern,
+        NavDestinationState state, const std::optional<SizeF>& size);
     void NotifySwiperContentUpdate(const SwiperContentInfo& info);
     bool IsSwiperContentObserverEmpty();
     void NotifyWinSizeLayoutBreakpointChangeFunc(int32_t instanceId, const WindowSizeBreakpoint& info);
@@ -303,6 +304,9 @@ public:
     using RouterPageSizeChangeHandleFunc = void (*)(const RouterPageInfoNG&);
     using NavDestinationSizeChangeHandleFunc = void (*)(const NavDestinationInfo&);
     using NavDestinationSizeChangeByUniqueIdHandleFunc = void (*)(const NavDestinationInfo&);
+    using RouterPageSizeChangeHandleFuncForAni = std::function<void(const RouterPageInfoNG&)>;
+    using NavDestinationSizeChangeHandleFuncForAni = std::function<void(const NavDestinationInfo&)>;
+    using NavDestinationSizeChangeByUniqueIdHandleFuncForAni = std::function<void(const NavDestinationInfo&)>;
     NavDestinationSwitchHandleFunc GetHandleNavDestinationSwitchFunc();
     NavDestinationSwitchHandleFuncForAni GetHandleNavDestinationSwitchFuncForAni();
     void SetHandleNavigationChangeFunc(NavigationHandleFunc func);
@@ -313,11 +317,14 @@ public:
     void SetHandleRouterPageChangeFuncForAni(RouterPageHandleFuncForAni func);
     using DensityHandleFunc = void (*)(AbilityContextInfo&, double);
     using WinSizeLayoutBreakpointHandleFunc = void (*)(int32_t instanceId, const WindowSizeBreakpoint& info);
+    using WinSizeLayoutBreakpointHandleFuncAni = std::function<void(int32_t instanceId,
+        const WindowSizeBreakpoint& info)>;
     using DensityHandleFuncForAni = std::function<void(AbilityContextInfo&, double)>;
     void SetHandleDensityChangeFunc(DensityHandleFunc func);
     void SetHandleDensityChangeFuncForAni(DensityHandleFuncForAni func);
     void SetHandleTabContentUpdateFuncForAni(TabContentHandleFuncForAni func);
     void SetWinSizeLayoutBreakpointChangeFunc(WinSizeLayoutBreakpointHandleFunc func);
+    void SetWinSizeLayoutBreakpointChangeFuncAni(WinSizeLayoutBreakpointHandleFuncAni func);
     void SetLayoutDoneHandleFunc(DrawCommandSendHandleFunc func);
     void HandleLayoutDoneCallBack();
     void SetDrawCommandSendHandleFunc(LayoutDoneHandleFunc func);
@@ -351,6 +358,10 @@ public:
     void SetRouterPageSizeChangeHandleFunc(RouterPageSizeChangeHandleFunc func);
     void SetNavDestinationSizeChangeHandleFunc(NavDestinationSizeChangeHandleFunc func);
     void SetNavDestinationSizeChangeByUniqueIdHandleFunc(NavDestinationSizeChangeByUniqueIdHandleFunc func);
+    void SetRouterPageSizeChangeHandleFuncForAni(RouterPageSizeChangeHandleFuncForAni&& func);
+    void SetNavDestinationSizeChangeHandleFuncForAni(NavDestinationSizeChangeHandleFuncForAni&& func);
+    void SetNavDestinationSizeChangeByUniqueIdHandleFuncForAni(
+        NavDestinationSizeChangeByUniqueIdHandleFuncForAni&& func);
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     NavigationHandleFuncForAni navigationHandleFuncForAni_ = nullptr;
@@ -362,6 +373,7 @@ private:
     DrawCommandSendHandleFunc drawCommandSendHandleFunc_ = nullptr;
     DensityHandleFunc densityHandleFunc_ = nullptr;
     WinSizeLayoutBreakpointHandleFunc winSizeLayoutBreakpointHandleFunc_ = nullptr;
+    WinSizeLayoutBreakpointHandleFuncAni winSizeLayoutBreakpointHandleFuncAni_ = nullptr;
     DensityHandleFuncForAni densityHandleFuncForAni_ = nullptr;
     NavDestinationSwitchHandleFunc navDestinationSwitchHandleFunc_ = nullptr;
     NavDestinationSwitchHandleFuncForAni navDestinationSwitchHandleFuncForAni_ = nullptr;
@@ -388,6 +400,9 @@ private:
     RouterPageSizeChangeHandleFunc routerPageSizeChangeHandleFunc_ = nullptr;
     NavDestinationSizeChangeHandleFunc navDestinationSizeChangeHandleFunc_ = nullptr;
     NavDestinationSizeChangeByUniqueIdHandleFunc navDestinationSizeChangeByUniqueIdHandleFunc_ = nullptr;
+    RouterPageSizeChangeHandleFuncForAni routerPageSizeChangeHandleFuncForAni_;
+    NavDestinationSizeChangeHandleFuncForAni navDestinationSizeChangeHandleFuncForAni_;
+    NavDestinationSizeChangeByUniqueIdHandleFuncForAni navDestinationSizeChangeByUniqueIdHandleFuncForAni_;
 
     napi_value GetUIContextValue();
 };

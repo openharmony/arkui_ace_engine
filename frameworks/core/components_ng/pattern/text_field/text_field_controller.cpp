@@ -229,6 +229,12 @@ void TextFieldController::SetPlaceholderStyledString(const RefPtr<SpanStringBase
 {
     auto textFieldPattern = AceType::DynamicCast<TextFieldPattern>(pattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
+    auto textField = DynamicCast<TextFieldPattern>(textFieldPattern);
+    CHECK_NULL_VOID(textField);
+    auto host = textField->GetHost();
+    if (host) {
+        ACE_UINODE_TRACE(host);
+    }
     auto spanString = AceType::DynamicCast<SpanString>(value);
     if (spanString) {
         textFieldPattern->SetPlaceholderStyledString(spanString);

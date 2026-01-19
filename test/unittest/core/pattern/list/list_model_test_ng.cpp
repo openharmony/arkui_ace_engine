@@ -22,7 +22,7 @@
 #include "ui/base/geometry/ng/offset_t.h"
 
 #include "core/components_ng/pattern/list/list_position_controller.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 constexpr char SCROLLBAR_COLOR_BLUE[] = "#FF0000FF";

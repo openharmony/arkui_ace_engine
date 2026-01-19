@@ -26,6 +26,8 @@ private:
     static ani_long ConstructCustomNode(ani_env* env, [[maybe_unused]] ani_object aniClass, ani_int id, ani_object obj);
     static void CustomNodeSetBuildFunction(
         ani_env *env, [[maybe_unused]] ani_object aniClass, ani_long ptr, ani_fn_object buildFunc);
+    static void CustomNodeAddChild(
+        ani_env *env, [[maybe_unused]] ani_object obj, ani_long parent, ani_long child);
 };
 } // namespace OHOS::Ace::Ani
 

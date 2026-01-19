@@ -16,6 +16,7 @@
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/text/span/mutable_span_string.h"
+#include "core/interfaces/native/utility/accessor_utils.h"
 #include "core/interfaces/native/utility/buffer_keeper.h"
 #include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/promise_helper.h"
@@ -113,6 +114,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
 using namespace Converter;
 
 namespace {
+void StyledStringThrowTSException(int32_t start, int32_t length)
+{
+    OHOS::Ace::NG::AccessorUtils::ThrowTSException(ERROR_CODE_PARAM_INVALID, "%s start:%d length:%d",
+        "CheckBoundary failed:", start, length);
+}
+
 void UpdateSpansRange(std::vector<RefPtr<SpanBase>>& styles, int32_t maxLength)
 {
     for (auto& style : styles) {
@@ -206,6 +213,7 @@ Opt_Array_SpanStyle GetStylesImpl(Ark_StyledString peer,
     auto spanLength = Converter::Convert<int32_t>(length);
     if (!peer->spanString->CheckRange(spanStart, spanLength)) {
         LOGE("CheckBoundary failed: start:%{public}d length:%{public}d", spanStart, spanLength);
+        StyledStringThrowTSException(spanStart, spanLength);
         return Converter::ArkValue<Opt_Array_SpanStyle>(Ark_Empty());
     }
     std::vector<RefPtr<SpanBase>> spans;
@@ -240,6 +248,7 @@ Opt_StyledString SubStyledStringImpl(Ark_StyledString peer,
     }
     if (!peer->spanString->CheckRange(startSpan, lengthSpan)) {
         LOGE("CheckBoundary failed: start:%{public}d length:%{public}d", startSpan, lengthSpan);
+        StyledStringThrowTSException(startSpan, lengthSpan);
         return Converter::ArkValue<Opt_StyledString>(Ark_Empty());
     }
     auto spanString = peer->spanString->GetSubSpanString(startSpan, lengthSpan);

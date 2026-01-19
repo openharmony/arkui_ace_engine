@@ -557,7 +557,11 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest044, TestSize.Le
     auto layoutProperty = AceType::MakeRefPtr<LayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     frameNode->layoutProperty_ = layoutProperty;
-    Inspector::offscreenNodes.clear();
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto offscreenNodesMgr = context->GetInspectorOffscreenNodesMgr();
+    ASSERT_NE(offscreenNodesMgr, nullptr);
+    offscreenNodesMgr->ClearOffscreenNodes();
     Inspector::AddOffscreenNode(frameNode);
     DragDropFuncWrapper::GetPreviewPixelMap("testid", frameNode);
     layoutProperty->propVisibility_ = VisibleType::GONE;

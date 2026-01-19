@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { __context, StateManager } from '@koalaui/runtime';
+import { __context, StateManager, remember, scheduleCallback, GlobalStateManager } from '@koalaui/runtime';
 import { int32 } from '@koalaui/common';
 import { WrappedBuilder, CustomBuilderT } from "./builder"
 import { NavigationRouterMap, NavDestinationBuilder } from "#handwritten"
@@ -29,12 +29,15 @@ import { Theme } from '@ohos.arkui.theme';
 import { LocalStorage, StateUpdateLoop } from '@ohos.arkui.stateManagement';
 import { PeerNode } from '../PeerNode';
 import { UIContext } from '@ohos/arkui/UIContext';
+import { RouterImpl } from 'arkui/base/Router';
 import promptAction from '@ohos/promptAction';
 import { RecordData } from "@ohos.base"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { UIContextUtil } from "arkui/base/UIContextUtil"
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton';
 import { ArkThemeScopeManager } from '../theme/ArkThemeScopeManager';
+import { transferTypeName } from '../stateManagement/storage/persistenceV2';
+import { ArkCustomComponentRootPeer } from './staticComponents';
 /** @custom_components_common_method_imports */
 
 export class ReuseObject {
@@ -60,7 +63,11 @@ export class ReuseObject {
         if (this._isRecord) {
             return this._recordValue[key];
         } else {
-            return ((reflect.Value.of(this._raw) as ClassValue).getFieldByName(key).getData() as RecordData);
+            const field = this.getRawField(key);
+            if (field != undefined) {
+                return field.getValue(this._raw as Object) as RecordData;
+            }
+            return undefined;
         }
     }
 
@@ -71,7 +78,7 @@ export class ReuseObject {
         if (this._isRecord) {
             return this._recordValue.has(key);
         } else {
-            return (Type.of(this._raw) as ClassType).hasField(key);
+            return (this.getRawField(key) !== undefined);
         }
     }
 
@@ -88,6 +95,17 @@ export class ReuseObject {
         } else {
             return Object.getOwnPropertyNames(this._raw!);
         }
+    }
+
+    getRawField(key: string): reflect.InstanceField | undefined {
+        let field: reflect.InstanceField | undefined = undefined;
+        for (let cls: Class | undefined = Class.ofAny(this._raw)!; cls != undefined; cls = cls!.getSuper()) {
+            field = cls!.getInstanceField(key);
+            if (field != undefined) {
+                break;
+            }
+        }
+        return field;
     }
 }
 
@@ -133,7 +151,10 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.styles?.(this.instance as T)
     }
  
- 
+    getInstance(): ExtendableComponent {
+        return this.instance;
+    }
+
     applyStyles(instance: CommonMethod): void {
         if (this.instance instanceof HasCommonMethod) {
             const component = this.instance as HasCommonMethod
@@ -170,8 +191,12 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         return ArkUIAniModule._CustomNode_QueryRouterPageInfo(this.getPeer()!.peer.ptr);
     }
 
-    queryNavDestinationInfo(isInner:boolean): uiObserver.NavDestinationInfo {
-        return ArkUIAniModule._CustomNode_QueryNavDestinationInfo0(this.getPeer()!.peer.ptr, isInner);
+    queryNavDestinationInfo(isInner: boolean | undefined): uiObserver.NavDestinationInfo {
+        if (isInner == undefined) {
+            return ArkUIAniModule._CustomNode_QueryNavDestinationInfo(this.getPeer()!.peer.ptr);
+        } else {
+            return ArkUIAniModule._CustomNode_QueryNavDestinationInfo0(this.getPeer()!.peer.ptr, isInner);
+        }
     }
     queryNavDestinationInfo() : uiObserver.NavDestinationInfo {
         return ArkUIAniModule._CustomNode_QueryNavDestinationInfo(this.getPeer()!.peer.ptr);
@@ -247,10 +272,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             ObserveSingleton.instance.unFreezeDelayedComputedProps();
             ObserveSingleton.instance.unFreezeDelayedMonitorPaths();
         }
-        const peer = this.getPeerNode() as PeerNode | undefined;
-        if (peer) {
-            peer.disabledStateUpdates = !this.isViewActive();
-        }
+        this.switchNodeFreeze();
         this.instance.__propagateToChild__Internal(active, isReuse);
     }
     pageTransition(): void {
@@ -272,7 +294,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     fireAboutToReuse(param?: RecordData): void {
-        this.aboutToReuse(param, this.initializers?.());
+        this.aboutToReuse(param, this._initializers?.());
     }
 
     fireAboutToRecycle(): void {
@@ -287,37 +309,87 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         this.instance.__aboutToRecycle_Internal();
     }
 
+    switchHasBeenRecycle(recycle: boolean): void {
+        this.instance.__switchHasBeenRecycle_Ineternal(recycle);
+    }
+
     aboutToReuse(param: RecordData, initializers?: T_Options): void {
         if (this.instance instanceof ReusableLifeCycle) {
             ArkUIAniModule._CustomNode_OnReuse(this.getPeer()!.peer.ptr);
+            this.instance.__unfreezeWhenReuse__Internal();
+            StateUpdateLoop.clearFreezeTaskWhenReuse(this.getUniqueId());
             const reusable = this.instance as ReusableLifeCycle;
             if (param) {
+                StateUpdateLoop.execTaskInSyncMode(() => {
+                    // update propref and objectlink in sync mode, means no wait next update loop
+                    this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
+                });
                 reusable.aboutToReuse(new ReuseObject(param))
+                this.switchNodeFreeze();
+                this.updateUISync();
                 return;
             }
             if (initializers === undefined) {
+                StateUpdateLoop.execTaskInSyncMode(() => {
+                    this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
+                });
                 reusable.aboutToReuse(new ReuseObject({} as Record<string, RecordData> as RecordData));
             } else {
                 const component = this.instance as BaseCustomComponent<T_Options>;
                 const data: T_Options = initializers as T_Options;
                 const params: Record<string, object> = component.__toRecord(data! as object);
+                StateUpdateLoop.execTaskInSyncMode(() => {
+                    this.__updateStruct((this._initializers as (() => T_Options) | undefined)?.());
+                });
                 reusable.aboutToReuse(new ReuseObject(params));
             }
+            this.switchNodeFreeze();
+            this.updateUISync();
         } else if (this.instance instanceof ReusableV2LifeCycle) {
             ArkUIAniModule._CustomNode_OnReuse(this.getPeer()!.peer.ptr);
-            const reusable = this.instance as ReusableV2LifeCycle;
+            const reusable = this.instance as ReusableV2LifeCycle<T_Options>;
+            const initializers0 = (this._initializers as (() => T_Options) | undefined)?.() as T_Options | undefined;
+            reusable.resetStateVarsOnReuse(initializers0);
+            this.instance.__unfreezeWhenReuse__Internal();
             reusable.aboutToReuse();
+            this.switchNodeFreeze();
+            this.updateUISync();
         } else {
             throw new Error('not an custom component');
         }
     }
     aboutToRecycle(): void {
-        if (this.instance instanceof BaseCustomComponent<T_Options>) {
+        if (this.instance instanceof ReusableLifeCycle || this.instance instanceof ReusableV2LifeCycle) {
             ArkUIAniModule._CustomNode_OnRecycle(this.getPeer()!.peer.ptr);
             const component = this.instance as BaseCustomComponent<T_Options>;
-            component.aboutToRecycle()
+            ObserveSingleton.instance.applyTaskDelayMutableStateChange(() => {
+                component.aboutToRecycle(); // aboutToRecycle can change variable
+            });
+            this.instance.__freezeWhenRecycle__Internal();
+            this.switchNodeFreeze();
         } else {
             throw new Error('not an custom component');
+        }
+    }
+
+    updateUISync(): void {
+        const manager = GlobalStateManager.instance;
+        manager.syncChanges();
+        manager.updateSnapshot();
+        // should it contain BuilderNode and LazyItems
+        const peer = this.getPeerNode() as ArkCustomComponentRootPeer | undefined;
+        peer?.recompute();
+    }
+
+    switchNodeFreeze(): void {
+        const peer = this.getPeerNode() as ArkCustomComponentRootPeer | undefined;
+        if (!peer) {
+            return;
+        }
+        if (this.isViewActive()) {
+            peer.unfreezeMyRoot();
+        } else {
+            peer.freezeMyRoot();
         }
     }
 
@@ -389,11 +461,22 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     }
 
     onCleanup(): void {
-        this.aboutToDisappear();
+        scheduleCallback(() => {
+            this.aboutToDisappear(); // aboutToDisappear can change variable
+        });
     }
 
     onGlobalThemeChanged(theme: Theme): void {
         this.onWillApplyTheme(theme);
+    }
+
+    __getParentNode__Internal(): PeerNode | undefined {
+        return this.instance.__getParentNode__Internal();
+    }
+
+    __getJsViewName_Internal(): string {
+        const classPath = Class.of(this.instance).getName();
+        return classPath.substring(classPath.lastIndexOf('.') + 1);
     }
 }
 
@@ -438,13 +521,16 @@ export abstract class BaseCustomDialog<T extends BaseCustomDialog<T, T_Options>,
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
-        CustomDelegate._instantiate(
-            () => createInstance(uiContext, factory, initializers), content, initializers);
+        CustomDelegate._instantiate<CustomDelegate<S, S_Options>, S_Options>(
+            () => createInstance<S, S_Options>(uiContext, factory, initializers), content, initializers);
     }
 }
 
 export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent implements OptionsCallback<T_Options>, HasCommonMethod, CommonMethod {
     private __commonStyles = new Array<(instance: CommonMethod) => void>();
+    override __get__commonStyles__Internal(): Array<(instance: CommonMethod) => void> | undefined {
+        return this.__commonStyles;
+    }
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         super(useSharedStorage, storage);
     }
@@ -462,8 +548,8 @@ export abstract class BaseCustomComponent<T_Options> extends ExtendableComponent
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
-        CustomDelegate._instantiate(
-            () => createInstance(uiContext, factory, initializers, style), content, initializers, reuseKey);
+        CustomDelegate._instantiate<CustomDelegate<S, S_Options>, S_Options>(
+            () => createInstance<S, S_Options>(uiContext, factory, initializers, style), content, initializers, reuseKey);
     }
 
     aboutToRecycle(): void {}
@@ -516,36 +602,49 @@ export abstract class CustomComponent<T extends CustomComponent<T, T_Options>, T
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
-        CustomDelegate._instantiate(
-            () => createInstance(uiContext, factory, initializers, style), content, initializers, reuseKey);
+        CustomDelegate._instantiate<CustomDelegate<S, S_Options>, S_Options>(
+            () => createInstance<S, S_Options>(uiContext, factory, initializers, style), content, initializers, reuseKey);
     }
 
      aboutToReuse(params: ReuseObject): void {}
 }
 
-interface ReusableV2LifeCycle {
+interface ReusableV2LifeCycle<T_Options> {
+    resetStateVarsOnReuse(params?: T_Options): void
     aboutToReuse(): void;
 }
 
-export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options>, T_Options> extends BaseCustomComponent<T_Options> implements ReusableV2LifeCycle {
+export abstract class CustomComponentV2<T extends CustomComponentV2<T, T_Options>, T_Options> extends BaseCustomComponent<T_Options> implements ReusableV2LifeCycle<T_Options> {
     /** @memo */
     static _invokeImpl<S extends CustomComponentV2<S, S_Options>, S_Options>(
         /** @memo */
         style: ((instance: S) => void) | undefined,
         factory: () => S,
         initializers?: () => S_Options,
-        reuseKey?: string,
+        reuseKey?: () => string,
         /** @memo */
         content?: () => void
     ): void {
         const context: StateManager = __context() as StateManager;
         const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
         const uiContext = data?.uiContext;
-        CustomDelegate._instantiate(
-            () => createInstance(uiContext, factory, initializers, style), content, initializers, reuseKey);
+        const reuseKeyValue = remember(() => {
+            if (reuseKey) {
+                let key: string | undefined | null = reuseKey() as string | undefined | null; // this means reusekey should be only calculated once
+                if (!key) { // include '' empty string
+                    key = transferTypeName((Type.of(factory) as FunctionType).getResultType().toString());
+                }
+                return key as string;
+            }
+            return undefined;
+        });
+        CustomDelegate._instantiate<CustomDelegate<S, S_Options>, S_Options>(
+            () => createInstance<S, S_Options>(uiContext, factory, initializers, style), content, initializers, reuseKeyValue);
     }
 
     aboutToReuse(): void {}
+
+    resetStateVarsOnReuse(params?: T_Options): void {}
 }
 
 export class EntryPoint {
@@ -560,9 +659,8 @@ export class EntryPoint {
     }
 
     public static RegisterNamedRouter(routerName: string, instance: EntryPoint, param: NavInterface) {
-        let uiContext : UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
-        const globalRouterImpl = uiContext.getRouter().getRouter();
-        globalRouterImpl.registerNamedRouter(routerName, instance, param);
+        InteropNativeModule._NativeLog(`AceRouter: register named router: ${routerName}`)
+        RouterImpl.registerNamedRouter(routerName, instance, param);
     }
 }
 

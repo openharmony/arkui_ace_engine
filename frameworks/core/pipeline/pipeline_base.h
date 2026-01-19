@@ -1253,7 +1253,7 @@ public:
         return isSubPipeline_;
     }
 
-    void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline)
+    virtual void SetParentPipeline(const WeakPtr<PipelineBase>& pipeline)
     {
         parentPipeline_ = pipeline;
     }
@@ -1595,6 +1595,11 @@ public:
     virtual void SetTouchAccelarate(bool isEnable) {}
     virtual void SetTouchPassThrough(bool isEnable) {}
     virtual void SetEnableSwipeBack(bool isEnable) {}
+    virtual void SetIsRecycleInvisibleImageMemory(bool isEnable) {}
+    virtual std::optional<bool> GetIsRecycleInvisibleImageMemory() const
+    {
+        return std::nullopt;
+    }
     virtual void SetBackgroundColorModeUpdated(bool backgroundColorModeUpdated) {}
 
     bool IsSystmColorChange()
@@ -1671,6 +1676,17 @@ public:
     {
         return statisticEventReporter_;
     }
+    virtual void UpdateDrawLayoutChildObserver(
+        int32_t uniqueId, bool isClearLayoutObserver, bool isClearDrawObserver) {};
+    virtual void UpdateDrawLayoutChildObserver(
+        const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver) {};
+    virtual void SetXComponentDisplayConstraintEnabled(bool isEnable) {}
+
+    virtual bool GetXComponentDisplayConstraintEnabled()
+    {
+        return false;
+    }
+
 protected:
     virtual bool MaybeRelease() override;
     void TryCallNextFrameLayoutCallback()
@@ -1826,6 +1842,7 @@ protected:
     uint64_t compensationValue_ = 0;
     int64_t recvTime_ = 0;
     int64_t currRecvTime_ = -1;
+    int64_t pipelineCreateTime_ = -1;
     std::once_flag displaySyncFlag_;
     RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 
@@ -1886,7 +1903,6 @@ private:
     std::shared_ptr<ArkUIPerfMonitor> perfMonitor_;
     ConfigurationChange configurationChange_;
     std::shared_ptr<StatisticEventReporter> statisticEventReporter_;
-
     ACE_DISALLOW_COPY_AND_MOVE(PipelineBase);
 };
 

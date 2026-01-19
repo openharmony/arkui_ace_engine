@@ -36,7 +36,7 @@ constexpr double DEFAULT_MINANGLE = 10.0;
 constexpr double STRAIGHT_ANGLE = 180.0;
 constexpr Color PRESSED_BLEND_COLOR = Color(0x19000000);
 
-class ScrollBar final : public AceType {
+class ACE_FORCE_EXPORT ScrollBar final : public AceType {
     DECLARE_ACE_TYPE(ScrollBar, AceType);
 
 public:

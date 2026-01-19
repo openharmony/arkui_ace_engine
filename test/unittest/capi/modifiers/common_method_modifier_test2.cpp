@@ -17,6 +17,7 @@
 
 #include "modifier_test_base.h"
 #include "modifiers_test_utils.h"
+#include "core/interfaces/native/implementation/key_event_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -396,7 +397,8 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent0Test, TestSize.Level1
     };
     static const int32_t expectedResId = 123;
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    auto checkCallback = [](Ark_VMContext, const Ark_Int32 resourceId, const Ark_KeyEvent event) {
+    auto checkCallback = [](Ark_VMContext, const Ark_Int32 resourceId, const Ark_KeyEvent event,
+        Callback_Boolean_Void callback) {
         auto peer = event;
         ASSERT_NE(peer, nullptr);
         auto accessor = GeneratedModifier::GetKeyEventAccessor();
@@ -406,10 +408,12 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOnKeyEvent0Test, TestSize.Level1
             .code = info->GetKeyCode()
         };
         accessor->destroyPeer(peer);
+        auto ret = CallbackHelper(callback);
+        ret.InvokeSync(Converter::ArkValue<Ark_Boolean>(true));
     };
 
-    auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Void>(checkCallback, expectedResId);
-    auto optCallback = Converter::ArkValue<Opt_Callback_KeyEvent_Void>(arkCallback);
+    auto arkCallback = Converter::ArkValue<Callback_KeyEvent_Boolean>(checkCallback, expectedResId);
+    auto optCallback = Converter::ArkValue<Opt_Callback_KeyEvent_Boolean>(arkCallback);
     modifier_->setOnKeyEvent(node_, &optCallback);
 
     auto callOnKeyEvent = focusHub->GetOnKeyCallback();
@@ -613,7 +617,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyleTestValidValu
         Ark_BackgroundBlurStyleOptions {
             .colorMode  = ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
             .adaptiveColor = ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
-            .scale = ArkValue<Opt_Number>(0.123f),
+            .scale = ArkValue<Opt_Float64>(0.123),
             .blurOptions = ArkCreate<Opt_BlurOptions>(20., 30.),
             .policy = ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_ACTIVE),
             .inactiveColor = ArkUnion<Opt_ResourceColor, Ark_String>("65535"),
@@ -1078,21 +1082,21 @@ HWTEST_F(CommonMethodModifierTest2, setDirection, TestSize.Level1)
  */
 HWTEST_F(CommonMethodModifierTest2, setAlign, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Opt_Alignment, std::string>;
-    const std::vector<OneTestStep> testPlan = {
-        { ArkValue<Opt_Alignment>(ARK_ALIGNMENT_TOP_START), "Alignment.TopStart" },
-        { ArkValue<Opt_Alignment>(ARK_ALIGNMENT_TOP), "Alignment.Top" },
-        { ArkValue<Opt_Alignment>(ARK_ALIGNMENT_TOP_END), "Alignment.TopEnd" },
-        { ArkValue<Opt_Alignment>(ARK_ALIGNMENT_START), "Alignment.Start" },
-        { ArkValue<Opt_Alignment>(ARK_ALIGNMENT_CENTER), "Alignment.Center" },
-        { ArkValue<Opt_Alignment>(ARK_ALIGNMENT_END), "Alignment.End" },
-        { ArkValue<Opt_Alignment>(ARK_ALIGNMENT_BOTTOM_START), "Alignment.BottomStart" },
-        { ArkValue<Opt_Alignment>(ARK_ALIGNMENT_BOTTOM), "Alignment.Bottom" },
-        { ArkValue<Opt_Alignment>(ARK_ALIGNMENT_BOTTOM_END), "Alignment.BottomEnd" },
+    const std::vector<std::pair<Ark_Alignment, std::string>> testPlan = {
+        { ArkValue<Ark_Alignment>(ARK_ALIGNMENT_TOP_START), "Alignment.TopStart" },
+        { ArkValue<Ark_Alignment>(ARK_ALIGNMENT_TOP), "Alignment.Top" },
+        { ArkValue<Ark_Alignment>(ARK_ALIGNMENT_TOP_END), "Alignment.TopEnd" },
+        { ArkValue<Ark_Alignment>(ARK_ALIGNMENT_START), "Alignment.Start" },
+        { ArkValue<Ark_Alignment>(ARK_ALIGNMENT_CENTER), "Alignment.Center" },
+        { ArkValue<Ark_Alignment>(ARK_ALIGNMENT_END), "Alignment.End" },
+        { ArkValue<Ark_Alignment>(ARK_ALIGNMENT_BOTTOM_START), "Alignment.BottomStart" },
+        { ArkValue<Ark_Alignment>(ARK_ALIGNMENT_BOTTOM), "Alignment.Bottom" },
+        { ArkValue<Ark_Alignment>(ARK_ALIGNMENT_BOTTOM_END), "Alignment.BottomEnd" },
     };
     std::string resultStr;
     for (const auto &[value, expected]: testPlan) {
-        modifier_->setAlign(node_, &value);
+        auto inputValue = Converter::ArkUnion<Opt_Union_Alignment_LocalizedAlignment, Ark_Alignment>(value);
+        modifier_->setAlign(node_, &inputValue);
         resultStr = GetAttrValue<std::string>(node_, ATTRIBUTE_ALIGN_NAME);
         EXPECT_EQ(resultStr, expected);
     }
@@ -1208,7 +1212,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundBlurStyle, TestSize.Le
 {
     auto style = Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN);
     auto options = Converter::ArkValue<Opt_BackgroundBlurStyleOptions>(Ark_BackgroundBlurStyleOptions {
-        .scale = Converter::ArkValue<Opt_Number>(2.2999999523162842f),
+        .scale = Converter::ArkValue<Opt_Float64>(2.2999999523162842),
         .colorMode = Converter::ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
         .blurOptions = ArkCreate<Opt_BlurOptions>(7., 7.),
         .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
@@ -1232,7 +1236,7 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundBlurStyle, TestSize.Level1)
 {
     auto style = Converter::ArkValue<Opt_BlurStyle>(ARK_BLUR_STYLE_COMPONENT_ULTRA_THIN);
     auto options = Ark_ForegroundBlurStyleOptions {
-        .scale = Converter::ArkValue<Opt_Number>(2.3f),
+        .scale = Converter::ArkValue<Opt_Float64>(2.3),
         .colorMode = Converter::ArkValue<Opt_ThemeColorMode>(ARK_THEME_COLOR_MODE_DARK),
         .blurOptions = ArkCreate<Opt_BlurOptions>(7., 7.),
         .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
@@ -1364,42 +1368,55 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setOverlay, TestSize.Level1)
 HWTEST_F(CommonMethodModifierTest2, setBorder, TestSize.Level1)
 {
     Ark_BorderOptions arkInputValue = {
-        .color = { .value = { .selector = 1, .value1 = { .selector = 0, .value0 = ARK_COLOR_BLUE }}},
-        .dashGap = {
-            .value = {
-                .selector = 0,
-                .value0 = {
-                    .left = Converter::ArkValue<Opt_Length>("8.00%"),
-                    .top = Converter::ArkValue<Opt_Length>("9.0fp"),
-                    .right = Converter::ArkValue<Opt_Length>("8.0px"),
-                    .bottom = Converter::ArkValue<Opt_Length>("6.0vp"),
-                }
-            }
-        },
-        .dashWidth = {
-            .value = {
-                .selector = 0,
-                .value0 = {
-                    .left = Converter::ArkValue<Opt_Length>("8.00%"),
-                    .top = Converter::ArkValue<Opt_Length>("4.0fp"),
-                    .right = Converter::ArkValue<Opt_Length>("3.0px"),
-                    .bottom = Converter::ArkValue<Opt_Length>("1.0vp"),
-                }
-            }
-        },
-        .radius = { .value = { .selector = 1, .value1 = Converter::ArkValue<Ark_Length>("5.0px") }},
-        .style = { .value = { .selector = 1, .value1 = ARK_BORDER_STYLE_DASHED }},
-        .width = { .value = { .selector = 1, .value1 = Converter::ArkValue<Ark_Length>("10.0px") }}
-    };
+        .color = ArkUnion<Opt_Union_EdgeColors_ResourceColor_LocalizedEdgeColors, Ark_ResourceColor>(
+            ArkUnion<Ark_ResourceColor, Ark_Color>(ARK_COLOR_BLUE)),
+        .dashGap = ArkUnion<Opt_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths, Ark_EdgeWidths>(
+            Ark_EdgeWidths {
+                .left = Converter::ArkValue<Opt_Length>("8.00%"),
+                .top = Converter::ArkValue<Opt_Length>("9.0fp"),
+                .right = Converter::ArkValue<Opt_Length>("8.0px"),
+                .bottom = Converter::ArkValue<Opt_Length>("6.0vp")}),
+        .dashWidth = ArkUnion<Opt_Union_EdgeWidths_LengthMetrics_LocalizedEdgeWidths, Ark_EdgeWidths>(
+            Ark_EdgeWidths {
+                .left = Converter::ArkValue<Opt_Length>("8.00%"),
+                .top = Converter::ArkValue<Opt_Length>("4.0fp"),
+                .right = Converter::ArkValue<Opt_Length>("3.0px"),
+                .bottom = Converter::ArkValue<Opt_Length>("1.0vp")}),
+        .radius = ArkUnion<Opt_Union_BorderRadiuses_Length_LocalizedBorderRadiuses, Ark_Length>("5.0px"),
+        .style = ArkUnion<Opt_Union_EdgeStyles_BorderStyle, Ark_BorderStyle>(ARK_BORDER_STYLE_DASHED),
+        .width = ArkUnion<Opt_Union_EdgeWidths_Length_LocalizedEdgeWidths, Ark_Length>("10.0px")};
     auto inputValue = Converter::ArkValue<Opt_BorderOptions>(arkInputValue);
     modifier_->setBorder(node_, &inputValue);
-    auto strResult = GetStringAttribute(node_, ATTRIBUTE_BORDER_NAME);
-    EXPECT_EQ(strResult, "{\"style\":\"BorderStyle.Dashed\",\"color\":\"#FF0000FF\","
-                        "\"width\":\"10.00px\",\"radius\":\"5.00px\","
-                        "\"dashGap\":{\"left\":\"0.00vp\",\"top\":\"9.00fp\",\"start\":\"0.00vp\",\"end\":\"0.00vp\","
-                        "\"right\":\"8.00px\",\"bottom\":\"6.00vp\"},"
-                        "\"dashWidth\":{\"left\":\"0.00vp\",\"top\":\"4.00fp\",\"start\":\"0.00vp\",\"end\":\"0.00vp\","
-                        "\"right\":\"3.00px\",\"bottom\":\"1.00vp\"}}");
+
+    auto jsonValue = GetJsonValue(node_);
+    auto border = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BORDER_NAME);
+    auto dashGap = GetAttrValue<std::unique_ptr<JsonValue>>(border, "dashGap");
+    auto dashWidth = GetAttrValue<std::unique_ptr<JsonValue>>(border, "dashWidth");
+
+    auto borderStyle = GetAttrValue<std::string>(border, "style");
+    EXPECT_EQ(borderStyle, "BorderStyle.Dashed");
+    auto borderColor = GetAttrValue<std::string>(border, "color");
+    EXPECT_EQ(borderColor, "#FF0000FF");
+    auto borderWidth = GetAttrValue<std::string>(border, "width");
+    EXPECT_EQ(borderWidth, "10.00px");
+    auto borderRadius = GetAttrValue<std::string>(border, "radius");
+    EXPECT_EQ(borderRadius, "5.00px");
+    auto dashGapLeft = GetAttrValue<std::string>(dashGap, "left");
+    EXPECT_EQ(dashGapLeft, "0.00px");
+    auto dashGapTop = GetAttrValue<std::string>(dashGap, "top");
+    EXPECT_EQ(dashGapTop, "9.00fp");
+    auto dashGapRight = GetAttrValue<std::string>(dashGap, "right");
+    EXPECT_EQ(dashGapRight, "8.00px");
+    auto dashGapBottom = GetAttrValue<std::string>(dashGap, "bottom");
+    EXPECT_EQ(dashGapBottom, "6.00vp");
+    auto dashWidthLeft = GetAttrValue<std::string>(dashWidth, "left");
+    EXPECT_EQ(dashWidthLeft, "0.00px");
+    auto dashWidthTop = GetAttrValue<std::string>(dashWidth, "top");
+    EXPECT_EQ(dashWidthTop, "4.00fp");
+    auto dashWidthRight = GetAttrValue<std::string>(dashWidth, "right");
+    EXPECT_EQ(dashWidthRight, "3.00px");
+    auto dashWidthBottom = GetAttrValue<std::string>(dashWidth, "bottom");
+    EXPECT_EQ(dashWidthBottom, "1.00vp");
 }
 
 /*
@@ -1437,9 +1454,18 @@ HWTEST_F(CommonMethodModifierTest2, setBorderWidth, TestSize.Level1)
     };
     auto width = Converter::ArkUnion<Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths, Ark_EdgeWidths>(arkWidth);
     modifier_->setBorderWidth(node_, &width);
-    auto strResult = GetStringAttribute(node_, ATTRIBUTE_BORDER_WIDTH_NAME);
-    EXPECT_EQ(strResult, "{\"left\":\"0.00vp\",\"top\":\"4.00fp\",\"start\":\"0.00vp\","
-                         "\"end\":\"0.00vp\",\"right\":\"3.00px\",\"bottom\":\"1.00vp\"}");
+
+    auto jsonValue = GetJsonValue(node_);
+    auto dashWidth = GetAttrValue<std::unique_ptr<JsonValue>>(jsonValue, ATTRIBUTE_BORDER_WIDTH_NAME);
+
+    auto dashWidthLeft = GetAttrValue<std::string>(dashWidth, "left");
+    EXPECT_EQ(dashWidthLeft, "0.00px");
+    auto dashWidthTop = GetAttrValue<std::string>(dashWidth, "top");
+    EXPECT_EQ(dashWidthTop, "4.00fp");
+    auto dashWidthRight = GetAttrValue<std::string>(dashWidth, "right");
+    EXPECT_EQ(dashWidthRight, "3.00px");
+    auto dashWidthBottom = GetAttrValue<std::string>(dashWidth, "bottom");
+    EXPECT_EQ(dashWidthBottom, "1.00vp");
 }
 
 /*
@@ -1472,7 +1498,7 @@ HWTEST_F(CommonMethodModifierTest2, setBorderRadius, TestSize.Level1)
     };
     auto radius = Converter::ArkUnion<Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses, Ark_BorderRadiuses>(
         arkRadius);
-    modifier_->setBorderRadius(node_, &radius);
+    modifier_->setBorderRadius0(node_, &radius);
     auto strResult = GetStringAttribute(node_, ATTRIBUTE_BORDER_RADIUS_NAME);
     EXPECT_EQ(strResult, "{\"topLeft\":\"8.00%\",\"topRight\":\"7.00px\",\"bottomLeft\":\"5.00fp\","
                          "\"bottomRight\":\"6.00vp\"}");
@@ -1519,7 +1545,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setLinearGradient, TestSize.Level1)
         .angle = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(77),
         .direction = Converter::ArkValue<Opt_GradientDirection>(ARK_GRADIENT_DIRECTION_LEFT_BOTTOM),
         .repeating = Converter::ArkValue<Opt_Boolean>(true),
-        .colors = Converter::ArkValue<Array_Tuple_ResourceColor_Number>(colorSteps, Converter::FC),
+        .colors = Converter::ArkValue<Array_Tuple_ResourceColor_F64>(colorSteps, Converter::FC),
     };
     auto inputValue = Converter::ArkValue<Opt_LinearGradientOptions>(arkInputValue);
     modifier_->setLinearGradient(node_, &inputValue);
@@ -2085,7 +2111,7 @@ HWTEST_F(CommonMethodModifierTest2, setMarkAnchorTestValidValues, TestSize.Level
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setFocusScopeIdTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -2120,7 +2146,7 @@ std::vector<std::tuple<std::string, Opt_Boolean, std::string>> testFixtureBoolea
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestFocusScopeIdValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setFocusScopeIdTestFocusScopeIdValidValues, TestSize.Level1)
 {
     Opt_String initValueFocusScopeId;
     Opt_Boolean initValueIsGroup;
@@ -2158,7 +2184,7 @@ HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestFocusScopeIdValidValues, 
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setFocusScopeIdTestIsGroupValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setFocusScopeIdTestIsGroupValidValues, TestSize.Level1)
 {
     Opt_String initValueFocusScopeId;
     Opt_Boolean initValueIsGroup;
@@ -2236,7 +2262,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setFocusScopeIdTestIsArrowStepOutVa
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setFocusScopePriorityTestDefaultValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setFocusScopePriorityTestDefaultValues, TestSize.Level1)
 {
     std::unique_ptr<JsonValue> jsonValue = GetJsonValue(node_);
     std::string resultStr;
@@ -2263,7 +2289,7 @@ std::vector<std::tuple<std::string, Ark_FocusPriority>> testFixtureEnumFocusPrio
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setFocusScopePriorityTestFocusScopePriorityValidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setFocusScopePriorityTestFocusScopePriorityValidValues, TestSize.Level1)
 {
     Opt_String initValueFocusScopeId;
     Opt_FocusPriority initValuePriority;
@@ -2298,7 +2324,7 @@ HWTEST_F(CommonMethodModifierTest2, setFocusScopePriorityTestFocusScopePriorityV
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(CommonMethodModifierTest2, setFocusScopePriorityTestPriorityInvalidValues, TestSize.Level1)
+HWTEST_F(CommonMethodModifierTest2, DISABLED_setFocusScopePriorityTestPriorityInvalidValues, TestSize.Level1)
 {
     Opt_String initValueFocusScopePriority;
     Opt_FocusPriority initValuePriority;

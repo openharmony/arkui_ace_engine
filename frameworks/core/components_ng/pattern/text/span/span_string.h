@@ -138,7 +138,7 @@ protected:
     std::u16string text_;
     std::unordered_map<SpanType, std::list<RefPtr<SpanBase>>> spansMap_;
     std::list<RefPtr<NG::SpanItem>> spans_;
-    WeakPtr<NG::FrameNode> framNode_;
+    WeakPtr<NG::FrameNode> frameNode_;
     int32_t groupId_ = 0;
 };
 } // namespace OHOS::Ace

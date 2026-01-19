@@ -633,6 +633,7 @@ void TextSelectOverlay::TriggerScrollableParentToScroll(
     auto scrollableFrameRect = scrollableHost->GetPaintRectWithTransform();
     auto host = GetOwner();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto hostRect = host->GetPaintRectWithTransform();
     auto hostSize = hostRect.Height();
     auto scrollableParentSize = scrollableFrameRect.Height();

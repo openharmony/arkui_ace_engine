@@ -26,14 +26,23 @@ namespace OHOS::Ace::Kit {
 
 class FrameNode;
 
+// paint x, paint y, component width, component height.
+using DrawCallback = std::function<bool(float, float, float, float)>;
+
 class ACE_FORCE_EXPORT Text : public View {
 public:
     static RefPtr<Text> Create(const std::u16string& content);
+    static RefPtr<Text> Create(const RefPtr<FrameNode>& node);
     Text(const std::u16string& content);
+    Text(const RefPtr<FrameNode>& node);
     ~Text() override;
 
     void SetTextColor(const Color& value);
     void SetFontSize(const Dimension& value);
+    std::optional<void*> GetParagraph();
+    void SetDrawCallback(DrawCallback&& drawCallback);
+    std::u16string GetContent();
+    void MarkRedraw();
 };
 
 } // namespace OHOS::Ace::Kit

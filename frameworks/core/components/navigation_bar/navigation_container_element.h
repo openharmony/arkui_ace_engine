@@ -16,8 +16,8 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATION_BAR_NAVIGATION_CONTAINER_ELEMENT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NAVIGATION_BAR_NAVIGATION_CONTAINER_ELEMENT_H
 
-#include "core/components/tab_bar/tab_controller.h"
 #include "core/pipeline/base/component_group_element.h"
+#include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
 
 namespace OHOS::Ace {
 

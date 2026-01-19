@@ -20,6 +20,7 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_common_ffi.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
+#include "bridge/cj_frontend/interfaces/cj_ffi/cj_native_view_ffi.h"
 
 extern "C" {
 CJ_EXPORT int32_t FfiOHOSAceFrameworkAllocateNewElmetIdForNextComponent();
@@ -27,6 +28,7 @@ CJ_EXPORT void FfiOHOSAceFrameworkStartGetAccessRecordingFor(int32_t elmtId);
 CJ_EXPORT int32_t FfiOHOSAceFrameworkGetElmtIdToAccountFor();
 CJ_EXPORT void FfiOHOSAceFrameworkStopGetAccessRecording();
 CJ_EXPORT void FfiOHOSAceFrameworkImplicitPopBeforeContinue();
+CJ_EXPORT VectorToCFFIArray FfiOHOSAceFrameworkViewStackProcessorMoveDeletedElmtIds();
 }
 
 #endif // OHOS_ACE_FRAMEWORK_CJ_VIEW_STACK_PROCESSOR_FFI_H

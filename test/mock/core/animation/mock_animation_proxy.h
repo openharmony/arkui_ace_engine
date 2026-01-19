@@ -40,7 +40,7 @@ public:
         if (!Manager::GetInstance().IsAnimationOpen()) {
             impl = { targetValue, targetValue };
 
-            if (Manager::Version() > Manager::Version::V0) {
+            if (Manager::GetVersion() > Manager::Version::V0) {
                 const auto prop = ptr.Upgrade();
                 CHECK_NULL_VOID(prop);
                 if (auto cb = prop->GetUpdateCallback()) {
@@ -100,4 +100,18 @@ private:
     std::map<WeakPtr<AnimatableProperty<T>>, PropertyImpl> props_;
 };
 } // namespace OHOS::Ace::NG
+
+namespace OHOS::Ace {
+
+#define SINGLETON_INSTANCE_IMPL_TEMPLATE(T)                      \
+template<>                                                       \
+NG::MockAnimationProxy<T>&                                       \
+OHOS::Ace::Singleton<NG::MockAnimationProxy<T>>::GetInstance()   \
+{                                                                \
+    static NG::MockAnimationProxy<T> instance;                   \
+    return instance;                                             \
+}
+
+}
+
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_MOCK_ANIMATION_PROXY_H

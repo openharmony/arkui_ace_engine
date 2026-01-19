@@ -18,6 +18,7 @@
 #define protected public
 #define private public
 
+#include "common_statistic_event.h"
 #include "statistic_event_manager.h"
 
 using namespace testing;
@@ -47,18 +48,44 @@ void StatisticEventManagerTest::TearDownTestSuite()
  */
 HWTEST_F(StatisticEventManagerTest, AggregateEvent001, TestSize.Level1)
 {
-    StatisticEvent event;
+    std::string eventName = "FA_APP_START";
+    StatisticEvent event(eventName);
     std::string bundleName = "com.example.test";
     AppInfoParcel newAppInfo(bundleName);
-    std::string eventName = "";
-    StatisticEventInfoParcel newEventInfo(eventName, 1);
-    DelayedSingleton<StatisticEventManager>::GetInstance()->AggregateEvent(
-        event, newAppInfo, newEventInfo);
-    EXPECT_EQ(event.bundleNames.size(), 1);
+    StatisticEventInfoParcel newEventInfo(eventName, "FA", 10);
+    event.AggregateEvent(newAppInfo, newEventInfo);
+    EXPECT_EQ(event.eventCounts_.size(), 1);
+    EXPECT_EQ(event.extraInfos_.size(), 1);
+    EXPECT_EQ(event.eventCounts_[0], 10);
 
-    DelayedSingleton<StatisticEventManager>::GetInstance()->AggregateEvent(
-        event, newAppInfo, newEventInfo);
-    EXPECT_EQ(event.bundleNames.size(), 1);
+    event.AggregateEvent(newAppInfo, newEventInfo);
+    EXPECT_EQ(event.eventCounts_.size(), 1);
+    EXPECT_EQ(event.extraInfos_.size(), 1);
+    EXPECT_EQ(event.eventCounts_[0], 20);
+}
+
+/**
+ * @tc.name: StatisticEventManagerTest
+ * @tc.desc: Test AggregateEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatisticEventManagerTest, AggregateEvent002, TestSize.Level1)
+{
+    std::string eventName = "FA_APP_START";
+    StatisticEvent event(eventName);
+    std::string bundleName = "com.example.test";
+    AppInfoParcel newAppInfo(bundleName);
+    StatisticEventInfoParcel newEventInfo(eventName, "FA", 10);
+    event.AggregateEvent(newAppInfo, newEventInfo);
+    EXPECT_EQ(event.eventCounts_.size(), 1);
+    EXPECT_EQ(event.eventCounts_[0], 10);
+    EXPECT_EQ(event.extraInfos_.size(), 1);
+
+    StatisticEventInfoParcel newEventInfo2(eventName, "WEB", 10);
+    event.AggregateEvent(newAppInfo, newEventInfo2);
+    EXPECT_EQ(event.eventCounts_.size(), 2);
+    EXPECT_EQ(event.eventCounts_[1], 10);
+    EXPECT_EQ(event.extraInfos_.size(), 2);
 }
 
 /**
@@ -73,7 +100,7 @@ HWTEST_F(StatisticEventManagerTest, SendStatisticEvents001, TestSize.Level1)
     std::string bundleName = "";
     AppInfoParcel newAppInfo(bundleName);
     std::string eventName = "";
-    StatisticEventInfoParcel newEventInfo(eventName, 1);
+    StatisticEventInfoParcel newEventInfo(eventName, "", 1);
     std::vector<StatisticEventInfoParcel> eventInfos;
     eventInfos.emplace_back(newEventInfo);
     DelayedSingleton<StatisticEventManager>::GetInstance()->SendStatisticEvents(
@@ -94,51 +121,21 @@ HWTEST_F(StatisticEventManagerTest, ReportTimedStatisticEvent001, TestSize.Level
 {
     DelayedSingleton<StatisticEventManager>::GetInstance()->eventMap_.clear();
     DelayedSingleton<StatisticEventManager>::GetInstance()->timedSet_.clear();
-    DelayedSingleton<StatisticEventManager>::GetInstance()->timedSet_.insert(1);
-    DelayedSingleton<StatisticEventManager>::GetInstance()->InitReporter();
+    DelayedSingleton<StatisticEventManager>::GetInstance()->defaultReportInterval_ = 101;
     
     std::string bundleName = "";
     AppInfoParcel newAppInfo(bundleName);
     std::string eventName = "FA_APP_START";
-    StatisticEventInfoParcel newEventInfo(eventName, 1);
+    StatisticEventInfoParcel newEventInfo(eventName, "", 1);
     std::vector<StatisticEventInfoParcel> eventInfos;
     eventInfos.emplace_back(newEventInfo);
     DelayedSingleton<StatisticEventManager>::GetInstance()->SendStatisticEvents(
         newAppInfo, eventInfos);
 
-    DelayedSingleton<StatisticEventManager>::GetInstance()->ReportTimedStatisticEvent(0);
+    DelayedSingleton<StatisticEventManager>::GetInstance()->ReportTimedStatisticEvent(100);
     EXPECT_EQ(DelayedSingleton<StatisticEventManager>::GetInstance()->eventMap_.size(), 1);
 
-    DelayedSingleton<StatisticEventManager>::GetInstance()->ReportTimedStatisticEvent(1);
-    EXPECT_EQ(DelayedSingleton<StatisticEventManager>::GetInstance()->eventMap_.size(), 0);
-}
-
-/**
- * @tc.name: StatisticEventManagerTest
- * @tc.desc: Test ReportCustomTimedStatisticEvents
- * @tc.type: FUNC
- */
-HWTEST_F(StatisticEventManagerTest, ReportCustomTimedStatisticEvents001, TestSize.Level1)
-{
-    DelayedSingleton<StatisticEventManager>::GetInstance()->eventMap_.clear();
-    DelayedSingleton<StatisticEventManager>::GetInstance()->timedSet_.clear();
-    DelayedSingleton<StatisticEventManager>::GetInstance()->timedSet_.insert(1);
-    DelayedSingleton<StatisticEventManager>::GetInstance()->timedSet_.insert(2);
-    DelayedSingleton<StatisticEventManager>::GetInstance()->customEventReportInterval_["FA_APP_START"] = 2;
-    
-    std::string bundleName = "";
-    AppInfoParcel newAppInfo(bundleName);
-    std::string eventName = "FA_APP_START";
-    StatisticEventInfoParcel newEventInfo(eventName, 1);
-    std::vector<StatisticEventInfoParcel> eventInfos;
-    eventInfos.emplace_back(newEventInfo);
-    DelayedSingleton<StatisticEventManager>::GetInstance()->SendStatisticEvents(
-        newAppInfo, eventInfos);
-
-    DelayedSingleton<StatisticEventManager>::GetInstance()->ReportCustomTimedStatisticEvents(0);
-    EXPECT_EQ(DelayedSingleton<StatisticEventManager>::GetInstance()->eventMap_.size(), 1);
-
-    DelayedSingleton<StatisticEventManager>::GetInstance()->ReportCustomTimedStatisticEvents(2);
+    DelayedSingleton<StatisticEventManager>::GetInstance()->ReportTimedStatisticEvent(101);
     EXPECT_EQ(DelayedSingleton<StatisticEventManager>::GetInstance()->eventMap_.size(), 0);
 }
 } // namespace OHOS::Ace

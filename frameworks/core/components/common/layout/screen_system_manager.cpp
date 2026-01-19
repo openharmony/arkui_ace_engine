@@ -74,4 +74,10 @@ double ScreenSystemManager::GetScreenWidth(const RefPtr<PipelineBase>& pipeline)
     }
     return screenWidth_;
 }
+
+ScreenSystemManager& ScreenSystemManager::GetInstance()
+{
+    static ScreenSystemManager instance;
+    return instance;
+}
 } // namespace OHOS::Ace

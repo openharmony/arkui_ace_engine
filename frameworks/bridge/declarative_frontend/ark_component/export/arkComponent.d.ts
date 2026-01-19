@@ -169,6 +169,7 @@ declare class ArkComponent implements CommonMethod<CommonAttribute> {
     alignRules(value: AlignRuleOption): this;
     aspectRatio(value: number): this;
     clickEffect(value: ClickEffect | null): this;
+    enableClickSoundEffect(enabled: boolean | undefined): this;
     onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
@@ -465,6 +466,7 @@ declare class ArkRichEditorComponent extends ArkComponent implements CommonMetho
     undoStyle(style: Optional<UndoStyle>): RichEditorAttribute;
     includeFontPadding(enable: Optional<boolean>): RichEditorAttribute;
     fallbackLineSpacing(enable: Optional<boolean>): RichEditorAttribute;
+    singleLine(enable: boolean): RichEditorAttribute;
 }
 declare class ArkRowComponent extends ArkComponent implements RowAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
@@ -633,6 +635,7 @@ declare class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     alignRules(value: AlignRuleOption): this;
     aspectRatio(value: number): this;
     clickEffect(value: ClickEffect | null): this;
+    enableClickSoundEffect(enabled: boolean | undefined): this;
     onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event?: DragEvent, extraParams?: string) => void): this;
     onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;
@@ -1056,7 +1059,7 @@ declare class ArkTextPickerComponent extends ArkComponent implements TextPickerA
     onScrollStop(callback: (value: string | string[], index: number | number[]) => void): this;
 }
 
-declare class ArkContainerPicker extends ArkComponent implements PickerAttribute {
+declare class ArkContainerPicker extends ArkComponent implements UIPickerComponentAttribute {
     constructor(nativePtr: KNode, classType?: ModifierType);
     onChange(callback: Optional<OnPickerCallback>): this;
     onScrollStop(callback: Optional<OnPickerCallback>): this;
@@ -1764,6 +1767,7 @@ declare class ArkXComponentComponent implements CommonMethod<XComponentAttribute
     alignRules(value: AlignRuleOption): this;
     aspectRatio(value: number): this;
     clickEffect(value: ClickEffect): this;
+    enableClickSoundEffect(enabled: boolean | undefined): this;
     onDragStart(event: (event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this;
     onDragEnter(event: (event: DragEvent, extraParams?: string) => void): this;
     onDragSpringLoading(callback: Callback<SpringLoadingContext> | null, configuration?: DragSpringLoadingConfiguration): this;

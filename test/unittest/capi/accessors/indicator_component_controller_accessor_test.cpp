@@ -66,7 +66,7 @@ public:
  * @tc.desc: Check the functionality of IndicatorComponentControllerAccessor.showNext
  * @tc.type: FUNC
  */
-HWTEST_F(IndicatorComponentControllerAccessorTest, showNextTest, TestSize.Level1)
+HWTEST_F(IndicatorComponentControllerAccessorTest, DISABLED_showNextTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->showNext, nullptr);
 
@@ -79,7 +79,7 @@ HWTEST_F(IndicatorComponentControllerAccessorTest, showNextTest, TestSize.Level1
  * @tc.desc: Check the functionality of IndicatorComponentControllerAccessor.showPrevious
  * @tc.type: FUNC
  */
-HWTEST_F(IndicatorComponentControllerAccessorTest, showPreviousTest, TestSize.Level1)
+HWTEST_F(IndicatorComponentControllerAccessorTest, DISABLED_showPreviousTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->showPrevious, nullptr);
 

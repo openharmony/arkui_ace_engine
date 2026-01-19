@@ -14,6 +14,7 @@
  */
 
 #include "irregular_matrices.h"
+#include "test/mock/core/animation/mock_animation_manager.h"
 #include "test/unittest/core/pattern/grid/grid_test_ng.h"
 
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_layout_algorithm.h"
@@ -915,5 +916,70 @@ HWTEST_F(GridIrregularLayoutTest, ToEdge001, TestSize.Level1)
         UpdateCurrentOffset(100.0f);
     }
     EXPECT_EQ(GetChildY(frameNode_, 0), 0.0f);
+}
+
+/**
+ * @tc.name: ReloadWhenOverScrollFromEnd
+ * @tc.desc: Test jumping to bottom edge
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridIrregularLayoutTest, ReloadWhenOverScrollFromEnd, TestSize.Level1)
+{
+    MockAnimationManager::GetInstance().Reset();
+    MockAnimationManager::GetInstance().SetTicks(10);
+    GridLayoutOptions option;
+    option.irregularIndexes = { 0 };
+    auto onGetIrregularSizeByIndex = [](int32_t index) -> GridItemSize {
+        if (index == 0) {
+            return { .rows = 2, .columns = 2 };
+        }
+        return { .rows = 1, .columns = 1 };
+    };
+    option.getSizeByIndex = std::move(onGetIrregularSizeByIndex);
+    GridModelNG model = CreateGrid();
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetLayoutOptions(option);
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateFixedHeightItems(1, 300.0f);
+    CreateFixedHeightItems(2, 150.0f);
+    CreateDone();
+
+    // mock the scroll up
+    GestureEvent info;
+    info.SetMainVelocity(-200.f);
+    info.SetMainDelta(-100.f);
+    auto scrollable = pattern_->GetScrollableEvent()->GetScrollable();
+    scrollable->HandleTouchDown();
+    scrollable->HandleDragStart(info);
+    scrollable->HandleDragUpdate(info);
+    FlushUITasks();
+
+    scrollable->HandleTouchUp();
+    scrollable->HandleDragEnd(info);
+    FlushUITasks();
+
+    std::map<int32_t, std::map<int32_t, int32_t>>  matrix = {
+        { 0, { { 0, 0 }, { 1, 0 } } },
+        { 1, { { 0, 0 }, { 1, 0 } } },
+        { 2, { { 0, 1 }, { 1, 2 } } },
+    };
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+    // start animation
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+
+    frameNode_->childrenUpdatedFrom_ = 0;
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
+
+    layoutProperty_->OnLayoutOptionsUpdate(option);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    EXPECT_EQ(pattern_->info_.gridMatrix_, matrix);
 }
 } // namespace OHOS::Ace::NG

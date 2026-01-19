@@ -69,14 +69,14 @@ private:
     VariantValue value_;
 };
 
-class PatternResourceManager final : public AceType {
+class ACE_FORCE_EXPORT PatternResourceManager final : public AceType {
     DECLARE_ACE_TYPE(PatternResourceManager, AceType);
 
 public:
     PatternResourceManager() = default;
     ~PatternResourceManager() override = default;
 
-    void AddResource(
+    ACE_FORCE_EXPORT void AddResource(
         const std::string& key,
         const RefPtr<ResourceObject>& resObj,
         std::function<void(const RefPtr<ResourceObject>&)>&& updateFunc);
@@ -131,7 +131,7 @@ public:
         AddResource(key, resObj, std::move(updateFunc));
     }
 
-    void ParsePropertyValue(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> value);
+    ACE_FORCE_EXPORT void ParsePropertyValue(const RefPtr<ResourceObject>& resObj, RefPtr<PropertyValueBase> value);
 
     const std::vector<std::string>& GetResKeyArray();
 private:

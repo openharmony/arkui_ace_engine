@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/stepper/stepper_item_model_static.h"
 
+#include "core/components_ng/pattern/stepper/stepper_constants.h"
 #include "core/components_ng/pattern/stepper/stepper_item_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -22,7 +23,7 @@ namespace OHOS::Ace::NG {
 RefPtr<FrameNode> StepperItemModelStatic::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::STEPPER_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperItemPattern>(); });
+        STEPPER_ITEM_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<StepperItemPattern>(); });
     return frameNode;
 }
 

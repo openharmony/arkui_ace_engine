@@ -29,7 +29,7 @@
 
 namespace OHOS::Ace {
 
-class RenderBoxBase : public RenderNode {
+class ACE_FORCE_EXPORT RenderBoxBase : public RenderNode {
     DECLARE_ACE_TYPE(RenderBoxBase, RenderNode);
 
 public:
@@ -43,7 +43,7 @@ public:
     const Size& GetPaintSize() const;
     void SetPaintSize(const Size& paintSize);
     virtual Size GetBorderSize() const;
-    double CalculateHeightPercent(double percent) const; // add for text filed
+    ACE_FORCE_EXPORT double CalculateHeightPercent(double percent) const; // add for text filed
     virtual void DrawOnPixelMap() {}
 
     FloatPropertyAnimatable::SetterMap GetFloatPropertySetterMap() override;

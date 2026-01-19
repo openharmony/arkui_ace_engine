@@ -3710,6 +3710,20 @@ class ClickEffectModifier extends ModifierWithKey<ClickEffect | null> {
   }
 }
 
+class EnableClickSoundEffectModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableClickSoundEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetEnableClickSoundEffect(node);
+    } else {
+      getUINativeModule().common.setEnableClickSoundEffect(node, this.value);
+    }
+  }
+}
+
 class KeyBoardShortCutModifier extends ModifierWithKey<Array<ArkKeyBoardShortCut>> {
   constructor(value: Array<ArkKeyBoardShortCut>) {
     super(value);
@@ -4096,6 +4110,22 @@ class OnVisibleAreaChangeModifier extends ModifierWithKey<ArkOnVisibleAreaChange
       getUINativeModule().common.resetOnVisibleAreaChange(node);
     } else {
       getUINativeModule().common.setOnVisibleAreaChange(node, this.value.ratios, this.value.event, this.value.measureFromViewport);
+    }
+  }
+}
+
+class OnVisibleAreaApproximateChangeModifier extends ModifierWithKey<ArkOnVisibleAreaApproximateChange> {
+  constructor(value: ArkOnVisibleAreaApproximateChange) {
+      super(value);
+  }
+  static identity: Symbol = Symbol('onVisibleAreaApproximateChange');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetOnVisibleAreaApproximateChange(node);
+    } else {
+      getUINativeModule().common.setOnVisibleAreaApproximateChange(node, this.value.event, this.value.ratios,
+        this.value.expectedUpdateInterval ? this.value.expectedUpdateInterval : 1000,
+        this.value.measureFromViewport ? this.value.measureFromViewport : false);
     }
   }
 }
@@ -5470,6 +5500,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  enableClickSoundEffect(value: boolean | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, EnableClickSoundEffectModifier.identity, EnableClickSoundEffectModifier, value);
+    return this;
+  }
+
   onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this {
     modifierWithKey(this._modifiersWithKeys, DragStartModifier.identity, DragStartModifier, event);
     return this;
@@ -5707,7 +5742,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   bindContextMenu(content: CustomBuilder, responseType: ResponseType, options?: ContextMenuOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindContextMenu not supported in attributeModifier scenario.');
   }
 
   bindContentCover(isShow: boolean, builder: CustomBuilder, type?: ModalTransition | ContentCoverOptions): this {
@@ -5753,15 +5788,32 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
-  onVisibleAreaChange(ratios: Array<number>, event: (isVisible: boolean, currentRatio: number) => void): this {
+  onVisibleAreaChange(ratios: Array<number>, event: (isVisible: boolean, currentRatio: number) => void, measureFromViewport?: boolean): this {
     let onVisibleAreaChange = new ArkOnVisibleAreaChange();
     onVisibleAreaChange.ratios = ratios;
     onVisibleAreaChange.event = event;
+    onVisibleAreaChange.measureFromViewport = measureFromViewport;
     this._onVisibleAreaChange = onVisibleAreaChange;
     if (typeof ratios === 'undefined' || typeof event === 'undefined') {
       modifierWithKey(this._modifiersWithKeys, OnVisibleAreaChangeModifier.identity, OnVisibleAreaChangeModifier, undefined);
     } else {
       modifierWithKey(this._modifiersWithKeys, OnVisibleAreaChangeModifier.identity, OnVisibleAreaChangeModifier, onVisibleAreaChange);
+    }
+    return this;
+  }
+
+  onVisibleAreaApproximateChange(options: VisibleAreaEventOptions, event: (isVisible: boolean, currentRatio: number) => void) {
+    let onVisibleAreaApproximateChange = new ArkOnVisibleAreaApproximateChange();
+    onVisibleAreaApproximateChange.ratios = options.ratios;
+    onVisibleAreaApproximateChange.event = event;
+    onVisibleAreaApproximateChange.expectedUpdateInterval = options.expectedUpdateInterval;
+    onVisibleAreaApproximateChange.measureFromViewport = options.measureFromViewport;
+    this._onVisibleAreaApproximateChange = onVisibleAreaApproximateChange;
+    if (typeof options.ratios === 'undefined' || typeof event === 'undefined') {
+      modifierWithKey(this._modifiersWithKeys, OnVisibleAreaApproximateChangeModifier.identity, OnVisibleAreaApproximateChangeModifier, undefined);
+    } else {
+      modifierWithKey(this._modifiersWithKeys, OnVisibleAreaApproximateChangeModifier.identity, OnVisibleAreaApproximateChangeModifier,
+        onVisibleAreaApproximateChange);
     }
     return this;
   }

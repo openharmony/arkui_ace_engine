@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -49,13 +49,22 @@ public:
         EffectEdge effectEdge = EffectEdge::ALL);
     static void SetFadingEdge(FrameNode* frameNode, const std::optional<bool>& fadingEdge,
             const std::optional<Dimension>& fadingEdgeLength);
+    static void SetScrollBarMargin(FrameNode* frameNode, const ScrollBarMargin& scrollBarMargin);
+    static void SetContentStartOffset(FrameNode* frameNode, const std::optional<float>& offset);
+    static void SetContentEndOffset(FrameNode* frameNode, const std::optional<float>& offset);
 
-    static void SetOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& onScroll);
-    static void SetOnDidScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
+    ACE_FORCE_EXPORT static void SetOnWillScroll(FrameNode* frameNode, OnWillScrollEvent&& onScroll);
+    ACE_FORCE_EXPORT static void SetOnDidScroll(FrameNode* frameNode, OnScrollEvent&& onScroll);
     static void SetOnReachStart(FrameNode* frameNode, OnReachEvent&& onReachStart);
     static void SetOnReachEnd(FrameNode* frameNode, OnReachEvent&& onReachEnd);
     static void SetOnScrollStart(FrameNode* frameNode, OnScrollStartEvent&& onScrollStart);
     static void SetOnScrollStop(FrameNode* frameNode, OnScrollStopEvent&& onScrollStop);
+    static void SetOnScrollFrameBegin(FrameNode* frameNode, OnScrollFrameBeginEvent&& ScrollFrameBegin);
+    static void SetOnWillStartDragging(FrameNode* frameNode, OnWillStartDraggingEvent&& event) ;
+    static void SetOnWillStopDragging(FrameNode* frameNode, OnWillStopDraggingEvent&& onWillStopDragging);
+    static void SetOnDidStopDragging(FrameNode* frameNode, OnDidStopDraggingEvent&& event);
+    static void SetOnWillStartFling(FrameNode* frameNode, OnWillStartFlingEvent&& event);
+    static void SetOnDidStopFling(FrameNode* frameNode, OnDidStopFlingEvent&& event);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     static void SetDigitalCrownSensitivity(FrameNode* frameNode, const std::optional<CrownSensitivity>& sensitivity);

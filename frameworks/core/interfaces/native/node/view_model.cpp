@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,9 +14,18 @@
  */
 
 #include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/node_checkbox_modifier.h"
+#include "core/interfaces/native/node/node_slider_modifier.h"
+#include "core/interfaces/native/node/checkboxgroup_modifier.h"
+
+#include "core/interfaces/native/node/flow_item_modifier.h"
+#include "core/interfaces/native/node/water_flow_modifier.h"
+
+#include "core/interfaces/native/node/radio_modifier.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/group_node.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/badge/badge_model_ng.h"
@@ -30,7 +39,6 @@
 #include "core/components_ng/pattern/list/list_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_model_ng.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
-#include "core/components_ng/pattern/marquee/marquee_model_ng.h"
 #include "core/components_ng/pattern/picker/datepicker_model_ng.h"
 #ifdef QRCODEGEN_SUPPORT
 #include "core/components_ng/pattern/qrcode/qrcode_model_ng.h"
@@ -59,14 +67,11 @@
 #include "core/components_ng/pattern/swiper/swiper_model_ng.h"
 #include "core/components_ng/pattern/button/button_model_ng.h"
 #include "core/components_ng/pattern/progress/progress_model_ng.h"
-#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
-#include "core/components_ng/pattern/checkboxgroup/checkboxgroup_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/column_model_ng.h"
 #include "core/components_ng/pattern/linear_layout/row_model_ng.h"
 #include "core/components_ng/pattern/flex/flex_model_ng.h"
 #include "core/components_ng/pattern/refresh/refresh_model_ng.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
-#include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_model_ng.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
 #include "core/components_ng/pattern/relative_container/relative_container_model_ng.h"
@@ -80,6 +85,7 @@
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
 #include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.h"
@@ -163,6 +169,14 @@ void* createTextInputNode(ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* createRichEditorNode(ArkUI_Int32 nodeId)
+{
+    RefPtr<FrameNode> frameNode = RichEditorModelNG::CreateRichEditorStyledStringNode(nodeId);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 void* createStackNode(ArkUI_Int32 nodeId)
 {
     auto frameNode = StackModelNG::CreateFrameNode(nodeId);
@@ -221,10 +235,9 @@ void* createProgressNode(ArkUI_Int32 nodeId)
 
 void* createCheckBoxNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = CheckBoxModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto checkboxModifier = NodeModifier::GetCheckboxCustomModifier();
+    CHECK_NULL_RETURN(checkboxModifier, nullptr);
+    return checkboxModifier->createCheckboxFrameNode(nodeId);
 }
 
 void* createColumnNode(ArkUI_Int32 nodeId)
@@ -338,10 +351,14 @@ void* createListItemGroupNode(ArkUI_Int32 nodeId)
 
 void* createSliderNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = SliderModelNG::CreateFrameNode(nodeId);
+    auto arkUISliderModifier = NG::NodeModifier::GetSliderModifier();
+    CHECK_NULL_RETURN(arkUISliderModifier, nullptr);
+    auto arkUINodeHandle = arkUISliderModifier->createSliderFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createCanvasNode(ArkUI_Int32 nodeId)
@@ -410,7 +427,9 @@ void* createNavigationNode(ArkUI_Int32 nodeId)
 
 void* createWaterFlowNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = WaterFlowModelNG::CreateFrameNode(nodeId);
+    auto* modifier = NG::NodeModifier::GetWaterFlowModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->createWaterFlow(nodeId)));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -418,7 +437,9 @@ void* createWaterFlowNode(ArkUI_Int32 nodeId)
 
 void* createFlowItemNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = WaterFlowItemModelNG::CreateFrameNode(nodeId);
+    auto* modifier = NG::NodeModifier::GetWaterFlowItemModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->createFlowItem(nodeId)));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -528,10 +549,14 @@ void* createImageAnimatorNode(ArkUI_Int32 nodeId)
 
 void* createRadioNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = RadioModelNG::CreateFrameNode(nodeId);
+    auto arkUIRadioModifier = NG::NodeModifier::GetRadioModifier();
+    CHECK_NULL_RETURN(arkUIRadioModifier, nullptr);
+    auto arkUINodeHandle = arkUIRadioModifier->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createSelectNode(ArkUI_Int32 nodeId)
@@ -594,26 +619,31 @@ void* createTextTimerNode(ArkUI_Int32 nodeId)
 
 void* createMarqueeNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = MarqueeModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto marqueeModifier = nodeModifier->getMarqueeModifier();
+    CHECK_NULL_RETURN(marqueeModifier, nullptr);
+    return marqueeModifier->createMarqueeFrameNode(nodeId);
 }
 
 void* createCheckBoxGroupNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = CheckBoxGroupModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto checkboxGroupModifier = NodeModifier::GetCheckboxGroupCustomModifier();
+    CHECK_NULL_RETURN(checkboxGroupModifier, nullptr);
+    return checkboxGroupModifier->createCheckboxGroupFrameNode(nodeId);
 }
 
 void* createRatingNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = RatingModelNG::CreateFrameNode(nodeId);
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Rating");
+    CHECK_NULL_RETURN(module, nullptr);
+    auto arkUIRatingModifier = reinterpret_cast<const ArkUIRatingModifier*>(module->GetDynamicModifier());
+    CHECK_NULL_RETURN(arkUIRatingModifier, nullptr);
+    auto arkUINodeHandle = arkUIRatingModifier->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* CreateCustomNode(ArkUI_CharPtr tag)
@@ -729,6 +759,7 @@ static createArkUIFrameNode* createArkUIFrameNodes[] = {
 #endif
     nullptr,
     createContainerPickerNode,
+    createRichEditorNode,
 };
 
 void* CreateNode(ArkUINodeType tag, ArkUI_Int32 nodeId)

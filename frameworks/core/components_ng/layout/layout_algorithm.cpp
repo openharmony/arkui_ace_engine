@@ -29,6 +29,7 @@ const std::unordered_set<std::string> OVERFLOW_ENABLED_COMPONENTS = {
     OHOS::Ace::V2::FLEX_ETS_TAG
 };
 }
+
 static inline void UnionRect(std::optional<RectF>& unionRect, const RectF& rect)
 {
     if (unionRect.has_value()) {
@@ -37,6 +38,7 @@ static inline void UnionRect(std::optional<RectF>& unionRect, const RectF& rect)
         unionRect = rect;
     }
 }
+
 LayoutAlgorithmWrapper::LayoutAlgorithmWrapper(
     const RefPtr<LayoutAlgorithm>& layoutAlgorithmT, bool skipMeasure, bool skipLayout)
     : layoutAlgorithm_(layoutAlgorithmT), skipMeasure_(skipMeasure), skipLayout_(skipLayout)
@@ -192,7 +194,7 @@ bool LayoutAlgorithm::IsContentOverflow(LayoutWrapper* layoutWrapper, OverflowCo
         return false;
     }
     vOverflowHandler->CreateContentRect();
-    return vOverflowHandler->IsVerticalOverflow() || vOverflowHandler->IsHorizontalOverflow();
+    return vOverflowHandler->IsOverflow();
 }
 
 void LayoutAlgorithm::HandleContentOverflow(LayoutWrapper* layoutWrapper)
@@ -211,18 +213,9 @@ void LayoutAlgorithm::HandleContentOverflow(LayoutWrapper* layoutWrapper)
     const auto &vOverflowHandler =
         pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(hostNode)));
     CHECK_NULL_VOID(vOverflowHandler);
-
-    if (vOverflowHandler->IsTotalChildFrameRectPrecomputed()) {
-        vOverflowHandler->SetOverflowDisabledFlag(
-            vOverflowHandler->IsOverflowDisabled() || hostNode->IsAncestorScrollable());
-    } else {
-        const bool earlyBreakWhenDisabled = true;
-        OverflowCollectResult res =
-            LayoutAlgorithm::CollectOverflowFromFrameNode(AceType::RawPtr(hostNode), earlyBreakWhenDisabled);
-        vOverflowHandler->SetOverflowDisabledFlag(res.overflowDisabled || hostNode->IsAncestorScrollable());
-        vOverflowHandler->SetTotalChildFrameRect(res.totalChildFrameRect.value_or(RectF()));
-        vOverflowHandler->CreateContentRect();
-    }
+    
+    vOverflowHandler->SetOverflowDisabledFlag(
+        vOverflowHandler->IsOverflowDisabled() || hostNode->IsAncestorScrollable());
     vOverflowHandler->HandleContentOverflow();
 }
 } // namespace OHOS::Ace::NG

@@ -31,7 +31,7 @@ class GaugeConfiguration : public CommonConfiguration {
 };
 using GaugeMakeCallback =
     std::function<RefPtr<FrameNode>(const GaugeConfiguration& gaugeConfiguration)>;
-class ACE_EXPORT GaugeModelNG : public OHOS::Ace::GaugeModel {
+class ACE_FORCE_EXPORT GaugeModelNG : public OHOS::Ace::GaugeModel {
 public:
     void Create(float values, float min, float max) override;
     void SetValue(float value) override;
@@ -61,10 +61,14 @@ public:
     void SetGradientColorModeInit() override;
     void SetGradientInit(const std::vector<NG::ColorStopArray>& colors) override;
 
+    static void CreateFrameNode(float values, float min, float max);
     static void SetValue(FrameNode* frameNode, float value);
     static void SetStartAngle(FrameNode* frameNode, float value);
     static void SetEndAngle(FrameNode* frameNode, float value);
     static void SetGaugeStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth);
+    static void SetDescriptionStatic(const RefPtr<AceType>& customNode);
+    static void SetIsShowLimitValue(FrameNode* frameNode, bool isShowLimitValue);
+    static void SetIsShowDescription(FrameNode* frameNode, bool isShowDescription);
     static void SetShadowOptions(FrameNode* frameNode, const GaugeShadowOptions& shadowOptions);
     static void ResetShadowOptions(FrameNode* frameNode);
     static void SetIsShowIndicator(FrameNode* frameNode, bool isShowIndicator);
@@ -79,6 +83,7 @@ public:
     static void ResetGradientColors(FrameNode* frameNode);
     static void SetBuilderFunc(FrameNode* frameNode, NG::GaugeMakeCallback&& jsMake);
     static void SetUseGradient(FrameNode* frameNode, bool useGradient);
+    static void SetUseSpecialDefaultIndicator(FrameNode* frameNode, bool useSpecialDefaultIndicator);
     static void CreateWithResourceObj(
         FrameNode* frameNode, GaugeResourceType jsResourceType, const RefPtr<ResourceObject>& resObj);
     static void SetGradientColorModeInit(FrameNode* frameNode);

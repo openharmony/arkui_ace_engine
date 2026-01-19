@@ -232,6 +232,8 @@ bool PixelMapImage::StretchImageWithLattice(
         PrintDrawingLatticeConfig(lattice, dstRect);
     }
     recordingCanvas.AttachBrush(brush);
+    auto dfxConfig = GetImageDfxConfig();
+    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap);
     recordingCanvas.DrawImageLattice(rsImage.get(), lattice, dstRect, filterMode);
     recordingCanvas.DetachBrush();
     return true;
@@ -276,6 +278,8 @@ bool PixelMapImage::StretchImageWithSlice(
     std::shared_ptr<RSImage> rsImage = DrawingImage::MakeRSImageFromPixmap(pixmap);
     CHECK_NULL_RETURN(rsImage, false);
     recordingCanvas.AttachBrush(brush);
+    auto dfxConfig = GetImageDfxConfig();
+    NotifyDrawCompletion(dfxConfig.ToStringWithSrc(), pixmap);
     recordingCanvas.DrawImageNine(rsImage.get(), rsCenterRect, dstRect, filterMode, &brush);
     recordingCanvas.DetachBrush();
     return true;

@@ -105,4 +105,43 @@ HWTEST_F(SubwindowManagerTest, ShowDialogNG001, TestSize.Level1)
     auto dialogNode = manager->ShowDialogNG(dialogProps, std::move(buildFunc));
     ASSERT_EQ(dialogNode, nullptr);
 }
+
+/**
+ * @tc.name: SubwindowManagerTest_HasDialogOrPopup001
+ * @tc.desc: Test method HasDialogOrPopup
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, HasDialogOrPopup001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get subwindowManager.
+     */
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+    /**
+     * @tc.steps: step2. call HasDialogOrPopup
+     */
+    auto containerId = 1000000;
+    ASSERT_EQ(manager->HasDialogOrPopup(containerId), false);
+}
+
+/**
+ * @tc.name: SubwindowManagerTest_ShouldEnableDragEventForSubwindow001
+ * @tc.desc: Test method ShouldEnableDragEventForSubwindow
+ * @tc.type: FUNC
+ */
+HWTEST_F(SubwindowManagerTest, ShouldEnableDragEventForSubwindow001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get subwindowManager.
+     */
+    auto manager = SubwindowManager::GetInstance();
+    ASSERT_NE(manager, nullptr);
+    /**
+     * @tc.steps: step2. call ShouldEnableDragEventForSubwindow
+     */
+    auto containerId = 1000000;
+    auto isRestartDrag = false;
+    ASSERT_EQ(manager->ShouldEnableDragEventForSubwindow(containerId, isRestartDrag), false);
+}
 }

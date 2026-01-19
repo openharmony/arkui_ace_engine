@@ -49,6 +49,7 @@ RefPtr<UIExtensionNode> UIExtensionNode::GetOrCreateUIExtensionNode(
         }
     }
     auto pattern = patternCreator ? patternCreator() : AceType::MakeRefPtr<Pattern>();
+    ACE_UINODE_TRACE(nodeId, tag, TypeInfoHelper::TypeName(AceType::RawPtr(pattern)));
     uiExtensionNode = AceType::MakeRefPtr<UIExtensionNode>(tag, nodeId, pattern, false);
     uiExtensionNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(uiExtensionNode);

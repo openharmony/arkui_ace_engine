@@ -527,19 +527,18 @@ HWTEST_F(CommonMethodModifierTest4, DISABLED_setSphericalEffectValidValues, Test
 HWTEST_F(CommonMethodModifierTest4, setSphericalEffectInvalidValues, TestSize.Level1)
 {
     ASSERT_NE(modifier_->setSphericalEffect, nullptr);
-    using OneTestStep = std::tuple<Opt_Float64, float>;
-    const std::vector<OneTestStep> testPlan = {
-        {Converter::ArkValue<Opt_Float64>(-1.0), 0.0},
-        {Converter::ArkValue<Opt_Float64>(-2.0), 0.0},
-        {Converter::ArkValue<Opt_Float64>(1.5), 0.0},
-        {Converter::ArkValue<Opt_Float64>(2.0), 0.0},
+    const std::vector<std::tuple<std::string, Opt_Float64, float>> testPlan = {
+        {"-1.0", Converter::ArkValue<Opt_Float64>(-1.0), 0.0},
+        {"-2.0", Converter::ArkValue<Opt_Float64>(-2.0), 0.0},
+        {"1.5", Converter::ArkValue<Opt_Float64>(1.5), 1.0},
+        {"2.0", Converter::ArkValue<Opt_Float64>(2.0), 1.0},
     };
-    for (auto [inputValue, expectedValue]: testPlan) {
+    for (auto [input, inputValue, expectedValue]: testPlan) {
         modifier_->setSphericalEffect(node_, &inputValue);
         auto fullJson = GetJsonValue(node_);
         auto resultValue = fullJson->GetDouble(ATTRIBUTE_SPHERICAL_EFFECT_NAME,
             ATTRIBUTE_SPHERICAL_EFFECT_DEFAULT_VALUE);
-        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << expectedValue;
+        EXPECT_EQ(resultValue, expectedValue) << "Passed value is: " << input;
     }
 }
 ////////////// LightUpEffect

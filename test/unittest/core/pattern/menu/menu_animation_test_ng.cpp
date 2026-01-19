@@ -487,16 +487,24 @@ HWTEST_F(MenuAnimationTestNg, GetAnimationOffset001, TestSize.Level1)
     mainMenu->MountToParent(wrapperNode);
     auto wrapperPattern = wrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(wrapperPattern, nullptr);
+
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
+    ASSERT_NE(selectTheme, nullptr);
+    auto defaultDimension = Dimension(30.0, DimensionUnit::PX);
+    selectTheme->menuAnimationOffset_ = defaultDimension;
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(selectTheme));
     /**
      * @tc.steps: step2. execute GetAnimationOffset
      * @tc.expected: property is set as expected
      */
     wrapperPattern->menuPlacement_ = Placement::LEFT;
-    wrapperPattern->GetAnimationOffset();
+    EXPECT_EQ(wrapperPattern->GetAnimationOffset().GetX(), defaultDimension);
     wrapperPattern->menuPlacement_ = Placement::RIGHT;
-    wrapperPattern->GetAnimationOffset();
+    EXPECT_EQ(wrapperPattern->GetAnimationOffset().GetX(), -defaultDimension);
     wrapperPattern->menuPlacement_ = Placement::TOP;
-    wrapperPattern->GetAnimationOffset();
+    EXPECT_EQ(wrapperPattern->GetAnimationOffset().GetY(), defaultDimension);
 }
 
 /**

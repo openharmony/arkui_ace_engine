@@ -14,6 +14,7 @@
  */
 #include "core/components/common/layout/constants.h"
 #include "core/components/image/image_component.h"
+#include "core/components/image/image_theme.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
 #include "core/components_ng/pattern/image/image_model_static.h"
@@ -34,6 +35,8 @@ constexpr float CEIL_SMOOTHEDGE_VALUE = 1.333f;
 constexpr float FLOOR_SMOOTHEDGE_VALUE = 0.334f;
 constexpr int32_t SELECTOR_INDEX = 3;
 constexpr float DEFAULT_HDR_BRIGHTNESS = 1.0f;
+constexpr float HDR_BRIGHTNESS_MIN = 0.0f;
+constexpr float HDR_BRIGHTNESS_MAX = 1.0f;
 } // namespace
 
 namespace Converter {
@@ -184,7 +187,15 @@ void SetFillColorImpl(Ark_NativePointer node,
         ImageModelNG::ResetImageFill(frameNode);
         return;
     }
-    ImageModelStatic::SetImageFill(frameNode, Converter::OptConvertPtr<Color>(value));
+    auto color = Converter::OptConvertPtr<Color>(value);
+    if (!color) {
+        auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+        CHECK_NULL_VOID(pipeline);
+        auto theme = pipeline->GetTheme<ImageTheme>();
+        CHECK_NULL_VOID(theme);
+        color = theme->GetFillColor();
+    }
+    ImageModelStatic::SetImageFill(frameNode, color);
 }
 void SetObjectFitImpl(Ark_NativePointer node,
                       const Opt_ImageFit* value)
@@ -240,8 +251,9 @@ void SetHdrBrightnessImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    ImageModelStatic::SetHdrBrightness(
-        frameNode, Converter::OptConvertPtr<float>(value).value_or(DEFAULT_HDR_BRIGHTNESS));
+    auto convValue = Converter::OptConvertPtr<float>(value);
+    Validator::ValidateByRange(convValue, HDR_BRIGHTNESS_MIN, HDR_BRIGHTNESS_MAX);
+    ImageModelStatic::SetHdrBrightness(frameNode, convValue.value_or(DEFAULT_HDR_BRIGHTNESS));
 }
 void SetInterpolationImpl(Ark_NativePointer node,
                           const Opt_ImageInterpolation* value)
@@ -488,6 +500,13 @@ void SetContentTransitionImpl(Ark_NativePointer node, const Opt_ContentTransitio
         ImageModelStatic::SetContentTransition(frameNode, peer->type_);
     }
 }
+void SetAntialiasedImpl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ImageModelStatic::SetAntialiased(frameNode, convValue);
+}
 } // namespace ImageAttributeModifier
 const GENERATED_ArkUIImageModifier* GetImageModifier()
 {
@@ -524,6 +543,7 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::SetOrientationImpl,
         ImageAttributeModifier::SetSupportSvg2Impl,
         ImageAttributeModifier::SetContentTransitionImpl,
+        ImageAttributeModifier::SetAntialiasedImpl,
     };
     return &ArkUIImageModifierImpl;
 }

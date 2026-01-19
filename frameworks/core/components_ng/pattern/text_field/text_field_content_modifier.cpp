@@ -40,7 +40,7 @@ const FontWeight FONT_WEIGHT_CONVERT_MAP[] = {
     FontWeight::W400,
 };
 constexpr float ROUND_VALUE = 0.5f;
-constexpr Dimension DEFAULT_FADEOUT_VP = 16.0_vp;
+constexpr Dimension DEFAULT_FADEOUT_VP = 32.0_vp;
 constexpr double MAX_TEXTFADEOUT_PERCENT = 0.5;
 constexpr double MIN_TEXTFADEOUT_DELTA = 1.0;
 
@@ -755,7 +755,7 @@ void TextFieldContentModifier::DoAutoFillDraw(DrawingContext& context)
     paragraph->UpdateColor(defaultCharIndex, length, autoFillEmphasizeCharTextColor_);
 
     auto emphasizeTranslationOffset = autoFillTranslationOffset_->Get();
-    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    auto isRTL = autoFillController->GetTextDirection(layoutProperty) == TextDirection::RTL;
     canvas.Save();
     auto textShowWidth = std::abs(emphasizeTranslationOffset);
     auto clipRectX0 = contentRect.GetX();

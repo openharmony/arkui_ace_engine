@@ -19,7 +19,7 @@
 #include "core/components_ng/property/accessibility_property.h"
 
 namespace OHOS::Ace::NG {
-class TextAccessibilityProperty : public AccessibilityProperty {
+class ACE_FORCE_EXPORT TextAccessibilityProperty : public AccessibilityProperty {
     DECLARE_ACE_TYPE(TextAccessibilityProperty, AccessibilityProperty);
 
 public:

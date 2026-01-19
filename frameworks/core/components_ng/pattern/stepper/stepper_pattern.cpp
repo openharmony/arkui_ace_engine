@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -23,6 +23,7 @@
 #include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
 #include "core/components_ng/pattern/loading_progress/loading_progress_pattern.h"
+#include "core/components_ng/pattern/stepper/stepper_constants.h"
 #include "core/components_ng/pattern/stepper/stepper_item_layout_property.h"
 #include "core/components_ng/pattern/stepper/stepper_node.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
@@ -164,7 +165,7 @@ void StepperPattern::CreateLeftButtonNode()
     CHECK_NULL_VOID(buttonPattern);
     buttonPattern->setComponentButtonType(ComponentButtonType::STEPPER);
     buttonPattern->SetFocusBorderColor(stepperTheme->GetFocusColor());
-    auto buttonNode = FrameNode::CreateFrameNode(V2::BUTTON_ETS_TAG, buttonId, buttonPattern);
+    auto buttonNode = FrameNode::CreateFrameNode(BUTTON_ETS_TAG, buttonId, buttonPattern);
     auto focusHub = buttonNode->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
     focusHub->SetFocusDependence(FocusDependence::SELF);
@@ -178,7 +179,7 @@ void StepperPattern::CreateLeftButtonNode()
     buttonNode->MarkModifyDone();
 
     // Create rowNode
-    auto rowNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto rowNode = FrameNode::GetOrCreateFrameNode(ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     auto rowLayoutProperty = rowNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rowLayoutProperty);
@@ -190,7 +191,7 @@ void StepperPattern::CreateLeftButtonNode()
     rowNode->MarkModifyDone();
 
     // Create imageNode
-    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto imageNode = FrameNode::GetOrCreateFrameNode(IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
@@ -217,7 +218,7 @@ void StepperPattern::CreateLeftButtonNode()
     imageNode->MarkModifyDone();
 
     // Create textNode
-    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto textNode = FrameNode::GetOrCreateFrameNode(TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
@@ -315,7 +316,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     }
     auto hasRightButton = hostNode->HasRightButtonNode();
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, hostNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        BUTTON_ETS_TAG, hostNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     if (hasRightButton) {
         buttonNode->Clean(true);
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
@@ -342,7 +343,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     buttonNode->MarkModifyDone();
 
     // Create rowNode
-    auto rowNode = FrameNode::GetOrCreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto rowNode = FrameNode::GetOrCreateFrameNode(ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<LinearLayoutPattern>(false); });
     auto rowLayoutProperty = rowNode->GetLayoutProperty<LinearLayoutProperty>();
     CHECK_NULL_VOID(rowLayoutProperty);
@@ -354,7 +355,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     rowNode->MarkModifyDone();
 
     // Create textNode
-    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto textNode = FrameNode::GetOrCreateFrameNode(TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -377,7 +378,7 @@ void StepperPattern::CreateArrowRightButtonNode(int32_t index, bool isDisabled)
     textNode->MarkModifyDone();
 
     // Create imageNode
-    auto imageNode = FrameNode::GetOrCreateFrameNode(V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto imageNode = FrameNode::GetOrCreateFrameNode(IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<ImagePattern>(); });
     auto imageLayoutProperty = imageNode->GetLayoutProperty<ImageLayoutProperty>();
     CHECK_NULL_VOID(imageLayoutProperty);
@@ -424,7 +425,7 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, bool isDisabl
     }
     auto hasRightButton = hostNode->HasRightButtonNode();
     auto buttonNode = FrameNode::GetOrCreateFrameNode(
-        V2::BUTTON_ETS_TAG, hostNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+        BUTTON_ETS_TAG, hostNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
     if (hasRightButton) {
         buttonNode->Clean(true);
         buttonNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
@@ -451,7 +452,7 @@ void StepperPattern::CreateArrowlessRightButtonNode(int32_t index, bool isDisabl
     buttonNode->MarkModifyDone();
 
     // Create textNode
-    auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+    auto textNode = FrameNode::GetOrCreateFrameNode(TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     CHECK_NULL_VOID(textLayoutProperty);
@@ -483,7 +484,7 @@ void StepperPattern::CreateWaitingRightButtonNode()
     CHECK_NULL_VOID(hostNode);
     // Create loadingProgressNode
     hostNode->RemoveRightButtonNode();
-    auto loadingProgressNode = FrameNode::GetOrCreateFrameNode(V2::LOADING_PROGRESS_ETS_TAG,
+    auto loadingProgressNode = FrameNode::GetOrCreateFrameNode(LOADING_PROGRESS_ETS_TAG,
         hostNode->GetRightButtonId(), []() { return AceType::MakeRefPtr<LoadingProgressPattern>(); });
     loadingProgressNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
         CalcSize(CalcLength(stepperTheme->GetProgressDiameter()), CalcLength(stepperTheme->GetProgressDiameter())));
@@ -698,14 +699,14 @@ void StepperPattern::OnColorConfigurationUpdate()
         renderContext->UpdateBackgroundColor(stepperTheme->GetMouseHoverColor().ChangeOpacity(0));
         auto firstChild = rightButtonFrameNode->GetFirstChild();
         CHECK_NULL_VOID(firstChild);
-        if (firstChild->GetTag() == V2::ROW_ETS_TAG) {
+        if (firstChild->GetTag() == ROW_ETS_TAG) {
             auto textFrameNode = DynamicCast<FrameNode>(firstChild->GetChildAtIndex(0));
             CHECK_NULL_VOID(textFrameNode);
             auto layoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();
             CHECK_NULL_VOID(layoutProperty);
             layoutProperty->UpdateTextColor(textColor);
         }
-        if (firstChild->GetTag() == V2::TEXT_ETS_TAG) {
+        if (firstChild->GetTag() == TEXT_ETS_TAG) {
             auto textFrameNode = DynamicCast<FrameNode>(firstChild);
             CHECK_NULL_VOID(textFrameNode);
             auto layoutProperty = textFrameNode->GetLayoutProperty<TextLayoutProperty>();

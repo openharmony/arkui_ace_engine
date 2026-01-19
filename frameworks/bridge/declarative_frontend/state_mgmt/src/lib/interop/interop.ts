@@ -118,42 +118,48 @@ function __Interop_CreateStaticComponent_Internal(
     content?: () => void
 ): [() => void, number] {
     if (InteropExtractorModule.compatibleStaticComponent === undefined) {
-        throw new Error('Non Method For Create StaticComponent');
+        // only happened in toolchain error, internal error
+        throw new BusinessError(NOT_IMPLEMENT, 'No compatibleStaticComponent Method For Create StaticComponent');
     }
     return InteropExtractorModule.compatibleStaticComponent(factory, options, content);
 }
 
 function __Interop_UpdateInteropExtendableComponent_Internal(dynamicComponent: Object): void {
     if (InteropExtractorModule.updateInteropExtendableComponent === undefined) {
-        throw new Error('Non Method For update InteropExtendableComponent');
+        // only happened in toolchain error, internal error
+        throw new BusinessError(NOT_IMPLEMENT, 'No updateInteropExtendableComponent method For update InteropExtendableComponent');
     }
     return InteropExtractorModule.updateInteropExtendableComponent(dynamicComponent);
 }
 
 function __Interop_ResetInteropExtendableComponent_Internal(): void {
     if (InteropExtractorModule.resetInteropExtendableComponent === undefined) {
-        throw new Error('Non Method For reset InteropExtendableComponent');
+        // only happened in toolchain error, internal error
+        throw new BusinessError(NOT_IMPLEMENT, 'No resetInteropExtendableComponent method For reset InteropExtendableComponent');
     }
     return InteropExtractorModule.resetInteropExtendableComponent();
 }
 
 function __Interop_TransferCompatibleBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
     if(InteropExtractorModule.transferCompatibleBuilder === undefined) {
-        throw new Error('Non Method For Transfer CompatibleBuilder');
+        // only happened in toolchain error, internal error
+        throw new BusinessError(NOT_IMPLEMENT, 'No transferCompatibleBuilder method For Transfer CompatibleBuilder');
     }
     return InteropExtractorModule.transferCompatibleBuilder(builder);
 }
 
 function __Interop_transferCompatibleDynamicBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
     if(InteropExtractorModule.transferCompatibleDynamicBuilder === undefined) {
-        throw new Error('Non Method For Transfer Compatible Dynamic Builder');
+        // only happened in toolchain error, internal error
+        throw new BusinessError(NOT_IMPLEMENT, 'No transferCompatibleDynamicBuilder method For Transfer Compatible Dynamic Builder');
     }
     return InteropExtractorModule.transferCompatibleDynamicBuilder(builder);
 }
 
 function __Interop_createCompatibleStaticState_Internal(value: Object): Object {
     if(InteropExtractorModule.createCompatibleStaticState === undefined) {
-        throw new Error('Non Method For createCompatibleStaticState');
+        // only happened in toolchain error, internal error
+        throw new BusinessError(NOT_IMPLEMENT, 'No createCompatibleStaticState method For createCompatibleStaticState');
     }
     if (value instanceof SynchedPropertyTwoWayPU<Object>) {
         value = value.getRootSource();
@@ -163,7 +169,8 @@ function __Interop_createCompatibleStaticState_Internal(value: Object): Object {
 
 function __Interop_TransferCompatibleUpdatableBuilder_Internal(builder: (...args: any[]) => void): (...args: any[]) => void {
     if(InteropExtractorModule.transferCompatibleUpdatableBuilder === undefined) {
-        throw new Error('Non Method For Transfer CompatibleUpdatableBuilder');
+        // only happened in toolchain error, internal error
+        throw new BusinessError(NOT_IMPLEMENT, 'No transferCompatibleUpdatableBuilder method For Transfer CompatibleUpdatableBuilder');
     }
     return InteropExtractorModule.transferCompatibleUpdatableBuilder(builder);
 }

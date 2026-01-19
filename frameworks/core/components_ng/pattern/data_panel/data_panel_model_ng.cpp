@@ -72,6 +72,7 @@ void DataPanelModelNG::SetValueColors(const std::vector<Gradient>& valueColors)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     std::string key = "dataPanel.ValueColors";
@@ -110,6 +111,7 @@ void DataPanelModelNG::SetShadowOption(const DataPanelShadow& shadowOption)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
@@ -148,6 +150,7 @@ void DataPanelModelNG::SetStrokeWidth(FrameNode* frameNode, const Dimension& str
 void DataPanelModelNG::SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern();
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     auto&& updateFunc = [shadowOption, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
@@ -166,6 +169,7 @@ void DataPanelModelNG::SetShadowOption(FrameNode* frameNode, const DataPanelShad
 void DataPanelModelNG::SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern();
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
     auto&& updateFunc = [valueColors, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {

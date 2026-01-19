@@ -757,6 +757,10 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     throw new Error('Method not implemented.');
   }
 
+  enableClickSoundEffect(enabled: boolean | undefined): this {
+    throw new Error('Method not implemented.');
+  }
+
   onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this {
     throw new Error('Method not implemented.');
   }

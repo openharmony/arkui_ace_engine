@@ -22,6 +22,7 @@
 #include "core/interfaces/native/implementation/tabs_controller_modifier_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
+#include "core/components_ng/pattern/text_field/text_field_manager.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
@@ -478,6 +479,16 @@ void UnbindTabsFromNestedScrollableImpl(
 {
     HandleUnbindTabsFromScrollable(tabsController, childScroller, parentScroller);
 }
+void SetCustomKeyboardContinueFeatureImpl(Ark_CustomKeyboardContinueFeature feature)
+{
+    auto pipeline = NG::PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto textFieldManager = AceType::DynamicCast<NG::TextFieldManagerNG>(pipeline->GetTextFieldManager());
+    CHECK_NULL_VOID(textFieldManager);
+    auto featureVal = static_cast<NG::CustomKeyboardContinueFeature>(feature);
+    bool value = (featureVal == NG::CustomKeyboardContinueFeature::ENABLED);
+    textFieldManager->SetCustomKeyboardContinueFeature(value);
+}
 } // namespace IUIContextAccessor
 const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
 {
@@ -492,6 +503,7 @@ const GENERATED_ArkUIIUIContextAccessor* GetIUIContextAccessor()
         IUIContextAccessor::UnbindTabsFromScrollableImpl,
         IUIContextAccessor::BindTabsToNestedScrollableImpl,
         IUIContextAccessor::UnbindTabsFromNestedScrollableImpl,
+        IUIContextAccessor::SetCustomKeyboardContinueFeatureImpl,
     };
     return &IUIContextAccessorImpl;
 }

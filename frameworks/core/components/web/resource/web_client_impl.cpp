@@ -139,6 +139,15 @@ void FindListenerImpl::OnFindResultReceived(
     delegate->OnSearchResultReceive(activeMatchOrdinal, numberOfMatches, isDoneCounting);
 }
 
+void WebAgentClientImpl::ReportEventJson(const std::string& json)
+{
+    TAG_LOGD(AceLogTag::ACE_WEB, "ReportEventJson: %{public}s", json.c_str());
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    ContainerScope scope(delegate->GetInstanceId());
+    delegate->ReportEventJson(json);
+}
+
 std::string SpanstringConvertHtmlImpl::SpanstringConvertHtml(const std::vector<uint8_t> &content)
 {
     ContainerScope scope(instanceId_);
@@ -1735,5 +1744,13 @@ void WebClientImpl::OnMicrophoneCaptureStateChanged(int originalState, int newSt
     CHECK_NULL_VOID(delegate);
     ContainerScope scope(delegate->GetInstanceId());
     delegate->OnMicrophoneCaptureStateChanged(originalState, newState);
+}
+
+void WebClientImpl::OnMediaCastEnter()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebClientImpl::OnMediaCastEnter");
+    auto delegate = webDelegate_.Upgrade();
+    CHECK_NULL_VOID(delegate);
+    delegate->OnMediaCastEnter();
 }
 } // namespace OHOS::Ace

@@ -356,14 +356,14 @@ void ResetSearchSearchIcon(ArkUINodeHandle node)
 }
 
 void SetSearchSearchButton(ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value,
-                           ArkUIImageIconRes* imageIconRes)
+                           ArkUIImageIconRes* imageIconRes, bool isThemeColor)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     SearchModelNG::SetSearchButton(frameNode, value->value);
     SearchModelNG::SetSearchButtonFontSize(frameNode, CalcDimension(value->sizeValue,
         static_cast<DimensionUnit>(value->sizeUnit)));
-    SearchModelNG::SetSearchButtonFontColor(frameNode, Color(value->fontColor));
+    SearchModelNG::SetSearchButtonFontColor(frameNode, Color(value->fontColor), isThemeColor);
     SearchModelNG::SetSearchButtonAutoDisable(frameNode, value->autoDisable);
     auto pattern = frameNode->GetPattern();
     CHECK_NULL_VOID(pattern);
@@ -1451,25 +1451,25 @@ void SetSearchSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 color,
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
     auto pattern = frameNode->GetPattern();
-    SearchModelNG::SetSelectedDragPreviewStyle(frameNode, result);
     if (SystemProperties::ConfigChangePerform() && resRawPtr) {
         auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         pattern->RegisterResource<Color>("selectedDragPreviewStyleColor", resObj, result);
     } else {
         pattern->UnRegisterResource("selectedDragPreviewStyleColor");
     }
+    SearchModelNG::SetSelectedDragPreviewStyle(frameNode, result);
 }
 
 void ResetSearchSelectedDragPreviewStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    SearchModelNG::ResetSelectedDragPreviewStyle(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         pattern->UnRegisterResource("selectedDragPreviewStyle");
     }
+    SearchModelNG::ResetSelectedDragPreviewStyle(frameNode);
 }
 
 ArkUI_Uint32 GetSearchSelectedDragPreviewStyle(ArkUINodeHandle node)

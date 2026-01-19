@@ -21,7 +21,8 @@ import { InteropNativeModule } from '@koalaui/interop';
 import { __context, GlobalStateManager, StateManager } from '@koalaui/runtime';
 import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 import { CallbackTransformer } from './CallbackTransformer';
-import { KPointer } from '@koalaui/interop';
+import { KPointer, nullptr } from '@koalaui/interop';
+import { FreeRootNode } from './CallbackTransformer';
 
 export function setNeedCreate(isNeedCreate: boolean): boolean {
     const temp = GlobalStateManager.instance._isNeedCreate
@@ -53,12 +54,18 @@ export function ArkComponentRoot(
                         component.aboutToDisappear();
                     });
                 });
+                FreeRootNode.current?.setComponent(node.getComponent()?.getInstance());
                 content(node);
             });
             node.setBuildFunction((): Long => {
-                const ptr = func(node.peer.ptr);
-                node.setChildPeerPtr(ptr);
-                return new Long(ptr);
+                const childPeerPtr = node.getChildPeerPtr();
+                if (childPeerPtr === nullptr) {
+                    const ptr = func(node.peer.ptr);
+                    node.setChildPeerPtr(ptr);
+                    return new Long(ptr);
+                } else {
+                    return new Long(childPeerPtr);
+                }
             });
             return node;
         },

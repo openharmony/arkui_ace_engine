@@ -15,23 +15,42 @@
 
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_column_split_ffi.h"
 
+#include "base/log/log_wrapper.h"
 #include "bridge/cj_frontend/cppview/shape_abstract.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/pattern/linear_split/linear_split_model.h"
+#include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
 
 using namespace OHOS::Ace;
 using namespace OHOS::FFI;
 using namespace OHOS::Ace::Framework;
 
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::LinearSplitModelNG* GetColumnSplitModel()
+{
+    static NG::LinearSplitModelNG* model = nullptr;
+    if (model == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("ColumnSplit");
+        if (module == nullptr) {
+            LOGF("Can't find column split dynamic module");
+            abort();
+        }
+        return reinterpret_cast<NG::LinearSplitModelNG*>(module->GetModel());
+    }
+    return model;
+}
+} // namespace OHOS::Ace
+
 extern "C" {
 void FfiOHOSAceFrameworkColumnSplitCreate()
 {
-    LinearSplitModel::GetInstance()->Create(NG::SplitType::COLUMN_SPLIT);
+    GetColumnSplitModel()->Create(NG::SplitType::COLUMN_SPLIT);
 }
 
 void FfiOHOSAceFrameworkColumnSplitResizeable(bool resizeable)
 {
-    LinearSplitModel::GetInstance()->SetResizable(NG::SplitType::COLUMN_SPLIT, resizeable);
+    GetColumnSplitModel()->SetResizable(NG::SplitType::COLUMN_SPLIT, resizeable);
 }
 
 void FfiOHOSAceFrameworkColumnSplitDivider(DividerParam params)
@@ -43,7 +62,7 @@ void FfiOHOSAceFrameworkColumnSplitDivider(DividerParam params)
     divider.startMargin = startMarginDime;
     divider.endMargin = endMarginDime;
 
-    LinearSplitModel::GetInstance()->SetDivider(NG::SplitType::COLUMN_SPLIT, divider);
+    GetColumnSplitModel()->SetDivider(NG::SplitType::COLUMN_SPLIT, divider);
 }
 
 void FfiOHOSAceFrameworkColumnSplitClip(bool isClip)

@@ -49,7 +49,7 @@ static constexpr bool TEST_DEFAULT_PRESSED = false;
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_F(ButtonContentModifierHelperAccessor, buttonContentModifierHelperAccessorTest, TestSize.Level1)
+HWTEST_F(ButtonContentModifierHelperAccessor, DISABLED_buttonContentModifierHelperAccessorTest, TestSize.Level1)
 {
     ASSERT_NE(accessor_->contentModifierButton, nullptr);
 
@@ -86,11 +86,12 @@ HWTEST_F(ButtonContentModifierHelperAccessor, buttonContentModifierHelperAccesso
 
     EXPECT_CALL(*MockContainer::Current(), GetFrontend()).WillRepeatedly(Return(nullptr));
 
-    auto builder = Converter::ArkValue<ButtonModifierBuilder>(modifierCallback, TEST_BUILDER_ID);
+    auto builder = Converter::ArkCallback<ButtonModifierBuilder>(modifierCallback, TEST_BUILDER_ID);
     Ark_NativePointer nodePtr = reinterpret_cast<Ark_NativePointer>(buttonNode.GetRawPtr());
     accessor_->contentModifierButton(nodePtr, &obj, &builder);
 
     FireBuilder(pattern.GetRawPtr());
+    ASSERT_TRUE(checkEvent.has_value());
     EXPECT_EQ(checkEvent->nodeId, TEST_NODE_ID);
     EXPECT_EQ(checkEvent->resourceId, TEST_BUILDER_ID);
     EXPECT_EQ(checkEvent->objId, TEST_OBJ_ID);

@@ -25,7 +25,7 @@ import { WatchFunc } from './decoratorWatch';
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { NullableObject } from '../base/types';
 import { UIUtils } from '../utils';
-import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '../../component/interop';
+import { CompatibleStateChangeCallback, getObservedObject, isDynamicObject } from '#interop';
 import { StateMgmtTool } from '../tools/arkts/stateMgmtTool';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtDFX } from '../tools/stateMgmtDFX';
@@ -45,6 +45,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
     // initValue is either value provided by parent or localInit value
     constructor(owningView: IVariableOwner | undefined, varName: string, initValue: T, watchFunc?: WatchFuncType) {
         super('@State', owningView, varName, watchFunc);
+        this.checkValueIsNotFunction(initValue);
         if (isDynamicObject(initValue)) {
             initValue = getObservedObject(initValue);
             this.backing_ = FactoryInternal.mkInteropDecoratorValue(varName, initValue);
@@ -78,6 +79,7 @@ export class StateDecoratedVariable<T> extends DecoratedV1VariableBase<T> implem
         if (oldValue === newValue) {
             return;
         }
+        this.checkValueIsNotFunction(newValue);
         let value: T = uiUtils.makeV1Observed(newValue);
         // for interop
         if (isDynamicObject(newValue)) {

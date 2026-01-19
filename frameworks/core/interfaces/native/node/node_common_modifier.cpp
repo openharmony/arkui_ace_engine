@@ -24,6 +24,7 @@
 #include "core/accessibility/static/accessibility_static_utils.h"
 #include "core/animation/animation_pub.h"
 #include "core/animation/curves.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/common/ime/text_input_type.h"
 #include "core/common/resource/resource_manager.h"
 #include "core/common/resource/resource_wrapper.h"
@@ -44,8 +45,6 @@
 #include "core/components_ng/pattern/text/span/span_string.h"
 #include "core/components_ng/pattern/text/text_model_ng.h"
 #include "core/components_ng/pattern/toggle/toggle_model_ng.h"
-#include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
-#include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/components_ng/property/transition_property.h"
 #include "core/components_ng/property/grid_property.h"
@@ -1103,7 +1102,7 @@ void SetBackgroundColor(ArkUINodeHandle node, uint32_t color, void* bgColorRawPt
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!bgColorRawPtr) {
-            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, result, frameNode->GetTag());
+            ResourceParseUtils::CompleteResObjFromColorWithAllowForceDark(resObj, result, frameNode->GetTag(), frameNode->GetForceDarkAllowed());
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(bgColorRawPtr));
         }
@@ -1466,6 +1465,14 @@ void SetTransform(ArkUINodeHandle node, const ArkUI_Float32* matrix, ArkUI_Int32
         frameNode, Matrix4(matrix[NUM_0], matrix[NUM_4], matrix[NUM_8], matrix[NUM_12], matrix[NUM_1], matrix[NUM_5],
             matrix[NUM_9], matrix[NUM_13], matrix[NUM_2], matrix[NUM_6], matrix[NUM_10], matrix[NUM_14],
                 matrix[NUM_3], matrix[NUM_7], matrix[NUM_11], matrix[NUM_15]));
+}
+
+void SetTransformMatrix(ArkUINodeHandle node, ArkUIMatrix4Handle matrix)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* matrixType = reinterpret_cast<OHOS::Ace::Matrix4*>(matrix);
+    NG::ViewAbstract::SetTransformMatrix(frameNode, *matrixType);
 }
 
 void ResetTransform(ArkUINodeHandle node)
@@ -3767,6 +3774,14 @@ void SetPadding(ArkUINodeHandle node, const struct ArkUISizeType* top, const str
     if (isLengthMetrics) {
         paddings.start = std::optional<CalcLength>(leftDimen);
         paddings.end = std::optional<CalcLength>(rightDimen);
+        auto isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
+        if (isRightToLeft) {
+            paddings.left = paddings.end;
+            paddings.right = paddings.start;
+        } else {
+            paddings.left = paddings.start;
+            paddings.right = paddings.end;
+        }
     } else {
         paddings.left = std::optional<CalcLength>(leftDimen);
         paddings.right = std::optional<CalcLength>(rightDimen);
@@ -5784,6 +5799,29 @@ void ResetClickEffect(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetClickEffectLevel(frameNode, OHOS::Ace::ClickEffectLevel::UNDEFINED, 0.9f);
+}
+
+void SetEnableClickSoundEffect(ArkUINodeHandle node, ArkUI_Bool value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    bool enabled = true;
+    enabled = static_cast<bool>(value);
+    ViewAbstract::SetEnableClickSoundEffect(frameNode, enabled);
+}
+
+void ResetEnableClickSoundEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetEnableClickSoundEffect(frameNode, true);
+}
+
+ArkUI_Bool GetEnableClickSoundEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return frameNode->GetEnableClickSoundEffect();
 }
 
 void SetKeyBoardShortCut(ArkUINodeHandle node, ArkUI_CharPtr value, const ArkUI_Int32* keysIntArray, ArkUI_Int32 length)
@@ -9359,9 +9397,13 @@ void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
     if (frameNode->GetTag() == V2::SWITCH_ETS_TAG) {
         ToggleModelNG::OnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
     } else if (frameNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
-        CheckBoxModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+        auto checkboxModifier = GetArkUINodeModifiers()->getCheckboxModifier();
+        CHECK_NULL_VOID(checkboxModifier);
+        return checkboxModifier->setCheckboxOnChange(node, reinterpret_cast<void*>(&onChange));
     } else {
-        RadioModelNG::SetOnChange(reinterpret_cast<FrameNode*>(node), std::move(onChange));
+        auto* radioModifier = GetArkUINodeModifiers()->getRadioModifier();
+        CHECK_NULL_VOID(radioModifier);
+        radioModifier->setRadioOnChange(reinterpret_cast<ArkUINodeHandle>(node), reinterpret_cast<void*>(&onChange));
     }
 }
 
@@ -9629,6 +9671,28 @@ void ResetSystemMaterial(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetSystemMaterial(frameNode, nullptr);
+}
+
+void SetSystemMaterialImmediate(ArkUINodeHandle node, const void* material)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* castMaterial = reinterpret_cast<const UiMaterial*>(material);
+    ViewAbstract::SetSystemMaterialImmediate(frameNode, castMaterial);
+}
+
+void SetUseUnionEffect(ArkUINodeHandle node, bool useUnion)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetUseUnion(frameNode, useUnion);
+}
+
+void ResetUseUnionEffect(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::SetUseUnion(frameNode, false);
 }
 
 void SetFreeze(ArkUINodeHandle node, ArkUI_Bool freeze)
@@ -10470,6 +10534,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .setBorderWidth = SetBorderWidth,
         .resetBorderWidth = ResetBorderWidth,
         .setTransform = SetTransform,
+        .setTransformMatrix = SetTransformMatrix,
         .resetTransform = ResetTransform,
         .setTransform3D = SetTransform3D,
         .resetTransform3D = ResetTransform3D,
@@ -10705,6 +10770,9 @@ const ArkUICommonModifier* GetCommonModifier()
         .getHoverEffect = GetHoverEffect,
         .setClickEffect = SetClickEffect,
         .resetClickEffect = ResetClickEffect,
+        .setEnableClickSoundEffect = SetEnableClickSoundEffect,
+        .resetEnableClickSoundEffect = ResetEnableClickSoundEffect,
+        .getEnableClickSoundEffect = GetEnableClickSoundEffect,
         .setKeyBoardShortCut = SetKeyBoardShortCut,
         .resetKeyBoardShortCut = ResetKeyBoardShortCut,
         .setPointLightPosition = SetPointLightPosition,
@@ -10976,6 +11044,7 @@ const ArkUICommonModifier* GetCommonModifier()
         .setRenderStrategy = SetRenderStrategy,
         .setSystemMaterial = SetSystemMaterial,
         .resetSystemMaterial = ResetSystemMaterial,
+        .setSystemMaterialImmediate = SetSystemMaterialImmediate,
         .setChainWeight = SetChainWeight,
         .resetChainWeight = ResetChainWeight,
         .getChainWeight = GetChainWeight,
@@ -10991,6 +11060,8 @@ const ArkUICommonModifier* GetCommonModifier()
         .setMaterialFilter = SetMaterialFilter,
         .resetMaterialFilter = ResetMaterialFilter,
         .getIgnoreLayoutSafeAreaOpts = GetIgnoreLayoutSafeAreaOpts,
+        .setUseUnionEffect = SetUseUnionEffect,
+        .resetUseUnionEffect = ResetUseUnionEffect,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -11212,6 +11283,8 @@ const CJUICommonModifier* GetCJUICommonModifier()
         .getHoverEffect = GetHoverEffect,
         .setClickEffect = SetClickEffect,
         .resetClickEffect = ResetClickEffect,
+        .setEnableClickSoundEffect = SetEnableClickSoundEffect,
+        .resetEnableClickSoundEffect = ResetEnableClickSoundEffect,
         .setKeyBoardShortCut = SetKeyBoardShortCut,
         .resetKeyBoardShortCut = ResetKeyBoardShortCut,
         .setPointLightPosition = SetPointLightPosition,

@@ -116,6 +116,7 @@ export class RichTextModifier extends CommonMethodModifier implements RichTextAt
         {
             this._onStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -127,6 +128,7 @@ export class RichTextModifier extends CommonMethodModifier implements RichTextAt
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.UPDATE
             this._onComplete_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onComplete_0_flag = AttributeUpdaterFlag.SKIP

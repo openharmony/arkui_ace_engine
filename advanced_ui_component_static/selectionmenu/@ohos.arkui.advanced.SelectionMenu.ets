@@ -267,7 +267,7 @@ struct SelectionMenuComponent {
     sysBoard.clearData()
     sysBoard.setData(pasteData).then(() => {
       hilog.info(0x3900, 'Ace', 'SelectionMenu copy option, Succeeded in setting PasteData.');
-    }).catch((err: BusinessError) => {
+    }).catch((err: Error) => {
       hilog.info(0x3900, 'Ace', 'SelectionMenu copy option, Failed to set PasteData. Cause:' + err.message);
     } as (error: Error) => void)
   }
@@ -464,6 +464,11 @@ struct SelectionMenuComponent {
           .borderRadius(this.theme.iconBorderRadius)
           .width(this.measureButtonWidth())
           .height(this.theme.buttonSize)
+        }, (item: EditorMenuOptions, index: int) => {
+          if (item.symbolStyle) {
+            return index + '__symbolStyle'
+          }
+          return index + '__' + JSON.stringify(item)
         })
       }
     }
@@ -624,6 +629,8 @@ struct SelectionMenuComponent {
                     expandedMenuOptionItem.action!()
                   }
                 })
+            }, (item: ExpandedMenuOptions, index: int) => {
+              return index + '__expandedMenu'
             })
           }
         }

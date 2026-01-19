@@ -26,6 +26,9 @@
 #include "frameworks/core/event/key_event.h"
 #include "frameworks/core/event/mouse_event.h"
 #include "frameworks/core/event/touch_event.h"
+namespace {
+constexpr int32_t KEYCODE_INVALID = 65535;
+}
 namespace OHOS::Ace::NG {
 Reporter& Reporter::GetInstance()
 {
@@ -40,8 +43,10 @@ void ReporterImpl::HandleUISessionReporting(const JsonReport& report) const
     if (value->IsNull()) {
         return;
     }
-    TAG_LOGD(AceLogTag::ACE_GESTURE, "UISession JsonString %{public}s", value->ToString().c_str());
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(report.GetId(), "event", value);
+    TAG_LOGD(
+        AceLogTag::ACE_GESTURE, "UISession JsonString " SEC_PLD("%{public}s"), SEC_PARAM(value->ToString().c_str()));
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(report.GetId(), "event", value,
+        ComponentEventType::COMPONENT_EVENT_GESTURE);
 }
 
 static const std::unordered_map<TouchType, std::string> TOUCH_TYPE_CONVERT_MAP {
@@ -71,9 +76,6 @@ void ReporterImpl::HandleInspectorReporting(const JsonReport& report) const
     CHECK_NULL_VOID(value);
     if (value->IsNull()) {
         return;
-    }
-    if (SystemProperties::GetDebugEnabled()) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "Inspector JsonString %{public}s", value->ToString().c_str());
     }
     LayoutInspector::SendMessage(value->ToString());
 }
@@ -106,6 +108,9 @@ void ReporterImpl::HandleInputEventInspectorReporting(const TouchEvent& event) c
 void ReporterImpl::HandleInputEventInspectorReporting(const MouseEvent& event) const
 {
     if (!LayoutInspector::GetInteractionEventStatus()) {
+        return;
+    }
+    if (event.isFalsifyCancel) {
         return;
     }
     if (event.sourceType != SourceType::MOUSE || (event.convertInfo.first != event.convertInfo.second)) {
@@ -163,6 +168,10 @@ void ReporterImpl::HandleInputEventInspectorReporting(const AxisEvent& event) co
 void ReporterImpl::HandleInputEventInspectorReporting(const KeyEvent& event) const
 {
     if (!LayoutInspector::GetInteractionEventStatus()) {
+        return;
+    }
+    // Block invalid keyCode 65535 (KEYCODE_INVALID) in certain scenarios to avoid subsequent exceptions
+    if (static_cast<int32_t>(event.code) == KEYCODE_INVALID) {
         return;
     }
     NG::KeyJsonReport keyReport;

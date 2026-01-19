@@ -113,6 +113,7 @@ enum class InputOperation {
     SET_PREVIEW_TEXT,
     SET_PREVIEW_FINISH,
     INPUT,
+    PERFORM_ACTION,
 };
 
 struct PasswordModeStyle {
@@ -219,6 +220,11 @@ struct InputCommandInfo {
     int32_t insertOffset;
     std::u16string insertValue;
     InputReason reason;
+};
+
+struct PerformActionInfo {
+    TextInputAction action;
+    bool forceCloseKeyboard;
 };
 
 struct TouchAndMoveCaretState {
@@ -472,6 +478,10 @@ public:
     const RefPtr<AutoFillController>& GetOrCreateAutoFillController()
     {
         if (!autoFillController_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             autoFillController_ = MakeRefPtr<AutoFillController>(WeakClaim(this));
         }
         return autoFillController_;
@@ -516,6 +526,7 @@ public:
 
     FocusPattern GetFocusPattern() const override;
     FocusPattern GetFocusPatternMultiThread() const;
+    virtual void PerformActionOperation(PerformActionInfo info);
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void UpdateInputFilterErrorText(const std::u16string& errorText) override;
@@ -1088,6 +1099,7 @@ public:
     void UpdateShowCountBorderStyle();
     void StripNextLine(std::wstring& data);
     bool IsShowHandle();
+    void HandleButtonFocusEvent(const RefPtr<TextInputResponseArea>& responseArea);
     std::string GetCancelButton();
     std::string GetCancelImageText();
     std::string GetPasswordIconPromptInformation(bool show);
@@ -1112,6 +1124,9 @@ public:
 
     float GetUnderlineWidth() const
     {
+        if (IsTV()) {
+            return static_cast<float>(underlineWidth_.ConvertToPx());
+        }
         return static_cast<float>(underlineWidth_.Value());
     }
 
@@ -1640,6 +1655,10 @@ public:
     const RefPtr<MultipleClickRecognizer>& GetOrCreateMultipleClickRecognizer()
     {
         if (!multipleClickRecognizer_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
         }
         return multipleClickRecognizer_;
@@ -1690,6 +1709,21 @@ public:
     void SetIsFocusedBeforeClick(bool isFocusedBeforeClick)
     {
         isFocusedBeforeClick_ = isFocusedBeforeClick;
+    }
+
+    void UpdateFoucsOffsetIfNeed(RoundRect& paintRect)
+    {
+        auto textFieldTheme = GetTheme();
+        auto focusPaintPadding = textFieldTheme->GetIconFocusPadding().ConvertToPx();
+        RectF rect = paintRect.GetRect();
+        auto x = rect.GetX();
+        auto y = rect.GetY();
+        auto width = rect.Width();
+        auto height = rect.Height();
+        paintRect.SetRect({x - focusPaintPadding, y - focusPaintPadding,
+            width + 2 * focusPaintPadding, height + 2 * focusPaintPadding});
+        float cornerRadius = width / 2 + focusPaintPadding;
+        paintRect.SetCornerRadius(cornerRadius);
     }
 
     void StartVibratorByIndexChange(int32_t currentIndex, int32_t preIndex);
@@ -1783,6 +1817,10 @@ public:
     RefPtr<DataDetectorAdapter> GetSelectDetectorAdapter()
     {
         if (!selectDetectorAdapter_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             selectDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
         }
         return selectDetectorAdapter_;
@@ -1798,8 +1836,7 @@ public:
     void HandleAIMenuOption(const std::string& labelInfo = "");
     void UpdateAIMenuOptions();
     bool MaybeNeedShowSelectAIDetect();
-    void SetCustomKeyboardNodeId(const RefPtr<UINode>& customKeyboardNode);
-    bool GetCustomKeyboardIsMatched(int32_t customKeyboard);
+    void SetPreKeyboardNode();
     bool NeedCloseKeyboard() override;
     void ProcessCustomKeyboard(bool matched, int32_t nodeId) override;
     void CloseTextCustomKeyboard(int32_t nodeId, bool isUIExtension) override;
@@ -1811,6 +1848,15 @@ public:
         }
         placeholderColorInfo_.append("[" + info + "]");
     }
+
+    // tv function
+    bool IsTV() const
+    {
+        auto theme = GetTheme();
+        CHECK_NULL_RETURN(theme, false);
+        return theme->GetHoverAndPressBgColorEnabled();
+    }
+
     bool IsPreviewTextInputting() const;
 
 protected:
@@ -1869,6 +1915,9 @@ private:
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     void GetTextSelectRectsInRangeAndWillChange();
+    void reportOnWillDeleteEvent();
+    void reportOnDidInsertEvent();
+    void reportOnDidDeleteEvent();
     bool BeforeIMEInsertValue(const std::u16string& insertValue, int32_t offset);
     void AfterIMEInsertValue(const std::u16string& insertValue);
     bool BeforeIMEDeleteValue(const std::u16string& deleteValue, TextDeleteDirection direction, int32_t offset);
@@ -2160,6 +2209,19 @@ private:
 #if defined(ENABLE_STANDARD_INPUT)
     void UpdateCaretInfoStandard(bool forceUpdate);
 #endif
+    void SetFocusStyleForTV();
+    void ClearFocusStyleForTV();
+    void UpdateHoverStyleForTV(bool isHover);
+    void UpdatePressStyleForTV(bool isPressed);
+    void SetShowErrorForTV();
+    void SetThemeAttrForTV();
+    void InitDisableColorForTV();
+    void ApplyUnderlineThemeForTV();
+    void ProcessFocusStyleForTV();
+    void GetInnerFocusPaintRectForTV(RoundRect& paintRect);
+    void PaintCancelRectForTV();
+    void PaintPasswordRectForTV();
+    void SetThemeBorderAttrForTV();
 
     RectF frameRect_;
     RectF textRect_;
@@ -2299,6 +2361,7 @@ private:
     std::queue<InsertCommandInfo> insertCommands_;
     std::queue<InputCommandInfo> inputCommands_;
     std::queue<InputOperation> inputOperations_;
+    std::queue<PerformActionInfo> performActionOperations_;
     bool leftMouseCanMove_ = false;
     bool isLongPress_ = false;
     bool isEdit_ = false;
@@ -2382,6 +2445,7 @@ private:
     TextOverflow lastTextOverflow_ = TextOverflow::ELLIPSIS;
     RelatedLPXInfo lpxInfo_;
     std::string placeholderColorInfo_;
+    bool needResetFocusColor_ = true;
 
 #if defined(CROSS_PLATFORM)
     std::shared_ptr<TextEditingValue> editingValue_;

@@ -147,8 +147,8 @@ HWTEST_F(NavigationPatternTestEightNg, onHover, TestSize.Level1)
     pattern->isInDividerDrag_ = false;
 
     /*
-        test 500 < 1000 * 0.8
-    */
+     *   test 500 < 1000 * 0.8
+     */
     layoutProperty->UpdateMinNavBarWidth(Dimension(500, DimensionUnit::PX));
     layoutProperty->UpdateMaxNavBarWidth(Dimension(0.8, DimensionUnit::PERCENT));
     pattern->isDividerDraggable_ = false;
@@ -156,11 +156,49 @@ HWTEST_F(NavigationPatternTestEightNg, onHover, TestSize.Level1)
     EXPECT_TRUE(pattern->isDividerDraggable_);
 
     /*
-        test 1000 * 0.5 > 400
-    */
+     *   test 1000 * 0.5 > 400
+     */
     layoutProperty->UpdateMinNavBarWidth(Dimension(0.5, DimensionUnit::PERCENT));
     layoutProperty->UpdateMaxNavBarWidth(Dimension(400, DimensionUnit::PX));
     pattern->OnHover(true);
     EXPECT_FALSE(pattern->isDividerDraggable_);
+
+    /*
+     *  test 500px > 400px
+     */
+    layoutProperty->UpdateMinNavBarWidth(Dimension(500, DimensionUnit::PX));
+    layoutProperty->UpdateMaxNavBarWidth(Dimension(400, DimensionUnit::PX));
+    pattern->OnHover(true);
+    EXPECT_FALSE(pattern->isDividerDraggable_);
+
+    /*
+     *  test 400px > 500px
+     */
+    layoutProperty->UpdateMinNavBarWidth(Dimension(400, DimensionUnit::PX));
+    layoutProperty->UpdateMaxNavBarWidth(Dimension(500, DimensionUnit::PX));
+    pattern->OnHover(true);
+    EXPECT_TRUE(pattern->isDividerDraggable_);
+}
+
+/**
+ * @tc.name: test CheckNeedInitRangeCalculation
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavigationPatternTestEightNg, CheckNeedInitRangeCalculation, TestSize.Level1)
+{
+    NavigationModelNG navigationModel;
+    navigationModel.Create();
+    navigationModel.SetNavigationStack();
+    auto navNode = AceType::DynamicCast<NavigationGroupNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto pattern = navNode->GetPattern<NavigationPattern>();
+
+    pattern->navigationSize_ = SizeF(100, 100);
+    auto temp = SizeF(100, 100);
+    bool ret = pattern->CheckNeedInitRangeCalculation(temp);
+    EXPECT_FALSE(ret);
+
+    auto tepm2 = SizeF(200, 200);
+    ret = pattern->CheckNeedInitRangeCalculation(tepm2);
+    EXPECT_TRUE(ret);
 }
 } // namespace OHOS::Ace::NG

@@ -64,12 +64,14 @@ private:
     int32_t GetSpecifiedContentOffsetsInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t HighlightSpecifiedContentInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetCurrentImagesShowingInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t GetMultiImagesByIdInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetVisibleInspectorTreeInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetHitTestNodeInfoForTouchInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t ExeAppAIFunctionInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t RegisterContentChangeCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t UnregisterContentChangeCallbackInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
     int32_t GetStateMgmtInfoInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
+    int32_t GetWebInfoByRequestInner(MessageParcel& data, MessageParcel& reply, MessageOption& option);
 
     bool IsSACalling() const;
 };

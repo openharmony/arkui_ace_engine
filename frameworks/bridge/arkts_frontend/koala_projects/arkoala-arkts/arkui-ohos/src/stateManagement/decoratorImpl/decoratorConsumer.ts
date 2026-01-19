@@ -19,7 +19,7 @@ import { UIUtils } from '../utils';
 import { DecoratedV2VariableBase } from './decoratorBase';
 import { uiUtils } from '../base/uiUtilsImpl';
 import { StateMgmtDFX } from '../tools/stateMgmtDFX';
-export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase implements IConsumerDecoratedVariable<T> {
+export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase<T> implements IConsumerDecoratedVariable<T> {
     provideAlias_: string;
     sourceProvider_: IProviderDecoratedVariable<T> | undefined;
     backing_?: IBackingValue<T>;
@@ -56,6 +56,17 @@ export class ConsumerDecoratedVariable<T> extends DecoratedV2VariableBase implem
         }
         const value = this.backing_!.get(false);
         StateMgmtDFX.enableDebug && StateMgmtDFX.functionTrace(`Consumer ${value === newValue} ${this.setTraceInfo()}`);
+        if (value === newValue) {
+            return;
+        }
+        this.backing_!.setNoCheck(uiUtils.autoProxyObject(newValue) as T);
+    }
+
+    resetOnReuse(newValue: T): void {
+        if (this.sourceProvider_) {
+            return;
+        }
+        const value = this.backing_!.get(false);
         if (value === newValue) {
             return;
         }

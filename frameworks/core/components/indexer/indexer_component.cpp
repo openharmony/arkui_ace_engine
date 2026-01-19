@@ -18,6 +18,7 @@
 #include "core/components/common/properties/shadow_config.h"
 #include "core/components/indexer/indexer_element.h"
 #include "core/components/indexer/render_indexer_circle.h"
+#include "core/components/list/list_compatible_modifier_helper.h"
 
 namespace OHOS::Ace {
 
@@ -426,7 +427,10 @@ int32_t IndexerComponent::AddSectionHead(
     box->SetAlignment(Alignment::CENTER);
     box->SetColor(Color::WHITE);
     box->SetChild(text);
-    RefPtr<ListItemComponent> listItem = AceType::MakeRefPtr<ListItemComponent>(headStyleStr, box);
+    
+    auto* modifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+    CHECK_NULL_RETURN(modifier, sectionHeadIndex);
+    RefPtr<ListItemComponent> listItem = modifier->getListItemComponent(headStyleStr, box);
     listItem->SetSticky(true);
     listItem->SetIndexKey(strSectionHeadLabel);
     RefPtr<ComposedComponent> composedItem =
@@ -449,9 +453,10 @@ bool IndexerComponent::RemoveSectionHead(int32_t index)
         LOGE("[indexer] RemoveSectionHead List ptr is NULL");
         return ret;
     }
-
+    auto* modifier = ListCompatibleModifierHelper::GetListItemCompatibleModifier();
+    CHECK_NULL_RETURN(modifier, false);
     for (const auto& item : list_->GetChildren()) {
-        RefPtr<ListItemComponent> listItem = ListItemComponent::GetListItem(item);
+        RefPtr<ListItemComponent> listItem = modifier->getListItem(item);
         if (listItem && listItem->GetIndex() == index) {
             list_->RemoveChild(item);
             ret = true;

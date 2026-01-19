@@ -218,6 +218,7 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -229,6 +230,7 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
         {
             this._selectedColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._selectedColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._selectedColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -240,6 +242,7 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
         {
             this._switchPointColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._switchPointColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._switchPointColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -251,6 +254,7 @@ export class ToggleModifier extends CommonMethodModifier implements ToggleAttrib
         {
             this._switchStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._switchStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._switchStyle_0_flag = AttributeUpdaterFlag.SKIP

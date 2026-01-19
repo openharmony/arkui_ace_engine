@@ -48,15 +48,31 @@ void* FindFunction(void* library, const char* name)
 }
 #else
 #include <dlfcn.h>
+class AceModule final {
+public:
+    AceModule()
+    {
+        const char libname[] = "libace_compatible.z.so";
+        handle_ = dlopen(libname, RTLD_LAZY | RTLD_LOCAL);
+        if (!handle_) {
+            TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot load libace: %{public}s", dlerror());
+        }
+    }
+    ~AceModule() {}
+
+    void* GetHandle() const
+    {
+        return handle_;
+    }
+
+private:
+    void* handle_ = nullptr;
+};
+
 void* FindModule()
 {
-    const char libname[] = "libace_compatible.z.so";
-    void* result = dlopen(libname, RTLD_LAZY | RTLD_LOCAL);
-    if (result) {
-        return result;
-    }
-    TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "Cannot load libace: %{public}s", dlerror());
-    return nullptr;
+    static AceModule module;
+    return module.GetHandle();
 }
 
 void* FindFunction(void* library, const char* name)
@@ -133,14 +149,14 @@ ArkUI_NodeHandle CreateNode(ArkUI_NodeType type)
         ARKUI_TOGGLE, ARKUI_LOADING_PROGRESS, ARKUI_TEXT_INPUT, ARKUI_TEXTAREA, ARKUI_BUTTON, ARKUI_PROGRESS,
         ARKUI_CHECKBOX, ARKUI_XCOMPONENT, ARKUI_DATE_PICKER, ARKUI_TIME_PICKER, ARKUI_TEXT_PICKER,
         ARKUI_CALENDAR_PICKER, ARKUI_SLIDER, ARKUI_RADIO, ARKUI_IMAGE_ANIMATOR, ARKUI_XCOMPONENT_TEXTURE,
-        ARKUI_CHECK_BOX_GROUP, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM,
+        ARKUI_CHECK_BOX_GROUP, ARKUI_RICH_EDITOR, ARKUI_STACK, ARKUI_SWIPER, ARKUI_SCROLL, ARKUI_LIST, ARKUI_LIST_ITEM,
         ARKUI_LIST_ITEM_GROUP, ARKUI_COLUMN, ARKUI_ROW, ARKUI_FLEX, ARKUI_REFRESH, ARKUI_WATER_FLOW, ARKUI_FLOW_ITEM,
         ARKUI_RELATIVE_CONTAINER, ARKUI_GRID, ARKUI_GRID_ITEM, ARKUI_CUSTOM_SPAN, ARKUI_EMBEDDED_COMPONENT,
         ARKUI_UNDEFINED, ARKUI_PICKER };
     // already check in entry point.
     uint32_t nodeType = type < MAX_NODE_SCOPE_NUM ? type : (type - MAX_NODE_SCOPE_NUM + BASIC_COMPONENT_NUM);
     const auto* impl = GetFullImpl();
-    if (nodeType >= sizeof(nodes) / sizeof(ArkUINodeType)) {
+    if (nodeType >= sizeof(nodes) / sizeof(ArkUINodeType) || nodes[nodeType] == ARKUI_UNDEFINED) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "node type: %{public}d NOT IMPLEMENT", type);
         return nullptr;
     }
@@ -206,7 +222,6 @@ void DisposeNode(ArkUI_NodeHandle nativePtr)
     }
     // already check in entry point.
     const auto* impl = GetFullImpl();
-    impl->getNodeModifiers()->getNDKRenderNodeModifier()->detachRsNodeDuringDispose(nativePtr->uiNodeHandle);
     impl->getBasicAPI()->disposeNode(nativePtr->uiNodeHandle);
     DisposeNativeSource(nativePtr);
     g_nodeSet.erase(nativePtr);
@@ -1098,7 +1113,6 @@ int32_t SetFrameDurations(void* object, uint32_t* durations, size_t size)
 
 int32_t GetFrameDurations(void* object, uint32_t* durations, size_t* size)
 {
-    TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "GetFrameDurations 0");
     void* module = FindModule();
     if (!module) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "fail to get module");
@@ -1409,6 +1423,7 @@ int32_t GetNodeTypeByTag(ArkUI_NodeHandle node)
         { OHOS::Ace::V2::CUSTOM_SPAN_NODE_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_CUSTOM_SPAN },
         { OHOS::Ace::V2::EMBEDDED_COMPONENT_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_EMBEDDED_COMPONENT },
         { OHOS::Ace::V2::CONTAINER_PICKER_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_PICKER },
+        { OHOS::Ace::V2::RICH_EDITOR_ETS_TAG, ArkUI_NodeType::ARKUI_NODE_RICH_EDITOR },
     };
 
     const auto* impl = OHOS::Ace::NodeModel::GetFullImpl();
@@ -1462,7 +1477,8 @@ std::string ConvertNodeTypeToTag(ArkUI_NodeType nodeType)
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_EMBEDDED_COMPONENT),
             OHOS::Ace::V2::EMBEDDED_COMPONENT_ETS_TAG },
         { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_PICKER), OHOS::Ace::V2::CONTAINER_PICKER_ETS_TAG },
-        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_UNDEFINED), OHOS::Ace::V2::UNDEFINED_NODE_ETS_TAG }
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_UNDEFINED), OHOS::Ace::V2::UNDEFINED_NODE_ETS_TAG },
+        { static_cast<uint32_t>(ArkUI_NodeType::ARKUI_NODE_RICH_EDITOR), OHOS::Ace::V2::RICH_EDITOR_ETS_TAG },
     };
     auto iter = nodeTypeConvertMap.find(static_cast<uint32_t>(nodeType));
     if (iter == nodeTypeConvertMap.end()) {

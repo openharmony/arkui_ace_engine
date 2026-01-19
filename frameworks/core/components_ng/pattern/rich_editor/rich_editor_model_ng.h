@@ -76,8 +76,10 @@ public:
     void SetScrollBarColor(std::optional<Color> value) override;
     void SetSelectedDragPreviewStyle(const Color& value) override;
     void ResetSelectedDragPreviewStyle() override;
-    void SetSingleLine(bool isEnable) override;
+    void SetSingleLine(bool enabled) override;
+    void ResetSingleLine() override;
 
+    static RefPtr<FrameNode> CreateRichEditorStyledStringNode(int32_t nodeId);
     static void SetSelectDetectEnable(FrameNode* frameNode, const bool value);
     static bool GetSelectDetectEnable(FrameNode* frameNode);
     static void ResetSelectDetectEnable(FrameNode* frameNode);
@@ -85,6 +87,7 @@ public:
     static std::vector<TextDataDetectType> GetSelectDetectConfig(FrameNode* frameNode);
     static void ResetSelectDetectConfig(FrameNode* frameNode);
     static void SetTextDetectEnable(FrameNode* frameNode, bool value);
+    static bool GetTextDetectEnable(FrameNode* frameNode);
     static void SetTextDetectConfig(FrameNode* frameNode, const TextDetectConfig& textDetectConfig);
     static void SetOnIMEInputComplete(FrameNode* frameNode,
         std::function<void(const RichEditorAbstractSpanResult&)>&& callback);
@@ -96,6 +99,7 @@ public:
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
     static void SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
     static void SetCaretColor(FrameNode* frameNode, const Color& color);
+    static Color GetCaretColor(FrameNode* frameNode);
     static void SetOnSelect(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
     static void SetOnReady(FrameNode* frameNode, std::function<void()>&& callback);
     static void SetOnDeleteComplete(FrameNode* frameNode, std::function<void()>&& callback);
@@ -111,6 +115,7 @@ public:
     static void SetOnWillAttachIME(FrameNode* frameNode, IMEAttachCallback&& func);
     void SetEnterKeyType(TextInputAction value) override;
     static void SetEnterKeyType(FrameNode* frameNode, const TextInputAction& action);
+    static TextInputAction GetEnterKeyType(FrameNode* frameNode);
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback);
     static void SetAboutToIMEInput(FrameNode* frameNode, std::function<bool(const RichEditorInsertValue&)>&& callback);
@@ -122,6 +127,7 @@ public:
     static void SetPreviewMenuParam(FrameNode* frameNode,
         TextSpanType spanType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
     static void SetBarState(FrameNode* frameNode, DisplayMode mode);
+    static OHOS::Ace::DisplayMode GetBarState(FrameNode* frameNode);
     static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
@@ -133,13 +139,17 @@ public:
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);
     static void SetSupportStyledUndo(FrameNode* frameNode, bool enabled);
     static void SetScrollBarColor(FrameNode* frameNode, std::optional<Color> value);
+    static Color GetScrollBarColor(FrameNode* frameNode);
     static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
     static void SetSelectedDragPreviewStyle(FrameNode* frameNode, const Color& value);
     static void ResetSelectedDragPreviewStyle(FrameNode* frameNode);
-    static void SetSingleLine(FrameNode* frameNode, bool isEnable);
+    static void SetSingleLine(FrameNode* frameNode, bool enabled);
+    static void ResetSingleLine(FrameNode* frameNode);
+    static bool GetSingleLine(FrameNode* frameNode);
 
 private:
     void SetDraggable(bool draggable);
+    static void InitRichEditorModel(bool isStyledStringMode, const RefPtr<FrameNode>& frameNode);
     bool isStyledStringMode_ = false;
 };
 } // namespace OHOS::Ace::NG

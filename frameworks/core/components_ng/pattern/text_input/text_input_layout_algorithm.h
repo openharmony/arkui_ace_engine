@@ -64,8 +64,9 @@ private:
     void UpdateTextRect(const UpdateTextRectParams& params);
     bool IsFontSizeNonPositive(const TextStyle& textStyle) const;
     void MeasureAutoFillIcon(LayoutWrapper* layoutWrapper);
-    void LayoutAutoFillIcon(LayoutWrapper* layoutWrapper);
+    void LayoutAutoFillIcon(LayoutWrapper* layoutWrapper, float unitNodeWidth);
     void MeasureCounterWithPolicy(LayoutWrapper* layoutWrapper, float nonContentWidth);
+    TextDirection GetTextDirection(const RefPtr<LayoutProperty>& layoutProperty);
 
     SizeF autoFillIconSizeMeasure_;
 };

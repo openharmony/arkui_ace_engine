@@ -26,7 +26,6 @@
 #include "core/components/menu/menu_component.h"
 #include "core/components/navigation_bar/render_collapsing_navigation_bar.h"
 #include "core/components/select/select_component.h"
-#include "core/components/tab_bar/tab_bar_component.h"
 #endif
 
 namespace OHOS::Ace {
@@ -96,7 +95,7 @@ public:
     NavigationBarType type = NavigationBarType::NORMAL;
 
 #ifndef WEARABLE_PRODUCT
-    RefPtr<TabBarComponent> tabBar;
+    RefPtr<Component> tabBar; // real type TabBarComponent
     RefPtr<SelectComponent> selectPopup;
     RefPtr<MenuComponent> menu;
     std::list<RefPtr<OptionComponent>> allMenuItems;
@@ -244,7 +243,7 @@ public:
     void BuildTabBar(const RefPtr<ComponentGroup>& parent);
 
 protected:
-    RefPtr<TabBarComponent> tabBar_;
+    RefPtr<Component> tabBar_; // real type TabBarComponent
 };
 
 class TitleBarMenuBuilder : public virtual AceType, public virtual CommonBuilder {

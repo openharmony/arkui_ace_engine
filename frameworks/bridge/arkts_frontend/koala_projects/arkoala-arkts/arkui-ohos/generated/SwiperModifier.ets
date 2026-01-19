@@ -1084,6 +1084,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._index_0_flag = AttributeUpdaterFlag.UPDATE
             this._index_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._index_0_flag = AttributeUpdaterFlag.SKIP
@@ -1095,6 +1096,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._autoPlay_0_flag = AttributeUpdaterFlag.UPDATE
             this._autoPlay_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._autoPlay_0_flag = AttributeUpdaterFlag.SKIP
@@ -1106,6 +1108,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._interval_0_flag = AttributeUpdaterFlag.UPDATE
             this._interval_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._interval_0_flag = AttributeUpdaterFlag.SKIP
@@ -1117,6 +1120,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._indicator_0_flag = AttributeUpdaterFlag.UPDATE
             this._indicator_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._indicator_0_flag = AttributeUpdaterFlag.SKIP
@@ -1128,6 +1132,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._loop_0_flag = AttributeUpdaterFlag.UPDATE
             this._loop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._loop_0_flag = AttributeUpdaterFlag.SKIP
@@ -1139,6 +1144,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._duration_0_flag = AttributeUpdaterFlag.UPDATE
             this._duration_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._duration_0_flag = AttributeUpdaterFlag.SKIP
@@ -1150,6 +1156,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._vertical_0_flag = AttributeUpdaterFlag.UPDATE
             this._vertical_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._vertical_0_flag = AttributeUpdaterFlag.SKIP
@@ -1161,6 +1168,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._itemSpace_0_flag = AttributeUpdaterFlag.UPDATE
             this._itemSpace_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._itemSpace_0_flag = AttributeUpdaterFlag.SKIP
@@ -1172,6 +1180,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._displayMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._displayMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._displayMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1183,6 +1192,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.UPDATE
             this._cachedCount_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._cachedCount_0_flag = AttributeUpdaterFlag.SKIP
@@ -1194,6 +1204,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._effectMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._effectMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._effectMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1205,6 +1216,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._disableSwipe_0_flag = AttributeUpdaterFlag.UPDATE
             this._disableSwipe_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._disableSwipe_0_flag = AttributeUpdaterFlag.SKIP
@@ -1216,6 +1228,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._curve_0_flag = AttributeUpdaterFlag.UPDATE
             this._curve_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._curve_0_flag = AttributeUpdaterFlag.SKIP
@@ -1227,6 +1240,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -1238,6 +1252,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._onSelected_0_flag = AttributeUpdaterFlag.UPDATE
             this._onSelected_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onSelected_0_flag = AttributeUpdaterFlag.SKIP
@@ -1249,6 +1264,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._onUnselected_0_flag = AttributeUpdaterFlag.UPDATE
             this._onUnselected_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onUnselected_0_flag = AttributeUpdaterFlag.SKIP
@@ -1260,6 +1276,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._onAnimationStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAnimationStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAnimationStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1271,6 +1288,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._onAnimationEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._onAnimationEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onAnimationEnd_0_flag = AttributeUpdaterFlag.SKIP
@@ -1282,6 +1300,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._onGestureSwipe_0_flag = AttributeUpdaterFlag.UPDATE
             this._onGestureSwipe_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onGestureSwipe_0_flag = AttributeUpdaterFlag.SKIP
@@ -1293,6 +1312,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._nestedScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1304,6 +1324,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._customContentTransition_0_flag = AttributeUpdaterFlag.UPDATE
             this._customContentTransition_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._customContentTransition_0_flag = AttributeUpdaterFlag.SKIP
@@ -1315,6 +1336,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._onContentDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onContentDidScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onContentDidScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1326,6 +1348,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._indicatorInteractive_0_flag = AttributeUpdaterFlag.UPDATE
             this._indicatorInteractive_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._indicatorInteractive_0_flag = AttributeUpdaterFlag.SKIP
@@ -1337,6 +1360,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._pageFlipMode_0_flag = AttributeUpdaterFlag.UPDATE
             this._pageFlipMode_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._pageFlipMode_0_flag = AttributeUpdaterFlag.SKIP
@@ -1348,6 +1372,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             this._onContentWillScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onContentWillScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onContentWillScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -1360,6 +1385,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
             this._autoPlay_1_flag = AttributeUpdaterFlag.UPDATE
             this._autoPlay_1_0value = autoPlay
             this._autoPlay_1_1value = options
+            this._state.fireChange()
         } else
         {
             this._autoPlay_1_flag = AttributeUpdaterFlag.SKIP
@@ -1372,6 +1398,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
             this._displayArrow_0_flag = AttributeUpdaterFlag.UPDATE
             this._displayArrow_0_0value = value
             this._displayArrow_0_1value = isHoverShow
+            this._state.fireChange()
         } else
         {
             this._displayArrow_0_flag = AttributeUpdaterFlag.SKIP
@@ -1384,6 +1411,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
             this._cachedCount_1_flag = AttributeUpdaterFlag.UPDATE
             this._cachedCount_1_0value = count
             this._cachedCount_1_1value = isShown
+            this._state.fireChange()
         } else
         {
             this._cachedCount_1_flag = AttributeUpdaterFlag.SKIP
@@ -1396,6 +1424,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
             this._displayCount_0_flag = AttributeUpdaterFlag.UPDATE
             this._displayCount_0_0value = value
             this._displayCount_0_1value = swipeByGroup
+            this._state.fireChange()
         } else
         {
             this._displayCount_0_flag = AttributeUpdaterFlag.SKIP
@@ -1408,6 +1437,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
             this._prevMargin_0_flag = AttributeUpdaterFlag.UPDATE
             this._prevMargin_0_0value = value
             this._prevMargin_0_1value = ignoreBlank
+            this._state.fireChange()
         } else
         {
             this._prevMargin_0_flag = AttributeUpdaterFlag.SKIP
@@ -1420,6 +1450,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
             this._nextMargin_0_flag = AttributeUpdaterFlag.UPDATE
             this._nextMargin_0_0value = value
             this._nextMargin_0_1value = ignoreBlank
+            this._state.fireChange()
         } else
         {
             this._nextMargin_0_flag = AttributeUpdaterFlag.SKIP

@@ -1035,8 +1035,9 @@ void NavDestinationModelNG::ResetResObj(FrameNode* frameNode, NavDestinationPatt
     pattern->RemoveResObj(key);
 }
 
-void NavDestinationModelNG::SetBackButtonIcon(
-    FrameNode* frameNode, const std::string& src, bool noPixMap, RefPtr<PixelMap>& pixMap)
+void NavDestinationModelNG::SetBackButtonIcon(FrameNode* frameNode,
+    const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol, const std::string& src, bool noPixMap,
+    RefPtr<PixelMap>& pixMap)
 {
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationNode);
@@ -1051,15 +1052,17 @@ void NavDestinationModelNG::SetBackButtonIcon(
     titleBarLayoutProperty->UpdatePixelMap(pixMap);
     bool isValidImage = noPixMap || (pixMap != nullptr);
     titleBarLayoutProperty->UpdateIsValidImage(isValidImage);
+    titleBarLayoutProperty->SetBackIconSymbol(iconSymbol);
 }
 
-void NavDestinationModelNG::SetBackButtonIcon(
-    FrameNode* frameNode, bool noPixMap, RefPtr<PixelMap>& pixMap, const RefPtr<ResourceObject>& backButtonIconResObj)
+void NavDestinationModelNG::SetBackButtonIcon(FrameNode* frameNode,
+    const std::function<void(WeakPtr<NG::FrameNode>)>& iconSymbol, bool noPixMap, RefPtr<PixelMap>& pixMap,
+    const RefPtr<ResourceObject>& backButtonIconResObj)
 {
     CHECK_NULL_VOID(frameNode);
     std::string result;
     ResourceParseUtils::ParseResMedia(backButtonIconResObj, result);
-    SetBackButtonIcon(frameNode, result, noPixMap, pixMap);
+    SetBackButtonIcon(frameNode, iconSymbol, result, noPixMap, pixMap);
     auto navDestinationNode = AceType::DynamicCast<NavDestinationGroupNode>(frameNode);
     CHECK_NULL_VOID(navDestinationNode);
     auto titleBarNode = AceType::DynamicCast<TitleBarNode>(navDestinationNode->GetTitleBarNode());

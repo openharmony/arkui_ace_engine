@@ -22,6 +22,7 @@
 #include <unordered_map>
 
 #include "interfaces/inner_api/ace/ai/data_detector_interface.h"
+#include "ui/base/macros.h"
 
 #include "base/geometry/dimension.h"
 #include "base/geometry/ng/offset_t.h"
@@ -70,6 +71,7 @@ class PreviewMenuController;
 enum class Status { DRAGGING, FLOATING, ON_DROP, NONE };
 using CalculateHandleFunc = std::function<void()>;
 using ShowSelectOverlayFunc = std::function<void(const RectF&, const RectF&)>;
+using ExternalDrawCallback = std::function<bool(float, float, float, float)>;
 struct SpanNodeInfo {
     RefPtr<UINode> node;
     RefPtr<UINode> containerSpanNode;
@@ -77,7 +79,7 @@ struct SpanNodeInfo {
 enum class SelectionMenuCalblackId { MENU_APPEAR, MENU_SHOW, MENU_HIDE };
 
 // TextPattern is the base class for text render node to perform paint text.
-class TextPattern : public virtual Pattern,
+class ACE_FORCE_EXPORT TextPattern : public virtual Pattern,
                     public TextDragBase,
                     public TextBase,
                     public TextGestureSelector,
@@ -86,12 +88,7 @@ class TextPattern : public virtual Pattern,
     DECLARE_ACE_TYPE(TextPattern, Pattern, TextDragBase, TextBase, TextGestureSelector, Magnifier);
 
 public:
-    TextPattern()
-    {
-        selectOverlay_ = AceType::MakeRefPtr<TextSelectOverlay>(WeakClaim(this));
-        pManager_ = AceType::MakeRefPtr<ParagraphManager>();
-        ResetOriginCaretPosition();
-    }
+    TextPattern();
 
     ~TextPattern() override;
 
@@ -267,6 +264,10 @@ public:
     RefPtr<DataDetectorAdapter> GetDataDetectorAdapter()
     {
         if (!dataDetectorAdapter_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             dataDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
         }
         return dataDetectorAdapter_;
@@ -274,6 +275,10 @@ public:
     RefPtr<DataDetectorAdapter> GetSelectDetectorAdapter()
     {
         if (!selectDetectorAdapter_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             selectDetectorAdapter_ = MakeRefPtr<DataDetectorAdapter>();
         }
         return selectDetectorAdapter_;
@@ -317,6 +322,7 @@ public:
     }
 
     void OnVisibleChange(bool isVisible) override;
+    void OnVisibleAreaChange(bool isVisible);
 
     std::list<RefPtr<SpanItem>> GetSpanItemChildren()
     {
@@ -617,6 +623,10 @@ public:
     void AllocStyledString()
     {
         if (!styledString_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             styledString_ = MakeRefPtr<MutableSpanString>(u"");
         }
     }
@@ -815,7 +825,7 @@ public:
 
     size_t GetSubComponentInfos(std::vector<SubComponentInfo>& subComponentInfos);
 
-    void UpdateFontColor(const Color& value);
+    void ACE_FORCE_EXPORT UpdateFontColor(const Color& value);
     void BeforeCreatePaintWrapper() override;
 
     void OnTextOverflowChanged();
@@ -864,6 +874,10 @@ public:
     RefPtr<MagnifierController> GetOrCreateMagnifier()
     {
         if (!magnifierController_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             magnifierController_ = MakeRefPtr<MagnifierController>(WeakClaim(this));
         }
         return magnifierController_;
@@ -952,6 +966,17 @@ public:
         return true;
     }
 
+    void SetExternalDrawCallback(ExternalDrawCallback&& callback)
+    {
+        externalDrawCallback_ = std::move(callback);
+    }
+
+    const ExternalDrawCallback& GetExternalDrawCallback()
+    {
+        return externalDrawCallback_;
+    }
+    std::optional<void*> GetDrawParagraph();
+
     void UpdateStyledStringByColorMode();
     virtual void MarkContentNodeForRender() {};
     float TextContentAlignOffsetY();
@@ -968,9 +993,7 @@ public:
     void HighlightSpecifiedContent(
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) override;
     void ResetHighLightValue();
-    void ReportSelectedText() override;
-    int32_t HighlightStrIndexToPaintRectIndex(int32_t matchIndex, bool isStart);
-    std::u16string TextHighlightSelectedContent(int32_t start, int32_t end);
+    void ReportSelectedText(bool isRegister = false) override;
 
 protected:
     virtual RefPtr<TextSelectOverlay> GetSelectOverlay();
@@ -1014,6 +1037,7 @@ protected:
     void HandleDoubleClickEvent(GestureEvent& info);
     void CheckOnClickEvent(GestureEvent& info);
     void HandleClickOnTextAndSpan(GestureEvent& info);
+    void InitSelectionOnLongPress(const Offset& localOffset);
     bool TryLinkJump(const RefPtr<SpanItem>& span);
     void ActTextOnClick(GestureEvent& info);
     RectF CalcAIMenuPosition(const AISpan& aiSpan, const CalculateHandleFunc& calculateHandleFunc);
@@ -1064,6 +1088,10 @@ protected:
     void CreateMultipleClickRecognizer()
     {
         if (!multipleClickRecognizer_) {
+            auto host = GetHost();
+            if (host) {
+                ACE_UINODE_TRACE(host);
+            }
             multipleClickRecognizer_ = MakeRefPtr<MultipleClickRecognizer>();
         }
     }
@@ -1263,6 +1291,12 @@ private:
     void GetPaintOffsetWithoutTransform(OffsetF& paintOffset);
     void ContentChangeByDetaching(PipelineContext*) override;
     void HighlightDisappearAnimation();
+    void HighlightAppearAnimation();
+    bool HighlightTriggerScrollableParentToScroll(const RectF& highlightRect);
+    const RefPtr<ScrollablePattern> FindScrollableParentWithRelativeOffset(OffsetF& offset);
+    RectF GetHighlightRect(const std::vector<std::pair<std::vector<RectF>, ParagraphStyle>>& paragraphsRects) const;
+    std::u16string GetContentWithPlaceholderSpaceFillter() const;
+    std::u16string TextHighlightSelectedContent(int32_t start, int32_t end) const;
 
     bool isMeasureBoundary_ = false;
     bool isMousePressed_ = false;
@@ -1326,6 +1360,7 @@ private:
     bool isTryEntityDragging_ = false;
     bool isRegisteredAreaCallback_ = false;
     OffsetF gestureSelectTextPaintOffset_;
+    ExternalDrawCallback externalDrawCallback_;
 
     std::shared_ptr<AnimationUtils::Animation> highlightAppearAnimation_;
     std::shared_ptr<AnimationUtils::Animation> highlightDisappearAnimation_;

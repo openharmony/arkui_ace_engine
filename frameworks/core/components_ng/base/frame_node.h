@@ -535,6 +535,7 @@ public:
     void OnReuse() override;
 
     void NotifyColorModeChange(uint32_t colorMode) override;
+    void NotifyColorModeChange(uint32_t colorMode, bool recursive) override;
 
     OffsetF GetOffsetRelativeToWindow() const;
 
@@ -784,6 +785,16 @@ public:
         allowDrop_ = allowDrop;
     }
 
+    void SetEnableClickSoundEffect(bool enabled)
+    {
+        enableClickSoundEffect_ = enabled;
+    }
+
+    bool GetEnableClickSoundEffect()
+    {
+        return enableClickSoundEffect_;
+    }
+
     const std::set<std::string>& GetAllowDrop() const
     {
         return allowDrop_;
@@ -806,7 +817,10 @@ public:
     void SetOverlayNode(const RefPtr<FrameNode>& overlayNode)
     {
         overlayNode_ = overlayNode;
+        SetOverlayNodeIsFree(IsFree());
     }
+
+    void SetOverlayNodeIsFree(bool isFree);
 
     RefPtr<FrameNode> GetOverlayNode() const
     {
@@ -1424,7 +1438,7 @@ public:
         return GetTag() == V2::SCREEN_ETS_TAG;
     }
 
-    bool CheckVisibleOrActive() override;
+    bool CheckVisibleAndActive() override;
 
     void SetPaintNode(const RefPtr<FrameNode>& paintNode)
     {
@@ -1463,7 +1477,7 @@ public:
     std::vector<std::pair<float, float>> GetSpecifiedContentOffsets(const std::string& content);
     void HighlightSpecifiedContent(
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs);
-    void ReportSelectedText();
+    void ReportSelectedText(bool isRegister);
 
     void ResetLastFrameNodeRect()
     {
@@ -1496,7 +1510,13 @@ public:
 
     void OnContentChangeRegister(const ContentChangeConfig& config);
     void OnContentChangeUnregister();
+    void SetIsFree(bool isFree) override;
+    bool IsPendingOnMainRenderTree() const
+    {
+        return isPendingState_;
+    }
 
+    void UpdateBackground();
 protected:
     void DumpInfo() override;
     std::unordered_map<std::string, std::function<void()>> destroyCallbacksMap_;
@@ -1540,8 +1560,18 @@ private:
 
     bool OnRemoveFromParent(bool allowTransition) override;
     bool RemoveImmediately() const override;
+    void ProcessRenderTreeDiff(const std::list<RefPtr<FrameNode>>& newChildren,
+        const std::multiset<WeakPtr<FrameNode>, ZIndexComparator>& oldChildren);
+    void CleanRenderTreeLifeCycle();
+    void DetachFromRenderTree(bool isOnMainTree, bool recursive = true);
+    void AttachToRenderTree(bool isOnMainTree, bool recursive = true);
+    void OnDetachFromMainRenderTree();
+    void OnAttachToMainRenderTree();
+    void OnOffscreenProcessResource() override;
 
     bool IsPaintRectWithTransformValid();
+
+    void DetachRsNodeInAdoptedChildren();
 
     // dump self info.
     void DumpDragInfo();
@@ -1669,7 +1699,7 @@ private:
     void MarkDirtyNodeMultiThread(PropertyChangeFlag extraFlag);
     void RebuildRenderContextTreeMultiThread();
     void MarkNeedRenderMultiThread(bool isRenderBoundary);
-    void UpdateBackground();
+    void OnInspectorIdUpdateMultiThread(const std::string& id);
     void DispatchVisibleAreaChangeEvent(const CacheVisibleRectResult& visibleResult);
     PipelineContext* GetOffMainTreeNodeContext();
     RefPtr<AccessibilityProperty>& GetOrCreateAccessibilityProperty();
@@ -1748,6 +1778,7 @@ private:
 
     ColorMode colorMode_ = ColorMode::LIGHT;
 
+    bool enableClickSoundEffect_ = true;
     bool draggable_ = false;
     bool userSet_ = false;
     bool customerSet_ = false;
@@ -1779,6 +1810,8 @@ private:
     bool hasPositionZ_ = false;
     bool hasBindTips_ = false;
     bool isAncestorScrollable_ = false;
+    // Marks whether this FrameNode has been attached to the main RenderTree and is awaiting a matching detach.
+    bool isPendingState_ = false;
 
     RefPtr<FrameNode> overlayNode_;
 

@@ -75,7 +75,9 @@
     "src/lib/v2/v2_computed.ts",
     "src/lib/v2/v2_view.ts",
     "src/lib/v2/v2_decorators.ts",
-    "src/lib/v2/v2_json_coder.ts",
+    "src/lib/v2/v2_data_coder/json2.ts",
+    "src/lib/v2/v2_data_coder/data_coder.ts",
+    "src/lib/v2/v2_data_coder/json_coder.ts",
     "src/lib/v2/v2_make_observed.ts",
     "src/lib/v2/v2_recycle_pool.ts",
     "src/lib/common/sendable_type.ts",
@@ -90,6 +92,7 @@
     // sdk
     "src/lib/sdk/v2_persistence.ts",
     "src/lib/sdk/ui_utils.ts",
+    "src/lib/sdk/observed_util.ts",
 
     // unit testing
     "src/utest/common/helpers_for_test.ts",

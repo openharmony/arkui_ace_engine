@@ -16,6 +16,8 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_rating_ffi.h"
 
 #include "cj_lambda.h"
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/rating/rating_model_ng.h"
 
 namespace {
@@ -27,24 +29,37 @@ namespace {
 using namespace OHOS::Ace;
 using namespace OHOS::Ace::Framework;
 
+namespace OHOS::Ace {
+// Should use CJUIModifier API later
+NG::RatingModelNG* GetRatingModel()
+{
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Rating");
+    if (module == nullptr) {
+        LOGF("Can't find rating dynamic module");
+        abort();
+    }
+    return reinterpret_cast<NG::RatingModelNG*>(module->GetModel());
+}
+}
+
 extern "C" {
 void FfiOHOSAceFrameworkRatingCreate(double rating, bool indicator)
 {
     double ratnum = rating <= 0 ?  RATING_SCORE_DEFAULT : rating;
-    RatingModel::GetInstance()->Create(ratnum, indicator);
+    GetRatingModel()->Create(ratnum, indicator);
 }
 
 void FfiOHOSAceFrameworkRatingSetStars(int32_t value)
 {
     auto stars = value <= 0 ? STARS_DEFAULT : value;
-    RatingModel::GetInstance()->SetStars(stars);
+    GetRatingModel()->SetStars(stars);
 }
 
 void FfiOHOSAceFrameworkRatingSetStepSize(double value)
 {
     static const double stepSizeMin = 0.1;
     double stepSize = LessNotEqual(value, stepSizeMin) ? STEPS_DEFAULT : value;
-    RatingModel::GetInstance()->SetStepSize(stepSize);
+    GetRatingModel()->SetStepSize(stepSize);
 }
 
 void FfiOHOSAceFrameworkRatingSetStarStyle(
@@ -53,9 +68,9 @@ void FfiOHOSAceFrameworkRatingSetStarStyle(
     bool backgroundisempty = !(strlen(backgroundUri) != 0);
     bool secondaryisempty = !(strlen(secondaryUri) != 0);
     bool foregroundisempty = !(strlen(foregroundUri) != 0);
-    RatingModel::GetInstance()->SetForegroundSrc(foregroundUri, foregroundisempty);
-    RatingModel::GetInstance()->SetSecondarySrc(secondaryUri, secondaryisempty);
-    RatingModel::GetInstance()->SetBackgroundSrc(backgroundUri, backgroundisempty);
+    GetRatingModel()->SetForegroundSrc(foregroundUri, foregroundisempty);
+    GetRatingModel()->SetSecondarySrc(secondaryUri, secondaryisempty);
+    GetRatingModel()->SetBackgroundSrc(backgroundUri, backgroundisempty);
 }
 
 void FfiOHOSAceFrameworkRatingSetOnChange(void (*callback)(double))
@@ -63,6 +78,6 @@ void FfiOHOSAceFrameworkRatingSetOnChange(void (*callback)(double))
     auto onChange = [lambda = CJLambda::Create(callback)](const std::string& value) {
         lambda(std::stod(value));
     };
-    RatingModel::GetInstance()->SetOnChange(onChange);
+    GetRatingModel()->SetOnChange(onChange);
 }
 }

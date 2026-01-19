@@ -460,4 +460,16 @@ void AccessibilityFrameNodeUtils::IsCoveredByBrother(
         }
     } while (parentFrameNode);
 }
+
+bool AccessibilityFrameNodeUtils::IsNodeEnabled(const RefPtr<FrameNode>& node)
+{
+    CHECK_NULL_RETURN(node, false);
+    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
+    CHECK_NULL_RETURN(accessibilityProperty, false);
+    auto enable = node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true;
+    if (accessibilityProperty->HasUserDisabled()) {
+        enable = !accessibilityProperty->IsUserDisabled();
+    }
+    return enable;
+}
 } // namespace OHOS::Ace::NG

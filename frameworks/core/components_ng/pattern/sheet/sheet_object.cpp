@@ -707,6 +707,8 @@ void SheetObject::AvoidKeyboardInDirtyLayoutProcess()
         // first switch the sheet to the position corresponding to the proportion before rotation
         sheetPattern->TranslateTo(sheetPattern->GetPageHeightWithoutOffset() - sheetPattern->GetHeight());
         sheetPattern->SetWindowRotate(false);
+    } else if (sheetPattern->GetNeedDoubleAvoidAfterLayout()) {
+        AvoidKeyboard(true);
     } else {
         // After rotation, if need to avoid the keyboard, trigger the avoidance behavior
         AvoidKeyboard(false);

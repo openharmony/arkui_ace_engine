@@ -155,9 +155,20 @@ void SetBorderRadiusImpl(Ark_NativePointer node, const Opt_Union_Length_BorderRa
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto radiuses = Converter::OptConvertPtr<BorderRadiusProperty>(value);
-    if (radiuses) {
-        ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
+    if (!radiuses) {
+        auto pattern = frameNode->GetPattern<TextFieldPattern>();
+        CHECK_NULL_VOID(pattern);
+        auto textFieldTheme = pattern->GetTheme();
+        CHECK_NULL_VOID(textFieldTheme);
+        auto borderRadiusTheme = textFieldTheme->GetBorderRadius();
+        NG::BorderRadiusProperty defaultBorderRadius {
+            borderRadiusTheme.GetX(), borderRadiusTheme.GetY(),
+            borderRadiusTheme.GetY(), borderRadiusTheme.GetX(),
+        };
+        ViewAbstractModelStatic::SetBorderRadius(frameNode, defaultBorderRadius);
+        return;
     }
+    ViewAbstractModelStatic::SetBorderRadius(frameNode, radiuses.value());
     TextFieldModelStatic::SetBackBorder(frameNode);
 }
 void SetBackgroundColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColor_ColorMetrics* value)

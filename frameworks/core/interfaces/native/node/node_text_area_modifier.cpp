@@ -2525,17 +2525,23 @@ void SetTextAreaScrollBarColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* r
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::SetTextAreaScrollBarColor(frameNode, Color(color));
+    Color value = Color(color);
     if (SystemProperties::ConfigChangePerform()) {
+        RefPtr<ResourceObject> resObj;
+        if (!resRawPtr) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(resObj, value, frameNode->GetTag());
+        } else {
+            resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+        }
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
-        if (resRawPtr) {
-            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
-            pattern->RegisterResource<Color>("scrollBarColor", resObj, Color(color));
+        if (resObj) {
+            pattern->RegisterResource<Color>("scrollBarColor", resObj, value);
         } else {
             pattern->UnRegisterResource("scrollBarColor");
         }
     }
+    TextFieldModelNG::SetTextAreaScrollBarColor(frameNode, value);
 }
 
 ArkUI_Uint32 GetTextAreaScrollBarColor(ArkUINodeHandle node)
@@ -2550,6 +2556,11 @@ void ResetTextAreaScrollBarColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ResetTextAreaScrollBarColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("scrollBarColor");
+    }
 }
 
 void ScrollToVisible(ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end)
@@ -2683,7 +2694,6 @@ void SetTextAreaSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 colo
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     Color result = Color(color);
-    TextFieldModelNG::SetSelectedDragPreviewStyle(frameNode, result);
     if (SystemProperties::ConfigChangePerform()) {
         RefPtr<ResourceObject> resObj;
         if (!resRawPtr) {
@@ -2699,18 +2709,19 @@ void SetTextAreaSelectedDragPreviewStyle(ArkUINodeHandle node, ArkUI_Uint32 colo
             pattern->UnRegisterResource("selectedDragPreviewStyleColor");
         }
     }
+    TextFieldModelNG::SetSelectedDragPreviewStyle(frameNode, result);
 }
 
 void ResetTextAreaSelectedDragPreviewStyle(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    TextFieldModelNG::ResetSelectedDragPreviewStyle(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         pattern->UnRegisterResource("selectedDragPreviewStyle");
     }
+    TextFieldModelNG::ResetSelectedDragPreviewStyle(frameNode);
 }
 
 ArkUI_Uint32 GetTextAreaSelectedDragPreviewStyle(ArkUINodeHandle node)

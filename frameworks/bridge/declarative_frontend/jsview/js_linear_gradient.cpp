@@ -15,16 +15,18 @@
 
 #include "bridge/declarative_frontend/jsview/js_linear_gradient.h"
 
+#include "bridge/declarative_frontend/jsview/js_linear_gradient_binding.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 namespace OHOS::Ace::Framework {
-void JSLinearGradient::JSBind(BindingTarget globalObj)
+void JSLinearGradientBinding::JSBind(BindingTarget globalObj)
 {
     JSClass<JSLinearGradient>::Declare("LinearGradient");
-    JSClass<JSLinearGradient>::Bind(globalObj, JSLinearGradient::Constructor, JSLinearGradient::Destructor);
+    JSClass<JSLinearGradient>::Bind(
+        globalObj, JSLinearGradientBinding::Constructor, JSLinearGradientBinding::Destructor);
 }
 
-void JSLinearGradient::Constructor(const JSCallbackInfo& args)
+void JSLinearGradientBinding::Constructor(const JSCallbackInfo& args)
 {
     auto jsLinearGradientPtr = Referenced::MakeRefPtr<JSLinearGradient>();
     jsLinearGradientPtr->IncRefCount();
@@ -69,7 +71,7 @@ void JSLinearGradient::Constructor(const JSCallbackInfo& args)
     }
 }
 
-void JSLinearGradient::Destructor(JSLinearGradient* jsLinearGradientPtr)
+void JSLinearGradientBinding::Destructor(JSLinearGradient* jsLinearGradientPtr)
 {
     if (jsLinearGradientPtr != nullptr) {
         jsLinearGradientPtr->DecRefCount();

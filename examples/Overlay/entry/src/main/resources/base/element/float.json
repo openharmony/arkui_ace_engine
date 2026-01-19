@@ -195,6 +195,14 @@
     {
       "name": "float_9",
       "value": "9"
+    },
+    {
+      "name": "outlineWidth",
+      "value": "10vp"
+    },
+    {
+      "name": "outlineWidth1",
+      "value": "30vp"
     }
   ]
 }

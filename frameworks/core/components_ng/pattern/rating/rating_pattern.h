@@ -33,6 +33,9 @@
 #include "core/components/theme/app_theme.h"
 
 namespace OHOS::Ace::NG {
+const double DEFAULT_RATING_STEP_SIZE_VALUE = 0.5;
+const int32_t DEFAULT_RATING_STAR_NUM_VALUE = 5;
+const double DEFAULT_RATING_SCORE_VALUE = 0.0;
 class InspectorFilter;
 
 
@@ -222,9 +225,9 @@ private:
     double lastRatingScore_ = 0.0;
     RatingModifier::RatingAnimationType state_;
     float singleStarWidth_ = .0f;
-    int32_t themeStarNum_ = OHOS::Ace::DEFAULT_RATING_STAR_NUM;
-    double themeStepSize_ = OHOS::Ace::DEFAULT_RATING_STEP_SIZE;
-    double themeRatingScore_ = OHOS::Ace::DEFAULT_RATING_SCORE;
+    int32_t themeStarNum_ = DEFAULT_RATING_STAR_NUM_VALUE;
+    double themeStepSize_ = DEFAULT_RATING_STEP_SIZE_VALUE;
+    double themeRatingScore_ = DEFAULT_RATING_SCORE_VALUE;
     Dimension themeBorderWidth_ = 0.0_vp;
 
     bool isForegroundImageInfoFromTheme_ = false;

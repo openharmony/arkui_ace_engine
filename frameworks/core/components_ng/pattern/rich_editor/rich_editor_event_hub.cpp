@@ -359,6 +359,26 @@ const std::u16string& RichEditorAbstractSpanResult::GetUrlAddress() const
     return urlAddress_;
 }
 
+void RichEditorAbstractSpanResult::SetStrokeWidth(double strokeWidth)
+{
+    strokeWidth_ = strokeWidth;
+}
+
+double RichEditorAbstractSpanResult::GetStrokeWidth() const
+{
+    return strokeWidth_;
+}
+
+void RichEditorAbstractSpanResult::SetStrokeColor(const std::string& strokeColor)
+{
+    strokeColor_ = strokeColor;
+}
+
+const std::string& RichEditorAbstractSpanResult::GetStrokeColor() const
+{
+    return strokeColor_;
+}
+
 void RichEditorDeleteValue::SetOffset(int32_t offset)
 {
     offset_ = offset;
@@ -576,7 +596,8 @@ void RichEditorEventHub::FireOnDeleteComplete()
 {
     if (onDeleteComplete_) {
         onDeleteComplete_();
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Radio.onChange");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "RichEditor.onDeleteComplete",
+            ComponentEventType::COMPONENT_EVENT_TEXT_INPUT);
     }
 }
 

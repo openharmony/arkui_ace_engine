@@ -90,7 +90,8 @@ void AlertDialogModelNG::SetShowDialog(const DialogProperties& arg)
                 dialog = overlayManager->ShowDialog(arg, nullptr, false);
                 CHECK_NULL_VOID(dialog);
             }
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("onVisibleChange", "show",
+                ComponentEventType::COMPONENT_EVENT_DIALOG);
             auto hub = dialog->GetEventHub<NG::DialogEventHub>();
             CHECK_NULL_VOID(hub);
             hub->SetOnCancel(arg.onCancel);

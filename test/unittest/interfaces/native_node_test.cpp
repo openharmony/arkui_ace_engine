@@ -1912,6 +1912,10 @@ HWTEST_F(NativeNodeTest, NativeNodeTest006, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(ON_CONTAINER_PICKER_CHANGE));
     ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_PICKER_EVENT_ON_SCROLL_STOP, nodeType);
     EXPECT_EQ(ret, static_cast<int32_t>(ON_CONTAINER_PICKER_SCROLL_STOP));
+
+    nodeType = static_cast<int32_t>(ARKUI_NODE_RICH_EDITOR);
+    ret = OHOS::Ace::NodeModel::ConvertOriginEventType(NODE_RICH_EDITOR_ON_SELECTION_CHANGE, nodeType);
+    EXPECT_EQ(ret, static_cast<int32_t>(ON_RICH_EDITOR_ON_SELECTION_CHANGE));
 }
 
 /**
@@ -2170,6 +2174,9 @@ HWTEST_F(NativeNodeTest, NativeNodeTest007, TestSize.Level1)
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_PICKER_EVENT_ON_CHANGE));
     ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_CONTAINER_PICKER_SCROLL_STOP);
     EXPECT_EQ(ret, static_cast<int32_t>(NODE_PICKER_EVENT_ON_SCROLL_STOP));
+
+    ret = OHOS::Ace::NodeModel::ConvertToNodeEventType(ON_RICH_EDITOR_ON_SELECTION_CHANGE);
+    EXPECT_EQ(ret, static_cast<int32_t>(NODE_RICH_EDITOR_ON_SELECTION_CHANGE));
 }
 
 /**
@@ -8530,6 +8537,58 @@ HWTEST_F(NativeNodeTest, NativeNodeTest149, TestSize.Level1)
 }
 
 /**
+ * @tc.name: NativeNodeTestRichEditor
+ * @tc.desc: Test textinputNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTestRichEditor, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_RICH_EDITOR, nullptr, true});
+    uint32_t color = 0XFFFF0000;
+    ArkUI_NumberValue value[] = {{.u32 = color}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    value[0].i32 = ARKUI_ENTER_KEY_TYPE_SEARCH;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_ENTER_KEY_TYPE, &item);
+    value[0].i32 = 2;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_BAR_STATE, &item);
+    value[0].u32 = color;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_CARET_COLOR, &item);
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_SCROLL_BAR_COLOR, &item);
+    value[0].i32 = true;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_DATA_DETECTOR, &item);
+ 
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_ENTER_KEY_TYPE), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_BAR_STATE), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_CARET_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_SCROLL_BAR_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_DATA_DETECTOR), ARKUI_ERROR_CODE_NO_ERROR);
+    
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_ENTER_KEY_TYPE), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_BAR_STATE), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_CARET_COLOR), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_SCROLL_BAR_COLOR), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_DATA_DETECTOR), nullptr);
+    
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTest150
+ * @tc.desc: Test Undefined function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTest150, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto node = nodeAPI->createNode(ARKUI_NODE_UNDEFINED);
+    ASSERT_EQ(node, nullptr);
+    nodeAPI->disposeNode(node);
+}
+
+/**
  * @tc.name: NativeNodeTest_OutlineColor001
  * @tc.desc: Test customNode function.
  * @tc.type: FUNC
@@ -11505,6 +11564,63 @@ HWTEST_F(NativeNodeTest, NativeNodeConvertToWindowTest001, TestSize.Level1)
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_NODE_NOT_ON_MAIN_TREE);
     ret = OH_ArkUI_NativeModule_ConvertPositionToWindow(nullptr, position, &pos1);
     EXPECT_EQ(ret, ARKUI_ERROR_CODE_PARAM_INVALID);
+}
+
+/**
+ * @tc.name: NativeNodeRefreshCancelTest01
+ * @tc.desc: Test refreshNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRefreshCancelTest01, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ ARKUI_NODE_REFRESH, nullptr, true });
+    ASSERT_NE(rootNode, nullptr);
+    ArkUI_NumberValue value[] = { { .i32 = true } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue), nullptr, nullptr };
+    nodeAPI->setAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH, &item);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH), nullptr);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeRefreshCancelTest02
+ * @tc.desc: Test refreshNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRefreshCancelTest02, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ ARKUI_NODE_REFRESH, nullptr, true });
+    ASSERT_NE(rootNode, nullptr);
+    ArkUI_NumberValue value[] = { { .i32 = false } };
+    ArkUI_AttributeItem item = { value, sizeof(value) / sizeof(ArkUI_NumberValue), nullptr, nullptr };
+    nodeAPI->setAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH, &item);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH), nullptr);
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeRefreshCancelTest03
+ * @tc.desc: Test refreshNode function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeRefreshCancelTest03, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ ARKUI_NODE_REFRESH, nullptr, true });
+    ASSERT_NE(rootNode, nullptr);
+    ArkUI_NumberValue value[] = {};
+    ArkUI_AttributeItem item = { value, 0, nullptr, nullptr };
+    EXPECT_EQ(
+        nodeAPI->setAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH, &item), ARKUI_ERROR_CODE_PARAM_INVALID);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_REFRESH_PULL_UP_TO_CANCEL_REFRESH), nullptr);
+    nodeAPI->disposeNode(rootNode);
 }
 
 /**

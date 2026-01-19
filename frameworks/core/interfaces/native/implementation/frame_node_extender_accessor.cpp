@@ -443,12 +443,53 @@ void DisposeTreeImpl(Ark_FrameNode peer)
     CHECK_NULL_VOID(frameNode);
     auto parent = frameNode->GetParent();
     if (parent && parent->GetTag() == "NodeContainer") {
-        auto pattern = AceType::DynamicCast<NodeContainerPattern>(parent);
+        auto parentFrameNode = AceType::DynamicCast<FrameNode>(parent);
+        CHECK_NULL_VOID(parentFrameNode);
+        auto pattern = AceType::DynamicCast<NodeContainerPattern>(parentFrameNode->GetPattern());
         CHECK_NULL_VOID(pattern);
         pattern->CleanChild();
     } else if (parent) {
         parent->RemoveChild(frameNode);
     }
+}
+void AddSupportedUIStatesImpl(Ark_FrameNode peer,
+                              Ark_Int32 uiStates,
+                              const UIStatesChangeHandler* statesChangeHandler,
+                              Ark_Boolean excludeInner)
+{
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(frameNode);
+    frameNode->CreateEventHubInner();
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    auto callFunc = statesChangeHandler ? statesChangeHandler->call : nullptr;
+    auto resourceId = statesChangeHandler ? statesChangeHandler->resource.resourceId : 0;
+    WeakPtr<FrameNode> weakFrameNode(frameNode);
+    std::function<void(uint64_t)> callback = [callFunc, resourceId, weakFrameNode](uint64_t currentUIStates) {
+        auto frameNode = weakFrameNode.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        if (callFunc) {
+            callFunc(resourceId,
+                     FrameNodePeer::Create(frameNode),
+                     static_cast<Ark_Int32>(currentUIStates));
+        }
+    };
+    eventHub->AddSupportedUIStateWithCallback(
+        static_cast<UIState>(uiStates),
+        callback,
+        false,
+        static_cast<bool>(excludeInner));
+}
+void RemoveSupportedUIStatesImpl(Ark_FrameNode peer,
+                                 Ark_Int32 uiStates)
+{
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_VOID(frameNode);
+    
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    CHECK_NULL_VOID(eventHub);
+    
+    eventHub->RemoveSupportedUIState(static_cast<UIState>(uiStates), false);
 }
 Ark_Boolean SetCrossLanguageOptionsImpl(Ark_FrameNode peer, Ark_Boolean options)
 {
@@ -571,6 +612,20 @@ Ark_Vector2 GetPositionToScreenImpl(Ark_FrameNode peer)
     auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(frameNode, {});
     auto offset = frameNode->GetPositionToScreen();
+    offset.SetX(PipelineBase::Px2VpWithCurrentDensity(offset.GetX()));
+    offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
+    return Converter::ArkValue<Ark_Vector2>(offset);
+}
+
+Ark_Vector2 GetGlobalPositionOnDisplayImpl(Ark_FrameNode peer)
+{
+    if (!peer) {
+        LOGW("This frameNode nullptr when GetGlobalPositionOnDisplayImpl!");
+        return {};
+    }
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(frameNode, {});
+    auto offset = frameNode->GetGlobalPositionOnDisplay();
     offset.SetX(PipelineBase::Px2VpWithCurrentDensity(offset.GetX()));
     offset.SetY(PipelineBase::Px2VpWithCurrentDensity(offset.GetY()));
     return Converter::ArkValue<Ark_Vector2>(offset);
@@ -1024,11 +1079,12 @@ Ark_NativePointer UnWrapRawPtrImpl(Ark_NativePointer peerNode)
     auto frameNodeRaw = Referenced::RawPtr(frameNode);
     return reinterpret_cast<Ark_NativePointer>(frameNodeRaw);
 }
-Ark_UICommonEvent GetCommonEventImpl(Ark_FrameNode peer)
+Ark_UICommonEvent GetCommonEventImpl(Ark_NativePointer peer)
 {
-    CHECK_NULL_RETURN(peer, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(peer);
+    CHECK_NULL_RETURN(frameNode, nullptr);
     auto ret = PeerUtils::CreatePeer<UICommonEventPeer>();
-    ret->node = peer->node;
+    ret->node = frameNode;
     return ret;
 }
 Ark_NativePointer GetRenderNodeImpl(Ark_NativePointer peer)
@@ -1048,6 +1104,28 @@ void ParseArrayResultNumber(std::vector<float>& indexes, NG::OffsetF offset)
     indexes.emplace_back(1);
     indexes.emplace_back(offset.GetX());
     indexes.emplace_back(offset.GetY());
+}
+
+Array_Float64 ConvertPositionWithWindow(Ark_FrameNode peer, const Ark_Vector2* position, bool fromWindow)
+{
+    std::vector<float> indexes;
+    ParseArrayFailNumber(indexes);
+    auto errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    CHECK_NULL_RETURN(position, errValue);
+    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(currentNode, errValue);
+    auto isOnMainTree = currentNode->IsOnMainTree();
+    if (!isOnMainTree) {
+        indexes[0] = 2; // 2 means not on main tree and will pass to js
+        return Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    }
+    auto xFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(position->x));
+    auto yFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(position->y));
+    auto offset = currentNode->ConvertPositionToWindow({ xFloat, yFloat }, fromWindow);
+    ParseArrayResultNumber(indexes,
+        { PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) });
+    auto resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    return resultValue;
 }
 
 Array_Float64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark_Vector2* vector2)
@@ -1074,39 +1152,14 @@ Array_Float64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark
     return resultValue;
 }
 
-Array_Float64 ConvertPositionToWindowImpl(Ark_FrameNode peer,
-                                          const Ark_Vector2* positionByLocal)
+Array_Float64 ConvertPositionToWindowImpl(Ark_FrameNode peer, const Ark_Vector2* positionByLocal)
 {
-    std::vector<float> indexes;
-    ParseArrayFailNumber(indexes);
-    auto errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
-    CHECK_NULL_RETURN(positionByLocal, errValue);
-    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
-    CHECK_NULL_RETURN(currentNode, errValue);
-    auto xFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByLocal->x));
-    auto yFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByLocal->y));
-    auto offset = currentNode->ConvertPositionToWindow({ xFloat, yFloat }, false);
-    ParseArrayResultNumber(indexes,
-        { PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) });
-    auto resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
-    return resultValue;
+    return ConvertPositionWithWindow(peer, positionByLocal, false);
 }
 
 Array_Float64 ConvertPositionFromWindowImpl(Ark_FrameNode peer, const Ark_Vector2* positionByWindow)
 {
-    std::vector<float> indexes;
-    ParseArrayFailNumber(indexes);
-    auto errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
-    CHECK_NULL_RETURN(positionByWindow, errValue);
-    auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
-    CHECK_NULL_RETURN(currentNode, errValue);
-    auto xFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByWindow->x));
-    auto yFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(positionByWindow->y));
-    auto offset = currentNode->ConvertPositionToWindow({ xFloat, yFloat }, true);
-    ParseArrayResultNumber(indexes,
-        { PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) });
-    auto resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
-    return resultValue;
+    return ConvertPositionWithWindow(peer, positionByWindow, true);
 }
 
 Ark_Int32 AdoptChildImpl(Ark_FrameNode peer, Ark_FrameNode child)
@@ -1161,6 +1214,24 @@ Ark_Int32 RemoveAdoptedChildImpl(Ark_FrameNode peer, Ark_FrameNode child)
     CHECK_NULL_RETURN(renderContext, ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN);
     renderContext->RemoveFromTree();
     return ERROR_CODE_NO_ERROR;
+}
+Ark_InteractionEventBindingInfo GetInteractionEventBindingInfoImpl(Ark_FrameNode peer,
+                                                                   Ark_EventQueryType eventType)
+{
+    Ark_InteractionEventBindingInfo info {};
+    auto peerNode = FrameNodePeer::GetFrameNodeByPeer(peer);
+    CHECK_NULL_RETURN(peerNode, info);
+    if (eventType != Ark_EventQueryType::ARK_EVENT_QUERY_TYPE_ON_CLICK) {
+        return info;
+    }
+    auto frameNode = AceType::DynamicCast<FrameNode>(peerNode);
+    CHECK_NULL_RETURN(frameNode, info);
+    auto bindingInfo = frameNode->GetInteractionEventBindingInfo();
+    info.baseEventRegistered = bindingInfo.baseEventRegistered;
+    info.nodeEventRegistered = bindingInfo.nodeEventRegistered;
+    info.nativeEventRegistered = bindingInfo.nativeEventRegistered;
+    info.builtInEventRegistered = bindingInfo.builtInEventRegistered;
+    return info;
 }
 Ark_Boolean IsOnRenderTreeImpl(Ark_FrameNode peer)
 {
@@ -1219,6 +1290,8 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::GetInspectorInfoImpl,
         FrameNodeExtenderAccessor::InvalidateImpl,
         FrameNodeExtenderAccessor::DisposeTreeImpl,
+        FrameNodeExtenderAccessor::AddSupportedUIStatesImpl,
+        FrameNodeExtenderAccessor::RemoveSupportedUIStatesImpl,
         FrameNodeExtenderAccessor::SetCrossLanguageOptionsImpl,
         FrameNodeExtenderAccessor::GetCrossLanguageOptionsImpl,
         FrameNodeExtenderAccessor::SetMeasuredSizeImpl,
@@ -1227,6 +1300,7 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::LayoutImpl,
         FrameNodeExtenderAccessor::SetNeedsLayoutImpl,
         FrameNodeExtenderAccessor::GetPositionToScreenImpl,
+        FrameNodeExtenderAccessor::GetGlobalPositionOnDisplayImpl,
         FrameNodeExtenderAccessor::GetPositionToWindowWithTransformImpl,
         FrameNodeExtenderAccessor::GetPositionToParentWithTransformImpl,
         FrameNodeExtenderAccessor::GetPositionToScreenWithTransformImpl,
@@ -1256,6 +1330,7 @@ const GENERATED_ArkUIFrameNodeExtenderAccessor* GetFrameNodeExtenderAccessor()
         FrameNodeExtenderAccessor::ConvertPointImpl,
         FrameNodeExtenderAccessor::AdoptChildImpl,
         FrameNodeExtenderAccessor::RemoveAdoptedChildImpl,
+        FrameNodeExtenderAccessor::GetInteractionEventBindingInfoImpl,
         FrameNodeExtenderAccessor::IsOnRenderTreeImpl,
         FrameNodeExtenderAccessor::IsOnMainTreeImpl,
         FrameNodeExtenderAccessor::ConvertPositionToWindowImpl,

@@ -21,6 +21,17 @@ type GetType<T> = () => T;
 type SetType<T> = (newVal: T) => void;
 export type OnChangeType<T> = (propName: string, newValue: T) => void;
 
+export enum ColorMode {
+    LIGHT = 0,
+    DARK = 1
+}
+
+export enum LayoutDirection {
+    RTL = 0,
+    LTR = 1,
+    Auto = 2
+}
+
 export class AbstractProperty<T> extends DecoratedV1VariableBase<T> implements IStorageProperty {
     private readonly key_: string;
     private readonly get_: GetType<T>;

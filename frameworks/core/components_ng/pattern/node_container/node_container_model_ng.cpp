@@ -14,6 +14,7 @@
  */
 #include "core/components_ng/pattern/node_container/node_container_model_ng.h"
 
+#include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/node_container/node_container_node.h"
 
@@ -134,5 +135,12 @@ void NodeContainerModelNG::FireMakeNode()
     auto pattern = AceType::DynamicCast<NodeContainerPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(pattern);
     pattern->RemakeNode();
+}
+
+RefPtr<FrameNode> NodeContainerModelNG::CreateFrameNode(int32_t nodeId)
+{
+    auto frameNode = NodeContainerNode::GetOrCreateNodeContainerNode(nodeId);
+    ViewAbstract::SetAlign(AceType::RawPtr(frameNode), Alignment::TOP_LEFT);
+    return frameNode;
 }
 } // namespace OHOS::Ace::NG

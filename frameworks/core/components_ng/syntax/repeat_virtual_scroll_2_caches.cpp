@@ -33,6 +33,7 @@ using GetFrameChildResult = RepeatVirtualScroll2Caches::GetFrameChildResult;
 
 RefPtr<RepeatVirtualScroll2CacheItem> RepeatVirtualScroll2CacheItem::MakeCacheItem(RefPtr<UINode>& node, bool isL1)
 {
+    ACE_UINODE_TRACE(node);
     return MakeRefPtr<RepeatVirtualScroll2CacheItem>(node, isL1);
 }
 

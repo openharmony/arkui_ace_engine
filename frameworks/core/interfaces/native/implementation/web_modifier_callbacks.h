@@ -69,6 +69,8 @@ void OnDetectedBlankScreen(const CallbackHelper<OnDetectBlankScreenCallback>& ar
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnTextSelectionChange(const CallbackHelper<TextSelectionChangeCallback>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void OnFirstScreenPaint(const CallbackHelper<OnFirstScreenPaintCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnResourceLoad(const CallbackHelper<Callback_OnResourceLoadEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnFullScreenExit(const CallbackHelper<Callback_Void>& arkCallback,
@@ -87,6 +89,8 @@ std::string OnOverrideErrorPage(
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
+void DefaultPermissionClipboard(const std::function<void(void*, std::function<void()>)>& callback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnScreenCaptureRequest(const CallbackHelper<Callback_OnScreenCaptureRequestEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 bool OnContextMenuShow(const CallbackHelper<Callback_OnContextMenuShowEvent_Boolean>& arkCallback,
@@ -104,6 +108,8 @@ bool OnSslError(const CallbackHelper<OnSslErrorEventCallback>& arkCallback,
 bool OnClientAuthentication(const CallbackHelper<Callback_OnClientAuthenticationEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);
 void OnWindowNew(const CallbackHelper<Callback_OnWindowNewEvent_Void>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
+void OnWindowNewExt(const CallbackHelper<Callback_OnWindowNewExtEvent_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info);
 void OnWindowExit(const CallbackHelper<Callback_Void>& arkCallback,
     WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info);

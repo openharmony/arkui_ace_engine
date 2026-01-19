@@ -315,11 +315,11 @@ ArkUI_Bool GetContainerPickerCanLoop(ArkUINodeHandle node)
 
 ArkUI_PickerIndicatorStyle GetContainerPickerIndicator(ArkUINodeHandle node)
 {
-    ArkUI_PickerIndicatorStyle indicatorStyle;
+    ArkUI_PickerIndicatorStyle indicatorStyle = {};
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, indicatorStyle);
     auto style = ContainerPickerModel::GetIndicatorStyle(frameNode);
-    indicatorStyle.type = style.type;
+    indicatorStyle.type = static_cast<uint32_t>(style.type);
     if (style.type == static_cast<int32_t>(PickerIndicatorType::DIVIDER)) {
         indicatorStyle.strokeWidth = style.strokeWidth->Value();
         indicatorStyle.dividerColor = style.dividerColor->GetValue();

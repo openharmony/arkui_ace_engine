@@ -373,6 +373,7 @@ private:
     RectF displayWindowRect_;
     RectF UIExtensionHostWindowRect_;
     bool isContainerModal_ = false;
+    bool showInSubWindow_ = false;
 
     OffsetF childOffset_;
     SizeF childMarginFrameSize_;

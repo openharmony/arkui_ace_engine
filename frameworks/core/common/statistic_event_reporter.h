@@ -26,6 +26,9 @@ class PipelineBase;
 enum class StatisticEventType {
     FA_APP_START = 0,
     CALL_SET_CACHE_RANGE,
+    SEARCH_ONDIDINSERT,
+    SEARCH_ONWILLDELETE,
+    SEARCH_ONDIDDELETE,
 };
 
 struct StatisticAppInfo {
@@ -34,7 +37,8 @@ struct StatisticAppInfo {
 
 struct StatisticEventInfo {
     std::string eventName;
-    int32_t eventCount = 0;
+    std::string subEventName;
+    int32_t eventCount = 1;
 };
 
 class StatisticEventReporter : public std::enable_shared_from_this<StatisticEventReporter> {
@@ -46,7 +50,7 @@ public:
     void ForceReportStatisticEvents();
 private:
     void ReportStatisticEvents(const std::map<StatisticEventType, StatisticEventInfo>& events);
-    std::string ConvertToEventName(StatisticEventType eventType);
+    StatisticEventInfo ConvertToEvent(StatisticEventType eventType);
     int32_t totalEventCount_ = 0;
     StatisticAppInfo appInfo_;
     std::map<StatisticEventType, StatisticEventInfo> statisitcEventMap_;

@@ -68,6 +68,7 @@ public:
     void SetEntry(int32_t row, int32_t col, double value);
     bool IsIdentityMatrix() const;
     int32_t Count() const;
+    Point TransformPoint(const Point& point);
 
     bool operator==(const Matrix4& matrix) const;
     bool operator==(const double (&matrix)[4][4]) const;

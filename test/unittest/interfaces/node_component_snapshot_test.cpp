@@ -378,10 +378,17 @@ HWTEST_F(SnapshotTest, SnapshotTestDynamicRange003, TestSize.Level1)
  */
 HWTEST_F(SnapshotTest, SnapshotTest007, TestSize.Level1)
 {
+    /**
+     * @tc.steps: step1. init node and snapshot options.
+     */
     OH_PixelmapNative* pixelmap = nullptr;
     auto options = OH_ArkUI_CreateSnapshotOptions();
     ASSERT_NE(options, nullptr);
     OH_ArkUI_SnapshotOptions_SetScale(options, 1.5f);
+    /**
+     * @tc.steps: step2. call OH_ArkUI_GetNodeSnapshot with null node.
+     * @tc.expected: step2. result is ARKUI_ERROR_CODE_PARAM_INVALID.
+     */
     auto result = OH_ArkUI_GetNodeSnapshot(nullptr, options, &pixelmap);
     EXPECT_EQ(result, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
 }

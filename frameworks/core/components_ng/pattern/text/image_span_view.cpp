@@ -64,6 +64,7 @@ void ImageSpanView::SetPlaceHolderStyle(TextBackgroundStyle& style)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     style.groupId = frameNode->GetId();
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, style);
     ACE_UPDATE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,
@@ -93,6 +94,7 @@ void ImageSpanView::SetPlaceHolderStyle(TextBackgroundStyle& style)
 
 void ImageSpanView::SetPlaceHolderStyle(FrameNode* frameNode, TextBackgroundStyle& style)
 {
+    ACE_UINODE_TRACE(frameNode);
     style.groupId = frameNode->GetId();
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, PlaceHolderStyle, style, frameNode);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, HasPlaceHolderStyle,

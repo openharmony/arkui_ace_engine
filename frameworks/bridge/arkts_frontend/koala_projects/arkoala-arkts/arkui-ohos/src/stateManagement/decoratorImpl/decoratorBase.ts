@@ -68,15 +68,15 @@ export class DecoratedVariableBase {
     }
 
     public getTraceInfo(): string {
-            return `get: ${this.varName} ${Type.of(this.owningComponent_)} ${this.shouldAddRef()} ${ObserveSingleton.instance.renderingComponent}`
+            return `get: ${this.varName} ${Class.ofAny(this.owningComponent_)} ${this.shouldAddRef()} ${ObserveSingleton.instance.renderingComponent}`
         }
     
     public setTraceInfo(): string {
-        return `set: ${this.varName} ${Type.of(this.owningComponent_)}`;
+        return `set: ${this.varName} ${Class.ofAny(this.owningComponent_)}`;
     } 
 
     public updateTraceInfo(): string {
-        return `update: ${this.varName} ${Type.of(this.owningComponent_)}`;
+        return `update: ${this.varName} ${Class.ofAny(this.owningComponent_)}`;
     }
 
     public shouldAddRef(): boolean {
@@ -216,12 +216,32 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
         this._watchFuncs.set(watchFuncObj.id(), watchFuncObj);
         return watchFuncObj.id();
     }
+
+    public checkValueIsNotFunction(value: Any): void {
+        if (typeof value === 'function') {
+            let componentName: string = this.owningComponent_ ? Class.of(this.owningComponent_!).getName() : 'undefined';
+            if (componentName.indexOf('.') >= 0) {
+                componentName = componentName.substring(componentName.lastIndexOf('.') + 1);
+            }
+            let msg: string = `@Component '${componentName}': Illegal variable value error `;
+            msg += `with decorated variable ${this.decorator} '${this._varName}': `;
+            msg += `failed validation: 'not function'`;
+            try {
+                msg += `, attempt to assign value type: '${typeof value}'`;
+                msg += `, value: '${JSON.stringify(value, null, 4)}'`;
+            } catch(e) { }
+            msg += '!';
+            console.error(msg);
+            throw new TypeError(msg);
+        }
+    }
 }
 
-export abstract class DecoratedV2VariableBase extends DecoratedVariableBase implements IDecoratedV2Variable {
+export abstract class DecoratedV2VariableBase<T> extends DecoratedVariableBase implements IDecoratedV2Variable<T> {
     constructor(decorator: string, owningComponent: IVariableOwner | undefined, varName: string) {
         super(decorator, owningComponent, varName);
     }
+    abstract resetOnReuse(newValue: T): void;
     public info(): string {
         return this.varName;
     }

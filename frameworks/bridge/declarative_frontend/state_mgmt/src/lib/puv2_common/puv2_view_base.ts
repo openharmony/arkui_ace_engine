@@ -107,6 +107,8 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   // Set of elements for delayed update
   private elmtIdsDelayedUpdate_: Set<number> = new Set();
 
+  protected __lifecycle__Internal: CustomComponentLifecycle;
+
   protected static prebuildPhase_: PrebuildPhase = PrebuildPhase.None;
   protected isPrebuilding_: boolean = false;
   protected static prebuildingElmtId_: number = -1;
@@ -127,6 +129,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     // these matching is requirement for updateChildViewById(elmtId) being able to
     // find the child ViewPU/V2 object by given elmtId
     this.id_ = elmtId === UINodeRegisterProxy.notRecordingDependencies ? SubscriberManager.MakeId() : elmtId;
+    this.__lifecycle__Internal = new CustomComponentLifecycle(this);
 
     stateMgmtConsole.debug(`PUV2ViewBase constructor: Creating @Component '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
 
@@ -149,10 +152,29 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
     stateMgmtConsole.debug(`${this.debugInfo__()}: constructor: done`);
   }
 
+  public __triggerLifecycle__Internal(eventId: LifeCycleEvent): boolean {
+    let res: boolean = this.__lifecycle__Internal.handleEvent(eventId);
+    return res;
+  }
+
+  public __getLifecycle__Internal(): CustomComponentLifecycle {
+    return this.__lifecycle__Internal;
+  }
+
+  public __customComponentExecuteInit__Internal(): void {
+    let watchProp = Symbol.for('INIT_INTERNAL_FUNCTION' + this.constructor.name);
+    const componentInitFunctions = this[watchProp];
+    if (componentInitFunctions instanceof Array) {
+        componentInitFunctions.forEach((componentInitFunction) => {
+            componentInitFunction.call(this);
+        })
+    }
+  }
+
   public static create(view: PUV2ViewBase): void {
     return NativeViewPartialUpdate.create(view.nativeViewPartialUpdate);
   }
-  
+
   static createRecycle(componentCall: object, isRecycling: boolean, reuseId: string, callback: () => void): void {
     return NativeViewPartialUpdate.createRecycle(componentCall, isRecycling, reuseId, callback);
   }
@@ -394,7 +416,9 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   protected abstract debugInfoStateVars(): string;
 
-  public abstract getRecycleDump(): string;
+  public __getRecycleDump_internal(): string {
+    return '';
+  }
 
   public isViewActive(): boolean {
     return this.activeCount_ > 0;
@@ -639,7 +663,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
         try {
           return `${index}__${JSON.stringify(item)}`;
         } catch (e) {
-          throw new Error(`${this.debugInfo__()}: ForEach id ${elmtId}: use of default id generator function not possible on provided data structure. Need to specify id generator function (ForEach 3rd parameter). Application Error!`);
+          throw new BusinessError(103801, `${this.debugInfo__()}: ForEach id ${elmtId}: use of default id generator function not possible on provided data structure. Need to specify id generator function (ForEach 3rd parameter). Application Error!`);
         }
       };
     }
@@ -851,7 +875,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
           this.sendStateInfo('{}');
           break;
         case 'RecyclePool':
-          DumpLog.addDesc('RecyclePool: ' + this.getRecycleDump());
+          DumpLog.addDesc('RecyclePool: ' + this.__getRecycleDump_internal());
           break;
         default:
           DumpLog.print(0, `\nUnsupported JS DFX dump command: [${command.what}, viewId=${command.viewId}, isRecursive=${command.isRecursive}]\n`);
@@ -1025,7 +1049,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
 
   public abstract __getPathValueFromJson__Internal(propertyName: string, jsonPath: string): string | undefined;
 
-  protected __findPathValueInJson__Internal(jsonValue: Object, jsonPath: string): string | undefined {
+  protected __findPathValueInJson__Internal(jsonValue: any, jsonPath: string): string | undefined {
     const paths = jsonPath.split('/').filter(path => path.length > 0);
     let current = jsonValue;
     for (const path of paths) {
@@ -1037,6 +1061,6 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       }
       current = current[path];
     }
-    return typeof current === 'string' ? current : undefined;
+    return typeof current === 'string' ? current : JSON.stringify(current);
   }
 } // class PUV2ViewBase

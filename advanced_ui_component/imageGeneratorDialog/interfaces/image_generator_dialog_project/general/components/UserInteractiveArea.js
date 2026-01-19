@@ -28,7 +28,8 @@ if (!("finalizeConstruction" in ViewPU.prototype)) {
 }
 import { FunctionAreaPlaceholder, StyleSelectBuilder, UserInteractiveTabBarBuilder } from "./UserFunctionArea";
 import { PhotoSelect } from "./PhotoSelect";
-export class LandscapeSelectFuncArea extends ViewV2 {
+import { CanvasLayoutDirection } from "../types/Declaration";
+export class SelectFuncArea extends ViewV2 {
     constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
         super(parent, elmtId, extraInfo);
         this.initParam("styles", (params && "styles" in params) ? params.styles : undefined);
@@ -38,6 +39,8 @@ export class LandscapeSelectFuncArea extends ViewV2 {
         this.initParam("imageInfoArr", (params && "imageInfoArr" in params) ? params.imageInfoArr : undefined);
         this.initParam("imageMatrixArr", (params && "imageMatrixArr" in params) ? params.imageMatrixArr : undefined);
         this.selectedIndex = 0;
+        this.setImgCounts = "setImgCounts" in params ? params.setImgCounts : () => { };
+        this.curLayoutDirection = CanvasLayoutDirection.DEFAULT;
         this.finalizeConstruction();
     }
     resetStateVarsOnReuse(params) {
@@ -47,6 +50,8 @@ export class LandscapeSelectFuncArea extends ViewV2 {
         this.resetParam("imageInfoArr", (params && "imageInfoArr" in params) ? params.imageInfoArr : undefined);
         this.resetParam("imageMatrixArr", (params && "imageMatrixArr" in params) ? params.imageMatrixArr : undefined);
         this.selectedIndex = 0;
+        this.setImgCounts = "setImgCounts" in params ? params.setImgCounts : (count) => { };
+        this.resetConsumer("curLayoutDirection", CanvasLayoutDirection.DEFAULT);
     }
     aboutToAppear() {
         for (let i = 0; this.styles && i < this.styles?.length; ++i) {
@@ -56,12 +61,12 @@ export class LandscapeSelectFuncArea extends ViewV2 {
     initialRender() {
         this.observeComponentCreation2((elmtId, isInitialRender) => {
             Tabs.create({ index: this.selectedIndex });
-            Tabs.barHeight(284);
+            Tabs.barHeight(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 284 : undefined);
             Tabs.scrollable(false);
-            Tabs.vertical(true);
+            Tabs.vertical(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL);
             Tabs.barPosition(BarPosition.End);
-            Tabs.width(118);
-            Tabs.height(386);
+            Tabs.width(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 118 : 396);
+            Tabs.height(this.curLayoutDirection === CanvasLayoutDirection.HORIZONTAL ? 386 : 96);
             Tabs.onChange((index) => {
                 this.selectedIndex = index;
             });
@@ -77,19 +82,25 @@ export class LandscapeSelectFuncArea extends ViewV2 {
                 {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         if (isInitialRender) {
-                            let componentCall = new PhotoSelect(this, { imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 40, col: 9 });
+                            let componentCall = new PhotoSelect(this, {
+                                imageInfoArr: this.imageInfoArr,
+                                imageMatrixArr: this.imageMatrixArr,
+                                setImgCounts: this.setImgCounts
+                            }, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 43, col: 9 });
                             ViewV2.create(componentCall);
                             let paramsLambda = () => {
                                 return {
                                     imageInfoArr: this.imageInfoArr,
-                                    imageMatrixArr: this.imageMatrixArr
+                                    imageMatrixArr: this.imageMatrixArr,
+                                    setImgCounts: this.setImgCounts
                                 };
                             };
                             componentCall.paramsGenerator_ = paramsLambda;
                         }
                         else {
                             this.updateStateVarsOfChildByElmtId(elmtId, {
-                                imageInfoArr: this.imageInfoArr, imageMatrixArr: this.imageMatrixArr
+                                imageInfoArr: this.imageInfoArr,
+                                imageMatrixArr: this.imageMatrixArr
                             });
                         }
                     }, { name: "PhotoSelect" });
@@ -105,7 +116,7 @@ export class LandscapeSelectFuncArea extends ViewV2 {
                 StyleSelectBuilder.bind(this)(this.styleItems);
             });
             TabContent.tabBar({ builder: () => {
-                    UserInteractiveTabBarBuilder.call(this, 1, '风格', { "id": 125836048, "type": 40000, params: ['sys.media.ohos_image_style'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
+                    UserInteractiveTabBarBuilder.call(this, 1, '风格', { "id": 125836048, "type": 40000, params: ['sys.symbol.style'], "bundleName": "__harDefaultBundleName__", "moduleName": "__harDefaultModuleName__" });
                 } });
         }, TabContent);
         TabContent.pop();
@@ -114,7 +125,7 @@ export class LandscapeSelectFuncArea extends ViewV2 {
                 {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         if (isInitialRender) {
-                            let componentCall = new FunctionAreaPlaceholder(this, {}, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 50, col: 9 });
+                            let componentCall = new FunctionAreaPlaceholder(this, {}, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 57, col: 9 });
                             ViewV2.create(componentCall);
                             let paramsLambda = () => {
                                 return {};
@@ -137,7 +148,7 @@ export class LandscapeSelectFuncArea extends ViewV2 {
                 {
                     this.observeComponentCreation2((elmtId, isInitialRender) => {
                         if (isInitialRender) {
-                            let componentCall = new FunctionAreaPlaceholder(this, {}, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 55, col: 9 });
+                            let componentCall = new FunctionAreaPlaceholder(this, {}, undefined, elmtId, () => { }, { page: "image_generator_dialog/src/main/ets/general/components/UserInteractiveArea.ets", line: 62, col: 9 });
                             ViewV2.create(componentCall);
                             let paramsLambda = () => {
                                 return {};
@@ -177,19 +188,25 @@ export class LandscapeSelectFuncArea extends ViewV2 {
 }
 __decorate([
     Param
-], LandscapeSelectFuncArea.prototype, "styles", void 0);
+], SelectFuncArea.prototype, "styles", void 0);
 __decorate([
     Local
-], LandscapeSelectFuncArea.prototype, "tabBarStyleBgColor", void 0);
+], SelectFuncArea.prototype, "tabBarStyleBgColor", void 0);
 __decorate([
     Local
-], LandscapeSelectFuncArea.prototype, "styleItems", void 0);
+], SelectFuncArea.prototype, "styleItems", void 0);
 __decorate([
     Param
-], LandscapeSelectFuncArea.prototype, "imageInfoArr", void 0);
+], SelectFuncArea.prototype, "imageInfoArr", void 0);
 __decorate([
     Param
-], LandscapeSelectFuncArea.prototype, "imageMatrixArr", void 0);
+], SelectFuncArea.prototype, "imageMatrixArr", void 0);
 __decorate([
     Provider('functionAreaSelectedIndex')
-], LandscapeSelectFuncArea.prototype, "selectedIndex", void 0);
+], SelectFuncArea.prototype, "selectedIndex", void 0);
+__decorate([
+    Event
+], SelectFuncArea.prototype, "setImgCounts", void 0);
+__decorate([
+    Consumer('globalLayoutDirection')
+], SelectFuncArea.prototype, "curLayoutDirection", void 0);

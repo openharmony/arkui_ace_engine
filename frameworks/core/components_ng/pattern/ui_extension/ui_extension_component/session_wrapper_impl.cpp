@@ -649,6 +649,7 @@ Rosen::SessionViewportConfig ConvertToRosenSessionViewportConfig(const SessionVi
 
 void SessionWrapperImpl::CreateSession(const AAFwk::Want& want, const SessionConfig& config)
 {
+    ACE_UINODE_TRACE(GetFrameNodeId());
     ContainerScope scope(instanceId_);
     UIEXT_LOGI("The session is created with bundle=%{public}s, ability=%{public}s,"
         " componentId=%{public}d, sessionType=%{public}d.", want.GetElement().GetBundleName().c_str(),
@@ -1017,6 +1018,7 @@ RectF SessionWrapperImpl::GetDisplayAreaWithWindowScene()
 
 void SessionWrapperImpl::NotifyForeground()
 {
+    ACE_UINODE_TRACE(GetFrameNodeId());
     ContainerScope scope(instanceId_);
     CHECK_NULL_VOID(session_);
     auto container = Platform::AceContainer::GetContainer(instanceId_);

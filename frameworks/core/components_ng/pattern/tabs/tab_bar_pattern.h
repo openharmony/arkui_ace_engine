@@ -616,6 +616,8 @@ public:
         return tabBarItemIds_.size();
     }
 
+    TabBarParamType GetTabBarItemType(int32_t tabBarItemId);
+
     bool IsNewTabBar(int32_t tabBarItemId) const
     {
         return std::find(tabBarItemIds_.begin(), tabBarItemIds_.end(), tabBarItemId) == tabBarItemIds_.end();
@@ -656,6 +658,11 @@ public:
     void SetOnTabBarItemsChangeEvent(OnTabBarItemsChangeEvent&& event)
     {
         onTabBarItemsChangeEvent_ = std::move(event);
+    }
+
+    void SetShouldPlayMaskAnimation(bool shouldPlayMaskAnimation)
+    {
+        shouldPlayMaskAnimation_ = shouldPlayMaskAnimation;
     }
 
 private:
@@ -894,6 +901,9 @@ private:
     Color tabBarItemDefaultBgColor_ = Color::TRANSPARENT;
     Color tabBarItemFocusBgColor_ = Color::TRANSPARENT;
     Color tabBarItemHoverColor_ = Color::TRANSPARENT;
+
+    bool shouldPlayMaskAnimation_ = true;
+
     ACE_DISALLOW_COPY_AND_MOVE(TabBarPattern);
 };
 } // namespace OHOS::Ace::NG

@@ -265,9 +265,9 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestVerticalAlignValidValues, TestSize
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
-        ASSERT_TRUE(peer->span->GetImageAttribute());
-        ASSERT_TRUE(peer->span->GetImageAttribute()->verticalAlign);
-        EXPECT_EQ(peer->span->GetImageAttribute()->verticalAlign, expected);
+        ASSERT_TRUE(peer->span->GetImageAttribute()) << "input value " << input;
+        ASSERT_TRUE(peer->span->GetImageAttribute()->verticalAlign) << "input value " << input;;
+        EXPECT_EQ(peer->span->GetImageAttribute()->verticalAlign, expected) << "input value " << input;
         accessor_->destroyPeer(peer);
     }
 }
@@ -286,8 +286,8 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestVerticalAlignInvalidValues, TestSi
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
-        ASSERT_TRUE(peer->span->GetImageAttribute());
-        ASSERT_FALSE(peer->span->GetImageAttribute()->verticalAlign);
+        ASSERT_TRUE(peer->span->GetImageAttribute()) << "input value " << input;
+        EXPECT_EQ(peer->span->GetImageAttribute()->verticalAlign, VerticalAlign::BOTTOM) << "input value " << input;
         accessor_->destroyPeer(peer);
     }
 }
@@ -306,9 +306,9 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitValidValues, TestSize.Lev
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
-        ASSERT_TRUE(peer->span->GetImageAttribute());
-        ASSERT_TRUE(peer->span->GetImageAttribute()->objectFit);
-        EXPECT_EQ(peer->span->GetImageAttribute()->objectFit, expected);
+        ASSERT_TRUE(peer->span->GetImageAttribute()) << "input value " << input;
+        ASSERT_TRUE(peer->span->GetImageAttribute()->objectFit) << "input value " << input;
+        EXPECT_EQ(peer->span->GetImageAttribute()->objectFit, expected) << "input value " << input;
         accessor_->destroyPeer(peer);
     }
 }
@@ -327,8 +327,8 @@ HWTEST_F(ImageAttachmentAccessorTest, ctorTestObjectFitInvalidValues, TestSize.L
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
-        ASSERT_TRUE(peer->span->GetImageAttribute());
-        ASSERT_FALSE(peer->span->GetImageAttribute()->objectFit);
+        ASSERT_TRUE(peer->span->GetImageAttribute()) << "input value " << input;
+        EXPECT_EQ(peer->span->GetImageAttribute()->objectFit, ImageFit::COVER) << "input value " << input;
         accessor_->destroyPeer(peer);
     }
 }
@@ -529,7 +529,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getVerticalAlignTestInvalidValues, TestSiz
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
-        EXPECT_EQ(Converter::GetOpt(accessor_->getVerticalAlign(peer)), std::nullopt);
+        EXPECT_EQ(Converter::GetOpt(accessor_->getVerticalAlign(peer)), ARK_IMAGE_SPAN_ALIGNMENT_BOTTOM);
         accessor_->destroyPeer(peer);
     }
 }
@@ -567,7 +567,7 @@ HWTEST_F(ImageAttachmentAccessorTest, getObjectFitTestInvalidValues, TestSize.Le
         auto inputValue = Converter::ArkUnion<Opt_AttachmentType,
             Ark_ImageAttachmentInterface>(content);
         auto peer = accessor_->construct(&inputValue);
-        EXPECT_EQ(Converter::GetOpt(accessor_->getObjectFit(peer)), std::nullopt);
+        EXPECT_EQ(Converter::GetOpt(accessor_->getObjectFit(peer)), ARK_IMAGE_FIT_COVER);
         accessor_->destroyPeer(peer);
     }
 }

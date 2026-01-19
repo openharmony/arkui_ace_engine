@@ -250,7 +250,8 @@
                         "header_files": [
                             "ui_content_service_interface.h",
                             "ui_content_proxy.h",
-                            "param_config.h"
+                            "param_config.h",
+                            "ui_content_proxy_error_code.h"
                         ]
                     },
                     "name": "//foundation/arkui/ace_engine/interfaces/inner_api/ui_session:ui_session"
@@ -279,8 +280,7 @@
             ],
             "test": [
                 "//foundation/arkui/ace_engine/test/unittest:unittest",
-                "//foundation/arkui/ace_engine/test/benchmark:benchmark",
-                "//foundation/arkui/ace_engine/frameworks/bridge/declarative_frontend/state_mgmt/test/unittest:statemgmt_ut_hap"
+                "//foundation/arkui/ace_engine/test/benchmark:benchmark"
             ]
         }
     }

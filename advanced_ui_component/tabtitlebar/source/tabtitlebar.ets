@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,7 @@ import common from '@ohos.app.ability.common'
 import { BusinessError } from '@kit.BasicServicesKit'
 import { hilog } from '@kit.PerformanceAnalysisKit'
 import { SymbolGlyphModifier, LengthMetrics } from '@kit.ArkUI'
+import { i18n } from '@kit.LocalizationKit';
 
 export interface TabTitleBarMenuItem {
   value: ResourceStr;
@@ -100,6 +101,11 @@ export struct TabTitleBar {
   private rightContext2D: CanvasRenderingContext2D = new CanvasRenderingContext2D(this.settings)
 
   @Builder
+  GradientMaskArray(context2D: CanvasRenderingContext2D, position: Array<number>) {
+    this.GradientMask(context2D, position[0], position[1], position[2], position[3]);
+  }
+
+  @Builder
   GradientMask(context2D: CanvasRenderingContext2D, x0: number, y0: number, x1: number, y1: number) {
     Column() {
       Canvas(context2D)
@@ -159,6 +165,17 @@ export struct TabTitleBar {
     })
   }
 
+  private isRTL(): boolean {
+    try {
+      return i18n?.isRTL(i18n?.System?.getSystemLanguage()) ?? false;
+    } catch (exception) {
+      const code: number = (exception as BusinessError)?.code;
+      const message: string = (exception as BusinessError)?.message;
+      hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to check RTL status, code: ${code}, message: ${message}`);
+      return false;
+    }
+  }
+
   build() {
     Column() {
       Flex({
@@ -192,11 +209,19 @@ export struct TabTitleBar {
               .listDirection(Axis.Horizontal)
               .scrollBar(BarState.Off)
             }
-            this.GradientMask(this.leftContext2D, 0, TabTitleBar.totalHeight / 2,
-              TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2)
+            this.GradientMaskArray(
+              this.isRTL() ? this.rightContext2D : this.leftContext2D,
+              this.isRTL() ?
+                [TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2, 0, TabTitleBar.totalHeight / 2] :
+                [0, TabTitleBar.totalHeight / 2, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2]
+            )
           }
-          this.GradientMask(this.rightContext2D, TabTitleBar.gradientMaskWidth,
-            TabTitleBar.totalHeight / 2, 0, TabTitleBar.totalHeight / 2)
+          this.GradientMaskArray(
+            this.isRTL() ? this.leftContext2D : this.rightContext2D,
+            this.isRTL() ?
+              [0, TabTitleBar.totalHeight / 2, TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2] :
+              [TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2, 0, TabTitleBar.totalHeight / 2]
+          )
         }
         .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
 
@@ -310,7 +335,7 @@ struct CollapsibleMenuSection {
     } catch (exception) {
       let code: number = (exception as BusinessError)?.code;
       let message: string = (exception as BusinessError)?.message;
-      hilog.error(0x3900, 'tabTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to decideFontScale,cause, code: ${code}, message: ${message}`);
     }
     this.menuItems.forEach((item, index) => {
       if (item.isEnabled && this.firstFocusableIndex === -1 &&
@@ -322,11 +347,11 @@ struct CollapsibleMenuSection {
   }
 
   decideFontScale(): number {
-      let uiContent: UIContext = this.getUIContext();
-      this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
-      if (!this.isFollowingSystemFontScale) {
-        return 1;
-      }
+    let uiContent: UIContext = this.getUIContext();
+    this.systemFontScale = (uiContent.getHostContext() as common.UIAbilityContext)?.config?.fontSizeScale ?? 1;
+    if (!this.isFollowingSystemFontScale) {
+      return 1;
+    }
     return Math.min(this.systemFontScale, this.maxFontScale);
   }
 
@@ -516,7 +541,7 @@ struct TabContentItem {
       } catch (err) {
         let code: number = (err as BusinessError)?.code;
         let message: string = (err as BusinessError)?.message;
-        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
+        hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
       return resourceString;
     }
@@ -748,7 +773,7 @@ struct ImageMenuItem {
       } catch (err) {
         let code: number = (err as BusinessError)?.code;
         let message: string = (err as BusinessError)?.message;
-        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
+        hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
       return resourceString;
     }
@@ -761,7 +786,7 @@ struct ImageMenuItem {
       } catch (err) {
         let code: number = (err as BusinessError)?.code;
         let message: string = (err as BusinessError)?.message;
-        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
+        hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
     } else if (this.item.accessibilityText) {
       return this.item.accessibilityText as string;
@@ -1002,7 +1027,7 @@ struct TabTitleBarDialog {
     } catch (exception) {
       let code: number = (exception as BusinessError)?.code;
       let message: string = (exception as BusinessError)?.message;
-      hilog.error(0x3900, 'tabTitleBar', `Faild to getMainWindowSync,cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to getMainWindowSync,cause, code: ${code}, message: ${message}`);
     }
   }
 }

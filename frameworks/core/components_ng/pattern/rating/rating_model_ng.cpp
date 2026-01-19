@@ -25,12 +25,42 @@ void RatingModelNG::Create(double rating, bool indicator)
     auto* stack = ViewStackProcessor::GetInstance();
     CHECK_NULL_VOID(stack);
     auto nodeId = stack->ClaimNodeId();
-    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::RATING_ETS_TAG, nodeId);
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", RATING_ETS_TAG, nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::RATING_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RatingPattern>(); });
+        RATING_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RatingPattern>(); });
     stack->Push(frameNode);
     RatingModelNG::SetRatingScore(rating);
     RatingModelNG::SetIndicator(indicator);
+}
+
+void RatingModelNG::CreateRating(double rating, bool indicator)
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    CHECK_NULL_VOID(stack);
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", RATING_ETS_TAG, nodeId);
+    auto frameNode = FrameNode::GetOrCreateFrameNode(
+        RATING_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RatingPattern>(); });
+    stack->Push(frameNode);
+    RatingModelNG::SetRatingScoreStatic(rating);
+    RatingModelNG::SetIndicatorStatic(indicator);
+}
+
+void RatingModelNG::SetRatingScoreStatic(double value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto paintProperty = frameNode->GetPaintPropertyPtr<RatingRenderProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    if (paintProperty->HasRatingScore() && !NearEqual(paintProperty->GetRatingScore().value(), value)) {
+        TAG_LOGI(AceLogTag::ACE_SELECT_COMPONENT, "rating set score %{public}f", value);
+    }
+    paintProperty->UpdateRatingScore(value);
+}
+
+void RatingModelNG::SetIndicatorStatic(bool value)
+{
+    ACE_UPDATE_LAYOUT_PROPERTY(RatingLayoutProperty, Indicator, value);
 }
 
 void RatingModelNG::SetRatingScore(double value)
@@ -105,10 +135,18 @@ void RatingModelNG::SetOnChangeEvent(RatingChangeEvent&& onChangeEvent)
     eventHub->SetOnChangeEvent(std::move(onChangeEvent));
 }
 
+void RatingModelNG::SetOnChangeEvent(FrameNode* frameNode, RatingChangeEvent&& onChangeEvent)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetOnChangeEvent(std::move(onChangeEvent));
+}
+
 RefPtr<FrameNode> RatingModelNG::CreateFrameNode(int32_t nodeId)
 {
     auto frameNode = FrameNode::GetOrCreateFrameNode(
-        V2::RATING_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RatingPattern>(); });
+        RATING_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<RatingPattern>(); });
     CHECK_NULL_RETURN(frameNode, nullptr);
     return frameNode;
 }

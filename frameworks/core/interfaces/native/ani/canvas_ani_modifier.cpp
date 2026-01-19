@@ -25,6 +25,7 @@
 #include "core/components_ng/pattern/canvas/canvas_renderer_type.h"
 #include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
 #include "core/interfaces/native/implementation/canvas_rendering_context2d_peer_impl.h"
+#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 #include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
 #include "core/interfaces/native/implementation/image_bitmap_peer_impl.h"
 #include "core/interfaces/native/implementation/image_data_peer.h"
@@ -223,7 +224,9 @@ void* GetDrawingCanvas(ArkUIDrawingRenderingContext peer)
 {
     auto peerImpl = reinterpret_cast<GeneratedModifier::DrawingRenderingContextPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, nullptr);
-    return peerImpl->GetCanvas();
+    auto drawingCanvasPeer = peerImpl->GetCanvas();
+    CHECK_NULL_RETURN(drawingCanvasPeer, nullptr);
+    return reinterpret_cast<void*>(drawingCanvasPeer->GetCanvas());
 }
 
 ani_int GetCanvasId(ArkUICanvasRenderingContext peer)

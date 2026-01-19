@@ -74,6 +74,7 @@ struct ScrollOptions {
     OHOS::Ace::Dimension xOffset;
     OHOS::Ace::Dimension yOffset;
     std::optional<ScrollAnimationParam> animation;
+    std::optional<bool> canOverScroll;
 };
 }
 
@@ -139,8 +140,15 @@ inline ScrollOptions Convert(const Ark_ScrollOptions& src)
         .xOffset = Converter::OptConvert<Dimension>(src.xOffset).value(),
         .yOffset = Converter::OptConvert<Dimension>(src.yOffset).value(),
         .animation = Converter::OptConvert<ScrollAnimationParam>(src.animation),
+        .canOverScroll = Converter::OptConvert<bool>(src.canOverScroll),
     };
     return scrollOptions;
+}
+
+void AssignArkValue(Ark_SizeResult& dst, const SizeF& src)
+{
+    dst.width = Converter::ArkValue<Ark_Number>(src.Width());
+    dst.height = Converter::ArkValue<Ark_Number>(src.Height());
 }
 } // namespace OHOS::Ace::NG::Converter
 
@@ -151,18 +159,17 @@ void ScrollerPeerImpl::TriggerScrollTo(Ark_VMContext vmContext, const Ark_Scroll
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollTo Controller not bound to component.");
-        ScrollerPeerImpl::ThrowControllerError(vmContext);
         return;
     }
     ScrollOptions options = Converter::Convert<ScrollOptions>(*optionsValue);
-
     double duration = 0.0;
     bool smooth = false;
     bool canOverScroll = false;
     RefPtr<Curve> curve = Curves::EASE;
-
-    if (options.animation) {
-        ScrollAnimationParam animationParam = options.animation.value();
+    ScrollAnimationParam animationParam;
+    auto hasAnimation = options.animation.has_value();
+    if (hasAnimation) {
+        animationParam = options.animation.value();
         if (auto animation = std::get_if<bool>(&animationParam)) {
             smooth = *animation;
         } else if (auto animationOptions = std::get_if<ScrollAnimationOptions>(&animationParam)) {
@@ -182,7 +189,19 @@ void ScrollerPeerImpl::TriggerScrollTo(Ark_VMContext vmContext, const Ark_Scroll
     }
     ContainerScope scope(instanceId_);
     auto direction = scrollController->GetScrollDirection();
+    if (direction == Axis::FREE &&
+        scrollController->FreeScrollTo({ .xOffset = options.xOffset,
+            .yOffset = options.yOffset,
+            .duration = static_cast<float>(
+                (hasAnimation && std::holds_alternative<bool>(animationParam)) ? DEFAULT_DURATION : duration),
+            .curve = curve,
+            .smooth = (hasAnimation && std::holds_alternative<bool>(animationParam) && smooth) ||
+                      (hasAnimation && std::holds_alternative<ScrollAnimationOptions>(animationParam)),
+            .canOverScroll = options.canOverScroll.value_or(false) })) {
+        return;
+    }
     auto position = direction == Axis::VERTICAL ? options.yOffset : options.xOffset;
+    scrollController->SetCanStayOverScroll(options.canOverScroll.value_or(false));
     scrollController->AnimateTo(position, static_cast<float>(duration), curve, smooth, canOverScroll);
 }
 
@@ -191,7 +210,6 @@ void ScrollerPeerImpl::TriggerScrollEdge(Ark_VMContext vmContext, Ark_Edge value
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollEdge Controller not bound to component.");
-        ScrollerPeerImpl::ThrowControllerError(vmContext);
         return;
     }
     std::optional<ScrollEdgeType> edgeType = Converter::OptConvert<ScrollEdgeType>(value);
@@ -234,7 +252,6 @@ void ScrollerPeerImpl::TriggerScrollPage0(Ark_VMContext vmContext, const Ark_Scr
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollPage0 Controller not bound to component.");
-        ScrollerPeerImpl::ThrowControllerError(vmContext);
         return;
     }
     ContainerScope scope(instanceId_);
@@ -261,7 +278,6 @@ Opt_OffsetResult ScrollerPeerImpl::TriggerCurrentOffset(Ark_VMContext vmContext)
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerCurrentOffset Controller not bound to component.");
-        ScrollerPeerImpl::ThrowControllerError(vmContext);
         return Converter::ArkValue<Opt_OffsetResult>();
     }
     ContainerScope scope(instanceId_);
@@ -290,7 +306,6 @@ void ScrollerPeerImpl::TriggerScrollToIndex(Ark_VMContext vmContext, const Ark_I
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollToIndex Controller not bound to component.");
-        ScrollerPeerImpl::ThrowControllerError(vmContext);
         return;
     }
 
@@ -314,7 +329,6 @@ void ScrollerPeerImpl::TriggerScrollBy(Ark_VMContext vmContext, const Dimension&
     auto scrollController = controllerWeak_.Upgrade();
     if (!scrollController) {
         LOGE("ARKOALA ScrollerPeerImpl::TriggerScrollBy Controller not bound to component.");
-        ScrollerPeerImpl::ThrowControllerError(vmContext);
         return;
     }
 
@@ -390,6 +404,18 @@ Ark_Int32 ScrollerPeerImpl::TriggerGetItemIndex(Ark_VMContext vmContext, const A
     }
 
     return Converter::ArkValue<Ark_Int32>(scrollController->GetItemIndex(deltaX, deltaY));
+}
+
+Ark_SizeResult ScrollerPeerImpl::TriggerContentSize(Ark_VMContext vmContext)
+{
+    auto scrollController = controllerWeak_.Upgrade();
+    if (!scrollController) {
+        LOGE("ARKOALA ScrollerPeerImpl::TriggerContentSize Controller not bound to component.");
+        ScrollerPeerImpl::ThrowControllerError(vmContext);
+        return Converter::ArkValue<Ark_SizeResult>(SizeF(-1, -1));
+    }
+    ContainerScope scope(instanceId_);
+    return Converter::ArkValue<Ark_SizeResult>(scrollController->ContentSize());
 }
 
 void ScrollerPeerImpl::ThrowParamsError(Ark_VMContext vmContext)

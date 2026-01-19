@@ -185,6 +185,7 @@ export class DividerModifier extends CommonMethodModifier implements DividerAttr
         {
             this._vertical_0_flag = AttributeUpdaterFlag.UPDATE
             this._vertical_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._vertical_0_flag = AttributeUpdaterFlag.SKIP
@@ -196,6 +197,7 @@ export class DividerModifier extends CommonMethodModifier implements DividerAttr
         {
             this._color_0_flag = AttributeUpdaterFlag.UPDATE
             this._color_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._color_0_flag = AttributeUpdaterFlag.SKIP
@@ -207,6 +209,7 @@ export class DividerModifier extends CommonMethodModifier implements DividerAttr
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -218,6 +221,7 @@ export class DividerModifier extends CommonMethodModifier implements DividerAttr
         {
             this._lineCap_0_flag = AttributeUpdaterFlag.UPDATE
             this._lineCap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._lineCap_0_flag = AttributeUpdaterFlag.SKIP

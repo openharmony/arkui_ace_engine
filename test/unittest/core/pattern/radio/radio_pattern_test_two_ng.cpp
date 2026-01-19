@@ -980,4 +980,33 @@ HWTEST_F(RadioPatternTwoTestNg, ReportOnChangeEvent001, TestSize.Level1)
     EXPECT_EQ(pattern->ReportOnChangeEvent(frameNode->GetId(), false, false), false);
     EXPECT_EQ(pattern->ReportOnChangeEvent(frameNode->GetId(), true, false), true);
 }
+
+/**
+ * @tc.name: UpdateGroupManager001
+ * @tc.desc: Test UpdateGroupManager
+ */
+HWTEST_F(RadioPatternTwoTestNg, UpdateGroupManager001, TestSize.Level1)
+{
+    auto stageNode = FrameNode::CreateFrameNode(V2::STAGE_ETS_TAG, 1, AIWriteAdapter::MakeRefPtr<StagePattern>());
+    ASSERT_NE(stageNode, nullptr);
+    auto pageNode = FrameNode::CreateFrameNode(V2::PAGE_ETS_TAG, 2, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(pageNode, nullptr);
+    auto pageEventHub = AceType::MakeRefPtr<NG::PageEventHub>();
+    ASSERT_NE(pageEventHub, nullptr);
+    pageNode->eventHub_ = pageEventHub;
+    pageNode->MountToParent(stageNode);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto stageManager = context->GetStageManager();
+    ASSERT_NE(stageManager, nullptr);
+    stageManager->stageNode_ = stageNode;
+    auto radioNode = FrameNode::CreateFrameNode(V2::RADIO_ETS_TAG, 3, AceType::MakeRefPtr<RadioPattern>());
+    ASSERT_NE(radioNode, nullptr);
+    auto pattern = radioNode->GetPattern<RadioPattern>();
+    ASSERT_NE(pattern, nullptr);
+    ASSERT_EQ(pattern->groupManager_.Upgrade(), nullptr);
+
+    pattern->UpdateGroupManager();
+    EXPECT_NE(pattern->groupManager_.Upgrade(), nullptr);
+}
 } // namespace OHOS::Ace::NG

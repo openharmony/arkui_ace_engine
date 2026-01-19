@@ -57,11 +57,11 @@ bool CheckNeedMeasure(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckNeedLayout(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag);
+ACE_FORCE_EXPORT bool CheckMeasureFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckForceParentMeasureFlag(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag);
+ACE_FORCE_EXPORT bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckMeasureSelfFlag(PropertyChangeFlag propertyChangeFlag);
 
@@ -71,7 +71,7 @@ bool CheckMeasureSelfAndChildFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckUpdateByChildRequest(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckNoChanged(PropertyChangeFlag propertyChangeFlag);
+ACE_FORCE_EXPORT bool CheckNoChanged(PropertyChangeFlag propertyChangeFlag);
 
 // For XXXProperty Class
 #define ACE_DEFINE_PROPERTY_GROUP(group, type)              \

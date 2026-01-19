@@ -19,7 +19,7 @@
 #include "test/unittest/core/pattern/test_ng.h"
 
 #include "adapter/ohos/entrance/picker/picker_haptic_factory.h"
-#include "core/components/picker/picker_theme.h"
+#include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components_ng/pattern/button/button_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"

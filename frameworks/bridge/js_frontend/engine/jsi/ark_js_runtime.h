@@ -98,7 +98,7 @@ public:
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
     void HandleUncaughtExceptionWithoutNativeEngine(panda::TryCatch& trycatch,
         const std::function<void(const std::string&, int32_t)>& errorCallback = nullptr) override;
-    bool HasPendingException() override;
+    ACE_FORCE_EXPORT bool HasPendingException() override;
     void ExecutePendingJob() override;
     void DumpHeapSnapshot(bool isPrivate) override;
     void NotifyUIIdle() override;
@@ -116,15 +116,9 @@ public:
         return GetThreadVm() ? GetThreadVm() : vm_;
     }
 
-    const EcmaVM* GetThreadVm() const
-    {
-        return threadVm_;
-    }
+    ACE_FORCE_EXPORT const EcmaVM* GetThreadVm() const;
 
-    void SetThreadVm(EcmaVM* vm)
-    {
-        threadVm_ = vm;
-    }
+    void SetThreadVm(EcmaVM* vm);
 
     void SetAssetPath(const std::string& assetPath)
     {

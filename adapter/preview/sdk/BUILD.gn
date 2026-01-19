@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2023 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -109,7 +109,8 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend:shape",
       "$ace_root/frameworks/bridge/declarative_frontend:statemanagement",
       "$ace_root/frameworks/bridge/declarative_frontend:uicontext",
-      "$ace_root/frameworks/bridge/declarative_frontend:x_node",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_node:x_node",
+      ":copy_component_model_abc_library",
     ]
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
@@ -126,6 +127,62 @@ if (is_ohos_standard_system) {
     outputs = [ target_out_dir +
                 "/previewer/common/bin/module/arkui/{{source_file_part}}" ]
     module_source_dir = target_out_dir + "/previewer/common/bin/module/arkui"
+    module_install_name = ""
+  }
+
+  ohos_copy("copy_component_model_abc_library") {
+    deps = [
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:flowitem",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:counter",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:gauge",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:hyperlink",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkbox",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkboxgroup",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:rating",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:waterflow",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:columnsplit",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:rowsplit",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:menu",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:menuitem",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:menuitemgroup",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:sidebarcontainer",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:marquee",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:stepper",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:stepperitem",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:radio",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:slider",
+    ]
+    out_path = get_label_info(
+            "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
+            "root_out_dir")
+    sources = [
+      "${out_path}/arkui/ace_engine/arkflowitem.abc",
+      "${out_path}/arkui/ace_engine/arkcounter.abc",
+      "${out_path}/arkui/ace_engine/arkgauge.abc",
+      "${out_path}/arkui/ace_engine/arkhyperlink.abc",
+      "${out_path}/arkui/ace_engine/arkcheckbox.abc",
+      "${out_path}/arkui/ace_engine/arkcheckboxgroup.abc",
+      "${out_path}/arkui/ace_engine/arkrating.abc",
+      "${out_path}/arkui/ace_engine/arkwaterflow.abc",
+      "${out_path}/arkui/ace_engine/arkcolumnsplit.abc",
+      "${out_path}/arkui/ace_engine/arkrowsplit.abc",
+      "${out_path}/arkui/ace_engine/arkmenu.abc",
+      "${out_path}/arkui/ace_engine/arkmenuitem.abc",
+      "${out_path}/arkui/ace_engine/arkmenuitemgroup.abc",
+      "${out_path}/arkui/ace_engine/arksidebarcontainer.abc",
+      "${out_path}/arkui/ace_engine/arkmarquee.abc",
+      "${out_path}/arkui/ace_engine/arkstepper.abc",
+      "${out_path}/arkui/ace_engine/arkstepperitem.abc",
+      "${out_path}/arkui/ace_engine/arkradio.abc",
+      "${out_path}/arkui/ace_engine/arkslider.abc",
+    ]
+
+    # Output path description: 
+    # "previewer/common/bin/module" is equivalent to the basic path of globalThis.requireNapi().
+    # globalThis.requireNapi("arkui.components").
+    outputs = [ target_out_dir +
+                "/previewer/common/bin/module/arkui/components/{{source_file_part}}" ]
+    module_source_dir = target_out_dir + "/previewer/common/bin/module/arkui/components"
     module_install_name = ""
   }
 

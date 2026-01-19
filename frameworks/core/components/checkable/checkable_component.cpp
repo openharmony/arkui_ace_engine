@@ -15,17 +15,29 @@
 
 #include "core/components/checkable/checkable_component.h"
 
+#include "compatible/components/switch/modifier/switch_modifier.h"
+
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/checkable/checkable_element.h"
 #include "core/components/checkable/render_checkbox.h"
 #include "core/components/checkable/render_radio.h"
-#include "core/components/checkable/render_switch.h"
 
 namespace OHOS::Ace {
 namespace {
-
-constexpr bool DEFAULT_SWITCH_VALUE = false;
 constexpr bool DEFAULT_CHECKBOX_VALUE = false;
 
+const ArkUISwitchModifierCompatible* GetSwitchInnerModifier()
+{
+    static const ArkUISwitchModifierCompatible* switchModifier_ = nullptr;
+    if (switchModifier_) {
+        return switchModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("switch");
+    if (loader) {
+        switchModifier_ = reinterpret_cast<const ArkUISwitchModifierCompatible*>(loader->GetCustomModifier());
+    }
+    return switchModifier_;
+}
 } // namespace
 
 CheckableComponent::CheckableComponent(CheckableType type, const RefPtr<CheckableTheme>& theme) : checkableType_(type)
@@ -64,7 +76,11 @@ RefPtr<RenderNode> CheckableComponent::CreateRenderNode()
     if (checkableType_ == CheckableType::CHECKBOX) {
         return RenderCheckbox::Create();
     } else if (checkableType_ == CheckableType::SWITCH) {
-        return RenderSwitch::Create();
+        auto* modifier = GetSwitchInnerModifier();
+        if (modifier) {
+            return modifier->createRenderNode ? modifier->createRenderNode() : nullptr;
+        }
+        return nullptr;
     } else if (checkableType_ == CheckableType::RADIO) {
         return RenderRadio::Create();
     } else {
@@ -84,13 +100,5 @@ std::unordered_map<std::string, RefPtr<CheckboxComponent>> CheckboxComponent::ch
 CheckboxComponent::CheckboxComponent(const RefPtr<CheckboxTheme>& theme)
     : CheckableComponent(CheckableType::CHECKBOX, theme), CheckableValue<bool>(DEFAULT_CHECKBOX_VALUE)
 {}
-
-SwitchComponent::SwitchComponent(const RefPtr<SwitchTheme>& theme)
-    : CheckableComponent(CheckableType::SWITCH, theme), CheckableValue<bool>(DEFAULT_SWITCH_VALUE)
-{
-    if (theme) {
-        backgroundSolid_ = theme->IsBackgroundSolid();
-    }
-}
 
 } // namespace OHOS::Ace

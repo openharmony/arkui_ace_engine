@@ -143,6 +143,34 @@ void SelectPattern::OnAttachToMainTree()
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree);
 }
 
+void SelectPattern::UpdateMenuBorderStyle(const RefPtr<FrameNode>& menu)
+{
+    CHECK_NULL_VOID(menu);
+    auto renderContext = menu->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    auto context = menu->GetContext();
+    CHECK_NULL_VOID(context);
+    auto theme = context->GetTheme<SelectTheme>(menu->GetThemeScopeId());
+    CHECK_NULL_VOID(theme);
+    if (!theme->GetMenuItemNeedFocus()) {
+        return;
+    }
+    if (!renderContext->HasBorderColor()) {
+        BorderColorProperty borderColor;
+        borderColor.SetColor(theme->GetMenuNormalBorderColor());
+        renderContext->UpdateBorderColor(borderColor);
+    }
+    if (!renderContext->HasBorderWidth()) {
+        auto menuLayoutProperty = menu->GetLayoutProperty<MenuLayoutProperty>();
+        CHECK_NULL_VOID(menuLayoutProperty);
+        auto menuBorderWidth = theme->GetMenuNormalBorderWidth();
+        BorderWidthProperty borderWidth;
+        borderWidth.SetBorderWidth(menuBorderWidth);
+        menuLayoutProperty->UpdateBorderWidth(borderWidth);
+        renderContext->UpdateBorderWidth(borderWidth);
+    }
+}
+
 void SelectPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -157,6 +185,7 @@ void SelectPattern::OnModifyDone()
     }
     auto menu = GetMenuNode();
     CHECK_NULL_VOID(menu);
+    UpdateMenuBorderStyle(menu);
     auto menuPattern = menu->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     menuPattern->UpdateSelectIndex(selected_);
@@ -2049,16 +2078,12 @@ void SelectPattern::OnColorConfigurationUpdate()
         renderContext->UpdateBackBlurStyle(renderContext->GetBackBlurStyle());
     } else {
         renderContext->UpdateBackgroundColor(selectTheme->GetBackgroundColor());
-        if (!SystemProperties::ConfigChangePerform()) {
-            SetOptionBgColor(selectTheme->GetBackgroundColor());
-        }
     }
 
     UpdateMenuChildColorConfiguration(menuNode, pipeline->GetConfigurationChange());
     auto optionNode = menuPattern->GetOptions();
     for (auto child : optionNode) {
         auto optionsPattern = child->GetPattern<MenuItemPattern>();
-        optionsPattern->SetFontColor(selectTheme->GetFontColor());
         auto selectLayoutProps = host->GetLayoutProperty<SelectLayoutProperty>();
         if (selectLayoutProps && selectLayoutProps->GetShowDefaultSelectedIconValue(false)) {
             optionsPattern->UpdateCheckMarkColor(selectTheme->GetCheckMarkColor());
@@ -2378,7 +2403,8 @@ bool SelectPattern::ReportOnSelectEvent(int32_t index, const std::string& value)
     CHECK_NULL_RETURN(result, false);
     TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "fire onSelect event:%{public}s, nodeId:%{public}d",
         result->ToString().c_str(), nodeId);
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", std::move(result));
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(nodeId, "event", std::move(result),
+        ComponentEventType::COMPONENT_EVENT_SELECT);
     return true;
 }
 

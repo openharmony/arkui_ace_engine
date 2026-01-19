@@ -1830,6 +1830,38 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: CheckRecycle002
+ * @tc.desc: Test ListItemGroupLayoutAlgorithm CheckRecycle
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create List and ListItemGroup, set TextDirection to RTL and set ListDirection to HORIZONTAL.
+     */
+    ListModelNG model = CreateList();
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    auto listItemGroup = ViewStackProcessor::GetInstance()->GetMainElementNode();
+    auto listItemGroupFrameNode = AceType::DynamicCast<FrameNode>(listItemGroup);
+    auto layoutAlgorithmWrapper = listItemGroupFrameNode->GetLayoutAlgorithm();
+    auto layoutAlgorithm = layoutAlgorithmWrapper->GetLayoutAlgorithm();
+    auto listItemGroupLayoutAlgorithm = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithm);
+    CreateListItems(20, V2::ListItemStyle::NONE);
+    CreateDone();
+    layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+    auto horizontal = 1;
+    ListModelNG::SetListDirection(AceType::RawPtr(frameNode_), horizontal);
+    
+    /**
+     * @tc.steps: step2. FlushUITasks
+     * @tc.expected: The size of cachedItemPosition is 0.
+     */
+    FlushUITasks();
+    auto cachedItemPosition = listItemGroupLayoutAlgorithm->GetCachedItemPosition();
+    EXPECT_TRUE(cachedItemPosition.empty());
+}
+
+/**
  * @tc.name: TestWhetherCacheItemLayouted
  * @tc.desc: Test whether the cached item is layouted.
  * @tc.type: FUNC
@@ -1948,6 +1980,32 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, TestGroupCacheRange, TestSize.Level1)
     EXPECT_EQ(groupPattern->cachedItemPosition_.count(0), 1);
     EXPECT_EQ(groupPattern->cachedItemPosition_.count(1), 1);
     EXPECT_EQ(groupPattern->cachedItemPosition_.count(7), 1);
+}
+
+/**
+ * @tc.name: TestGroupCacheRangeInBusy
+ * @tc.desc: Test group cached node
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListItemGroupAlgorithmTestNg, TestGroupCacheRangeInBusy, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetCachedCount(1);
+    CreateListItemGroup(V2::ListItemGroupStyle::NONE);
+    CreateItemsInLazyForEach(10, 100.0f, nullptr); /* 10: item count */
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. SetCacheRange
+     * @tc.expected: 1 ListItem cached.
+     */
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushUITasks(frameNode_);
+    ASSERT_NE(listPattern->GetPredictLayoutParamV2(), std::nullopt);
+    auto param = listPattern->GetPredictLayoutParamV2().value();
+    for (auto it : param.items) {
+        EXPECT_EQ(it.forceCache, true);
+    }
 }
 
 /**

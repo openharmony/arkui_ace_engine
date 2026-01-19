@@ -15,7 +15,30 @@
 
 #include "test/mock/core/animation/mock_animation_manager.h"
 
+namespace OHOS::Ace {
+SINGLETON_INSTANCE_IMPL(NG::MockAnimationManager);
+}
+
 namespace OHOS::Ace::NG {
+
+void MockAnimationManager::Enable(bool value)
+{
+    GetInstance().enabled_ = value;
+}
+bool MockAnimationManager::Enabled()
+{
+    return GetInstance().enabled_;
+}
+
+MockAnimationManager::Version MockAnimationManager::GetVersion()
+{
+    return GetInstance().runningVersion_;
+}
+void MockAnimationManager::SetVersion(enum MockAnimationManager::Version value)
+{
+    GetInstance().runningVersion_ = value;
+}
+
 void MockAnimationManager::CancelAnimations()
 {
     const auto props = std::move(activeProps_);

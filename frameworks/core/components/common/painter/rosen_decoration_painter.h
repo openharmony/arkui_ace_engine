@@ -53,12 +53,17 @@ class Size;
 class RosenDecorationPainter : public virtual NG::SkiaDecorationPainter {
     DECLARE_ACE_TYPE(RosenDecorationPainter, NG::SkiaDecorationPainter);
 #else
+#ifdef NG_BUILD
 class RosenDecorationPainter : public virtual NG::DrawingDecorationPainter {
     DECLARE_ACE_TYPE(RosenDecorationPainter, NG::DrawingDecorationPainter);
+#else
+class ACE_FORCE_EXPORT RosenDecorationPainter : public virtual NG::DrawingDecorationPainter {
+    DECLARE_ACE_TYPE(RosenDecorationPainter, NG::DrawingDecorationPainter);
+#endif
 #endif
 
 public:
-    RosenDecorationPainter(
+    ACE_FORCE_EXPORT RosenDecorationPainter(
         const RefPtr<Decoration>& decoration, const Rect& paintRect, const Size& paintSize, double dipScale);
     ~RosenDecorationPainter() override = default;
 
@@ -87,12 +92,12 @@ public:
 
     void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context, const sk_sp<SkImage>& image);
 
-    void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context);
+    ACE_FORCE_EXPORT void PaintDecoration(const Offset& offset, SkCanvas* canvas, RenderContext& context);
 
     static void PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize, const Offset& position,
         SkCanvas* canvas, const sk_sp<SkImage>& image, double dipScale);
 #else
-    static void PaintShadow(const RSPath& path, const Shadow& shadow,
+    ACE_FORCE_EXPORT static void PaintShadow(const RSPath& path, const Shadow& shadow,
         RSCanvas* canvas, const RSBrush* brush = nullptr, const RSPen* pen = nullptr);
     static void PaintShadow(const RSPath& path, const Shadow& shadow,
         const std::shared_ptr<RSNode>& rsNode);
@@ -112,7 +117,7 @@ public:
         const float& hueRotate, const Color& color);
     void PaintDecoration(const Offset& offset, RSCanvas* canvas, RenderContext& context,
         const std::shared_ptr<RSImage>& image);
-    void PaintDecoration(const Offset& offset, RSCanvas* canvas, RenderContext& context);
+    ACE_FORCE_EXPORT void PaintDecoration(const Offset& offset, RSCanvas* canvas, RenderContext& context);
     static void PaintBorderImage(RefPtr<OHOS::Ace::Decoration>& decoration, Size& paintSize, const Offset& position,
         RSCanvas* canvas, const std::shared_ptr<RSImage>& image, double dipScale);
 #endif
@@ -165,9 +170,9 @@ public:
     }
 
 #ifndef USE_ROSEN_DRAWING
-    SkRRect GetBoxRRect(const Offset& offset, const Border& border, double shrinkFactor, bool isRound);
+    ACE_FORCE_EXPORT SkRRect GetBoxRRect(const Offset& offset, const Border& border, double shrinkFactor, bool isRound);
 #else
-    RSRoundRect GetBoxRRect(const Offset& offset, const Border& border,
+    ACE_FORCE_EXPORT RSRoundRect GetBoxRRect(const Offset& offset, const Border& border,
         double shrinkFactor, bool isRound);
 #endif
 

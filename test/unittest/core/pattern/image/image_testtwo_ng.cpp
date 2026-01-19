@@ -339,6 +339,7 @@ HWTEST_F(ImageTestTwoNg, ImagePatternGetSrcTypeToString001, TestSize.Level0)
     EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::RESOURCE_ID).c_str(), "resourceId");
     EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::PIXMAP).c_str(), "pixmap");
     EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::ASTC).c_str(), "astc");
+    EXPECT_STREQ(imagePattern->GetSrcTypeToString(SrcType::STREAM).c_str(), "stream");
 }
 
 /**

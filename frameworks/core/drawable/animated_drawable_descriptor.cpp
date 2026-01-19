@@ -114,7 +114,7 @@ RefPtr<ControlledAnimator> AnimatedDrawableDescriptor::GetControlledAnimator(con
     if (animators_.size() == 1) {
         return animators_.begin()->second;
     }
-    
+
     auto it = animators_.find(id);
     if (it == animators_.end()) {
         return nullptr;
@@ -164,7 +164,7 @@ int32_t AnimatedDrawableDescriptor::GetIterations() const
 
 int32_t AnimatedDrawableDescriptor::GetTotalDuration()
 {
-    if (totalDuration_ > 0) {
+    if (totalDuration_ >= 0 || isSetDurations_) {
         return totalDuration_;
     }
     if (pixelMapList_.size() > 0) {
@@ -181,7 +181,7 @@ std::vector<int32_t> AnimatedDrawableDescriptor::GetDurations()
     if (userDurations_.size() > 0) {
         return userDurations_;
     }
-    if (totalDuration_ > 0) {
+    if (totalDuration_ >= 0) {
         std::vector<int32_t> result;
         result.resize(GetFrameCount(), totalDuration_ / GetFrameCount());
         return result;
@@ -206,7 +206,7 @@ void AnimatedDrawableDescriptor::SetDurations(const std::vector<int32_t>& durati
 
 void AnimatedDrawableDescriptor::SetTotalDuration(const int32_t totalDuration)
 {
-    if (isSetDurations_ || totalDuration <= 0) {
+    if (isSetDurations_ || totalDuration < 0) {
         return;
     }
     totalDuration_ = totalDuration;
@@ -259,6 +259,15 @@ void AnimatedDrawableDescriptor::CreateAnimator(int32_t nodeId)
             durations[index] / static_cast<float>(totalDuration), static_cast<int32_t>(index));
     }
     animator->AddInterpolator(pictureAnimation);
+    animator->AddStopListener([weak = WeakClaim(this), nodeId] {
+        NG::ImageUtils::PostToBg(
+            [weak, nodeId]() {
+                auto drawable = weak.Upgrade();
+                CHECK_NULL_VOID(drawable);
+                drawable->FlushUpdateCallbacksByNodeId(0, nodeId);
+            },
+            "FlushOnFinishEventByNodeId");
+    });
     animator->AddListener([weak = WeakClaim(this), nodeId](int32_t index) {
         NG::ImageUtils::PostToBg(
             [weak, nodeId, index]() {

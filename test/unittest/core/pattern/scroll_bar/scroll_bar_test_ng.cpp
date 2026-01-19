@@ -240,8 +240,8 @@ HWTEST_F(ScrollBarTestNg, ScrollBarProxy001, TestSize.Level1)
     ASSERT_EQ(scrollBarProxy->scrollBars_.size(), 0);
     scrollBarProxy->RegisterScrollableNode(nodeInfo);
     scrollBarProxy->RegisterScrollBar(nullptr);
-    scrollBarProxy->NotifyScrollableNode(0, 1, nullptr);
-    scrollBarProxy->NotifyScrollBarNode(0, 1);
+    scrollBarProxy->NotifyScrollableNode(0, 1, nullptr, Axis::VERTICAL);
+    scrollBarProxy->NotifyScrollBarNode(0, 1, Axis::VERTICAL);
     scrollBarProxy->NotifyScrollStart();
     scrollBarProxy->NotifyScrollStop();
     scrollBarProxy->NotifyScrollBar(SCROLL_FROM_NONE);
@@ -1353,5 +1353,45 @@ HWTEST_F(ScrollBarTestNg, ResetScrollBarColorTest001, TestSize.Level1)
     ScrollBarModelNG::ResetScrollBarColor(AceType::RawPtr(frameNode_));
     scrollBarColor = paintProperty->GetScrollBarColor();
     EXPECT_EQ(scrollBarColor, std::nullopt);
+}
+
+/**
+ * @tc.name: IsFreeScrollTest001
+ * @tc.desc: Test IsFreeScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, IsFreeScrollTest001, TestSize.Level1)
+{
+    ScrollModelNG model;
+    model.Create();
+    model.SetAxis(Axis::FREE);
+    scrollNode_ = CreateMainFrameNode();
+    CHECK_NULL_VOID(scrollNode_);
+    scrollPattern_ = scrollNode_->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern_);
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    CHECK_NULL_VOID(scrollBarProxy);
+
+    EXPECT_TRUE(scrollBarProxy->IsFreeScroll());
+}
+
+/**
+ * @tc.name: IsFreeScrollTest002
+ * @tc.desc: Test IsFreeScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarTestNg, IsFreeScrollTest002, TestSize.Level1)
+{
+    ScrollModelNG model;
+    model.Create();
+    model.SetAxis(Axis::HORIZONTAL);
+    scrollNode_ = CreateMainFrameNode();
+    CHECK_NULL_VOID(scrollNode_);
+    scrollPattern_ = scrollNode_->GetPattern<ScrollPattern>();
+    CHECK_NULL_VOID(scrollPattern_);
+    auto scrollBarProxy = scrollPattern_->GetScrollBarProxy();
+    CHECK_NULL_VOID(scrollBarProxy);
+
+    EXPECT_FALSE(scrollBarProxy->IsFreeScroll());
 }
 } // namespace OHOS::Ace::NG

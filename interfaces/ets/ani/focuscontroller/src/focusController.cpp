@@ -26,47 +26,84 @@
 #include "frameworks/base/error/error_code.h"
 
 namespace {
-static void AniThrow(ani_env* env, const std::string& errMsg, int32_t errorCode)
+ani_object WrapStsError(ani_env* env, const std::string& msg)
+{
+    ani_class cls {};
+    ani_method method {};
+    ani_object obj = nullptr;
+    ani_status status = ANI_ERROR;
+    if (env == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "null env");
+        return nullptr;
+    }
+
+    ani_string aniMsg = nullptr;
+    if ((status = env->String_NewUTF8(msg.c_str(), msg.size(), &aniMsg)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "String_NewUTF8 failed %{public}d", status);
+        return nullptr;
+    }
+
+    ani_ref undefRef;
+    if ((status = env->GetUndefined(&undefRef)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "GetUndefined failed %{public}d", status);
+        return nullptr;
+    }
+
+    if ((status = env->FindClass("escompat.Error", &cls)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "FindClass failed %{public}d", status);
+        return nullptr;
+    }
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &method)) !=
+        ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Class_FindMethod failed %{public}d", status);
+        return nullptr;
+    }
+
+    if ((status = env->Object_New(cls, method, &obj, aniMsg, undefRef)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Object_New failed %{public}d", status);
+        return nullptr;
+    }
+    return obj;
+}
+static ani_ref CreateStsError(ani_env* env, ani_int code, const std::string& msg)
+{
+    ani_class cls;
+    ani_status status = ANI_OK;
+    if ((status = env->FindClass("@ohos.base.BusinessError", &cls)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "FindClass failed %{public}d", status);
+        return nullptr;
+    }
+    ani_method ctor;
+    if ((status = env->Class_FindMethod(cls, "<ctor>", "iC{escompat.Error}:", &ctor)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Class_FindMethod failed %{public}d", status);
+        return nullptr;
+    }
+    ani_object error = WrapStsError(env, msg);
+    if (error == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "error nulll");
+        return nullptr;
+    }
+    ani_object obj = nullptr;
+    if ((status = env->Object_New(cls, ctor, &obj, code, error)) != ANI_OK) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Object_New failed %{public}d", status);
+    }
+    return reinterpret_cast<ani_ref>(obj);
+}
+
+void AniThrow(ani_env* env, const std::string& msg, ani_int code)
 {
     CHECK_NULL_VOID(env);
-    ani_class errCls;
-    if (ANI_OK != env->FindClass("L@ohos/base/BusinessError", &errCls)) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "FindClass BusinessError failed.");
-        return;
-    }
-    ani_method errCtor {};
-    if (ANI_OK != env->Class_FindMethod(errCls, "<ctor>", "C{std.core.String}C{escompat.ErrorOptions}:", &errCtor)) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "FindMethod escompat.Error failed.");
-        return;
-    }
-    ani_string resultString {};
-    if (ANI_OK != env->String_NewUTF8(errMsg.c_str(), errMsg.size(), &resultString)) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Convert string to ani string failed.");
-        return;
-    }
-    ani_ref undefinedRef {};
-    if (ANI_OK != env->GetUndefined(&undefinedRef)) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Get undefined failed.");
-        return;
-    }
-    ani_object errObj {};
-    if (ANI_OK != env->Object_New(errCls, errCtor, &errObj, resultString, undefinedRef)) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Create ani error object failed.");
-        return;
-    }
-    if (ANI_OK != env->Object_SetFieldByName_Int(errObj, "code", static_cast<ani_int>(errorCode))) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Set error code failed.");
-        return;
-    }
-    if (ANI_OK != env->Object_SetFieldByName_Ref(errObj, "message", resultString)) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Set error message failed.");
+    auto errObj = CreateStsError(env, code, msg);
+    if (errObj == nullptr) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS,  "Get error object failed!");
         return;
     }
     if (ANI_OK != env->ThrowError(static_cast<ani_error>(errObj))) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Throw ani error object failed.");
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_FOCUS, "Throw ani error object failed!");
         return;
     }
 }
+
 std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
 {
     ani_size strSize;
@@ -92,7 +129,7 @@ static bool GetBooleanValue(ani_env* env, ani_object object, bool& value)
         return false;
     }
     ani_boolean aniValue;
-    if (ANI_OK != env->Object_CallMethodByName_Boolean(object, "unboxed", ":z", &aniValue)) {
+    if (ANI_OK != env->Object_CallMethodByName_Boolean(object, "toBoolean", ":z", &aniValue)) {
         return false;
     }
     value = static_cast<bool>(aniValue);

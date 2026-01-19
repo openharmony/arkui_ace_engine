@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_SWIPER_SWIPER_PATTERN_H
 
+#include "interfaces/inner_api/ui_session/param_config.h"
 #include "core/components/swiper/swiper_controller.h"
 #include "core/components/swiper/swiper_indicator_theme.h"
 #include "core/components_ng/base/frame_scene_status.h"
@@ -52,6 +53,13 @@ enum class MoveStep {
     NONE
 };
 
+enum class SwiperCommand {
+    INVALID = 0,
+    FORWARD,
+    BACKWARD,
+    INDEX
+};
+
 using SwiperHoverFlag = uint32_t;
 constexpr SwiperHoverFlag HOVER_NONE = 0;
 constexpr SwiperHoverFlag HOVER_SWIPER = 1;
@@ -70,7 +78,7 @@ public:
     using CustomContentTransitionPtr = std::shared_ptr<std::function<TabContentAnimatedTransition(int32_t, int32_t)>>;
     using PanEventFunction = std::function<void(const GestureEvent& info)>;
 
-    SwiperPattern();
+    ACE_FORCE_EXPORT SwiperPattern();
     ~SwiperPattern() override = default;
 
     bool IsAtomicNode() const override
@@ -123,6 +131,10 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void FromJson(const std::unique_ptr<JsonValue>& json) override;
+    static SwiperCommand ParseCommand(const std::string& command);
+    static int32_t ParseIndexFromCommand(const std::string& command);
+    void ReportComponentChangeEvent(bool result, SwiperCommand type);
+    int32_t OnInjectionEvent(const std::string& command) override;
 
     virtual std::string GetArcDotIndicatorStyle() const { return ""; }
     // ArcSwiper will implement this interface in order to set transitionAnimation disable
@@ -227,7 +239,7 @@ public:
     void CheckMarkDirtyNodeForRenderIndicator(
         float additionalOffset = 0.0f, std::optional<int32_t> nextIndex = std::nullopt);
 
-    int32_t TotalCount() const;
+    ACE_FORCE_EXPORT int32_t TotalCount() const;
 
     Axis GetDirection() const;
 
@@ -535,6 +547,9 @@ public:
     void DumpInfo() override;
     void DumpAdvanceInfo() override;
     void DumpAdvanceInfo(std::unique_ptr<JsonValue>& json) override;
+    void DumpSimplifyInfoOnlyForParamConfig(std::shared_ptr<JsonValue>& json,
+        ParamConfig config = ParamConfig()) override;
+    const char* GetScrollAbility();
     void BuildOffsetInfo(std::unique_ptr<JsonValue>& json);
     void BuildAxisInfo(std::unique_ptr<JsonValue>& json);
     void BuildItemPositionInfo(std::unique_ptr<JsonValue>& json);
@@ -683,7 +698,7 @@ public:
     }
     void UpdateNodeRate();
 
-    virtual RefPtr<FrameNode> GetKeyFrameNodeWhenContentChanged() override;
+    std::list<RefPtr<FrameNode>> GetKeyFrameNodeWhenContentChanged() override;
 #ifdef SUPPORT_DIGITAL_CROWN
     virtual void SetDigitalCrownSensitivity(CrownSensitivity sensitivity) {}
     virtual void InitOnCrownEventInternal(const RefPtr<FocusHub>& focusHub) {}
@@ -1085,7 +1100,6 @@ private:
     std::pair<int32_t, SwiperItemInfo> GetLastItemInfoInVisibleArea() const;
     std::pair<int32_t, SwiperItemInfo> GetSecondItemInfoInVisibleArea() const;
     void OnIndexChange(bool isInLayout = false);
-    bool IsOutOfHotRegion(const PointF& dragPoint) const;
     void SetDigitStartAndEndProperty(const RefPtr<FrameNode>& indicatorNode);
     void UpdatePaintProperty(const RefPtr<FrameNode>& indicatorNode);
     void PostTranslateTask(uint32_t delayTime);
@@ -1352,7 +1366,7 @@ private:
     void PropertyPrefMonitor(bool isBeginPerf);
     friend class SwiperHelper;
     void LoadCompleteManagerStartCollect();
-    void LoadCompleteManagerStopCollect();
+    void LoadCompleteManagerStopCollect(std::optional<int32_t> jumpIndex = std::nullopt);
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;
@@ -1510,6 +1524,7 @@ private:
     std::set<int32_t> indexsInAnimation_;
     std::set<int32_t> needUnmountIndexs_;
     std::optional<int32_t> customAnimationToIndex_;
+    std::optional<int32_t> customAnimationPrevIndex_;
     RefPtr<TabContentTransitionProxy> currentProxyInAnimation_;
     PaddingPropertyF tabsPaddingAndBorder_;
     std::map<int32_t, bool> indexCanChangeMap_;

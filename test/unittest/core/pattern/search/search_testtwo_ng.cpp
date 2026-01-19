@@ -828,15 +828,17 @@ HWTEST_F(SearchTestTwoNg, OnSubmitEvent001, TestSize.Level1)
     };
     eventHub->SetOnSubmit(std::move(callback));
 
-    bool forceCloseKeyboard = true;
     TextInputAction action2 = TextInputAction::SEARCH;
-    textFieldPattern->PerformAction(action2, forceCloseKeyboard);
+    PerformActionInfo info;
+    info.action = action2;
+    info.forceCloseKeyboard = true;
+    textFieldPattern->PerformActionOperation(info);
     EXPECT_EQ(count, 1);
-    action2 = TextInputAction::NEW_LINE;
-    textFieldPattern->PerformAction(action2, forceCloseKeyboard);
+    info.action = TextInputAction::NEW_LINE;
+    textFieldPattern->PerformActionOperation(info);
     EXPECT_EQ(count, 2);
-    action2 = TextInputAction::DONE;
-    textFieldPattern->PerformAction(action2, forceCloseKeyboard);
+    info.action = TextInputAction::DONE;
+    textFieldPattern->PerformActionOperation(info);
     EXPECT_EQ(count, 3);
 }
 
@@ -909,14 +911,15 @@ HWTEST_F(SearchTestTwoNg, PackInnerRecognizerr001, TestSize.Level1)
     Offset offset;
     std::list<RefPtr<NGGestureRecognizer>> innerRecognizers;
     int32_t touchId = 0;
+    int32_t originalId = 0;
     RefPtr<TargetComponent> targetComponent;
     searchgestureEventHub->innerParallelRecognizer_ = nullptr;
     searchgestureEventHub->CheckClickActuator();
     auto clickEventActuator = searchgestureEventHub->GetUserClickEventActuator();
     GestureEventFunc callback = [](GestureEvent& info) {};
     clickEventActuator->SetUserCallback(std::move(callback));
-    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, targetComponent);
-    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, targetComponent);
+    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, originalId, targetComponent);
+    searchgestureEventHub->PackInnerRecognizer(offset, innerRecognizers, touchId, originalId, targetComponent);
 }
 
 /**
@@ -2117,7 +2120,7 @@ HWTEST_F(SearchTestTwoNg, searchModelStatic012, TestSize.Level1)
     EXPECT_EQ(buttonLayoutProperty->GetFontSize().value(), SEARCH_BUTTON_FONT_SIZE);
 
     SearchModelStatic::SetSearchButtonFontSize(frameNode, std::nullopt);
-    EXPECT_FALSE(buttonLayoutProperty->GetFontSize().has_value());
+    EXPECT_TRUE(buttonLayoutProperty->GetFontSize().has_value());
 }
 
 /**

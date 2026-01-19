@@ -252,5 +252,12 @@ HWTEST_F(TextFieldOverlayModifierTest, TextFieldOverlayModifierTest004, TestSize
     textFieldOverlayModifier->PaintUnderline(rsCanvas);
     ret = layoutProperty->GetShowUnderline();
     EXPECT_EQ(ret, true);
+
+    /**
+     * @tc.steps: step9.
+     * Change show counter
+     */
+
+    layoutProperty->UpdateShowCounter(false);
 }
 } // namespace OHOS::Ace::NG

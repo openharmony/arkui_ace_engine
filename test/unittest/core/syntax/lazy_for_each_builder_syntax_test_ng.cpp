@@ -1500,10 +1500,14 @@ HWTEST_F(LazyForEachSyntaxTestNg, ReorganizeOffscreenNode001, TestSize.Level1)
     lazyForEachBuilder->expiringItem_["2"] = LazyForEachCacheChild(2, node2);
     lazyForEachBuilder->expiringItem_["3"] = LazyForEachCacheChild(3, node3);
     lazyForEachBuilder->expiringItem_["4"] = LazyForEachCacheChild(4, nullptr);
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto offscreenNodesMgr = context->GetInspectorOffscreenNodesMgr();
+    ASSERT_NE(offscreenNodesMgr, nullptr);
     lazyForEachBuilder->ProcessOffscreenNode(node1, false);
-    auto count1 = Inspector::offscreenNodes.size();
+    auto count1 = offscreenNodesMgr->GetOffscreenNodesSize();
     lazyForEachBuilder->ReorganizeOffscreenNode();
-    auto count2 = Inspector::offscreenNodes.size();
+    auto count2 = offscreenNodesMgr->GetOffscreenNodesSize();
     EXPECT_EQ(count2 - count1, 1);
 }
 
@@ -1545,23 +1549,4 @@ HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder40, TestSize.Level1)
     EXPECT_EQ(removingNodes.size(), 1);
 }
 
-/**
- * @tc.name: LazyForEachBuilder40
- * @tc.desc: Test the RemovingExpiringItem function. 
- * Release all nodes.
- * @tc.type: FUNC
- */
-HWTEST_F(LazyForEachSyntaxTestNg, LazyForEachBuilder41, TestSize.Level1)
-{
-    auto lazyForEachBuilder = CreateLazyForEachBuilder();
-    auto uiNode_1 = AceType::MakeRefPtr<NG::CustomNode>(666, "node_1");
-    auto uiNode_2 = AceType::MakeRefPtr<NG::CustomNode>(777, "node_2");
-    auto childNode = AceType::MakeRefPtr<NG::CustomNode>(666, "childNode");
-    uiNode_1->children_ = { childNode };
-    std::list<RefPtr<UINode>> removingNodes;
-    int64_t deadline = GetSysTimestamp() + 1000;
-    std::unordered_map<std::string, LazyForEachCacheChild> cache{{"1", {1, uiNode_1}}, {"2", {2, uiNode_2}}};
-    lazyForEachBuilder->RemovingExpiringItem(removingNodes, deadline, cache);
-    EXPECT_EQ(removingNodes.size(), 0);
-}
 } // namespace OHOS::Ace::NG

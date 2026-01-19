@@ -98,7 +98,8 @@ public:
         return latestElementId_;
     }
 
-    RefPtr<NG::FrameNode> GetAttachedFrameNodeById(const std::string& key, bool willGetAll = false);
+    RefPtr<NG::FrameNode> GetAttachedFrameNodeById(
+        const std::string& key, bool willGetAll = false, int32_t instanceId = -1);
 
     void AddFrameNodeByInspectorId(const std::string& key, const WeakPtr<NG::FrameNode>& node, int32_t nodeId);
 
@@ -417,7 +418,8 @@ void ElementRegisterImpl::ClearPendingRemoveNodes()
     pendingRemoveNodes_.clear();
 }
 
-RefPtr<NG::FrameNode> ElementRegisterImpl::GetAttachedFrameNodeById(const std::string& key, bool willGetAll)
+RefPtr<NG::FrameNode> ElementRegisterImpl::GetAttachedFrameNodeById(
+    const std::string& key, bool willGetAll, int32_t instanceId)
 {
     auto it = inspectorIdMap_.find(key);
     CHECK_NULL_RETURN(it != inspectorIdMap_.end(), nullptr);
@@ -431,7 +433,8 @@ RefPtr<NG::FrameNode> ElementRegisterImpl::GetAttachedFrameNodeById(const std::s
         }
         auto depOfNode = uiNode->GetDepth();
         bool withInScope = willGetAll || uiNode->IsOnMainTree();
-        if (withInScope && uiNode->GetInspectorId().value_or("") == key && depth > depOfNode) {
+        bool checkInstanceId = instanceId == -1 ? true : uiNode->GetInstanceId() == instanceId;
+        if (withInScope && uiNode->GetInspectorId().value_or("") == key && depth > depOfNode && checkInstanceId) {
             depth = depOfNode;
             frameNode = uiNode;
         }
@@ -626,9 +629,10 @@ ElementIdType ElementRegister::GetLatestElementId() const
     DELEGATE(GetLatestElementId(), ElementRegister::UndefinedElementId);
 }
 
-RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(const std::string& key, bool willGetAll)
+RefPtr<NG::FrameNode> ElementRegister::GetAttachedFrameNodeById(
+    const std::string& key, bool willGetAll, int32_t instanceId)
 {
-    DELEGATE(GetAttachedFrameNodeById(key, willGetAll), nullptr);
+    DELEGATE(GetAttachedFrameNodeById(key, willGetAll, instanceId), nullptr);
 }
 
 void ElementRegister::AddFrameNodeByInspectorId(const std::string& key,

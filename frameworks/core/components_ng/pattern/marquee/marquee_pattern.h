@@ -85,7 +85,7 @@ public:
     
     void DumpSimplifyInfo(std::shared_ptr<JsonValue>& json) override {}
     void DumpInfo(std::unique_ptr<JsonValue>& json) override;
-    void OnVisibleChange(bool isVisible) override;
+    void OnVisibleAreaChange(bool isVisible);
     void OnWindowHide() override;
     void OnWindowShow() override;
     void SetMarqueeFrameRateRange(const RefPtr<FrameRateRange>& rateRange, MarqueeDynamicSyncSceneType type)

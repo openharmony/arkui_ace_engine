@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -27,6 +27,7 @@
 #include "core/interfaces/native/node/data_panel_modifier.h"
 #include "core/interfaces/native/node/divider_modifier.h"
 #include "core/interfaces/native/node/flex_modifier.h"
+#include "core/interfaces/native/node/flow_item_modifier.h"
 #include "core/interfaces/native/node/frame_node_modifier.h"
 #include "core/interfaces/native/node/gauge_modifier.h"
 #include "core/interfaces/native/node/grid_col_modifier.h"
@@ -39,6 +40,7 @@
 #include "core/interfaces/native/node/line_modifier.h"
 #include "core/interfaces/native/node/linear_indicator_modifier.h"
 #include "core/interfaces/native/node/marquee_modifier.h"
+#include "core/interfaces/native/node/menu_item_group_modifier.h"
 #include "core/interfaces/native/node/menu_item_modifier.h"
 #include "core/interfaces/native/node/menu_modifier.h"
 #include "core/interfaces/native/node/nav_destination_modifier.h"
@@ -65,6 +67,7 @@
 #include "core/interfaces/native/node/node_refresh_modifier.h"
 #include "core/interfaces/native/node/node_relative_container_modifier.h"
 #include "core/interfaces/native/node/node_render_node_modifier.h"
+#include "core/interfaces/native/node/martix_modifier.h"
 #include "core/interfaces/native/node/node_scroll_bar_modifier.h"
 #include "core/interfaces/native/node/node_scroll_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
@@ -145,7 +148,7 @@ using namespace OHOS::Ace::NG;
 #define BLANK_LINES 6
 
 extern "C" {
-const ArkUINodeModifiers* GetArkUINodeModifiers()
+ACE_FORCE_EXPORT const ArkUINodeModifiers* GetArkUINodeModifiers()
 {
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static ArkUINodeModifiers impl = {
@@ -213,6 +216,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getMenuModifier = NodeModifier::GetMenuModifier,
         .getDatePickerModifier = NodeModifier::GetDatePickerModifier,
         .getWaterFlowModifier = NodeModifier::GetWaterFlowModifier,
+        .getWaterFlowItemModifier = NodeModifier::GetWaterFlowItemModifier,
         .getAlphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier,
         .getDataPanelModifier = NodeModifier::GetDataPanelModifier,
         .getGaugeModifier = NodeModifier::GetGaugeModifier,
@@ -267,7 +271,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getWebModifier = nullptr, // WebModifier
     #endif
         .getRefreshModifier = NodeModifier::GetRefreshModifier, // RefreshModifier
-        .getMenuItemGroupModifier = nullptr, // MenuItemGroupModifier
+        .getMenuItemGroupModifier = NodeModifier::GetMenuItemGroupModifier, // MenuItemGroupModifier
         .getSearchControllerModifier = nullptr, // SearchControllerModifier
         .getSideBarModifier = nullptr, // SideBarModifier
         .getPatternLockControllerModifier = nullptr, // PatternLockControllerModifier
@@ -301,6 +305,7 @@ const ArkUINodeModifiers* GetArkUINodeModifiers()
         .getNDKRenderNodeModifier = NodeModifier::GetNDKRenderNodeModifier,
         .getContainerPickerModifier = NodeModifier::GetContainerPickerModifier,
         .getAtomicServiceModifier = NodeModifier::GetAtomicServiceModifier,
+        .getMatrix4Modifier = NodeModifier::GetMatrix4Modifier,
     };
     CHECK_INITIALIZED_FIELDS_END(impl, MODIFIER_COUNTS, 0, 0); // don't move this line.
     return &impl;

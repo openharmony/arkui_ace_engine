@@ -377,7 +377,7 @@ private:
     void UpdateTargetSize();
     bool GetShadowFromTheme(ShadowStyle shadowStyle, Shadow& shadow);
     void ShowScrollBar();
-
+    void UpdateMenuBorderStyle(const RefPtr<FrameNode>& menu);
     std::vector<RefPtr<FrameNode>> options_;
     RefPtr<FrameNode> menuWrapper_ = nullptr;
     RefPtr<FrameNode> text_ = nullptr;

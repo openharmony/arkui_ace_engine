@@ -21,8 +21,8 @@
 #include "bridge/declarative_frontend/jsview/canvas/js_drawing_rendering_context.h"
 #include "bridge/declarative_frontend/jsview/canvas/js_rendering_context_base.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
-#include "bridge/declarative_frontend/jsview/models/canvas/canvas_model_impl.h"
 #include "core/common/container.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
@@ -39,8 +39,12 @@ CanvasModel* CanvasModel::GetInstance()
         static NG::CanvasModelNG instance;
         return &instance;
     } else {
-        static Framework::CanvasModelImpl instance;
-        return &instance;
+        static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("canvas");
+        if (loader == nullptr) {
+            LOGF("Can't find canvas loader");
+            abort();
+        }
+        return reinterpret_cast<CanvasModel*>(loader->CreateModel());
     }
 #endif
 }
@@ -82,7 +86,7 @@ void JSCanvas::Create(const JSCallbackInfo& info)
         if (jsContext) {
             if (jsContext->IsBuiltIn()) {
                 JSException::Throw(ERROR_CODE_CANVAS_ERROR_CONTEXT, "%s",
-                    "The context created in system cannot be bound to other canvas component");
+                    "The context created in system cannot be bound to other canvas component.");
             }
             jsContext->SetInstanceId(Container::CurrentId());
             jsContext->SetCanvasPattern(pattern);
@@ -149,13 +153,9 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
                 return;
             }
             auto frameNode = node.Upgrade();
-            if (!frameNode) {
-                return;
-            }
+            CHECK_NULL_VOID(frameNode);
             auto pattern = frameNode->GetPattern<NG::CanvasPattern>();
-            if (!pattern) {
-                return;
-            }
+            CHECK_NULL_VOID(pattern);
             JSRef<JSObject> jsDrawingContext = JSClass<JSDrawingRenderingContext>::NewInstance();
             auto drawingContext = Referenced::Claim(jsDrawingContext->Unwrap<JSDrawingRenderingContext>());
             drawingContext->SetBuiltIn(true);
@@ -163,7 +163,11 @@ void JSCanvas::OnReady(const JSCallbackInfo& info)
             drawingContext->SetCanvasPattern(pattern);
             drawingContext->SetUnit(unit);
             pattern->SetUpdateContextCallback(
-                [drawingContext = drawingContext](CanvasUnit unit) { drawingContext->SetUnit(unit); });
+                [weakDrawingContext = AceType::WeakClaim(AceType::RawPtr(drawingContext))](CanvasUnit unit) {
+                    auto drawingContext = weakDrawingContext.Upgrade();
+                    CHECK_NULL_VOID(drawingContext);
+                    drawingContext->SetUnit(unit);
+                });
             pattern->SetRSCanvasForDrawingContext();
             JSRef<JSVal> params[] = { jsDrawingContext };
             func->ExecuteJS(1, params);

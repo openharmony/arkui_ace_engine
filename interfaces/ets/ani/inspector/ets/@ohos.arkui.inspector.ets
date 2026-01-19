@@ -27,21 +27,48 @@
         return InspetorTreeSerializeTool.parseNoThrow(inspectorTree);
     }
     
-    export native function createComponentObserver(id: string): ComponentObserver | undefined;
+    export native function createComponentObserver(id: string | int): ComponentObserver;
+    native function deleteComponentObserver(ptr: long): string;
     export native function getInspectorByKey(id: string): string;
     export native function sendEventByKey(id: string, action: int, params: string): boolean;
     native function getInspectorTreeNative(): string;
     export native function getFilteredInspectorTree(filters?: Array<string>): string;
     export native function getFilteredInspectorTreeById(id: string, depth: int, filters?: Array<string>): string;
 
+    class Cleaner {
+        private ptr: long = 0;
+        constructor(ptr: long) {
+            this.ptr = ptr;
+        }
+        public clean(): void {
+            deleteComponentObserver(this.ptr)
+        }
+    }
+
+    export function callback(cleaner: Cleaner): void {
+        cleaner.clean()
+    }
+
+    let destroyRegister = new FinalizationRegistry<Cleaner>(callback)
+
     export class ComponentObserver
     {
         private nativeComponentObserver:long = 0;
-        
+        private cleaner: Cleaner | null = null;
         constructor(nativeAddr:long) {
             if (this.nativeComponentObserver == 0) {
                 this.nativeComponentObserver = nativeAddr;
             }
+            this.registerCleaner(nativeAddr)
+        }
+
+        registerCleaner(ptr: long): void {
+            this.cleaner = new Cleaner(ptr);
+            destroyRegister.register(this, this.cleaner!, this);
+        }
+
+        unregisterCleaner(): void {
+            destroyRegister.unregister(this);
         }
         
         public onLayout(callback: VoidCallback): void {
@@ -67,6 +94,14 @@
         public offDrawChildren(callback?: VoidCallback): void {
             this.off('drawChildren', callback);
         }
+
+        public onLayoutChildren(callback: VoidCallback): void {
+            this.on('layoutChildren', callback);
+        }
+        
+        public offLayoutChildren(callback?: VoidCallback): void {
+            this.off('layoutChildren', callback);
+        }
         
         public native on(type: string, callback: VoidCallback) : void;
 
@@ -77,7 +112,7 @@
  class InspetorTreeSerializeTool {
     public static stringifyNoThrow(obj: Record<string, Object>): String {
         try {
-            return JSON.stringify(obj as Object as Record<string, NullishType>);
+            return JSON.stringify(obj as Object as Record<string, Any>);
         } catch (err) {
             hilog.error(DOMAIN_ID, TAG, `InspetorTreeSerializeTool.stringify error: ${err}`);
             return '';

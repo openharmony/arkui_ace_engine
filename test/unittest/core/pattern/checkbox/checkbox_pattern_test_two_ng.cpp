@@ -104,6 +104,9 @@ HWTEST_F(CheckBoxPatternTwoTestNG, CheckBoxPatternTest042, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->isFirstCreated_ = false;
@@ -159,6 +162,9 @@ HWTEST_F(CheckBoxPatternTwoTestNG, CheckBoxPatternTest043, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->isFirstCreated_ = false;
@@ -214,6 +220,9 @@ HWTEST_F(CheckBoxPatternTwoTestNG, CheckBoxPatternTest044, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->isFirstCreated_ = false;
@@ -267,6 +276,9 @@ HWTEST_F(CheckBoxPatternTwoTestNG, CheckBoxPatternTest045, TestSize.Level1)
     auto frameNode = AceType::DynamicCast<FrameNode>(ViewStackProcessor::GetInstance()->Finish());
     ASSERT_NE(frameNode, nullptr);
     frameNode->MarkModifyDone();
+    auto pipeline = frameNode->GetContext();
+    ASSERT_NE(pipeline, nullptr);
+    pipeline->FlushBuildFinishCallbacks();
     auto pattern = frameNode->GetPattern<CheckBoxPattern>();
     ASSERT_NE(pattern, nullptr);
     pattern->isFirstCreated_ = true;

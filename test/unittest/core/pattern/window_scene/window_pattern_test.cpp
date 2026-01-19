@@ -32,6 +32,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/pattern/image/image_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_node.h"
 #include "core/components_ng/pattern/window_scene/scene/window_pattern.h"
 #include "core/components_ng/pattern/window_scene/scene/window_scene.h"
@@ -145,6 +146,32 @@ HWTEST_F(WindowPatternTest, AddPersistentImage, TestSize.Level1)
 }
 
 /**
+ * @tc.name: UpdateSnapshotWindowProperty
+ * @tc.desc: UpdateSnapshotWindowProperty Test
+ * @tc.type: FUNC
+ */
+HWTEST_F(WindowPatternTest, UpdateSnapshotWindowProperty, TestSize.Level1)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+    sceneSession_->enableRemoveStartingWindow_ = false;
+    sceneSession_->appBufferReady_ = false;
+    sceneSession_->surfaceNode_->bufferAvailable_ = false;
+    auto snapshotWindowNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene_);
+    windowScene_->snapshotWindow_ = AceType::RawPtr(snapshotWindowNode);
+    ASSERT_NE(windowScene_->snapshotWindow_, nullptr);
+
+    sceneSession_->isPersistentImageFit_ = true;
+    windowScene_->UpdateSnapshotWindowProperty();
+    EXPECT_EQ(sceneSession_->IsPersistentImageFit(), true);
+
+    sceneSession_->isPersistentImageFit_ = false;
+    windowScene_->UpdateSnapshotWindowProperty();
+    EXPECT_EQ(sceneSession_->IsPersistentImageFit(), false);
+}
+
+/**
  * @tc.name: AddBackgroundColorDelayed
  * @tc.desc: add background color delayed
  * @tc.type: FUNC
@@ -169,24 +196,27 @@ HWTEST_F(WindowPatternTest, AddBackgroundColorDelayed, TestSize.Level1)
 }
 
 /**
- * @tc.name: CreateSnapshotWindow
- * @tc.desc: CreateSnapshotWindow Test
+ * @tc.name: DelayAddAppWindowForDmaResume
+ * @tc.desc: delay add app window for dma resume
  * @tc.type: FUNC
  */
-HWTEST_F(WindowPatternTest, CreateSnapshotWindow, TestSize.Level0)
+HWTEST_F(WindowPatternTest, DelayAddAppWindowForDmaResume, TestSize.Level1)
 {
     ASSERT_NE(windowScene_, nullptr);
     ASSERT_NE(windowScene_->GetHost(), nullptr);
-    windowScene_->isBlankForSnapshot_ = true;
-    windowScene_->CreateSnapshotWindow();
-    auto key = Rosen::defaultStatus;
-    sceneSession_->scenePersistence_->SetHasSnapshot(true, key);
-    windowScene_->CreateSnapshotWindow();
+    sceneSession_->collaboratorType_ = 0;
+    windowScene_->dmaReclaimEnabled_ = false;
+    windowScene_->DelayAddAppWindowForDmaResume(0);
+    EXPECT_EQ(windowScene_->dmaReclaimEnabled_, false);
 
-    sceneSession_->scenePersistence_->isSavingSnapshot_ = true;
-    sceneSession_->freeMultiWindow_.store(true);
-    windowScene_->CreateSnapshotWindow();
-    EXPECT_EQ(windowScene_->isBlankForSnapshot_, false);
+    windowScene_->dmaReclaimEnabled_ = true;
+    sceneSession_->collaboratorType_ = static_cast<int32_t>(Rosen::CollaboratorType::RESERVE_TYPE);
+    windowScene_->DelayAddAppWindowForDmaResume(0);
+    EXPECT_EQ(windowScene_->dmaReclaimEnabled_, true);
+
+    sceneSession_->collaboratorType_ = 0;
+    windowScene_->DelayAddAppWindowForDmaResume(0);
+    EXPECT_EQ(windowScene_->dmaReclaimEnabled_, true);
 }
 
 /**
@@ -240,11 +270,12 @@ HWTEST_F(WindowPatternTest, OnAttachToFrameNode, TestSize.Level0)
 }
 
 /**
- * @tc.name: CreateStartingWindow
- * @tc.desc: CreateStartingWindow Test
+ * @tc.name: CreateStartingWindow_StartWindowType_RetainAndInvisible
+ * @tc.desc: Test CreateStartingWindow when startWindowType is RETAIN_AND_INVISIBLE
  * @tc.type: FUNC
+ * @tc.level: Level0
  */
-HWTEST_F(WindowPatternTest, CreateStartingWindow, TestSize.Level0)
+HWTEST_F(WindowPatternTest, CreateStartingWindow_StartWindowType_RetainAndInvisible, TestSize.Level0)
 {
     ASSERT_NE(windowScene_, nullptr);
     ASSERT_NE(windowScene_->GetHost(), nullptr);
@@ -252,20 +283,123 @@ HWTEST_F(WindowPatternTest, CreateStartingWindow, TestSize.Level0)
     sceneSession_->sessionInfo_.startWindowType_ = Rosen::StartWindowType::RETAIN_AND_INVISIBLE;
     windowScene_->WindowPattern::CreateStartingWindow();
     EXPECT_EQ(sceneSession_->hidingStartWindow_, true);
-
+}
+ 
+/**
+ * @tc.name: CreateStartingWindow_StartWindowType_Default_NoPreloadData
+ * @tc.desc: Test CreateStartingWindow when startWindowType is DEFAULT and no preload data is set
+ * @tc.type: FUNC
+ * @tc.level: Level0
+ */
+HWTEST_F(WindowPatternTest, CreateStartingWindow_StartWindowType_Default_NoPreloadData, TestSize.Level0)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
     sceneSession_->sessionInfo_.startWindowType_ = Rosen::StartWindowType::DEFAULT;
-    ssm_->preLoadStartingWindowMap_.clear();
+    sceneSession_->ResetPreloadStartingWindow();
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;
+    pixelMap = nullptr;
+    bufferInfo = {nullptr, 0};
     windowScene_->WindowPattern::CreateStartingWindow();
-    auto sessionInfo = sceneSession_->GetSessionInfo();
-    EXPECT_EQ(ssm_->GetPreLoadStartingWindow(sessionInfo), nullptr);
+    sceneSession_->GetPreloadStartingWindow(pixelMap, bufferInfo);
+    EXPECT_EQ(pixelMap, nullptr);
+    EXPECT_EQ(bufferInfo.first, nullptr);
+    EXPECT_EQ(bufferInfo.second, 0);
+}
+ 
+/**
+ * @tc.name: CreateStartingWindow_WithValidPreloadPixelMap
+ * @tc.desc: Test CreateStartingWindow when valid preload PixelMap is set (PixelMap should be cleared after call)
+ * @tc.type: FUNC
+ * @tc.level: Level0
+ */
+HWTEST_F(WindowPatternTest, CreateStartingWindow_WithValidPreloadPixelMap, TestSize.Level0)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+    sceneSession_->ResetPreloadStartingWindow();
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;
+    pixelMap = nullptr;
+    bufferInfo = {nullptr, 0};
+    std::shared_ptr<Media::PixelMap> validPixelMap = std::make_shared<Media::PixelMap>();
+    sceneSession_->SetPreloadStartingWindow(validPixelMap);
+    sceneSession_->GetPreloadStartingWindow(pixelMap, bufferInfo);
+    EXPECT_NE(pixelMap, nullptr);
+    EXPECT_EQ(bufferInfo.first, nullptr);
+    EXPECT_EQ(bufferInfo.second, 0);
+    windowScene_->WindowPattern::CreateStartingWindow();
+    sceneSession_->GetPreloadStartingWindow(pixelMap, bufferInfo);
+    EXPECT_EQ(pixelMap, nullptr);
+    EXPECT_EQ(bufferInfo.first, nullptr);
+    EXPECT_EQ(bufferInfo.second, 0);
+}
+ 
+/**
+ * @tc.name: CreateStartingWindow_WithValidPreloadSvgBuffer
+ * @tc.desc: Test CreateStartingWindow when valid preload SVG buffer is set (SVG buffer should be cleared after call)
+ * @tc.type: FUNC
+ * @tc.level: Level0
+ */
+HWTEST_F(WindowPatternTest, CreateStartingWindow_WithValidPreloadSvgBuffer, TestSize.Level0)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+    sceneSession_->ResetPreloadStartingWindow();
+    std::shared_ptr<Media::PixelMap> pixelMap;
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> bufferInfo;
+    pixelMap = nullptr;
+    bufferInfo = {nullptr, 0};
+    auto svgBufferVec = std::make_shared<std::vector<uint8_t>>(10);
+    std::shared_ptr<uint8_t[]> validSvgBuffer(svgBufferVec->data(), [](uint8_t*) {});
+    std::pair<std::shared_ptr<uint8_t[]>, size_t> validBufferInfo = {validSvgBuffer, 10};
+    sceneSession_->SetPreloadStartingWindow(validBufferInfo);
+    sceneSession_->GetPreloadStartingWindow(pixelMap, bufferInfo);
+    EXPECT_EQ(pixelMap, nullptr);
+    EXPECT_NE(bufferInfo.first, nullptr);
+    EXPECT_NE(bufferInfo.second, 0);
+    windowScene_->WindowPattern::CreateStartingWindow();
+    sceneSession_->GetPreloadStartingWindow(pixelMap, bufferInfo);
+    EXPECT_EQ(pixelMap, nullptr);
+    EXPECT_EQ(bufferInfo.first, nullptr);
+    EXPECT_EQ(bufferInfo.second, 0);
+}
+ 
+/**
+ * @tc.name: CreateStartingWindow_PreloadingStartingWindow_True
+ * @tc.desc: Test CreateStartingWindow when PreloadingStartingWindow is set to true
+ * @tc.type: FUNC
+ * @tc.level: Level0
+ */
+HWTEST_F(WindowPatternTest, CreateStartingWindow_PreloadingStartingWindow_True, TestSize.Level0)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+    sceneSession_->ResetPreloadStartingWindow();
+    sceneSession_->SetPreloadingStartingWindow(true);
+    windowScene_->WindowPattern::CreateStartingWindow();
+    EXPECT_EQ(sceneSession_->GetPreloadingStartingWindow(), true);
+    ASSERT_NE(windowScene_->startingWindow_, nullptr);
+    auto layoutProperty = windowScene_->startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+}
 
-    std::string key = sessionInfo.bundleName_ + '_' + sessionInfo.moduleName_ + '_' + sessionInfo.abilityName_;
-    std::shared_ptr<Media::PixelMap> pixelMap = std::make_shared<Media::PixelMap>();
-    ssm_->preLoadStartingWindowMap_.emplace(std::pair<std::string, std::shared_ptr<Media::PixelMap>>(key, pixelMap));
-    EXPECT_NE(ssm_->GetPreLoadStartingWindow(sessionInfo), nullptr);
+/**
+ * @tc.name: CreateStartingWindow_PreloadingStartingWindow_False
+ * @tc.desc: Test CreateStartingWindow when PreloadingStartingWindow is set to false
+ * @tc.type: FUNC
+ * @tc.level: Level0
+ */
+HWTEST_F(WindowPatternTest, CreateStartingWindow_PreloadingStartingWindow_False, TestSize.Level0)
+{
+    ASSERT_NE(windowScene_, nullptr);
+    ASSERT_NE(windowScene_->GetHost(), nullptr);
+    sceneSession_->ResetPreloadStartingWindow();
+    sceneSession_->SetPreloadingStartingWindow(false);
     windowScene_->WindowPattern::CreateStartingWindow();
-    EXPECT_EQ(ssm_->GetPreLoadStartingWindow(sessionInfo), nullptr);
-    ssm_->preLoadStartingWindowMap_.clear();
+    EXPECT_EQ(sceneSession_->GetPreloadingStartingWindow(), false);
+    ASSERT_NE(windowScene_->startingWindow_, nullptr);
 }
 
 /**

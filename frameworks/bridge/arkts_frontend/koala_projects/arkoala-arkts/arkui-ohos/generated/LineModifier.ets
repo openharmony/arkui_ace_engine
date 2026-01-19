@@ -483,6 +483,7 @@ export class LineModifier extends CommonMethodModifier implements LineAttribute,
         {
             this._startPoint_0_flag = AttributeUpdaterFlag.UPDATE
             this._startPoint_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._startPoint_0_flag = AttributeUpdaterFlag.SKIP
@@ -494,6 +495,7 @@ export class LineModifier extends CommonMethodModifier implements LineAttribute,
         {
             this._endPoint_0_flag = AttributeUpdaterFlag.UPDATE
             this._endPoint_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._endPoint_0_flag = AttributeUpdaterFlag.SKIP
@@ -505,6 +507,7 @@ export class LineModifier extends CommonMethodModifier implements LineAttribute,
         {
             this._stroke_0_flag = AttributeUpdaterFlag.UPDATE
             this._stroke_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._stroke_0_flag = AttributeUpdaterFlag.SKIP
@@ -516,6 +519,7 @@ export class LineModifier extends CommonMethodModifier implements LineAttribute,
         {
             this._fill_0_flag = AttributeUpdaterFlag.UPDATE
             this._fill_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fill_0_flag = AttributeUpdaterFlag.SKIP
@@ -527,6 +531,7 @@ export class LineModifier extends CommonMethodModifier implements LineAttribute,
         {
             this._strokeDashOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeDashOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeDashOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -538,6 +543,7 @@ export class LineModifier extends CommonMethodModifier implements LineAttribute,
         {
             this._strokeLineCap_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeLineCap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeLineCap_0_flag = AttributeUpdaterFlag.SKIP
@@ -549,6 +555,7 @@ export class LineModifier extends CommonMethodModifier implements LineAttribute,
         {
             this._strokeLineJoin_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeLineJoin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeLineJoin_0_flag = AttributeUpdaterFlag.SKIP
@@ -560,6 +567,7 @@ export class LineModifier extends CommonMethodModifier implements LineAttribute,
         {
             this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeMiterLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeMiterLimit_0_flag = AttributeUpdaterFlag.SKIP
@@ -571,6 +579,7 @@ export class LineModifier extends CommonMethodModifier implements LineAttribute,
         {
             this._strokeOpacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeOpacity_0_flag = AttributeUpdaterFlag.SKIP
@@ -582,6 +591,7 @@ export class LineModifier extends CommonMethodModifier implements LineAttribute,
         {
             this._fillOpacity_0_flag = AttributeUpdaterFlag.UPDATE
             this._fillOpacity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._fillOpacity_0_flag = AttributeUpdaterFlag.SKIP
@@ -593,6 +603,7 @@ export class LineModifier extends CommonMethodModifier implements LineAttribute,
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -604,6 +615,7 @@ export class LineModifier extends CommonMethodModifier implements LineAttribute,
         {
             this._antiAlias_0_flag = AttributeUpdaterFlag.UPDATE
             this._antiAlias_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._antiAlias_0_flag = AttributeUpdaterFlag.SKIP
@@ -615,6 +627,7 @@ export class LineModifier extends CommonMethodModifier implements LineAttribute,
         {
             this._strokeDashArray_0_flag = AttributeUpdaterFlag.UPDATE
             this._strokeDashArray_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._strokeDashArray_0_flag = AttributeUpdaterFlag.SKIP

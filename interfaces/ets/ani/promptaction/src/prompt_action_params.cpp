@@ -127,7 +127,7 @@ bool IsClassObject(ani_env *env, ani_object object, const char *class_descriptor
 
 bool IsArrayObject(ani_env *env, ani_object object)
 {
-    return IsClassObject(env, object, "escompat.Array");
+    return IsClassObject(env, object, "std.core.Array");
 }
 
 bool IsArrayObject(ani_env *env, ani_ref ref)
@@ -164,7 +164,7 @@ bool GetBoolParam(ani_env* env, ani_ref ref, bool& result)
     }
 
     ani_boolean resultValue;
-    ani_status status = env->Object_CallMethodByName_Boolean(object, "unboxed", ":z", &resultValue);
+    ani_status status = env->Object_CallMethodByName_Boolean(object, "toBoolean", ":z", &resultValue);
     if (status != ANI_OK) {
         return false;
     }
@@ -194,7 +194,7 @@ bool GetInt32Param(ani_env* env, ani_ref ref, int32_t& result)
     }
 
     ani_int resultValue;
-    ani_status status = env->Object_CallMethodByName_Int(object, "unboxed", ":i", &resultValue);
+    ani_status status = env->Object_CallMethodByName_Int(object, "toInt", ":i", &resultValue);
     if (status != ANI_OK) {
         return false;
     }
@@ -224,7 +224,7 @@ bool GetInt64Param(ani_env* env, ani_ref ref, int64_t& result)
     }
 
     ani_long resultValue;
-    ani_status status = env->Object_CallMethodByName_Long(object, "unboxed", ":l", &resultValue);
+    ani_status status = env->Object_CallMethodByName_Long(object, "toLong", ":l", &resultValue);
     if (status != ANI_OK) {
         return false;
     }
@@ -254,7 +254,7 @@ bool GetDoubleParam(ani_env* env, ani_ref ref, double& result)
     }
 
     ani_double resultValue;
-    ani_status status = env->Object_CallMethodByName_Double(object, "unboxed", ":d", &resultValue);
+    ani_status status = env->Object_CallMethodByName_Double(object, "toDouble", ":d", &resultValue);
     if (status != ANI_OK) {
         return false;
     }
@@ -610,7 +610,7 @@ void ProcessResourceType(ani_env *env, ani_object value, ani_ref paramsRef, ani_
     std::vector<std::string> stringArray;
     for (int i = 0; i < int(length); i++) {
         ani_ref itemRef;
-        status = env->Object_CallMethodByName_Ref(paramsObj, "$_get", "i:C{std.core.Object}", &itemRef, (ani_int)i);
+        status = env->Object_CallMethodByName_Ref(paramsObj, "$_get", "i:Y", &itemRef, (ani_int)i);
         if (status != ANI_OK) {
             continue;
         }
@@ -634,7 +634,7 @@ void ProcessResourceType(ani_env *env, ani_object value, ani_ref paramsRef, ani_
     ani_string firstStr;
     status = env->String_NewUTF8(resName.c_str(), resName.size(), &firstStr);
     if (status != ANI_OK) {
-        status = env->Object_CallMethodByName_Void(paramsObj, "$_set", "iC{std.core.Object}:", index, firstStr);
+        status = env->Object_CallMethodByName_Void(paramsObj, "$_set", "iY:", index, firstStr);
         if (status != ANI_OK) {
             return;
         }
@@ -648,7 +648,7 @@ void ProcessResourceType(ani_env *env, ani_object value, ani_ref paramsRef, ani_
             break;
         }
 
-        status = env->Object_CallMethodByName_Void(paramsObj, "$_set", "iC{std.core.Object}:", index, aniStr);
+        status = env->Object_CallMethodByName_Void(paramsObj, "$_set", "iY:", index, aniStr);
         if (status != ANI_OK) {
             break;
         }

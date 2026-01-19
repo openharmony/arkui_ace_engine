@@ -1,0 +1,11 @@
+{
+  "dependencies": {
+    "@panda/sdk": "^1.5.0-dev.32018"
+  },
+
+  "scripts": {
+    "clean": "make -f tests/Makefile clean",
+    "build": "make -f tests/Makefile framework",
+    "test": "make -f tests/Makefile"
+  }
+}

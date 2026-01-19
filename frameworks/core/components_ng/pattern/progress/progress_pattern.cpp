@@ -53,6 +53,12 @@ void ProgressPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
+void ProgressPattern::OnDetachFromMainTree()
+{
+    CHECK_NULL_VOID(progressModifier_);
+    progressModifier_->StopAllLoopAnimation();
+}
+
 void ProgressPattern::InitAnimatableProperty(ProgressAnimatableProperty& progressAnimatableProperty)
 {
     auto pipeline = PipelineBase::GetCurrentContext();
@@ -503,6 +509,7 @@ void ProgressPattern::OnModifyDone()
     FireBuilder();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto progressLayoutProperty = GetLayoutProperty<ProgressLayoutProperty>();
     CHECK_NULL_VOID(progressLayoutProperty);
     if (progressLayoutProperty->GetType() == ProgressType::CAPSULE) {
@@ -870,7 +877,8 @@ void ProgressPattern::ReportProgressEvent()
     }
     auto maxValue = progressPaintProperty->GetMaxValue().value();
     if (LessOrEqual(maxValue, value) && LessNotEqual(reportLastValue_, maxValue)) {
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Progress.onProgress");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Progress.onProgress",
+            ComponentEventType::COMPONENT_EVENT_PROGRESS);
     }
     reportLastValue_ = value;
 }

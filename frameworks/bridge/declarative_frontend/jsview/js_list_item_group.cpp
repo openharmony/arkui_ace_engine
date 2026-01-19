@@ -18,9 +18,9 @@
 #include "bridge/declarative_frontend/jsview/js_list_item.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_list_children_main_size.h"
-#include "bridge/declarative_frontend/jsview/models/list_item_group_model_impl.h"
 #include "bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components_v2/list/list_item_group_component.h"
+#include "core/common/dynamic_module_helper.h"
+#include "compatible/components/list_v2/list_item_group_component.h"
 #include "core/components_ng/pattern/list/list_item_group_model.h"
 #include "core/components_ng/pattern/list/list_item_group_model_ng.h"
 
@@ -40,7 +40,10 @@ ListItemGroupModel* ListItemGroupModel::GetInstance()
             if (Container::IsCurrentUseNewPipeline()) {
                 instance_.reset(new NG::ListItemGroupModelNG());
             } else {
-                instance_.reset(new Framework::ListItemGroupModelImpl());
+                static auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("list-item-group");
+                static ListItemGroupModel* instance =
+                    loader ? reinterpret_cast<ListItemGroupModel*>(loader->CreateModel()) : nullptr;
+                return instance;
             }
 #endif
         }
@@ -74,7 +77,20 @@ void SyncChildrenSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChi
     childrenSize->SyncChildrenSizeOver();
 }
 
-void InitNativeMainSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChildrenMainSize> listChildrenMainSize)
+void CallSetNativeMainSize(const JSRef<JSObject>& childrenSizeObj,
+    const JSRef<JSObject>& nativeMainSize)
+{
+    auto property = childrenSizeObj->GetProperty("setNativeMainSize");
+    if (property->IsFunction()) {
+        auto setnativeMainSizeFunc = JSRef<JSFunc>::Cast(property);
+        JSRef<JSVal> params[1];
+        params[0] = JSRef<JSVal>::Cast(nativeMainSize);
+        setnativeMainSizeFunc->Call(childrenSizeObj, 1, params);
+    }
+}
+
+void InitNativeMainSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListChildrenMainSize> listChildrenMainSize,
+    NG::FrameNode* node = nullptr)
 {
     auto nativeMainSize = JSClass<JSListChildrenMainSize>::NewInstance();
     if (nativeMainSize->IsEmpty()) {
@@ -82,7 +98,10 @@ void InitNativeMainSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListC
     }
     auto nativeMainSizeObj = JSRef<JSObject>::Cast(nativeMainSize);
     JSListChildrenMainSize* jsChildrenMainSize = nativeMainSizeObj->Unwrap<JSListChildrenMainSize>();
-    auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    if (jsChildrenMainSize == nullptr) {
+        return;
+    }
+    auto frameNode = AceType::WeakClaim(node ? node : NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     jsChildrenMainSize->SetHost(frameNode);
 
     auto id = Container::CurrentId();
@@ -121,14 +140,9 @@ void InitNativeMainSize(const JSRef<JSObject>& childrenSizeObj, RefPtr<NG::ListC
     };
     jsChildrenMainSize->SetOnDefaultSizeUpdate(updateSizeCallback);
 
-    auto property = childrenSizeObj->GetProperty("setNativeMainSize");
-    if (property->IsFunction()) {
-        auto setnativeMainSizeFunc = JSRef<JSFunc>::Cast(property);
-        JSRef<JSVal> params[1];
-        params[0] = JSRef<JSVal>::Cast(nativeMainSize);
-        setnativeMainSizeFunc->Call(childrenSizeObj, 1, params);
-    }
+    CallSetNativeMainSize(childrenSizeObj, nativeMainSize);
 }
+
 } // namespace
 
 void JSListItemGroup::SetChildrenMainSize(const JSCallbackInfo& args)
@@ -139,14 +153,14 @@ void JSListItemGroup::SetChildrenMainSize(const JSCallbackInfo& args)
     SetChildrenMainSize(JSRef<JSObject>::Cast(args[0]));
 }
 
-void JSListItemGroup::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj)
+void JSListItemGroup::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj, NG::FrameNode* node)
 {
     double defaultSize = 0.0f;
     if (!ParseJsDouble(childrenSizeObj->GetProperty("childDefaultSize"), defaultSize) || !NonNegative(defaultSize)) {
         LOGW("JSListItemGroup input parameter defaultSize check failed.");
         return;
     }
-    auto listChildrenMainSize = ListItemGroupModel::GetInstance()->GetOrCreateListChildrenMainSize();
+    auto listChildrenMainSize = ListItemGroupModel::GetInstance()->GetOrCreateListChildrenMainSize(node);
     CHECK_NULL_VOID(listChildrenMainSize);
 
     // Used for makeObserved to listen and refresh status.
@@ -162,10 +176,10 @@ void JSListItemGroup::SetChildrenMainSize(const JSRef<JSObject>& childrenSizeObj
         auto nativeMainSizeObj = JSRef<JSObject>::Cast(nativeMainSize);
         jsChildrenMainSize = nativeMainSizeObj->Unwrap<JSListChildrenMainSize>();
     }
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = node ? node : NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     if (nativeMainSize->IsEmpty() || !nativeMainSize->IsObject() ||
         (jsChildrenMainSize && !jsChildrenMainSize->IsHostEqual(frameNode))) {
-        InitNativeMainSize(childrenSizeObj, listChildrenMainSize);
+        InitNativeMainSize(childrenSizeObj, listChildrenMainSize, frameNode);
         listChildrenMainSize->UpdateDefaultSize(Dimension(defaultSize, DimensionUnit::VP).ConvertToPx());
         SyncChildrenSize(childrenSizeObj, listChildrenMainSize);
     }

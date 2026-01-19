@@ -31,10 +31,14 @@ class ACE_EXPORT TabContentModelStatic {
 public:
     static void SetShallowBuilder(FrameNode* frameNode, const RefPtr<ShallowBuilder>& shallowBuilder);
     static void SetIndicator(FrameNode* frameNode, const std::optional<IndicatorStyle>& indicatorOpt);
-    static void SetLabelStyle(FrameNode* frameNode, const std::optional<LabelStyle>& labelStyleOpt);
+    static void SetLabelStyle(FrameNode* frameNode,
+        const std::optional<LabelStyle>& labelStyleOpt, bool isSubTabStyle);
+    static LabelStyle CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle);
     static void SetSelectedMode(FrameNode* node, const std::optional<SelectedMode>& selectedMode);
     static void SetBoard(FrameNode* node, const std::optional<BoardStyle>& board);
-    static void SetPadding(FrameNode* node, const std::optional<NG::PaddingProperty>& padding);
+    static void SetPadding(FrameNode* node,
+        const std::optional<NG::PaddingProperty>& padding, bool isSubTabStyle);
+    static PaddingProperty CompletePaddingProperty(PaddingProperty& padding, bool isSubTabStyle);
     static void SetUseLocalizedPadding(FrameNode* node, bool useLocalizedPadding);
     static void SetId(FrameNode* node, const std::optional<std::string>& id);
     static void SetTabBarStyle(FrameNode* node, TabBarStyle tabBarStyle);

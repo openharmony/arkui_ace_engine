@@ -1261,5 +1261,8 @@ HWTEST_F(TextTestNgSeven, CreateTextDragInfo005, TestSize.Level1)
     textModelNG.SetSelectedDragPreviewStyle(frameNode, Color::BLUE);
     auto color = textModelNG.GetSelectedDragPreviewStyle(frameNode);
     EXPECT_EQ(color.GetValue(), Color::BLUE.GetValue());
+    textModelNG.ResetSelectedDragPreviewStyle(frameNode);
+    color = textModelNG.GetSelectedDragPreviewStyle(frameNode);
+    EXPECT_NE(color.GetValue(), Color::BLUE.GetValue());
 }
 } // namespace OHOS::Ace::NG

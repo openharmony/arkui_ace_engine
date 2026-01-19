@@ -425,4 +425,23 @@ HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest013, TestSize.Level1)
                             "\"windowId\":500,\"time\":5000000,\"data\":{\"isFocus\":false}}";
     EXPECT_EQ(JsonStr2, JsonStr21);
 }
+
+/**
+ * @tc.name: JsonReportTestNgTypeTest014
+ * @tc.desc: Test FocusJsonReport with focus and blur states
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(JsonReportTestNg, JsonReportTestNgTypeTest014, TestSize.Level1)
+{
+    TapJsonReport tapReport;
+    tapReport.SetPoint(globalPoint);
+    tapReport.SetCount(10);
+    tapReport.SetId(id);
+    tapReport.SetFingerList(fingerList);
+    auto value = tapReport.GetJsonData();
+    std::string JsonStr = value->ToString().c_str();
+    std::string JsonStr1 = "{\"GestureType\":\"Tap\",\"id\":1,\"point\":[100,100],\"count\":10,\"fingers\":1}";
+    EXPECT_EQ(JsonStr, JsonStr1);
+}
 } // namespace OHOS::Ace::NG

@@ -354,4 +354,12 @@ void ContainerPickerModel::ProcessResourceObj(FrameNode* frameNode, const std::s
     }
 }
 
+void ContainerPickerModel::SetChangeEvent(ContainerPickerChangeEvent&& onChange)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto eventHub = frameNode->GetEventHub<ContainerPickerEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetChangeEvent(std::move(onChange));
+}
 } // namespace OHOS::Ace::NG

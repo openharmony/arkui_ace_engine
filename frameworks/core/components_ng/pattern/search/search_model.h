@@ -49,8 +49,7 @@ public:
     virtual void SetCancelButtonStyle(CancelButtonStyle cancelButtonStyle);
     virtual void SetCancelIconColor(const Color& color) {};
     virtual void SetSearchButtonFontSize(const Dimension& value);
-    virtual void SetSearchButtonFontColor(const Color& color);
-    virtual void ResetSearchButtonFontColor();
+    virtual void SetSearchButtonFontColor(const Color& color, bool isTheme = false);
     virtual void SetSearchButtonAutoDisable(bool needToDisable);
     virtual void SetPlaceholderColor(const Color& color);
     virtual void ResetPlaceholderColor();

@@ -52,6 +52,10 @@ namespace OHOS::Ace::NG::Converter {
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace MouseEventAccessor {
+namespace {
+    const Opt_Float64 INVALID_OPT_FLOAT64 = Converter::ArkValue<Opt_Float64>();
+    const float DEFAULT_VALUE = 0.0;
+} // namespace
 void DestroyPeerImpl(Ark_MouseEvent peer)
 {
     PeerUtils::DestroyPeer(peer);
@@ -63,6 +67,13 @@ Ark_MouseEvent ConstructImpl()
 Ark_NativePointer GetFinalizerImpl()
 {
     return reinterpret_cast<void *>(&DestroyPeerImpl);
+}
+void StopPropagationImpl(Ark_MouseEvent peer)
+{
+    CHECK_NULL_VOID(peer);
+    MouseInfo* info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    info->SetStopPropagation(true);
 }
 Ark_MouseButton GetButtonImpl(Ark_MouseEvent peer)
 {
@@ -236,24 +247,6 @@ void SetYImpl(Ark_MouseEvent peer, Ark_Float64 y)
     localLocation.SetY(yConvert, animation);
     info->SetLocalLocation(localLocation);
 }
-Callback_Void GetStopPropagationImpl(Ark_MouseEvent peer)
-{
-    CHECK_NULL_RETURN(peer, {});
-    auto callback = CallbackKeeper::ReturnReverseCallback<Callback_Void>([peer]() {
-        MouseInfo* info = peer->GetEventInfo();
-        CHECK_NULL_VOID(info);
-        info->SetStopPropagation(true);
-    });
-    return callback;
-}
-void SetStopPropagationImpl(Ark_MouseEvent peer,
-                            const Callback_Void* stopPropagation)
-{
-    CHECK_NULL_VOID(peer);
-    auto info = peer->GetEventInfo();
-    CHECK_NULL_VOID(info);
-    LOGE("Arkoala method MouseEventAccessor.SetStopPropagation doesn't have sense. Not implemented...");
-}
 Opt_Float64 GetRawDeltaXImpl(Ark_MouseEvent peer)
 {
     const auto errValue = Converter::ArkValue<Opt_Float64>();
@@ -323,6 +316,50 @@ void SetPressedButtonsImpl(Ark_MouseEvent peer,
         info->SetPressedButtons(buttons);
     }
 }
+Opt_Float64 GetGlobalDisplayXImpl(Ark_MouseEvent peer)
+{
+    CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, INVALID_OPT_FLOAT64);
+    const auto& globalDisplayLocation = info->GetGlobalDisplayLocation();
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetX());
+    return Converter::ArkValue<Opt_Float64>(value);
+}
+void SetGlobalDisplayXImpl(Ark_MouseEvent peer,
+                           const Opt_Float64* globalDisplayX)
+{
+    CHECK_NULL_VOID(peer);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    auto globalDisplayLocation = info->GetGlobalDisplayLocation();
+    const auto animation = globalDisplayLocation.GetXAnimationOption();
+    auto value = Converter::OptConvertPtr<double>(globalDisplayX);
+    auto xConvert = PipelineBase::Vp2PxWithCurrentDensity(value.value_or(DEFAULT_VALUE));
+    globalDisplayLocation.SetX(xConvert, animation);
+    info->SetGlobalDisplayLocation(globalDisplayLocation);
+}
+Opt_Float64 GetGlobalDisplayYImpl(Ark_MouseEvent peer)
+{
+    CHECK_NULL_RETURN(peer, INVALID_OPT_FLOAT64);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_RETURN(info, INVALID_OPT_FLOAT64);
+    const auto& globalDisplayLocation = info->GetGlobalDisplayLocation();
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(globalDisplayLocation.GetY());
+    return Converter::ArkValue<Opt_Float64>(value);
+}
+void SetGlobalDisplayYImpl(Ark_MouseEvent peer,
+                           const Opt_Float64* globalDisplayY)
+{
+    CHECK_NULL_VOID(peer);
+    auto info = peer->GetEventInfo();
+    CHECK_NULL_VOID(info);
+    auto globalDisplayLocation = info->GetGlobalDisplayLocation();
+    const auto animation = globalDisplayLocation.GetYAnimationOption();
+    auto value = Converter::OptConvertPtr<double>(globalDisplayY);
+    auto yConvert = PipelineBase::Vp2PxWithCurrentDensity(value.value_or(DEFAULT_VALUE));
+    globalDisplayLocation.SetY(yConvert, animation);
+    info->SetGlobalDisplayLocation(globalDisplayLocation);
+}
 } // MouseEventAccessor
 const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
 {
@@ -330,6 +367,7 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::DestroyPeerImpl,
         MouseEventAccessor::ConstructImpl,
         MouseEventAccessor::GetFinalizerImpl,
+        MouseEventAccessor::StopPropagationImpl,
         MouseEventAccessor::GetButtonImpl,
         MouseEventAccessor::SetButtonImpl,
         MouseEventAccessor::GetActionImpl,
@@ -346,14 +384,16 @@ const GENERATED_ArkUIMouseEventAccessor* GetMouseEventAccessor()
         MouseEventAccessor::SetXImpl,
         MouseEventAccessor::GetYImpl,
         MouseEventAccessor::SetYImpl,
-        MouseEventAccessor::GetStopPropagationImpl,
-        MouseEventAccessor::SetStopPropagationImpl,
         MouseEventAccessor::GetRawDeltaXImpl,
         MouseEventAccessor::SetRawDeltaXImpl,
         MouseEventAccessor::GetRawDeltaYImpl,
         MouseEventAccessor::SetRawDeltaYImpl,
         MouseEventAccessor::GetPressedButtonsImpl,
         MouseEventAccessor::SetPressedButtonsImpl,
+        MouseEventAccessor::GetGlobalDisplayXImpl,
+        MouseEventAccessor::SetGlobalDisplayXImpl,
+        MouseEventAccessor::GetGlobalDisplayYImpl,
+        MouseEventAccessor::SetGlobalDisplayYImpl,
     };
     return &MouseEventAccessorImpl;
 }

@@ -16,14 +16,12 @@
 import { IObserve, OBSERVE } from '../decorator';
 import { IObservedObject, RenderIdType } from '../decorator';
 import { IBindingSource, ITrackedDecoratorRef } from './mutableStateMeta';
-import { TypeChecker } from '#components';
 import { StateMgmtTool } from '#stateMgmtTool';
 import { NullableObject } from './types';
-import { StateManagerImpl } from '@koalaui/runtime';
-import { StateMgmtConsole } from '../tools/stateMgmtDFX';
 import { MonitorFunctionDecorator, MonitorValueInternal } from '../decoratorImpl/decoratorMonitor';
 import { ComputedDecoratedVariable, IComputedDecoratorRef } from '../decoratorImpl/decoratorComputed';
 import { PersistenceV2Impl } from '../storage/persistenceV2';
+import { GlobalStateManager } from '@koalaui/runtime';
 
 type TaskType<T> = () => T;
 
@@ -36,6 +34,7 @@ enum NotifyMutableStateMode {
 export class ObserveSingleton implements IObserve {
     public static readonly instance: ObserveSingleton = new ObserveSingleton();
     public static readonly InvalidRenderId: RenderIdType | undefined = undefined;
+    public static readonly RenderingPause: int = -1;
     public static readonly RenderingComponent: int = 0;
     public static readonly RenderingComponentV1: int = 1;
     public static readonly RenderingComponentV2: int = 2;
@@ -67,7 +66,7 @@ export class ObserveSingleton implements IObserve {
 
     get renderingId(): RenderIdType | undefined {
         const id =
-            (StateMgmtTool.getGlobalStateManager() as StateManagerImpl).current?.id ?? ObserveSingleton.InvalidRenderId;
+            GlobalStateManager.instance.currentScope?.id ?? ObserveSingleton.InvalidRenderId;
         return id;
     }
     set renderingId(value: RenderIdType | undefined) {
@@ -216,6 +215,14 @@ export class ObserveSingleton implements IObserve {
             this.computedPropRefsChanged_.add(weak);
         });
         this.computedPropRefsDelayed_.clear();
+    }
+
+    public clearDelayedComputedWhenReuse(): void {
+        this.computedPropRefsChanged_.clear();
+    }
+
+    public clearDelayedMonitorWhenReuse(): void {
+        this.monitorPathRefsDelayed_.clear();
     }
 
     public unFreezeDelayedMonitorPaths(): void {

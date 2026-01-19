@@ -87,6 +87,7 @@ constexpr uint32_t APP_DOMAIN = 0xC0D0;
 #define TAG_LOGF(tag, fmt, ...) PRINT_LOG(FATAL, tag, fmt, ##__VA_ARGS__)
 
 #define LOG_FUNCTION() LOGD("function track: %{public}s", __FUNCTION__)
+#define LOG_CALLBACK(callback) CallbackLogger _(__FUNCTION__, reinterpret_cast<uintptr_t>(callback))
 
 #define LOGF_ABORT(fmt, ...)      \
     do {                          \
@@ -229,6 +230,7 @@ enum AceLogTag : uint8_t {
     ACE_DRAWABLE_DESCRIPTOR = 96,  // C03960
     ACE_LAZY_GRID = 97,            // C03961
     ACE_CONTAINER_PICKER = 98,     // C03962
+    ACE_IMAGE_GENERATION = 99,     // C03963
 
     FORM_RENDER = 255, // C039FF FormRenderer, last domain, do not add
 };
@@ -314,6 +316,17 @@ private:
 };
 
 bool LogBacktrace(size_t maxFrameNums = 256);
+
+class ACE_FORCE_EXPORT CallbackLogger final {
+public:
+    CallbackLogger(const std::string& funcName, uintptr_t callback);
+    ~CallbackLogger();
+    CallbackLogger(const CallbackLogger&) = delete;
+    CallbackLogger& operator=(const CallbackLogger&) = delete;
+private:
+    std::string msg_;
+    uintptr_t lastObjAddr_ = 0;
+};
 } // namespace OHOS::Ace
 
 #endif // FOUNDATION_ACE_FRAMEWORKS_BASE_LOG_LOG_WRAPPER_H

@@ -401,8 +401,14 @@ void DefaultOnShowFileSelector(const std::function<void(void*, void*, std::funct
     auto* eventInfo = TypeInfoHelper::DynamicCast<FileSelectorEvent>(info);
     CHECK_NULL_VOID(eventInfo);
     auto paramPeer = new FileSelectorParamPeer();
+    CHECK_NULL_VOID(paramPeer);
     paramPeer->handler = eventInfo->GetParam();
     auto resultPeer = new FileSelectorResultPeer();
+    if (!resultPeer) {
+        delete paramPeer;
+        paramPeer = nullptr;
+        return;
+    }
     resultPeer->handler = eventInfo->GetFileSelectorResult();
     auto releaseFunc = [&paramPeer, &resultPeer](void* peer) {
         if (paramPeer == peer) {
@@ -454,6 +460,24 @@ void OnTextSelectionChange(const CallbackHelper<TextSelectionChangeCallback>& ar
     Ark_String selectionText;
     selectionText = Converter::ArkValue<Ark_String>(eventInfo->GetselectionText());
     arkCallback.InvokeSync(selectionText);
+}
+
+void OnFirstScreenPaint(const CallbackHelper<OnFirstScreenPaintCallback>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    const auto refNode = weakNode.Upgrade();
+    CHECK_NULL_VOID(refNode);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<FirstScreenPaintEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    Ark_FirstScreenPaint parameter;
+    parameter.url = Converter::ArkValue<Ark_String>(eventInfo->GetUrl());
+    parameter.navigationStartTime = Converter::ArkValue<Ark_Int64>(eventInfo->GetNavigationStartTime());
+    parameter.firstScreenPaintTime = Converter::ArkValue<Ark_Int64>(eventInfo->GetFirstScreenPaintTime());
+    arkCallback.InvokeSync(parameter);
 }
 
 void OnResourceLoad(const CallbackHelper<Callback_OnResourceLoadEvent_Void>& arkCallback,
@@ -593,6 +617,26 @@ void OnPermissionRequest(const CallbackHelper<Callback_OnPermissionRequestEvent_
     peer->handler = eventInfo->GetWebPermissionRequest();
     parameter.request = peer;
     arkCallback.InvokeSync(parameter);
+}
+
+void DefaultPermissionClipboard(const std::function<void(void*, std::function<void()>)>& callback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const BaseEventInfo* info)
+{
+    CHECK_NULL_VOID(callback);
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<WebPermissionRequestEvent>(info);
+    CHECK_NULL_VOID(eventInfo);
+    auto peer = new PermissionRequestPeer();
+    CHECK_NULL_VOID(peer);
+    peer->handler = eventInfo->GetWebPermissionRequest();
+    auto releaseFunc = [&peer]() {
+        delete peer;
+        peer = nullptr;
+    };
+    callback(peer, std::move(releaseFunc));
 }
 
 void OnScreenCaptureRequest(const CallbackHelper<Callback_OnScreenCaptureRequestEvent_Void>& arkCallback,
@@ -793,6 +837,60 @@ void OnWindowNew(const CallbackHelper<Callback_OnWindowNewEvent_Void>& arkCallba
     parameter.isAlert = Converter::ArkValue<Ark_Boolean>(eventInfo->IsAlert());
     parameter.isUserTrigger = Converter::ArkValue<Ark_Boolean>(eventInfo->IsUserTrigger());
     parameter.targetUrl = Converter::ArkValue<Ark_String>(eventInfo->GetTargetUrl());
+    auto peer = new ControllerHandlerPeer();
+    peer->handler = eventInfo->GetWebWindowNewHandler();
+    parameter.handler = peer;
+    arkCallback.InvokeSync(parameter);
+}
+
+static bool HandleWindowNewExtEvent(const WebWindowNewExtEvent* eventInfo)
+{
+    auto handler = eventInfo->GetWebWindowNewHandler();
+    if ((handler) && (!handler->IsFrist())) {
+        int32_t parentId = -1;
+        auto controller = ControllerHandlerPeer::PopController(handler->GetId(), &parentId);
+        if (!controller) {
+            return false;
+        }
+        if (controller->getWebIdFunc) {
+            handler->SetWebController(controller->getWebIdFunc());
+        }
+        if (controller->completeWindowNewFunc) {
+            controller->completeWindowNewFunc(parentId);
+        }
+        if (controller->releaseRefFunc) {
+            controller->releaseRefFunc();
+        }
+        delete controller;
+        return false;
+    }
+    return true;
+}
+
+void OnWindowNewExt(const CallbackHelper<Callback_OnWindowNewExtEvent_Void>& arkCallback,
+    WeakPtr<FrameNode> weakNode, int32_t instanceId, const std::shared_ptr<BaseEventInfo>& info)
+{
+    ContainerScope scope(instanceId);
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->UpdateCurrentActiveNode(weakNode);
+    auto* eventInfo = TypeInfoHelper::DynamicCast<WebWindowNewExtEvent>(info.get());
+    CHECK_NULL_VOID(eventInfo);
+    Ark_WindowFeatures arkFeatures;
+    arkFeatures.x = Converter::ArkValue<Ark_Float64>(eventInfo->GetX());
+    arkFeatures.y = Converter::ArkValue<Ark_Float64>(eventInfo->GetY());
+    arkFeatures.width = Converter::ArkValue<Ark_Float64>(eventInfo->GetWidth());
+    arkFeatures.height = Converter::ArkValue<Ark_Float64>(eventInfo->GetHeight());
+    if (!HandleWindowNewExtEvent(eventInfo)) {
+        return;
+    }
+    Ark_OnWindowNewExtEvent parameter;
+    parameter.isAlert = Converter::ArkValue<Ark_Boolean>(eventInfo->IsAlert());
+    parameter.isUserTrigger = Converter::ArkValue<Ark_Boolean>(eventInfo->IsUserTrigger());
+    parameter.targetUrl = Converter::ArkValue<Ark_String>(eventInfo->GetTargetUrl());
+    parameter.windowFeatures = Converter::ArkValue<Ark_WindowFeatures>(arkFeatures);
+    parameter.navigationPolicy =
+        static_cast<Ark_NavigationPolicy>(static_cast<int32_t>(eventInfo->GetNavigationPolicy()));
     auto peer = new ControllerHandlerPeer();
     peer->handler = eventInfo->GetWebWindowNewHandler();
     parameter.handler = peer;

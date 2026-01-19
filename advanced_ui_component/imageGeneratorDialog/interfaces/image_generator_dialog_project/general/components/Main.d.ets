@@ -14,6 +14,7 @@
  */
 
 import imageGeneration from '@ohos.arkui.intelligence.imageGeneration';
+import { CanvasLayoutDirection, CanvasMode } from '../types/Declaration';
 @ComponentV2
 export declare struct ImageGeneratorDialog {
     stack: NavPathStack;
@@ -29,9 +30,24 @@ export declare struct ImageGeneratorDialog {
     imageInfoArr: Array<imageGeneration.ImageItem>;
     @Local
     stylesArr: Array<imageGeneration.ImageStyle>;
+    @Local
+    userPrompt: string;
+    private curWindow?;
+    @Provider('globalCanvasMode')
+    curCanvasMode: CanvasMode;
+    @Provider('globalSheetType')
+    curSheetType: SheetType;
+    @Provider('globalLayoutDirection')
+    curLayoutDirection: CanvasLayoutDirection;
+    updateCanvasLayoutProperties: (size: Size) => void;
+    onWinSizeChangForAll: (size: Size) => void;
+    private initWinSizeChangeCallback;
+    private initLayoutProperties;
     @Builder
     pageMap(name: string): void;
     private initImageInfoArr;
+    private initUserPrompt;
     aboutToAppear(): void;
+    aboutToDisappear(): void;
     build(): void;
 }

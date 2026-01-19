@@ -573,7 +573,8 @@ public:
 
     virtual void SetTopWindowBoundaryByID(const std::string& stringId) {};
 
-    virtual bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data, uint8_t subSystemId)
+    virtual bool SendUIExtProprty(uint32_t code, const AAFwk::Want& data,
+        uint8_t subSystemId, const UIExtOptions& options = UIExtOptions())
     {
         return false;
     }
@@ -642,6 +643,7 @@ public:
         return UIContentErrorCode::NO_ERRORS;
     }
 
+    virtual void SetXComponentDisplayConstraintEnabled(bool isEnable) {};
 };
 
 } // namespace OHOS::Ace

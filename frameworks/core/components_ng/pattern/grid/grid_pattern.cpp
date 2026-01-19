@@ -30,6 +30,7 @@
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -140,6 +141,7 @@ void GridPattern::OnModifyDone()
     info_.axis_ = gridLayoutProperty->IsVertical() ? Axis::VERTICAL : Axis::HORIZONTAL;
     isConfigScrollable_ = gridLayoutProperty->IsConfiguredScrollable();
     if (!isConfigScrollable_) {
+        SetScrollBar(DisplayMode::OFF);
         return;
     }
     SetAxis(info_.axis_);
@@ -305,6 +307,7 @@ void GridPattern::FireOnScrollStart(bool withPerfMonitor)
     if (onJSFrameNodeScrollStart) {
         onJSFrameNodeScrollStart();
     }
+    ContentChangeOnScrollStart(host);
 }
 
 void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnReachEvent& onJSFrameNodeReachStart)
@@ -316,6 +319,7 @@ void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnRea
     }
     if (!isInitialized_) {
         FireObserverOnReachStart();
+        ReportOnItemGridEvent("onReachStart");
         CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
         if (onReachStart) {
             onReachStart();
@@ -333,6 +337,7 @@ void GridPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnRea
                                  GreatOrEqual(info_.currentHeight_, -info_.contentStartOffset_);
         if (scrollUpToStart || scrollDownToStart) {
             FireObserverOnReachStart();
+            ReportOnItemGridEvent("onReachStart");
             CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
             ACE_SCOPED_TRACE("OnReachStart, scrollUpToStart:%u, scrollDownToStart:%u, id:%d, tag:Grid", scrollUpToStart,
                 scrollDownToStart, static_cast<int32_t>(host->GetAccessibilityId()));
@@ -369,6 +374,7 @@ void GridPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReachEv
             GreatNotEqual(info_.prevHeight_, endHeight_) && LessOrEqual(info_.currentHeight_, endHeight_);
         if (scrollDownToEnd || scrollUpToEnd) {
             FireObserverOnReachEnd();
+            ReportOnItemGridEvent("onReachEnd");
             CHECK_NULL_VOID(onReachEnd || onJSFrameNodeReachEnd);
             ACE_SCOPED_TRACE("OnReachEnd, scrollUpToEnd:%u, scrollDownToEnd:%u, id:%d, tag:Grid", scrollUpToEnd,
                 scrollDownToEnd, static_cast<int32_t>(host->GetAccessibilityId()));
@@ -455,7 +461,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     auto itemsHeight = info_.GetTotalHeightOfItemsInView(mainGap, irregular);
     float mainContentSize = GetMainContentSize();
     if (info_.offsetEnd_) {
-        if (source == SCROLL_FROM_UPDATE) {
+        if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_BAR_OVER_DRAG) {
             float overScroll = 0.0f;
             if (GetTotalHeight() <= mainContentSize) {
                 overScroll = GetTotalOffset();
@@ -482,7 +488,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         return true;
     }
     if (info_.reachStart_) {
-        if (source == SCROLL_FROM_UPDATE) {
+        if (source == SCROLL_FROM_UPDATE || source == SCROLL_FROM_BAR_OVER_DRAG) {
             if (!NearZero(mainContentSize)) {
                 auto friction = CalculateFriction(std::abs(info_.currentOffset_) / mainContentSize);
                 offset *= friction;
@@ -872,6 +878,7 @@ void GridPattern::ScrollTo(float position)
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
     SetIsOverScroll(GetCanStayOverScroll());
     // AccessibilityEventType::SCROLL_END
+    ContentChangeReport(GetHost());
 }
 
 float GridPattern::EstimateHeight() const
@@ -1482,6 +1489,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             UpdateStartIndex(index, align);
+            ContentChangeReport(host);
         }
     }
     FireAndCleanScrollingListener();
@@ -1820,5 +1828,40 @@ float GridPattern::GetOffsetWithLimit(float offset) const
         return std::max(offset, -remainHeight);
     }
     return 0;
+}
+
+void GridPattern::ReportOnItemGridEvent(const std::string& event)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    auto gridEvent = std::string("Grid.") + event;
+    params->Put("name", gridEvent.c_str());
+    params->Put("nodeId", nodeId);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
+        ComponentEventType::COMPONENT_EVENT_SCROLL);
+}
+
+int32_t GridPattern::OnInjectionEvent(const std::string& command)
+{
+    std::string ret = ScrollablePattern::ParseCommand(command);
+    if (ret == "scrollForward") {
+        ScrollPage(true);
+    } else if (ret == "scrollBackward") {
+        ScrollPage(false);
+    } else {
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
 }
 } // namespace OHOS::Ace::NG

@@ -22,7 +22,7 @@
 namespace OHOS::Ace::NG {
 void LinearSplitModelNG::Create(SplitType splitType)
 {
-    std::string tag = splitType == SplitType::ROW_SPLIT ? V2::ROW_SPLIT_ETS_TAG : V2::COLUMN_SPLIT_ETS_TAG;
+    std::string tag = splitType == SplitType::ROW_SPLIT ? ROW_SPLIT_ETS_TAG : COLUMN_SPLIT_ETS_TAG;
     auto* stack = ViewStackProcessor::GetInstance();
     int32_t nodeId = (stack == nullptr ? 0 : stack->ClaimNodeId());
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag.c_str(), nodeId);

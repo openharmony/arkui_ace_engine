@@ -15,8 +15,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("box_layout_algorithm_test_ng") {
   type = "new"
-  module_name = "Component-Layout"
-  module_output = "layout"
+  module_name = "CommonProperties-LayoutAndBorder"
   sources = [
     "box_layout_algorithm_test.cpp",
     "old_cases/box_layout_algorithm_test_old.cpp",

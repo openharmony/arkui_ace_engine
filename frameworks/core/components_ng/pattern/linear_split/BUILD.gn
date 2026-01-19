@@ -1,0 +1,45 @@
+# Copyright (c) 2026 Huawei Device Co., Ltd.
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import("//foundation/arkui/ace_engine/ace_config.gni")
+import("//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
+
+build_component_ng("linear_split_pattern_ng") {
+  is_component_model = true
+  sources = [
+    "linear_split_layout_algorithm.cpp",
+    "linear_split_model_ng.cpp",
+    "linear_split_model_ng_static.cpp",
+    "linear_split_paint_method.cpp",
+    "linear_split_pattern.cpp",
+  ]
+
+  ark_sources = [
+    "bridge/arkts_native_column_split_bridge.cpp",
+    "bridge/arkts_native_row_split_bridge.cpp",
+    "bridge/column_split_dynamic_modifier.cpp",
+    "bridge/column_split_dynamic_module.cpp",
+    "bridge/row_split_dynamic_modifier.cpp",
+    "bridge/row_split_dynamic_module.cpp",
+  ]
+
+  if (!is_arkui_x) {
+    if (!ace_engine_feature_wearable) {
+      ark_sources += [
+        "bridge/column_split_static_modifier.cpp",
+        "bridge/row_split_static_modifier.cpp", 
+        ]
+    }
+    ark_sources += [ "linear_split_model_impl.cpp" ]
+  }
+}

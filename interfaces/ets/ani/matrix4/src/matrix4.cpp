@@ -39,11 +39,13 @@ namespace {
 ani_class g_matrix4Class[2] = { nullptr };
 enum class MatrixClassName : int32_t {
     TRANSIT_INNER = 0, // "@ohos.matrix4.matrix4.Matrix4TransitInner"
-    ESCOMPAT = 1,      // "escompat.Array"
+    ESCOMPAT = 1, // "std.core.Array"
 };
-const char* g_matrixClassName[2] = { "@ohos.matrix4.matrix4.Matrix4TransitInner", "escompat.Array" };
+const char* g_matrixClassName[2] = {
+    "@ohos.matrix4.matrix4.Matrix4TransitInner",
+    "std.core.Array"
+};
 ani_class GetOrCreateMatrix4Class(ani_env* env, MatrixClassName matrixClassName)
-
 {
     int32_t index = static_cast<int32_t>(matrixClassName);
     if (g_matrix4Class[index]) {
@@ -66,7 +68,6 @@ ani_class GetOrCreateMatrix4Class(ani_env* env, MatrixClassName matrixClassName)
 
 ani_method g_matrix4ToDoubleMethod;
 ani_method GetOrCreateToDoubleMethod(ani_env* env)
-
 {
     if (g_matrix4ToDoubleMethod) {
         return g_matrix4ToDoubleMethod;
@@ -88,7 +89,6 @@ ani_method GetOrCreateToDoubleMethod(ani_env* env)
 
 ani_method g_matrix4ToIntMethod;
 ani_method GetOrCreateToIntMethod(ani_env* env)
-
 {
     if (g_matrix4ToIntMethod) {
         return g_matrix4ToIntMethod;
@@ -100,7 +100,7 @@ ani_method GetOrCreateToIntMethod(ani_env* env)
     }
 
     ani_method result;
-    if (ANI_OK != env->Class_FindMethod(intClass, "unboxed", nullptr, &result)) {
+    if (ANI_OK != env->Class_FindMethod(intClass, "toInt", nullptr, &result)) {
         return nullptr;
     }
 
@@ -137,12 +137,12 @@ ani_method GetOrCreateArrayGetMethod(ani_env* env)
     }
 
     ani_class arrayClass;
-    if (env->FindClass("escompat.Array", &arrayClass) != ANI_OK) {
+    if (env->FindClass("std.core.Array", &arrayClass) != ANI_OK) {
         return nullptr;
     }
 
     ani_method result;
-    if (ANI_OK != env->Class_FindMethod(arrayClass, "$_get", "i:C{std.core.Object}", &result)) {
+    if (ANI_OK != env->Class_FindMethod(arrayClass, "$_get", "i:Y", &result)) {
         return nullptr;
     }
 
@@ -230,7 +230,7 @@ Matrix4 ConvertToMatrixArray([[maybe_unused]] ani_env* env, [[maybe_unused]] ani
             }
             ani_double unboxedDouble {};
             if (env->Object_CallMethodByName_Double(
-                reinterpret_cast<ani_object>(value), "unboxed", ":d", &unboxedDouble) != ANI_OK) {
+                reinterpret_cast<ani_object>(value), "toDouble", ":d", &unboxedDouble) != ANI_OK) {
                 return result;
             }
             auto ret = static_cast<double>(unboxedDouble);
@@ -339,13 +339,13 @@ static ani_object Matrix4_Scale([[maybe_unused]] ani_env* env, ani_object object
     double xValue = 1.0;
     ParseOption(env, options, xValue, "x");
     double yValue = 1.0;
-    ParseOption(env, options, xValue, "y");
+    ParseOption(env, options, yValue, "y");
     double zValue = 1.0;
-    ParseOption(env, options, xValue, "z");
+    ParseOption(env, options, zValue, "z");
     double centerXValue = 0.0;
     ParseOption(env, options, centerXValue, "centerX");
     double centerYValue = 0.0;
-    ParseOption(env, options, centerXValue, "centerY");
+    ParseOption(env, options, centerYValue, "centerY");
 
     auto scaleMatrix = Matrix4::CreateScale(xValue, yValue, zValue);
     if (!NearZero(centerXValue) || !NearZero(centerYValue)) {
@@ -425,18 +425,21 @@ void ParseArray([[maybe_unused]] ani_env* env, const char* property, ani_object 
     if (!arrayClass) {
         return;
     }
+    ani_object builderObj = static_cast<ani_object>(params_ref);
     ani_boolean isArray;
-    if (ANI_OK != env->Object_InstanceOf(static_cast<ani_object>(params_ref), arrayClass, &isArray)) {
+    if (ANI_OK != env->Object_InstanceOf(builderObj, arrayClass, &isArray)) {
         return;
     }
-    ani_double length;
-    if (ANI_OK != env->Object_GetPropertyByName_Double(static_cast<ani_object>(params_ref), "length", &length)) {
+    ani_int arrLength;
+    ani_status status = env->Object_GetPropertyByName_Int(builderObj, "length", &arrLength);
+    if (ANI_OK != status) {
+        LOGI("matrix4, get array length fail. status=%{public}d", status);
         return;
     }
-    for (int i = 0; i < static_cast<int32_t>(length); i++) {
+    for (int i = 0; i < static_cast<int32_t>(arrLength); i++) {
         ani_ref pointRef;
         ani_method ctor = GetOrCreateArrayGetMethod(env);
-        if (ANI_OK != env->Object_CallMethod_Ref(static_cast<ani_object>(params_ref), ctor, &pointRef, (ani_int)i)) {
+        if (ANI_OK != env->Object_CallMethod_Ref(builderObj, ctor, &pointRef, (ani_int)i)) {
             break;
         }
         ani_object pointObject = static_cast<ani_object>(pointRef);
@@ -648,7 +651,7 @@ ani_status BindMatrixTransit(ani_env* env)
     };
 
     std::array staticMethod = {
-        ani_native_function  { "nativeTransferStatic", nullptr, reinterpret_cast<void*>(MatrixTransferStatic) }
+        ani_native_function { "nativeTransferStatic", nullptr, reinterpret_cast<void*>(MatrixTransferStatic) }
     };
     if (ANI_OK != env->Class_BindStaticNativeMethods(cls, staticMethod.data(), staticMethod.size())) {
         return ANI_ERROR;

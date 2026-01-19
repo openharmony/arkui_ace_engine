@@ -384,6 +384,7 @@ public:
     static void SetZIndex(int32_t value);
     // renderGroup
     static void SetRenderGroup(bool isRenderGroup);
+    static void SetAdaptiveGroup(bool isRenderGroup, bool useAdaptiveFilter);
     // exclude self and children from renderGroup
     static void SetExcludeFromRenderGroup(bool exclude);
     // renderFit, i.e. gravity
@@ -633,6 +634,8 @@ public:
 
     // useEffect
     static void SetUseEffect(bool useEffect, EffectType effectType);
+    // useUnion
+    static void SetUseUnion(bool useUnion);
 
     static void SetFreeze(bool freeze);
     static void SetAttractionEffect(const AttractionEffect& effect);
@@ -648,6 +651,9 @@ public:
 
     // clickEffect
     static void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue);
+
+    // enableClickSoundEffect
+    static void SetEnableClickSoundEffect(bool enabled);
 
     // custom animatable property
     static void CreateAnimatablePropertyFloat(
@@ -785,6 +791,7 @@ public:
     static void SetExcludeFromRenderGroup(FrameNode* frameNode, bool exclude);
     static void SetRenderFit(FrameNode* frameNode, RenderFit renderFit);
     static void SetUseEffect(FrameNode* frameNode, bool useEffect, EffectType effectType);
+    static void SetUseUnion(FrameNode* frameNode, bool useUnion);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color);
     static void SetForegroundColor(FrameNode* frameNode, const Color& color, const RefPtr<ResourceObject>& resObj);
     static void SetForegroundColorStrategy(FrameNode* frameNode, const ForegroundColorStrategy& strategy);
@@ -885,6 +892,7 @@ public:
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
     static HoverEffectType GetHoverEffect(FrameNode* frameNode);
     static void SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue);
+    static void SetEnableClickSoundEffect(FrameNode* frameNode, bool enabled);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 
@@ -1106,6 +1114,8 @@ public:
     static void SetCompositingFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* compositingFilter);
     static void SetMaterialFilter(FrameNode* frameNode, const OHOS::Rosen::Filter* materialFilter);
     static void SetSystemMaterial(FrameNode* frameNode, const UiMaterial* material);
+    // set systemMaterial for inner use, use SetSystemMaterial normally.
+    static void SetSystemMaterialImmediate(FrameNode* frameNode, const UiMaterial* material);
     static int32_t GetWindowWidthBreakpoint();
     static int32_t GetWindowHeightBreakpoint();
 
@@ -1181,10 +1191,7 @@ void SetOnVisibleAreaApproximateChangeMultiThread(FrameNode* frameNode,
     int32_t expectedUpdateInterval);
 void ResetAreaChangedMultiThread(FrameNode* frameNode);
 void ResetVisibleChangeMultiThread(FrameNode* frameNode);
-void SetFocusableMultiThread(FrameNode* frameNode, bool focusable);
 void SetNeedFocusMultiThread(FrameNode* frameNode, bool value);
-void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, double distanceThreshold);
-void SetOnClickMultiThread(FrameNode* frameNode, GestureEventFunc&& clickEventFunc, Dimension distanceThreshold);
 void SetBackgroundEffectMultiThread(FrameNode* frameNode, const EffectOption& effectOption,
     const SysOptions& sysOptions = SysOptions());
 void SetClickEffectLevelMultiThread(const ClickEffectLevel& level, float scaleValue);

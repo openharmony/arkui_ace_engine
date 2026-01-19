@@ -155,6 +155,23 @@ inline float NonZeroOrInteger(const double& value, const int32_t& integer)
     return NearZero(value) ? integer : static_cast<float>(value);
 }
 
+bool UsePredictPoints(const MMI::PointerEvent::PointerItem& pointerItem, TouchPoint& touchPoint)
+{
+    // Predict is for window X/Y coordinates only.
+    // In effect in game scenario only, display coords mismatch do not matter.
+    double predictX;
+    double predictY;
+    bool predictExists =
+        pointerItem.GetExtension(OHOS::MMI::PointerEvent::PointerItemExtension::PREDICT_WINDOW_X, predictX) &&
+        pointerItem.GetExtension(OHOS::MMI::PointerEvent::PointerItemExtension::PREDICT_WINDOW_Y, predictY);
+    if (!predictExists) {
+        return false;
+    }
+    touchPoint.x = predictX;
+    touchPoint.y = predictY;
+    return true;
+}
+
 TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, int32_t sourceType,
     bool useHighPrecision)
 {
@@ -164,12 +181,7 @@ TouchPoint ConvertTouchPoint(const MMI::PointerEvent::PointerItem& pointerItem, 
     touchPoint.id = pointerItem.GetPointerId();
     touchPoint.downTime = TimeStamp(std::chrono::microseconds(pointerItem.GetDownTime()));
     bool useHighPrecisionTouch = useHighPrecision && sourceType == OHOS::MMI::PointerEvent::SOURCE_TYPE_TOUCHSCREEN;
-    if (pointerItem.GetPredictExist()) {
-        // Predict is for window X/Y coordinates only.
-        // In effect in game scenario only, display coords mismatch do not matter.
-        touchPoint.x = pointerItem.GetWindowXPredict();
-        touchPoint.y = pointerItem.GetWindowYPredict();
-    } else {
+    if (!UsePredictPoints(pointerItem, touchPoint)) {
         if (useHighPrecisionTouch) {
             touchPoint.x = NonZeroOrInteger(pointerItem.GetWindowXPos(), pointerItem.GetWindowX());
             touchPoint.y = NonZeroOrInteger(pointerItem.GetWindowYPos(), pointerItem.GetWindowY());
@@ -974,6 +986,13 @@ void ConvertPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
     }
     int32_t orgAction = pointerEvent->GetPointerAction();
     GetPointerEventAction(orgAction, event);
+    if (event.action == PointerAction::PULL_UP) {
+        TAG_LOGD(AceLogTag::ACE_DRAG, "Transmits the authentication information.");
+        event.signature = pointerEvent->GetSignature();
+        event.dragEventData = { .timestampMs = pointerEvent->GetDistributeEventTime(),
+            .coordinateX = pointerItem.GetDisplayXPos(),
+            .coordinateY = pointerItem.GetDisplayYPos() };
+    }
 }
 
 void LogPointAxisInfo(const std::shared_ptr<MMI::PointerEvent>& pointerEvent)

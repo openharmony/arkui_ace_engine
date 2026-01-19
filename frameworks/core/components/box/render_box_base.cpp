@@ -17,7 +17,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/string_expression.h"
-#include "core/components/text_field/render_text_field.h"
+#include "compatible/components/text_field/render_text_field.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace {

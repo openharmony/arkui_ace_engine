@@ -316,14 +316,23 @@ public:
     {
         colors_ = colors;
     }
+    void SetDarkColors(const RefPtr<AniThemeColors>& colors)
+    {
+        darkColors_ = colors;
+    }
 
     const RefPtr<AniThemeColors>& Colors() const
     {
         return colors_;
     }
+    const RefPtr<AniThemeColors>& DarkColors() const
+    {
+        return darkColors_;
+    }
 
 private:
     RefPtr<AniThemeColors> colors_;
+    RefPtr<AniThemeColors> darkColors_;
 };
 
 class AniThemeScope {

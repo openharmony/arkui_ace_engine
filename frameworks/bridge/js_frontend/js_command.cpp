@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,13 @@
 #include "frameworks/bridge/js_frontend/js_command.h"
 
 #include "base/log/event_report.h"
+#include "compatible/components/search/dom_search.h"
+#include "compatible/components/text_field/dom_textarea.h"
 #include "core/common/dynamic_module_helper.h"
-#include "frameworks/bridge/common/dom/dom_search.h"
-#include "frameworks/bridge/common/dom/dom_textarea.h"
 #include "frameworks/bridge/js_frontend/engine/common/js_engine_loader.h"
 #include "frameworks/bridge/js_frontend/js_ace_page.h"
+
+#include "compatible/components/chart/chart_modifier_compatible.h"
 
 namespace OHOS::Ace::Framework {
 namespace {
@@ -75,20 +77,29 @@ std::vector<std::string> g_declarationNodes = {
 
 } // namespace
 
+static const ArkUIChartModifierCompatible* GetCachedModifier()
+{
+    static const auto* modifier = []() {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("chart");
+        CHECK_NULL_RETURN(loader, static_cast<const ArkUIChartModifierCompatible*>(nullptr));
+        return reinterpret_cast<const ArkUIChartModifierCompatible*>(loader->GetCustomModifier());
+    }();
+    return modifier;
+}
+
 void JsCommandDomElementOperator::UpdateForChart(const RefPtr<DOMNode>& node) const
 {
     if (chartDatasets_ || chartOptions_ || segments_) {
-        auto chart = AceType::DynamicCast<DOMChart>(node);
-        if (chart) {
-            if (chartDatasets_) {
-                chart->SetChartAttrDatasets(*chartDatasets_);
-            }
-            if (chartOptions_) {
-                chart->SetChartAttrOptions(*chartOptions_);
-            }
-            if (segments_) {
-                chart->SetChartAttrSegments(*segments_);
-            }
+        auto modifier = GetCachedModifier();
+        CHECK_NULL_VOID(modifier);
+        if (chartDatasets_) {
+            modifier->setChartDatasets(node, chartDatasets_.get());
+        }
+        if (chartOptions_) {
+            modifier->setChartOptions(node, chartOptions_.get());
+        }
+        if (segments_) {
+            modifier->setChartSegments(node, segments_.get());
         }
     }
 }
@@ -96,9 +107,9 @@ void JsCommandDomElementOperator::UpdateForChart(const RefPtr<DOMNode>& node) co
 void JsCommandDomElementOperator::UpdateForImageAnimator(const RefPtr<DOMNode>& node) const
 {
     if (images_) {
-        auto imageAnimator = AceType::DynamicCast<DOMImageAnimator>(node);
-        if (imageAnimator) {
-            imageAnimator->SetImagesAttr(*images_);
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("image-animator");
+        if (loader) {
+            loader->UpdateDomConfig(node, images_.get());
         }
     }
 }
@@ -106,9 +117,9 @@ void JsCommandDomElementOperator::UpdateForImageAnimator(const RefPtr<DOMNode>& 
 void JsCommandDomElementOperator::UpdateForClock(const RefPtr<DOMNode>& node) const
 {
     if (clockConfig_) {
-        auto domClock = AceType::DynamicCast<DOMClock>(node);
-        if (domClock) {
-            domClock->SetClockConfig(*clockConfig_);
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("clock");
+        if (loader) {
+            loader->UpdateDomConfig(node, clockConfig_.get());
         }
     }
 }
@@ -126,9 +137,9 @@ void JsCommandDomElementOperator::UpdateForBadge(const RefPtr<DOMNode>& node) co
 void JsCommandDomElementOperator::UpdateForStepperLabel(const RefPtr<DOMNode>& node) const
 {
     if (stepperLabel_) {
-        auto domStepperItem = AceType::DynamicCast<DOMStepperItem>(node);
-        if (domStepperItem) {
-            domStepperItem->SetLabel(*stepperLabel_);
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("stepper-item");
+        if (loader) {
+            loader->UpdateDomConfig(node, stepperLabel_.get());
         }
     }
 }
@@ -139,19 +150,19 @@ void JsCommandDomElementOperator::UpdateForInput(const RefPtr<DOMNode>& node) co
         return;
     }
 
-    auto input = AceType::DynamicCast<DOMInput>(node);
-    if (input) {
-        input->SetInputOptions(*inputOptions_);
+    auto inputLoader = DynamicModuleHelper::GetInstance().GetLoaderByName("input");
+    if (AceType::DynamicCast<DOMInput>(node) && inputLoader) {
+        inputLoader->UpdateDomConfig(node, inputOptions_.get());
         return;
     }
-    auto textarea = AceType::DynamicCast<DOMTextarea>(node);
-    if (textarea) {
-        textarea->SetInputOptions(*inputOptions_);
+    auto areaLoader = DynamicModuleHelper::GetInstance().GetLoaderByName("textarea");
+    if (AceType::DynamicCast<DOMTextarea>(node) && areaLoader) {
+        areaLoader->UpdateDomConfig(node, inputOptions_.get());
         return;
     }
-    auto search = AceType::DynamicCast<DOMSearch>(node);
-    if (search) {
-        search->SetInputOptions(*inputOptions_);
+    auto searchloader = DynamicModuleHelper::GetInstance().GetLoaderByName("search");
+    if (AceType::DynamicCast<DOMSearch>(node) && searchloader) {
+        searchloader->UpdateDomConfig(node, inputOptions_.get());
     }
 }
 
@@ -655,26 +666,6 @@ void JsCommandCallDomElementMethod::Execute(const RefPtr<JsAcePage>& page) const
     } else {
         node->CallMethod(method_, param_);
     }
-}
-
-void JsCommandContextOperation::Execute(const RefPtr<JsAcePage>& page) const
-{
-    if (!task_) {
-        return;
-    }
-    auto canvas = AceType::DynamicCast<DOMCanvas>(GetNodeFromPage(page, nodeId_));
-    if (!canvas) {
-        LOGE("Node %{private}d not exists or not a canvas", nodeId_);
-        return;
-    }
-    auto paintChild = AceType::DynamicCast<CustomPaintComponent>(canvas->GetSpecializedComponent());
-    ACE_DCHECK(paintChild);
-    auto pool = paintChild->GetTaskPool();
-    if (!pool) {
-        LOGE("canvas get pool failed");
-        return;
-    }
-    task_(pool);
 }
 
 void JsCommandXComponentOperation::Execute(const RefPtr<JsAcePage>& page) const

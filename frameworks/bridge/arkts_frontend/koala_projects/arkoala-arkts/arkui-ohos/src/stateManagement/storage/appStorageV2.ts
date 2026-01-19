@@ -18,22 +18,22 @@ import { StorageHelper } from './persistenceV2'
 import { StorageDefaultCreator } from './persistenceV2'
 import { transferTypeName } from './persistenceV2'
 import { StateMgmtConsole } from '../tools/stateMgmtDFX';
-import { InteropAppStorageV2 } from '../interop/interopStorageV2';
+import { InteropAppStorageV2 } from '@interopStorage/interopStorageV2';
 
 export class AppStorageV2 {
     public static connect<T extends object>(
-        ttype: Type,
+        ttype: Class,
         key: string,
         defaultCreator?: StorageDefaultCreator<T>
     ): T | undefined {
         return InteropAppStorageV2.instance().connect<T>(ttype, key, defaultCreator);
     }
 
-    public static connect<T extends object>(ttype: Type, defaultCreator?: StorageDefaultCreator<T>): T | undefined {
+    public static connect<T extends object>(ttype: Class, defaultCreator?: StorageDefaultCreator<T>): T | undefined {
         return InteropAppStorageV2.instance().connect<T>(ttype, defaultCreator);
     }
 
-    public static remove(keyOrType: string | Type): void {
+    public static remove(keyOrType: string | Class): void {
         InteropAppStorageV2.instance().remove(keyOrType);
     }
 
@@ -60,11 +60,24 @@ export class AppStorageV2Impl {
     }
 
     public connect<T extends object>(
-        ttype: Type,
+        ttype: Class,
         key: string,
         defaultCreator?: StorageDefaultCreator<T>
     ): T | undefined {
-        if (ttype.isPrimitive()) {
+        if (ttype.isPrimitive() ||
+            ttype === Class.from<void>() ||
+            ttype === Class.from<null>() ||
+            ttype === Class.from<undefined>() ||
+            ttype === Class.from<Boolean>() ||
+            ttype === Class.from<Byte>() ||
+            ttype === Class.from<Short>() ||
+            ttype === Class.from<Int>() ||
+            ttype === Class.from<Long>() ||
+            ttype === Class.from<Char>() ||
+            ttype === Class.from<Float>() ||
+            ttype === Class.from<Double>() ||
+            ttype === Class.from<Number>() ||
+            ttype === Class.from<String>()) {
             throw new Error(StorageHelper.INVALID_DEFAULT_VALUE_PRIMITIVE);
         }
         if (!StorageHelper.isKeyValid(key)) {
@@ -84,15 +97,15 @@ export class AppStorageV2Impl {
         }
 
         let obj = this.memorizedValues_.get(key!);
-        StorageHelper.checkTypeByType(key!, ttype, Type.of(obj));
+        StorageHelper.checkTypeByType(key!, ttype, Class.of(obj!));
         return obj as T;
     }
 
-    public connect<T extends object>(ttype: Type, defaultCreator?: StorageDefaultCreator<T>): T | undefined {
+    public connect<T extends object>(ttype: Class, defaultCreator?: StorageDefaultCreator<T>): T | undefined {
         return this.connect<T>(ttype, transferTypeName(ttype.getName()), defaultCreator);
     }
 
-    public remove(keyOrType: string | Type): void {
+    public remove(keyOrType: string | Class): void {
         const key = StorageHelper.getKeyOrTypeNameWithChecks(keyOrType);
         if (!key) {
             return;
@@ -123,7 +136,7 @@ export class AppStorageV2Impl {
         return obj!;
     }
 
-    public removeByInterop(keyOrType: string | Type): boolean {
+    public removeByInterop(keyOrType: string | Class): boolean {
         const key = StorageHelper.getKeyOrTypeNameWithChecks(keyOrType);
         if (!key) {
             return false;

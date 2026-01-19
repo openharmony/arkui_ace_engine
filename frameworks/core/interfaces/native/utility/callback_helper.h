@@ -31,7 +31,7 @@
 namespace OHOS::Ace::NG {
 
 #if !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
-RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyNode> CreateProxyNode(const RefPtr<UINode>& uiNode);
+ACE_FORCE_EXPORT RefPtr<OHOS::Ace::NG::DetachedFreeRootProxyNode> CreateProxyNode(const RefPtr<UINode>& uiNode);
 #endif // !defined(PREVIEW) && !defined(ARKUI_CAPI_UNITTEST)
 
 namespace GeneratedApiImpl {

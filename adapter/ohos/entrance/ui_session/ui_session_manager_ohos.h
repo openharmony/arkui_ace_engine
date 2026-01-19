@@ -34,9 +34,9 @@ public:
     void ReportSearchEvent(const std::string& data) override;
     void ReportTextChangeEvent(const std::string& data) override;
     void ReportRouterChangeEvent(const std::string& data) override;
-    void ReportComponentChangeEvent(const std::string& key, const std::string& value) override;
-    void ReportComponentChangeEvent(
-        int32_t nodeId, const std::string& key, const std::shared_ptr<InspectorJsonValue>& value) override;
+    void ReportComponentChangeEvent(const std::string& key, const std::string& value, uint32_t eventType) override;
+    void ReportComponentChangeEvent(int32_t nodeId, const std::string& key,
+        const std::shared_ptr<InspectorJsonValue>& value, uint32_t eventType) override;
     void ReportWebInputEvent(
         int64_t accessibilityId, const std::string& data, const std::string& type = "") override;
     void ReportScrollEvent(const std::string& data) override;
@@ -47,6 +47,7 @@ public:
     void SetTextChangeEventRegistered(bool status) override;
     void SetRouterChangeEventRegistered(bool status) override;
     void SetComponentChangeEventRegistered(bool status) override;
+    void SetComponentChangeEventMask(uint32_t mask) override;
     void SetScrollEventRegistered(bool status) override;
     void SetLifeCycleEventRegistered(bool status) override;
     void SetSelectTextEventRegistered(bool status) override;
@@ -55,6 +56,7 @@ public:
     bool GetTextChangeEventRegistered() override;
     bool GetRouterChangeEventRegistered() override;
     bool GetComponentChangeEventRegistered() override;
+    bool NeedComponentChangeTypeReporting(uint32_t eventType) override;
     bool GetScrollEventRegistered() override;
     bool GetLifeCycleEventRegistered() override;
     bool GetSelectTextEventRegistered() override;
@@ -88,6 +90,7 @@ public:
     void SaveBaseInfo(const std::string& info) override;
     void SendBaseInfo(int32_t processId) override;
     void SaveGetPixelMapFunction(GetPixelMapFunction&& function) override;
+    void SaveGetImagesByIdFunction(GetImagesByIdFunction&& function) override;
     void SaveTranslateManager(std::shared_ptr<UiTranslateManager> uiTranslateManager,
         int32_t instanceId) override;
     void SaveGetCurrentInstanceIdCallback(std::function<int32_t()>&& callback) override;
@@ -106,7 +109,14 @@ public:
     void SendTranslateResult(int32_t nodeId, std::string res) override;
     void ResetTranslate(int32_t nodeId) override;
     void GetPixelMap() override;
+    void GetMultiImagesById(const std::vector<int32_t>& arkUIIds,
+        const std::map<int32_t, std::vector<int32_t>>& arkWebs) override;
     void SendPixelMap(const std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>& maps) override;
+    void SendArkUIImagesById(int32_t windowId,
+        const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>& componentImages,
+        MultiImageQueryErrorCode arkUIErrorCode) override;
+    void SendArkWebImagesById(int32_t windowId, const std::map<int32_t, std::map<int32_t,
+        std::shared_ptr<Media::PixelMap>>>& webImages, MultiImageQueryErrorCode arkWebErrorCode) override;
     void GetVisibleInspectorTree(ParamConfig config = ParamConfig()) override;
     void SendCommand(const std::string& command) override;
     void SaveSendCommandFunction(SendCommandFunction&& function) override;
@@ -123,6 +133,10 @@ public:
         const std::string& ComponentName, const std::string& propertyName, const std::string& jsonPath) override;
     void SaveGetStateMgmtInfoFunction(GetStateMgmtInfoFunction&& callback) override;
     void ReportGetStateMgmtInfo(std::vector<std::string> results) override;
+    void SaveGetWebInfoByRequestFunction(GetWebInfoByRequestFunction&& callback) override;
+    void GetWebInfoByRequest(int32_t webId, const std::string& request) override;
+    void SendWebInfoByRequest(uint32_t windowId, int32_t webId, const std::string& request,
+        const std::string& result, WebRequestErrorCode errorCode) override;
 
     void SaveReportStub(sptr<IRemoteObject> reportStub, int32_t processId);
 

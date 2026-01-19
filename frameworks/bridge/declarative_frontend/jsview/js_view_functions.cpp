@@ -382,6 +382,10 @@ void ViewFunctions::InitViewFunctions(
             jsSetPrebuildPhase_ = JSRef<JSFunc>::Cast(jsSetPrebuildPhase);
         }
     }
+    JSRef<JSVal> jsTriggerLifecycleFunc = jsObject->GetProperty("__triggerLifecycle__Internal");
+    if (jsTriggerLifecycleFunc->IsFunction()) {
+        jsTriggerLifecycleFunc_ = JSRef<JSFunc>::Cast(jsTriggerLifecycleFunc);
+    }
 
     JSRef<JSVal> jsAppearFunc = jsObject->GetProperty("aboutToAppear");
     if (jsAppearFunc->IsFunction()) {
@@ -614,6 +618,24 @@ void ViewFunctions::ExecuteAboutToBeDeleted()
     } else {
         LOGE("jsView Object is undefined and will not execute aboutToBeDeleted function");
     }
+}
+
+bool ViewFunctions::ExecuteTriggerLifecycle(int32_t eventId)
+{
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(context_, false);
+    auto func = jsTriggerLifecycleFunc_.Lock();
+    if (func->IsEmpty()) {
+        return false;
+    }
+    JSRef<JSVal> jsObject = jsObject_.Lock();
+    if (jsObject->IsUndefined()) {
+        LOGE("jsView Object is undefined and will not execute jsTriggerLifecycleFunc function");
+        return false;
+    }
+    JSRef<JSVal> params[1];
+    params[0] = JSRef<JSVal>(JSVal(JsiValueConvertor::toJsiValue(eventId)));
+    auto result = func->Call(jsObject, 1, params);
+    return result->IsBoolean() && result->ToBoolean();
 }
 
 void ViewFunctions::ExecuteAboutToRender()

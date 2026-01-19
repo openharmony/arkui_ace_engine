@@ -1,4 +1,6 @@
 #!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+
 # Copyright (c) 2025 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -23,25 +25,51 @@ let __CreateErrorCode;
     __CreateErrorCode.NO_ERROR = 0;
     __CreateErrorCode.IMAGES_OVERSIZE = 1;
     __CreateErrorCode.CONTENT_OVERSIZE = 2;
+    __CreateErrorCode.INVALID_INSTANCE_ID = 3;
+    __CreateErrorCode.PARAMETERS_ERROR = 4;
 })(__CreateErrorCode || (__CreateErrorCode = {}));
 
-export function __localImageGeneratorDialogCreator(options) {
+export function __localImageGeneratorDialogCreator(options, instanceId) {
     if (options) {
         if (options.images && options.images.length > 4) {
+            AbnormalPopUp.PopUpWindows(ImageGeneratorDialogErrorCode.IMAGES_OVERSIZE);
             return __CreateErrorCode.IMAGES_OVERSIZE;
         }
-        if (options.content && (typeof options.content === 'string') && options.content.length > 600) {
+        if (options.content && (typeof options.content === 'string') && options.content.length > 280) {
+            AbnormalPopUp.PopUpWindows(ImageGeneratorDialogErrorCode.CONTENT_OVERSIZE);
             return __CreateErrorCode.CONTENT_OVERSIZE;
+        } else if (options.content && (typeof options.content === 'object')) {
+            try {
+                let strValue = getContext(this).resourceManager.getStringSync(options.content);
+                options.content = strValue;
+                if (options.content.length > 280) {
+                    AbnormalPopUp.PopUpWindows(ImageGeneratorDialogErrorCode.CONTENT_OVERSIZE);
+                    return __CreateErrorCode.CONTENT_OVERSIZE;
+                }
+            } catch (error) {
+                return __CreateErrorCode.PARAMETERS_ERROR;
+            }
         }
     }
-    console.info('[imageGenerator]', `will call loadImageGeneratorDialog`);
-    ViewStackProcessor.StartGetAccessRecordingFor(ViewStackProcessor.AllocateNewElmetIdForNextComponent());
-    loadImageGeneratorDialog(new ImageGeneratorDialog(undefined, {options: options}));
-    ViewStackProcessor.StopGetAccessRecording();
+    if (!instanceId || instanceId === -1) {
+        return __CreateErrorCode.INVALID_INSTANCE_ID;
+    }
+    globalThis.__getUIContext__(instanceId).runScopedTask(() => {
+        console.info('[imageGenerator]', `will call loadImageGeneratorDialog`);
+        ViewStackProcessor.StartGetAccessRecordingFor(ViewStackProcessor.AllocateNewElmetIdForNextComponent());
+        loadImageGeneratorDialog(new ImageGeneratorDialog(undefined, {options: options}));
+        ViewStackProcessor.StopGetAccessRecording();
+    })
     return __CreateErrorCode.NO_ERROR;
 }
 globalThis.__imageGeneratorDialogCreator = __localImageGeneratorDialogCreator;
 '''
+
+SYSTEM_HANDLED_FUNC = ["onXIconClicked"]
+
+def is_match_system_handled_functions(line):
+    function_name = line[line.find('function') + len('function') : line.find('(')]
+    return function_name.strip() in SYSTEM_HANDLED_FUNC
 
 def convert_imports_to_requirenapi(line):
     new_line = ''
@@ -66,20 +94,27 @@ def convert_imports_to_requirenapi(line):
     return new_line
 
 def modify_js(file_to_modify):
-    pattern = r'import[\s+|\S+]+from[\s+|\S+]+'
+    import_pattern = r'import[\s+|\S+]+from[\s+|\S+]+'
+    function_declare_pattern = r'function [\s+\S+]+'
     lines = []
     with open(file_to_modify, 'r', encoding='utf-8') as file:
         lines = file.readlines()
 
     with open(file_to_modify, 'w', encoding='utf-8') as file:
         # replace import to requireNapi begin
-        line_number = 0
-        for line in lines:
-            if not re.match(pattern, line):
+        for line_number in range(len(lines)):
+            line = lines[line_number]
+            if not re.match(import_pattern, line):
                 break
             lines[line_number] = convert_imports_to_requirenapi(line)
             line_number = line_number + 1
         # replace import to requireNapi end
+        # delete system handled func in summary.js begin
+        for line_number in range(len(lines)):
+            line = lines[line_number]
+            if re.match(function_declare_pattern, line) and is_match_system_handled_functions(line):
+                lines[line_number] = ""
+        # delete system handled func in summary.js end
         # append imageGenerator creator func begin
         lines.append(IMAGE_GENERATOR_CREATOR)
         # append imageGenerator creator func end

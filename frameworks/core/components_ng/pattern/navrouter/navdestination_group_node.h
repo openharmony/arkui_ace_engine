@@ -217,7 +217,7 @@ public:
     void ReleaseTextNodeList();
     void CollectTextNodeAsRenderGroup(bool isPopPage);
 
-    void CleanContent(bool cleanDirectly = false, bool allowTransition = false);
+    void CleanContent(bool cleanDirectly = false, bool allowTransition = false, bool needSkipClean = false);
     bool IsNeedContentTransition();
     bool TransitionContentInValid();
     bool IsNeedTitleTransition();
@@ -280,6 +280,8 @@ public:
     {
         return isTitleConsumedElapsedTime_;
     }
+    void ContentChangeReport();
+
 private:
     int32_t DoCustomTransition(NavigationOperation operation, bool isEnter);
     int32_t DoSystemTransition(NavigationOperation operation, bool isEnter);
@@ -295,7 +297,7 @@ private:
     void ResetCustomTransitionAnimationProperties();
 
     std::optional<AnimationOption> GetTransitionAnimationOption(NavigationOperation operation, bool isEnter) const;
-    std::function<void()> BuildTransitionFinishCallback(
+    std::function<void()> BuildTransitionFinishCallback(bool needReport = false,
         bool isSystemTransition = true, std::function<void()>&& extraOption = nullptr);
     std::function<void()> BuildEmptyFinishCallback();
 

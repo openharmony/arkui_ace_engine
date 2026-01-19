@@ -64,10 +64,36 @@ bool ImageSourceInfo::IsValidBase64Head(const std::string& uri, const std::strin
     return std::regex_match(base64Head, regular);
 }
 
-bool ImageSourceInfo::IsUriOfDataAbilityEncoded(const std::string& uri, const std::string& pattern)
+bool ImageSourceInfo::IsFileMediaThumbnailUri(const std::string& uri)
 {
-    std::regex regular(pattern);
-    return std::regex_match(uri, regular);
+    static const std::regex REG("^file://media/.*thumbnail.*$");
+    return std::regex_match(uri, REG);
+}
+
+bool ImageSourceInfo::IsFileMediaAstcUri(const std::string& uri)
+{
+    static const std::regex REG("^file://media/.*astc.*$");
+    return std::regex_match(uri, REG);
+}
+
+bool ImageSourceInfo::IsFileMediaUri(const std::string& uri)
+{
+    static const std::regex REG("^file://media/.*");
+    return std::regex_match(uri, REG);
+}
+
+bool ImageSourceInfo::IsDataAbilityThumbnailUri(const std::string& uri)
+{
+    static const std::regex REG1("^dataability://.*?/media/.*thumbnail.*$");
+    static const std::regex REG2("^datashare://.*?/media/.*thumbnail.*$");
+    return std::regex_match(uri, REG1) || std::regex_match(uri, REG2);
+}
+
+bool ImageSourceInfo::IsDataAbilityMediaUri(const std::string& uri)
+{
+    static const std::regex REG1("^dataability://.*?/media/.*$");
+    static const std::regex REG2("^datashare://.*?/media/.*$");
+    return std::regex_match(uri, REG1) || std::regex_match(uri, REG2);
 }
 
 SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
@@ -84,11 +110,13 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     if (head == "http" || head == "https") {
         return SrcType::NETWORK;
     } else if (head == "file") {
-        if (IsUriOfDataAbilityEncoded(uri, "^file://media/.*thumbnail.*$")) {
+        if (IsFileMediaThumbnailUri(uri)) {
             return SrcType::DATA_ABILITY_DECODED;
-        } else if (IsUriOfDataAbilityEncoded(uri, "^file://media/.*astc.*$")) {
+        }
+        if (IsFileMediaAstcUri(uri)) {
             return SrcType::ASTC;
-        } else if (IsUriOfDataAbilityEncoded(uri, "^file://media/.*")) {
+        }
+        if (IsFileMediaUri(uri)) {
             return SrcType::DATA_ABILITY;
         }
         return SrcType::FILE;
@@ -107,8 +135,7 @@ SrcType ImageSourceInfo::ResolveURIType(const std::string& uri)
     } else if (head == "resource") {
         return SrcType::RESOURCE;
     } else if (head == "dataability" || head == "datashare") {
-        if (IsUriOfDataAbilityEncoded(uri, "^dataability://.*?/media/.*thumbnail.*$") ||
-            IsUriOfDataAbilityEncoded(uri, "^datashare://.*?/media/.*thumbnail.*$")) {
+        if (IsDataAbilityThumbnailUri(uri)) {
             return SrcType::DATA_ABILITY_DECODED;
         }
         return SrcType::DATA_ABILITY;
@@ -181,6 +208,19 @@ ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<std::string>& imageSrc, s
     GenerateCacheKey();
 }
 
+ImageSourceInfo::ImageSourceInfo(const std::shared_ptr<uint8_t[]>& buffer, size_t bufferSize)
+    : buffer_(buffer), bufferSize_(bufferSize)
+{
+    isSvg_ = true;
+    auto pipelineContext = NG::PipelineContext::GetCurrentContext();
+    if (pipelineContext) {
+        localColorMode_ = pipelineContext->GetLocalColorMode();
+    }
+    srcType_ = SrcType::STREAM;
+
+    GenerateCacheKey();
+}
+
 SrcType ImageSourceInfo::ResolveSrcType() const
 {
     if (pixmap_) {
@@ -204,7 +244,8 @@ void ImageSourceInfo::GenerateCacheKey()
         .append(moduleName_)
         .append(std::to_string(static_cast<int32_t>(resourceId_)))
         .append(std::to_string(static_cast<int32_t>(Container::CurrentColorMode())))
-        .append(std::to_string(static_cast<int32_t>(localColorMode_)));
+        .append(std::to_string(static_cast<int32_t>(localColorMode_)))
+        .append(std::to_string(reinterpret_cast<std::size_t>(buffer_.get())));
     if (srcType_ == SrcType::BASE64) {
         name.append("SrcType:BASE64");
     }
@@ -223,6 +264,10 @@ bool ImageSourceInfo::operator==(const ImageSourceInfo& info) const
     }
     // only svg uses fillColor
     if (isSvg_ && fillColor_ != info.fillColor_) {
+        return false;
+    }
+
+    if (buffer_ != info.buffer_) {
         return false;
     }
     return ((!pixmap_ && !info.pixmap_) || (pixmap_ && info.pixmap_ && pixmapBuffer_ == info.pixmap_->GetPixels() &&
@@ -393,6 +438,16 @@ const RefPtr<PixelMap>& ImageSourceInfo::GetPixmap() const
     return pixmap_;
 }
 
+const std::shared_ptr<uint8_t[]>& ImageSourceInfo::GetBuffer() const
+{
+    return buffer_;
+}
+
+size_t ImageSourceInfo::GetBufferSize() const
+{
+    return bufferSize_;
+}
+
 bool ImageSourceInfo::SupportObjCache() const
 {
     if (IsPixmap()) {
@@ -438,6 +493,15 @@ void ImageSourceInfo::SetImageHdr(bool isHdr)
 bool ImageSourceInfo::IsImageHdr() const
 {
     return isHdr_;
+}
+
+void ImageSourceInfo::UpdateLocalColorMode(ColorMode localColorMode)
+{
+    if (localColorMode_ == localColorMode || srcType_ != SrcType::RESOURCE) {
+        return;
+    }
+    localColorMode_ = localColorMode;
+    GenerateCacheKey();
 }
 
 std::string ImageSourceInfo::GetTaskKey() const

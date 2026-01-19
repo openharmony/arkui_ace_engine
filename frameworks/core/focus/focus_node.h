@@ -311,7 +311,7 @@ private:
     Rect rectFromOrigin_;
 };
 
-class ACE_EXPORT FocusGroup : public FocusNode {
+class ACE_FORCE_EXPORT FocusGroup : public FocusNode {
     DECLARE_ACE_TYPE(FocusGroup, FocusNode);
 
 public:

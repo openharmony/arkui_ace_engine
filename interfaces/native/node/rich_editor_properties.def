@@ -1,0 +1,11 @@
+#define IF_1(exp1, exp2) exp1
+#define IF_0(exp1, exp2) exp2
+/* X(needSetter, needGetter, needResetter, porpName) */
+X(1, 1, 1, RichEditorEnterKeyType)
+X(1, 1, 1, CaretColor)
+X(1, 1, 1, RichEditorScrollBarColor)
+X(1, 1, 1, RichEditorBarState)
+X(1, 1, 1, RichEditorEnableDataDetector)
+X(1, 0, 1, RichEditorDataDetectorConfig)
+#undef IF_1
+#undef IF_0

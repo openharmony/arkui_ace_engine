@@ -71,6 +71,8 @@ const std::unordered_map<std::string, LongScreenType> RES_LONG_SCREEN = {
 
 } // namespace
 
+SINGLETON_INSTANCE_IMPL(AceResKeyParser);
+
 AceResKeyParser::AceResKeyParser() = default;
 AceResKeyParser::~AceResKeyParser() = default;
 

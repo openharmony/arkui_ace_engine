@@ -15,8 +15,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("flex_test_ng") {
   type = "new"
-  module_name = "Component-Layout"
-  module_output = ""
+  module_name = "Layout-Flex"
   sources = [
     "flex_base_test_ng.cpp",
     "flex_new_test_ng_first_part.cpp",
@@ -31,10 +30,18 @@ ace_unittest("flex_test_ng") {
 
 ace_unittest("flex_overflow_test_ng") {
   type = "new"
-  module_name = "Component-Layout"
-  module_output = ""
+  module_name = "Layout-Flex"
   sources = [
-    "flex_overflow_test_ng.cpp",
     "flex_base_test_ng.cpp",
+    "flex_overflow_test_ng.cpp",
+  ]
+}
+
+ace_unittest("wrap_overflow_test_ng") {
+  type = "new"
+  module_name = "Layout-Flex"
+  sources = [
+    "flex_base_test_ng.cpp",
+    "wrap_overflow_test_ng.cpp",
   ]
 }

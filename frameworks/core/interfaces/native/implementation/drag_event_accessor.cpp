@@ -203,9 +203,46 @@ Ark_Int32 GetDisplayIdImpl(Ark_DragEvent peer)
     const auto value = info->GetDisplayId();
     return Converter::ArkValue<Ark_Int32>(value);
 }
+Ark_String GetDragSourceImpl(Ark_DragEvent peer)
+{
+    std::string errStr = "";
+    const auto errValue = Converter::ArkValue<Ark_String>(errStr);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(peer->dragInfo, errValue);
+    auto& value = peer->dragInfo->GetDragSource();
+    return Converter::ArkValue<Ark_String>(value);
+}
+Ark_Boolean IsRemoteImpl(Ark_DragEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Boolean>(false);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(peer->dragInfo, errValue);
+    auto isRemote = peer->dragInfo->isRemoteDev();
+    return Converter::ArkValue<Ark_Boolean>(isRemote);
+}
+void SetDataLoadParamsImpl(Ark_DragEvent peer,
+                           const Ark_unifiedDataChannel_DataLoadParams* dataLoadParams)
+{
+}
 void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
                                      const Ark_String* configuration)
 {
+}
+Ark_Float64 GetGlobalDisplayXImpl(Ark_DragEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(peer->dragInfo, errValue);
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(peer->dragInfo->GetGlobalDisplayX());
+    return Converter::ArkValue<Ark_Float64>(value);
+}
+Ark_Float64 GetGlobalDisplayYImpl(Ark_DragEvent peer)
+{
+    const auto errValue = Converter::ArkValue<Ark_Float64>(0);
+    CHECK_NULL_RETURN(peer, errValue);
+    CHECK_NULL_RETURN(peer->dragInfo, errValue);
+    const auto value = PipelineBase::Px2VpWithCurrentDensity(peer->dragInfo->GetGlobalDisplayY());
+    return Converter::ArkValue<Ark_Float64>(value);
 }
 Ark_DragBehavior GetDragBehaviorImpl(Ark_DragEvent peer)
 {
@@ -283,8 +320,13 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
         DragEventAccessor::GetVelocityYImpl,
         DragEventAccessor::GetVelocityImpl,
         DragEventAccessor::GetDisplayIdImpl,
+        DragEventAccessor::GetDragSourceImpl,
+        DragEventAccessor::IsRemoteImpl,
+        DragEventAccessor::SetDataLoadParamsImpl,
         DragEventAccessor::ExecuteDropAnimationImpl,
         DragEventAccessor::EnableInternalDropAnimationImpl,
+        DragEventAccessor::GetGlobalDisplayXImpl,
+        DragEventAccessor::GetGlobalDisplayYImpl,
         DragEventAccessor::GetDragBehaviorImpl,
         DragEventAccessor::SetDragBehaviorImpl,
         DragEventAccessor::GetUseCustomDropAnimationImpl,

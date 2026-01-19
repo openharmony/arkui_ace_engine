@@ -125,8 +125,8 @@ ohos_unittest("ui_event_test") {
 }
 
 ace_unittest("extension_custom_node_test_ng") {
+  module_name = "StateManagement-CustomCoponent"
   type = "new"
-  module_output = "basic"
   sources = [
     "$ace_root/frameworks/core/interfaces/native/node/extension_custom_node.cpp",
     "extension_custom_node_test_ng.cpp",
@@ -386,12 +386,12 @@ ohos_unittest("ui_input_event_test_coverage") {
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
     "ui_input_event_first_test.cpp",
-    "ui_input_event_test.cpp",
-    "ui_input_event_test_one.cpp",
     "ui_input_event_first_two_test.cpp",
-    "ui_input_event_test_two.cpp",
-    "ui_input_event_test_three.cpp",
+    "ui_input_event_test.cpp",
     "ui_input_event_test_five.cpp",
+    "ui_input_event_test_one.cpp",
+    "ui_input_event_test_three.cpp",
+    "ui_input_event_test_two.cpp",
   ]
 
   configs = [
@@ -870,10 +870,12 @@ ohos_unittest("native_render_node_test") {
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_utils.cpp",
+    "$ace_root/interfaces/native/node/node_visual_effect.cpp",
     "$ace_root/interfaces/native/node/progress_option.cpp",
     "$ace_root/interfaces/native/node/render_node.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
     "native_render_node_test.cpp",
+    "node_visual_effect_test.cpp",
   ]
 
   configs = [

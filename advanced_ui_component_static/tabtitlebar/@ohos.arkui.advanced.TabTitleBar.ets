@@ -24,7 +24,7 @@ import {
   ConstraintSizeOptions, focusControl, BorderOptions ,HitTestMode, SymbolEffect, ImageCompleteEvent, Resource,
   Image, Callback ,ImageFit, VerticalAlign, TextOverflow, TextAlign, ShadowStyle, BlurStyle,Margin, Padding,
   CommonMethod, ButtonOptions, ImageError, ImageOnCompleteCallback, ImageErrorCallback, SymbolGlyphModifier,
-  ClassCastError, ClickEvent, LocalizedPadding, LengthMetrics
+  ClassCastError, ClickEvent, LocalizedPadding, LengthMetrics, BusinessError
 } from "@ohos.arkui.component";
 import { State, Observed, PropRef, StorageLink, StorageProp, Watch } from '@ohos.arkui.stateManagement';
 import { Context, UIContext, MeasureUtils } from "@ohos.arkui.UIContext";
@@ -34,6 +34,7 @@ import { MeasureOptions } from '@ohos.measure';
 import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
 import hilog from '@ohos.hilog';
+import i18n from '@ohos.i18n';
 
 export class TabTitleBarMenuItem {
   value: ResourceStr = '';
@@ -149,10 +150,10 @@ export struct TabTitleBar {
     this.tabOffsets.push(tabOffset);
     tabOffset += TabContentItem.marginFirst;
 
-    this.tabItems.forEach((tabItem: TabTitleBarTabItem, index: number) => {
+    this.tabItems.forEach((tabItem: TabTitleBarTabItem, index: int) => {
       if (tabItem.icon !== undefined || tabItem.symbolStyle !== undefined) {
-        if (Math.abs(this.imageWidths[index as int]) > TabContentItem.imageHotZoneWidth) {
-          tabOffset += this.imageWidths[index as int];
+        if (Math.abs(this.imageWidths[index]) > TabContentItem.imageHotZoneWidth) {
+          tabOffset += this.imageWidths[index];
         } else {
           tabOffset += TabContentItem.imageHotZoneWidth;
         }
@@ -168,6 +169,17 @@ export struct TabTitleBar {
       }
       this.tabOffsets.push(tabOffset);
     })
+  }
+
+  private isRTL(): boolean {
+    try {
+      return i18n.isRTL(i18n.System.getSystemLanguage() as string) ?? false;
+    } catch (exception) {
+      const code: undefined | int = (exception as BusinessError)?.code;
+      const message: undefined | string = (exception as BusinessError)?.message;
+      hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to decideFontScale,cause, code: ${code}, message: ${message}`);
+      return false;
+    }
   }
 
   build() {
@@ -209,12 +221,21 @@ export struct TabTitleBar {
               .scrollBar(BarState.Off)
             }
 
-            this.GradientMask(this.leftContext2D, 0, TabTitleBar.totalHeight / 2,
-              TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2);
+            if (this.isRTL()) {
+              this.GradientMask(this.rightContext2D, TabTitleBar.gradientMaskWidth,
+                TabTitleBar.totalHeight / 2, 0, TabTitleBar.totalHeight / 2)
+            } else {
+              this.GradientMask(this.leftContext2D, 0, TabTitleBar.totalHeight / 2,
+                TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2)
+            }
           }
-
-          this.GradientMask(this.rightContext2D, TabTitleBar.gradientMaskWidth,
-            TabTitleBar.totalHeight / 2, 0, TabTitleBar.totalHeight / 2);
+          if (this.isRTL()) {
+            this.GradientMask(this.leftContext2D, 0, TabTitleBar.totalHeight / 2,
+              TabTitleBar.gradientMaskWidth, TabTitleBar.totalHeight / 2)
+          } else {
+            this.GradientMask(this.rightContext2D, TabTitleBar.gradientMaskWidth,
+              TabTitleBar.totalHeight / 2, 0, TabTitleBar.totalHeight / 2)
+          }
         }
         .blendMode(BlendMode.SRC_OVER, BlendApplyType.OFFSCREEN)
 
@@ -335,7 +356,7 @@ export struct CollapsibleMenuSection {
     } catch (exception) {
       let code: int | undefined = (exception as ClassCastError)?.code;
       let message: string | undefined = (exception as ClassCastError)?.message;
-      hilog.error(0x3900, 'tabTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to decideFontScale,cause, code: ${code}, message: ${message}`);
 
     }
     this.menuItems.forEach((item, index) => {
@@ -480,7 +501,7 @@ export struct CollapsibleMenuSection {
       } catch (exception) {
         let code: int | undefined = (exception as ClassCastError)?.code;
         let message: string | undefined = (exception as ClassCastError)?.message;
-        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
+        hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
       return resourceString;
     }
@@ -587,7 +608,7 @@ struct TabContentItem {
       } catch (exception) {
         let code: int | undefined = (exception as ClassCastError)?.code;
         let message: string | undefined = (exception as ClassCastError)?.message;
-        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
+        hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
       return resourceString;
     }
@@ -839,7 +860,7 @@ struct ImageMenuItem {
       } catch (exception) {
         let code: int | undefined = (exception as ClassCastError)?.code;
         let message: string | undefined = (exception as ClassCastError)?.message;
-        hilog.error(0x3900, 'Ace', `Faild to TabTitleBar toStringFormat,code: ${code},message:${message}`);
+        hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to TabTitleBar toStringFormat,code: ${code},message:${message}`);
       }
     } else if (this.item.accessibilityText) {
       if (typeof this.item.accessibilityText === 'string') {
@@ -1127,7 +1148,7 @@ struct TabTitleBarDialog {
     } catch (exception) {
       let code: int | undefined = (exception as ClassCastError)?.code;
       let message: string | undefined = (exception as ClassCastError)?.message;
-      hilog.error(0x3900, 'tabTitleBar', `Faild to getMainWindowSync,cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'AdvancedTabTitleBar', `Failed to getMainWindowSync,cause, code: ${code}, message: ${message}`);
     }
   }
 }

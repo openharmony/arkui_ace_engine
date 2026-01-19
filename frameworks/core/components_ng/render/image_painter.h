@@ -16,14 +16,16 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_IMAGE_PAINT_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_IMAGE_PAINT_H
 
+#include "ui/base/macros.h"
 #include "core/components/common/properties/background_image.h"
 #include "core/components/common/properties/alignment.h"
 #include "core/components_ng/render/canvas_image.h"
 #include "core/components_ng/render/drawing.h"
+#include "ui/base/macros.h"
 
 namespace OHOS::Ace::NG {
 
-class ImagePainter {
+class ACE_FORCE_EXPORT ImagePainter {
 public:
     explicit ImagePainter(const RefPtr<CanvasImage>& canvasImage) : canvasImage_(canvasImage) {}
     ~ImagePainter() = default;

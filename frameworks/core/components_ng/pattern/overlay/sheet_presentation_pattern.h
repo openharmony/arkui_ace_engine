@@ -90,17 +90,7 @@ public:
         return false;
     }
 
-    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
-    {
-        auto sheetType = sheetType_;
-        if (sheetType == SheetType::SHEET_SIDE) {
-            return MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
-        }
-        if (sheetType == SheetType::SHEET_CONTENT_COVER) {
-            return MakeRefPtr<SheetContentCoverLayoutAlgorithm>();
-        }
-        return MakeRefPtr<SheetPresentationLayoutAlgorithm>(sheetType, sheetPopupInfo_);
-    }
+    RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
@@ -1112,6 +1102,16 @@ public:
         return sheetHeightForTranslate_;
     }
 
+    void SetNeedDoubleAvoidAfterLayout(bool needDoubleAvoidAfterLayout)
+    {
+        needDoubleAvoidAfterLayout_ = needDoubleAvoidAfterLayout;
+    }
+
+    bool GetNeedDoubleAvoidAfterLayout() const
+    {
+        return needDoubleAvoidAfterLayout_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
@@ -1287,6 +1287,7 @@ private:
     RefPtr<SheetObject> sheetObject_;
     WeakPtr<FrameNode> dragBarNode_;
     float sheetHeightForTranslate_ { 0.0 };
+    bool needDoubleAvoidAfterLayout_ = false;
 };
 } // namespace OHOS::Ace::NG
 

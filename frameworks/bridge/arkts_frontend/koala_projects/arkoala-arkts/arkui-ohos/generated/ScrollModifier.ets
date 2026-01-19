@@ -16,9 +16,10 @@
 
 // WARNING! THIS FILE IS AUTO-GENERATED, DO NOT MAKE CHANGES, THEY WILL BE LOST ON NEXT GENERATION!
 
-import { CommonMethod, NestedScrollOptions, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod } from "./component/common"
+import { CommonMethod, NestedScrollOptions, OnWillStopDraggingCallback, OnDidStopDraggingCallback, ContentClipMode, EdgeEffectOptions, FadingEdgeOptions, ScrollableCommonMethod, Bindable } from "./component/common"
 import { BarState, Color, CrownSensitivity, EdgeEffect, ScrollSource, Edge } from "./component/enums"
 import { Resource } from "global.resource"
+import { VoidCallback } from "./component/units"
 import { extractors, AttributeModifier } from "#handwritten"
 import { RectShape } from "@ohos.arkui.shape"
 import { ScrollableCommonMethodModifier } from "./ScrollableCommonMethodModifier"
@@ -26,10 +27,10 @@ import { CommonMethodModifier } from "./CommonMethodModifier"
 import { ModifierState } from './CommonModifier'
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkScrollPeer, ScrollDirection, ScrollOnWillScrollCallback, ScrollOnScrollCallback, OnScrollEdgeCallback, OnScrollFrameBeginCallback, ScrollSnapOptions, OffsetOptions, ScrollAttribute } from "./component/scroll"
+import { ArkScrollPeer, ScrollDirection, ScrollOnWillScrollCallback, ScrollOnScrollCallback, OnScrollEdgeCallback, ScrollOnDidZoomCallback, OnScrollFrameBeginCallback, ScrollSnapOptions, OffsetOptions, ScrollAttribute } from "./component/scroll"
 import { int32 } from "@koalaui/common"
 import { ScrollState } from "./component/list"
-import { VoidCallback } from "./component/units"
+import { VoidCallback, ScrollBarMargin } from "./component/units"
 export class ScrollModifier extends CommonMethodModifier implements ScrollAttribute,AttributeModifier<ScrollAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState	
@@ -44,6 +45,14 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
     applySelectedAttribute(instance: ScrollAttribute): void { }
     _scrollable_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollable_0_0value?: ScrollDirection | undefined
+    _maxZoomScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _maxZoomScale_0_0value?: double | undefined
+    _minZoomScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _minZoomScale_0_0value?: double | undefined
+    _zoomScale_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _zoomScale_0_0value?: double | Bindable<double> | undefined
+    _enableBouncesZoom_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _enableBouncesZoom_0_0value?: boolean | undefined
     _onWillScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onWillScroll_0_0value?: ScrollOnWillScrollCallback | undefined
     _onDidScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -54,10 +63,16 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
     _onScrollStart_0_0value?: VoidCallback | undefined
     _onScrollStop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onScrollStop_0_0value?: VoidCallback | undefined
+    _onDidZoom_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDidZoom_0_0value?: ScrollOnDidZoomCallback | undefined
+    _onZoomStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onZoomStart_0_0value?: VoidCallback | undefined
+    _onZoomStop_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onZoomStop_0_0value?: VoidCallback | undefined
     _scrollBar_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollBar_0_0value?: BarState | undefined
     _scrollBarColor_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _scrollBarColor_0_0value?: Color | int32 | string | undefined
+    _scrollBarColor_0_0value?: Color | int32 | string | Resource | undefined
     _scrollBarWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _scrollBarWidth_0_0value?: double | string | undefined
     _onScrollFrameBegin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -77,12 +92,28 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
     _edgeEffect_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _edgeEffect_0_0value?: EdgeEffect | undefined
     _edgeEffect_0_1value?: EdgeEffectOptions | undefined
+    _scrollBarMargin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _scrollBarMargin_0_0value?: ScrollBarMargin | undefined
+    _contentStartOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentStartOffset_0_0value?: double | Resource | undefined
+    _contentEndOffset_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _contentEndOffset_0_0value?: double | Resource | undefined
+    _onWillStartDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillStartDragging_0_0value?: VoidCallback | undefined
+    _onWillStopDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillStopDragging_0_0value?: OnWillStopDraggingCallback | undefined
+    _onDidStopDragging_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDidStopDragging_0_0value?: OnDidStopDraggingCallback | undefined
+    _onWillStartFling_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onWillStartFling_0_0value?: VoidCallback | undefined
+    _onDidStopFling_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _onDidStopFling_0_0value?: VoidCallback | undefined
     _onReachStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onReachStart_0_0value?: (() => void) | undefined
     _onReachEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onReachEnd_0_0value?: (() => void) | undefined
     _flingSpeedLimit_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _flingSpeedLimit_0_0value?: number | undefined
+    _flingSpeedLimit_0_0value?: double | undefined
     _clipContent_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _clipContent_0_0value?: ContentClipMode | RectShape | undefined
     _digitalCrownSensitivity_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -111,6 +142,78 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 default: {
                     this._scrollable_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setScrollableAttribute((undefined as ScrollDirection | undefined));
+                }
+            }
+        }
+        if (this._maxZoomScale_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._maxZoomScale_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMaxZoomScaleAttribute((this._maxZoomScale_0_0value as double | undefined));
+                    this._maxZoomScale_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._maxZoomScale_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._maxZoomScale_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMaxZoomScaleAttribute((undefined as double | undefined));
+                }
+            }
+        }
+        if (this._minZoomScale_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._minZoomScale_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMinZoomScaleAttribute((this._minZoomScale_0_0value as double | undefined));
+                    this._minZoomScale_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._minZoomScale_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._minZoomScale_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMinZoomScaleAttribute((undefined as double | undefined));
+                }
+            }
+        }
+        if (this._zoomScale_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._zoomScale_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setZoomScaleAttribute((this._zoomScale_0_0value as double | Bindable<double> | undefined));
+                    this._zoomScale_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._zoomScale_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._zoomScale_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setZoomScaleAttribute((undefined as double | Bindable<double> | undefined));
+                }
+            }
+        }
+        if (this._enableBouncesZoom_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._enableBouncesZoom_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setEnableBouncesZoomAttribute((this._enableBouncesZoom_0_0value as boolean | undefined));
+                    this._enableBouncesZoom_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._enableBouncesZoom_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._enableBouncesZoom_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setEnableBouncesZoomAttribute((undefined as boolean | undefined));
                 }
             }
         }
@@ -204,6 +307,60 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
+        if (this._onDidZoom_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDidZoom_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDidZoomAttribute((this._onDidZoom_0_0value as ScrollOnDidZoomCallback | undefined));
+                    this._onDidZoom_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDidZoom_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDidZoom_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDidZoomAttribute((undefined as ScrollOnDidZoomCallback | undefined));
+                }
+            }
+        }
+        if (this._onZoomStart_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onZoomStart_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnZoomStartAttribute((this._onZoomStart_0_0value as VoidCallback | undefined));
+                    this._onZoomStart_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onZoomStart_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onZoomStart_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnZoomStartAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._onZoomStop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onZoomStop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnZoomStopAttribute((this._onZoomStop_0_0value as VoidCallback | undefined));
+                    this._onZoomStop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onZoomStop_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onZoomStop_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnZoomStopAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
         if (this._scrollBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._scrollBar_0_flag) {
@@ -226,7 +383,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             switch (this._scrollBarColor_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | int32 | string | undefined));
+                    peer.setScrollBarColorAttribute((this._scrollBarColor_0_0value as Color | int32 | string | Resource | undefined));
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -236,7 +393,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     this._scrollBarColor_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setScrollBarColorAttribute((undefined as Color | int32 | string | undefined));
+                    peer.setScrollBarColorAttribute((undefined as Color | int32 | string | Resource | undefined));
                 }
             }
         }
@@ -402,6 +559,150 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
+        if (this._scrollBarMargin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._scrollBarMargin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setScrollBarMarginAttribute((this._scrollBarMargin_0_0value as ScrollBarMargin | undefined));
+                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._scrollBarMargin_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setScrollBarMarginAttribute((undefined as ScrollBarMargin | undefined));
+                }
+            }
+        }
+        if (this._contentStartOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentStartOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setContentStartOffsetAttribute((this._contentStartOffset_0_0value as double | Resource | undefined));
+                    this._contentStartOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentStartOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentStartOffset_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setContentStartOffsetAttribute((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (this._contentEndOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._contentEndOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setContentEndOffsetAttribute((this._contentEndOffset_0_0value as double | Resource | undefined));
+                    this._contentEndOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._contentEndOffset_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._contentEndOffset_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setContentEndOffsetAttribute((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (this._onWillStartDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillStartDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillStartDraggingAttribute((this._onWillStartDragging_0_0value as VoidCallback | undefined));
+                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillStartDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillStartDraggingAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._onWillStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillStopDraggingAttribute((this._onWillStopDragging_0_0value as OnWillStopDraggingCallback | undefined));
+                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillStopDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillStopDraggingAttribute((undefined as OnWillStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (this._onDidStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDidStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDidStopDraggingAttribute((this._onDidStopDragging_0_0value as OnDidStopDraggingCallback | undefined));
+                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDidStopDragging_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDidStopDraggingAttribute((undefined as OnDidStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (this._onWillStartFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onWillStartFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnWillStartFlingAttribute((this._onWillStartFling_0_0value as VoidCallback | undefined));
+                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onWillStartFling_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnWillStartFlingAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (this._onDidStopFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._onDidStopFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setOnDidStopFlingAttribute((this._onDidStopFling_0_0value as VoidCallback | undefined));
+                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._onDidStopFling_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setOnDidStopFlingAttribute((undefined as VoidCallback | undefined));
+                }
+            }
+        }
         if (this._onReachStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._onReachStart_0_flag) {
@@ -442,7 +743,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             switch (this._flingSpeedLimit_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as number | undefined));
+                    peer.setFlingSpeedLimitAttribute((this._flingSpeedLimit_0_0value as double | undefined));
                     this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -452,7 +753,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
                 default: {
                     this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setFlingSpeedLimitAttribute((undefined as number | undefined));
+                    peer.setFlingSpeedLimitAttribute((undefined as double | undefined));
                 }
             }
         }
@@ -545,6 +846,58 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
+        if (modifier._maxZoomScale_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._maxZoomScale_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.maxZoomScale(modifier._maxZoomScale_0_0value);
+                    break;
+                }
+                default: {
+                    this.maxZoomScale((undefined as double | undefined));
+                }
+            }
+        }
+        if (modifier._minZoomScale_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._minZoomScale_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.minZoomScale(modifier._minZoomScale_0_0value);
+                    break;
+                }
+                default: {
+                    this.minZoomScale((undefined as double | undefined));
+                }
+            }
+        }
+        if (modifier._zoomScale_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._zoomScale_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.zoomScale(modifier._zoomScale_0_0value);
+                    break;
+                }
+                default: {
+                    this.zoomScale((undefined as double | Bindable<double> | undefined));
+                }
+            }
+        }
+        if (modifier._enableBouncesZoom_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._enableBouncesZoom_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.enableBouncesZoom(modifier._enableBouncesZoom_0_0value);
+                    break;
+                }
+                default: {
+                    this.enableBouncesZoom((undefined as boolean | undefined));
+                }
+            }
+        }
         if (modifier._onWillScroll_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onWillScroll_0_flag) {
@@ -610,6 +963,45 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
+        if (modifier._onDidZoom_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDidZoom_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDidZoom(modifier._onDidZoom_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDidZoom((undefined as ScrollOnDidZoomCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onZoomStart_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onZoomStart_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onZoomStart(modifier._onZoomStart_0_0value);
+                    break;
+                }
+                default: {
+                    this.onZoomStart((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onZoomStop_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onZoomStop_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onZoomStop(modifier._onZoomStop_0_0value);
+                    break;
+                }
+                default: {
+                    this.onZoomStop((undefined as VoidCallback | undefined));
+                }
+            }
+        }
         if (modifier._scrollBar_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._scrollBar_0_flag) {
@@ -632,7 +1024,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                     break;
                 }
                 default: {
-                    this.scrollBarColor((undefined as Color | int32 | string | undefined));
+                    this.scrollBarColor((undefined as Color | int32 | string | Resource | undefined));
                 }
             }
         }
@@ -753,6 +1145,110 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                 }
             }
         }
+        if (modifier._scrollBarMargin_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._scrollBarMargin_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.scrollBarMargin(modifier._scrollBarMargin_0_0value);
+                    break;
+                }
+                default: {
+                    this.scrollBarMargin((undefined as ScrollBarMargin | undefined));
+                }
+            }
+        }
+        if (modifier._contentStartOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentStartOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentStartOffset(modifier._contentStartOffset_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentStartOffset((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._contentEndOffset_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._contentEndOffset_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.contentEndOffset(modifier._contentEndOffset_0_0value);
+                    break;
+                }
+                default: {
+                    this.contentEndOffset((undefined as double | Resource | undefined));
+                }
+            }
+        }
+        if (modifier._onWillStartDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillStartDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillStartDragging(modifier._onWillStartDragging_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillStartDragging((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onWillStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillStopDragging(modifier._onWillStopDragging_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillStopDragging((undefined as OnWillStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onDidStopDragging_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDidStopDragging_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDidStopDragging(modifier._onDidStopDragging_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDidStopDragging((undefined as OnDidStopDraggingCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onWillStartFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onWillStartFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onWillStartFling(modifier._onWillStartFling_0_0value);
+                    break;
+                }
+                default: {
+                    this.onWillStartFling((undefined as VoidCallback | undefined));
+                }
+            }
+        }
+        if (modifier._onDidStopFling_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._onDidStopFling_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.onDidStopFling(modifier._onDidStopFling_0_0value);
+                    break;
+                }
+                default: {
+                    this.onDidStopFling((undefined as VoidCallback | undefined));
+                }
+            }
+        }
         if (modifier._onReachStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onReachStart_0_flag) {
@@ -788,7 +1284,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
                     break;
                 }
                 default: {
-                    this.flingSpeedLimit((undefined as number | undefined));
+                    this.flingSpeedLimit((undefined as double | undefined));
                 }
             }
         }
@@ -850,9 +1346,54 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._scrollable_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollable_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollable_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    maxZoomScale(value: double | undefined): this {
+        if (((this._maxZoomScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._maxZoomScale_0_0value) !== (value)))
+        {
+            this._maxZoomScale_0_flag = AttributeUpdaterFlag.UPDATE
+            this._maxZoomScale_0_0value = value
+        } else
+        {
+            this._maxZoomScale_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    minZoomScale(value: double | undefined): this {
+        if (((this._minZoomScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._minZoomScale_0_0value) !== (value)))
+        {
+            this._minZoomScale_0_flag = AttributeUpdaterFlag.UPDATE
+            this._minZoomScale_0_0value = value
+        } else
+        {
+            this._minZoomScale_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    zoomScale(value: double | Bindable<double> | undefined): this {
+        if (((this._zoomScale_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._zoomScale_0_flag = AttributeUpdaterFlag.UPDATE
+            this._zoomScale_0_0value = value
+        } else
+        {
+            this._zoomScale_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    enableBouncesZoom(value: boolean | undefined): this {
+        if (((this._enableBouncesZoom_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._enableBouncesZoom_0_0value) !== (value)))
+        {
+            this._enableBouncesZoom_0_flag = AttributeUpdaterFlag.UPDATE
+            this._enableBouncesZoom_0_0value = value
+        } else
+        {
+            this._enableBouncesZoom_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -861,6 +1402,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onWillScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onWillScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onWillScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -872,6 +1414,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onDidScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDidScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDidScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -883,6 +1426,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onScrollEdge_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollEdge_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollEdge_0_flag = AttributeUpdaterFlag.SKIP
@@ -894,6 +1438,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -905,9 +1450,43 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollStop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollStop_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onDidZoom(value: ScrollOnDidZoomCallback | undefined): this {
+        if (((this._onDidZoom_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDidZoom_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDidZoom_0_0value = value
+        } else
+        {
+            this._onDidZoom_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onZoomStart(value: VoidCallback | undefined): this {
+        if (((this._onZoomStart_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onZoomStart_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onZoomStart_0_0value = value
+        } else
+        {
+            this._onZoomStart_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onZoomStop(value: VoidCallback | undefined): this {
+        if (((this._onZoomStop_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onZoomStop_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onZoomStop_0_0value = value
+        } else
+        {
+            this._onZoomStop_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -916,17 +1495,19 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBar_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBar_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    scrollBarColor(value: Color | int32 | string | undefined): this {
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
         if (((this._scrollBarColor_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarColor_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarColor_0_flag = AttributeUpdaterFlag.SKIP
@@ -938,6 +1519,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollBarWidth_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollBarWidth_0_flag = AttributeUpdaterFlag.SKIP
@@ -949,6 +1531,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.UPDATE
             this._onScrollFrameBegin_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onScrollFrameBegin_0_flag = AttributeUpdaterFlag.SKIP
@@ -960,6 +1543,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
             this._nestedScroll_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
@@ -971,6 +1555,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableScrollInteraction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableScrollInteraction_0_flag = AttributeUpdaterFlag.SKIP
@@ -982,6 +1567,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._friction_0_flag = AttributeUpdaterFlag.UPDATE
             this._friction_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._friction_0_flag = AttributeUpdaterFlag.SKIP
@@ -993,6 +1579,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._scrollSnap_0_flag = AttributeUpdaterFlag.UPDATE
             this._scrollSnap_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._scrollSnap_0_flag = AttributeUpdaterFlag.SKIP
@@ -1004,6 +1591,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._enablePaging_0_flag = AttributeUpdaterFlag.UPDATE
             this._enablePaging_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enablePaging_0_flag = AttributeUpdaterFlag.SKIP
@@ -1015,6 +1603,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._initialOffset_0_flag = AttributeUpdaterFlag.UPDATE
             this._initialOffset_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._initialOffset_0_flag = AttributeUpdaterFlag.SKIP
@@ -1027,9 +1616,98 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
             this._edgeEffect_0_flag = AttributeUpdaterFlag.UPDATE
             this._edgeEffect_0_0value = edgeEffect
             this._edgeEffect_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._edgeEffect_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    scrollBarMargin(value: ScrollBarMargin | undefined): this {
+        if (((this._scrollBarMargin_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._scrollBarMargin_0_0value) !== (value)))
+        {
+            this._scrollBarMargin_0_flag = AttributeUpdaterFlag.UPDATE
+            this._scrollBarMargin_0_0value = value
+        } else
+        {
+            this._scrollBarMargin_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentStartOffset(value: double | Resource | undefined): this {
+        if (((this._contentStartOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._contentStartOffset_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentStartOffset_0_0value = value
+        } else
+        {
+            this._contentStartOffset_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    contentEndOffset(value: double | Resource | undefined): this {
+        if (((this._contentEndOffset_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._contentEndOffset_0_flag = AttributeUpdaterFlag.UPDATE
+            this._contentEndOffset_0_0value = value
+        } else
+        {
+            this._contentEndOffset_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillStartDragging(value: VoidCallback | undefined): this {
+        if (((this._onWillStartDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillStartDragging_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillStartDragging_0_0value = value
+        } else
+        {
+            this._onWillStartDragging_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillStopDragging(value: OnWillStopDraggingCallback | undefined): this {
+        if (((this._onWillStopDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillStopDragging_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillStopDragging_0_0value = value
+        } else
+        {
+            this._onWillStopDragging_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onDidStopDragging(value: OnDidStopDraggingCallback | undefined): this {
+        if (((this._onDidStopDragging_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDidStopDragging_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDidStopDragging_0_0value = value
+        } else
+        {
+            this._onDidStopDragging_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onWillStartFling(value: VoidCallback | undefined): this {
+        if (((this._onWillStartFling_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onWillStartFling_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onWillStartFling_0_0value = value
+        } else
+        {
+            this._onWillStartFling_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    onDidStopFling(value: VoidCallback | undefined): this {
+        if (((this._onDidStopFling_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._onDidStopFling_0_flag = AttributeUpdaterFlag.UPDATE
+            this._onDidStopFling_0_0value = value
+        } else
+        {
+            this._onDidStopFling_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
@@ -1038,6 +1716,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachStart_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachStart_0_flag = AttributeUpdaterFlag.SKIP
@@ -1049,17 +1728,19 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.UPDATE
             this._onReachEnd_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onReachEnd_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }
-    flingSpeedLimit(value: number | undefined): this {
+    flingSpeedLimit(value: double | undefined): this {
         if (((this._flingSpeedLimit_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._flingSpeedLimit_0_0value) !== (value)))
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.UPDATE
             this._flingSpeedLimit_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._flingSpeedLimit_0_flag = AttributeUpdaterFlag.SKIP
@@ -1071,6 +1752,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.UPDATE
             this._clipContent_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._clipContent_0_flag = AttributeUpdaterFlag.SKIP
@@ -1082,6 +1764,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.UPDATE
             this._digitalCrownSensitivity_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._digitalCrownSensitivity_0_flag = AttributeUpdaterFlag.SKIP
@@ -1093,6 +1776,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.UPDATE
             this._backToTop_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._backToTop_0_flag = AttributeUpdaterFlag.SKIP
@@ -1105,6 +1789,7 @@ export class ScrollModifier extends CommonMethodModifier implements ScrollAttrib
             this._fadingEdge_0_flag = AttributeUpdaterFlag.UPDATE
             this._fadingEdge_0_0value = enabled
             this._fadingEdge_0_1value = options
+            this._state.fireChange()
         } else
         {
             this._fadingEdge_0_flag = AttributeUpdaterFlag.SKIP

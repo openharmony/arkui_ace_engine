@@ -391,11 +391,12 @@ private:
     void HandleDragStart(const GestureEvent& info);
     void HandleDragUpdate(const GestureEvent& info);
     void HandleDragEnd(const GestureEvent& info);
+    void ProcessScrollOverDrag();
     void ProcessFrictionMotion(double value);
     void ProcessFrictionMotionStop();
     void CalcFlingVelocity(float offset);
     void RegisterScrollBarOverDragEventTask();
-    void DragEndOverScroll();
+    bool DragEndOverScroll();
     bool CanOverScrollWithDelta(double delta) const;
 
     RefPtr<ScrollBarProxy> scrollBarProxy_;

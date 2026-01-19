@@ -21,7 +21,7 @@
 
 namespace OHOS::Ace::NG {
 
-class PathPainter {
+class ACE_FORCE_EXPORT PathPainter {
 public:
     PathPainter() = default;
     ~PathPainter() = default;

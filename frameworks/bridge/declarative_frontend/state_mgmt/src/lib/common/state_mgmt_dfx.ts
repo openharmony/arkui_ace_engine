@@ -159,25 +159,36 @@ class stateMgmtDFX {
     return {
       decorator: decorators, propertyName: varName, id: -1, value: stateMgmtDFX.getRawValue(prop),
       dependentElementIds:
-        { mode: 'V2', trackPropertiesDependencies: [], propertyDependencies: stateMgmtDFX.dumpDepenetElementV2(dependentElmIds) }
+        { mode: 'V2', trackPropertiesDependencies: [],
+          propertyDependencies: stateMgmtDFX.dumpDepenetElementV2(dependentElmIds) as Array<ElementType | string> }
       , syncPeers: []
     };
   }
 
-  private static dumpDepenetElementV2(dependentElmIds: Set<number> | undefined): Array<ElementType | string> {
-    const dumpElementIds: Array<ElementType | string> = [];
+  public static dumpDepenetElementV2(dependentElmIds: Set<number> | undefined,
+    isGetElement: boolean = false): Array<ElementType | string | ElementInfo> {
+    const dumpElementIds: Array<ElementType | string | ElementInfo> = [];
     dependentElmIds?.forEach((elmtId: number) => {
-      if (elmtId < ComputedV2.MIN_COMPUTED_ID) {
-        dumpElementIds.push(ObserveV2.getObserve().getElementInfoById(elmtId));
-      } else if (elmtId < MonitorV2.MIN_WATCH_ID) {
-        dumpElementIds.push(`@Computed ${ObserveV2.getObserve().getComputedInfoById(elmtId)}`);
-      } else if (elmtId < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
-        dumpElementIds.push(`@Monitor ${ObserveV2.getObserve().getMonitorInfoById(elmtId)}`);
-      } else {
-        dumpElementIds.push(`PersistenceV2[${elmtId}]`);
-      }
+      dumpElementIds.push(isGetElement ?
+        { elementId: elmtId, elementName: this.getElementName(elmtId, true) } as ElementInfo :
+        this.getElementName(elmtId, false));
     });
     return dumpElementIds;
+  }
+
+  private static getElementName(elmtId: number, isGetElement: boolean): string {
+    if (elmtId < ComputedV2.MIN_COMPUTED_ID) {
+      return isGetElement ? ObserveV2.getObserve().getElementNameById(elmtId) :
+        ObserveV2.getObserve().getElementInfoById(elmtId) as string;
+    } else if (elmtId < MonitorV2.MIN_WATCH_ID) {
+      return `@Computed ${ObserveV2.getObserve().getComputedInfoById(elmtId)}`;
+    } else if (elmtId < MonitorV2.MIN_WATCH_FROM_API_ID) {
+      return `@Monitor ${ObserveV2.getObserve().getMonitorInfoById(elmtId)}`;
+    } else if (elmtId < PersistenceV2Impl.MIN_PERSISTENCE_ID) {
+      return `MonitorApi ${ObserveV2.getObserve().getMonitorInfoById(elmtId)}`;
+    } else {
+      return isGetElement ? 'PersistenceV2' : `PersistenceV2[${elmtId}]`;
+    }
   }
 
   private static getType(item: RawValue): string {
@@ -320,8 +331,14 @@ function setAceDebugMode(): void {
 }
 
 function getStateMgmtInfo(nodeIds: Array<number>, propertyName: string, jsonPath: string): Array<string | undefined> {
+  const startTime = Date.now();
+  const timeoutMs = 2000;
+
   const result = [];
   for (const id of nodeIds) {
+    if (Date.now() - startTime > timeoutMs) {
+      break;
+    }
     let value = undefined;
     let view = findViewById(id);
     if (!view) {
@@ -339,26 +356,22 @@ function getStateMgmtInfo(nodeIds: Array<number>, propertyName: string, jsonPath
   return result;
 }
 
-function findViewById(id: number): ViewPU | ViewV2 | undefined {
-  if (SubscriberManager.Has(id)) { // v1
-    const view = SubscriberManager.Find(id);
-    if (view instanceof ViewPU) {
-      return view;
-    }
-  } else if (id in ObserveV2.getObserve().id2cmp_) { // v2
-    const view = ObserveV2.getObserve().id2cmp_[id].deref();
-    if (view instanceof ViewV2) {
-      return view;
-    }
+function findViewById(id: number): PUV2ViewBase | undefined {
+  const v1 = SubscriberManager.Find(id);
+  if (v1 instanceof ViewPU) {
+    return v1;
   }
-  return undefined;
-};
+  const v2 = ObserveV2.getObserve().id2ViewV2_[id]?.deref();
+  return v2 instanceof ViewV2 ? v2 : undefined;
+}
 
 class aceDebugTrace {
-  public static begin(...args: any): void {
+  public static begin(...args: any): boolean {
     if (stateMgmtDFX.enableDebug) {
       aceTrace.begin(...args);
     }
+    // add return value to use stateMgmtDFX.enableDebug && aceDebugTrace.begin to optimize performance
+    return true;
   }
   public static end(): void {
     if (stateMgmtDFX.enableDebug) {

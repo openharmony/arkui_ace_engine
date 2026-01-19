@@ -19,9 +19,10 @@ import { NativePeerNode } from "./NativePeerNode"
 import { nullptr, pointer } from "@koalaui/interop"
 import { ArkRootPeer, StateStylesOps } from "#generated"
 import { ReusablePool } from "./ReusablePool"
-import { StateUpdateLoop } from "./stateManagement"  
+import { StateUpdateLoop } from "./stateManagement"
 import { RecordData } from "@ohos.base"
 import { ArkUIAniModule } from 'arkui.ani';
+import { ExtendableComponent } from './component/extendableComponent'
 
 export const PeerNodeType = 11
 export const RootPeerType = 33
@@ -57,25 +58,12 @@ export class PeerNode extends IncrementalNode {
     private _reusePool?: Map<string, ReusablePool>
     public reusable: boolean = false
     private _uiStateStyle?: MutableState<int32>;
-    private _disabledStateUpdates: MutableState<boolean> | undefined = undefined
 
     getPeerPtr(): pointer {
         return this.peer.ptr
     }
     public getStateStyleMutable(): MutableState<int32> | undefined {
         return this._uiStateStyle;
-    }
-    override get disabledStateUpdates(): boolean {
-        return this._disabledStateUpdates?.value ?? false
-    }
-
-    set disabledStateUpdates(disabled: boolean) {
-        const state = this._disabledStateUpdates
-        if (state) {
-            state.value = disabled
-        } else if (disabled) {
-            this._disabledStateUpdates = GlobalStateManager.instance.mutableState<boolean>(true, true)
-        }
     }
     setId(id: int32) {
         PeerNode.updatePeerNodeMap()
@@ -93,7 +81,9 @@ export class PeerNode extends IncrementalNode {
             return
         }
         if (this._onReuse && !needRecurs) {
-            scheduleCallback(() => { this._onReuse?.(param) }) // could change states
+            StateUpdateLoop.add(() => {
+                this._onReuse?.(param); // use StateUpdateLoop to make reuse render in the same frame
+            });
         } else if (needRecurs) {
             this._onReuse?.(param);
             for (let child = this.firstChild; child; child = child!.nextSibling) {
@@ -140,6 +130,9 @@ export class PeerNode extends IncrementalNode {
     override recycle(reuseKey: string, child: Disposable, id: KoalaCallsiteKey): boolean {
         if (!this.isKind(RootPeerType)) {
             return this.parent?.recycle(reuseKey, child, id) ?? false
+        }
+        if (this.disposing) {
+            return false;
         }
         if (!this._reusePool)
             this._reusePool = new Map<string, ReusablePool>()
@@ -275,8 +268,6 @@ export class PeerNode extends IncrementalNode {
         this._reusePool = undefined
         this._onRecycle = undefined
         this._onReuse = undefined
-        this._disabledStateUpdates?.dispose()
-        this._disabledStateUpdates = undefined
         super.dispose()
     }
 
@@ -288,10 +279,18 @@ export class PeerNode extends IncrementalNode {
             const manager = GlobalStateManager.instance
             this._uiStateStyle = manager.mutableState<int32>(0 as int32, true)
             StateStylesOps.onStateStyleChange(this.getPeerPtr(), (state: int32) => {
-                this._uiStateStyle!.value = state
+                StateUpdateLoop.add(() => {
+                    this._uiStateStyle!.value = state
+                })
             }, curState)
             return this._uiStateStyle!;
         }
+    }
+
+    public override getCurrentNodeWhenReuse(): IncrementalNode | undefined {
+        const currentComponent = (ExtendableComponent.current) as (ExtendableComponent | undefined);
+        const peerNode = currentComponent?.__getPeerNode__Internal();
+        return peerNode;
     }
 }
 

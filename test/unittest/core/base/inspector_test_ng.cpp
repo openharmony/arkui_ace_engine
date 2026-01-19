@@ -774,20 +774,22 @@ HWTEST_F(InspectorTestNg, InspectorTestNg021, TestSize.Level1)
  */
 HWTEST_F(InspectorTestNg, AddOffscreenNode_001, TestSize.Level1)
 {
-    int32_t num = Inspector::offscreenNodes.size();
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto offscreenNodesMgr = context->GetInspectorOffscreenNodesMgr();
+    ASSERT_NE(offscreenNodesMgr, nullptr);
+    int32_t num = offscreenNodesMgr->GetOffscreenNodesSize();
     RefPtr<FrameNode> one = nullptr;
     Inspector::AddOffscreenNode(one);
-    EXPECT_EQ(Inspector::offscreenNodes.size(), num);
+    EXPECT_EQ(offscreenNodesMgr->GetOffscreenNodesSize(), num);
 
     auto id = ElementRegister::GetInstance()->MakeUniqueId();
     one = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
 
     context->stageManager_ = AceType::MakeRefPtr<StageManager>(one);
-    num = Inspector::offscreenNodes.size();
+    num = offscreenNodesMgr->GetOffscreenNodesSize();
     Inspector::AddOffscreenNode(one);
-    EXPECT_EQ(Inspector::offscreenNodes.size(), num + 1);
+    EXPECT_EQ(offscreenNodesMgr->GetOffscreenNodesSize(), num + 1);
     context->stageManager_ = nullptr;
 }
 
@@ -798,21 +800,23 @@ HWTEST_F(InspectorTestNg, AddOffscreenNode_001, TestSize.Level1)
  */
 HWTEST_F(InspectorTestNg, RemoveOffscreenNode_001, TestSize.Level1)
 {
-    int32_t num = Inspector::offscreenNodes.size();
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto offscreenNodesMgr = context->GetInspectorOffscreenNodesMgr();
+    ASSERT_NE(offscreenNodesMgr, nullptr);
+    int32_t num = offscreenNodesMgr->GetOffscreenNodesSize();
     RefPtr<FrameNode> one = nullptr;
     Inspector::RemoveOffscreenNode(one);
-    EXPECT_EQ(Inspector::offscreenNodes.size(), num);
+    EXPECT_EQ(offscreenNodesMgr->GetOffscreenNodesSize(), num);
 
     auto id = ElementRegister::GetInstance()->MakeUniqueId();
     one = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
-    auto context = PipelineContext::GetCurrentContext();
-    ASSERT_NE(context, nullptr);
     context->stageManager_ = AceType::MakeRefPtr<StageManager>(one);
     Inspector::AddOffscreenNode(one);
-    num = Inspector::offscreenNodes.size();
+    num = offscreenNodesMgr->GetOffscreenNodesSize();
 
     Inspector::RemoveOffscreenNode(one);
-    EXPECT_EQ(Inspector::offscreenNodes.size(), num - 1);
+    EXPECT_EQ(offscreenNodesMgr->GetOffscreenNodesSize(), num - 1);
     context->stageManager_ = nullptr;
 }
 
@@ -827,9 +831,11 @@ HWTEST_F(InspectorTestNg, GetOffScreenTreeNodes_001, TestSize.Level1)
     RefPtr<FrameNode> one = FrameNode::CreateFrameNode("one", id, AceType::MakeRefPtr<Pattern>(), true);
     auto context = PipelineContext::GetCurrentContext();
     ASSERT_NE(context, nullptr);
+    auto offscreenNodesMgr = context->GetInspectorOffscreenNodesMgr();
+    ASSERT_NE(offscreenNodesMgr, nullptr);
     context->stageManager_ = AceType::MakeRefPtr<StageManager>(one);
     Inspector::AddOffscreenNode(one);
-    int32_t num = Inspector::offscreenNodes.size();
+    int32_t num = offscreenNodesMgr->GetOffscreenNodesSize();
     NG::InspectorTreeMap offNodes;
     Inspector::GetOffScreenTreeNodes(offNodes);
     EXPECT_EQ(offNodes.size(), num);

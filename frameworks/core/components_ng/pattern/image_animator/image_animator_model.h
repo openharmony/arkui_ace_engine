@@ -19,7 +19,7 @@
 #include <mutex>
 
 #include "base/memory/ace_type.h"
-#include "core/components/image/image_animator_component.h"
+#include "core/components_ng/pattern/image/image_properties.h"
 
 namespace OHOS::Ace {
 class ACE_FORCE_EXPORT ImageAnimatorModel {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -12,36 +12,19 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "core/components_ng/base/frame_node.h"
-#include "core/interfaces/native/utility/converter.h"
+#include "ui/base/utils/utils.h"
 #include "arkoala_api_generated.h"
-#include "frameworks/core/components_ng/pattern/waterflow/water_flow_item_model_ng.h"
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-namespace FlowItemModifier {
-Ark_NativePointer ConstructImpl(Ark_Int32 id,
-                                Ark_Int32 flags)
-{
-    auto frameNode = WaterFlowItemModelNG::CreateFrameNode(id);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
-}
-} // FlowItemModifier
-namespace FlowItemInterfaceModifier {
-void SetFlowItemOptionsImpl(Ark_NativePointer node)
-{
-    // keep it empty because FlowItem doesn`t have any options
-}
-} // FlowItemInterfaceModifier
 const GENERATED_ArkUIFlowItemModifier* GetFlowItemModifier()
 {
-    static const GENERATED_ArkUIFlowItemModifier ArkUIFlowItemModifierImpl {
-        FlowItemModifier::ConstructImpl,
-        FlowItemInterfaceModifier::SetFlowItemOptionsImpl,
-    };
-    return &ArkUIFlowItemModifierImpl;
+    static const GENERATED_ArkUIFlowItemModifier* cachedModifier = nullptr;
+    if (!cachedModifier) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("FlowItem");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIFlowItemModifier*>(module->GetStaticModifier());
+    }
+    return cachedModifier;
 }
-
 }

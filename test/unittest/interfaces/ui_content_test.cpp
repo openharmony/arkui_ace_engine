@@ -48,9 +48,18 @@ HWTEST_F(UiContentTest, DumpTest001, TestSize.Level1)
  */
 HWTEST_F(UiContentTest, GetUIContent001, TestSize.Level1)
 {
+    /**
+     * @tc.steps1: Call GetUIContent function with invalid instanceId(1)
+     * @tc.expected: The returned pointer is null
+     */
     int32_t instanceId = 1;
     UIContent* ret = UIContent::GetUIContent(instanceId);
     EXPECT_TRUE(ret == nullptr);
+
+    /**
+     * @tc.steps2: Call GetCurrentUIStackInfo function
+     * @tc.expected: The returned string is empty
+     */
     std::string ret2 = UIContent::GetCurrentUIStackInfo();
     EXPECT_TRUE(ret2 == std::string());
 }

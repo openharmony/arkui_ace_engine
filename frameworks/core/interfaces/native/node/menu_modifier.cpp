@@ -32,6 +32,11 @@ const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 const Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 
+inline FrameNode* GetFrameNode(ArkUINodeHandle node)
+{
+    return node ? reinterpret_cast<FrameNode*>(node) : ViewStackProcessor::GetInstance()->GetMainFrameNode();
+}
+
 SubMenuExpandingMode ParseSubMenuExpandingMode(int32_t subMenuExpandingMode)
 {
     SubMenuExpandingMode mode = SubMenuExpandingMode::SIDE;
@@ -53,7 +58,7 @@ SubMenuExpandingMode ParseSubMenuExpandingMode(int32_t subMenuExpandingMode)
 
 void SetMenuDivider(ArkUINodeHandle node, ArkUIMenuDividerOptions* dividerInfo, void* colorRawPtr, bool isGroupDivider)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
 
     V2::ItemDivider divider;
@@ -80,7 +85,7 @@ void SetMenuDivider(ArkUINodeHandle node, ArkUIMenuDividerOptions* dividerInfo, 
 
 void ResetMenuDivider(ArkUINodeHandle node, bool isGroupDivider)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     V2::ItemDivider divider;
     divider.strokeWidth = Dimension(0.0);
@@ -101,14 +106,14 @@ void ResetMenuDivider(ArkUINodeHandle node, bool isGroupDivider)
 
 void SetMenuFontColor(ArkUINodeHandle node, uint32_t color)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     MenuModelNG::SetFontColor(frameNode, Color(color));
 }
 
 void SetMenuFontColorWithResource(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     MenuModelNG::SetFontColor(frameNode, Color(color));
     if (SystemProperties::ConfigChangePerform() && colorRawPtr) {
@@ -120,7 +125,7 @@ void SetMenuFontColorWithResource(ArkUINodeHandle node, uint32_t color, void* co
 
 void ResetMenuFontColor(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     std::optional<Color> color = std::nullopt;
     MenuModelNG::SetFontColor(frameNode, color);
@@ -132,7 +137,7 @@ void ResetMenuFontColor(ArkUINodeHandle node)
 
 void SetMenuFont(ArkUINodeHandle node, const char* fontInfo, int32_t styleVal)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
 
     std::vector<std::string> res;
@@ -169,7 +174,7 @@ void SetMenuFont(ArkUINodeHandle node, const char* fontInfo, int32_t styleVal)
 void SetMenuFontWithResource(
     ArkUINodeHandle node, const char* fontInfo, int32_t styleVal, void* fontSizeRawPtr, void* fontFamilyRawPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
 
     std::vector<std::string> res;
@@ -216,7 +221,7 @@ void SetMenuFontWithResource(
 
 void ResetMenuFont(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     CalcDimension fontSize;
     FontWeight fontWeight = StringUtils::StringToFontWeight(DEFAULT_FONT_WEIGHT);
@@ -233,7 +238,7 @@ void ResetMenuFont(ArkUINodeHandle node)
 
 void ResetRadius(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     MenuModelNG::ResetBorderRadius(frameNode);
 }
@@ -241,7 +246,7 @@ void ResetRadius(ArkUINodeHandle node)
 void SetRadius(
     ArkUINodeHandle node, const ArkUI_Float32* values, const int32_t* units)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     auto topLeft = Dimension(values[0], static_cast<OHOS::Ace::DimensionUnit>(units[0])); // 0: index of top left value
     auto topRight =
@@ -299,7 +304,7 @@ void AddRadiusResource(BorderRadiusProperty& borderRadius, void** resObjs)
 void SetRadiusWithResource(
     ArkUINodeHandle node, const ArkUI_Float32* values, const int32_t* units, void** resObjs, size_t unitSize)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     if (!values || !units || !resObjs || unitSize < COUNT_PROP) {
         return;
@@ -327,15 +332,28 @@ void SetRadiusWithResource(
 
 void SetMenuWidth(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     Dimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     MenuModelNG::SetWidth(frameNode, width);
 }
 
+void SetMenuWidthWithResource(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit, void* resObjs)
+{
+    FrameNode* frameNode = GetFrameNode(node);
+    CHECK_NULL_VOID(frameNode);
+    Dimension width = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
+    MenuModelNG::SetWidth(frameNode, width);
+    if (SystemProperties::ConfigChangePerform() && resObjs) {
+        auto* resPtr = reinterpret_cast<ResourceObject*>(resObjs);
+        auto resObj = AceType::Claim(resPtr);
+        MenuModelNG::CreateWithDimensionResourceObj(frameNode, resObj, MenuDimensionType::WIDTH);
+    }
+}
+
 void ResetMenuWidth(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     OHOS::Ace::CalcDimension reset;
     MenuModelNG::SetWidth(frameNode, reset);
@@ -376,7 +394,7 @@ void ResetMenuItemGroupDivider(ArkUINodeHandle node)
 
 void SetSubMenuExpandingMode(ArkUINodeHandle node, ArkUI_Int32 modeParam)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
 
     SubMenuExpandingMode subMenuExpandingMode = ParseSubMenuExpandingMode(modeParam);
@@ -385,7 +403,7 @@ void SetSubMenuExpandingMode(ArkUINodeHandle node, ArkUI_Int32 modeParam)
 
 void ResetSubMenuExpandingMode(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     MenuModelNG::SetExpandingMode(frameNode, SubMenuExpandingMode::SIDE);
 }
@@ -393,7 +411,7 @@ void ResetSubMenuExpandingMode(ArkUINodeHandle node)
 void SetSubMenuExpandSymbol(ArkUINodeHandle node, void* symbolFunction)
 {
     CHECK_NULL_VOID(symbolFunction);
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     auto symbolCallback = reinterpret_cast<std::function<void(WeakPtr<NG::FrameNode>)>*>(symbolFunction);
     MenuModelNG::SetExpandSymbol(frameNode, std::move(*symbolCallback));
@@ -401,14 +419,14 @@ void SetSubMenuExpandSymbol(ArkUINodeHandle node, void* symbolFunction)
 
 void ResetSubMenuExpandSymbol(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     MenuModelNG::SetExpandSymbol(frameNode, nullptr);
 }
 
 void SetMenuFontSize(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit, void* fontSizeRawPtr)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     Dimension fontSize = Dimension(value, static_cast<OHOS::Ace::DimensionUnit>(unit));
     MenuModelNG::SetFontSize(frameNode, fontSize);
@@ -421,7 +439,7 @@ void SetMenuFontSize(ArkUINodeHandle node, ArkUI_Float32 value, int32_t unit, vo
 
 void ResetMenuFontSize(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    FrameNode* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     OHOS::Ace::CalcDimension reset;
     MenuModelNG::SetFontSize(frameNode, reset);
@@ -431,35 +449,47 @@ void ResetMenuFontSize(ArkUINodeHandle node)
     }
 }
 
+void CreateMenu()
+{
+    MenuModelNG menuModel = MenuModelNG();
+    menuModel.Create();
+}
+
 namespace NodeModifier {
 const ArkUIMenuModifier* GetMenuModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUIMenuModifier modifier = {
-        .setMenuFontColor = SetMenuFontColorWithResource,
-        .resetMenuFontColor = ResetMenuFontColor,
-        .setFont = SetMenuFontWithResource,
-        .resetFont = ResetMenuFont,
-        .setRadius = SetRadiusWithResource,
-        .resetRadius = ResetRadius,
-        .setMenuWidth = SetMenuWidth,
-        .resetMenuWidth = ResetMenuWidth,
-        .setMenuItemDivider = SetMenuItemDivider,
-        .setMenuItemDividerWithResource = SetMenuItemDividerWithResource,
-        .resetMenuItemDivider = ResetMenuItemDivider,
-        .setMenuItemGroupDivider = SetMenuItemGroupDivider,
-        .setMenuItemGroupDividerWithResource = SetMenuItemGroupDividerWithResource,
-        .resetMenuItemGroupDivider = ResetMenuItemGroupDivider,
-        .setSubMenuExpandingMode = SetSubMenuExpandingMode,
-        .resetSubMenuExpandingMode = ResetSubMenuExpandingMode,
-        .setSubMenuExpandSymbol = SetSubMenuExpandSymbol,
-        .resetSubMenuExpandSymbol = ResetSubMenuExpandSymbol,
-        .setMenuFontSize = SetMenuFontSize,
-        .resetMenuFontSize = ResetMenuFontSize,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-
-    return &modifier;
+    static bool isCurrentUseNewPipeline = Container::IsCurrentUseNewPipeline();
+    if (isCurrentUseNewPipeline) {
+        CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
+        static const ArkUIMenuModifier modifier = {
+            .createMenu = CreateMenu,
+            .setMenuFontColor = SetMenuFontColorWithResource,
+            .resetMenuFontColor = ResetMenuFontColor,
+            .setFont = SetMenuFontWithResource,
+            .resetFont = ResetMenuFont,
+            .setRadius = SetRadiusWithResource,
+            .resetRadius = ResetRadius,
+            .setMenuWidth = SetMenuWidth,
+            .setMenuWidthWithResource = SetMenuWidthWithResource,
+            .resetMenuWidth = ResetMenuWidth,
+            .setMenuItemDivider = SetMenuItemDivider,
+            .setMenuItemDividerWithResource = SetMenuItemDividerWithResource,
+            .resetMenuItemDivider = ResetMenuItemDivider,
+            .setMenuItemGroupDivider = SetMenuItemGroupDivider,
+            .setMenuItemGroupDividerWithResource = SetMenuItemGroupDividerWithResource,
+            .resetMenuItemGroupDivider = ResetMenuItemGroupDivider,
+            .setSubMenuExpandingMode = SetSubMenuExpandingMode,
+            .resetSubMenuExpandingMode = ResetSubMenuExpandingMode,
+            .setSubMenuExpandSymbol = SetSubMenuExpandSymbol,
+            .resetSubMenuExpandSymbol = ResetSubMenuExpandSymbol,
+            .setMenuFontSize = SetMenuFontSize,
+            .resetMenuFontSize = ResetMenuFontSize,
+        };
+        CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
+        return &modifier;
+    } else {
+        return nullptr;
+    }
 }
 
 const CJUIMenuModifier* GetCJUIMenuModifier()

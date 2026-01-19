@@ -85,6 +85,7 @@ struct MarkProcessedEventInfo {
 
 struct NodeGeneralInfo {
     int32_t nodeId = -1;
+    std::string tag = "";
 };
 struct HitNodeInfos {
     int32_t pointerId = -1;
@@ -443,8 +444,11 @@ public:
     void NotifyCoastingAxisEventStop() const;
     std::string GetLastHitTestNodeInfosForTouch(bool isTopMost);
     void AddHitTestInfoRecord(const RefPtr<NG::FrameNode>& frameNode);
-    void LogHitTestInfoRecord(int32_t fingerId);
+    void LogHitTestInfoRecord(const TouchEvent& touchPoint);
     void ClearHitTestInfoRecord(const TouchEvent& touchPoint);
+    void RegisterHitTestFrameNodeListener(int32_t uniqueIdentify, std::function<void(const TouchEvent&)> callback);
+    void UnRegisterHitTestFrameNodeListener(int32_t uniqueIdentify);
+    void NotifyHitTestFrameNodeListener(const TouchEvent& touchEvent);
 
 private:
     void SetHittedFrameNode(const std::list<RefPtr<NG::NGGestureRecognizer>>& touchTestResults);
@@ -466,7 +470,8 @@ private:
     void DispatchTouchEventInOldPipeline(const TouchEvent& point, bool dispatchSuccess);
     void DispatchTouchEventToTouchTestResult(const TouchEvent& touchEvent, TouchTestResult touchTestResult,
         bool sendOnTouch);
-    void SetResponseLinkRecognizers(const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers);
+    void SetResponseLinkRecognizers(
+        const TouchTestResult& result, const ResponseLinkResult& responseLinkRecognizers, bool isPostEvent = false);
     void FalsifyCancelEventAndDispatch(const TouchEvent& touchPoint, bool sendOnTouch = true);
     void FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent, bool sendOnTouch = true);
     void FalsifyHoverCancelEventAndDispatch(const TouchEvent& touchPoint);
@@ -555,6 +560,7 @@ private:
     std::map<int32_t, HitNodeInfos> touchHitTestInfos_;
     // Only used in TouchTest
     std::optional<HitTestRecordInfo> hitTestRecordInfo_ = std::nullopt;
+    std::unordered_map<int32_t, std::function<void(const TouchEvent&)>> hitTestFrameNodeListener_;
 };
 
 } // namespace OHOS::Ace

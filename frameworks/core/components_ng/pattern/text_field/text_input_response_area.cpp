@@ -137,8 +137,12 @@ RefPtr<FrameNode> TextInputResponseArea::CreateResponseAreaImageNode(const Image
 void TextInputResponseArea::SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
     float hoverRectHeight, bool isFocus)
 {
-    auto textFieldPattern = hostPattern_.Upgrade();
+    auto textFieldPattern = DynamicCast<TextFieldPattern>(hostPattern_.Upgrade());
     CHECK_NULL_VOID(textFieldPattern);
+    if (textFieldPattern->IsTV()) {
+        SetHoverRectForTV(stackNode, rect, iconSize, hoverRectHeight, isFocus);
+        return;
+    }
     auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(stackNode);
@@ -166,6 +170,52 @@ void TextInputResponseArea::SetHoverRect(RefPtr<FrameNode>& stackNode, RectF& re
     }
 }
 
+void TextInputResponseArea::SetHoverRectForTV(RefPtr<FrameNode>& stackNode, RectF& rect, float iconSize,
+    float hoverRectHeight, bool isFocus)
+{
+    auto textFieldPattern = hostPattern_.Upgrade();
+    CHECK_NULL_VOID(textFieldPattern);
+    auto layoutProperty = textFieldPattern->GetLayoutProperty<TextFieldLayoutProperty>();
+    CHECK_NULL_VOID(layoutProperty);
+    CHECK_NULL_VOID(stackNode);
+    auto stackGeometryNode = stackNode->GetGeometryNode();
+    CHECK_NULL_VOID(stackGeometryNode);
+    auto stackRect = stackGeometryNode->GetFrameRect();
+    auto imageFrameNode = AceType::DynamicCast<FrameNode>(stackNode->GetFirstChild());
+    CHECK_NULL_VOID(imageFrameNode);
+    auto imageGeometryNode = imageFrameNode->GetGeometryNode();
+    CHECK_NULL_VOID(imageGeometryNode);
+    auto imageRect = imageGeometryNode->GetFrameRect();
+    auto host = textFieldPattern->GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContextRefPtr();
+    CHECK_NULL_VOID(pipeline);
+    auto themeManager = pipeline->GetThemeManager();
+    CHECK_NULL_VOID(themeManager);
+    auto textFieldTheme = themeManager->GetTheme<TextFieldTheme>();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto iconOffsetPadding = textFieldTheme->GetIconOffsetPadding().Value();
+
+    if (isFocus) {
+        hoverRectHeight = hoverRectHeight - ICON_FOCUS_PADDING.ConvertToPx();
+    }
+
+    auto iconHoverPadding = (hoverRectHeight - iconSize) / HALF_SPACE;
+    auto stackHoverPadding = (hoverRectHeight - stackRect.Height()) / HALF_SPACE;
+    auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
+    if (isRTL) {
+        rect = RectF(stackRect.GetX() + stackRect.Width() - imageRect.Width() - iconHoverPadding + iconOffsetPadding,
+            stackRect.GetY() - stackHoverPadding + iconOffsetPadding,
+            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding,
+            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding);
+    } else {
+        rect = RectF(stackRect.GetX() - iconHoverPadding - iconOffsetPadding,
+            stackRect.GetY() - stackHoverPadding - iconOffsetPadding,
+            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding,
+            hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding);
+    }
+}
+
 void TextInputResponseArea::SetHotZoneRect(DimensionRect& hotZoneRegion, float iconSize, float hotZoneHeight)
 {
     auto hotZoneX = - (hotZoneHeight - iconSize) / HALF_SPACE;
@@ -190,6 +240,7 @@ void PasswordResponseArea::InitResponseArea()
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     if (!IsShowPasswordIcon()) {
         return;
     }
@@ -219,6 +270,7 @@ RefPtr<FrameNode> PasswordResponseArea::CreateNode()
 
     auto stackNode = FrameNode::CreateFrameNode(
         V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    ACE_UINODE_TRACE(stackNode);
     auto stackLayoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
     stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(hotZoneSize), std::nullopt));
@@ -411,6 +463,7 @@ void PasswordResponseArea::ReplaceNode()
 {
     auto oldFrameNode = passwordNode_.Upgrade();
     CHECK_NULL_VOID(oldFrameNode);
+    ACE_UINODE_TRACE(oldFrameNode);
 
     if (IsShowSymbol() && SystemProperties::IsNeedSymbol()) {
         auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
@@ -715,6 +768,7 @@ void UnitResponseArea::InitResponseArea()
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     if (!IsShowUnit()) {
         return;
     }
@@ -771,6 +825,7 @@ void CleanNodeResponseArea::InitResponseArea()
     CHECK_NULL_VOID(pattern);
     auto host = pattern->GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     LoadingImageProperty();
     auto cleanNode = CreateNode();
     CHECK_NULL_VOID(cleanNode);
@@ -909,6 +964,7 @@ RefPtr<FrameNode> CleanNodeResponseArea::CreateNode()
 {
     auto stackNode = FrameNode::CreateFrameNode(
         V2::STACK_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<StackPattern>());
+    ACE_UINODE_TRACE(stackNode);
     auto stackLayoutProperty = stackNode->GetLayoutProperty<LayoutProperty>();
     CHECK_NULL_RETURN(stackLayoutProperty, nullptr);
     stackLayoutProperty->UpdateUserDefinedIdealSize(CalcSize(CalcLength(0.0f), std::nullopt));
@@ -1183,6 +1239,7 @@ void CleanNodeResponseArea::ReplaceNode()
     CHECK_NULL_VOID(cleanNode_->GetFirstChild());
     auto oldFrameNode = AceType::DynamicCast<FrameNode>(cleanNode_->GetFirstChild());
     CHECK_NULL_VOID(oldFrameNode);
+    ACE_UINODE_TRACE(oldFrameNode);
 
     if (IsShowSymbol() && SystemProperties::IsNeedSymbol()) {
         auto symbolNode = FrameNode::GetOrCreateFrameNode(V2::SYMBOL_ETS_TAG,
@@ -1300,6 +1357,7 @@ void PlaceholderResponseArea::InitResponseArea()
     auto textNode = FrameNode::GetOrCreateFrameNode(V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPattern>(); });
     CHECK_NULL_VOID(textNode);
+    ACE_UINODE_TRACE(textNode);
     auto gesture = textNode->GetOrCreateGestureEventHub();
     CHECK_NULL_VOID(gesture);
     // 屏蔽子节点所有事件

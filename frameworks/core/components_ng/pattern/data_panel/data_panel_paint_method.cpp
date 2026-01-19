@@ -27,15 +27,18 @@ void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
 {
     CHECK_NULL_VOID(dataPanelModifier_);
     auto paintProperty = DynamicCast<DataPanelPaintProperty>(paintWrapper->GetPaintProperty());
+    CHECK_NULL_VOID(paintProperty);
     auto pipelineContext = PipelineBase::GetCurrentContext();
     CHECK_NULL_VOID(pipelineContext);
     auto theme = pipelineContext->GetTheme<DataPanelTheme>();
+    CHECK_NULL_VOID(theme);
 
     auto values_ = paintProperty->GetValues().value();
     auto max_ = paintProperty->GetMax().value_or(DEFAULT_MAX_VALUE);
     auto dataPanelType_ = paintProperty->GetDataPanelType().value_or(0);
     auto effect_ = paintProperty->GetEffect().value_or(true);
     auto offset_ = paintWrapper->GetContentOffset();
+    auto contentSize = paintWrapper->GetContentSize();
     auto trackBackgroundColor = paintProperty->GetTrackBackground().value_or(theme->GetBackgroundColor());
     auto strokeWidth = paintProperty->GetStrokeWidth().value_or(theme->GetThickness()).ConvertToPx();
 
@@ -51,35 +54,17 @@ void DataPanelPaintMethod::UpdateContentModifier(PaintWrapper* paintWrapper)
         }
     }
 
-    DataPanelShadow shadowOption;
-    bool isHasShadowValue = false;
-    if (paintProperty->HasShadowOption()) {
-        isHasShadowValue = true;
-        shadowOption = paintProperty->GetShadowOptionValue();
-    }
-
-    size_t shadowColorsLastLength = MAX_COUNT;
-    if (shadowOption.colors.size() == 0) {
-        shadowOption.colors = valuesColor;
-    } else {
-        shadowColorsLastLength = shadowOption.colors.size();
-    }
-
     dataPanelModifier_->SetValues(values_);
     dataPanelModifier_->SetMax(max_);
     dataPanelModifier_->SetDataPanelType(dataPanelType_);
     dataPanelModifier_->SetEffect(effect_);
     dataPanelModifier_->SetOffset(offset_);
+    dataPanelModifier_->SetContentSize(contentSize);
 
     dataPanelModifier_->SetValueColors(valuesColor);
     dataPanelModifier_->SetTrackBackground(trackBackgroundColor);
     dataPanelModifier_->SetStrokeWidth(strokeWidth);
-    dataPanelModifier_->SetIsHasShadowValue(isHasShadowValue);
-    dataPanelModifier_->SetShadowVisible(shadowOption.isShadowVisible);
-    dataPanelModifier_->SetShadowRadius(shadowOption.radius);
-    dataPanelModifier_->SetShadowOffsetX(shadowOption.offsetX);
-    dataPanelModifier_->SetShadowOffsetY(shadowOption.offsetY);
-    dataPanelModifier_->SetShadowColors(shadowOption.colors, shadowColorsLastLength);
+    UpdateShadow(paintProperty, valuesColor);
     dataPanelModifier_->UpdateDate();
 }
 
@@ -95,4 +80,29 @@ void DataPanelPaintMethod::CreateGradient(const std::pair<Color, Color>& itemPar
     gradient.AddColor(gradientColorEnd);
 }
 
+void DataPanelPaintMethod::UpdateShadow(
+    const RefPtr<DataPanelPaintProperty>& paintProperty, const std::vector<Gradient>& valuesColor) const
+{
+    CHECK_NULL_VOID(paintProperty);
+    DataPanelShadow shadowOption;
+    bool isHasShadowValue = false;
+    if (paintProperty->HasShadowOption()) {
+        isHasShadowValue = true;
+        shadowOption = paintProperty->GetShadowOptionValue();
+    }
+
+    size_t shadowColorsLastLength = MAX_COUNT;
+    if (shadowOption.colors.size() == 0) {
+        shadowOption.colors = valuesColor;
+    } else {
+        shadowColorsLastLength = shadowOption.colors.size();
+    }
+
+    dataPanelModifier_->SetIsHasShadowValue(isHasShadowValue);
+    dataPanelModifier_->SetShadowVisible(shadowOption.isShadowVisible);
+    dataPanelModifier_->SetShadowRadius(shadowOption.radius);
+    dataPanelModifier_->SetShadowOffsetX(shadowOption.offsetX);
+    dataPanelModifier_->SetShadowOffsetY(shadowOption.offsetY);
+    dataPanelModifier_->SetShadowColors(shadowOption.colors, shadowColorsLastLength);
+}
 } // namespace OHOS::Ace::NG

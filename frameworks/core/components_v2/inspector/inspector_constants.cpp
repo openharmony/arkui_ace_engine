@@ -94,7 +94,7 @@ const char DRAG_BAR_ETS_TAG[] = "DragBar";
 
 // text
 const char TEXT_COMPONENT_TAG[] = "TextComponentV2";
-const char TEXT_ETS_TAG[] = "Text";
+ACE_FORCE_EXPORT const char TEXT_ETS_TAG[] = "Text";
 const char TEXT_ATTRS_OVER_FLOW[] = "textOverflow";
 const char TEXT_ATTRS_MAX_LINES[] = "maxLines";
 
@@ -105,7 +105,7 @@ const char RICH_EDITOR_CONTENT_ETS_TAG[] = "RichEditorContent";
 
 // stack
 const char STACK_COMPONENT_TAG[] = "StackComponent";
-const char STACK_ETS_TAG[] = "Stack";
+ACE_FORCE_EXPORT const char STACK_ETS_TAG[] = "Stack";
 
 // swiper
 const char SWIPER_COMPONENT_TAG[] = "SwiperComponent";
@@ -227,8 +227,8 @@ const char PATTERN_LOCK_COMPONENT_TAG[] = "PatternLockComponent";
 const char PATTERN_LOCK_ETS_TAG[] = "PatternLock";
 
 // row
-const char ROW_COMPONENT_TAG[] = "RowComponent";
-const char ROW_ETS_TAG[] = "Row";
+ACE_FORCE_EXPORT const char ROW_COMPONENT_TAG[] = "RowComponent";
+ACE_FORCE_EXPORT const char ROW_ETS_TAG[] = "Row";
 
 // rect
 const char RECT_ETS_TAG[] = "Rect";
@@ -370,8 +370,8 @@ const char INDEXER_COMPONENT_TAG[] = "IndexerComponent";
 const char INDEXER_ETS_TAG[] = "AlphabetIndexer";
 
 // slider
-const char SLIDER_COMPONENT_TAG[] = "SliderComponent";
-const char SLIDER_ETS_TAG[] = "Slider";
+ACE_FORCE_EXPORT const char SLIDER_COMPONENT_TAG[] = "SliderComponent";
+ACE_FORCE_EXPORT const char SLIDER_ETS_TAG[] = "Slider";
 
 // rating
 const char RATING_COMPONENT_TAG[] = "RatingComponent";
@@ -424,8 +424,10 @@ const char REFRESH_ETS_TAG[] = "Refresh";
 // datePicker
 const char DATE_PICKER_COMPONENT_TAG[] = "PickerDateComponent";
 const char DATE_PICKER_ETS_TAG[] = "DatePicker";
+const char DATE_PICKER_COMPONENT_LOADER_TAG[] = "datePicker";
 const char TIME_PICKER_COMPONENT_TAG[] = "PickerTimeComponent";
 const char TIME_PICKER_ETS_TAG[] = "TimePicker";
+const char TIME_PICKER_COMPONENT_LOADER_TAG[] = "timePicker";
 
 // Radio
 const char RADIO_COMPONENT_TAG[] = "RadioComponent<VALUE_TYPE>";
@@ -497,10 +499,12 @@ const char TEXTCLOCK_ETS_TAG[] = "TextClock";
 // textpicker
 const char TEXT_PICKER_COMPONENT_TAG[] = "PickerTextComponent";
 const char TEXT_PICKER_ETS_TAG[] = "TextPicker";
+const char TEXT_PICKER_COMPONENT_LOADER_TAG[] = "textPicker";
 
 // pickertextdialog
 const char PICKER_TEXT_DIALOG_COMPONENT_TAG[] = "pickerTextDialog";
 const char PICKER_TEXT_DIALOG_ETS_TAG[] = "pickerTextDialog";
+const char PICKER_TEXT_DIALOG_COMPONENT_LOADER_TAG[] = "textPickerDialog";
 
 // canvas
 const char CANVAS_COMPONENT_TAG[] = "CustomPaintComponent";
@@ -521,6 +525,7 @@ const char CUSTOM_DIALOG_ETS_TAG[] = "CustomDialog";
 // datePickerdialog
 const char DATE_PICKER_DIALOG_COMPONENT_TAG[] = "DatePickerDialog";
 const char DATE_PICKER_DIALOG_ETS_TAG[] = "DatePickerDialog";
+const char DATE_PICKER_DIALOG_COMPONENT_LOADER_TAG[] = "datePickerDialog";
 
 // Normal dialog
 const char DIALOG_COMPONENT_TAG[] = "Dialog";
@@ -541,6 +546,7 @@ const char CHECKBOXGROUP_ETS_TAG[] = "CheckboxGroup";
 // timePickerdialog
 const char TIME_PICKER_DIALOG_COMPONENT_TAG[] = "TimePickerDialog";
 const char TIME_PICKER_DIALOG_ETS_TAG[] = "TimePickerDialog";
+const char TIME_PICKER_DIALOG_COMPONENT_LOADER_TAG[] = "timePickerDialog";
 
 // web
 const char WEB_COMPONENT_TAG[] = "WebComponent";
@@ -666,9 +672,12 @@ const char ACCESSIBILITY_FOCUS_PAINT_NODE_TAG[] = "Accessibility_focus_paint_nod
 // LazyVGridLayout
 const char LAZY_V_GRID_LAYOUT_ETS_TAG[] = "LazyVGridLayout";
 
-//Picker
-const char CONTAINER_PICKER_ETS_TAG[] = "Picker";
+// UIPickerComponent
+const char CONTAINER_PICKER_ETS_TAG[] = "UIPickerComponent";
 
 // UndefinedNode
 const char UNDEFINED_NODE_ETS_TAG[] = "";
+
+// UnionEffectContainer
+const char UNION_EFFECT_CONTAINER_ETS_TAG[] = "UnionEffectContainer";
 } // namespace OHOS::Ace::V2

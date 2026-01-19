@@ -22,7 +22,6 @@
 #include "include/core/SkPath.h"
 #endif
 
-#include "core/components/custom_paint/offscreen_canvas.h"
 #include "core/components/shape/rosen_render_shape.h"
 #include "frameworks/core/components/shape/render_shape_container.h"
 

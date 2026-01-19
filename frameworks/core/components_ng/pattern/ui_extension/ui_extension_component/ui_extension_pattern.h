@@ -21,7 +21,6 @@
 #include <list>
 #include <memory>
 #include <optional>
-#include <refbase.h>
 #include <vector>
 
 #include "base/memory/referenced.h"
@@ -39,6 +38,7 @@
 #endif
 #include "core/event/mouse_event.h"
 #include "core/event/touch_event.h"
+#include "interfaces/inner_api/ace/ui_content_config.h"
 
 #define UIEXT_LOGD(fmt, ...)                                                                                      \
     TAG_LOGD(AceLogTag::ACE_UIEXTENSIONCOMPONENT, "[@%{public}d][ID: %{public}d] " fmt, __LINE__, uiExtensionId_, \
@@ -287,7 +287,8 @@ public:
 
     void TransferAccessibilityRectInfo(bool isForce = false);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
-    void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data, RSSubsystemId subSystemId);
+    void UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data,
+        RSSubsystemId subSystemId, const UIExtOptions& options = UIExtOptions());
 
     const ContainerModalAvoidInfo& GetAvoidInfo() const
     {

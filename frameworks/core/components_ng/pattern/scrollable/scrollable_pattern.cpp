@@ -1293,9 +1293,10 @@ void ScrollablePattern::ProcessScrollOverDrag(double velocity, bool isNestScroll
 {
     auto vel = std::clamp(velocity, -maxFlingVelocity_, maxFlingVelocity_);
     if (!isNestScroller) {
-        CHECK_NULL_VOID(scrollEffect_);
-        if (scrollEffect_->IsSpringEffect()) {
+        if (scrollEffect_ && scrollEffect_->IsSpringEffect()) {
             scrollEffect_->ProcessScrollOver(vel);
+        } else {
+            OnScrollEnd();
         }
         return;
     }
@@ -1523,14 +1524,22 @@ void ScrollablePattern::SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBa
 {
     CHECK_NULL_VOID(scrollBarProxy);
     auto scrollFunction = [weak = WeakClaim(this)](double offset, int32_t source, bool nestedScroll,
-        bool isMouseWheelScroll) {
+        bool isMouseWheelScroll, Axis axis) {
         if (source != SCROLL_FROM_START) {
             auto pattern = weak.Upgrade();
             CHECK_NULL_RETURN(pattern && pattern->GetAxis() != Axis::NONE, false);
+            if (pattern->TryFreeScroll(offset, axis)) {
+                return true;
+            }
             auto scrollable = pattern->GetScrollable();
             if (isMouseWheelScroll && scrollable) {
                 scrollable->ProcessAxisUpdateEvent(offset, true);
                 return true;
+            }
+            if (source == SCROLL_FROM_BAR_OVER_DRAG && pattern->GetAxis() != Axis::NONE && pattern->AnimateStoped()) {
+                float tmp = static_cast<float>(offset);
+                pattern->AdjustOffset(tmp, source);
+                offset = tmp;
             }
             if (!nestedScroll) {
                 return pattern->UpdateCurrentOffset(offset, source);
@@ -1801,6 +1810,7 @@ void ScrollablePattern::ScrollTo(float position)
     SetAnimateCanOverScroll(GetCanStayOverScroll());
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
     SetIsOverScroll(GetCanStayOverScroll());
+    ContentChangeReport(GetHost());
 }
 
 void ScrollablePattern::AnimateTo(
@@ -3332,6 +3342,7 @@ void ScrollablePattern::FireOnScrollStart(bool withPerfMonitor)
     if (scrollBarProxy_) {
         scrollBarProxy_->SetIsScrollableNodeScrolling(true);
     }
+    ContentChangeOnScrollStart(host);
     FireObserverOnScrollStart();
     auto onScrollStart = hub->GetOnScrollStart();
     auto onJSFrameNodeScrollStart = hub->GetJSFrameNodeOnScrollStart();
@@ -3548,6 +3559,7 @@ void ScrollablePattern::FireOnScrollStop(const OnScrollStopEvent& onScrollStop,
     CHECK_NULL_VOID(host);
     ACE_SCOPED_TRACE("OnScrollStop, id:%d, tag:%s", static_cast<int32_t>(host->GetAccessibilityId()),
         host->GetTag().c_str());
+    ReportOnItemStopEvent();
     if (onScrollStop) {
         onScrollStop();
     }
@@ -3638,10 +3650,11 @@ void ScrollablePattern::Register2DragDropManager()
  * 1.Gives the rolling direction according to the location of the hot zone
  * 2.Gives the distance from the edge of the hot zone from the drag point
  * @param {PointF&} point The drag point
+ * @param {bool} needExpandHotZone whether to expand the hot zone
  * @return The distance from the edge of the hot zone from the drag point.scroll up:Offset percent is positive, scroll
  * down:Offset percent is  negative
  */
-float ScrollablePattern::IsInHotZone(const PointF& point)
+float ScrollablePattern::IsInHotZone(const PointF& point, bool needExpandHotZone)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.f);
@@ -3667,12 +3680,16 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
         // Determines whether the drag point is within the hot zone,
         // then gives the scroll component movement direction according to which hot zone the point is in
         // top or bottom hot zone
-        if (topHotzone.IsInRegion(point)) {
+        bool needScrollTop = needExpandHotZone ? (point.GetY() < topHotzone.Bottom())
+                                        : topHotzone.IsInRegion(point);
+        bool needScrollBottom = needExpandHotZone ? (point.GetY() > bottomHotzone.Top())
+                                           : bottomHotzone.IsInRegion(point);
+        if (needScrollTop) {
             offset = hotZoneHeightPX - point.GetY() + topHotzone.GetY();
             if (!NearZero(hotZoneHeightPX)) {
                 return offset / hotZoneHeightPX;
             }
-        } else if (bottomHotzone.IsInRegion(point)) {
+        } else if (needScrollBottom) {
             offset = bottomZoneEdgeY - point.GetY() - hotZoneHeightPX;
             if (!NearZero(hotZoneHeightPX)) {
                 return offset / hotZoneHeightPX;
@@ -3694,12 +3711,16 @@ float ScrollablePattern::IsInHotZone(const PointF& point)
         // Determines whether the drag point is within the hot zone,
         // gives the scroll component movement direction according to which hot zone the point is in
         // left or right hot zone
-        if (leftHotzone.IsInRegion(point)) {
+        bool needScrollLeft = needExpandHotZone ? (point.GetX() < leftHotzone.Right())
+                                       : leftHotzone.IsInRegion(point);
+        bool needScrollRight = needExpandHotZone ? (point.GetX() > rightHotzone.Left())
+                                        : rightHotzone.IsInRegion(point);
+        if (needScrollLeft) {
             offset = hotZoneWidthPX - point.GetX() + wholeRect.GetX();
             if (!NearZero(hotZoneWidthPX)) {
                 return factor * offset / hotZoneWidthPX;
             }
-        } else if (rightHotzone.IsInRegion(point)) {
+        } else if (needScrollRight) {
             offset = rightZoneEdgeX - point.GetX() - hotZoneWidthPX;
             if (!NearZero(hotZoneWidthPX)) {
                 return factor * offset / hotZoneWidthPX;
@@ -3848,11 +3869,12 @@ void ScrollablePattern::HandleHotZone(
  * @description:When a drag point is inside the scroll component, it is necessary to handle the events of each moving
  * point
  * @param {PointF&} point the drag point
+ * @param {bool} needExpandHotZone whether to expand the hot zone
  * @return None
  */
-void ScrollablePattern::HandleMoveEventInComp(const PointF& point)
+void ScrollablePattern::HandleMoveEventInComp(const PointF& point, bool needExpandHotZone)
 {
-    float offsetPct = IsInHotZone(point);
+    float offsetPct = IsInHotZone(point, needExpandHotZone);
     if ((Positive(offsetPct) && !IsAtTop()) || (Negative(offsetPct) && !IsAtBottom())) {
         // The drag point enters the hot zone
         HotZoneScroll(offsetPct);
@@ -4975,12 +4997,65 @@ void ScrollablePattern::OnSyncGeometryNode(const DirtySwapConfig& config)
     }
 }
 
-void ScrollablePattern::ContentChangeReport(RefPtr<FrameNode>& keyNode)
+void ScrollablePattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
     mgr->OnScrollChangeEnd(keyNode);
+}
+void ScrollablePattern::ContentChangeByDetaching(PipelineContext* pipeline)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    mgr->OnScrollRemoved(host->GetId());
+}
+
+void ScrollablePattern::ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode)
+{
+    CHECK_NULL_VOID(keyNode);
+    auto pipeline = GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto mgr = pipeline->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    mgr->OnScrollChangeStart(keyNode);
+}
+
+std::string ScrollablePattern::ParseCommand(const std::string& command)
+{
+    auto json = JsonUtil::ParseJsonString(command);
+    if (!json || json->IsNull()) {
+        return std::string("");
+    }
+    return json->GetString("cmd");
+}
+
+void ScrollablePattern::ReportOnItemStopEvent()
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto nodeId = host->GetId();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    if (host->GetTag() == V2::GRID_ETS_TAG) {
+        params->Put("name", "Grid.onScrollStop");
+    }
+    if (host->GetTag() == V2::LIST_ETS_TAG) {
+        params->Put("name", "List.onScrollStop");
+    }
+    params->Put("nodeId", nodeId);
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", params);
+
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("result", result->ToString(),
+        ComponentEventType::COMPONENT_EVENT_SCROLL);
 }
 } // namespace OHOS::Ace::NG

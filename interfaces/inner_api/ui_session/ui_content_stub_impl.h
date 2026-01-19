@@ -35,7 +35,8 @@ public:
     int32_t RegisterRouterChangeEventCallback(const EventCallback& eventCallback) override;
     int32_t RegisterSearchEventCallback(const EventCallback& eventCallback) override;
     int32_t RegisterTextChangeEventCallback(const EventCallback& eventCallback) override;
-    int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback) override;
+    int32_t RegisterComponentChangeEventCallback(const EventCallback& eventCallback,
+        uint32_t mask = ComponentEventType::COMPONENT_EVENT_ALL) override;
     int32_t RegisterWebUnfocusEventCallback(
         const std::function<void(int64_t accessibilityId, const std::string& data)>& eventCallback) override;
     int32_t RegisterScrollEventCallback(const EventCallback& eventCallback) override;
@@ -72,6 +73,13 @@ public:
     int32_t GetCurrentImagesShowing(
         const std::function<void(std::vector<std::pair<int32_t, std::shared_ptr<Media::PixelMap>>>)>& finishCallback)
         override;
+    int32_t GetImagesById(
+        const std::vector<int32_t>& arkUIIds,
+        const std::function<void(int32_t, const std::unordered_map<int32_t, std::shared_ptr<Media::PixelMap>>&,
+            MultiImageQueryErrorCode)>& arkUIfinishCallback,
+        const std::map<int32_t, std::vector<int32_t>>& arkWebs,
+        const std::function<void(int32_t, const std::map<int32_t, std::map<int32_t,
+            std::shared_ptr<Media::PixelMap>>>&, MultiImageQueryErrorCode)>& arkWebfinishCallback) override;
     int32_t GetVisibleInspectorTree(const std::function<void(std::string, int32_t, bool)>& eventCallback,
         ParamConfig config = ParamConfig()) override;
     int32_t GetLatestHitTestNodeInfosForTouch(
@@ -85,6 +93,11 @@ public:
     int32_t UnregisterContentChangeCallback() override;
     int32_t GetStateMgmtInfo(const std::string& componentName, const std::string& propertyName,
         const std::string& jsonPath, const std::function<void(std::vector<std::string>)>& eventCallback) override;
+
+    int32_t GetWebInfoByRequest(
+        int32_t webId,
+        const std::string& request,
+        const GetWebInfoByRequestCallback& finishCallback) override;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_INTERFACE_UI_CONTENT_STUB_IMPL_H

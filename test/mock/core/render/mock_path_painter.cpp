@@ -20,9 +20,9 @@ namespace {
 constexpr float PATH_WIDTH = 100.0f;
 constexpr float PATH_HEIGHT = 100.0f;
 } // namespace
-void PathPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const OffsetF& offset) {}
-void PathPainter::DrawPath(RSCanvas& canvas, const PathPaintProperty& shapePaintProperty) {}
-SizeF PathPainter::GetPathSize(const std::string& commands)
+ACE_FORCE_EXPORT void PathPainter::DrawPath(RSCanvas& canvas, const std::string& commands, const OffsetF& offset) {}
+ACE_FORCE_EXPORT void PathPainter::DrawPath(RSCanvas& canvas, const PathPaintProperty& shapePaintProperty) {}
+ACE_FORCE_EXPORT SizeF PathPainter::GetPathSize(const std::string& commands)
 {
     return SizeF(PATH_WIDTH, PATH_HEIGHT);
 }

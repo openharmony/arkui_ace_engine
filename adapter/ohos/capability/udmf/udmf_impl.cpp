@@ -103,6 +103,12 @@ void* UdmfClientImpl::TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedDataIm
     return unifiedData.get();
 }
 
+std::shared_ptr<void> UdmfClientImpl::TransformUnifiedDataSharedPtr(RefPtr<UnifiedData>& unifiedDataImpl)
+{
+    CHECK_NULL_RETURN(unifiedDataImpl, nullptr);
+    return AceType::DynamicCast<UnifiedDataImpl>(unifiedDataImpl)->GetUnifiedData();
+}
+
 RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataForNative(void* rawData)
 {
     CHECK_NULL_RETURN(rawData, nullptr);
@@ -700,10 +706,19 @@ RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataFromANI(void* rawData)
     return udData;
 }
 
-
-void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr)
+RefPtr<DataLoadParams> UdmfClientImpl::TransformDataLoadParamsFromANI(void* rawData)
 {
-    auto udmfSummary = reinterpret_cast<UDMF::Summary*>(summaryPtr);
+    CHECK_NULL_RETURN(rawData, nullptr);
+    auto dataLoadParams = reinterpret_cast<UDMF::DataLoadParams*>(rawData);
+    auto dataLoadParamsPtr = std::make_shared<UDMF::DataLoadParams>(*dataLoadParams);
+    auto dataLP = AceType::AceType::MakeRefPtr<DataLoadParamsImpl>();
+    dataLP->SetDataLoadParams(dataLoadParamsPtr);
+    return dataLP;
+}
+
+void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, std::shared_ptr<void> summaryPtr)
+{
+    std::shared_ptr<OHOS::UDMF::Summary> udmfSummary = std::static_pointer_cast<OHOS::UDMF::Summary>(summaryPtr);
     CHECK_NULL_VOID(udmfSummary);
     udmfSummary->totalSize = 0;
     for (auto element : summary) {

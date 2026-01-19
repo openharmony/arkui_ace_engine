@@ -241,6 +241,7 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm001, TestSize.Level2)
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(richEditorTheme));
 
     LayoutConstraintF parentLayoutConstraint;
     parentLayoutConstraint.maxSize = CONTAINER_SIZE;
@@ -328,6 +329,64 @@ HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm003, TestSize.Level2)
     layoutWrapper->GetLayoutProperty()->UpdateLayoutConstraint(layoutConstraint);
     layoutAlgorithm->Measure(AceType::RawPtr(layoutWrapper));
     EXPECT_EQ(layoutWrapper->GetGeometryNode()->GetFrameSize().Width(), 720.0f);
+}
+
+/**
+ * @tc.name: RichEditorLayoutAlgorithm004
+ * @tc.desc: test MeasureContent
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, RichEditorLayoutAlgorithm004, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. get RichEditorPattern
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. mock RichEditorTheme
+     */
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    auto richEditorTheme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(richEditorTheme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(richEditorTheme));
+
+    /**
+     * @tc.steps: step3. init layoutAlgorithm
+     */
+    LayoutConstraintF parentLayoutConstraint;
+    parentLayoutConstraint.maxSize = CONTAINER_SIZE;
+        parentLayoutConstraint.selfIdealSize.SetHeight(std::nullopt);
+    parentLayoutConstraint.selfIdealSize.SetWidth(1.0f);
+    auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+        richEditorNode_, AceType::MakeRefPtr<GeometryNode>(), richEditorNode_->GetLayoutProperty());
+    ASSERT_NE(layoutWrapper, nullptr);
+
+    /**
+     * @tc.steps: step4. add spans
+     */
+    AddImageSpan();
+    AddSpan(INIT_VALUE_1);
+    richEditorPattern->AddSymbolSpan(SYMBOL_SPAN_OPTIONS_1);
+    auto layoutAlgorithm = AceType::DynamicCast<RichEditorLayoutAlgorithm>(richEditorPattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+    layoutWrapper->SetLayoutAlgorithm(AceType::MakeRefPtr<LayoutAlgorithmWrapper>(layoutAlgorithm));
+    auto paragraph = MockParagraph::GetOrCreateMockParagraph();
+    ASSERT_NE(paragraph, nullptr);
+    auto paragraphManager = AceType::MakeRefPtr<ParagraphManager>();
+    layoutAlgorithm->paragraphManager_ = paragraphManager;
+    ParagraphStyle testStyle = {};
+    EXPECT_CALL(*paragraph, GetParagraphStyle()).WillRepeatedly(ReturnRef(testStyle));
+    layoutAlgorithm->spans_.emplace_back(richEditorPattern->spans_);
+
+    /**
+     * @tc.steps: step5. test MeasureContent
+     */
+    layoutAlgorithm->MeasureContent(parentLayoutConstraint, AceType::RawPtr(layoutWrapper));
+    ASSERT_NE(layoutAlgorithm->spans_.size(), 0);
 }
 
 /**
@@ -639,6 +698,7 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateTextFieldManager001, TestSize.Level2)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     ASSERT_NE(themeManager, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(AceType::MakeRefPtr<RichEditorTheme>()));
 
     auto oldThemeManager = PipelineBase::GetCurrentContext()->themeManager_;
     PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
@@ -1162,6 +1222,99 @@ HWTEST_F(RichEditorLayoutTestNg, UpdateParagraphByCustomSpanTest002, TestSize.Le
     EXPECT_EQ(spanTextLength, 29);
     EXPECT_EQ(customSpanItem->placeholderIndex, 10);
     EXPECT_EQ(customSpanPlaceholder.customSpanIndex, 10);
+}
+
+/**
+ * @tc.name: AddSymbolSpanToParagraphTest001
+ * @tc.desc: Test AddSymbolSpanToParagraph when useParagraphCache_ is false
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, AddSymbolSpanToParagraphTest001, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create RichEditorPattern and get layout algorithm
+     */
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create RichEditorLayoutAlgorithm with useParagraphCache_ = false
+     */
+    auto layoutAlgorithm =
+        AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    // Set useParagraphCache_ to false
+    layoutAlgorithm->useParagraphCache_ = false;
+
+    /**
+     * @tc.steps: step3. Prepare test parameters
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = u"symbol content";
+    int32_t spanTextLength = 5;
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<TextPattern>());
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+
+    /**
+     * @tc.steps: step4. Call AddSymbolSpanToParagraph method
+     * @tc.expected: When useParagraphCache_ is false, should call base class method
+     */
+    layoutAlgorithm->AddSymbolSpanToParagraph(spanItem, spanTextLength, frameNode, paragraph);
+
+    /**
+     * @tc.expected: spanTextLength should be increased by the content length
+     */
+    EXPECT_EQ(spanTextLength, 7);
+}
+
+/**
+ * @tc.name: AddSymbolSpanToParagraphTest002
+ * @tc.desc: Test AddSymbolSpanToParagraph when useParagraphCache_ is true
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorLayoutTestNg, AddSymbolSpanToParagraphTest002, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. Create RichEditorPattern and get layout algorithm
+     */
+    auto pattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    /**
+     * @tc.steps: step2. Create RichEditorLayoutAlgorithm with useParagraphCache_ = true
+     */
+    auto layoutAlgorithm =
+        AceType::DynamicCast<RichEditorLayoutAlgorithm>(pattern->CreateLayoutAlgorithm());
+    ASSERT_NE(layoutAlgorithm, nullptr);
+
+    // Set useParagraphCache_ to true
+    layoutAlgorithm->useParagraphCache_ = true;
+
+    /**
+     * @tc.steps: step3. Prepare test parameters
+     */
+    auto spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanItem->content = u"symbol content";
+    int32_t spanTextLength = 5;
+    auto frameNode = FrameNode::CreateFrameNode(
+        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        AceType::MakeRefPtr<TextPattern>());
+    auto paragraph = AceType::MakeRefPtr<MockParagraph>();
+
+    /**
+     * @tc.steps: step4. Call AddSymbolSpanToParagraph method
+     * @tc.expected: When useParagraphCache_ is true, should execute override logic
+     *               spanTextLength should be increased by content length
+     */
+    layoutAlgorithm->AddSymbolSpanToParagraph(spanItem, spanTextLength, frameNode, paragraph);
+
+    /**
+     * @tc.expected: spanTextLength should be increased by the content length (15 characters)
+     */
+    EXPECT_EQ(spanTextLength, 19);
 }
 
 } // namespace OHOS::Ace::NG

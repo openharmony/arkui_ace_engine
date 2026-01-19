@@ -22,4 +22,5 @@ bool EffectComponentPattern::OnDirtyLayoutWrapperSwap(
 {
     return false;
 }
+void EffectComponentPattern::SetEffectLayer(EffectLayer effectLayerValue) {}
 } // namespace OHOS::Ace::NG

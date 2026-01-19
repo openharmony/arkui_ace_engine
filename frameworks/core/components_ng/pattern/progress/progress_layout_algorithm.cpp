@@ -80,17 +80,24 @@ std::optional<SizeF> ProgressLayoutAlgorithm::MeasureContent(
         progressTheme ? progressTheme->GetRingDiameter().ConvertToPx() : DEFALT_RING_DIAMETER.ConvertToPx();
     auto selfIdealWidth = contentConstraint.selfIdealSize.Width();
     auto selfIdealHeight = contentConstraint.selfIdealSize.Height();
-    float width_ = selfIdealWidth.value_or(contentConstraint.percentReference.Width());
+    if (layoutPolicy.has_value()) {
+        if (layoutPolicy->IsWidthMatch()) {
+            selfIdealWidth = contentConstraint.parentIdealSize.Width();
+        }
+        if (layoutPolicy->IsHeightMatch()) {
+            selfIdealHeight = contentConstraint.parentIdealSize.Height();
+        }
+    }
+    float width_ = 0.0f;
+    if (selfIdealWidth) {
+        width_ = selfIdealWidth.value();
+    } else {
+        auto percentReference = contentConstraint.percentReference;
+        percentReference.Constrain(contentConstraint.minSize, contentConstraint.maxSize, true);
+        width_ = percentReference.Width();
+    }
     float height_ = selfIdealHeight.value_or(strokeWidth_);
     if (type_ == ProgressType::RING || type_ == ProgressType::SCALE || type_ == ProgressType::MOON) {
-        if (layoutPolicy.has_value()) {
-            if (layoutPolicy->IsWidthMatch()) {
-                selfIdealWidth = contentConstraint.parentIdealSize.Width();
-            }
-            if (layoutPolicy->IsHeightMatch()) {
-                selfIdealHeight = contentConstraint.parentIdealSize.Height();
-            }
-        }
         if (!selfIdealHeight) {
             if (!selfIdealWidth) {
                 width_ = diameter;

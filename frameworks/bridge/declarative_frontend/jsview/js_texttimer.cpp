@@ -281,6 +281,9 @@ void JSTextTimer::SetFontWeight(const JSCallbackInfo& info)
     std::string weight;
     if (fontWeight->IsNumber()) {
         weight = std::to_string(fontWeight->ToNumber<int32_t>());
+        if (SystemProperties::ConfigChangePerform()) {
+            TextTimerModel::GetInstance()->CreateWithResourceObj(JsTextTimerResourceType::FONTWEIGHT, nullptr);
+        }
     } else {
         if (SystemProperties::ConfigChangePerform()) {
             RefPtr<ResourceObject> resObj;

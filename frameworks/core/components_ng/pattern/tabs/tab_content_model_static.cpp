@@ -63,12 +63,51 @@ void TabContentModelStatic::SetIndicator(FrameNode* frameNode, const std::option
     }
 }
 
-void TabContentModelStatic::SetLabelStyle(FrameNode* frameNode, const std::optional<LabelStyle>& labelStyleOpt)
+void TabContentModelStatic::SetLabelStyle(FrameNode* frameNode,
+    const std::optional<LabelStyle>& labelStyleOpt, bool isSubTabStyle)
 {
     CHECK_NULL_VOID(frameNode);
     auto frameNodePattern = frameNode->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(frameNodePattern);
-    frameNodePattern->SetLabelStyle(labelStyleOpt.value_or(LabelStyle()));
+    LabelStyle labelStyle = labelStyleOpt.value_or(LabelStyle());
+    frameNodePattern->SetLabelStyle(CompleteParameters(labelStyle, isSubTabStyle));
+}
+
+LabelStyle TabContentModelStatic::CompleteParameters(LabelStyle& labelStyle, bool isSubTabStyle)
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, labelStyle);
+    RefPtr<TabTheme> tabTheme = pipeline->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(tabTheme, labelStyle);
+    if (!labelStyle.maxLines.has_value()) {
+        labelStyle.maxLines = 1;
+    }
+    if (!labelStyle.minFontSize.has_value()) {
+        labelStyle.minFontSize = 0.0_vp;
+    }
+    if (!labelStyle.maxFontSize.has_value()) {
+        labelStyle.maxFontSize = 0.0_vp;
+    }
+    if (!labelStyle.fontSize.has_value()) {
+        if (isSubTabStyle) {
+            labelStyle.fontSize = tabTheme->GetSubTabTextDefaultFontSize();
+        } else if (Container::LessThanAPITargetVersion(PlatformVersion::VERSION_TWELVE)) {
+            labelStyle.fontSize = tabTheme->GetBottomTabTextSize();
+        }
+    }
+    if (!labelStyle.fontWeight.has_value() && !isSubTabStyle) {
+        labelStyle.fontWeight = FontWeight::MEDIUM;
+    }
+    if (!labelStyle.fontStyle.has_value()) {
+        labelStyle.fontStyle = Ace::FontStyle::NORMAL;
+    }
+    if (!labelStyle.heightAdaptivePolicy.has_value()) {
+        labelStyle.heightAdaptivePolicy = TextHeightAdaptivePolicy::MAX_LINES_FIRST;
+    }
+    if (!labelStyle.textOverflow.has_value()) {
+        labelStyle.textOverflow = TextOverflow::ELLIPSIS;
+    }
+    return labelStyle;
 }
 
 void TabContentModelStatic::SetSelectedMode(FrameNode* node, const std::optional<SelectedMode>& selectedMode)
@@ -87,12 +126,37 @@ void TabContentModelStatic::SetBoard(FrameNode* node, const std::optional<BoardS
     frameNodePattern->SetBoardStyle(board.value_or(BoardStyle()));
 }
 
-void TabContentModelStatic::SetPadding(FrameNode* node, const std::optional<PaddingProperty>& padding)
+void TabContentModelStatic::SetPadding(FrameNode* node,
+    const std::optional<PaddingProperty>& padding, bool isSubTabStyle)
 {
     CHECK_NULL_VOID(node);
     auto pattern = node->GetPattern<TabContentPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetPadding(padding.value_or(PaddingProperty()));
+    PaddingProperty paddingProperty = padding.value_or(PaddingProperty());
+    pattern->SetPadding(CompletePaddingProperty(paddingProperty, isSubTabStyle));
+}
+
+PaddingProperty TabContentModelStatic::CompletePaddingProperty(PaddingProperty& padding, bool isSubTabStyle)
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_RETURN(pipeline, padding);
+    RefPtr<TabTheme> tabTheme = pipeline->GetTheme<TabTheme>();
+    CHECK_NULL_RETURN(tabTheme, padding);
+    if (!padding.top.has_value()) {
+        padding.top = isSubTabStyle ? NG::CalcLength(tabTheme->GetSubTabTopPadding()) : NG::CalcLength(0.0_vp);
+    }
+    if (!padding.bottom.has_value()) {
+        padding.bottom = isSubTabStyle ? NG::CalcLength(tabTheme->GetSubTabBottomPadding()) : NG::CalcLength(0.0_vp);
+    }
+    if (!padding.left.has_value()) {
+        padding.left = isSubTabStyle ? NG::CalcLength(tabTheme->GetSubTabHorizontalPadding()) :
+                                        NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
+    }
+    if (!padding.right.has_value()) {
+        padding.right = isSubTabStyle ? NG::CalcLength(tabTheme->GetSubTabHorizontalPadding()) :
+                                        NG::CalcLength(tabTheme->GetBottomTabHorizontalPadding());
+    }
+    return padding;
 }
 
 void TabContentModelStatic::SetUseLocalizedPadding(FrameNode* node, bool useLocalizedPadding)

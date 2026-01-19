@@ -29,6 +29,8 @@ namespace OHOS::Ace {
         #cls, std::make_shared<cls>() \
     }
 
+SINGLETON_INSTANCE_IMPL(FeatureParamManager);
+
 const std::unordered_map<std::string, std::shared_ptr<ConfigParserBase>> FeatureParamManager::featureParamMap_ = {
     ADD_PARSER_MODEL(UINodeGcParamParser),
     ADD_PARSER_MODEL(SyncLoadParser),
@@ -99,10 +101,11 @@ void FeatureParamManager::FeatureParamParseEntry(const std::string& bundleName)
     }
 }
 
-void FeatureParamManager::SetSyncLoadEnableParam(bool enabled, uint32_t deadline)
+void FeatureParamManager::SetSyncLoadEnableParam(bool enabled, uint32_t deadline, int64_t startupDelay)
 {
     syncLoadEnabled_ = enabled;
     syncloadResponseDeadline_ = deadline;
+    syncLoadStartupDelay_ = startupDelay;
 }
 
 bool FeatureParamManager::IsSyncLoadEnabled() const
@@ -129,6 +132,11 @@ void FeatureParamManager::SetUiCorrectionEnableParam(bool pageOverflowEnabled, b
 uint32_t FeatureParamManager::GetSyncloadResponseDeadline() const
 {
     return syncloadResponseDeadline_;
+}
+
+int64_t FeatureParamManager::GetSyncLoadStartupDelay() const
+{
+    return syncLoadStartupDelay_;
 }
 
 void FeatureParamManager::SetUINodeGcEnabled(bool enabled)

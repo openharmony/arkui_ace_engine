@@ -18,8 +18,21 @@
 #include "core/components/navigation_bar/navigation_container_component.h"
 #include "frameworks/bridge/declarative_frontend/declarative_frontend.h"
 #include "frameworks/core/components/navigator/navigator_element.h"
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace {
+namespace {
+const ArkUIInnerTabsModifier* GetTabsInnerModifier()
+{
+    static const ArkUIInnerTabsModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("tabs");
+        CHECK_NULL_RETURN(loader, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIInnerTabsModifier*>(loader->GetCustomModifier());
+    }
+    return cachedModifier;
+}
+}
 
 void NavigationContainerElement::ConnectNavigator(const RefPtr<StageElement>& targetContainer)
 {
@@ -95,7 +108,9 @@ void NavigationContainerElement::PerformBuild()
             }
             pipelineContext->ScheduleUpdate(NavigationContainerComponent::BuildToolBar(declaration, tabController));
         };
-        tabController->SetTabBarChangeListener(tabBarChangeListener_);
+        if (auto modifier = GetTabsInnerModifier()) {
+            modifier->setTabBarChangeListener(tabController, tabBarChangeListener_);
+        }
     }
 
     auto lastChild = GetChildren().back();

@@ -162,8 +162,6 @@ export class ArkNodeContainerComponent extends ArkCommonMethodComponent implemen
 export function NodeContainerImpl(
     /** @memo */
     style: ((attributes: NodeContainerAttribute) => void) | undefined,
-    /** @memo */
-    content_?: (() => void) | undefined,
 ): void {
     const context: StateManager = __context() as StateManager;
     const data: ContextRecord | undefined = context.contextData ? context.contextData as ContextRecord : undefined
@@ -173,6 +171,5 @@ export function NodeContainerImpl(
     })
     NodeAttach<ArkNodeContainerPeer>((): ArkNodeContainerPeer => ArkNodeContainerPeer.create(receiver), (_: ArkNodeContainerPeer) => {
         style?.(receiver)
-        content_?.()
     })
 }

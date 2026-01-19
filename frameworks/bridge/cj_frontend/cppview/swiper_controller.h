@@ -18,7 +18,7 @@
 
 #include "ffi_remote_data.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_macro.h"
-#include "core/components/swiper/swiper_component.h"
+#include "core/components/swiper/swiper_controller.h"
 
 namespace OHOS::Ace::Framework {
 

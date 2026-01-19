@@ -61,8 +61,8 @@ void CanvasRenderingContext2DPeerImpl::OnAttachToCanvas()
 {
     ContainerScope scope(instanceId_);
     for (const auto& iter : attachCallback_) {
-        if (iter.second.IsValid()) {
-            iter.second.Invoke();
+        if (iter.second) {
+            iter.second();
         }
     }
 }
@@ -70,8 +70,8 @@ void CanvasRenderingContext2DPeerImpl::OnDetachFromCanvas()
 {
     ContainerScope scope(instanceId_);
     for (const auto& iter : detachCallback_) {
-        if (iter.second.IsValid()) {
-            iter.second.Invoke();
+        if (iter.second) {
+            iter.second();
         }
     }
 }
@@ -82,9 +82,9 @@ CanvasRenderingContext2DPeerImpl::CanvasCallbackIterator CanvasRenderingContext2
         [callbackId](const auto& item) -> bool { return (callbackId == item.first); });
 }
 void CanvasRenderingContext2DPeerImpl::DeleteCallbackFromList(
-    const CallbackHelper<VoidCallback>& callback, const CanvasCallbackType& type)
+    const std::function<void()>& callback, const CanvasCallbackType& type)
 {
-    if (!callback.IsValid()) {
+    if (!callback) {
         if (type == CanvasCallbackType::ON_ATTACH) {
             attachCallback_.clear();
         } else if (type == CanvasCallbackType::ON_DETACH) {
@@ -110,8 +110,8 @@ void CanvasRenderingContext2DPeerImpl::DeleteCallbackFromList(
         }
     }
 }
-void CanvasRenderingContext2DPeerImpl::AddCallbackToList(CallbackHelper<VoidCallback> &&callback,
-    const CanvasCallbackType& type)
+void CanvasRenderingContext2DPeerImpl::AddCallbackToList(
+    std::function<void()>&& callback, const CanvasCallbackType& type)
 {
     if (type == CanvasCallbackType::ON_ATTACH) {
         auto iter = FindCallbackInList(attachCallback_, attachCallbackId_);
@@ -125,11 +125,11 @@ void CanvasRenderingContext2DPeerImpl::AddCallbackToList(CallbackHelper<VoidCall
         }
     }
 }
-void CanvasRenderingContext2DPeerImpl::On(CallbackHelper<VoidCallback> &&callback, const CanvasCallbackType& type)
+void CanvasRenderingContext2DPeerImpl::On(std::function<void()> &&callback, const CanvasCallbackType& type)
 {
     AddCallbackToList(std::move(callback), type);
 }
-void CanvasRenderingContext2DPeerImpl::Off(CallbackHelper<VoidCallback> &&callback, const CanvasCallbackType& type)
+void CanvasRenderingContext2DPeerImpl::Off(std::function<void()> &&callback, const CanvasCallbackType& type)
 {
     DeleteCallbackFromList(callback, type);
 }
@@ -210,5 +210,10 @@ int32_t CanvasRenderingContext2DPeerImpl::GetCanvasId()
     auto canvasRenderingContext2DModel = AceType::DynamicCast<CanvasRenderingContext2DModel>(renderingContext2DModel_);
     CHECK_NULL_RETURN(canvasRenderingContext2DModel, -1);
     return canvasRenderingContext2DModel->GetId();
+}
+void CanvasRenderingContext2DPeerImpl::SetRenderingContextOptions(const RenderingContextOptions& options)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    renderingContext2DModel_->SetAntiAlias(options.antialias);
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier

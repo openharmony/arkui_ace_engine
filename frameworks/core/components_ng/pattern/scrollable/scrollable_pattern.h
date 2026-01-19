@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -81,7 +81,7 @@ struct ScrollOffsetAbility {
     float contentStartOffset = 0.0f;
     float contentEndOffset = 0.0f;
 };
-class ScrollablePattern : public NestableScrollContainer, public virtual StatusBarClickListener {
+class ACE_FORCE_EXPORT ScrollablePattern : public NestableScrollContainer, public virtual StatusBarClickListener {
     DECLARE_ACE_TYPE(ScrollablePattern, NestableScrollContainer);
 
 public:
@@ -168,9 +168,22 @@ public:
     {
         return false;
     }
+
+    virtual bool TryFreeScroll(double offset, Axis axis)
+    {
+        return false;
+    }
+
+    virtual bool FreeOverScrollWithDelta(Axis axis, double delta)
+    {
+        return false;
+    }
+
     virtual bool CanOverScrollWithDelta(double delta, bool isNestScroller = false);
 
     virtual void OnTouchDown(const TouchEventInfo& info);
+
+    virtual void ProcessFreeScrollOverDrag(const OffsetF velocity) {};
 
     void AddScrollEvent();
     RefPtr<ScrollableEvent> GetScrollableEvent()
@@ -243,6 +256,7 @@ public:
     void SetScrollBarProxy(const RefPtr<ScrollBarProxy>& scrollBarProxy);
     virtual RefPtr<ScrollBarOverlayModifier> CreateOverlayModifier();
     void CreateScrollBarOverlayModifier();
+    virtual void AdjustOffset(float& delta, int32_t source) {}
 
     float GetScrollableDistance() const
     {
@@ -410,7 +424,7 @@ public:
     {
         return {};
     }
-    virtual bool FreeScrollBy(const OffsetF& delta)
+    virtual bool FreeScrollBy(const OffsetF& delta, bool canOverScroll = false)
     {
         return false;
     }
@@ -776,7 +790,7 @@ public:
 
     PositionMode GetPositionMode();
 
-    void HandleMoveEventInComp(const PointF& point);
+    void HandleMoveEventInComp(const PointF& point, bool needExpandHotZone = false);
     void HandleLeaveHotzoneEvent();
     void SetHotZoneScrollCallback(std::function<void(void)>&& func)
     {
@@ -936,6 +950,10 @@ public:
     void ProcessScrollOverDrag(double velocity, bool isNestScroller);
 
     void SetCanOverScroll(bool val);
+    
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
+
+    void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
 
 protected:
     void SuggestOpIncGroup(bool flag);
@@ -946,6 +964,7 @@ protected:
     void OnDetachFromFrameNodeMultiThread(FrameNode* frameNode);
     void OnDetachFromMainTree() override;
     void OnDetachFromMainTreeMultiThread();
+    void ContentChangeByDetaching(PipelineContext* pipeline) override;
     void UpdateScrollBarRegion(float offset, float estimatedHeight, Size viewPort, Offset viewOffset);
 
     EdgeEffect GetEdgeEffect() const;
@@ -1042,6 +1061,8 @@ protected:
     {
         return isBackToTopRunning_;
     }
+
+    std::string ParseCommand(const std::string& command);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownEvent();
@@ -1185,7 +1206,7 @@ private:
     void SetOnHiddenChangeForParent();
     virtual void ResetForExtScroll() {};
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
-    void ContentChangeReport(RefPtr<FrameNode>& keyNode);
+    void ReportOnItemStopEvent();
 
     Axis axis_ = Axis::VERTICAL;
     RefPtr<ScrollableEvent> scrollableEvent_;
@@ -1266,7 +1287,7 @@ private:
     RefPtr<VelocityMotion> fixedVelocityMotion_;
     std::function<void(void)> hotZoneScrollCallback_;
     void UnRegister2DragDropManager(FrameNode* frameNode);
-    float IsInHotZone(const PointF& point);
+    float IsInHotZone(const PointF& point, bool needExpandHotZone = false);
     void HotZoneScroll(const float offset);
     void StopHotzoneScroll();
     void HandleHotZone(const DragEventType& dragEventType, const RefPtr<NotifyDragEvent>& notifyDragEvent);

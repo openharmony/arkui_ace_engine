@@ -162,7 +162,7 @@ private:
     ThemeWrappers& GetThemeWrappers(ColorMode mode);
     ColorMode GetCurrentColorMode() const;
 
-    std::mutex themeMultiThreadMutex_;
+    std::recursive_mutex themeMultiThreadMutex_;
 };
 } // namespace OHOS::Ace
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_THEME_THEME_MANAGER_H

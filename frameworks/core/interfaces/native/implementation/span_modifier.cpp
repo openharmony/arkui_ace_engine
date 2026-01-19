@@ -103,7 +103,7 @@ void SetFontStyleImpl(Ark_NativePointer node,
     SpanModelStatic::SetItalicFontStyle(frameNode, convValue);
 }
 void SetFontWeightImpl(Ark_NativePointer node,
-                       const Opt_Union_I32_FontWeight_String* value)
+                       const Opt_Union_I32_FontWeight_ResourceStr* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -138,8 +138,8 @@ void SetLetterSpacingImpl(Ark_NativePointer node,
                           const Opt_Union_F64_String* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    CHECK_NULL_VOID(frameNode && value);
+    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Union_F64_String, Ark_Float64>(*value);
     Validator::ValidateNonPercent(convValue);
     SpanModelStatic::SetLetterSpacing(frameNode, convValue);
 }
@@ -156,7 +156,7 @@ void SetLineHeightImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto convValue = Converter::OptConvertPtr<Dimension>(value);
+    auto convValue = Converter::OptConvertFromArkNumStrRes<Opt_Length, Ark_Float64>(*value);
     Validator::ValidateNonNegative(convValue);
     SpanModelStatic::SetLineHeight(frameNode, convValue);
 }

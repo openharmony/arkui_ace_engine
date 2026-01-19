@@ -167,6 +167,7 @@ void WindowSceneHelper::IsWindowSceneCloseKeyboard(const RefPtr<FrameNode>& fram
             auto pipeline = frameNode->GetContext();
             CHECK_NULL_VOID(pipeline);
             auto systemWindowId = pipeline->GetFocusWindowId();
+            ConvertSystemWindowId(frameNode, systemWindowId);
             inputMethod->RequestHideInput(systemWindowId, true);
             inputMethod->Close();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "scbSoftKeyboard Closes Successfully.");
@@ -192,6 +193,7 @@ void WindowSceneHelper::IsCloseKeyboard(const RefPtr<FrameNode>& frameNode)
             auto pipeline = frameNode->GetContext();
             CHECK_NULL_VOID(pipeline);
             auto systemWindowId = pipeline->GetFocusWindowId();
+            ConvertSystemWindowId(frameNode, systemWindowId);
             inputMethod->RequestHideInput(systemWindowId, true);
             inputMethod->Close();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
@@ -437,5 +439,14 @@ std::string WindowSceneHelper::RSUIContextToStr(const std::shared_ptr<Rosen::RSU
         << static_cast<int32_t>(rsUIContext->GetToken() >> 32) // 32: tid's offset position in the token
         << "]";
     return oss.str();
+}
+
+void WindowSceneHelper::ConvertSystemWindowId(const RefPtr<FrameNode>& frameNode, uint32_t& systemWindowId)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto focusSystemWindowId = WindowSceneHelper::GetFocusSystemWindowId(frameNode);
+    if (focusSystemWindowId != 0) {
+        systemWindowId = focusSystemWindowId;
+    }
 }
 } // namespace OHOS::Ace::NG

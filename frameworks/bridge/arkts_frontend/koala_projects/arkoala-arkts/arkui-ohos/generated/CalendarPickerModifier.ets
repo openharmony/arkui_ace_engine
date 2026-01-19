@@ -184,6 +184,7 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
         {
             this._textStyle_0_flag = AttributeUpdaterFlag.UPDATE
             this._textStyle_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._textStyle_0_flag = AttributeUpdaterFlag.SKIP
@@ -195,6 +196,7 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
         {
             this._onChange_0_flag = AttributeUpdaterFlag.UPDATE
             this._onChange_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onChange_0_flag = AttributeUpdaterFlag.SKIP
@@ -206,6 +208,7 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
         {
             this._markToday_0_flag = AttributeUpdaterFlag.UPDATE
             this._markToday_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._markToday_0_flag = AttributeUpdaterFlag.SKIP
@@ -218,6 +221,7 @@ export class CalendarPickerModifier extends CommonMethodModifier implements Cale
             this._edgeAlign_0_flag = AttributeUpdaterFlag.UPDATE
             this._edgeAlign_0_0value = alignType
             this._edgeAlign_0_1value = offset
+            this._state.fireChange()
         } else
         {
             this._edgeAlign_0_flag = AttributeUpdaterFlag.SKIP

@@ -29,6 +29,8 @@ constexpr char REC_FILE_NAME[] = "/arkui_dump.rec";
 const std::vector<std::string> SKIP_COMPARE_PARAMS = { "time", "children" };
 } // namespace
 
+SINGLETON_INSTANCE_IMPL(DumpRecorder);
+
 DumpRecorder::DumpRecorder() = default;
 DumpRecorder::~DumpRecorder() = default;
 

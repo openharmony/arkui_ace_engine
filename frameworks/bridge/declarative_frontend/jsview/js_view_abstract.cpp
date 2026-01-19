@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -33,6 +33,7 @@
 #include "base/geometry/ng/offset_t.h"
 #include "base/geometry/ng/vector.h"
 #include "base/geometry/shape.h"
+#include "base/i18n/localization.h"
 #include "base/json/json_util.h"
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log.h"
@@ -43,6 +44,7 @@
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_clipboard_function.h"
+#include "bridge/declarative_frontend/engine/functions/js_drag_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_event_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_on_child_touch_test_function.h"
 #include "bridge/declarative_frontend/engine/functions/js_focus_function.h"
@@ -85,7 +87,6 @@
 #include "core/common/resource/resource_wrapper.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/common/resource/resource_configuration.h"
-#include "base/i18n/localization.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -105,6 +106,7 @@ namespace {
 const std::string RESOURCE_TOKEN_PATTERN = "(app|sys|\\[.+?\\])\\.(\\S+?)\\.(\\S+)";
 const std::string RESOURCE_NAME_PATTERN = "\\[(.+?)\\]";
 constexpr int32_t DIRECTION_COUNT = 4;
+constexpr int32_t FLOAT_PRECISION = 6;
 constexpr char JS_TEXT_MENU_ID_CLASS_NAME[] = "TextMenuItemId";
 constexpr int NUM1 = 1;
 constexpr int NUM2 = 2;
@@ -400,10 +402,8 @@ std::string TryLocalizeNumberStr(const std::string& numStr, int32_t precision)
         return numStr;
     }
 
-    std::string result = numStr;
-    std::string backup = numStr;
-
-    return localization->LocalizeNumber(result, precision) ? result : backup;
+    std::string result;
+    return localization->LocalizeNumber(numStr, result, precision) ? result : numStr;
 }
 
 std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray> params, int32_t containCount)
@@ -435,12 +435,12 @@ std::string GetReplaceContentStr(int pos, const std::string& type, JSRef<JSArray
     } else if (type == "f") {
         if (item->IsNumber()) {
             std::string numStr = std::to_string(item->ToNumber<float>());
-            return TryLocalizeNumberStr(numStr, -1);
+            return TryLocalizeNumberStr(numStr, FLOAT_PRECISION);
         } else if (item->IsObject()) {
             double result = 0.0;
             JSViewAbstract::ParseJsDouble(item, result);
             std::string numStr = std::to_string(result);
-            return TryLocalizeNumberStr(numStr, -1);
+            return TryLocalizeNumberStr(numStr, FLOAT_PRECISION);
         }
     }
     return std::string();
@@ -5287,9 +5287,8 @@ void JSViewAbstract::ParseBorderColor(const JSRef<JSVal>& args)
     if (ParseJsColor(args, borderColor, borderColorResObj)) {
         if (SystemProperties::ConfigChangePerform() && borderColorResObj) {
             ViewAbstractModel::GetInstance()->SetBorderColor(borderColorResObj);
-        } else {
-            ViewAbstractModel::GetInstance()->SetBorderColor(borderColor);
         }
+        ViewAbstractModel::GetInstance()->SetBorderColor(borderColor);
     } else if (args->IsObject()) {
         CommonColor commonColor;
         JSRef<JSObject> object = JSRef<JSObject>::Cast(args);
@@ -7862,10 +7861,6 @@ void JSViewAbstract::ParseDragInteractionOptions(const JSCallbackInfo& info,
         if (hapicFeedback->IsBoolean()) {
             previewOption.enableHapticFeedback = hapicFeedback->ToBoolean();
         }
-        auto dragPreview = interObj->GetProperty("isDragPreviewEnabled");
-        if (dragPreview->IsBoolean()) {
-            previewOption.isDragPreviewEnabled = dragPreview->ToBoolean();
-        }
         auto enableEdgeAutoScroll = interObj->GetProperty("enableEdgeAutoScroll");
         if (enableEdgeAutoScroll->IsBoolean()) {
             previewOption.enableEdgeAutoScroll = enableEdgeAutoScroll->ToBoolean();
@@ -9592,6 +9587,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("background", &JSViewAbstract::JsBackground);
     JSClass<JSViewAbstract>::StaticMethod("bindMenu", &JSViewAbstract::JsBindMenu);
     JSClass<JSViewAbstract>::StaticMethod("bindContextMenu", &JSViewAbstract::JsBindContextMenu);
+    JSClass<JSViewAbstract>::StaticMethod("bindContextMenuWithResponse", &JSViewAbstract::JsBindContextMenuWithResponse);
     JSClass<JSViewAbstract>::StaticMethod("bindContentCover", &JSViewAbstract::JsBindContentCover);
     JSClass<JSViewAbstract>::StaticMethod("bindSheet", &JSViewAbstract::JsBindSheet);
     JSClass<JSViewAbstract>::StaticMethod("draggable", &JSViewAbstract::JsSetDraggable);
@@ -9666,6 +9662,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
         "onGestureRecognizerJudgeBegin", &JSViewAbstract::JsOnGestureRecognizerJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchTestDone", &JSViewAbstract::JsOnTouchTestDone);
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
+    JSClass<JSViewAbstract>::StaticMethod("enableClickSoundEffect", &JSViewAbstract::JsSetEnableClickSoundEffect);
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
     JSClass<JSViewAbstract>::StaticMethod("onAreaChange", &JSViewAbstract::JsOnAreaChange);
@@ -9719,6 +9716,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
     JSClass<JSViewAbstract>::StaticMethod("renderGroup", &JSViewAbstract::JSRenderGroup);
     JSClass<JSViewAbstract>::StaticMethod("excludeFromRenderGroup", &JSViewAbstract::JSExcludeFromRenderGroup);
     JSClass<JSViewAbstract>::StaticMethod("renderFit", &JSViewAbstract::JSRenderFit);
+    JSClass<JSViewAbstract>::StaticMethod("useUnionEffect", &JSViewAbstract::JSUseUnion);
 
     JSClass<JSViewAbstract>::StaticMethod("freeze", &JSViewAbstract::JsSetFreeze);
 
@@ -10989,6 +10987,7 @@ void JSViewAbstract::JsOnAxisEvent(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto eventObj = NG::CommonBridge::CreateAxisEventInfo(vm, info);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        ACE_BENCH_MARK_TRACE("OnAxisEvent_end type:%d", info.GetAction());
         func->Call(vm, func.ToLocal(), params, 1);
     };
     ViewAbstractModel::GetInstance()->SetOnAxisEvent(std::move(onAxisEvent));
@@ -11261,6 +11260,18 @@ void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetClickEffectLevel((ClickEffectLevel)clickEffectLevelValue, scaleNumberValue);
 }
 
+void JSViewAbstract::JsSetEnableClickSoundEffect(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->SetEnableClickSoundEffect(true);
+    }
+    bool enabled = true;
+    if (info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetEnableClickSoundEffect(enabled);
+}
+
 void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
 {
     if (info.Length() < 2 || info.Length() > 3) {
@@ -11429,6 +11440,7 @@ void JSViewAbstract::JsForegroundColor(const JSCallbackInfo& info)
         ViewAbstractModel::GetInstance()->SetForegroundColorStrategy(strategy);
         return;
     }
+    ViewAbstractModel::GetInstance()->ResetColorPicker();
     if (!SystemProperties::ConfigChangePerform()) {
         ParseJsColor(info[0], foregroundColor);
         ViewAbstractModel::GetInstance()->SetForegroundColor(foregroundColor);
@@ -11524,6 +11536,7 @@ void JSViewAbstract::JsOnFocusAxisEvent(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto eventObj = NG::CommonBridge::CreateFocusAxisEventInfo(vm, info);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        ACE_BENCH_MARK_TRACE("OnFocusAxisEvent_end type:%d", info.GetAction());
         func->Call(vm, func.ToLocal(), params, 1);
     };
     ViewAbstractModel::GetInstance()->SetOnFocusAxisEvent(std::move(onFocusAxisEvent));
@@ -11628,12 +11641,17 @@ void JSViewAbstract::JsPrivacySensitive(const JSCallbackInfo& info)
 
 void JSViewAbstract::JSRenderGroup(const JSCallbackInfo& info)
 {
-    if (info.Length() != 1) {
+    const auto argLen = info.Length();
+    if (argLen == 0 || argLen > 2) {
         return;
     }
     bool isRenderGroup = false;
     if (info[0]->IsBoolean()) {
         isRenderGroup = info[0]->ToBoolean();
+    }
+    if (argLen == 2 && info[1]->IsBoolean()) {
+        ViewAbstractModel::GetInstance()->SetAdaptiveGroup(isRenderGroup, info[1]->ToBoolean());
+        return;
     }
     ViewAbstractModel::GetInstance()->SetRenderGroup(isRenderGroup);
 }
@@ -11666,6 +11684,19 @@ void JSViewAbstract::JSRenderFit(const JSCallbackInfo& info)
     }
     // how content fills the node duration implicit animation
     ViewAbstractModel::GetInstance()->SetRenderFit(renderFit);
+}
+
+void JSViewAbstract::JSUseUnion(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    JSRef<JSVal> argUnion = info[0];
+    bool useUnion = false;
+    if (argUnion->IsBoolean()) {
+        useUnion = argUnion->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetUseUnion(useUnion);
 }
 
 bool JSViewAbstract::GetJsMediaBundleInfo(const JSRef<JSVal>& jsValue, std::string& bundleName, std::string& moduleName)
@@ -12155,6 +12186,7 @@ std::function<void(NG::DrawingContext& context)> JSViewAbstract::GetDrawOverlayC
         napi_unwrap(env, jsCanvas, reinterpret_cast<void**>(&unwrapCanvas));
         if (unwrapCanvas) {
             unwrapCanvas->SaveCanvas();
+            unwrapCanvas->ClipCanvas(context.width, context.height);
         }
         JsiRef<JsiValue> jsCanvasVal = JsConverter::ConvertNapiValueToJsVal(jsCanvas);
         contextObj->SetPropertyObject("canvas", jsCanvasVal);
@@ -12634,11 +12666,12 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     // parse custom background
     Color color = Color::TRANSPARENT;
     RefPtr<ResourceObject> backgroundColorResObj;
+    RefPtr<ResourceObject> backgroundResObj;
     std::function<void()> builderFunc;
     BackgroundType backgroundType = BackgroundType::COLOR;
     if (!ParseJsColor(info[0], color, backgroundColorResObj)) {
         ViewAbstractModel::GetInstance()->ClearResObj("customBackgroundColor");
-        if (ParseBackgroundBuilder(info, info[0], builderFunc)) {
+        if (ParseBackgroundBuilder(info, info[0], builderFunc, backgroundResObj)) {
             backgroundType = BackgroundType::CUSTOM_BUILDER;
         } else {
             return;
@@ -12672,26 +12705,29 @@ void JSViewAbstract::JsBackground(const JSCallbackInfo& info)
     }
 
     ViewAbstractModel::GetInstance()->SetIsBuilderBackground(BackgroundType::CUSTOM_BUILDER == backgroundType);
-    ViewAbstractModel::GetInstance()->SetBackground(std::move(builderFunc));
     ViewAbstractModel::GetInstance()->SetBackgroundIgnoresLayoutSafeAreaEdges(ignoreLayoutSafeAreaEdges);
     ViewAbstractModel::GetInstance()->SetBackgroundAlign(alignment);
     if (SystemProperties::ConfigChangePerform()) {
+        ViewAbstractModel::GetInstance()->SetBackgroundWithResourceObj(std::move(builderFunc), backgroundResObj);
         ViewAbstractModel::GetInstance()->SetCustomBackgroundColorWithResourceObj(color, backgroundColorResObj);
     } else {
+        ViewAbstractModel::GetInstance()->SetBackground(std::move(builderFunc));
         ViewAbstractModel::GetInstance()->SetCustomBackgroundColor(color);
     }
 }
 
-bool JSViewAbstract::ParseBackgroundBuilder(
-    const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, std::function<void()>& builderFunc)
+bool JSViewAbstract::ParseBackgroundBuilder(const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc,
+    std::function<void()>& builderFunc, RefPtr<ResourceObject>& resObj)
 {
     if (!jsFunc->IsObject()) {
+        resObj = nullptr;
         return false;
     }
 
     JSRef<JSObject> backgroundObj = JSRef<JSObject>::Cast(jsFunc);
     auto contentObj = backgroundObj->GetProperty(static_cast<int32_t>(ArkUIIndex::BUILDER));
     if (!contentObj->IsFunction()) {
+        resObj = nullptr;
         return false;
     }
     auto jsBuilderFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSFunc>::Cast(contentObj));
@@ -12703,6 +12739,12 @@ bool JSViewAbstract::ParseBackgroundBuilder(
         PipelineContext::SetCallBackNode(node);
         func->Execute();
     };
+
+    if (SystemProperties::ConfigChangePerform()) {
+        if (!resObj) {
+            resObj = AceType::MakeRefPtr<ResourceObject>();
+        }
+    }
 
     return true;
 }

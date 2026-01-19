@@ -48,20 +48,6 @@ inline bool Convert(const Ark_EdgeEffectOptions& value)
 {
     return Converter::Convert<bool>(value.alwaysEnabled);
 }
-template<>
-TwoDimensionScrollResult Convert(const Ark_OffsetResult& src)
-{
-    auto xOffset = OptConvert<Dimension>(src.xOffset);
-    auto yOffset = OptConvert<Dimension>(src.yOffset);
-    TwoDimensionScrollResult result;
-    if (xOffset.has_value()) {
-        result.xOffset = xOffset.value();
-    }
-    if (yOffset.has_value()) {
-        result.yOffset = yOffset.value();
-    }
-    return result;
-}
 } // namespace Converter
 namespace {
 std::vector<Dimension> ValidateDimensionArray(std::optional<std::vector<std::optional<Dimension>>>& in)
@@ -79,6 +65,26 @@ std::vector<Dimension> ValidateDimensionArray(std::optional<std::vector<std::opt
         out.emplace_back(std::move(v.value()));
     }
     return out;
+}
+
+std::optional<float> ProcessBindableZoomScale(FrameNode* frameNode, const Opt_Union_F64_Bindable *value)
+{
+    std::optional<float> result;
+    Converter::VisitUnionPtr(value,
+        [&result](const Ark_Float64& src) {
+            result = Converter::OptConvert<float>(src);
+        },
+        [&result, frameNode](const Ark_Bindable_F64& src) {
+            result = Converter::OptConvert<float>(src.value);
+            WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+            auto onEvent = [arkCallback = CallbackHelper(src.onChange), weakNode](float value) {
+                PipelineContext::SetCallBackNode(weakNode);
+                arkCallback.Invoke(Converter::ArkValue<Ark_Float64>(value));
+            };
+            ScrollModelStatic::SetZoomScaleChangeEvent(frameNode, std::move(onEvent));
+        },
+        [] {});
+    return result;
 }
 } // namespace
 } // namespace OHOS::Ace::NG
@@ -119,6 +125,34 @@ void SetScrollableImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto direction = Converter::OptConvertPtr<Axis>(value);
     ScrollModelStatic::SetAxis(frameNode, direction);
+}
+void SetMaxZoomScaleImpl(Ark_NativePointer node,
+                         const Opt_Float64* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelStatic::SetMaxZoomScale(frameNode, Converter::OptConvertPtr<float>(value).value_or(1.0f));
+}
+void SetMinZoomScaleImpl(Ark_NativePointer node,
+                         const Opt_Float64* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelStatic::SetMinZoomScale(frameNode, Converter::OptConvertPtr<float>(value).value_or(1.0f));
+}
+void SetZoomScaleImpl(Ark_NativePointer node,
+                      const Opt_Union_F64_Bindable* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelStatic::SetZoomScale(frameNode, ProcessBindableZoomScale(frameNode, value));
+}
+void SetEnableBouncesZoomImpl(Ark_NativePointer node,
+                              const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    ScrollModelStatic::SetEnableBouncesZoom(frameNode, Converter::OptConvertPtr<bool>(value).value_or(true));
 }
 void SetOnWillScrollImpl(Ark_NativePointer node,
                          const Opt_ScrollOnWillScrollCallback* value)
@@ -216,6 +250,52 @@ void SetOnScrollStopImpl(Ark_NativePointer node,
     };
     ScrollModelStatic::SetOnScrollStop(frameNode, std::move(onEvent));
 }
+void SetOnDidZoomImpl(Ark_NativePointer node,
+                      const Opt_ScrollOnDidZoomCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ScrollModelStatic::SetOnDidZoom(frameNode, nullptr);
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)](float scaleIn) {
+        auto arkScale = Converter::ArkValue<Ark_Float64>(scaleIn);
+        arkCallback.Invoke(arkScale);
+    };
+    ScrollModelStatic::SetOnDidZoom(frameNode, std::move(onEvent));
+}
+void SetOnZoomStartImpl(Ark_NativePointer node,
+                        const Opt_VoidCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ScrollModelStatic::SetOnZoomStart(frameNode, nullptr);
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
+        arkCallback.Invoke();
+    };
+    ScrollModelStatic::SetOnZoomStart(frameNode, std::move(onEvent));
+}
+void SetOnZoomStopImpl(Ark_NativePointer node,
+                       const Opt_VoidCallback* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        ScrollModelStatic::SetOnZoomStop(frameNode, nullptr);
+        return;
+    }
+    auto onEvent = [arkCallback = CallbackHelper(*optValue)]() {
+        arkCallback.Invoke();
+    };
+    ScrollModelStatic::SetOnZoomStop(frameNode, std::move(onEvent));
+}
 void SetScrollBarImpl(Ark_NativePointer node,
                       const Opt_BarState* value)
 {
@@ -225,7 +305,7 @@ void SetScrollBarImpl(Ark_NativePointer node,
     ScrollModelStatic::SetScrollBar(frameNode, displayMode);
 }
 void SetScrollBarColorImpl(Ark_NativePointer node,
-                           const Opt_Union_Color_I32_String* value)
+                           const Opt_Union_Color_I32_String_Resource* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -383,11 +463,18 @@ const GENERATED_ArkUIScrollModifier* GetScrollModifier()
         ScrollModifier::ConstructImpl,
         ScrollInterfaceModifier::SetScrollOptionsImpl,
         ScrollAttributeModifier::SetScrollableImpl,
+        ScrollAttributeModifier::SetMaxZoomScaleImpl,
+        ScrollAttributeModifier::SetMinZoomScaleImpl,
+        ScrollAttributeModifier::SetZoomScaleImpl,
+        ScrollAttributeModifier::SetEnableBouncesZoomImpl,
         ScrollAttributeModifier::SetOnWillScrollImpl,
         ScrollAttributeModifier::SetOnDidScrollImpl,
         ScrollAttributeModifier::SetOnScrollEdgeImpl,
         ScrollAttributeModifier::SetOnScrollStartImpl,
         ScrollAttributeModifier::SetOnScrollStopImpl,
+        ScrollAttributeModifier::SetOnDidZoomImpl,
+        ScrollAttributeModifier::SetOnZoomStartImpl,
+        ScrollAttributeModifier::SetOnZoomStopImpl,
         ScrollAttributeModifier::SetScrollBarImpl,
         ScrollAttributeModifier::SetScrollBarColorImpl,
         ScrollAttributeModifier::SetScrollBarWidthImpl,

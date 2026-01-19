@@ -117,9 +117,9 @@ void ListItemGroupModelNG::SetFooter(FrameNode* frameNode, FrameNode* footerNode
     pattern->SetFooterComponentContentExist(true);
 }
 
-RefPtr<ListChildrenMainSize> ListItemGroupModelNG::GetOrCreateListChildrenMainSize()
+RefPtr<ListChildrenMainSize> ListItemGroupModelNG::GetOrCreateListChildrenMainSize(FrameNode* node)
 {
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    auto frameNode = node ? node : ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto pattern = frameNode->GetPattern<ListItemGroupPattern>();
     CHECK_NULL_RETURN(pattern, nullptr);

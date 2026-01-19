@@ -228,7 +228,7 @@ HWTEST_F(ViewAbstractModelStaticTestNg, ViewAbstractModelStaticTestNg006, TestSi
     /**
      * @tc.steps: gestureHub is nullptr.
      */
-    auto targetNodes = AceType::RawPtr(FRAME_NODE_REGISTER);
+    auto targetNodes = FRAME_NODE_REGISTER;
     targetNodes->eventHub_ = nullptr;
     targetNodes->pattern_ = nullptr;
     viewAbstractModelStatic.BindDragWithContextMenuParamsStatic(targetNodes, menuParam);
@@ -240,28 +240,28 @@ HWTEST_F(ViewAbstractModelStaticTestNg, ViewAbstractModelStaticTestNg006, TestSi
      * @tc.steps: contextMenuRegisterType is CUSTOM_TYPE.
      */
     menuParam.contextMenuRegisterType = ContextMenuRegisterType::CUSTOM_TYPE;
-    viewAbstractModelStatic.BindDragWithContextMenuParamsStatic(AceType::RawPtr(targetNode), menuParam);
+    viewAbstractModelStatic.BindDragWithContextMenuParamsStatic(targetNode, menuParam);
     EXPECT_EQ(targetNode->GetOrCreateGestureEventHub()->bindMenuStatus_.isBindCustomMenu, true);
 
     /**
      * @tc.steps: menuBindType is RIGHT_CLICK.
      */
     menuParam.menuBindType = MenuBindingType::RIGHT_CLICK;
-    viewAbstractModelStatic.BindDragWithContextMenuParamsStatic(AceType::RawPtr(targetNode), menuParam);
+    viewAbstractModelStatic.BindDragWithContextMenuParamsStatic(targetNode, menuParam);
     EXPECT_EQ(targetNode->GetOrCreateGestureEventHub()->bindMenuStatus_.isBindCustomMenu, true);
 
     /**
      * @tc.steps: contextMenuRegisterType is NORMAL_TYPE.
      */
     menuParam.contextMenuRegisterType = ContextMenuRegisterType::NORMAL_TYPE;
-    viewAbstractModelStatic.BindDragWithContextMenuParamsStatic(AceType::RawPtr(targetNode), menuParam);
+    viewAbstractModelStatic.BindDragWithContextMenuParamsStatic(targetNode, menuParam);
     EXPECT_EQ(targetNode->GetOrCreateGestureEventHub()->bindMenuStatus_.isBindCustomMenu, true);
 
     /**
      * @tc.steps: menuBindType is LONG_PRESS.
      */
     menuParam.menuBindType = MenuBindingType::LONG_PRESS;
-    viewAbstractModelStatic.BindDragWithContextMenuParamsStatic(AceType::RawPtr(targetNode), menuParam);
+    viewAbstractModelStatic.BindDragWithContextMenuParamsStatic(targetNode, menuParam);
     EXPECT_EQ(targetNode->GetOrCreateGestureEventHub()->bindMenuStatus_.isBindCustomMenu, true);
 }
 } // namespace OHOS::Ace::NG

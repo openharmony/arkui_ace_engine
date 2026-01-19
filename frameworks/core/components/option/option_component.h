@@ -27,7 +27,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT OptionComponent : public ComponentGroup {
+class ACE_FORCE_EXPORT OptionComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(OptionComponent, ComponentGroup);
 
 public:

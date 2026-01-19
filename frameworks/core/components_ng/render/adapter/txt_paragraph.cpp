@@ -31,7 +31,8 @@ constexpr int32_t THOUSAND = 1000;
 constexpr char16_t NEWLINE_CODE = u'\n';
 constexpr float TEXT_SPLIT_RATIO = 0.6f;
 } // namespace
-RefPtr<Paragraph> Paragraph::Create(const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
+ACE_FORCE_EXPORT RefPtr<Paragraph> Paragraph::Create(
+    const ParagraphStyle& paraStyle, const RefPtr<FontCollection>& fontCollection)
 {
     auto txtFontCollection = DynamicCast<TxtFontCollection>(fontCollection);
     CHECK_NULL_RETURN(txtFontCollection, nullptr);
@@ -205,6 +206,12 @@ void TxtParagraph::Layout(float width)
 
 void TxtParagraph::ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles)
 {
+    this->ReLayout(width, paraStyle, textStyles, std::nullopt);
+}
+
+void TxtParagraph::ReLayout(float width, const ParagraphStyle& paraStyle, const std::vector<TextStyle>& textStyles,
+    const std::optional<TextStyle>& firstValidTextStyle)
+{
     CHECK_NULL_VOID(!hasExternalParagraph_ && paragraph_);
     paraStyle_ = paraStyle;
     std::stringstream nodeID;
@@ -219,18 +226,26 @@ void TxtParagraph::ReLayout(float width, const ParagraphStyle& paraStyle, const 
         txtStyles.emplace_back(txtStyle);
     }
     nodeID << "]";
+
+    ReLayoutParagraphStyleBitmap validBitmap;
+    if (firstValidTextStyle.has_value()) {
+        validBitmap = firstValidTextStyle.value().GetReLayoutParagraphStyleBitmap();
+    } else if (!textStyles.empty()) {
+        validBitmap = textStyles.front().GetReLayoutParagraphStyleBitmap();
+    } else {
+        TAG_LOGW(AceLogTag::ACE_TEXT, "TxtParagraph::ReLayout no valid TextStyle available");
+    }
     if (SystemProperties::GetTextTraceEnabled() && !txtStyles.empty()) {
         ACE_TEXT_SCOPED_TRACE(
             "TxtParagraph::ReLayout node size:%d id:%s paraStyle id:%d paragraphStyleBitmap:%s width:%f",
             static_cast<uint32_t>(txtStyles.size()), nodeID.str().c_str(), paraStyle.textStyleUid,
-            textStyles.front().GetReLayoutParagraphStyleBitmap().to_string().c_str(), width);
+            validBitmap.to_string().c_str(), width);
     }
     Rosen::TypographyStyle style;
     ConvertTypographyStyle(style, paraStyle_);
-    auto bitmap = textStyles.front().GetReLayoutParagraphStyleBitmap();
-    auto size = std::min(bitmap.size(), style.relayoutChangeBitmap.size());
+    auto size = std::min(validBitmap.size(), style.relayoutChangeBitmap.size());
     for (size_t i = 0; i < size; ++i) {
-        style.relayoutChangeBitmap.set(i, bitmap.test(i));
+        style.relayoutChangeBitmap.set(i, validBitmap.test(i));
     }
     paragraph_->Relayout(width, style, txtStyles);
 }
@@ -776,16 +791,24 @@ bool TxtParagraph::GetWordBoundary(int32_t offset, int32_t& start, int32_t& end)
 void TxtParagraph::HandleTextAlign(CaretMetricsF& result, TextAlign align)
 {
     auto width = GetMaxWidth();
+    const bool isRTL = paraStyle_.direction == TextDirection::RTL;
     float offsetX = 0.0f;
     switch (align) {
         case TextAlign::CENTER:
             offsetX = width * 0.5f;
             break;
+        case TextAlign::RIGHT:
         case TextAlign::END:
             offsetX = width;
             break;
+        case TextAlign::JUSTIFY:
+            offsetX = isRTL ? width : 0.0f;
+            break;
         case TextAlign::START:
+        case TextAlign::LEFT:
+            break;
         default:
+            TAG_LOGW(AceLogTag::ACE_TEXT, "Unknown TextAlign value: %{public}d", static_cast<int>(align));
             break;
     }
     result.offset.SetX(offsetX);
@@ -1098,5 +1121,12 @@ std::string TxtParagraph::GetDumpInfo()
     auto paragrah = GetParagraph();
     CHECK_NULL_RETURN(paragrah, "");
     return paragrah->GetDumpInfo();
+}
+
+std::optional<void*> TxtParagraph::GetRawParagraph()
+{
+    auto paragraph = GetParagraph();
+    CHECK_NULL_RETURN(paragraph, std::nullopt);
+    return static_cast<void*>(paragraph);
 }
 } // namespace OHOS::Ace::NG

@@ -24,7 +24,7 @@ class RenderFocusCollaboration  : public RenderNode {
     DECLARE_ACE_TYPE(RenderFocusCollaboration, RenderNode);
 
 public:
-    static RefPtr<RenderNode> Create();
+    ACE_FORCE_EXPORT static RefPtr<RenderNode> Create();
     void Update(const RefPtr<Component>& component) override {};
     void PerformLayout() override;
 };

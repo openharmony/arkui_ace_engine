@@ -19,41 +19,19 @@
 #include <functional>
 #include <string>
 
-#include "bridge/declarative_frontend/jsview/canvas/js_canvas_renderer.h"
-#include "bridge/declarative_frontend/jsview/canvas/js_rendering_context.h"
-#include "bridge/declarative_frontend/view_stack_processor.h"
+#include "base/memory/referenced.h"
 #include "core/components_ng/pattern/preview_mock/preview_mock_model.h"
 
-namespace OHOS::Ace::Framework {
-namespace {
-constexpr Dimension DEFAULT_FONT_SIZE = 30.0_px;
-constexpr double DEFAULT_OFFSET = 25;
-constexpr double DEFAULT_HEIGHT = 30;
+namespace OHOS::Ace {
+class CanvasTaskPool;
 }
+namespace OHOS::Ace::Framework {
 
 class ACE_EXPORT PreviewMockModelImpl : public PreviewMockModel {
 public:
-    void Create(const std::string& content) {
-        RefPtr<OHOS::Ace::CustomPaintComponent> mockComponent = AceType::MakeRefPtr<OHOS::Ace::CustomPaintComponent>();
-        auto jsContext = Referenced::MakeRefPtr<JSRenderingContext>();
-        jsContext->SetAnti(true);
-        jsContext->SetCanvasPattern(mockComponent->GetTaskPool());
-        jsContext->SetAntiAlias();
-        mockComponent->GetTaskPool()->UpdateFontSize(DEFAULT_FONT_SIZE);
-        mockComponent->GetTaskPool()->FillText(
-            "This component is not supported on PC preview.", Offset(0, DEFAULT_OFFSET));
-        if (content == "Video") {
-            mockComponent->SetInspectorTag(content + "ComponentV2");
-        } else if (content == "PluginComponent" || content == "UIExtensionComponent") {
-            mockComponent->SetInspectorTag(content);
-        } else {
-            mockComponent->SetInspectorTag(content + "Component");
-        }
-        ViewStackProcessor::GetInstance()->Push(mockComponent);
-        RefPtr<BoxComponent> mountBox = ViewStackProcessor::GetInstance()->GetBoxComponent();
-        mountBox->SetColor(Color::FromString("#808080"));
-        mountBox->SetHeight(DEFAULT_HEIGHT);
-    }
+    void Create(const std::string& content) override;
+
+    ACE_FORCE_EXPORT static void CreateJSRenderingContext(bool anti, const RefPtr<CanvasTaskPool>& pool);
 };
 } // namespace OHOS::Ace::Framework
 

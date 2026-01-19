@@ -1,6 +1,6 @@
 import { KPointer, InteropNativeModule } from "@koalaui/interop"
 import { int32} from "@koalaui/common"
-import { GlobalStateManager, MutableState, rememberDisposable, mutableState, __context, memoEntry1, memoEntry, __id, StateManager, StateManagerImpl, ComputableState, memoize, NodeAttach, remember } from "@koalaui/runtime"
+import { GlobalStateManager, MutableState, rememberDisposable, mutableState, __context, memoEntry1, memoEntry, __id, StateManager, ComputableState, memoize, NodeAttach, remember } from '@koalaui/runtime'
 import { StateContext } from 'arkui.incremental.runtime.state';
 import { PeerNode } from "arkui/PeerNode"
 import { ArkContentSlotPeer } from "arkui/component/contentSlot"
@@ -79,10 +79,7 @@ export class ParallelNode<T> {
             let createFun = () => {
                 this.rootState = this.manager!.updatableNode<PeerNode>(this.peerNode!, (context: StateContext) => {
                     try {
-                        const frozen = this.manager!.frozen
-                        this.manager!.frozen = true
                         memoEntry1<T, void>(context, 0, builder, this._args as T)
-                        this.manager!.frozen = frozen
                     } catch (err: Error) {
                         console.error('parallel run in taskpool error :', err)
                         console.error(err.stack)
@@ -93,7 +90,7 @@ export class ParallelNode<T> {
             this.status = 1
             return
         }
-        if (this.status === 0) {
+        if (this.status === 3) {
             this.manager!.merge(__context() as StateManager, this.rootState!)
             this.update(updateUseParallel)
         }
@@ -115,10 +112,7 @@ export class ParallelNode<T> {
             let createFun = () => {
                 this.rootState = this.manager!.updatableNode<PeerNode>(this.peerNode!, (context: StateContext) => {
                     try {
-                        const frozen = this.manager!.frozen
-                        this.manager!.frozen = true
                         memoEntry<void>(context, 0, builder)
-                        this.manager!.frozen = frozen
                     } catch (err: Error) {
                         console.error('parallel run in taskpool error :', err)
                         console.error(err.stack)
@@ -129,7 +123,7 @@ export class ParallelNode<T> {
             this.status = 1
             return
         }
-        if (this.status === 0) {
+        if (this.status === 3) {
             this.manager!.merge(__context() as StateManager, this.rootState!)
             this.update(updateUseParallel)
         }
@@ -154,10 +148,7 @@ export class ParallelNode<T> {
             let createFun = () => {
                 this.rootState = this.manager!.updatableNode<PeerNode>(this.peerNode!, (context: StateContext) => {
                     try {
-                        const frozen = this.manager!.frozen
-                        this.manager!.frozen = true
                         memoEntry<void>(context, 0, () => { content_(this._args as T) })
-                        this.manager!.frozen = frozen
                     } catch (err: Error) {
                         console.error('parallel run in taskpool error :', err)
                         console.error(err.stack)
@@ -168,7 +159,7 @@ export class ParallelNode<T> {
             this.status = 1
             return
         }
-        if (this.status === 0) {
+        if (this.status === 3) {
             this.manager!.merge(__context() as StateManager, this.rootState!)
             this.update()
         }
@@ -436,7 +427,7 @@ export function ParallelizeUI<V, T>(
     SerializerBase.setMultithreadMode()
 
     let isLazy = false
-    const peerNode = (__context() as StateManagerImpl)?.current?.nodeRef
+    const peerNode = (__context() as StateManager).node
     if (peerNode instanceof ArkListPeer || peerNode instanceof ArkGridPeer) {
         isLazy = true
     }

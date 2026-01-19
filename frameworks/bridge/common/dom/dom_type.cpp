@@ -30,15 +30,12 @@ const char DOM_NODE_TAG_GRID_CONTAINER[] = "grid-container";
 const char DOM_NODE_TAG_GRID_ROW[] = "grid-row";
 const char DOM_NODE_TAG_SVG_TEXT[] = "svg-text";
 const char DOM_NODE_TAG_TEXT[] = "text";
-const char DOM_NODE_TAG_TEXT_PATH[] = "textpath";
-const char DOM_NODE_TAG_TSPAN[] = "tspan";
 const char DOM_NODE_TAG_PICKER_DIALOG[] = "picker";
 const char DOM_NODE_TAG_PICKER_VIEW[] = "picker-view";
 const char DOM_NODE_TAG_OPTION[] = "option";
 const char DOM_NODE_TAG_POPUP[] = "popup";
 const char DOM_NODE_TAG_PROGRESS[] = "progress";
 const char DOM_NODE_TAG_SELECT[] = "select";
-const char DOM_NODE_TAG_MASK[] = "mask";
 const char DOM_NODE_TAG_MENU[] = "menu";
 const char DOM_NODE_TAG_SLIDER[] = "slider";
 const char DOM_NODE_TAG_SPAN[] = "span";
@@ -79,33 +76,12 @@ const char DOM_NODE_TAG_TOOL_BAR[] = "toolbar";
 const char DOM_NODE_TAG_TOOL_BAR_ITEM[] = "toolbar-item";
 const char DOM_NODE_TAG_QRCODE[] = "qrcode";
 const char DOM_NODE_TAG_SVG[] = "svg";
-const char DOM_NODE_TAG_G[] = "g";
-const char DOM_NODE_TAG_USE[] = "use";
-const char DOM_NODE_TAG_DEFS[] = "defs";
 const char DOM_NODE_TAG_SYMBOL[] = "symbol";
-const char DOM_NODE_TAG_RECT[] = "rect";
-const char DOM_NODE_TAG_ANIMATE[] = "animate";
-const char DOM_NODE_TAG_ANIMATE_TRANSFORM[] = "animatetransform";
 const char DOM_NODE_TAG_WEB[] = "web";
 const char DOM_NODE_TAG_RICH_TEXT[] = "richtext";
 const char DOM_NODE_TAG_XCOMPONENT[] = "xcomponent";
-const char DOM_NODE_TAG_PATH[] = "path";
-const char DOM_NODE_TAG_LINE[] = "line";
-const char DOM_NODE_TAG_POLYLINE[] = "polyline";
-const char DOM_NODE_TAG_POLYGON[] = "polygon";
-const char DOM_NODE_TAG_CIRCLE[] = "circle";
-const char DOM_NODE_TAG_ELLIPSE[] = "ellipse";
 const char DOM_NODE_TAG_FORM[] = "form";
-const char DOM_NODE_TAG_ANIMATE_MOTION[] = "animatemotion";
 const char DOM_NODE_TAG_CAMERA[] = "camera";
-const char DOM_NODE_TAG_STOP[] = "stop";
-const char DOM_NODE_TAG_LINEAR_GRADIENT[] = "linearGradient";
-const char DOM_NODE_TAG_RADIAL_GRADIENT[] = "radialGradient";
-const char DOM_NODE_TAG_FILTER[] = "filter";
-const char DOM_NODE_TAG_FE_COLORMATRIX[] = "fecolormatrix";
-const char DOM_NODE_TAG_FE_COMPOSITE[] = "fecomposite";
-const char DOM_NODE_TAG_FE_GAUSSIANBLUR[] = "fegaussianblur";
-const char DOM_NODE_TAG_FE_OFFSET[] = "feoffset";
 
 // common attribute constants
 const char DOM_ID[] = "id";
@@ -433,15 +409,6 @@ const char DOM_IMAGE_POSITION_BOTTOM[] = "bottom";
 
 // image animator attribute and style constants
 const char DOM_IMAGES[] = "images";
-const char DOM_ITERATION[] = "iteration";
-const char DOM_REVERSE[] = "reverse";
-const char DOM_FIXEDSIZE[] = "fixedsize";
-const char DOM_FILLMODE[] = "fillmode";
-const char DOM_PREDECODE[] = "predecode";
-const char DOM_IMAGE_ANIMATOR_START[] = "start";
-const char DOM_IMAGE_ANIMATOR_STOP[] = "stop";
-const char DOM_IMAGE_ANIMATOR_PAUSE[] = "pause";
-const char DOM_IMAGE_ANIMATOR_RESUME[] = "resume";
 
 // list attribute、style and event constants
 const char DOM_LIST_COLUMNS[] = "columns";
@@ -630,18 +597,8 @@ const char DOM_DIRECTION[] = "direction";
 const char DOM_START_TO_END[] = "startToEnd";
 
 // chart attribute and style constants
-const char DOM_CHART_TYPE[] = "type";
-const char DOM_CHART_TYPE_BAR[] = "bar";
-const char DOM_CHART_TYPE_LINE[] = "line";
-const char DOM_CHART_TYPE_GAUGE[] = "gauge";
-const char DOM_CHART_TYPE_LOADING[] = "loading";
-const char DOM_CHART_TYPE_PROGRESS[] = "progress";
-const char DOM_CHART_TYPE_RAINBOW[] = "rainbow";
-const char DOM_COLORS_ARRAY[] = "colors";
-const char DOM_WEIGHTS_ARRAY[] = "weights";
 const char DOM_EFFECTS_ON[] = "effects";
-const char DOM_AUTO_SCALE[] = "autoscale";
-const char DOM_CHART_ANIMATION_DURATION[] = "animationduration";
+const char DOM_METHOD_APPEND[] = "append";
 
 // slider attribute and style constants
 const char DOM_MIN[] = "min";
@@ -661,57 +618,11 @@ const char DOM_OUTSET[] = "outset";
 const char DOM_INSET[] = "inset";
 
 // stepper attribute style and event constants
-const char DOM_STEPPER_INDEX[] = "index";
 const char DOM_STEPPER_LABEL[] = "label";
 const char DOM_STEPPER_LEFT_LABEL[] = "prevLabel";
 const char DOM_STEPPER_RIGHT_LABEL[] = "nextLabel";
 const char DOM_STEPPER_INITIAL_STATUS[] = "status";
-const char DOM_STEPPER_TEXT_COLOR[] = "color";
-const char DOM_STEPPER_FONT_SIZE[] = "fontSize";
-const char DOM_STEPPER_FONT_STYLE[] = "fontStyle";
-const char DOM_STEPPER_FONT_WEIGHT[] = "fontWeight";
-const char DOM_STEPPER_FONT_FAMILY[] = "fontFamily";
-const char DOM_STEPPER_TEXT_DECORATION[] = "textDecoration";
-const char DOM_STEPPER_EVENT_FINISH[] = "finish";
-const char DOM_STEPPER_EVENT_SKIP[] = "skip";
-const char DOM_STEPPER_EVENT_CHANGE[] = "change";
-const char DOM_STEPPER_EVENT_NEXT[] = "next";
-const char DOM_STEPPER_EVENT_BACK[] = "back";
-const char DOM_STEPPER_SET_RIGHT_BUTTON_STATUS[] = "setNextButtonStatus";
-
-// stepper-item attribute style and event constants
-const char DOM_STEPPER_ITEM_EVENT_APPEAR[] = "appear";
-const char DOM_STEPPER_ITEM_EVENT_DISAPPEAR[] = "disappear";
-
-// swiper attribute and style constants
-const char DOM_INDEX[] = "index";
-const char DOM_SWIPER_ANIMATION_OPACITY[] = "animationopacity";
-const char DOM_AUTOPLAY[] = "autoplay";
-const char DOM_CACHED_SIZE[] = "cachedSize";
-const char DOM_DISPLAY_MODE[] = "displaymode";
-const char DOM_DISPLAY_MODE_AUTO_LINEAR[] = "autoLinear";
-const char DOM_INTERVAL[] = "interval";
-const char DOM_INDICATOR[] = "indicator";
-const char DOM_LOOP[] = "loop";
 const char DOM_DURATION[] = "duration";
-const char DOM_VERTICAL[] = "vertical";
-const char DOM_ANIMATION_CURVE[] = "animationCurve";
-const char DOM_INDICATOR_COLOR[] = "indicatorColor";
-const char DOM_INDICATOR_MASK[] = "indicatormask";
-const char DOM_INDICATOR_DISABLED[] = "indicatordisabled";
-const char DOM_INDICATOR_SELECTEDCOLOR[] = "indicatorSelectedColor";
-const char DOM_INDICATOR_SIZE[] = "indicatorSize";
-const char DOM_INDICATOR_TOP[] = "indicatorTop";
-const char DOM_INDICATOR_LEFT[] = "indicatorLeft";
-const char DOM_INDICATOR_RIGHT[] = "indicatorRight";
-const char DOM_INDICATOR_BOTTOM[] = "indicatorBottom";
-const char DOM_METHOD_SWIPE_TO[] = "swipeTo";
-const char DOM_METHOD_APPEND[] = "append";
-const char DOM_METHOD_SHOW_PREVIOUS[] = "showPrevious";
-const char DOM_METHOD_SHOW_NEXT[] = "showNext";
-const char DOM_DIGITAL_INDICATOR[] = "digital";
-const char DOM_PREVIOUS_MARGIN[] = "previousMargin";
-const char DOM_NEXT_MARGIN[] = "nextMargin";
 
 // switch attribute and style constants
 const char DOM_CHECKED[] = "checked";
@@ -725,30 +636,7 @@ const char DOM_TRACK_COLOR_ON[] = "trackColorOn";
 const char DOM_TRACK_COLOR_OFF[] = "trackColorOff";
 
 // tabs attribute and style constants
-const char DOM_TAB_BAR_MODE[] = "mode";
 const char DOM_TAB_CONTENT_SCROLLABLE[] = "scrollable";
-
-// refresh attribute and style constants
-const char DOM_REFRESH[] = "refresh";
-const char DOM_REFRESH_OFFSET[] = "offset";
-const char DOM_REFRESH_REFRESHING[] = "refreshing";
-const char DOM_REFRESH_TYPE[] = "type";
-const char DOM_REFRESH_LASTTIME[] = "lasttime";
-const char DOM_REFRESH_FRICTION[] = "friction";
-const char DOM_REFRESH_BACKGROUND_COLOR[] = "backgroundColor";
-const char DOM_REFRESH_PROGRESS_COLOR[] = "progressColor";
-const char DOM_REFRESH_EVENT_PULL_DOWN[] = "pulldown";
-const char DOM_REFRESH_TIME_OFFSET[] = "timeoffset";
-
-// rating attribute and style constants
-const char DOM_STAR_NUM[] = "numstars";
-const char DOM_RATING_SCORE[] = "rating";
-const char DOM_RATING_STEP[] = "stepsize";
-const char DOM_RATING_INDICATOR[] = "indicator";
-const char DOM_BACKGROUND_SRC[] = "starBackground";
-const char DOM_FOREGROUND_SRC[] = "starForeground";
-const char DOM_SECONDARY_SRC[] = "starSecondary";
-const char DOM_RTL_FLIP[] = "rtlFlip";
 
 // marquee attribute and style constants
 const char DOM_MARQUEE_LOOP[] = "loop";
@@ -836,33 +724,6 @@ const char DOM_ROTATION[] = "rotation";
 const char DOM_ANIMATION_FINISH[] = "animationfinish";
 
 // video constants
-const char DOM_VIDEO_MUTED[] = "muted";
-const char DOM_VIDEO_SRC[] = "src";
-const char DOM_VIDEO_AUTOPLAY[] = "autoplay";
-const char DOM_VIDEO_POSTER[] = "poster";
-const char DOM_VIDEO_CONTROLS[] = "controls";
-const char DOM_VIDEO_FIT[] = "objectFit";
-const char DOM_VIDEO_LOOP[] = "loop";
-const char DOM_VIDEO_START_TIME[] = "starttime";
-const char DOM_VIDEO_EVENT_PREPARED[] = "prepared";
-const char DOM_VIDEO_EVENT_START[] = "start";
-const char DOM_VIDEO_EVENT_PAUSE[] = "pause";
-const char DOM_VIDEO_EVENT_STOP[] = "stop";
-const char DOM_VIDEO_EVENT_FINISH[] = "finish";
-const char DOM_VIDEO_EVENT_ERROR[] = "error";
-const char DOM_VIDEO_EVENT_SEEKING[] = "seeking";
-const char DOM_VIDEO_EVENT_SEEKED[] = "seeked";
-const char DOM_VIDEO_EVENT_TIMEUPDATE[] = "timeupdate";
-const char DOM_VIDEO_EVENT_FULLSCREENCHANGE[] = "fullscreenchange";
-const char DOM_VIDEO_METHOD_START[] = "start";
-const char DOM_VIDEO_METHOD_PAUSE[] = "pause";
-const char DOM_VIDEO_METHOD_STOP[] = "stop";
-const char DOM_VIDEO_METHOD_SEEK_TO[] = "setCurrentTime";
-const char DOM_VIDEO_METHOD_REQUEST_FULLSCREEN[] = "requestFullscreen";
-const char DOM_VIDEO_METHOD_EXIT_FULLSCREEN[] = "exitFullscreen";
-const char DOM_VIDEO_SPEED[] = "speed";
-const char DOM_VIDEO_DIRECTION[] = "direction";
-const char DOM_VIDEO_POSITION[] = "objectPosition";
 const char DOM_VIDEO_POSITION_LEFT[] = "left";
 const char DOM_VIDEO_POSITION_CENTER[] = "center";
 const char DOM_VIDEO_POSITION_RIGHT[] = "right";
@@ -870,75 +731,17 @@ const char DOM_VIDEO_POSITION_TOP[] = "top";
 const char DOM_VIDEO_POSITION_BOTTOM[] = "bottom";
 
 // textarea attribute and style constants
-const char DOM_TEXTAREA_VALUE[] = "value";
-const char DOM_TEXTAREA_PLACEHOLDER[] = "placeholder";
-const char DOM_TEXTAREA_MAXLENGTH[] = "maxlength";
-const char DOM_TEXTAREA_MAXLINES[] = "maxlines";
-const char DOM_TEXTAREA_OBSCURE[] = "obscure";
-const char DOM_TEXTAREA_OVERFLOWX[] = "overflowx";
-const char DOM_INPUT_AUTO_FOCUS[] = "autoFocus";
-const char DOM_TEXTAREA_PLACEHOLDER_COLOR[] = "placeholderColor";
-const char DOM_TEXTAREA_CURSOR_COLOR[] = "cursorColor";
 const char DOM_TEXTAREA_COLOR[] = "color";
 const char DOM_TEXTAREA_FONT_SIZE[] = "fontSize";
 const char DOM_TEXTAREA_FONT_WEIGHT[] = "fontWeight";
 const char DOM_TEXTAREA_FONT_FAMILY[] = "fontFamily";
-const char DOM_INPUT_RECT_RADIUS[] = "rectRadius";
-const char DOM_INPUT_BACKGROUND_COLOR[] = "backgroundColor";
-const char DOM_INPUT_CLICKED_COLOR[] = "clickedColor";
-const char DOM_INPUT_DISABLE_COLOR[] = "disabledColor";
-const char DOM_INPUT_FOCUS_COLOR[] = "focusColor";
-const char DOM_TEXTAREA_METHOD_FOCUS[] = "focus";
-const char DOM_TEXTAREA_EXTEND[] = "extend";
-const char DOM_TEXTAREA_SHOW_COUNTER[] = "showcounter";
-const char DOM_INPUT_SHOW_COUNTER[] = "showcounter";
-const char DOM_INPUT_METHOD_SHOW_ERROR[] = "showError";
-const char DOM_INPUT_METHOD_DELETE[] = "delete";
-const char DOM_INPUT_METHOD_INSERT[] = "insert";
 
 // input attribute and style constants
-const char DOM_INPUT_TYPE[] = "type";
 const char DOM_INPUT_TYPE_EMAIL[] = "email";
 const char DOM_INPUT_TYPE_DATE[] = "date";
 const char DOM_INPUT_TYPE_TIME[] = "time";
 const char DOM_INPUT_TYPE_NUMBER[] = "number";
 const char DOM_INPUT_TYPE_PASSWORD[] = "password";
-const char DOM_INPUT_CHECKED[] = "checked";
-const char DOM_INPUT_NAME[] = "name";
-const char DOM_INPUT_VALUE[] = "value";
-const char DOM_INPUT_PLACEHOLDER[] = "placeholder";
-const char DOM_INPUT_MAXLENGTH[] = "maxlength";
-const char DOM_INPUT_ENTERKEYTYPE[] = "enterkeytype";
-const char DOM_INPUT_OBSCURE[] = "obscure";
-const char DOM_INPUT_PLACEHOLDER_COLOR[] = "placeholderColor";
-const char DOM_INPUT_CURSOR_COLOR[] = "cursorColor";
-const char DOM_INPUT_COLOR[] = "color";
-const char DOM_INPUT_FONT_SIZE[] = "fontSize";
-const char DOM_INPUT_FONT_WEIGHT[] = "fontWeight";
-const char DOM_INPUT_WIDTH[] = "width";
-const char DOM_INPUT_HEIGHT[] = "height";
-const char DOM_INPUT_FONT_FAMILY[] = "fontFamily";
-const char DOM_INPUT_METHOD_FOCUS[] = "focus";
-const char DOM_ICON_SRC[] = "headericon";
-const char DOM_SHOW_ICON_SRC[] = "showicon";
-const char DOM_HIDE_ICON_SRC[] = "hideicon";
-const char DOM_INPUT_SHOW_PASSWORD_ICON[] = "showpasswordicon";
-const char DOM_INPUT_OPTION_ICON[] = "icon";
-const char DOM_INPUT_OPTION_CONTENT[] = "content";
-const char DOM_INPUT_SELECTED_START[] = "selectedstart";
-const char DOM_INPUT_SELECTED_END[] = "selectedend";
-const char DOM_INPUT_SOFT_KEYBOARD_ENABLED[] = "softkeyboardenabled";
-
-// input event constants
-const char DOM_INPUT_EVENT_NAME[] = "name";
-const char DOM_INPUT_EVENT_VALUE[] = "value";
-const char DOM_INPUT_EVENT_CHECKED[] = "checked";
-const char DOM_INPUT_EVENT_ENTERKEYCLICK[] = "enterkeyclick";
-const char DOM_INPUT_EVENT_OPTION_SELECT[] = "optionselect";
-const char DOM_INPUT_EVENT_TRANSLATE[] = "translate";
-const char DOM_INPUT_EVENT_SHARE[] = "share";
-const char DOM_INPUT_EVENT_SEARCH[] = "search";
-const char DOM_INPUT_EVENT_SELECT_CHANGE[] = "selectchange";
 
 // divider style extern constants
 const char DOM_DIVIDER_VERTICAL[] = "vertical";
@@ -1037,27 +840,7 @@ const char DOM_SUBSCRIPT_LABEL[] = "subscriptlabel";
 const char DOM_SUBSCRIPT_FLAG[] = "subscriptflag";
 const char DOM_SCENE_LABEL[] = "scenelabel";
 
-// search constants
-const char DOM_SEARCH_HINT[] = "hint";
-const char DOM_SEARCH_ICON[] = "icon";
-const char DOM_SUBMIT[] = "submit";
-const char DOM_SEARCH_VALUE[] = "value";
-const char DOM_SEARCH_BUTTON[] = "searchbutton";
-
-// toggle constants
-const char DOM_TOGGLE_BACKGROUND_COLOR[] = "backgroundColor";
-const char DOM_TOGGLE_CHECKED_COLOR[] = "checkedColor";
-const char DOM_TOGGLE_CHECKED_STATE[] = "checked";
-const char DOM_TOGGLE_TEXT_COLOR[] = "textColor";
-const char DOM_TOGGLE_HEIGHT[] = "height";
-const char DOM_TOGGLE_WIDTH[] = "width";
-
-// clock constants
-// clock style
-const char DOM_DIGIT_FONT_FAMILY[] = "fontFamily";
 // clock attr
-const char DOM_HOURS_WEST[] = "hourswest";
-const char DOM_CLOCK_CONFIG[] = "clockconfig";
 const char DOM_DIGIT_COLOR[] = "digitColor";
 const char DOM_DIGIT_COLOR_NIGHT[] = "digitColorNight";
 const char DOM_DIGIT_RADIUS_RATIO[] = "digitRadiusRatio";
@@ -1070,13 +853,6 @@ const char DOM_MINUTE_HAND_SOURCE[] = "minuteHand";
 const char DOM_MINUTE_HAND_SOURCE_NIGHT[] = "minuteHandNight";
 const char DOM_SECOND_HAND_SOURCE[] = "secondHand";
 const char DOM_SECOND_HAND_SOURCE_NIGHT[] = "secondHandNight";
-const char DOM_SHOW_DIGIT[] = "showdigit";
-
-// piece constants
-const char DOM_PIECE_CONTENT[] = "content";
-const char DOM_PIECE_ICON[] = "icon";
-const char DOM_PIECE_CLOSABLE[] = "closable";
-const char DOM_PIECE_EVENT_CLOSE[] = "close";
 
 // badge constants
 const char DOM_BADGE_COLOR[] = "badgeColor";
@@ -1085,30 +861,6 @@ const char DOM_BADGE_TEXT_FONT_SIZE[] = "textSize";
 const char DOM_BADGE_TEXT_COLOR[] = "textColor";
 
 // grid container/row/columns
-const char DOM_GRID_CONTAINER_COLUMNS[] = "columns";
-const char DOM_GRID_CONTAINER_GUTTER_WIDTH[] = "gutterwidth";
-const char DOM_GRID_CONTAINER_SIZE_TYPE[] = "sizetype";
-const char DOM_GRID_CONTAINER_GUTTER[] = "gutter";
-const char DOM_GRID_CONTAINER_TEMPLATE[] = "gridtemplate";
-const char DOM_GRID_TEMPLATE_TYPE_NORMAL[] = "normal";
-const char DOM_GRID_TEMPLATE_TYPE_GRID[] = "grid";
-const char DOM_GRID_CONTAINER_GET_COLUMNS[] = "getColumns";
-const char DOM_GRID_CONTAINER_GET_COLUMN_WIDTH[] = "getColumnWidth";
-const char DOM_GRID_CONTAINER_GET_GUTTER_WIDTH[] = "getGutterWidth";
-const char DOM_GRID_CONTAINER_GET_SIZE_TYPE[] = "getSizeType";
-const char DOM_GRID_COLUMN_SPAN[] = "span";
-const char DOM_GRID_COLUMN_OFFSET[] = "offset";
-const char DOM_GRID_COLUMN_TYPE[] = "columntype";
-const char DOM_GRID_SIZE_TYPE_XS[] = "xs";
-const char DOM_GRID_SIZE_TYPE_SM[] = "sm";
-const char DOM_GRID_SIZE_TYPE_MD[] = "md";
-const char DOM_GRID_SIZE_TYPE_LG[] = "lg";
-
-const char DOM_COLUMN_TYPE_NONE[] = "none";
-const char DOM_COLUMN_TYPE_BUBBLE[] = "bubble";
-const char DOM_COLUMN_TYPE_BUTTON[] = "button";
-const char DOM_COLUMN_TYPE_CARD[] = "card";
-const char DOM_COLUMN_TYPE_CONTENT[] = "content";
 
 const char DOM_CLICK_EFFECT[] = "clickEffect";
 const char DOM_SPRING_EFFECT[] = "springeffect";
@@ -1123,137 +875,13 @@ const char DOM_PANEL_ATTR_HALF_HEIGHT[] = "halfheight";
 const char DOM_PANEL_ATTR_FULL_HEIGHT[] = "fullheight";
 const char DOM_PANEL_EVENT_SIZE_CHANGED[] = "sizechange";
 
-// tool-bar-item constants
-const char DOM_TOOL_BAR_ITEM_ICON[] = "icon";
-const char DOM_TOOL_BAR_ITEM_VALUE[] = "value";
-const char DOM_TOOL_BAR_ITEM_TEXT_COLOR[] = "textColor";
-const char DOM_TOOL_BAR_ITEM_COLOR[] = "color";
-const char DOM_TOOL_BAR_ITEM_FONT_SIZE[] = "fontSize";
-const char DOM_TOOL_BAR_ITEM_FONT_STYLE[] = "fontStyle";
-const char DOM_TOOL_BAR_ITEM_FONT_WEIGHT[] = "fontWeight";
-const char DOM_TOOL_BAR_ITEM_TEXT_DECORATION[] = "textDecoration";
-const char DOM_TOOL_BAR_ITEM_FONT_FAMILY[] = "fontFamily";
-const char DOM_TOOL_BAR_ITEM_ALLOW_SCALE[] = "allowScale";
-
 // card transition
 const char DOM_TRANSITION_EFFECT[] = "transitionEffect";
 const char DOM_TRANSITION_CARD_COMPOSEID[] = "ref";
 const char DOM_TRANSITION_CARD_PARAMS[] = "paramsData";
 
-// qrcode
-const char DOM_QRCODE_BACKGROUND_COLOR[] = "backgroundColor";
-const char DOM_QRCODE_COLOR[] = "color";
-const char DOM_QRCODE_HEIGHT[] = "height";
-const char DOM_QRCODE_WIDTH[] = "width";
-const char DOM_QRCODE_TYPE[] = "type";
-const char DOM_QRCODE_VALUE[] = "value";
-
 // svg
 const char DOM_SVG_ID[] = "svgId";
-const char DOM_SVG_ANIMATION_BEGIN[] = "begin";
-const char DOM_SVG_ANIMATION_DUR[] = "dur";
-const char DOM_SVG_ANIMATION_END[] = "end";
-const char DOM_SVG_ANIMATION_MIN[] = "min";
-const char DOM_SVG_ANIMATION_MAX[] = "max";
-const char DOM_SVG_ANIMATION_RESTART[] = "restart";
-const char DOM_SVG_ANIMATION_REPEAT_COUNT[] = "repeatcount";
-const char DOM_SVG_ANIMATION_REPEAT_DUR[] = "repeatdur";
-const char DOM_SVG_ANIMATION_FILL[] = "fill";
-const char DOM_SVG_ANIMATION_CALC_MODE[] = "calcmode";
-const char DOM_SVG_ANIMATION_VALUES[] = "values";
-const char DOM_SVG_ANIMATION_KEY_TIMES[] = "keytimes";
-const char DOM_SVG_ANIMATION_KEY_SPLINES[] = "keysplines";
-const char DOM_SVG_ANIMATION_FROM[] = "from";
-const char DOM_SVG_ANIMATION_TO[] = "to";
-const char DOM_SVG_ANIMATION_BY[] = "by";
-const char DOM_SVG_ANIMATION_ATTRIBUTE_NAME[] = "attributename";
-const char DOM_SVG_ANIMATION_ADDITIVE[] = "additive";
-const char DOM_SVG_ANIMATION_ACCUMULATE[] = "accumulate";
-const char DOM_SVG_ANIMATION_TYPE[] = "type";
-const char DOM_SVG_ANIMATION_KEY_POINTS[] = "keypoints";
-const char DOM_SVG_ANIMATION_PATH[] = "path";
-const char DOM_SVG_ANIMATION_ROTATE[] = "rotate";
-const char DOM_SVG_ATTR_PATH[] = "path";
-const char DOM_SVG_START_OFFSET[] = "startoffset";
-const char DOM_SVG_FILL[] = "fill";
-const char DOM_SVG_FILL_OPACITY[] = "fillOpacity";
-const char DOM_SVG_FILL_RULE[] = "fillRule";
-const char DOM_SVG_FILTER[] = "filter";
-const char DOM_SVG_FONT_FAMILY[] = "fontFamily";
-const char DOM_SVG_FONT_SIZE[] = "fontSize";
-const char DOM_SVG_FONT_STYLE[] = "fontStyle";
-const char DOM_SVG_FONT_WEIGHT[] = "fontWeight";
-const char DOM_SVG_LETTER_SPACING[] = "letterSpacing";
-const char DOM_SVG_TEXT_DECORATION[] = "textDecoration";
-const char DOM_SVG_TEXT_LENGTH[] = "textlength";
-const char DOM_SVG_MASK[] = "mask";
-const char DOM_SVG_STROKE[] = "stroke";
-const char DOM_SVG_STROKE_DASHARRAY[] = "strokeDasharray";
-const char DOM_SVG_STROKE_DASHOFFSET[] = "strokeDashoffset";
-const char DOM_SVG_STROKE_LINECAP[] = "strokeLinecap";
-const char DOM_SVG_STROKE_LINEJOIN[] = "strokeLinejoin";
-const char DOM_SVG_STROKE_MITERLIMIT[] = "strokeMiterlimit";
-const char DOM_SVG_STROKE_OPACITY[] = "strokeOpacity";
-const char DOM_SVG_STROKE_WIDTH[] = "strokeWidth";
-const char DOM_SVG_OPACITY[] = "opacity";
-const char DOM_SVG_VIEW_BOX[] = "viewbox";
-const char DOM_SVG_X[] = "x";
-const char DOM_SVG_Y[] = "y";
-const char DOM_SVG_WIDTH[] = "width";
-const char DOM_SVG_HEIGHT[] = "height";
-const char DOM_SVG_DX[] = "dx";
-const char DOM_SVG_DY[] = "dy";
-const char DOM_SVG_RX[] = "rx";
-const char DOM_SVG_RY[] = "ry";
-const char DOM_SVG_D[] = "d";
-const char DOM_SVG_X1[] = "x1";
-const char DOM_SVG_X2[] = "x2";
-const char DOM_SVG_Y1[] = "y1";
-const char DOM_SVG_Y2[] = "y2";
-const char DOM_SVG_POINTS[] = "points";
-const char DOM_SVG_CX[] = "cx";
-const char DOM_SVG_CY[] = "cy";
-const char DOM_SVG_R[] = "r";
-const char DOM_SVG_ROTATE[] = "rotate";
-const char DOM_SVG_LENGTH_ADJUST[] = "lengthadjust";
-const char DOM_SVG_MIRROR[] = "automirror";
-const char DOM_SVG_MASK_CONTENT_UNITS[] = "maskcontentunits";
-const char DOM_SVG_MASK_UNITS[] = "maskunits";
-const char DOM_SVG_PATTERN_CONTENT_UNITS[] = "patterncontentunits";
-const char DOM_SVG_PATTERN_UNITS[] = "patternunits";
-const char DOM_SVG_PATTERN_TRANSFORM[] = "patterntransform";
-const char DOM_SVG_OFFSET[] = "offset";
-const char DOM_SVG_STOP_COLOR[] = "stopColor";
-const char DOM_SVG_STOP_OPACITY[] = "stopOpacity";
-const char DOM_SVG_GRADIENT_TRANSFORM[] = "gradienttransform";
-const char DOM_SVG_SPREAD_METHOD[] = "spreadmethod";
-const char DOM_SVG_FX[] = "fx";
-const char DOM_SVG_FY[] = "fy";
-const char DOM_SVG_FR[] = "fr";
-const char DOM_SVG_HREF[] = "href";
-const char DOM_SVG_XLINK_HREF[] = "xlink:href";
-const char DOM_SVG_CLIP_RULE[] = "clipRule";
-const char DOM_SVG_FE_IN[] = "in";
-const char DOM_SVG_FE_IN2[] = "in2";
-const char DOM_SVG_FE_MODE[] = "mode";
-const char DOM_SVG_FE_RESULT[] = "result";
-const char DOM_SVG_FE_COLOR_INTERPOLATION_FILTERS[] = "color-interpolation-filters";
-const char DOM_SVG_FE_TYPE[] = "type";
-const char DOM_SVG_FE_VALUES[] = "values";
-const char DOM_SVG_FE_FLOOD_COLOR[] = "flood-color";
-const char DOM_SVG_FE_FLOOD_OPACITY[] = "flood-opacity";
-const char DOM_SVG_FE_EDGE_MODE[] = "edgemode";
-const char DOM_SVG_FE_STD_DEVIATION[] = "stddeviation";
-const char DOM_SVG_FE_AMPLITUDE[] = "amplitude";
-const char DOM_SVG_FE_EXPONENT[] = "exponent";
-const char DOM_SVG_FE_INTERCEPT[] = "intercept";
-const char DOM_SVG_FE_SLOPE[] = "slope";
-const char DOM_SVG_FE_TABLE_VALUES[] = "tablevalues";
-const char DOM_SVG_FE_K1[] = "k1";
-const char DOM_SVG_FE_K2[] = "k2";
-const char DOM_SVG_FE_K3[] = "k3";
-const char DOM_SVG_FE_K4[] = "k4";
-const char DOM_SVG_FE_OPERATOR_TYPE[] = "operator";
 
 // web
 const char DOM_PAGESTART[] = "pagestart";

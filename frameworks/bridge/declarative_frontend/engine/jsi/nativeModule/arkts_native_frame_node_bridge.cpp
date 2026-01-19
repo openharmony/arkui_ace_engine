@@ -606,7 +606,7 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPositionToWindow(ArkUIRuntimeCall
 
     ArkUI_Float32 targetNodePositionOffset[2];
     auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->convertPositionToWindow(
-        nativeNode, position, &targetNodePositionOffset, true);
+        nativeNode, &position, &targetNodePositionOffset, true);
     if (result != ERROR_CODE_NO_ERROR) {
         Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 0));
         return valueArray;
@@ -643,7 +643,7 @@ ArkUINativeModuleValue FrameNodeBridge::ConvertPositionFromWindow(ArkUIRuntimeCa
 
     ArkUI_Float32 targetNodePositionOffset[2];
     auto result = GetArkUINodeModifiers()->getFrameNodeModifier()->convertPositionFromWindow(
-        nativeNode, position, &targetNodePositionOffset, true);
+        nativeNode, &position, &targetNodePositionOffset, true);
     if (result != ERROR_CODE_NO_ERROR) {
         Framework::ArrayRef::SetValueAt(vm, valueArray, 0, panda::NumberRef::New(vm, 0));
         return valueArray;
@@ -1790,6 +1790,23 @@ ArkUINativeModuleValue FrameNodeBridge::GetId(ArkUIRuntimeCallInfo* runtimeCallI
     auto inspectorId = GetArkUINodeModifiers()->getFrameNodeModifier()->getInspectorId(nativeNode);
     return panda::StringRef::NewFromUtf8(vm, inspectorId);
 }
+
+ArkUINativeModuleValue FrameNodeBridge::GetNodeInstanceId(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NumberRef::New(vm, -1));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    if (firstArg.IsNull() || firstArg->IsUndefined() || !firstArg->IsNativePointer(vm)) {
+        return panda::NumberRef::New(vm, -1);
+    }
+    auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
+    CHECK_NULL_RETURN(nativeNode, panda::NumberRef::New(vm, -1));
+    auto frameNode = reinterpret_cast<NG::FrameNode*>(nativeNode);
+    CHECK_NULL_RETURN(frameNode, panda::NumberRef::New(vm, -1));
+    auto instanceId = frameNode->GetInstanceId();
+    return panda::NumberRef::New(vm, instanceId);
+}
+
 ArkUINativeModuleValue FrameNodeBridge::GetNodeType(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -3068,9 +3085,9 @@ ArkUINativeModuleValue FrameNodeBridge::SetOnScrollDidScroll(ArkUIRuntimeCallInf
             PipelineContext::SetCallBackNode(node);
 
             panda::Local<panda::NumberRef> xOffsetParam =
-                panda::NumberRef::New(vm, static_cast<int32_t>(xOffset.ConvertToVp()));
+                panda::NumberRef::New(vm, static_cast<double>(xOffset.ConvertToVp()));
             panda::Local<panda::NumberRef> yOffsetParam =
-                panda::NumberRef::New(vm, static_cast<int32_t>(yOffset.ConvertToVp()));
+                panda::NumberRef::New(vm, static_cast<double>(yOffset.ConvertToVp()));
             panda::Local<panda::NumberRef> stateParam = panda::NumberRef::New(vm, static_cast<int32_t>(state));
             // 3: Array length
             panda::Local<panda::JSValueRef> params[3] = { xOffsetParam, yOffsetParam, stateParam };

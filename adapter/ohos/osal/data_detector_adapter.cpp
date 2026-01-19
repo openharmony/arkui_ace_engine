@@ -336,8 +336,6 @@ void DataDetectorAdapter::InitTextDetect(int32_t startPos, std::string detectTex
         auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         TAG_LOGD(AceLogTag::ACE_TEXT, "detectBackgroundTaskCallback, taskId=%{public}" PRIu64 "", taskId);
         CHECK_NULL_VOID(context);
-        auto dataDetectorAdapter = weak.Upgrade();
-        CHECK_NULL_VOID(dataDetectorAdapter && dataDetectorAdapter->CheckTaskId(taskId));
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask(
             [result, weak, instanceID, startPos, detectTypesSet, taskId] {
@@ -404,8 +402,6 @@ void DataDetectorAdapter::HandleTextUrlDetect(uint64_t taskId)
         TAG_LOGD(AceLogTag::ACE_TEXT, "urlBackgroundTaskCallback, taskId=%{public}" PRIu64 "", taskId);
         auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
         CHECK_NULL_VOID(context);
-        auto dataDetectorAdapter = weak.Upgrade();
-        CHECK_NULL_VOID(dataDetectorAdapter && dataDetectorAdapter->CheckTaskId(taskId));
         auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
         uiTaskExecutor.PostTask(
             [urlEntities, weak, instanceID, detectTypesSet, taskId] {

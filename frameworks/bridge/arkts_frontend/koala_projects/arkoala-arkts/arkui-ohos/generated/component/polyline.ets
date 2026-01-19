@@ -176,8 +176,6 @@ export class ArkPolylineComponent extends ArkCommonShapeMethodComponent implemen
 export function PolylineImpl(
     @memo
     style: ((attributes: PolylineAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkPolylineComponent>((): ArkPolylineComponent => {
         return new ArkPolylineComponent()
@@ -186,7 +184,6 @@ export function PolylineImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

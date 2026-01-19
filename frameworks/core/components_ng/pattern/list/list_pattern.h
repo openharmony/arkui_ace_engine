@@ -499,16 +499,6 @@ public:
         return listSnapSpeed_;
     }
 
-    void SetEditModeOptions(EditModeOptions& editModeOptions)
-    {
-        editModeOptions_ = editModeOptions;
-    }
-
-    EditModeOptions GetEditModeOptions() const override
-    {
-        return editModeOptions_;
-    }
-
 protected:
     void OnModifyDone() override;
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
@@ -668,6 +658,9 @@ private:
     void ResetForExtScroll() override;
     bool LayoutReachEnd(float currentEndPos, float endMainPos, int32_t currentIndex);
     void CheckValidPredictItem();
+    void ReportOnItemListEvent(const std::string& event);
+    void ReportOnItemListScrollEvent(const std::string& event, int32_t startindex, int32_t endindex);
+    int32_t OnInjectionEvent(const std::string& command) override;
 
     std::optional<int32_t> focusIndex_;
     std::optional<int32_t> focusGroupIndex_;
@@ -692,6 +685,7 @@ private:
 
     float listTotalHeight_ = 0.0f;
 
+    std::unordered_map<int32_t, int32_t> predictItemTimes_;
     std::map<int32_t, int32_t> lanesItemRange_;
     std::map<int32_t, uint32_t> noDividerItems_;
     int32_t lanes_ = 1;
@@ -727,9 +721,6 @@ private:
     int32_t draggingIndex_ = -1;
     bool heightEstimated_ = false;
     ScrollSnapAnimationSpeed listSnapSpeed_ = ScrollSnapAnimationSpeed::NORMAL;
-
-    EditModeOptions editModeOptions_;
-    std::unordered_map<int32_t, int32_t> predictItemTimes_;
 };
 } // namespace OHOS::Ace::NG
 

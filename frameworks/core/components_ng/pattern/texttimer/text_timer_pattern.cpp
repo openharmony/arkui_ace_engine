@@ -162,6 +162,7 @@ void TextTimerPattern::OnModifyDone()
 {
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
 
     if (host->GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_EIGHTEEN)) {
         Pattern::OnModifyDone();
@@ -377,9 +378,11 @@ void TextTimerPattern::FireBuilder()
         }
         return;
     }
+    auto node = BuildContentModifierNode();
+    CHECK_EQUAL_VOID(contentModifierNode_, node);
     textNode_.Reset();
     host->RemoveChildAtIndex(0);
-    contentModifierNode_ = BuildContentModifierNode();
+    contentModifierNode_ = node;
     CHECK_NULL_VOID(contentModifierNode_);
     host->AddChild(contentModifierNode_, 0);
     host->MarkNeedFrameFlushDirty(PROPERTY_UPDATE_MEASURE);

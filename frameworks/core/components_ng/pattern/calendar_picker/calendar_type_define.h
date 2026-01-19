@@ -21,7 +21,7 @@
 
 #include "base/geometry/dimension_offset.h"
 #include "core/components/common/properties/text_style.h"
-#include "core/components/picker/picker_data.h"
+#include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
 #include "core/common/resource/resource_object.h"

@@ -37,7 +37,7 @@ namespace OHOS::Ace::NG {
 class NodePaintMethod;
 
 // PaintWrapper are used to flush dirty render task.
-class PaintWrapper : public virtual AceType {
+class ACE_FORCE_EXPORT PaintWrapper : public virtual AceType {
     DECLARE_ACE_TYPE(PaintWrapper, AceType);
 
 public:
@@ -114,7 +114,7 @@ public:
         return renderContext->GetForegroundColor().value_or(Color::FOREGROUND);
     }
 
-    void FlushOverlayModifier();
+    ACE_FORCE_EXPORT void FlushOverlayModifier();
 
     void FlushContentModifier();
 

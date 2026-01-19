@@ -249,6 +249,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         {
             this._onLoad_0_flag = AttributeUpdaterFlag.UPDATE
             this._onLoad_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onLoad_0_flag = AttributeUpdaterFlag.SKIP
@@ -260,6 +261,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         {
             this._onDestroy_0_flag = AttributeUpdaterFlag.UPDATE
             this._onDestroy_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onDestroy_0_flag = AttributeUpdaterFlag.SKIP
@@ -271,6 +273,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableAnalyzer_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableAnalyzer_0_flag = AttributeUpdaterFlag.SKIP
@@ -282,6 +285,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         {
             this._enableSecure_0_flag = AttributeUpdaterFlag.UPDATE
             this._enableSecure_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._enableSecure_0_flag = AttributeUpdaterFlag.SKIP
@@ -304,6 +308,7 @@ export class XComponentModifier extends CommonMethodModifier implements XCompone
         {
             this._hdrBrightness_0_flag = AttributeUpdaterFlag.UPDATE
             this._hdrBrightness_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._hdrBrightness_0_flag = AttributeUpdaterFlag.SKIP

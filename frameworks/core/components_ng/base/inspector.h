@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 const char KEY_METHOD[] = "method";
 const char KEY_PARAMS[] = "params";
 
-const uint32_t INVALID_WINDOW_ID = 0;
+const uint32_t INSPECTOR_INVALID_WINDOW_ID = 0;
 const int32_t INVALID_METHOD_ID = -1;
 class InspectorFilter;
 using InspectorTreeMap = std::unordered_map<int32_t, RefPtr<RecNode>>;
@@ -38,6 +38,18 @@ struct InspectorChildrenParameters {
     bool isActive = false;
     bool isLayoutInspector = false;
     bool needHandleInternal = false;
+};
+
+class ACE_FORCE_EXPORT InspectorOffscreenNodesMgr : public AceType {
+    DECLARE_ACE_TYPE(InspectorOffscreenNodesMgr, AceType);
+public:
+    void AddOffscreenNode(RefPtr<FrameNode> node);
+    void RemoveOffscreenNode(RefPtr<FrameNode> node);
+    int32_t GetOffscreenNodesSize();
+    std::set<RefPtr<FrameNode>> GetOffscreenNodes();
+    void ClearOffscreenNodes();
+private:
+    std::set<RefPtr<FrameNode>> offscreenNodes_;
 };
 
 class ACE_FORCE_EXPORT Inspector {
@@ -69,9 +81,6 @@ private:
     static void GetInspectorChildrenInfo(
         const RefPtr<NG::UINode>& parent, InspectorTreeMap& recNodes, int32_t pageId, uint32_t depth = UINT32_MAX);
     static void RecordOnePageNodes(const RefPtr<NG::UINode>& pageNode, InspectorTreeMap& treesInfo);
-
-private:
-    static std::set<RefPtr<FrameNode>> offscreenNodes;
 };
 } // namespace OHOS::Ace::NG
 

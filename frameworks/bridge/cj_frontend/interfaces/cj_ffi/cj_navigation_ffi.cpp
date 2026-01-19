@@ -83,10 +83,15 @@ void ParseMenuItem(const std::vector<NavigationItem>& items, std::vector<NG::Bar
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
     uint32_t result = origin;
-    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
-        result = origin | COLOR_ALPHA_VALUE;
+    // After Api22, alpha is handled on the cangjie.
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        return result;
+    } else {
+        if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
+            result = origin | COLOR_ALPHA_VALUE;
+        }
+        return result;
     }
-    return result;
 }
 
 void ParseTitlebarOptions(const CJNavigationTitleOptions& info, NG::NavigationTitlebarOptions& options)

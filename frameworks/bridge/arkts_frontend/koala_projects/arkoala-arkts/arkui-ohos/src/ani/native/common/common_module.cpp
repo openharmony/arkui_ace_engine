@@ -194,6 +194,27 @@ ani_object CreateSizeInPixelObject(ani_env* env, const NG::DrawingContext& conte
     return sizeInPixelObject;
 }
 
+ani_object CreateAniObject(ani_env* env, ani_double leftValue, ani_double rightValue, ani_double topValue,
+    ani_double bottomValue)
+{
+    ani_class aniClass;
+    if (env->FindClass("@ohos.graphics.common2D.common2D.RectInternal", &aniClass) != ANI_OK) {
+        return Rosen::Drawing::CreateAniUndefined(env);
+    }
+
+    ani_method aniConstructor;
+    if (env->Class_FindMethod(aniClass, "<ctor>", "dddd:", &aniConstructor) != ANI_OK) {
+        return Rosen::Drawing::CreateAniUndefined(env);
+    }
+
+    ani_object aniObject;
+    if (env->Object_New(aniClass, aniConstructor, &aniObject, leftValue, rightValue, topValue, bottomValue) != ANI_OK) {
+        return Rosen::Drawing::CreateAniUndefined(env);
+    }
+
+    return aniObject;
+}
+
 ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
 {
     ani_status status;
@@ -229,6 +250,15 @@ ani_object CreateDrawingContext(ani_env* env, const NG::DrawingContext& context)
     if (!aniCanvas) {
         HILOGE("Create AniCanvas failed !");
     }
+    ani_object obj = CreateAniObject(env,
+        0,
+        0,
+        context.width,
+        context.height);
+    ani_ref aniRef;
+    env->GetUndefined(&aniRef);
+    ani_object undefined = static_cast<ani_object>(aniRef);
+    OHOS::Rosen::Drawing::AniCanvas::ClipRect(env, aniCanvas, obj, undefined, undefined);
     env->Object_SetPropertyByName_Ref(result, "canvas_", (ani_ref)aniCanvas);
 #endif
 
@@ -1124,13 +1154,13 @@ void ParseOverlayOptions(ani_env* env, ani_object options, AniOverlayOptions& op
         ani_ref x;
         if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "x", &x)) {
             ani_double param_value;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "unboxed", ":d", &param_value);
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(x), "toDouble", ":d", &param_value);
             opt.x = static_cast<float>(param_value);
         }
         ani_ref y;
         if (ANI_OK == env->Object_GetPropertyByName_Ref(offset, "y", &y)) {
             ani_double param_value;
-            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "unboxed", ":d", &param_value);
+            env->Object_CallMethodByName_Double(static_cast<ani_object>(y), "toDouble", ":d", &param_value);
             opt.y = static_cast<float>(param_value);
         }
     }
@@ -1198,6 +1228,16 @@ ani_double Px2lpx(ani_env* env, ani_object obj, ani_double value, ani_int instan
         return 0;
     }
     return modifier->getCommonAniModifier()->px2lpx(value, instanceId);
+}
+
+void SetIsRecycleInvisibleImageMemory(
+    ani_env* env, ani_object obj, ani_boolean isRecycle, ani_int instanceId)
+{
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getCommonAniModifier() || !env) {
+        return;
+    }
+    modifier->getCommonAniModifier()->setIsRecycleInvisibleImageMemory(isRecycle, instanceId);
 }
 
 ani_string getWindowName(ani_env* env, ani_object obj, ani_int instanceId)
@@ -1776,16 +1816,79 @@ void SetTouchEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, 
             env, "Component does not support prevent function.", ERROR_CODE_COMPONENT_NOT_SUPPORTED_PREVENT_FUNCTION);
     }
 }
+ani_int GetCallingScopeUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, -1);
+    int32_t instanceId = -1;
+    modifier->getCommonAniModifier()->getCallingScopeUIContext(instanceId);
+    ani_int ani_instanceId = static_cast<ani_int>(instanceId);
+    return ani_instanceId;
+}
+
+ani_int GetLastFocusedUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, -1);
+    int32_t instanceId = -1;
+    modifier->getCommonAniModifier()->getLastFocusedUIContext(instanceId);
+    ani_int ani_instanceId = static_cast<ani_int>(instanceId);
+    return ani_instanceId;
+}
+
+ani_int GetLastForegroundUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, -1);
+    int32_t instanceId = -1;
+    modifier->getCommonAniModifier()->getLastForegroundUIContext(instanceId);
+    ani_int ani_instanceId = static_cast<ani_int>(instanceId);
+    return ani_instanceId;
+}
+
+ani_array GetAllUIContexts(ani_env* env, [[maybe_unused]] ani_object obj)
+{
+    ani_array resultArray = nullptr;
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, resultArray);
+    std::vector<int32_t> instanceIds;
+    modifier->getCommonAniModifier()->getAllInstanceIds(instanceIds);
+    ani_ref undefined {};
+    auto status = env->GetUndefined(&undefined);
+    auto arraySize = instanceIds.size();
+    env->Array_New(arraySize, undefined, &resultArray);
+    ani_class intCls {};
+    ani_method intCtor {};
+    status = env->FindClass("std.core.Int", &intCls);
+    status = env->Class_FindMethod(intCls, "<ctor>", "i:", &intCtor);
+    ani_object result {};
+    for (int i = 0; i < arraySize; ++i) {
+        status = env->Object_New(intCls, intCtor, &result, ani_int(instanceIds[i]));
+        status = env->Array_Set(resultArray, i, result);
+    }
+    return resultArray;
+}
 
 ani_array ResolveUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
 {
-    ani_array_int resultArray = nullptr;
+    ani_array resultArray = nullptr;
     const auto* modifier = GetNodeAniModifier();
     CHECK_NULL_RETURN(modifier, resultArray);
     std::vector<int32_t> instance;
     modifier->getCommonAniModifier()->resolveUIContext(instance);
-    env->Array_New_Int(instance.size(), &resultArray);
-    auto status = env->Array_SetRegion_Int(resultArray, 0, instance.size(), instance.data());
+    ani_ref undefined {};
+    auto status = env->GetUndefined(&undefined);
+    auto arraySize = instance.size();
+    env->Array_New(arraySize, undefined, &resultArray);
+    ani_class intCls {};
+    ani_method intCtor {};
+    status = env->FindClass("std.core.Int", &intCls);
+    status = env->Class_FindMethod(intCls, "<ctor>","i:", &intCtor);
+    ani_object result {};
+    for (int i = 0; i < arraySize; ++i) {
+        status = env->Object_New(intCls, intCtor, &result, ani_int(instance[i]));
+        status = env->Array_Set(resultArray, i, result);
+    }
     return resultArray;
 }
 } // namespace OHOS::Ace::Ani

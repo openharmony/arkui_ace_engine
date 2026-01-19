@@ -41,4 +41,8 @@ class Utils {
         }
         return Utils.arkTsUtil;
     }
+
+    public static isNull(obj: any): boolean {
+      return obj === null || obj === undefined;
+    }
 }

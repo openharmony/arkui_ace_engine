@@ -18,7 +18,7 @@
 
 #include "base/memory/referenced.h"
 #include "base/utils/noncopyable.h"
-#include "core/components/video/resource/player.h"
+#include "core/components_ng/pattern/video/resource/player.h"
 #include "core/components_ng/render/media_player.h"
 #include "core/components_ng/render/render_surface.h"
 

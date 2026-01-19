@@ -50,7 +50,7 @@ export interface IExtendableComponent {
     getUniqueId(): int32;
     getPeerNode(): PeerNode | undefined;
     queryNavigationInfo(): uiObserver.NavigationInfo;
-    queryNavDestinationInfo(isInner: boolean): uiObserver.NavDestinationInfo;
+    queryNavDestinationInfo(isInner: boolean | undefined): uiObserver.NavDestinationInfo;
     queryNavDestinationInfo(): uiObserver.NavDestinationInfo
     queryRouterPageInfo(): uiObserver.RouterPageInfo;
     getDialogController(): promptAction.DialogController | undefined;
@@ -60,11 +60,13 @@ export interface IExtendableComponent {
     setActiveInternal(active: boolean, isReuse: boolean): void;
     fireAboutToReuse(param?: RecordData): void;
     fireAboutToRecycle(): void;
+    __getParentNode__Internal(): PeerNode | undefined;
+    getInstance(): ExtendableComponent;
 }
 
 export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     static current: object | undefined = undefined;
-    private isActive_: number = 1;
+    private activeCount_: number = 1;
 
     private parent_: ExtendableComponent | undefined;
     private providedVars_: Map<string, IProvideDecoratedVariable<object>> = new Map<string, IProvideDecoratedVariable<object>>();
@@ -75,6 +77,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     private useSharedStorage_?: boolean | undefined = undefined;
     private childrenWeakRefMap_: Map<int32, WeakRef<ExtendableComponent>> = new Map<int32, WeakRef<ExtendableComponent>>();
     private activeChangeListenerForInterop_: Set<(active: boolean, isReuse: boolean) => void> = new Set<(active: boolean, isReuse: boolean) => void>();
+    private hasBeenRecycled_: boolean = false;
 
     constructor(useSharedStorage?: boolean, storage?: LocalStorage) {
         this.useSharedStorage_ = useSharedStorage;
@@ -86,10 +89,19 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         this.delegate_!.fireAboutToReuse(param);
         this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
             const child = weak.deref();
-            child?.__aboutToReuse_Internal(param);
+            child?.__checkAndCallReuse_Internal(param);
         });
     }
 
+    __checkAndCallReuse_Internal(param?: RecordData): void {
+        if (!this.hasBeenRecycled_) {
+            this.__aboutToReuse_Internal(param);
+        }
+    }
+
+    __switchHasBeenRecycle_Ineternal(recycle: boolean): void {
+        this.hasBeenRecycled_ = recycle;
+    }
     __aboutToRecycle_Internal(): void {
         this.delegate_!.fireAboutToRecycle();
         this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
@@ -118,6 +130,10 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         this.parent_?.__removeChildById__Internal(this.getUniqueId());
     }
 
+    __getParentNode__Internal(): PeerNode | undefined {
+        return this.parent_?.__getPeerNode__Internal();
+    }
+
     __removeAllChild__Internal(): void {
         this.childrenWeakRefMap_.forEach((weak: WeakRef<ExtendableComponent>, _: int32) => {
             const child = weak.deref();
@@ -127,11 +143,19 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     }
 
     __getActive__Internal(): number {
-        return this.isActive_;
+        return this.activeCount_;
     }
 
     __setActive__Internal(activeCount: number): void {
-        this.isActive_ = activeCount;
+        this.activeCount_ = activeCount;
+    }
+
+    __freezeWhenRecycle__Internal(): void {
+        this.activeCount_--;
+    }
+
+    __unfreezeWhenReuse__Internal(): void {
+        this.activeCount_++;
     }
 
     __isViewActive__Internal(): boolean {
@@ -221,7 +245,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     queryRouterPageInfo(): uiObserver.RouterPageInfo {
         return this.delegate_!.queryRouterPageInfo();
     }
-    queryNavDestinationInfo(isInner: boolean): uiObserver.NavDestinationInfo {
+    queryNavDestinationInfo(isInner: boolean | undefined): uiObserver.NavDestinationInfo {
         return this.delegate_!.queryNavDestinationInfo(isInner);
     }
     queryNavDestinationInfo() : uiObserver.NavDestinationInfo {
@@ -268,7 +292,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         const dumpInfo: DumpInfo = new DumpInfo();
         const isV2 = this instanceof CustomComponentV2;
         dumpInfo.viewinfo = {
-            componentName: Type.of(this).getName(),
+            componentName: Class.of(this).getName(),
             isV2: isV2
         };
         let ret: string = '';

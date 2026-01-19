@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
 
+#include "core/components_ng/pattern/navigation/navdestination_pattern_base.h"
 #include "core/components_ng/pattern/navigation/tool_bar_pattern.h"
 
 namespace OHOS::Ace::NG {
@@ -58,5 +59,14 @@ void NavToolbarNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const Inspect
     auto mbOptionJson = JsonUtil::Create(true);
     moreButtonOptions.ToJsonValue(mbOptionJson, filter);
     json->PutExtAttr("moreButtonOptions", mbOptionJson, filter);
+}
+
+bool NavToolbarNode::IsHideToolBar() const
+{
+    auto navNode = AceType::DynamicCast<NavDestinationNodeBase>(GetParent());
+    CHECK_NULL_RETURN(navNode, false);
+    auto navLayoutProperty = navNode->GetLayoutProperty<NavDestinationLayoutPropertyBase>();
+    CHECK_NULL_RETURN(navLayoutProperty, false);
+    return navLayoutProperty->GetHideToolBarValue(false);
 }
 } // namespace OHOS::Ace::NG

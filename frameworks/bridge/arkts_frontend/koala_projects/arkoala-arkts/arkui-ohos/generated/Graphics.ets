@@ -21,6 +21,7 @@ import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./CallbackTransformer"
+import { ColorSpace } from "./component/enums"
 import { extractors } from "#handwritten"
 import { common2D_Rect_serializer } from "./framework/ohos.graphics.common2D"
 import { default as common2D } from "@ohos.graphics.common2D"
@@ -43,15 +44,17 @@ export class Size_serializer {
 export class ColorMetrics_serializer {
     public static write(buffer: SerializerBase, value: ColorMetrics): void {
         let valueSerializer : SerializerBase = buffer
-        const valueHolderForRed_  = value.red_
+        const valueHolderForRed_  = value.red
         valueSerializer.writeInt32(valueHolderForRed_)
-        const valueHolderForGreen_  = value.green_
+        const valueHolderForGreen_  = value.green
         valueSerializer.writeInt32(valueHolderForGreen_)
-        const valueHolderForBlue_  = value.blue_
+        const valueHolderForBlue_  = value.blue
         valueSerializer.writeInt32(valueHolderForBlue_)
-        const valueHolderForAlpha_  = value.alpha_
+        const valueHolderForAlpha_  = value.alpha
         valueSerializer.writeInt32(valueHolderForAlpha_)
-        const valueHolderForResourceId_  = value.resourceId_
+        const valueHolderForColorSpace_  = value.getColorSpace()
+        valueSerializer.writeInt32(valueHolderForColorSpace_.valueOf())
+        const valueHolderForResourceId_  = value.getResourceId()
         valueSerializer.writeInt32(valueHolderForResourceId_)
     }
     public static read(buffer: DeserializerBase): ColorMetrics {
@@ -60,8 +63,10 @@ export class ColorMetrics_serializer {
         const green_TmpResult : int32 = valueDeserializer.readInt32()
         const blue_TmpResult : int32 = valueDeserializer.readInt32()
         const alpha_TmpResult : int32 = valueDeserializer.readInt32()
+        const colorSpace_TmpResult : ColorSpace = ColorSpace.fromValue(valueDeserializer.readInt32())
         const resourceId_TmpResult : int32 = valueDeserializer.readInt32()
-        let value : ColorMetrics = ({red_: red_TmpResult, green_: green_TmpResult, blue_: blue_TmpResult, alpha_: alpha_TmpResult, resourceId_: resourceId_TmpResult} as ColorMetrics)
+        let value : ColorMetrics = new ColorMetrics(red_TmpResult,green_TmpResult, blue_TmpResult, alpha_TmpResult)
+        value.setResourceId(resourceId_TmpResult)
         return value
     }
 }

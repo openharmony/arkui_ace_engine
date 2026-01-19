@@ -16,19 +16,26 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_REFRESH_RENDER_REFRESH_ADAPTER_BASE_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_REFRESH_RENDER_REFRESH_ADAPTER_BASE_H
 
-#include "core/components/refresh/render_refresh.h"
+#include "compatible/components/refresh/render_refresh.h"
 #include "core/components/scroll/scrollable.h"
 #include "core/pipeline/base/render_node.h"
 
 namespace OHOS::Ace {
 
-class RenderRefreshTarget : public virtual AceType {
+struct ArkUIRefreshModifierCompatible {
+    void (*updateScrollableOffset)(RefPtr<RenderNode> refresh, double delta);
+    void (*handleDragEnd)(RefPtr<RenderNode> refresh);
+    void (*handleDragCancel)(RefPtr<RenderNode> refresh);
+};
+
+class ACE_FORCE_EXPORT RenderRefreshTarget : public virtual AceType {
     DECLARE_ACE_TYPE(RenderRefreshTarget, AceType);
 
 public:
     virtual bool HandleRefreshEffect(double delta, int32_t source, double currentOffset);
     virtual void FindRefreshParent(const WeakPtr<RenderNode>& node);
     virtual void InitializeScrollable(const RefPtr<Scrollable>& scrollable);
+    static const ArkUIRefreshModifierCompatible* GetRefreshModifier();
 protected:
     WeakPtr<RenderRefresh> refreshParent_;
 private:

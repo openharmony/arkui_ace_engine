@@ -15,6 +15,7 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_canvas_bridge.h"
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "bridge/declarative_frontend/jsview/canvas/js_drawing_rendering_context.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
 
@@ -33,11 +34,34 @@ ArkUINativeModuleValue CanvasBridge::SetCanvasOnReady(ArkUIRuntimeCallInfo* runt
     auto frameNode = reinterpret_cast<FrameNode*>(nativeNode);
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
     CHECK_NULL_RETURN(frameNode, panda::JSValueRef::Undefined(vm));
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void(bool, CanvasUnit)> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)](
+                                                         bool needDrawingContext, CanvasUnit unit) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
-        func->Call(vm, func.ToLocal(), nullptr, 0);
+        if (!needDrawingContext) {
+            func->Call(vm, func.ToLocal(), nullptr, 0);
+            return;
+        }
+        if (!frameNode) {
+            return;
+        }
+        auto pattern = frameNode->GetPattern<NG::CanvasPattern>();
+        if (!pattern) {
+            return;
+        }
+        auto jsDrawingContext = Framework::JSClass<Framework::JSDrawingRenderingContext>::NewInstance();
+        auto drawingContext = Referenced::Claim(jsDrawingContext->Unwrap<Framework::JSDrawingRenderingContext>());
+        drawingContext->SetBuiltIn(true);
+        drawingContext->SetInstanceId(Container::CurrentId());
+        drawingContext->SetCanvasPattern(pattern);
+        drawingContext->SetUnit(unit);
+        pattern->SetUpdateContextCallback(
+            [drawingContext = drawingContext](CanvasUnit unit) { drawingContext->SetUnit(unit); });
+        pattern->SetRSCanvasForDrawingContext();
+        std::vector<Local<JSValueRef>> argv;
+        argv.emplace_back(jsDrawingContext->GetLocalHandle());
+        func->Call(vm, func.ToLocal(), argv.data(), argv.size());
     };
     GetArkUINodeModifiers()->getCanvasModifier()->setCanvasOnReady(nativeNode, reinterpret_cast<void*>(&callback));
     return panda::JSValueRef::Undefined(vm);

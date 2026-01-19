@@ -25,6 +25,17 @@
 
 namespace OHOS::Ace::NG {
 
+inline constexpr char SIDE_BAR_ETS_TAG[] = "SideBarContainer";
+inline constexpr char IMAGE_ETS_TAG[] = "Image";
+inline constexpr char BUTTON_ETS_TAG[] = "Button";
+inline constexpr char DIVIDER_ETS_TAG[] = "Divider";
+
+enum class SideBarControlButtonType {
+    SHOWN = 0,
+    HIDDEN,
+    SWITCHING,
+};
+
 enum class SideBarAnimationDirection {
     LTR,
     RTL,
@@ -176,16 +187,7 @@ public:
 
     bool OnThemeScopeUpdate(int32_t themeScopeId) override;
 
-    void InitToolBarManager()
-    {
-        if (!toolbarManager_) {
-            auto pipeline = GetHost()->GetContext();
-            CHECK_NULL_VOID(pipeline);
-            toolbarManager_ = pipeline->GetToolbarManager();
-            UpdateSideBarStatus();
-            UpdateSideBarColorToToolbarManager();
-        }
-    }
+    void InitToolBarManager();
 
     RefPtr<ToolbarManager> GetToolBarManager()
     {

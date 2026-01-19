@@ -89,6 +89,7 @@ class ListDividerModifier extends ModifierWithKey<DividerStyle> {
   checkObjectDiff(): boolean {
     return !(this.stageValue?.strokeWidth === this.value?.strokeWidth &&
       this.stageValue?.color === this.value?.color &&
+      !isResource(this.stageValue?.color) && !isResource(this.value?.color) &&
       this.stageValue?.startMargin === this.value?.startMargin &&
       this.stageValue?.endMargin === this.value?.endMargin);
   }
@@ -823,7 +824,7 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
     return this;
   }
   onScroll(event: (scrollOffset: number, scrollState: ScrollState) => void): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onScroll not supported in attributeModifier scenario.');
   }
   onScrollIndex(event: (start: number, end: number, center: number) => void): this {
     modifierWithKey(this._modifiersWithKeys, ListOnScrollIndexModifier.identity, ListOnScrollIndexModifier, event);
@@ -834,7 +835,7 @@ class ArkListComponent extends ArkScrollable<ListAttribute> implements ListAttri
     return this;
   }
   onItemDelete(event: (index: number) => boolean): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onItemDelete not supported in attributeModifier scenario.');
   }
   onItemMove(callback: (from: number, to: number) => boolean): this {
     modifierWithKey(this._modifiersWithKeys, ListOnItemMoveModifier.identity, ListOnItemMoveModifier, callback);

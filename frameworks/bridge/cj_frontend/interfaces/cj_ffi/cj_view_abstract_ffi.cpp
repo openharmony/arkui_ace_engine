@@ -55,10 +55,15 @@ constexpr float DEFAULT_SCALE_MIDDLE_OR_HEAVY = 0.95f;
 uint32_t ColorAlphaAdapt(uint32_t origin)
 {
     uint32_t result = origin;
-    if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
-        result = origin | COLOR_ALPHA_VALUE;
+    // After Api22, alpha is handled on the cangjie.
+    if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_TWO)) {
+        return result;
+    } else {
+        if ((origin >> COLOR_ALPHA_OFFSET) == 0) {
+            result = origin | COLOR_ALPHA_VALUE;
+        }
+        return result;
     }
-    return result;
 }
 const std::vector<BorderStyle> BORDER_STYLES = { BorderStyle::SOLID, BorderStyle::DASHED, BorderStyle::DOTTED };
 const std::vector<ImageRepeat> IMAGES_REPEATS = { ImageRepeat::NO_REPEAT, ImageRepeat::REPEAT_X, ImageRepeat::REPEAT_Y,
@@ -3086,9 +3091,10 @@ RetDimension FFIGetResourceDimension(NativeResourceObject obj)
 
 double FFIGetResourceDouble(NativeResourceObject obj)
 {
-    double result;
+    double result = 0.0;
     if (!ViewAbstract::ParseCjDouble(obj, result)) {
         LOGE("Parse double failed.");
+        return 0.0;
     }
     return result;
 }

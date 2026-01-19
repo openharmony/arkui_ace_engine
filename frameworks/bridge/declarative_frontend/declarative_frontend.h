@@ -172,7 +172,17 @@ public:
     void OnLayoutCompleted(const std::string& componentId) override;
     void OnDrawCompleted(const std::string& componentId) override;
     void OnDrawChildrenCompleted(const std::string& componentId) override;
+    void OnLayoutChildrenCompleted(const std::string& componentId) override;
     bool IsDrawChildrenCallbackFuncExist(const std::string& componentId) override;
+    bool IsLayoutChildrenCallbackFuncExist(const std::string& componentId) override;
+ 
+    void OnLayoutCompleted(int32_t uniqueId) override;
+    void OnDrawCompleted(int32_t uniqueId) override;
+    void OnDrawChildrenCompleted(int32_t uniqueId) override;
+    void OnLayoutChildrenCompleted(int32_t uniqueId) override;
+    bool IsDrawChildrenCallbackFuncExist(int32_t uniqueId) override;
+    bool IsLayoutChildrenCallbackFuncExist(int32_t uniqueId) override;
+
     void DumpFrontend() const override;
     std::string GetPagePath() const override;
     void TriggerGarbageCollection() override;

@@ -14,6 +14,11 @@
  */
 
 #include "base/log/ace_trace.h"
+#include "core/common/container.h"
+#include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/pattern/pattern.h"
+
+#include <iostream>
 
 namespace OHOS::Ace {
 
@@ -74,4 +79,70 @@ std::atomic<std::int32_t> AceAsyncScopedTrace::id_ = 0;
 AceAsyncScopedTrace::AceAsyncScopedTrace(const char* /* format */, ...) {}
 
 AceAsyncScopedTrace::~AceAsyncScopedTrace() = default;
+
+void AceSetResTraceId(uint32_t traceType, uint64_t traceId, uint32_t* pOldTraceType, uint64_t* pOldTraceId)
+{
+    thread_local uint32_t gTraceType;
+    thread_local uint64_t gTraceId;
+    *pOldTraceType = gTraceType;
+    *pOldTraceId = gTraceId;
+    gTraceType = traceType;
+    gTraceId = traceId;
+    std::clog << __func__ << ": traceType=" << traceType << " traceId=" << traceId
+              << " oldTraceType=" << (*pOldTraceType) << " oldTraceId=" << (*pOldTraceId) << std::endl;
+}
+
+ResTracer::ResTracer(uint32_t traceType, uint64_t traceId)
+{
+    AceSetResTraceId(traceType, traceId, &traceType_, &traceId_);
+}
+
+ResTracer::~ResTracer()
+{
+    uint32_t traceType;
+    uint64_t traceId;
+    AceSetResTraceId(traceType_, traceId_, &traceType, &traceId);
+}
+
+ContainerTracer::ContainerTracer(const Container* container)
+    : ContainerTracer(container ? container->GetInstanceId() : INSTANCE_ID_UNDEFINED)
+{}
+
+ContainerTracer::ContainerTracer()
+    : ContainerTracer(Container::CurrentId())
+{}
+
+static void UINodeTracerLog(int32_t nodeId, const std::string_view& nodeTag, const std::string_view& nodePattern,
+    const std::string_view& nodeType = "")
+{
+    std::clog << "UINodeTracer: nodeId=" << nodeId << " nodeTag=" << nodeTag << " nodePattern=" << nodePattern;
+    if (!nodeType.empty()) {
+        std::clog << " nodeType=" << nodeType;
+    }
+    std::clog << std::endl;
+}
+
+UINodeTracer::UINodeTracer(int32_t nodeId, const std::string_view& nodeTag, const std::string_view& nodePattern)
+    : UINodeTracer(nodeId)
+{
+    UINodeTracerLog(nodeId, nodeTag, nodePattern);
+}
+
+UINodeTracer::UINodeTracer(const NG::UINode* uiNode)
+    : UINodeTracer(uiNode ? uiNode->GetId() : ElementRegister::UndefinedElementId)
+{
+    int32_t nodeId = ElementRegister::UndefinedElementId;
+    std::string nodeTag;
+    std::string nodePattern;
+    std::string nodeType;
+    if (uiNode) {
+        nodeId = uiNode->GetId();
+        nodeTag = uiNode->GetTag();
+        nodeType = TypeInfoHelper::TypeName(uiNode);
+        if (auto frameNode = AceType::DynamicCast<NG::FrameNode>(uiNode)) {
+            nodePattern = TypeInfoHelper::TypeName(AceType::RawPtr(frameNode->GetPattern()));
+        }
+    }
+    UINodeTracerLog(nodeId, nodeTag, nodePattern, nodeType);
+}
 } // namespace OHOS::Ace

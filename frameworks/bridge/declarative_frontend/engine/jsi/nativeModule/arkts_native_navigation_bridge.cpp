@@ -14,6 +14,7 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
 
+#include "base/log/ace_scoring_log.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/jsi/jsi_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_utils.h"
@@ -21,12 +22,17 @@
 #include "bridge/declarative_frontend/jsview/js_navigation_stack.h"
 #include "bridge/declarative_frontend/jsview/js_navigation_utils.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
+#include "core/components/navigation_bar/navigation_container_component.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/navigation/navigation_declaration.h"
 #include "core/components_ng/pattern/navigation/navigation_model_data.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "frameworks/bridge/declarative_frontend/engine/functions/js_navigation_function.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
+
+#include "base/log/ace_scoring_log.h"
+#include "core/components/navigation_bar/navigation_container_component.h"
+
 namespace OHOS::Ace::NG {} // namespace OHOS::Ace::NG
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -1117,6 +1123,66 @@ ArkUINativeModuleValue NavigationBridge::ResetSystemBarStyle(ArkUIRuntimeCallInf
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     nodeModifiers->getNavigationModifier()->resetSystemBarStyle(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavigationBridge::SetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
+    Local<JSValueRef> dividerArgs = runtimeCallInfo->GetCallArgRef(1);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    // hide divider
+    if (dividerArgs->IsNull()) {
+        GetArkUINodeModifiers()->getNavigationModifier()->hideDivider(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    if (!dividerArgs->IsObject(vm)) {
+        GetArkUINodeModifiers()->getNavigationModifier()->resetDividerStyle(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+    GetArkUINodeModifiers()->getNavigationModifier()->resetDividerStyle(nativeNode);
+    // get divider color
+    auto dividerObj = dividerArgs->ToObject(vm);
+    auto jsColor = dividerObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "color"));
+    Color color;
+    RefPtr<ResourceObject> colorRes;
+    bool definedColor = true;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, jsColor, color, colorRes, nodeInfo)) {
+        definedColor = false;
+    }
+    GetArkUINodeModifiers()->getNavigationModifier()->setDividerColor(nativeNode,
+        color.ToString().c_str(), AceType::RawPtr(colorRes), definedColor);
+    auto jsStart = dividerObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "startMargin"));
+    RefPtr<ResourceObject> startMargin;
+    CalcDimension start;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsStart, start, startMargin)) {
+        start = CalcDimension(0.0);
+    }
+    GetArkUINodeModifiers()->getNavigationModifier()->setDividerStartMargin(nativeNode,
+        start.ToString().c_str(), AceType::RawPtr(startMargin));
+    auto jsEnd = dividerObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "endMargin"));
+    RefPtr<ResourceObject> endMargin;
+    CalcDimension end;
+    if (!ArkTSUtils::ParseJsDimensionVpNG(vm, jsEnd, end, endMargin)) {
+        end = CalcDimension(0.0f);
+    }
+    GetArkUINodeModifiers()->getNavigationModifier()->setDividerEndMargin(nativeNode,
+        end.ToString().c_str(), AceType::RawPtr(endMargin));
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue NavigationBridge::ResetDivider(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    auto nodeModifiers = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
+    nodeModifiers->getNavigationModifier()->resetDividerStyle(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

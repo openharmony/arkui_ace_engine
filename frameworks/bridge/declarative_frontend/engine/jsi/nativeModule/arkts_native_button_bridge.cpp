@@ -17,6 +17,7 @@
 #include <string>
 
 #include "base/geometry/dimension.h"
+#include "core/components/common/layout/common_text_constants.h"
 #include "core/components/common/properties/text_style.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
@@ -31,7 +32,6 @@ const std::vector<TextOverflow> TEXT_OVERFLOWS = { TextOverflow::NONE, TextOverf
 const std::vector<Ace::FontStyle> FONT_STYLES = { Ace::FontStyle::NORMAL, Ace::FontStyle::ITALIC };
 const std::vector<TextHeightAdaptivePolicy> HEIGHT_ADAPTIVE_POLICY = { TextHeightAdaptivePolicy::MAX_LINES_FIRST,
     TextHeightAdaptivePolicy::MIN_FONT_SIZE_FIRST, TextHeightAdaptivePolicy::LAYOUT_CONSTRAINT_FIRST };
-const std::vector<TextAlign> TEXT_ALIGN = { TextAlign::START, TextAlign::CENTER, TextAlign::END, TextAlign::JUSTIFY };
 const std::string DEFAULT_FONT_WEIGHT = "400";
 const std::string NONE_FONT_FAMILY = "NoneFontFamily";
 constexpr int32_t DEFAULT_BUTTON_TYPE = 1;
@@ -443,7 +443,7 @@ void ButtonBridge::PutButtonValuesParameters(
     Local<JSValueRef> textAlignArg = runtimeCallInfo->GetCallArgRef(TEXT_ALIGN_ARG_10);
     if (!textAlignArg->IsNull() && textAlignArg->IsNumber()) {
         auto textAlign = textAlignArg->Int32Value(vm);
-        if (textAlign >= 0 && textAlign < static_cast<int32_t>(TEXT_ALIGN.size())) {
+        if (textAlign >= 0 && textAlign < static_cast<int32_t>(TEXT_ALIGNS.size())) {
             textAlignOptional = textAlign;
         }
     }
@@ -787,6 +787,7 @@ ArkUINativeModuleValue ButtonBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
     ButtonModelNG::SetBuilderFunc(frameNode, [vm, frameNode, obj = std::move(obj), containerId](
             ButtonConfiguration config) -> RefPtr<FrameNode> {
             ContainerScope scope(containerId);
+            LocalScope pandaScope(vm);
             auto context = ArkTSUtils::GetContext(vm);
             const char* keyOfButton[] = { "label", "pressed", "enabled", "triggerClick" };
             Local<JSValueRef> valuesOfButton[] = { panda::StringRef::NewFromUtf8(vm, config.label_.c_str()),
@@ -797,7 +798,6 @@ ArkUINativeModuleValue ButtonBridge::SetContentModifierBuilder(ArkUIRuntimeCallI
             button->SetNativePointerFieldCount(vm, 1);
             button->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
             panda::Local<panda::JSValueRef> params[CALL_ARG_2] = { context, button };
-            LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             auto jsObject = obj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));

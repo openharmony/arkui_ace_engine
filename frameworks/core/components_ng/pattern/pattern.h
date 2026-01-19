@@ -47,6 +47,10 @@ class AccessibilityElementInfo;
 class AccessibilityEventInfo;
 }
 
+namespace OHOS::Ace {
+struct UiMaterialParam;
+}
+
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
@@ -430,6 +434,9 @@ public:
     virtual void DumpSimplifyInfoOnlyForParamConfig(
         std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig())
     {}
+    virtual void AddExtraInfoWithParamConfig(
+        std::shared_ptr<JsonValue>& json, ParamConfig config = ParamConfig())
+    {}
     virtual void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) {}
@@ -766,7 +773,7 @@ public:
     };
     virtual void HighlightSpecifiedContent(
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) {};
-    virtual void ReportSelectedText() {};
+    virtual void ReportSelectedText(bool isRegister = false) {};
     virtual int32_t OnInjectionEvent(const std::string& command)
     {
         return RET_SUCCESS;
@@ -869,10 +876,14 @@ public:
     virtual void OnContentChangeRegister(const ContentChangeConfig& config) {}
     virtual void OnContentChangeUnregister() {}
     virtual void ContentChangeByDetaching(PipelineContext*) {}
-    virtual RefPtr<FrameNode> GetKeyFrameNodeWhenContentChanged()
+    virtual std::list<RefPtr<FrameNode>> GetKeyFrameNodeWhenContentChanged()
     {
-        return nullptr;
+        return std::list<RefPtr<FrameNode>>();
     }
+    virtual void OnDetachFromMainRenderTree() {}
+    virtual void OnAttachToMainRenderTree() {}
+    virtual void OnOffscreenProcessResource() {}
+    virtual void OnUiMaterialParamUpdate(const UiMaterialParam& params) {}
 
 protected:
     virtual void OnAttachToFrameNode() {}

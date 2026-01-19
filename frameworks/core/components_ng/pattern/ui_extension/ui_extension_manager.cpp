@@ -22,6 +22,10 @@
 #include "core/components_ng/pattern/container_modal/enhance/container_modal_view_enhance.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 
+namespace OHOS::Ace {
+SINGLETON_INSTANCE_IMPL(NG::UIExtensionIdUtility);
+}
+
 namespace OHOS::Ace::NG {
 UIExtensionIdUtility::UIExtensionIdUtility() {}
 
@@ -576,19 +580,19 @@ void UIExtensionManager::TransferAccessibilityRectInfo()
 }
 
 void UIExtensionManager::UpdateWMSUIExtProperty(UIContentBusinessCode code, const AAFwk::Want& data,
-    RSSubsystemId subSystemId)
+    RSSubsystemId subSystemId, const UIExtOptions& options)
 {
     CHECK_RUN_ON(UI);
     for (const auto& it : aliveUIExtensions_) {
         auto uiExtension = it.second.Upgrade();
         if (uiExtension) {
-            uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
+            uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId, options);
         }
     }
     for (const auto& it : aliveSecurityUIExtensions_) {
         auto uiExtension = it.second.Upgrade();
         if (uiExtension) {
-            uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId);
+            uiExtension->UpdateWMSUIExtProperty(code, data, subSystemId, options);
         }
     }
 }

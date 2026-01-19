@@ -58,7 +58,19 @@ HWTEST_F(DetachedRsNodeManagerTest, DetachedRsNodeManagerTest001, TestSize.Level
     EXPECT_NE(rsContext, nullptr);
     auto rsNode = Rosen::RSCanvasNode::Create(false, false, rsContext);
 
+    DetachedRsNodeManager::GetInstance().rsUIContexts_.emplace(rsContext.get());
+    EXPECT_FALSE(DetachedRsNodeManager::GetInstance().rsUIContexts_.empty());
     DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode);
+    EXPECT_FALSE(DetachedRsNodeManager::GetInstance().rsUIContexts_.empty());
+    DetachedRsNodeManager::GetInstance().RemoveRSUIContext(rsContext);
+    EXPECT_TRUE(DetachedRsNodeManager::GetInstance().rsUIContexts_.empty());
+
+    DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode);
+    EXPECT_TRUE(DetachedRsNodeManager::GetInstance().rsUIContexts_.empty());
+
+    rsContext->AttachFromUI();
+    DetachedRsNodeManager::GetInstance().PostDestructorTask(rsNode);
+    DetachedRsNodeManager::GetInstance().FlushImplicitTransaction(rsContext);
     EXPECT_TRUE(DetachedRsNodeManager::GetInstance().rsUIContexts_.empty());
 
     rsContext->DetachFromUI();

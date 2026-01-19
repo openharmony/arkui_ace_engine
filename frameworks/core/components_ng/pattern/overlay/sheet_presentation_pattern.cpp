@@ -44,6 +44,8 @@
 #include "core/components_ng/pattern/scroll/scroll_layout_algorithm.h"
 #include "core/components_ng/pattern/scroll/scroll_layout_property.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
+#include "core/components_ng/pattern/sheet/minimize/sheet_minimize_object.h"
+#include "core/components_ng/pattern/sheet/minimize/sheet_presentation_minimize_layout_algorithm.h"
 #include "core/components_ng/pattern/stage/page_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
@@ -965,7 +967,7 @@ float SheetPresentationPattern::GetSheetHeightChange()
         return .0f;
     }
     float inputH = 0.f;
-    if (pipelineContext->UsingCaretAvoidMode()) {
+    if (pipelineContext->UsingCaretAvoidMode() && !needDoubleAvoidAfterLayout_) {
         // when user scroll after avoiding keyboard, we need to update scroll offset before avoid keyboard twice.
         GetCurrentScrollHeight();
         // when avoiding keyboard twice, recover input height before avoiding is needed.
@@ -976,6 +978,7 @@ float SheetPresentationPattern::GetSheetHeightChange()
         inputH = textFieldManager ? (pipelineContext->GetRootHeight() -
             textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight()) : 0.f;
     }
+    SetNeedDoubleAvoidAfterLayout(false);
     // keyboardH : keyboard height + height of the bottom navigation bar
     auto keyboardH = keyboardInsert.Length() + manager->GetSystemSafeArea().bottom_.Length();
     // The minimum height of the input component from the bottom of the screen after popping up the soft keyboard
@@ -1111,6 +1114,10 @@ void SheetPresentationPattern::SheetTransitionForOverlay(bool isTransitionIn, bo
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     auto pipeline = host->GetContextRefPtr();
+    // The window or sheet type changes
+    if (isTransitionIn == true && isFirstTransition == false) {
+        SetNeedDoubleAvoidAfterLayout(true);
+    }
     AnimationUtils::Animate(option,
         sheetObject_->GetAnimationPropertyCallForOverlay(isTransitionIn), // Moving effect end point
         option.GetOnFinishEvent(), nullptr, pipeline);
@@ -1176,6 +1183,9 @@ void SheetPresentationPattern::ChangeScrollHeight(float height)
         sheetType == SheetType::SHEET_BOTTOM_OFFSET) {
         auto sheetHeight = geometryNode->GetFrameSize().Height();
         scrollHeight = sheetHeight - GetTitleBuilderHeight() - resizeDecreasedHeight_;
+    }
+    if (sheetType == SheetType::SHEET_MINIMIZE) {
+        scrollHeight = geometryNode->GetFrameSize().Height();
     }
     scrollProps->UpdateUserDefinedIdealSize(CalcSize(std::nullopt, CalcLength(scrollHeight)));
     scrollNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
@@ -1489,7 +1499,7 @@ void SheetPresentationPattern::UpdateSheetCloseIcon()
     CHECK_NULL_VOID(pipeline);
     auto sheetTheme = pipeline->GetTheme<SheetTheme>();
     CHECK_NULL_VOID(sheetTheme);
-    auto sheetCloseIcon = DynamicCast<FrameNode>(host->GetChildAtIndex(2));
+    auto sheetCloseIcon = GetSheetCloseIcon();
     CHECK_NULL_VOID(sheetCloseIcon);
     auto renderContext = sheetCloseIcon->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -1964,6 +1974,9 @@ SheetType SheetPresentationPattern::GetSheetTypeFromSheetManager() const
     auto layoutProperty = GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_RETURN(layoutProperty, sheetType);
     auto sheetStyle = layoutProperty->GetSheetStyleValue(SheetStyle());
+    if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_MINIMIZE) {
+        return SheetType::SHEET_MINIMIZE;
+    }
     if (sheetStyle.instanceId.has_value()) {
         return GetSheetType();
     }
@@ -2023,6 +2036,9 @@ SheetType SheetPresentationPattern::GetSheetType() const
     }
     if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_SIDE) {
         return SheetType::SHEET_SIDE;
+    }
+    if (sheetStyle.sheetType.has_value() && sheetStyle.sheetType.value() == SheetType::SHEET_MINIMIZE) {
+        return SheetType::SHEET_MINIMIZE;
     }
     if (sheetThemeType_ == "auto") {
         GetSheetTypeWithAuto(sheetType);
@@ -3815,7 +3831,7 @@ void SheetPresentationPattern::OnAppear()
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
-    mgr->OnDialogChangeEnd(GetHost());
+    mgr->OnDialogChangeEnd(GetHost(), true);
 }
 
 bool SheetPresentationPattern::IsNeedChangeScrollHeight(float height)
@@ -3864,7 +3880,7 @@ void SheetPresentationPattern::OnDisappear()
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
-    mgr->OnDialogChangeEnd(GetHost());
+    mgr->OnDialogChangeEnd(GetHost(), false);
 }
 
 void SheetPresentationPattern::OnFontScaleConfigurationUpdate()
@@ -4015,6 +4031,8 @@ void SheetPresentationPattern::InitSheetObject()
         sheetObject_ = AceType::MakeRefPtr<SheetSideObject>(sheetType_);
     } else if (sheetType_ == SheetType::SHEET_CONTENT_COVER) {
         sheetObject_ = AceType::MakeRefPtr<SheetContentCoverObject>(sheetType_);
+    } else if (sheetType_ == SheetType::SHEET_MINIMIZE) {
+        sheetObject_ = AceType::MakeRefPtr<SheetMinimizeObject>(sheetType_);
     } else {
         sheetObject_ = AceType::MakeRefPtr<SheetObject>(sheetType_);
     }
@@ -4057,6 +4075,8 @@ void SheetPresentationPattern::UpdateSheetObject(SheetType newType)
         sheetObject = AceType::MakeRefPtr<SheetSideObject>(newType);
     } else if (newType == SheetType::SHEET_CONTENT_COVER) {
         sheetObject = AceType::MakeRefPtr<SheetContentCoverObject>(newType);
+    } else if (newType == SheetType::SHEET_MINIMIZE) {
+        sheetObject = AceType::MakeRefPtr<SheetMinimizeObject>(newType);
     } else {
         sheetObject = AceType::MakeRefPtr<SheetObject>(newType);
     }
@@ -4692,5 +4712,20 @@ bool SheetPresentationPattern::IsPcOrPadFreeMultiWindowMode() const
     DeviceType deviceType = SystemProperties::GetDeviceType();
     TAG_LOGD(AceLogTag::ACE_SHEET, "IsPCMode: %{public}d", SystemProperties::IsPCMode());
     return deviceType == DeviceType::TWO_IN_ONE || SystemProperties::IsPCMode();
+}
+
+RefPtr<LayoutAlgorithm> SheetPresentationPattern::CreateLayoutAlgorithm()
+{
+    auto sheetType = sheetType_;
+    if (sheetType == SheetType::SHEET_SIDE) {
+        return MakeRefPtr<SheetPresentationSideLayoutAlgorithm>();
+    }
+    if (sheetType == SheetType::SHEET_CONTENT_COVER) {
+        return MakeRefPtr<SheetContentCoverLayoutAlgorithm>();
+    }
+    if (sheetType == SheetType::SHEET_MINIMIZE) {
+        return MakeRefPtr<SheetPresentationMinimizeLayoutAlgorithm>();
+    }
+    return MakeRefPtr<SheetPresentationLayoutAlgorithm>(sheetType, sheetPopupInfo_);
 }
 } // namespace OHOS::Ace::NG

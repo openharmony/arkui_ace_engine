@@ -64,6 +64,7 @@ RefPtr<FrameNode> EventHub::GetFrameNode() const
 
 void EventHub::AddSupportedState(UIState state)
 {
+    ACE_UINODE_TRACE(host_);
     if (!stateStyleMgr_) {
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
@@ -72,6 +73,7 @@ void EventHub::AddSupportedState(UIState state)
 
 void EventHub::SetSupportedStates(UIState state)
 {
+    ACE_UINODE_TRACE(host_);
     if (!stateStyleMgr_) {
         stateStyleMgr_ = MakeRefPtr<StateStyleManager>(host_);
     }
@@ -1056,13 +1058,6 @@ bool EventHub::IsDeveloperEnabled() const
 
 void EventHub::SetEnabled(bool enabled)
 {
-    auto host = GetFrameNode();
-    if (enabled_ != enabled && host) {
-        auto accessibilityProperty = host->GetAccessibilityProperty<NG::AccessibilityProperty>();
-        if (accessibilityProperty) {
-            accessibilityProperty->NotifyComponentChangeEvent(AccessibilityEventType::ELEMENT_INFO_CHANGE);
-        }
-    }
     enabled_ = enabled;
     developerEnabled_ = enabled;
 }

@@ -58,7 +58,7 @@ public:
 
     int32_t GetDragState(DragState& dragState) const override;
 
-    int32_t AddPrivilege() override;
+    int32_t AddPrivilege(const std::string& signature, const DragEventData& dragEventData) override;
 
     int32_t EnterTextEditorArea(bool enable) override;
 

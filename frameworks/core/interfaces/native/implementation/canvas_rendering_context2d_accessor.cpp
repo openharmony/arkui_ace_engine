@@ -15,10 +15,12 @@
 #include <utility>
 
 #include "core/components_ng/base/frame_node.h"
+#include "core/interfaces/native/utility/callback_helper.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "canvas_rendering_context2d_peer_impl.h"
+#include "drawing_rendering_context_peer_impl.h"
 #include "frame_node_peer_impl.h"
 #include "ui_context_accessor_peer.h"
 #include "arkoala_api_generated.h"
@@ -80,32 +82,62 @@ void OnAttachImpl(Ark_CanvasRenderingContext2D peer,
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(callback_);
-    auto arkCallback = CallbackHelper(*callback_);
-    peer->On(std::move(arkCallback), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_ATTACH);
+    auto func = [arkCallback = CallbackHelper(*callback_)]() {
+        arkCallback.Invoke();
+    };
+    peer->On(std::move(func), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_ATTACH);
 }
 void OffAttachImpl(Ark_CanvasRenderingContext2D peer,
                    const Opt_VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     auto optCallback = Converter::GetOptPtr(callback_);
-    auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<VoidCallback>();
-    peer->Off(std::move(arkCallback), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
+    if (optCallback) {
+        auto func = [arkCallback = CallbackHelper(*optCallback)]() {
+            arkCallback.Invoke();
+        };
+        peer->Off(std::move(func), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
+    }
 }
 void OnDetachImpl(Ark_CanvasRenderingContext2D peer,
                   const VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(callback_);
-    auto arkCallback = CallbackHelper(*callback_);
-    peer->On(std::move(arkCallback), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_DETACH);
+    auto func = [arkCallback = CallbackHelper(*callback_)]() {
+        arkCallback.Invoke();
+    };
+    peer->On(std::move(func), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_DETACH);
 }
 void OffDetachImpl(Ark_CanvasRenderingContext2D peer,
                    const Opt_VoidCallback* callback_)
 {
     CHECK_NULL_VOID(peer);
     auto optCallback = Converter::GetOptPtr(callback_);
-    auto arkCallback = optCallback ? CallbackHelper(*optCallback) : CallbackHelper<VoidCallback>();
-    peer->Off(std::move(arkCallback), CanvasRenderingContext2DPeer::CanvasCallbackType::ON_DETACH);
+    if (optCallback) {
+        auto func = [arkCallback = CallbackHelper(*optCallback)]() {
+            arkCallback.Invoke();
+        };
+        peer->Off(std::move(func), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
+    }
+}
+Ark_CanvasRenderingContext2D GetContext2DFromDrawingContextImpl(
+    Ark_DrawingRenderingContext drawingContext, const Opt_RenderingContextOptions* options)
+{
+    CHECK_NULL_RETURN(drawingContext, {});
+    auto drawContextImpl = reinterpret_cast<DrawingRenderingContextPeerImpl*>(drawingContext);
+    CHECK_NULL_RETURN(drawContextImpl, {});
+    auto contextPeer = drawContextImpl->GetOrCreateContext2D();
+    CHECK_NULL_RETURN(contextPeer, {});
+    auto optRenderingContextOptions = Converter::OptConvertPtr<Ark_RenderingContextOptions>(options);
+    RenderingContextOptions renderingContextOptions;
+    if (optRenderingContextOptions.has_value()) {
+        renderingContextOptions = Converter::Convert<OHOS::Ace::RenderingContextOptions>(*optRenderingContextOptions);
+    }
+    auto contextPeerImpl = reinterpret_cast<CanvasRenderingContext2DPeerImpl*>(contextPeer);
+    CHECK_NULL_RETURN(contextPeerImpl, {});
+    contextPeerImpl->SetRenderingContextOptions(renderingContextOptions);
+    return contextPeer;
 }
 Ark_Float64 GetHeightImpl(Ark_CanvasRenderingContext2D peer)
 {
@@ -147,6 +179,7 @@ const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext
         CanvasRenderingContext2DAccessor::OffAttachImpl,
         CanvasRenderingContext2DAccessor::OnDetachImpl,
         CanvasRenderingContext2DAccessor::OffDetachImpl,
+        CanvasRenderingContext2DAccessor::GetContext2DFromDrawingContextImpl,
         CanvasRenderingContext2DAccessor::GetHeightImpl,
         CanvasRenderingContext2DAccessor::SetHeightImpl,
         CanvasRenderingContext2DAccessor::GetWidthImpl,

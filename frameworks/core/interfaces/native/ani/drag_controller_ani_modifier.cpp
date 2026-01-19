@@ -30,6 +30,7 @@
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
 #include "core/components_ng/render/adapter/component_snapshot.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
+#include "core/interfaces/native/implementation/drag_springloadingcontext_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "bridge/common/utils/utils.h"
 #include "core/pipeline/pipeline_base.h"
@@ -335,18 +336,19 @@ bool GetShadowInfo(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, Msdp::Devic
     shadowInfo = { pixelMapDuplicated, -x, -y };
     return true;
 }
-bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
-    NG::PreparedInfoForDrag& data, NG::PreparedAsyncCtxForAnimate& asyncCtxData,
-    Msdp::DeviceStatus::ShadowInfo& shadowInfo, std::shared_ptr<Media::PixelMap> pixelMap)
+
+bool CreatePreparedInfoForDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx, NG::PreparedInfoForDrag& data,
+    NG::PreparedAsyncCtxForAnimate& asyncCtxData, std::shared_ptr<Media::PixelMap> pixelMap,
+    RefPtr<Subwindow>& subWindow)
 {
     CHECK_NULL_RETURN(asyncCtx, false);
+    CHECK_NULL_RETURN(pixelMap, false);
     auto container = AceEngine::Get().GetContainer(asyncCtx->instanceId);
     CHECK_NULL_RETURN(container, false);
     auto pipeline = container->GetPipelineContext();
     CHECK_NULL_RETURN(pipeline, false);
     auto dragNodePipeline = AceType::DynamicCast<NG::PipelineContext>(pipeline);
     CHECK_NULL_RETURN(dragNodePipeline, false);
-    CHECK_NULL_RETURN(pixelMap, false);
     auto scaleData =
         NG::DragControllerFuncWrapper::GetScaleInfo(asyncCtx->instanceId, pixelMap->GetWidth(), pixelMap->GetHeight());
     CHECK_NULL_RETURN(scaleData, false);
@@ -362,20 +364,43 @@ bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     NG::DragControllerFuncWrapper::ResetContextMenuDragPosition(asyncCtx->instanceId);
     if (scaleData->isNeedScale && asyncCtx->dragPreviewOption.isScaleEnabled) {
         auto overlayManager = dragNodePipeline->GetOverlayManager();
+        CHECK_NULL_RETURN(overlayManager, false);
         auto imageNode = overlayManager->GetPixelMapContentNode();
         scale = scaleData->scale * asyncCtx->windowScale;
         data.previewScale = scale;
         NG::DragControllerFuncWrapper::CreatePreviewNode(imageNode, data, asyncCtxData);
         CHECK_NULL_RETURN(imageNode, false);
         data.imageNode = imageNode;
+        if (!subWindow) {
+            subWindow = NG::DragControllerFuncWrapper::SubWindowShow(pipeline);
+        }
         data.dragPreviewOffsetToScreen = NG::DragControllerFuncWrapper::GetOriginNodeOffset(data, asyncCtxData);
     }
-    if (!GetShadowInfo(asyncCtx, shadowInfo, refPixelMap, scale)) {
+    return true;
+}
+
+bool CreatePreviewNodeAndScale(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
+    Msdp::DeviceStatus::ShadowInfo& shadowInfo, std::shared_ptr<Media::PixelMap> pixelMap)
+{
+    CHECK_NULL_RETURN(asyncCtx, false);
+    CHECK_NULL_RETURN(pixelMap, false);
+    auto scaleData =
+        NG::DragControllerFuncWrapper::GetScaleInfo(asyncCtx->instanceId, pixelMap->GetWidth(), pixelMap->GetHeight());
+    CHECK_NULL_RETURN(scaleData, false);
+    auto scale = asyncCtx->windowScale;
+    auto badgeNumber = asyncCtx->dragPreviewOption.GetCustomerBadgeNumber();
+    if (badgeNumber.has_value()) {
+        asyncCtx->badgeNumber = badgeNumber.value();
+    }
+    if (scaleData->isNeedScale && asyncCtx->dragPreviewOption.isScaleEnabled) {
+        scale = scaleData->scale * asyncCtx->windowScale;
+    }
+    RefPtr<PixelMap> refPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
+    CHECK_NULL_RETURN(refPixelMap, false);
+    auto result = GetShadowInfo(asyncCtx, shadowInfo, refPixelMap, scale);
+    if (!result) {
         return false;
     }
-    asyncCtxData = { asyncCtx->instanceId, asyncCtx->touchPoint.has_value(), asyncCtx->dragPointerEvent,
-        asyncCtx->dragPreviewOption, asyncCtx->touchPoint.value_or(DimensionOffset(0.0_vp, 0.0_vp)),
-        asyncCtx->pixelMapList };
     return true;
 }
 
@@ -490,6 +515,24 @@ bool EnvelopedDragData(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
     return true;
 }
 
+bool UpdateShadowInfos(std::shared_ptr<DragControllerAsyncCtx> asyncCtx,
+    std::vector<Msdp::DeviceStatus::ShadowInfo>& shadowInfos)
+{
+    CHECK_NULL_RETURN(asyncCtx, false);
+    Msdp::DeviceStatus::ShadowInfo shadowInfo;
+    for (auto& pixelMap: asyncCtx->pixelMapList) {
+        if (!pixelMap) {
+            TAG_LOGD(AceLogTag::ACE_DRAG, "Skipping null pixelMap");
+            continue;
+        }
+        if (!CreatePreviewNodeAndScale(asyncCtx, shadowInfo, pixelMap)) {
+            return false;
+        }
+        shadowInfos.push_back(shadowInfo);
+    }
+    return true;
+}
+
 bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
 {
     CHECK_NULL_RETURN(asyncCtx, false);
@@ -500,21 +543,18 @@ bool StartDragService(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     NG::PreparedInfoForDrag data;
     NG::PreparedAsyncCtxForAnimate asyncCtxData;
     std::vector<Msdp::DeviceStatus::ShadowInfo> shadowInfos;
-    Msdp::DeviceStatus::ShadowInfo shadowInfo;
     asyncCtxData = { asyncCtx->instanceId, asyncCtx->touchPoint.has_value(), asyncCtx->dragPointerEvent,
         asyncCtx->dragPreviewOption, asyncCtx->touchPoint.value_or(DimensionOffset(0.0_vp, 0.0_vp)),
         asyncCtx->pixelMapList };
-    for (auto& pixelMap : asyncCtx->pixelMapList) {
-        if (!pixelMap) {
-            LOGE("AceDrag, skip null pixelMap");
-            continue;
-        }
-        if (!CreatePreviewNodeAndScale(asyncCtx, data, asyncCtxData, shadowInfo, pixelMap)) {
+    if (!UpdateShadowInfos(asyncCtx, shadowInfos)) {
+        return false;
+    }
+    RefPtr<Subwindow> subWindow = nullptr;
+    if (!asyncCtx->pixelMapList.empty() && asyncCtx->pixelMapList[0]) {
+        if (!CreatePreparedInfoForDrag(asyncCtx, data, asyncCtxData, asyncCtx->pixelMapList[0], subWindow)) {
             return false;
         }
-        shadowInfos.push_back(shadowInfo);
     }
-    auto subWindow = DragControllerFuncWrapper::SubWindowShow(pipeline);
     std::optional<Msdp::DeviceStatus::DragData> dragData;
     if (!EnvelopedDragData(asyncCtx, dragData, shadowInfos)) {
         return false;
@@ -711,11 +751,13 @@ bool TryToStartDrag(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
     asyncCtxData = { asyncCtx->instanceId, asyncCtx->touchPoint.has_value(), asyncCtx->dragPointerEvent,
         asyncCtx->dragPreviewOption, asyncCtx->touchPoint.value_or(DimensionOffset(0.0_vp, 0.0_vp)),
         asyncCtx->pixelMapList };
-    if (!CreatePreviewNodeAndScale(asyncCtx, data, asyncCtxData, shadowInfo, asyncCtx->pixelMap)) {
-        LOGE("AceDrag, create preview node failed.");
+    RefPtr<Subwindow> subWindow = nullptr;
+    if (!CreatePreviewNodeAndScale(asyncCtx, shadowInfo, asyncCtx->pixelMap)) {
         return false;
     }
-    auto subWindow = DragControllerFuncWrapper::SubWindowShow(pipeline);
+    if (!CreatePreparedInfoForDrag(asyncCtx, data, asyncCtxData, asyncCtx->pixelMap, subWindow)) {
+        return false;
+    }
     Msdp::DeviceStatus::DragData dragData;
     if (!PrepareDragData(asyncCtx, dragData, shadowInfo)) {
         LOGE("AceDrag, prepare drag data failed!");
@@ -842,7 +884,17 @@ void UpdatePreviewOptionDefaultAttr(
     } else {
         dragAsyncContext->dragPreviewOption.isShowBadge = asyncCtx.dragPreviewOption.isShowBadge;
     }
-    NG::DragDropFuncWrapper::UpdatePreviewOptionDefaultAttr(dragAsyncContext->dragPreviewOption);
+    DragPreviewOption& option = dragAsyncContext->dragPreviewOption;
+    if (option.isDefaultShadowEnabled) {
+        option.options.shadow = NG::DragDropFuncWrapper::GetDefaultShadow();
+    } else {
+        option.options.shadow = std::nullopt;
+    }
+    if (option.isDefaultRadiusEnabled) {
+        option.options.borderRadius = NG::DragDropFuncWrapper::GetDefaultBorderRadius();
+    } else {
+        option.options.borderRadius = std::nullopt;
+    }
 }
 
 void UpdateDragPreviewOptionsFromModifier(std::shared_ptr<DragControllerAsyncCtx> dragAsyncContext,
@@ -992,15 +1044,18 @@ bool ANIHandleDragActionStartDrag(ArkUIDragControllerAsync& asyncCtx)
     return true;
 }
 
-void ANIDragPreviewSetForegroundColor(Ark_ResourceColor value, ArkUIDragPreviewAsync& asyncCtx)
+void ANIDragPreviewSetForegroundColor(ani_long colorValue, ArkUIDragPreviewAsync& asyncCtx)
 {
     auto iter = std::find(asyncCtx.previewStyle.types.begin(),
         asyncCtx.previewStyle.types.end(), ArkUIPreviewType::FOREGROUND_COLOR);
     if (iter == asyncCtx.previewStyle.types.end()) {
         asyncCtx.previewStyle.types.emplace_back(ArkUIPreviewType::FOREGROUND_COLOR);
     }
-    const auto convColor = Converter::OptConvert<Color>(value);
-    asyncCtx.previewStyle.foregroundColor = convColor->GetValue();
+    const auto convColor = static_cast<int64_t>(colorValue);
+    if (convColor < 0 || convColor > UINT_MAX) {
+        return;
+    }
+    asyncCtx.previewStyle.foregroundColor = convColor;
     PreviewStyle previewStyle { {}, 0, -1, -1, -1 };
     ConvertPreviewStyle(previewStyle, asyncCtx);
     if (!asyncCtx.hasAnimation) {
@@ -1061,6 +1116,95 @@ void ANIDragActionNotifyDragStartReques(int requestStatus)
     ViewAbstractModel::GetInstance()->NotifyDragStartRequest(static_cast<Ace::DragStartRequestStatus>(requestStatus));
 }
 
+void ANIDragActionEnableDropDisallowedBadge(bool enabled)
+{
+    ViewAbstractModel::GetInstance()->EnableDropDisallowedBadge(enabled);
+}
+
+int32_t ANISpringLoadingContextGetState(ani_long ptr)
+{
+    CHECK_NULL_RETURN(ptr, 0);
+    auto peer = reinterpret_cast<Ark_dragController_SpringLoadingContext>(ptr);
+    CHECK_NULL_RETURN(peer, 0);
+    auto context = peer->context;
+    CHECK_NULL_RETURN(context, 0);
+    return static_cast<int32_t>(context->GetState());
+}
+
+int32_t ANISpringLoadingContextGetCurrentNotifySequence(ani_long ptr)
+{
+    CHECK_NULL_RETURN(ptr, 0);
+    auto peer = reinterpret_cast<Ark_dragController_SpringLoadingContext>(ptr);
+    CHECK_NULL_RETURN(peer, 0);
+    auto context = peer->context;
+    CHECK_NULL_RETURN(context, 0);
+    return static_cast<int32_t>(context->GetCurrentNotifySequence());
+}
+
+void ANISpringLoadingContextGetDragInfos(ani_long ptr, ArkUIDragInfos& info)
+{
+    CHECK_NULL_VOID(ptr);
+    auto peer = reinterpret_cast<Ark_dragController_SpringLoadingContext>(ptr);
+    CHECK_NULL_VOID(peer);
+    auto context = peer->context;
+    CHECK_NULL_VOID(context);
+    info.extraInfo = context->GetExtraInfos();
+    auto summary = context->GetSummary();
+    auto summaryPtr = info.summary.GetSharedPtr();
+    UdmfClient::GetInstance()->TransformSummaryANI(summary, summaryPtr);
+}
+
+ArkUIDragSpringLoadingConfiguration ANISpringLoadingContextGetCurrentConfig(ani_long ptr)
+{
+    ArkUIDragSpringLoadingConfiguration arkConfig;
+    CHECK_NULL_RETURN(ptr, arkConfig);
+    auto peer = reinterpret_cast<Ark_dragController_SpringLoadingContext>(ptr);
+    CHECK_NULL_RETURN(peer, arkConfig);
+    auto context = peer->context;
+    CHECK_NULL_RETURN(context, arkConfig);
+    const auto& config = context->GetDragSpringLoadingConfiguration();
+    CHECK_NULL_RETURN(config, arkConfig);
+    arkConfig.stillTimeLimit = config->stillTimeLimit;
+    arkConfig.updateInterval = config->updateInterval;
+    arkConfig.updateNotifyCount = config->updateNotifyCount;
+    arkConfig.updateToFinishInterval = config->updateToFinishInterval;
+    return arkConfig;
+}
+
+void ANISpringLoadingContextAbort(ani_long ptr)
+{
+    CHECK_NULL_VOID(ptr);
+    auto peer = reinterpret_cast<Ark_dragController_SpringLoadingContext>(ptr);
+    CHECK_NULL_VOID(peer);
+    auto context = peer->context;
+    CHECK_NULL_VOID(context);
+    context->SetSpringLoadingAborted();
+}
+
+void ANISpringLoadingContextUpdateConfiguration(ani_long ptr, ArkUIDragSpringLoadingConfiguration& value)
+{
+    CHECK_NULL_VOID(ptr);
+    auto peer = reinterpret_cast<Ark_dragController_SpringLoadingContext>(ptr);
+    CHECK_NULL_VOID(peer);
+    auto context = peer->context;
+    CHECK_NULL_VOID(context);
+    auto config = AceType::MakeRefPtr<OHOS::Ace::NG::DragSpringLoadingConfiguration>();
+    CHECK_NULL_VOID(config);
+    if (value.stillTimeLimit >= 0) {
+        config->stillTimeLimit = value.stillTimeLimit;
+    }
+    if (value.updateInterval >= 0) {
+        config->updateInterval = value.updateInterval;
+    }
+    if (value.updateNotifyCount >= 0) {
+        config->updateNotifyCount = value.updateNotifyCount;
+    }
+    if (value.updateToFinishInterval >= 0) {
+        config->updateToFinishInterval = value.updateToFinishInterval;
+    }
+    context->SetDragSpringLoadingConfiguration(std::move(config));
+}
+
 const ArkUIAniDragControllerModifier* GetDragControllerAniModifier()
 {
     static const ArkUIAniDragControllerModifier impl = {
@@ -1073,6 +1217,13 @@ const ArkUIAniDragControllerModifier* GetDragControllerAniModifier()
         .aniDragActionSetDragEventStrictReportingEnabled = NG::ANIDragActionSetDragEventStrictReportingEnabled,
         .aniDragActionCancelDataLoading = NG::ANIDragActionCancelDataLoading,
         .aniDragActionNotifyDragStartReques = NG::ANIDragActionNotifyDragStartReques,
+        .aniDragActionEnableDropDisallowedBadge = NG::ANIDragActionEnableDropDisallowedBadge,
+        .aniSpringLoadingContextGetState = NG::ANISpringLoadingContextGetState,
+        .aniSpringLoadingContextGetCurrentNotifySequence = NG::ANISpringLoadingContextGetCurrentNotifySequence,
+        .aniSpringLoadingContextGetDragInfos = NG::ANISpringLoadingContextGetDragInfos,
+        .aniSpringLoadingContextGetCurrentConfig = NG::ANISpringLoadingContextGetCurrentConfig,
+        .aniSpringLoadingContextAbort = NG::ANISpringLoadingContextAbort,
+        .aniSpringLoadingContextUpdateConfiguration = NG::ANISpringLoadingContextUpdateConfiguration
     };
     return &impl;
 }

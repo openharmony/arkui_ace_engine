@@ -286,4 +286,26 @@ const RefPtr<MouseEventResult>& NativeEmbeadMouseInfo::GetResult() const
     return result_;
 }
 
+MouseEvent MouseInfo::ConvertToMouseEvent() const
+{
+    MouseEvent mouseEvent;
+    mouseEvent.sourceType = GetSourceDevice();
+    mouseEvent.sourceTool = GetSourceTool();
+    mouseEvent.time = GetTimeStamp();
+    mouseEvent.deviceId = GetDeviceId();
+    mouseEvent.targetDisplayId = GetTargetDisplayId();
+    mouseEvent.x = localLocation_.GetX();
+    mouseEvent.y = localLocation_.GetY();
+    mouseEvent.globalDisplayX = globalDisplayLocation_.GetX();
+    mouseEvent.globalDisplayY = globalDisplayLocation_.GetY();
+    mouseEvent.button = button_;
+    mouseEvent.action = action_;
+    mouseEvent.screenX = screenLocation_.GetX();
+    mouseEvent.screenY = screenLocation_.GetY();
+    mouseEvent.rawDeltaX = rawDeltaX_;
+    mouseEvent.rawDeltaY = rawDeltaY_;
+    mouseEvent.pressedKeyCodes_ = GetPressedKeyCodes();
+    mouseEvent.pressedButtonsArray = pressedButtonsArray_;
+    return mouseEvent;
+}
 } // namespace OHOS::Ace

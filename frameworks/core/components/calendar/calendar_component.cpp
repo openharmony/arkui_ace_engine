@@ -16,12 +16,14 @@
 #include "core/components/calendar/calendar_component.h"
 
 #include "base/i18n/localization.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/button/render_button.h"
 #include "core/components/calendar/calendar_element.h"
 #include "core/components/calendar/render_calendar.h"
 #include "core/components/display/display_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/padding/padding_component.h"
+#include "compatible/components/swiper/swiper_modifier.h"
 
 namespace OHOS::Ace {
 namespace {
@@ -281,6 +283,18 @@ void CalendarController::UpdateTitle(const CalendarDay& today)
 
 CalendarComponent::CalendarComponent(const ComposeId& id, const std::string& name) : ComposedComponent(id, name) {}
 
+const ArkUISwiperModifierCompatible* GetSwiperComponentModifier()
+{
+    static const ArkUISwiperModifierCompatible* swiperModifier_ = nullptr;
+    if (swiperModifier_) {
+        return swiperModifier_;
+    }
+    auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("swiper");
+    CHECK_NULL_RETURN(loader, nullptr);
+    swiperModifier_ = reinterpret_cast<const ArkUISwiperModifierCompatible*>(loader->GetCustomModifier());
+    return swiperModifier_;
+}
+
 RefPtr<Component> CalendarComponent::Build(
     const WeakPtr<PipelineContext>& pipelineContext, const RefPtr<CalendarController>& calendarController)
 {
@@ -312,31 +326,33 @@ RefPtr<Component> CalendarComponent::Build(
         display->SetOpacity(MAX_OPACITY);
         monthChildren.emplace_back(display);
     }
+    auto* modifier = GetSwiperComponentModifier();
     if (!swiperContainer_) {
-        swiperContainer_ = AceType::MakeRefPtr<SwiperComponent>(monthChildren, false);
+        swiperContainer_ = modifier->createSwiperComponent(monthChildren);
     }
-    swiperContainer_->SetAxis(axis_);
-    swiperContainer_->SetIndex(TODAY_MONTH_INDEX_OF_CONTAINER);
-    swiperContainer_->SetTextDirection(direction);
-    swiperContainer_->SetSlideContinue(true);
-    calendarController_->SetSwiperController(swiperContainer_->GetSwiperController());
-    swiperContainer_->SetMoveCallback([controller = WeakPtr<CalendarController>(calendarController_)](int32_t index) {
+    modifier->setAxis(swiperContainer_, axis_);
+    modifier->setIndex(swiperContainer_, TODAY_MONTH_INDEX_OF_CONTAINER);
+    modifier->setDirection(swiperContainer_, direction);
+    modifier->setSlideContinue(swiperContainer_, true);
+    calendarController_->SetSwiperController(modifier->getSwiperController(swiperContainer_));
+    auto moveCallBack = [controller = WeakPtr<CalendarController>(calendarController_)](int32_t index) {
         auto calendarController = controller.Upgrade();
         if (calendarController) {
             calendarController->SetHasMoved(true);
             calendarController->RequestMonthData(index);
         }
-    });
+    };
+    modifier->setMoveCallback(swiperContainer_, moveCallBack);
     if (type_ == CalendarType::SIMPLE) {
-        swiperContainer_->SetDisabledStatus(true);
+        modifier->setDisabledStatus(swiperContainer_, true);
     }
     if (!needSlide_) {
-        swiperContainer_->SetLoop(false);
-        swiperContainer_->DisableSwipe(true);
-        swiperContainer_->SetDisableRotation(true);
+        modifier->setLoop(swiperContainer_, false);
+        modifier->disableSwipe(swiperContainer_, true);
+        modifier->setDisableRotation(swiperContainer_, true);
     }
     if (!cardCalendar_) {
-        return swiperContainer_;
+        return modifier->updateSwiperComponent(swiperContainer_);
     } else {
         RefPtr<ColumnComponent> colComponent;
         BuildCardCalendarTitle(colComponent);

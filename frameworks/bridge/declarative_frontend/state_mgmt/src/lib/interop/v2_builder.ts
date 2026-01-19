@@ -36,9 +36,6 @@ class BuilderViewV2 extends ViewV2 {
     static getEntryName(): string {
         return 'BuilderViewV2';
     }
-    public getRecycleDump(): string {
-        return '';
-    }
 }
 
 function createCompatibleNodeWithFuncVoid(fn: (() => void) | Object, elmtId: number): ViewV2 {

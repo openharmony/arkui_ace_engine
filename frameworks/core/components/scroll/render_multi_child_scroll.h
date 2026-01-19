@@ -16,15 +16,15 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_RENDER_MULTI_CHILD_SCROLL_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_SCROLL_RENDER_MULTI_CHILD_SCROLL_H
 
+#include "compatible/components/list/list_component.h"
+#include "compatible/components/list/render_list.h"
 #include "core/common/vibrator/vibrator.h"
 #include "core/components/common/rotation/rotation_node.h"
-#include "core/components/list/list_component.h"
-#include "core/components/list/render_list.h"
 #include "core/components/scroll/render_scroll.h"
 
 namespace OHOS::Ace {
 
-class RenderMultiChildScroll : public RenderScroll, public RotationNode {
+class ACE_FORCE_EXPORT RenderMultiChildScroll : public RenderScroll, public RotationNode {
     DECLARE_ACE_TYPE(RenderMultiChildScroll, RenderScroll, RotationNode);
 
 public:

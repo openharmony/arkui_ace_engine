@@ -19,14 +19,17 @@ namespace OHOS::Ace::NG {
 
 RefPtr<NGGestureRecognizer> SearchGestureEventHub::PackInnerRecognizer(
     const Offset& offset, std::list<RefPtr<NGGestureRecognizer>>& innerRecognizers, int32_t touchId,
-    const RefPtr<TargetComponent>& targetComponent)
+    int32_t originalId, const RefPtr<TargetComponent>& targetComponent)
 {
-    auto recognizer = GestureEventHub::PackInnerRecognizer(offset, innerRecognizers, touchId, targetComponent);
+    auto host = GetFrameNode();
+    ACE_UINODE_TRACE(host);
+    auto recognizer = GestureEventHub::PackInnerRecognizer(
+        offset, innerRecognizers, touchId, originalId, targetComponent);
     auto clickEventActuator = GetUserClickEventActuator();
     CHECK_NULL_RETURN(clickEventActuator, recognizer);
     auto clickRecognizer = clickEventActuator->GetClickRecognizer();
     CHECK_NULL_RETURN(clickRecognizer, recognizer);
-    clickRecognizer->BeginReferee(touchId, true);
+    clickRecognizer->BeginReferee(touchId, originalId, true);
     std::list<RefPtr<NGGestureRecognizer>> innerRecognizersList;
     innerRecognizersList.push_back(recognizer);
     innerRecognizersList.push_back(clickRecognizer);
@@ -36,8 +39,7 @@ RefPtr<NGGestureRecognizer> SearchGestureEventHub::PackInnerRecognizer(
         innerParallelRecognizer_->AddChildren(innerRecognizersList);
     }
     innerParallelRecognizer_->SetCoordinateOffset(offset);
-    innerParallelRecognizer_->BeginReferee(touchId);
-    auto host = GetFrameNode();
+    innerParallelRecognizer_->BeginReferee(touchId, originalId);
     innerParallelRecognizer_->AttachFrameNode(WeakPtr<FrameNode>(host));
     innerParallelRecognizer_->SetTargetComponent(targetComponent);
     return innerParallelRecognizer_;

@@ -36,6 +36,7 @@
 #include "base/utils/utils.h"
 #include "base/perfmonitor/perf_monitor.h"
 #include "core/accessibility/accessibility_manager.h"
+#include "core/components_ng/pattern/web/web_agent_event_reporter.h"
 #include "core/components_ng/render/detached_rs_node_manager.h"
 #include "core/components/container_modal/container_modal_constants.h"
 #include "core/components/web/render_web.h"
@@ -833,6 +834,9 @@ void ContextMenuResultOhos::PasteAndMatchStyle() const
 
 void ContextMenuResultOhos::RequestPasswordAutoFill() const
 {
+    if (IS_CALLING_FROM_M114()) {
+        return;
+    }
     if (callback_) {
         callback_->Continue(CI_REQUEST_AUTOFILL, EF_NONE);
     }
@@ -3057,7 +3061,7 @@ void WebDelegate::InitWebViewWithWindow()
                 std::make_shared<OHOS::NWeb::NWebEngineInitArgsImpl>();
             std::string app_path = GetDataPath();
             if (!app_path.empty()) {
-                initArgs->AddArg(std::string("--user-data-dir=").append(app_path));
+                initArgs->AddArg(std::string("--arkweb-app-data-dir=").append(app_path));
             }
 
             delegate->window_ = delegate->CreateWindow();
@@ -3099,6 +3103,11 @@ void WebDelegate::InitWebViewWithWindow()
             auto findListenerImpl = std::make_shared<FindListenerImpl>();
             findListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->PutFindCallback(findListenerImpl);
+
+            // set agentClientImpl
+            auto agentClientImpl = std::make_shared<WebAgentClientImpl>();
+            agentClientImpl->SetWebDelegate(weak);
+            delegate->nweb_->SetNWebAgentHandler(agentClientImpl);
 
             auto spanstringConvertHtmlImpl = std::make_shared<SpanstringConvertHtmlImpl>(Container::CurrentId());
             spanstringConvertHtmlImpl->SetWebDelegate(weak);
@@ -3531,7 +3540,7 @@ void WebDelegate::InitWebViewWithSurface()
             CHECK_NULL_VOID(delegate);
             std::shared_ptr<OHOS::NWeb::NWebEngineInitArgsImpl> initArgs =
                 std::make_shared<OHOS::NWeb::NWebEngineInitArgsImpl>();
-            initArgs->AddArg(std::string("--user-data-dir=").append(delegate->bundleDataPath_));
+            initArgs->AddArg(std::string("--arkweb-app-data-dir=").append(delegate->bundleDataPath_));
             initArgs->AddArg(std::string("--bundle-installation-dir=").append(delegate->bundlePath_));
             initArgs->AddArg(std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
                     "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
@@ -3603,6 +3612,10 @@ void WebDelegate::InitWebViewWithSurface()
             downloadListenerImpl->SetWebDelegate(weak);
             delegate->nweb_->SetNWebHandler(nweb_handler);
             delegate->nweb_->PutDownloadCallback(downloadListenerImpl);
+            // set aiClientImpl
+            auto agentClientImpl = std::make_shared<WebAgentClientImpl>();
+            agentClientImpl->SetWebDelegate(weak);
+            delegate->nweb_->SetNWebAgentHandler(agentClientImpl);
 #ifdef OHOS_STANDARD_SYSTEM
             auto screenLockCallback = std::make_shared<NWebScreenLockCallbackImpl>(context);
             delegate->nweb_->RegisterScreenLockFunction(Container::CurrentId(), screenLockCallback);
@@ -4018,6 +4031,14 @@ void WebDelegate::UpdateCacheMode(const WebCacheMode& mode)
 std::shared_ptr<OHOS::NWeb::NWeb> WebDelegate::GetNweb()
 {
     return nweb_;
+}
+
+std::shared_ptr<OHOS::NWeb::NWebAgentManager> WebDelegate::GetNWebAgentManager()
+{
+    if (!nweb_) {
+        return nullptr;
+    }
+    return nweb_->GetAgentManager();
 }
 
 bool WebDelegate::GetForceDarkMode()
@@ -6442,9 +6463,6 @@ void WebDelegate::RemoveSnapshotFrameNode(int removeDelayTime, bool isAnimate)
 
 void WebDelegate::CreateSnapshotFrameNode(const std::string& snapshotPath, uint32_t width, uint32_t height)
 {
-    if (snapshotPath.empty()) {
-        return;
-    }
     TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::CreateSnapshotFrameNode");
     auto context = context_.Upgrade();
     CHECK_NULL_VOID(context);
@@ -6499,6 +6517,13 @@ void WebDelegate::RemoveSnapshotFrameNodeIfNeeded()
         TAG_LOGD(AceLogTag::ACE_WEB, "blankless RemoveSnapshotFrameNodeIfNeeded");
         RemoveSnapshotFrameNode(0);
     }
+}
+
+void WebDelegate::CallBlanklessCallback(int32_t state, const std::string& reason)
+{
+    CHECK_NULL_VOID(nweb_);
+    TAG_LOGD(AceLogTag::ACE_WEB, "WebDelegate::CallBlanklessCallback");
+    nweb_->CallExecuteBlanklessCallback(state, reason);
 }
 
 bool WebDelegate::OnHandleInterceptLoading(std::shared_ptr<OHOS::NWeb::NWebUrlResourceRequest> request)
@@ -7332,6 +7357,7 @@ void WebDelegate::HandleAccessibilityHoverEvent(
     CHECK_NULL_VOID(nweb_);
     int32_t x = point.GetX();
     int32_t y = point.GetY();
+    bool isHoverEnter = (eventType != NG::AccessibilityHoverEventType::EXIT);
     std::shared_lock<std::shared_mutex> readLock(embedDataInfoMutex_);
     for (auto iter = embedDataInfo_.begin(); iter != embedDataInfo_.end(); iter++) {
         std::shared_ptr<OHOS::NWeb::NWebNativeEmbedDataInfo> dataInfo = iter->second;
@@ -7360,10 +7386,12 @@ void WebDelegate::HandleAccessibilityHoverEvent(
             auto accessibilityManagerNG = pipeline->GetAccessibilityManagerNG();
             CHECK_NULL_VOID(accessibilityManagerNG);
             accessibilityManagerNG->HandleAccessibilityHoverEventBySurfaceId(dataInfo->GetSurfaceId(), param);
+            if (!isHoverEnter) {
+                nweb_->SendAccessibilityHoverEventV2(x, y, isHoverEnter);
+            }
             return;
         }
     }
-    bool isHoverEnter = (eventType != NG::AccessibilityHoverEventType::EXIT);
     nweb_->SendAccessibilityHoverEventV2(x, y, isHoverEnter);
 }
 
@@ -8798,6 +8826,15 @@ std::vector<int8_t> WebDelegate::GetWordSelection(const std::string& text, int8_
     return webPattern->GetWordSelection(text, offset);
 }
 
+void WebDelegate::ReportEventJson(const std::string& jsonString)
+{
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto reporter = webPattern->GetAgentEventReporter();
+    CHECK_NULL_VOID(reporter);
+    reporter->AddEvent(jsonString);
+}
+
 void WebDelegate::NotifyForNextTouchEvent()
 {
     ACE_DCHECK(nweb_ != nullptr);
@@ -9533,21 +9570,23 @@ std::string WebDelegate::GetLastSelectionText() const
     return lastSelectionText_;
 }
 
-void WebDelegate::OnTextSelectionChange(const std::string& selectionText, bool isFromOverlay)
+void WebDelegate::OnTextSelectionChange(const std::string& selectionText)
 {
     CHECK_NULL_VOID(taskExecutor_);
     auto webPattern = webPattern_.Upgrade();
     CHECK_NULL_VOID(webPattern);
-    if (lastSelectionText_ == selectionText && !isFromOverlay) {
-        return;
-    }
     lastSelectionText_ = selectionText;
-    if (webPattern->IsShowHandle() && !isFromOverlay) {
+    bool selectionChanged = (lastPostSelectionText_ != selectionText);
+    if (!selectionChanged) {
         return;
     }
     if (webPattern->IsTextSelectionEnable()) {
         return;
     }
+    if (!selectionText.empty() && selectionChanged) {
+        webPattern->UpdateTextSelectionHolderId();
+    }
+    lastPostSelectionText_ = selectionText;
     taskExecutor_->PostTask(
         [weak = WeakClaim(this), selectionText]() {
             TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnTextSelectionChange, fire event task");
@@ -9555,6 +9594,7 @@ void WebDelegate::OnTextSelectionChange(const std::string& selectionText, bool i
             CHECK_NULL_VOID(delegate);
             auto webPattern = delegate->webPattern_.Upgrade();
             CHECK_NULL_VOID(webPattern);
+            webPattern->ReportSelectedText();
             auto webEventHub = webPattern->GetWebEventHub();
             CHECK_NULL_VOID(webEventHub);
             webEventHub->FireOnTextSelectionChangeEvent(std::make_shared<TextSelectionChangedEvent>(selectionText));
@@ -9695,6 +9735,17 @@ void WebDelegate::OnPdfLoadEvent(int32_t result, const std::string& url)
             webEventHub->FireOnPdfLoadEvent(std::make_shared<PdfLoadEvent>(result, url));
         },
         TaskExecutor::TaskType::JS, "ArkUIWebPdfLoadEvent");
+}
+
+void WebDelegate::OnMediaCastEnter()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDelegate::OnMediaCastEnter");
+    auto webPattern = webPattern_.Upgrade();
+    CHECK_NULL_VOID(webPattern);
+    auto onMediaCastEnterCallback = webPattern->GetOnMediaCastEnterCallback();
+    if (onMediaCastEnterCallback) {
+        onMediaCastEnterCallback();
+    }
 }
 
 void WebDelegate::SetForceEnableZoom(bool isEnabled)

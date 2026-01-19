@@ -62,6 +62,7 @@ void JsHoverFunction::HoverExecute(bool isHover, HoverInfo& hoverInfo)
     hoverObj->Wrap<HoverInfo>(&hoverInfo);
     JSRef<JSVal> hoverVal = JSRef<JSObject>::Cast(hoverObj);
     JSRef<JSVal> params[] = { isHoverParam, hoverVal };
+    ACE_BENCH_MARK_TRACE("OnHoverEvent_end isHover:%d", isHover);
     JsFunction::ExecuteJS((sizeof(params) / sizeof(params[0])), params);
 }
 

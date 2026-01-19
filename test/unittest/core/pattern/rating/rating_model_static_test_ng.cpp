@@ -187,4 +187,100 @@ HWTEST_F(RatingStaticTestNg, RatingStaticTestNg003, TestSize.Level1)
     EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(0.0), RATING_SCORE_3);
     EXPECT_EQ(ratingLayoutrProperty->GetIndicator().value_or(false), RATING_INDICATOR);
 }
+
+/**
+ * @tc.name: RatingStaticTestNg004
+ * @tc.desc: test rating SetOnChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingStaticTestNg, RatingStaticTestNg004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rating frameNode.
+     */
+    auto node = RatingModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::RATING_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create rating paintProperty.
+     */
+    auto ratingRenderProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
+    ASSERT_NE(ratingRenderProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test SetOnChange.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    std::string unknownRatingScore;
+    auto onChange = [&unknownRatingScore](const std::string& ratingScore) { unknownRatingScore = ratingScore; };
+    RatingModelStatic::SetOnChange(frameNode, onChange);
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_NE(eventHub->changeEvent_, nullptr);
+}
+
+/**
+ * @tc.name: RatingStaticTestNg005
+ * @tc.desc: test rating SetOnChangeEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingStaticTestNg, RatingStaticTestNg005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rating frameNode.
+     */
+    auto node = RatingModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::RATING_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create rating paintProperty.
+     */
+    auto ratingRenderProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
+    ASSERT_NE(ratingRenderProperty, nullptr);
+
+    /**
+     * @tc.steps: step3. test SetOnChangeEvent.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    auto onChange = [](const std::string& ratingScore) { EXPECT_EQ(ratingScore, "1"); };
+    RatingModelStatic::SetOnChangeEvent(frameNode, onChange);
+    auto eventHub = frameNode->GetEventHub<RatingEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    EXPECT_NE(eventHub->indexChangeEvent_, nullptr);
+}
+
+/**
+ * @tc.name: RatingStaticTestNg006
+ * @tc.desc: test rating TriggerChange.
+ * @tc.type: FUNC
+ */
+HWTEST_F(RatingStaticTestNg, RatingStaticTestNg006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create rating frameNode.
+     */
+    auto node = RatingModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
+    ASSERT_NE(node, nullptr);
+    EXPECT_EQ(node->GetTag(), V2::RATING_ETS_TAG);
+    auto frameNode = AceType::RawPtr(node);
+    ASSERT_NE(frameNode, nullptr);
+    /**
+     * @tc.steps: step2. create rating paintProperty.
+     */
+    auto ratingLayoutrProperty = frameNode->GetLayoutProperty<RatingLayoutProperty>();
+    ASSERT_NE(ratingLayoutrProperty, nullptr);
+    auto ratingRenderProperty = frameNode->GetPaintProperty<RatingRenderProperty>();
+    ASSERT_NE(ratingRenderProperty, nullptr);
+    /**
+     * @tc.steps: step3. test TriggerChange.
+     * @tc.expected: step3. the property value meet expectations.
+     */
+    double ratingValue = 0.0;
+    RatingModelStatic::TriggerChange(frameNode, ratingValue);
+    EXPECT_EQ(ratingRenderProperty->GetRatingScore().value_or(0.0), 0.0);
+}
 } // namespace OHOS::Ace::NG

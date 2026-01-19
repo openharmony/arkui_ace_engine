@@ -794,6 +794,11 @@ float WaterFlowLayoutSW::MeasureChild(int32_t idx, size_t lane, bool forward) co
         child->SetActive(false);
     }
     const float res = child->GetGeometryNode()->GetMarginFrameSize().MainSize(info_->axis_);
+    if (std::isnan(res)) {
+        TAG_LOGW(AceLogTag::ACE_WATERFLOW, "Measured NaN height for index %{public}d", idx);
+        info_->CacheItemHeight(idx, 0.0f);
+        return 0.0f;
+    }
     info_->CacheItemHeight(idx, res);
     return res;
 }

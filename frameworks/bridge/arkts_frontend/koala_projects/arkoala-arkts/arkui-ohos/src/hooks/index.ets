@@ -46,9 +46,10 @@ import { default as EventHub } from "application.EventHub";
 import { default as UIAbilityContext } from "application.UIAbilityContext";
 import { CommonMethod, StateStyles, ArkCommonMethodComponent, ArkCommonMethodPeer, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent, DragPreviewOptions, DragInteractionOptions, UniformDataType, DragEventInternal, FunctionKey, ModifierKey } from "#generated";
 import { CommonMethodModifier } from "../CommonMethodModifier"
+import { ModifierState } from '../CommonModifier';
 import { AnimateParam } from "#generated";
 import { GestureModifier } from "#generated";
-import { CanvasRenderer, ImageData, OffscreenCanvas, RenderingContextSettings, CanvasRenderingContext2D, OffscreenCanvasRenderingContext2D, VoidCallback } from "#generated";
+import { CanvasRenderer, ImageData, OffscreenCanvas, RenderingContextSettings, CanvasRenderingContext2D, OffscreenCanvasRenderingContext2D, VoidCallback, } from "#generated";
 import { pointer } from "@koalaui/interop";
 import { ArkUIAniModule } from "arkui.ani"
 import { InteropNativeModule } from "@koalaui/interop"
@@ -59,10 +60,12 @@ import { PageMapBuilder } from "../component/builder";
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
 import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkImagePeer, ImageErrorCallback, ArkTabsComponent } from "#generated";
 import { ArkWaterFlowComponent, WaterFlowOptions } from '#generated';
+import { ArkListItemGroupComponent, ListItemGroupOptions } from '#generated';
+import { ListItemGroupHandWritten } from './ListItemGroupHandWritten';
 import { ImageOpsHandWritten } from "./ImageOpsHandWritten";
 import { TabsOpsHandWritten } from "./TabsOpsHandWritten";
 import { WaterFlowHandWritten } from './WaterFlowHandWritten';
-import { ArkCanvasComponent, CanvasRenderingContext2D, DrawingRenderingContext } from "#generated";
+import { ArkCanvasComponent, CanvasRenderingContext2D, DrawingRenderingContext, CanvasParams } from "#generated";
 import { ArkVideoComponent, ArkVideoPeer, VideoOptions } from "#generated";
 import { ArkXComponentComponent, XComponentOptions, XComponentParameters, NativeXComponentParameters, XComponentController, ImageAnalyzerConfig } from "#generated";
 import { CanvasOpsHandWritten } from "./CanvasOpsHandWritten";
@@ -84,6 +87,8 @@ import { WebHandWritten } from "./WebHandWritten";
 import { ArkSaveButtonComponent, ArkSaveButtonPeer, SaveButtonCallback, ArkPasteButtonComponent, ArkPasteButtonPeer, PasteButtonCallback } from '#generated';
 import { SaveButtonOpsHandWritten } from './SaveButtonOpsHandWritten';
 import { PasteButtonOpsHandWritten } from './PasteButtonOpsHandWritten';
+import { ArkGaugeComponent, ArkGaugePeer, GaugeIndicatorOptions } from "#generated";
+import { GaugeExtender } from "#generated"
 
 export function hookId(component: object, value?: string) {}
 
@@ -93,6 +98,12 @@ export function hookKeyboardShortcut(peer: ArkCommonMethodPeer, shortcuts: Array
   if (shortcuts && shortcuts.length > 0) {
     for (let i = 0; i < shortcuts.length; i++) {
       const shortcut = shortcuts[i];
+      if (shortcut.value !== undefined && typeof shortcut.value === 'string') {
+        const strValue = shortcut.value as string;
+        if (strValue.length > 1) {
+            continue;
+        }
+      }
       peer.setKeyboardShortcutAttribute(
         shortcut.value as string | FunctionKey | undefined,
         shortcut.keys as Array<ModifierKey> | undefined,
@@ -165,13 +176,14 @@ export function hookGestureModifier(commonMethod: ArkCommonMethodComponent, valu
     value_casted.applyGesture(gestureEvent as UIGestureEvent);
 }
 
-export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPeer, value: Array<UniformDataType> | null | Array<string> | undefined) : void {
+export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPeer | ArkBaseNode,
+  value: Array<UniformDataType> | null | Array<string> | undefined) : void {
   if (!node) {
       return
   }
   if (value === null) {
-    if (node instanceof ArkCommonMethodComponent) {
-      let nodeComponent = node as ArkCommonMethodComponent
+    if (node instanceof ArkCommonMethodComponent || node instanceof ArkBaseNode) {
+      let nodeComponent = node as (ArkCommonMethodComponent | ArkBaseNode)
       ArkUIAniModule._Drag_Set_AllowDrop_Null(nodeComponent.getPeer().getPeerPtr())
     } else if (node instanceof ArkCommonMethodPeer) {
       let nodePeer = node as ArkCommonMethodPeer
@@ -180,8 +192,8 @@ export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPe
     return
   }
   let array = value as (Array<UniformDataType> | Array<string> | undefined)
-  if (node instanceof ArkCommonMethodComponent) {
-    let nodeComponent = node as ArkCommonMethodComponent
+  if (node instanceof ArkCommonMethodComponent || node instanceof ArkBaseNode) {
+    let nodeComponent = node as (ArkCommonMethodComponent | ArkBaseNode)
     ArkUIAniModule._Drag_Set_AllowDrop(nodeComponent.getPeer().getPeerPtr(), array)
   } else if (node instanceof ArkCommonMethodPeer) {
     let nodePeer = node as ArkCommonMethodPeer
@@ -189,9 +201,10 @@ export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPe
   }
 }
 
-export function hookDragPreviewOptions(node: ArkCommonMethodComponent | ArkCommonMethodPeer, value: DragPreviewOptions | undefined, options?: DragInteractionOptions) {
-  if (node instanceof ArkCommonMethodComponent) {
-    let nodeComponent = node as ArkCommonMethodComponent
+export function hookDragPreviewOptions(node: ArkCommonMethodComponent | ArkCommonMethodPeer | ArkBaseNode,
+  value: DragPreviewOptions | undefined, options?: DragInteractionOptions) {
+  if (node instanceof ArkCommonMethodComponent || node instanceof ArkBaseNode) {
+    let nodeComponent = node as (ArkCommonMethodComponent | ArkBaseNode)
     ArkUIAniModule._Drag_Set_DragPreviewOptions(nodeComponent.getPeer().getPeerPtr(), value, options)
   } else if (node instanceof ArkCommonMethodPeer) {
     let nodePeer = node as ArkCommonMethodPeer
@@ -208,10 +221,34 @@ export function hookDragEventGetSummary(event: DragEventInternal) : unifiedDataC
   return ArkUIAniModule._DragEvent_Get_Summary(event.peer!.ptr)
 }
 
+export function hookDragEventSetDataLoadParams(event: DragEventInternal, dataLoadParams: unifiedDataChannel.DataLoadParams) {
+  ArkUIAniModule._DragEvent_Set_Data_LoadParams(event.peer!.ptr, dataLoadParams)
+}
+
+export function hookEnableInternalDropAnimation(event: DragEventInternal, configuration: string) {
+  return ArkUIAniModule._DragEvent_Enable_InternalDropAnimation(event.peer!.ptr, configuration)
+}
+
+class StateStyleModifierState extends ModifierState {
+    fireChange(): void {
+        return;
+    }
+}
+
+class StateStyleCommonMethodModifier extends CommonMethodModifier {
+    constructor() {
+        super()
+        this._state = new StateStyleModifierState();
+    }
+}
+
 export function hookStateStyleImpl(
   receiver: ArkCommonMethodComponent,
   value: StateStyles | undefined
 ) {
+    if (value === undefined) {
+        return;
+    }
     const UI_STATE_NORMAL = 0;
     const UI_STATE_PRESSED = 1;
     const UI_STATE_FOCUSED = 1 << 1;
@@ -223,6 +260,9 @@ export function hookStateStyleImpl(
         curState |= UI_STATE_NORMAL;
     }
     if (value?.pressed) {
+        curState |= UI_STATE_PRESSED;
+    }
+    if (value?.clicked) {
         curState |= UI_STATE_PRESSED;
     }
     if (value?.focused) {
@@ -240,7 +280,7 @@ export function hookStateStyleImpl(
       return;
     }
 
-    let cm = new CommonMethodModifier();
+    let cm = new StateStyleCommonMethodModifier();
 
     if (currentState.value === UI_STATE_NORMAL) {
         value?.normal?.(cm)
@@ -412,25 +452,33 @@ export function hookDrawModifier(arkComponent: ArkCommonMethodComponent, value: 
   if (value === undefined) {
     return;
   }
-  let classType: ClassType = (Type.of(value) as ClassType);
-  let numberOfFun = classType.getMethodsNum();
   let flag: int32 = 0;
-  for (let i = 0; i < numberOfFun; i++) {
-    if (classType.getMethod(i)?.getName() === "drawFront") {
-      flag |= (1 << 0);
-    } else if (classType.getMethod(i)?.getName() === "drawContent") {
-      flag |= (1 << 1);
-    } else if (classType.getMethod(i)?.getName() === "drawBehind") {
-      flag |= (1 << 2);
-    } else if (classType.getMethod(i)?.getName() === "drawForeground") {
-      flag |= (1 << 3);
-    } else if (classType.getMethod(i)?.getName() === 'drawOverlay') {
-      flag |= (1 << 4);
+  let classType = Class.of(value);
+  for (let cls: Class | undefined = classType; cls != undefined; cls = cls!.getSuper()) {
+    const clsMethods = cls!.getInstanceMethods();
+    for (const method of clsMethods) {
+      let name = method.getName()
+      if (name == "drawFront") {
+        flag |= (1 << 0);
+      }
+      if (name == "drawContent") {
+        flag |= (1 << 1);
+      }
+      if (name == "drawBehind") {
+        flag |= (1 << 2);
+      }
+      if (name == "drawForeground") {
+        flag |= (1 << 3);
+      }
+      if (name == "drawOverlay") {
+        flag |= (1 << 4);
+      }
     }
-  }
-  if (flag) {
-    ArkUIAniModule._SetDrawModifier(arkComponent.getPeer().getPeerPtr(), flag, value!);
-    value.weakRefOfPeerNode = new WeakRef<PeerNode>(arkComponent.getPeer());
+    if (flag) {
+      ArkUIAniModule._SetDrawModifier(arkComponent.getPeer().getPeerPtr(), flag, value!);
+      value.weakRefOfPeerNode = new WeakRef<PeerNode>(arkComponent.getPeer());
+      break;
+    }
   }
 }
 
@@ -509,7 +557,7 @@ export function hookCreateImageData(peerPtr: CanvasRenderer, sw: number, sh: num
     const arrayBuffer: ArrayBuffer = new ArrayBuffer(length)
     const uint8View = new Uint8Array(arrayBuffer)
     for (let i = 0; i < length; i++) {
-        uint8View[i] = 0xffffffff
+        uint8View[i] = 0xffffffff.toInt()
     }
     const data: Uint8ClampedArray = new Uint8ClampedArray(arrayBuffer)
     const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)
@@ -522,7 +570,7 @@ export function hookCreateImageData(peerPtr: CanvasRenderer, imagedata: ImageDat
     const arrayBuffer: ArrayBuffer = new ArrayBuffer(length)
     const uint8View = new Uint8Array(arrayBuffer)
     for (let i = 0; i < length; i++) {
-        uint8View[i] = 0xffffffff
+        uint8View[i] = 0xffffffff.toInt()
     }
     const data: Uint8ClampedArray = new Uint8ClampedArray(arrayBuffer)
     const resObj: ImageData = new ImageData(width_cast, height_cast, data, LengthMetricsUnit.PX)
@@ -642,6 +690,10 @@ export function hookSetCanvasOptions(component: ArkCanvasComponent,
   CanvasOpsHandWritten.hookSetCanvasOptionsImpl(component, context, imageAIOptions);
 }
 
+export function hookSetCanvasOptions(component: ArkCanvasComponent, params: CanvasParams): void {
+  CanvasOpsHandWritten.hookSetCanvasOptionsImpl(component, params);
+}
+
 export function hookCanvasStartImageAnalyzer(
   context: CanvasRenderingContext2D, config: ImageAnalyzerConfig): Promise<void> {
   return CanvasOpsHandWritten.hookCanvasStartImageAnalyzerImpl(context, config);
@@ -731,6 +783,13 @@ export function hookWaterFlowOptionsImpl(node: ArkWaterFlowComponent, options: W
   WaterFlowHandWritten.hookWaterFlowOptionsImpl(node, options)
 }
 
+export function hookListItemGroupOptionsImpl(
+    node: ArkListItemGroupComponent,
+    options: ListItemGroupOptions | undefined
+): void {
+    ListItemGroupHandWritten.hookListItemGroupOptionsImpl(node, options)
+}
+
 export function hookTextPickerDivider(receiver: ArkTextPickerComponent | ArkTextPickerPeer,
   value: DividerOptions | null | undefined): void {
   const peer: ArkTextPickerPeer =
@@ -780,4 +839,28 @@ export function hookSaveButtonOnClick(
 export function hookPasteButtonOnClick(
   receiver: ArkPasteButtonComponent | ArkPasteButtonPeer, value: PasteButtonCallback | undefined): void {
     PasteButtonOpsHandWritten.hookPasteButtonOnClickImpl(receiver, value);
+}
+
+export function hookGaugeIndicator(receiver: ArkGaugeComponent | ArkGaugePeer,
+  value: GaugeIndicatorOptions | null | undefined): void {
+
+  const gaugePeer: ArkGaugePeer =
+    receiver instanceof ArkGaugeComponent ? (receiver as ArkGaugeComponent).getPeer() :
+      (receiver as ArkGaugePeer);
+  if (!gaugePeer) {
+    return;
+  }
+
+  let value_casted: GaugeIndicatorOptions | undefined;
+  if (value === undefined) {
+    value_casted = {
+      icon: undefined,
+      space: undefined
+    }
+  } else if (value === null) {
+    value_casted = undefined;
+  } else {
+    value_casted = value as (GaugeIndicatorOptions | undefined)
+  }
+  GaugeExtender.setIndicator(gaugePeer.peer.ptr, value_casted)
 }

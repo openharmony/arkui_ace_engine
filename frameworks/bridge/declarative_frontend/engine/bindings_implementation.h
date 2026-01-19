@@ -26,6 +26,7 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "frameworks/bridge/common/utils/function_traits.h"
+#include "frameworks/bridge/declarative_frontend/engine/bindings_defines.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
 

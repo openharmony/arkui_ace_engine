@@ -189,6 +189,11 @@ public:
         customAnimationToIndex_ = customAnimationToIndex;
     }
 
+    void SetCustomAnimationPrevIndex(std::optional<int32_t> customAnimationPrevIndex)
+    {
+        customAnimationPrevIndex_ = customAnimationPrevIndex;
+    }
+
     void SetRemoveFromRSTreeIndex(std::optional<int32_t> removeFromRSTreeIndex)
     {
         removeFromRSTreeIndex_ = removeFromRSTreeIndex;
@@ -404,6 +409,7 @@ private:
     std::optional<int32_t> currentJumpIndex_;
     std::optional<int32_t> currentTargetIndex_;
     std::optional<int32_t> customAnimationToIndex_;
+    std::optional<int32_t> customAnimationPrevIndex_;
     std::optional<int32_t> removeFromRSTreeIndex_;
     std::optional<SizeF> leftCaptureSize_ = std::nullopt;
     std::optional<SizeF> rightCaptureSize_ = std::nullopt;

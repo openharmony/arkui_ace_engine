@@ -49,18 +49,23 @@ void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
         CHECK_NULL_VOID(overlay);
         overlay->ShowSelectOverlay(request, hasData);
     };
+    CheckHasPasteData(checkClipboard);
+}
+
+void BaseTextSelectOverlay::CheckHasPasteData(const std::function<void(bool)>& callback)
+{
     auto textBase = hostTextBase_.Upgrade();
     CHECK_NULL_VOID(textBase);
     auto clipboard = textBase->GetClipboard();
     if (clipboard) {
         auto mimeTypes = GetPasteMimeTypes();
         if (!mimeTypes.empty()) {
-            clipboard->HasDataType(checkClipboard, mimeTypes);
+            clipboard->HasDataType(callback, mimeTypes);
             return;
         }
-        clipboard->HasData(checkClipboard);
+        clipboard->HasData(callback);
     } else {
-        checkClipboard(false);
+        callback(false);
     }
 }
 
@@ -159,11 +164,11 @@ void BaseTextSelectOverlay::ShowMenu()
     UpdateOriginalMenuIsShow();
 }
 
-void BaseTextSelectOverlay::HideMenu(bool noAnimation)
+void BaseTextSelectOverlay::HideMenu(bool noAnimation, bool showSubMenu)
 {
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
-    manager->HideOptionMenu(noAnimation);
+    manager->HideOptionMenu(noAnimation, showSubMenu);
     UpdateOriginalMenuIsShow();
 }
 
@@ -1034,10 +1039,11 @@ void BaseTextSelectOverlay::RegisterScrollingListener(const RefPtr<FrameNode> sc
     if (hasRegisterListener_) {
         return;
     }
+    auto host = GetOwner();
+    CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto scrollingNode = scrollableNode;
     if (!scrollingNode) {
-        auto host = GetOwner();
-        CHECK_NULL_VOID(host);
         scrollingNode = host->GetAncestorNodeOfFrame(true);
         while (scrollingNode) {
             if (scrollingNode->GetTag() == V2::SWIPER_ETS_TAG) {
@@ -1350,7 +1356,7 @@ void BaseTextSelectOverlay::HandleOnAutoFill(OptionMenuType type)
     CHECK_NULL_VOID(node && !node->GetIsExtensionMenu());
     TAG_LOGI(AceLogTag::ACE_SELECT_OVERLAY, "HandleOnAutoFill");
     node->SetSubToolbarStatus(SubToolbarStatus::NEEDEXPAND);
-    HideMenu(true);
+    HideMenu(true, true);
 }
 
 void BaseTextSelectOverlay::HandleOnTranslate()

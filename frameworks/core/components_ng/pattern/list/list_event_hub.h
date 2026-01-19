@@ -21,7 +21,7 @@
 #include "core/components/hyperlink/hyperlink_resources.h"
 #include "core/components_ng/base/ui_node.h"
 #include "core/components_ng/pattern/scrollable/scrollable_event_hub.h"
-#include "core/components_v2/list/list_component.h"
+#include "compatible/components/list_v2/list_component.h"
 
 namespace OHOS::Ace::NG {
 constexpr int32_t INVALID_IDX = -1;

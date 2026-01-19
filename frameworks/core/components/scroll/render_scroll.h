@@ -41,7 +41,7 @@ enum class ScrollType {
     SCROLL_TOP,
 };
 
-class RenderScroll : public RenderNode, public RenderRefreshTarget {
+class ACE_FORCE_EXPORT RenderScroll : public RenderNode, public RenderRefreshTarget {
     DECLARE_ACE_TYPE(RenderScroll, RenderNode, RenderRefreshTarget);
 
 public:

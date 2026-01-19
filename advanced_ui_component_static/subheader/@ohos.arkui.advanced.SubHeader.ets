@@ -20,7 +20,7 @@ import {
   ConstraintSizeOptions, TextAttribute, CommonMethod, Rectangle, TextOverflow, KeyType, ClickEvent, TouchEvent, Margin,
   TouchType, HorizontalAlign, FlexDirection, ItemAlign, ButtonOptions, HoverEffect, FlexAlign, VerticalAlign, Image,
   SymbolGlyph, Text, Select, Stack, ForEach, LoadingProgress, Padding, MeasureResult, ButtonType, ButtonStyleMode,
-  CustomLayout
+  CustomLayout, AccessibilityRoleType
 } from '@ohos.arkui.component';
 import { PropRef, State, Provide, Consume } from '@ohos.arkui.stateManagement';
 import { UIContext } from '@ohos.arkui.UIContext';
@@ -129,7 +129,7 @@ class SubHeaderTheme {
   public rightIconColor: ResourceColor = $r('sys.color.icon_primary');
 }
 
-function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): this {
+function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle) {
   this.fontSize(`${getResourceValue('sys.float.Subtitle_S')}fp`);
   this.fontColor(fontStyle?.fontColor ?? $r('sys.color.font_secondary'));
   this.fontWeight(fontStyle?.fontWeight);
@@ -139,7 +139,7 @@ function secondaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): this {
   return this;
 }
 
-function primaryTitleStyles(this: TextAttribute, fontStyle: FontStyle): this {
+function primaryTitleStyles(this: TextAttribute, fontStyle: FontStyle) {
   this.fontSize(`${getResourceValue('sys.float.subheader_title_font_size')}fp`);
   this.fontColor(fontStyle?.fontColor ?? $r('sys.color.font_primary'));
   this.fontWeight(fontStyle?.fontWeight);
@@ -238,6 +238,7 @@ export struct SubHeader {
   @BuilderParam titleBuilder?: () => void;
   @PropRef contentMargin: LocalizedMargin | undefined = undefined;
   @PropRef contentPadding: LocalizedPadding | undefined = undefined;
+  @PropRef titleAccessibilityText: ResourceStr | undefined = undefined;
   subHeaderMargin: LocalizedMargin = {
     start: LengthMetrics.vp(getResourceValue('sys.float.margin_left')),
     end: LengthMetrics.vp(getResourceValue('sys.float.margin_right')),
@@ -370,6 +371,17 @@ export struct SubHeader {
     return true;
   }
 
+  private getTitleAccessibilityText(): string {
+    if (this.select || !this.titleAccessibilityText) {
+      return '';
+    }
+    if (Util.isResourceType(this.titleAccessibilityText)) {
+      return (this.getUIContext().getHostContext() as common.Context).resourceManager
+        .getStringSync((this.titleAccessibilityText as Resource).id);
+    }
+    return this.titleAccessibilityText as string;
+  }
+
   build() {
     if (this.isSuitableAging()) {
       Column() {
@@ -388,8 +400,8 @@ export struct SubHeader {
         } as LocalizedPadding)
         .width('100%')
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        .accessibilityDescription(this.select ? '' :
-          Util.getStringByResource((this.getUIContext().getHostContext() as common.Context), 125834353, ''))
+        .accessibilityText(this.getTitleAccessibilityText())
+        .accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParentAging();
@@ -410,8 +422,8 @@ export struct SubHeader {
         .width('100%')
         .flexShrink(1)
         .accessibilityGroup(this.isLeftAreaAccessibilityGroup())
-        .accessibilityDescription(this.select ? '' :
-          Util.getStringByResource((this.getUIContext().getHostContext() as common.Context), 125834353, ''))
+        .accessibilityText(this.getTitleAccessibilityText())
+        .accessibilityRole(this.select ? undefined : AccessibilityRoleType.TITLE_BAR)
 
         if (this.isRightAreaExists()) {
           this.rightAreaParent();

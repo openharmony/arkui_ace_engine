@@ -1414,4 +1414,22 @@ HWTEST_F(TextTestNgOne, TextContentModifierSetSymbolColor001, TestSize.Level1)
     EXPECT_EQ(resultColors->size(), 1);
     EXPECT_EQ((*resultColors)[0], LinearColor(Color::GREEN));
 }
+
+/**
+ * @tc.name: TextLayoutProperty01
+ * @tc.desc: test text_pattern.h CreateLayoutProperty function
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextTestNgOne, TextLayoutProperty01, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create textFrameNode and textPattern.
+     */
+    auto textFrameNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textFrameNode, nullptr);
+    auto textPattern = textFrameNode->GetPattern<TextPattern>();
+    ASSERT_NE(textPattern, nullptr);
+    RefPtr<LayoutProperty> textLayoutProperty = textPattern->CreateLayoutProperty();
+    ASSERT_NE(textLayoutProperty, nullptr);
+}
 } // namespace OHOS::Ace::NG

@@ -59,6 +59,7 @@ constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
 bool SystemProperties::debugEnabled_ = false;
+bool SystemProperties::eventBenchMarkEnabled_ = false;
 DebugFlags SystemProperties::debugFlags_ = 0;
 bool SystemProperties::containerDeleteFlag_ = false;
 bool SystemProperties::layoutDetectEnabled_ = false;
@@ -106,6 +107,7 @@ bool SystemProperties::syncLoadEnabled_ = true;
 int32_t SystemProperties::formSharedImageCacheThreshold_ = DEFAULT_FORM_SHARED_IMAGE_CACHE_THRESHOLD;
 bool SystemProperties::debugThreadSafeNodeEnable_ = false;
 bool SystemProperties::prebuildInMultiFrameEnabled_ = false;
+std::once_flag SystemProperties::getSysPropertiesFlag_;
 
 bool g_segmentedWaterflow = true;
 bool g_isNeedSymbol = true;
@@ -291,6 +293,11 @@ std::string SystemProperties::GetDebugInspectorId()
     return "N/A";
 }
 
+bool SystemProperties::GetEventBenchMarkEnabled()
+{
+    return false;
+}
+
 double SystemProperties::GetSrollableVelocityScale()
 {
     return 0.0;
@@ -424,5 +431,9 @@ float SystemProperties::GetScrollCoefficients()
 bool SystemProperties::GetTransformEnabled()
 {
     return MockSystemProperties::g_isCompatibleInputTransEnabled;
+}
+
+void SystemProperties::ReadSystemParametersCallOnce()
+{
 }
 } // namespace OHOS::Ace

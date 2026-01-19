@@ -23,7 +23,7 @@
 #include <optional>
 
 #include "display_manager.h"
-#include "dm_common.h"
+
 #include "interfaces/inner_api/ace/arkui_rect.h"
 #include "interfaces/inner_api/ace/viewport_config.h"
 #include "native_engine/native_reference.h"
@@ -638,6 +638,7 @@ public:
     void ProcessColorModeUpdate(
         ResourceConfiguration& resConfig, ConfigurationChange& configurationChange, const ParsedConfig& parsedConfig);
     void CheckForceVsync(const ParsedConfig& parsedConfig);
+    bool GetWhiteListStatus();
     void OnFrontUpdated(const ConfigurationChange& configurationChange, const std::string& configuration);
     void UpdateConfiguration(
         const ParsedConfig& parsedConfig, const std::string& configuration, bool abilityLevel = false);
@@ -895,7 +896,7 @@ public:
     bool GetLastMovingPointerPosition(DragPointerEvent& dragPointerEvent) override;
 
     Rect GetDisplayAvailableRect() const override;
-    
+
     // Get the available rect of the full screen.
     Rect GetFoldExpandAvailableRect() const override;
 

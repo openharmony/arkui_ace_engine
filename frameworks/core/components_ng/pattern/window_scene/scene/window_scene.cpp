@@ -39,7 +39,7 @@ const uint32_t REMOVE_STARTING_WINDOW_TIMEOUT_MS = 5000;
 const int32_t ANIMATION_DURATION = 200;
 const uint32_t REMOVE_SNAPSHOT_WINDOW_DELAY_TIME = 100;
 const uint64_t REMOVE_WINDOW_PRELAUNCH_DELAY_TIME_MS =
-    system::GetIntParameter<int>("persist.sys.window.prelaunchDelayTime", 250);
+    system::GetIntParameter<int>("persist.sys.window.prelaunchDelayTime", 1000);
 std::unordered_map<uint64_t, int> surfaceNodeCountMap_;
 } // namespace
 
@@ -55,6 +55,7 @@ WindowScene::WindowScene(const sptr<Rosen::Session>& session)
     CHECK_NULL_VOID(session_);
     initWindowMode_ = session_->GetWindowMode();
     syncStartingWindow_ = Rosen::SceneSessionManager::GetInstance().IsSyncLoadStartingWindow();
+    dmaReclaimEnabled_ = Rosen::SceneSessionManager::GetInstance().IsDmaReclaimEnabled();
     session_->SetNeedSnapshot(true);
     RegisterLifecycleListener();
     callback_ = [weakThis = WeakClaim(this), weakSession = wptr(session_)]() {
@@ -182,6 +183,7 @@ RefPtr<RosenRenderContext> WindowScene::GetContextByDisableDelegator(bool isAbil
     }
     return AceType::DynamicCast<RosenRenderContext>(appWindow_->GetRenderContext());
 }
+
 void WindowScene::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -224,6 +226,7 @@ void WindowScene::OnAttachToFrameNode()
     RegisterFocusCallback();
     WindowPattern::OnAttachToFrameNode();
     session_->ResetLockedCacheSnapshot();
+    session_->ResetPreloadSnapshot();
 }
 
 void WindowScene::InsertSurfaceNodeId(uint64_t nodeId)
@@ -419,7 +422,7 @@ void WindowScene::BufferAvailableCallback()
             self->session_->SetBufferAvailable(true, true);
         }
         self->session_->EditSessionInfo().isPrelaunch_ = false;
-        self->isPrelaunch_ = false;
+        self->isPrelaunch_.store(false, std::memory_order_release);
         auto surfaceNode = self->session_->GetSurfaceNode();
         bool isWindowSizeEqual = self->IsWindowSizeEqual();
         if (!isWindowSizeEqual || surfaceNode == nullptr || !surfaceNode->IsBufferAvailable()) {
@@ -559,7 +562,7 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
 
         CHECK_NULL_VOID(self->snapshotWindow_);
         self->session_->EditSessionInfo().isPrelaunch_ = false;
-        self->isPrelaunch_ = false;
+        self->isPrelaunch_.store(false, std::memory_order_release);
         if (self->isBlankForSnapshot_) {
             self->SetOpacityAnimation(self->snapshotWindow_);
             TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "blank animation id %{public}d, name %{public}s",
@@ -595,7 +598,7 @@ void WindowScene::BufferAvailableCallbackForSnapshot()
 bool WindowScene::CheckPrelaunchForBufferAvailableCallback(CancelableCallback<void()>& task,
     const std::function<void()>& uiTask)
 {
-    CHECK_EQUAL_RETURN(isPrelaunch_, false, false);
+    CHECK_EQUAL_RETURN(isPrelaunch_.load(std::memory_order_acquire), false, false);
     task.Cancel();
     task.Reset(uiTask);
     auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -645,7 +648,7 @@ void WindowScene::OnActivation()
             if (self->session_->IsPrelaunch()) {
                 TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnActivation CreateBlankWindow");
                 self->CreateBlankWindow(self->startingWindow_);
-                self->isPrelaunch_ = true;
+                self->isPrelaunch_.store(true, std::memory_order_release);
             } else {
                 self->CreateStartingWindow();
             }
@@ -655,7 +658,7 @@ void WindowScene::OnActivation()
             self->session_->GetSessionState() != Rosen::SessionState::STATE_DISCONNECT) {
             auto surfaceNode = self->session_->GetSurfaceNode();
             CHECK_NULL_VOID(surfaceNode);
-            self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
+            self->DelayAddAppWindowForDmaResume(self->session_->GetCallingPid());
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
             CHECK_EQUAL_VOID(isRestart, true);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
@@ -685,7 +688,7 @@ void WindowScene::DisposeSnapshotAndBlankWindow()
     CHECK_NULL_VOID(surfaceNode);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    AddChild(host, appWindow_, appWindowName_, 0);
+    DelayAddAppWindowForDmaResume(session_->GetCallingPid());
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     surfaceNode->SetBufferAvailableCallback(callback_);
     CHECK_EQUAL_VOID(session_->GetSystemConfig().IsPcWindow(), true);
@@ -855,10 +858,7 @@ void WindowScene::OnRemoveBlank()
 
 void WindowScene::OnAddSnapshot()
 {
-    int32_t imageFit = 0;
-    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-        session_->GetPersistentId(), imageFit);
-    auto uiTask = [weakThis = WeakClaim(this), isPersistentImageFit]() {
+    auto uiTask = [weakThis = WeakClaim(this)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         CHECK_NULL_VOID(self->session_);
@@ -870,7 +870,7 @@ void WindowScene::OnAddSnapshot()
                 self->session_->GetPersistentId(), host->GetId());
             return;
         }
-        if (isPersistentImageFit && self->session_->GetSnapshot() == nullptr) {
+        if (self->session_->GetSnapshot() == nullptr) {
             self->CreateSnapshotWindow();
         } else {
             self->CreateSnapshotWindow(self->session_->GetSnapshot());
@@ -890,24 +890,20 @@ void WindowScene::OnAddSnapshot()
 
 void WindowScene::OnRemoveSnapshot()
 {
-    int32_t imageFit = 0;
-    auto isPersistentImageFit = Rosen::SceneSessionManager::GetInstance().GetPersistentImageFit(
-        session_->GetPersistentId(), imageFit);
-    auto uiTask = [weakThis = WeakClaim(this), isPersistentImageFit]() {
+    auto uiTask = [weakThis = WeakClaim(this)]() {
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         CHECK_NULL_VOID(self->session_);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         if (self->snapshotWindow_) {
-            if (isPersistentImageFit) {
-                self->SetSubSessionVisible();
-            }
+            self->SetSubSessionVisible();
             self->AddChild(host, self->appWindow_, self->appWindowName_, 0);
             auto surfaceNode = self->session_->GetSurfaceNode();
             CHECK_NULL_VOID(surfaceNode);
             if (!surfaceNode->IsBufferAvailable()) {
                 TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "OnRemoveSnapshot not IsBufferAvailable");
+                host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
                 surfaceNode->SetBufferAvailableCallback(self->callback_);
                 return;
             }
@@ -971,11 +967,22 @@ void WindowScene::OnPreLoadStartingWindowFinished()
         auto imageLayoutProperty = self->startingWindow_->GetLayoutProperty<ImageLayoutProperty>();
         CHECK_NULL_VOID(imageLayoutProperty);
         const auto& sessionInfo = self->session_->GetSessionInfo();
-        auto preLoadPixelMap = Rosen::SceneSessionManager::GetInstance().GetPreLoadStartingWindow(sessionInfo);
-        CHECK_NULL_VOID(preLoadPixelMap);
-        auto pixelMap = PixelMap::CreatePixelMap(&preLoadPixelMap);
-        auto sourceInfo = ImageSourceInfo(pixelMap);
-        Rosen::SceneSessionManager::GetInstance().RemovePreLoadStartingWindowFromMap(sessionInfo);
+        std::shared_ptr<Media::PixelMap> preloadPixelMap = nullptr;
+        std::pair<std::shared_ptr<uint8_t[]>, size_t> preloadBufferInfo = {nullptr, 0};
+        self->session_->GetPreloadStartingWindow(preloadPixelMap, preloadBufferInfo);
+        ImageSourceInfo sourceInfo;
+        if (preloadPixelMap != nullptr) {
+            auto pixelMap = PixelMap::CreatePixelMap(&preloadPixelMap);
+            sourceInfo = ImageSourceInfo(pixelMap);
+            self->session_->ResetPreloadStartingWindow();
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnPreLoadStartingWindowFinished pixelMap id:%{public}d",
+                self->session_->GetPersistentId());
+        } else if (preloadBufferInfo.first != nullptr && preloadBufferInfo.second > 0) {
+            sourceInfo = ImageSourceInfo(preloadBufferInfo.first, preloadBufferInfo.second);
+            self->session_->ResetPreloadStartingWindow();
+            TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "OnPreLoadStartingWindowFinished buffer id:%{public}d",
+                self->session_->GetPersistentId());
+        }
         imageLayoutProperty->UpdateImageSourceInfo(sourceInfo);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         self->startingWindow_->MarkModifyDone();
@@ -1035,6 +1042,32 @@ void WindowScene::OnRestart()
         std::move(uiTask), "ArkUIWindowSceneRestartApp", TaskExecutor::TaskType::UI);
 }
 
+void WindowScene::OnRemovePrelaunchStartingWindow()
+{
+    auto uiTask = [weakThis = WeakClaim(this)]() {
+        auto self = weakThis.Upgrade();
+        CHECK_NULL_VOID(self);
+        auto host = self->GetHost();
+        CHECK_NULL_VOID(host);
+        ACE_SCOPED_TRACE("WindowScene::OnRemovePrelaunchStartingWindow[id:%d][self:%d][enabled:%d]",
+            self->session_->GetPersistentId(), host->GetId(), self->session_->GetBufferAvailableCallbackEnable());
+
+        auto surfaceNode = self->session_->GetSurfaceNode();
+        CHECK_NULL_VOID(surfaceNode);
+        TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "prelaunch SetBufferAvailableCallback");
+        // bufferavailble callback no delay
+        self->isPrelaunch_.store(false, std::memory_order_release);
+        surfaceNode->SetBufferAvailableCallback(self->callback_);
+    };
+
+    ContainerScope scope(instanceId_);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(pipelineContext);
+    TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "prelaunch OnRemovePrelaunchStartingWindow");
+    pipelineContext->PostAsyncEvent(std::move(uiTask),
+        "ArkUIWindowSceneOnRemovePrelaunchStartingWindow", TaskExecutor::TaskType::UI);
+}
+
 bool WindowScene::IsWindowSizeEqual()
 {
     auto host = GetHost();
@@ -1084,7 +1117,7 @@ bool WindowScene::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     SetSubSessionVisible();
     RemoveChild(host, startingWindow_, startingWindowName_);
     startingWindow_.Reset();
-    AddChild(host, appWindow_, appWindowName_, 0);
+    DelayAddAppWindowForDmaResume(session_->GetCallingPid());
     if (surfaceNode) {
         surfaceNode->SetVisible(false);
     }

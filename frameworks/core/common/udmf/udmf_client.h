@@ -55,6 +55,7 @@ public:
     virtual RefPtr<UnifiedData> TransformUnifiedDataForNative(void* rawData) = 0;
     virtual RefPtr<DataLoadParams> TransformDataLoadParamsForNative(void* rawData) = 0;
     virtual void* TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData) = 0;
+    virtual std::shared_ptr<void> TransformUnifiedDataSharedPtr(RefPtr<UnifiedData>& unifiedDataImpl) = 0;
     virtual napi_value TransformUdmfUnifiedData(RefPtr<UnifiedData>& UnifiedData) = 0;
     virtual napi_value TransformSummary(std::map<std::string, int64_t>& summary) = 0;
     virtual RefPtr<UnifiedData> CreateUnifiedData() = 0;
@@ -96,10 +97,9 @@ public:
     virtual bool GetFileUriEntry(const RefPtr<UnifiedData>& unifiedData, std::vector<std::string>& uri) = 0;
     virtual std::vector<uint8_t> GetSpanStringEntry(const RefPtr<UnifiedData>& unifiedData) = 0;
     virtual bool IsAppropriateType(DragSummaryInfo& dragSummaryInfo, const std::set<std::string>& allowTypes) = 0;
-#if !defined(IOS_PLATFORM) && !defined(ANDROID_PLATFORM)
     virtual RefPtr<UnifiedData> TransformUnifiedDataFromANI(void* rawData) = 0;
-    virtual void TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr) = 0;
-#endif
+    virtual RefPtr<DataLoadParams> TransformDataLoadParamsFromANI(void* rawData) = 0;
+    virtual void TransformSummaryANI(std::map<std::string, int64_t>& summary, std::shared_ptr<void> summaryPtr) = 0;
 };
 } // namespace OHOS::Ace
 #endif

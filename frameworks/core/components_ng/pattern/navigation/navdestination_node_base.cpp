@@ -295,7 +295,15 @@ LayoutConstraintF NavDestinationNodeBase::AdjustLayoutConstarintIfNeeded(const L
         return originConstraint;
     }
     auto layoutConstraint = viewportConfig_->CreateRootLayoutConstraint();
-    ApplySafeArea(safeAreaInsets_, layoutConstraint);
+    auto ctx = GetContext();
+    bool isIgnoreSafeArea = false;
+    if (ctx) {
+        auto mgr = ctx->GetSafeAreaManager();
+        isIgnoreSafeArea = mgr && mgr->IsIgnoreSafeArea();
+    }
+    if (!isIgnoreSafeArea) {
+        ApplySafeArea(safeAreaInsets_, layoutConstraint);
+    }
     return layoutConstraint;
 }
 

@@ -960,12 +960,7 @@ bool MovingPhotoPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& d
     auto movingPhotoNodeSize = geometryNode->GetContentSize();
     auto layoutProperty = GetLayoutProperty<MovingPhotoLayoutProperty>();
     CHECK_NULL_RETURN(layoutProperty, false);
-    SizeF videoFrameSize;
-    if (isXmageMode_) {
-        videoFrameSize = MeasureModeContentLayout(movingPhotoNodeSize, layoutProperty);
-    } else {
-        videoFrameSize = MeasureContentLayout(movingPhotoNodeSize, layoutProperty);
-    }
+    SizeF videoFrameSize = SetVideoFrameSize(movingPhotoNodeSize, layoutProperty);
     if (xmageModeValue_ != ROUND_XMAGE_MODE_VALUE) {
         SetRenderContextBoundsInXmage(movingPhotoNodeSize, videoFrameSize);
     } else {
@@ -1050,6 +1045,20 @@ void MovingPhotoPattern::SetRenderContextBoundsInXmage(
         renderContextForMediaPlayer_->SetBounds(0, 0,
             imageSize.Width() * xmageOffsetRatio.Width() + ROUND_XMAGE_PIXEL_GAP,
             imageSize.Height() * xmageOffsetRatio.Height() + ROUND_XMAGE_PIXEL_GAP);
+    }
+}
+
+SizeF MovingPhotoPattern::SetVideoFrameSize(const SizeF& layoutSize,
+    const RefPtr<MovingPhotoLayoutProperty>& layoutProperty)
+{
+    if (isXmageMode_) {
+        return MeasureModeContentLayout(layoutSize, layoutProperty);
+    } else {
+        if (autoAndRepeatLevel_ == PlaybackMode::REPEAT) {
+            return CalculateFitFill(layoutSize);
+        } else {
+            return MeasureContentLayout(layoutSize, layoutProperty);
+        }
     }
 }
 
@@ -1848,6 +1857,7 @@ void MovingPhotoPattern::RefreshMovingPhoto()
     }
     imageSrc += "?date_modified = " + std::to_string(GetMicroTickCount());
     ImageSourceInfo src;
+    handleImageError_ = false;
     src.SetSrc(imageSrc);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(MovingPhotoLayoutProperty, ImageSourceInfo, src, host);
     UpdateImageNode();
@@ -2735,5 +2745,33 @@ MovingPhotoPattern::~MovingPhotoPattern()
         TAG_LOGI(AceLogTag::ACE_MOVING_PHOTO, "~MovingPhotoPattern DestroyAnalyzerOverlay.");
         DestroyAnalyzerOverlay();
     }
+}
+
+void MovingPhotoPattern::SetMovingPhotoController(const RefPtr<MovingPhotoController>& movingPhotoController)
+{
+    if (controller_) {
+        return;
+    }
+    CHECK_NULL_VOID(movingPhotoController);
+    controller_ = movingPhotoController;
+    ContainerScope scope(instanceId_);
+    auto context = PipelineContext::GetCurrentContext();
+    CHECK_NULL_VOID(context);
+    auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
+    SetStartPlaybackImpl(uiTaskExecutor);
+    SetStopPlaybackImpl(uiTaskExecutor);
+    SetRefreshMovingPhotoImpl(uiTaskExecutor);
+    SetPauseImpl(uiTaskExecutor);
+    SetResetImpl(uiTaskExecutor);
+    SetRestartImpl(uiTaskExecutor);
+    SetEnableTransitionImpl(uiTaskExecutor);
+    SetPlaybackPeriodImpl(uiTaskExecutor);
+    SetEnableAutoPlayImpl(uiTaskExecutor);
+    RegisterVisibleAreaChange();
+}
+
+RefPtr<MovingPhotoController> MovingPhotoPattern::GetMovingPhotoController()
+{
+    return controller_;
 }
 } // namespace OHOS::Ace::NG

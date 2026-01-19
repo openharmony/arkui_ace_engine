@@ -129,6 +129,7 @@ void JsClickFunction::Execute(GestureEvent& info)
     obj->SetPropertyObject("target", target);
     obj->Wrap<GestureEvent>(&info);
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);
+    ACE_BENCH_MARK_TRACE("OnClickEvent_end");
     JsFunction::ExecuteJS(1, &param);
 }
 
@@ -189,6 +190,8 @@ void JsClickFunction::Execute(MouseInfo& info)
     obj->Wrap<MouseInfo>(&info);
 
     JSRef<JSVal> param = JSRef<JSObject>::Cast(obj);
+    ACE_BENCH_MARK_TRACE("OnMouseEvent_end type:%d button:%d", static_cast<int32_t>(info.GetAction()),
+        static_cast<int32_t>(info.GetButton()));
     JsFunction::ExecuteJS(1, &param);
 }
 

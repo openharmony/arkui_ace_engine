@@ -21,7 +21,7 @@
 #include "core/components_ng/layout/layout_algorithm.h"
 #include "core/components_ng/layout/layout_wrapper.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 class ListPositionMap;
@@ -456,14 +456,7 @@ private:
     void LayoutIndex(const RefPtr<LayoutWrapper>& wrapper, const OffsetF& paddingOffset,
         float crossSize, float startPos);
     RefPtr<LayoutWrapper> GetListItem(LayoutWrapper *layoutWrapper, int32_t index, bool addToRenderTree = true,
-                                      bool isCache = false) const
-    {
-        index = !isStackFromEnd_ ? index : totalItemCount_ - index - 1;
-        if (index < 0) {
-            return nullptr;
-        }
-        return layoutWrapper->GetOrCreateChildByIndex(index + itemStartIndex_, addToRenderTree, isCache);
-    }
+                                      bool isCache = false) const;
     void CalculateLanes(const RefPtr<ListLayoutProperty>& layoutProperty,
         const LayoutConstraintF& layoutConstraint, std::optional<float> crossSizeOptional, Axis axis);
 

@@ -119,14 +119,8 @@ bool FrameNodeRulesCheckNode::GetPropIsEnable(Accessibility::PropValue& value)
 {
     auto node = weakNode_.Upgrade();
     CHECK_NULL_RETURN(node, false);
-    auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
-    CHECK_NULL_RETURN(accessibilityProperty, false);
     value.valueType = Accessibility::ValueType::BOOL;
-    auto enable = node->GetFocusHub() ? node->GetFocusHub()->IsEnabled() : true;
-    if (accessibilityProperty->HasUserDisabled()) {
-        enable = !accessibilityProperty->IsUserDisabled();
-    }
-    value.valueBool = enable;
+    value.valueBool = NG::AccessibilityFrameNodeUtils::IsNodeEnabled(node);
     return true;
 }
 
@@ -150,7 +144,8 @@ bool FrameNodeRulesCheckNode::GetPropActionNames(Accessibility::PropValue& value
         accessibilityProperty->GetAccessibilityFocusState() ? "clearAccessibilityFocus" : "accessibilityFocus";
     value.valueArray.insert(accessibilityFocusStr);
 
-    CHECK_EQUAL_RETURN(accessibilityProperty->IsUserDisabled(), true, false);
+    auto enable = NG::AccessibilityFrameNodeUtils::IsNodeEnabled(node);
+    CHECK_EQUAL_RETURN(enable, false, true);
     auto focusHub = node->GetFocusHub();
     if (focusHub && focusHub->IsFocusable()) {
         std::string focusSupportAction = focusHub->IsCurrentFocus() ? "clearFocus" : "focus";

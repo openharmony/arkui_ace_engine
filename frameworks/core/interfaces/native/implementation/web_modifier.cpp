@@ -270,6 +270,12 @@ void SetWebOptionsImpl(Ark_NativePointer node,
             WebAttributeModifier::DefaultOnShowFileSelector(std::move(callback), weakNode, instanceId, info);
         };
         WebModelStatic::SetDefaultFileSelectorShow(frameNode, std::move(fileSelectorShowFromUserCallback));
+        auto requestPermissionsFromUserCallback = [callback = std::move(controller->defaultPermissionClipboardFunc),
+                                                      weakNode = AceType::WeakClaim(frameNode),
+                                                      instanceId = Container::CurrentId()](const BaseEventInfo* info) {
+            WebAttributeModifier::DefaultPermissionClipboard(std::move(callback), weakNode, instanceId, info);
+        };
+        WebModelStatic::SetPermissionClipboard(frameNode, std::move(requestPermissionsFromUserCallback));
         /* This controller is only used to pass the hook function for initializing the webviewController.
          * After passing, the corresponding memory needs to be released.
          */
@@ -1289,6 +1295,26 @@ void SetOnWindowNewImpl(Ark_NativePointer node,
         OnWindowNew(callback, weakNode, instanceId, info);
     };
     WebModelStatic::SetWindowNewEvent(frameNode, onWindowNew);
+#endif // WEB_SUPPORTED
+}
+void SetOnWindowNewExtImpl(Ark_NativePointer node,
+                           const Opt_Callback_OnWindowNewExtEvent_Void* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onWindowNewExt = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const std::shared_ptr<BaseEventInfo>& info) {
+        OnWindowNewExt(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetWindowNewExtEvent(frameNode, onWindowNewExt);
 #endif // WEB_SUPPORTED
 }
 void SetOnWindowExitImpl(Ark_NativePointer node,
@@ -2888,6 +2914,27 @@ void SetOnTextSelectionChangeImpl(Ark_NativePointer node,
 #endif // WEB_SUPPORTED
 }
 
+void SetOnFirstScreenPaintImpl(Ark_NativePointer node,
+                               const Opt_OnFirstScreenPaintCallback* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto optValue = Converter::GetOptPtr(value);
+    if (!optValue) {
+        // Implement Reset value
+        return;
+    }
+    auto instanceId = Container::CurrentId();
+    WeakPtr<FrameNode> weakNode = AceType::WeakClaim(frameNode);
+    auto onFirstScreenPaint = [callback = CallbackHelper(*optValue), weakNode, instanceId](
+        const BaseEventInfo* info) -> void {
+        OnFirstScreenPaint(callback, weakNode, instanceId, info);
+    };
+    WebModelStatic::SetOnFirstScreenPaint(frameNode, onFirstScreenPaint);
+#endif // WEB_SUPPORTED
+}
+
 void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
                                  const Opt_Boolean* value)
 {
@@ -2896,6 +2943,17 @@ void SetEnableImageAnalyzerImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvert<bool>(*value);
     WebModelStatic::SetEnableImageAnalyzer(frameNode, convValue.value_or(true));
+#endif // WEB_SUPPORTED
+}
+
+void SetEnableAutoFillImpl(Ark_NativePointer node,
+                                 const Opt_Boolean* value)
+{
+#ifdef WEB_SUPPORTED
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvert<bool>(*value);
+    WebModelStatic::SetEnableAutoFill(frameNode, convValue.value_or(true));
 #endif // WEB_SUPPORTED
 }
 void SetOnMicrophoneCaptureStateChangeImpl(Ark_NativePointer node,
@@ -3004,6 +3062,7 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetOnSslErrorEventImpl,
         WebAttributeModifier::SetOnClientAuthenticationRequestImpl,
         WebAttributeModifier::SetOnWindowNewImpl,
+        WebAttributeModifier::SetOnWindowNewExtImpl,
         WebAttributeModifier::SetOnWindowExitImpl,
         WebAttributeModifier::SetMultiWindowAccessImpl,
         WebAttributeModifier::SetOnInterceptKeyEventImpl,
@@ -3082,7 +3141,9 @@ const GENERATED_ArkUIWebModifier* GetWebModifier()
         WebAttributeModifier::SetZoomControlAccessImpl,
         WebAttributeModifier::SetEnableSelectedDataDetectorImpl,
         WebAttributeModifier::SetOnTextSelectionChangeImpl,
+        WebAttributeModifier::SetOnFirstScreenPaintImpl,
         WebAttributeModifier::SetEnableImageAnalyzerImpl,
+        WebAttributeModifier::SetEnableAutoFillImpl,
         WebAttributeModifier::SetOnMicrophoneCaptureStateChangeImpl,
         WebAttributeModifier::SetOnCameraCaptureStateChangeImpl,
         WebAttributeModifier::SetRegisterNativeEmbedRuleImpl,

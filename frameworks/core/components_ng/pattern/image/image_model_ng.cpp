@@ -80,6 +80,7 @@ void ImageModelNG::Create(ImageInfoConfig& imageInfoConfig)
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     const std::string& src = imageInfoConfig.src ? *imageInfoConfig.src : "";
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d] [src:%s]", V2::IMAGE_ETS_TAG, nodeId, src.c_str());
     RefPtr<FrameNode> frameNode;
@@ -158,6 +159,7 @@ void ImageModelNG::SetInitialPixelMap(FrameNode* frameNode, RefPtr<PixelMap>& pi
 RefPtr<FrameNode> ImageModelNG::CreateFrameNode(int32_t nodeId, const std::string& src, RefPtr<PixelMap>& pixMap,
     const std::string& bundleName, const std::string& moduleName, bool isUriPureNumber)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, nodeId, AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(frameNode, nullptr);
     // set draggable for framenode
@@ -273,6 +275,7 @@ void ImageModelNG::SetBorderRadius(const NG::BorderRadiusProperty& borderRadius)
         std::string radiusKey = "borderRadius";
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
+        ACE_UINODE_TRACE(frameNode);
         auto pattern = frameNode->GetPattern<ImagePattern>();
         CHECK_NULL_VOID(pattern);
         pattern->RemoveResObj(key);
@@ -627,6 +630,7 @@ void ImageModelNG::SetResizableSlice(ImageResizableSlice& slice)
     if (SystemProperties::ConfigChangePerform()) {
         auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
         CHECK_NULL_VOID(frameNode);
+        ACE_UINODE_TRACE(frameNode);
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         std::string key = "image.ResizableSlice";
@@ -648,6 +652,7 @@ void ImageModelNG::SetResizableSlice(ImageResizableSlice& slice)
 void ImageModelNG::SetResizableSlice(FrameNode* frameNode, ImageResizableSlice& slice)
 {
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
@@ -1264,6 +1269,7 @@ void ImageModelNG::CreateWithResourceObj(ImageResourceType resourceType, const R
 void ImageModelNG::CreateWithResourceObj(
     FrameNode* frameNode, ImageResourceType resourceType, const RefPtr<ResourceObject>& resObj)
 {
+    ACE_UINODE_TRACE(frameNode);
     auto pattern = frameNode->GetPattern<ImagePattern>();
     CHECK_NULL_VOID(pattern);
     switch (resourceType) {

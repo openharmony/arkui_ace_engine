@@ -172,6 +172,13 @@ void CanvasPattern::OnSizeChanged(const DirtySwapConfig& config, bool needReset)
 
 void CanvasPattern::SetAntiAlias(bool isEnabled)
 {
+    auto holder = TestHolder::GetInstance();
+    if (holder->request) {
+        holder->counter++;
+        holder->isCalled = true;
+        holder->antialias = isEnabled;
+        return;
+    }
 #ifndef USE_FAST_TASKPOOL
     auto task = [isEnabled](CanvasPaintMethod& paintMethod) {
         paintMethod.SetAntiAlias(isEnabled);
@@ -1402,7 +1409,7 @@ double CanvasPattern::GetHeight()
     return canvasSize_->Height();
 }
 
-void CanvasPattern::SetRSCanvasCallback(std::function<void(RSCanvas*, double, double)>& callback)
+void CanvasPattern::SetRSCanvasCallback(std::function<void(std::shared_ptr<RSCanvas>, double, double)>& callback)
 {
     auto holder = TestHolder::GetInstance();
     if (holder->request) {

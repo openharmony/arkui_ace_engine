@@ -58,7 +58,7 @@ bool GetKeyboardAvoidModeImpl(ani_env* env, ani_enum_item* enumItem)
     }
     ani_enum enumType;
     ani_status status = ANI_OK;
-    if ((status = env->FindEnum("L@ohos/arkui/UIContext/KeyboardAvoidMode;", &enumType)) != ANI_OK) {
+    if ((status = env->FindEnum("@ohos.arkui.UIContext.KeyboardAvoidMode", &enumType)) != ANI_OK) {
         HILOGE("GetKeyboardAvoidMode FindEnum failed, status:%{public}d", status);
         return false;
     }

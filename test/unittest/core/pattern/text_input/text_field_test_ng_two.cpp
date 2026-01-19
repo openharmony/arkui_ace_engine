@@ -58,6 +58,14 @@ HWTEST_F(TextFieldTestNgTwo, testCaretPosition001, TestSize.Level1)
     pattern_->UpdateSelectionOffset();
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->selectController_->GetCaretIndex(), value.text.length());
+
+    /** 
+     * @tc.step: step4. Set value
+     */
+    value.text = "12345678";
+    selection.baseOffset = value.text.length();
+    value.selection = selection;
+    pattern_->UpdateEditingValue(std::make_shared<TextEditingValue>(value));
 }
 
 /**
@@ -356,6 +364,7 @@ HWTEST_F(TextFieldTestNgTwo, testEnterKeyType001, TestSize.Level1)
     pattern_->UpdateTextInputAction(TextInputAction::PREVIOUS);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->GetTextInputActionValue(), TextInputAction::PREVIOUS);
+    EXPECT_STREQ(pattern_->TextInputActionToString().c_str(), "EnterKeyType.Previous");
 
     /**
      * @tc.step: step4. Set enterKeyType
@@ -363,6 +372,14 @@ HWTEST_F(TextFieldTestNgTwo, testEnterKeyType001, TestSize.Level1)
     pattern_->UpdateTextInputAction(TextInputAction::END);
     frameNode_->MarkModifyDone();
     EXPECT_EQ(pattern_->GetTextInputActionValue(), TextInputAction::END);
+
+    /**
+     * @tc.step: step4. Set enterKeyType
+     */
+    pattern_->UpdateTextInputAction(TextInputAction::NEW_LINE);
+    frameNode_->MarkModifyDone();
+    EXPECT_EQ(pattern_->GetTextInputActionValue(), TextInputAction::NEW_LINE);
+    EXPECT_STREQ(pattern_->TextInputActionToString().c_str(), "EnterKeyType.NewLine");
 }
 
 /**

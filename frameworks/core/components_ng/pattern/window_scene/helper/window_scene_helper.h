@@ -61,7 +61,7 @@ public:
 
     static bool IsWindowScene(const RefPtr<FrameNode>& focusedFrameNode);
 
-    static int32_t GetFocusSystemWindowId(const RefPtr<FrameNode>& focusedFrameNode);
+    ACE_FORCE_EXPORT static int32_t GetFocusSystemWindowId(const RefPtr<FrameNode>& focusedFrameNode);
 
     static int32_t GetWindowIdForWindowScene(const RefPtr<FrameNode>& windowSceneNode);
 
@@ -106,6 +106,8 @@ public:
     static std::string RSNodeToStr(const std::shared_ptr<Rosen::RSNode>& rsNode);
 
     static std::string RSUIContextToStr(const std::shared_ptr<Rosen::RSUIContext>& rsUIContext);
+
+    static void ConvertSystemWindowId(const RefPtr<FrameNode>& frameNode, uint32_t& systemWindowId);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_WINDOW_SCENE_HELPER_H

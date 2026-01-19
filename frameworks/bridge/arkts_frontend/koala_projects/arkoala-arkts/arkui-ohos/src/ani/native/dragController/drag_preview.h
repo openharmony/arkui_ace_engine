@@ -35,7 +35,7 @@ public:
     ~DragPreview() = default;
 
     static void SetForegroundColor([[maybe_unused]] ani_env *env, [[maybe_unused]] ani_object object,
-        Ark_ResourceColor color, ani_long dragPreviewPtr)
+        ani_long colorValue, ani_long dragPreviewPtr)
     {
         CHECK_NULL_VOID(env);
         if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
@@ -52,7 +52,8 @@ public:
             env->DestroyLocalScope();
             return;
         }
-        modifier->getDragControllerAniModifier()->aniDragPreviewSetForegroundColor(color, dragPreview->previewAsync_);
+        modifier->getDragControllerAniModifier()->aniDragPreviewSetForegroundColor(
+            colorValue, dragPreview->previewAsync_);
         env->DestroyLocalScope();
     }
 
@@ -137,7 +138,7 @@ private:
             dragPreview->previewAsync_.previewAnimation.duration = DEFAULT_DURATION_VALUE;
         } else {
             if ((status = env->Object_CallMethodByName_Double(
-                static_cast<ani_object>(durationAni), "unboxed", ":d", &duration)) != ANI_OK) {
+                static_cast<ani_object>(durationAni), "toDouble", ":d", &duration)) != ANI_OK) {
                 HILOGE("AceDrag, Object_CallMethodByName_Double failed. status = %{public}d", status);
             } else {
                 if (GreatOrEqual(static_cast<size_t>(duration), INT32_MAX)) {

@@ -1558,7 +1558,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage056, TestSi
     auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
     ASSERT_NE(frameNode, nullptr);
     EXPECT_CALL(
-        *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), AddPrivilege())
+        *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), AddPrivilege(_, _))
         .WillRepeatedly(testing::Return(1));
     EXPECT_CALL(
         *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), GetShadowOffset(_))
@@ -1569,7 +1569,7 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage056, TestSi
     dragDropManager->RequestDragSummaryInfoAndPrivilege();
 
     EXPECT_CALL(
-        *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), AddPrivilege())
+        *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), AddPrivilege(_, _))
         .WillRepeatedly(testing::Return(0));
     EXPECT_CALL(
         *(AceType::DynamicCast<MockInteractionInterface>(MockInteractionInterface::GetInstance())), GetShadowOffset(_))
@@ -2486,5 +2486,402 @@ HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage082, TestSi
     pointerEvent.windowX = 2;
     dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
     EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage083
+ * @tc.desc: Test ExecuteCustomDropAnimation
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage083, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    dragDropManager->rootNode_ = frameNode;
+
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isSceneBoardWindow_ = true;
+
+    DragPointerEvent pointerEvent;
+    pointerEvent.x = 1;
+    pointerEvent.y = 1;
+    DragRet dragResult = DragRet::DRAG_CANCEL;
+    bool useCustomAnimation = false;
+    int32_t windowId = 0;
+    DragBehavior dragBehavior = DragBehavior::UNKNOWN;
+    DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId, dragBehavior };
+    dragDropManager->ExecuteCustomDropAnimation(nullptr, dragDropRet);
+    auto res = SystemProperties::GetMultiInstanceEnabled();
+    SystemProperties::SetMultiInstanceEnabled(false);
+    dragDropManager->ExecuteCustomDropAnimation(dragEvent, dragDropRet);
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 0);
+
+    auto node = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    pointerEvent.windowX = 1;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, node);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 0);
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+    SystemProperties::SetMultiInstanceEnabled(true);
+    dragDropManager->ExecuteCustomDropAnimation(dragEvent, dragDropRet);
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+
+    pointerEvent.windowX = 1;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, node);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 1);
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+    SystemProperties::SetMultiInstanceEnabled(res);
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage084
+ * @tc.desc: Test InitSyncTransaction
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage084, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    dragDropManager->rootNode_ = frameNode;
+
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isSceneBoardWindow_ = true;
+
+    DragPointerEvent pointerEvent;
+    pointerEvent.x = 1;
+    pointerEvent.y = 1;
+    DragRet dragResult = DragRet::DRAG_CANCEL;
+    bool useCustomAnimation = false;
+    int32_t windowId = 0;
+    DragBehavior dragBehavior = DragBehavior::UNKNOWN;
+    DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId, dragBehavior };
+    bool isExecuted = false;
+    DragPointerEvent point;
+    point.x = 1;
+    point.y = 1;
+    dragDropManager->ExecuteCustomDropAnimation(nullptr, dragDropRet);
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_CANCEL, isExecuted, 0, DragBehavior::UNKNOWN, point);
+#ifdef ENABLE_ROSEN_BACKEND
+    auto res = SystemProperties::GetMultiInstanceEnabled();
+    SystemProperties::SetMultiInstanceEnabled(false);
+    dragDropManager->InitSyncTransaction();
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+    SystemProperties::SetMultiInstanceEnabled(true);
+    dragDropManager->InitSyncTransaction();
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+    SystemProperties::SetMultiInstanceEnabled(res);
+#endif
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage085
+ * @tc.desc: Test OpenSyncTransaction
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage085, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    dragDropManager->rootNode_ = frameNode;
+
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isSceneBoardWindow_ = true;
+
+    DragPointerEvent pointerEvent;
+    pointerEvent.x = 1;
+    pointerEvent.y = 1;
+    DragRet dragResult = DragRet::DRAG_CANCEL;
+    bool useCustomAnimation = false;
+    int32_t windowId = 0;
+    DragBehavior dragBehavior = DragBehavior::UNKNOWN;
+    DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId, dragBehavior };
+    bool isExecuted = false;
+    DragPointerEvent point;
+    point.x = 1;
+    point.y = 1;
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_CANCEL, isExecuted, 0, DragBehavior::UNKNOWN, point);
+    dragDropManager->ExecuteCustomDropAnimation(nullptr, dragDropRet);
+#ifdef ENABLE_ROSEN_BACKEND
+    auto res = SystemProperties::GetMultiInstanceEnabled();
+    SystemProperties::SetMultiInstanceEnabled(false);
+    dragDropManager->OpenSyncTransaction();
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+    SystemProperties::SetMultiInstanceEnabled(true);
+    dragDropManager->OpenSyncTransaction();
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+    SystemProperties::SetMultiInstanceEnabled(res);
+#endif
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage086
+ * @tc.desc: Test CloseSyncTransaction
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage086, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    dragDropManager->rootNode_ = frameNode;
+
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isSceneBoardWindow_ = true;
+
+    DragPointerEvent pointerEvent;
+    pointerEvent.x = 1;
+    pointerEvent.y = 1;
+    DragRet dragResult = DragRet::DRAG_CANCEL;
+    bool useCustomAnimation = false;
+    int32_t windowId = 0;
+    DragBehavior dragBehavior = DragBehavior::UNKNOWN;
+    DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId, dragBehavior };
+    bool isExecuted = false;
+    DragPointerEvent point;
+    point.x = 1;
+    point.y = 1;
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_CANCEL, isExecuted, 0, DragBehavior::UNKNOWN, point);
+    dragDropManager->ExecuteCustomDropAnimation(nullptr, dragDropRet);
+#ifdef ENABLE_ROSEN_BACKEND
+    auto res = SystemProperties::GetMultiInstanceEnabled();
+    SystemProperties::SetMultiInstanceEnabled(false);
+    dragDropManager->CloseSyncTransaction();
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+    SystemProperties::SetMultiInstanceEnabled(true);
+    dragDropManager->CloseSyncTransaction();
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+    SystemProperties::SetMultiInstanceEnabled(res);
+#endif
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage087
+ * @tc.desc: Test GetRSTransaction
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage087, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    dragDropManager->rootNode_ = frameNode;
+
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isSceneBoardWindow_ = true;
+
+    DragPointerEvent pointerEvent;
+    pointerEvent.x = 1;
+    pointerEvent.y = 1;
+    DragRet dragResult = DragRet::DRAG_CANCEL;
+    bool useCustomAnimation = false;
+    int32_t windowId = 0;
+    DragBehavior dragBehavior = DragBehavior::UNKNOWN;
+    DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId, dragBehavior };
+    bool isExecuted = false;
+    DragPointerEvent point;
+    point.x = 1;
+    point.y = 1;
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_CANCEL, isExecuted, 0, DragBehavior::UNKNOWN, point);
+    dragDropManager->ExecuteCustomDropAnimation(nullptr, dragDropRet);
+#ifdef ENABLE_ROSEN_BACKEND
+    auto res = SystemProperties::GetMultiInstanceEnabled();
+    SystemProperties::SetMultiInstanceEnabled(false);
+    dragDropManager->GetRSTransaction();
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+    SystemProperties::SetMultiInstanceEnabled(true);
+    dragDropManager->GetRSTransaction();
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+    SystemProperties::SetMultiInstanceEnabled(res);
+#endif
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage088
+ * @tc.desc: Test ResetSyncTransaction
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage088, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    dragDropManager->rootNode_ = frameNode;
+
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isSceneBoardWindow_ = true;
+
+    DragPointerEvent pointerEvent;
+    pointerEvent.x = 1;
+    pointerEvent.y = 1;
+    DragRet dragResult = DragRet::DRAG_CANCEL;
+    bool useCustomAnimation = false;
+    int32_t windowId = 0;
+    DragBehavior dragBehavior = DragBehavior::UNKNOWN;
+    DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId, dragBehavior };
+    bool isExecuted = false;
+    DragPointerEvent point;
+    point.x = 1;
+    point.y = 1;
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_CANCEL, isExecuted, 0, DragBehavior::UNKNOWN, point);
+    dragDropManager->ExecuteCustomDropAnimation(nullptr, dragDropRet);
+#ifdef ENABLE_ROSEN_BACKEND
+    auto res = SystemProperties::GetMultiInstanceEnabled();
+    SystemProperties::SetMultiInstanceEnabled(false);
+    dragDropManager->ResetSyncTransaction();
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+    SystemProperties::SetMultiInstanceEnabled(true);
+    dragDropManager->ResetSyncTransaction();
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+    SystemProperties::SetMultiInstanceEnabled(res);
+#endif
+}
+
+/**
+ * @tc.name: DragDropManagerTestNgCoverage089
+ * @tc.desc: Test CalculateNewOffset
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(DragDropManagerTestNgCoverage, DragDropManagerTestNgCoverage089, TestSize.Level1)
+{
+    auto dragDropManager = AceType::MakeRefPtr<DragDropManager>();
+    ASSERT_NE(dragDropManager, nullptr);
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(NODE_TAG, -1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    dragDropManager->rootNode_ = frameNode;
+
+    auto dragEvent = AceType::MakeRefPtr<OHOS::Ace::DragEvent>();
+    ASSERT_NE(dragEvent, nullptr);
+
+    auto container = MockContainer::Current();
+    ASSERT_NE(container, nullptr);
+    container->isSceneBoardWindow_ = true;
+
+    DragPointerEvent pointerEvent;
+    pointerEvent.x = 1;
+    pointerEvent.y = 1;
+    DragRet dragResult = DragRet::DRAG_CANCEL;
+    bool useCustomAnimation = false;
+    int32_t windowId = 0;
+    DragBehavior dragBehavior = DragBehavior::UNKNOWN;
+    DragDropRet dragDropRet { dragResult, useCustomAnimation, windowId, dragBehavior };
+    bool isExecuted = false;
+    DragPointerEvent point;
+    point.x = 1;
+    point.y = 1;
+    dragDropManager->ExecuteStopDrag(dragEvent, DragRet::DRAG_CANCEL, isExecuted, 0, DragBehavior::UNKNOWN, point);
+    dragDropManager->ExecuteCustomDropAnimation(nullptr, dragDropRet);
+    auto res = SystemProperties::GetMultiInstanceEnabled();
+    SystemProperties::SetMultiInstanceEnabled(false);
+    GestureEvent event;
+    bool isDragStartPending = false;
+    dragDropManager->CalculateNewOffset(frameNode, event, isDragStartPending);
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+    SystemProperties::SetMultiInstanceEnabled(true);
+    dragDropManager->CalculateNewOffset(frameNode, event, isDragStartPending);
+
+    container->isSceneBoardWindow_ = false;
+    pointerEvent.windowX = 2;
+    dragDropManager->SetDragAnimationPointerEvent(pointerEvent, frameNode);
+    EXPECT_EQ(dragDropManager->dragAnimationPointerEvent_.windowX, 2);
+    SystemProperties::SetMultiInstanceEnabled(res);
 }
 } // namespace OHOS::Ace::NG

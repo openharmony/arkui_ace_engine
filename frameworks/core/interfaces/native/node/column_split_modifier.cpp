@@ -14,82 +14,31 @@
  */
 #include "core/interfaces/native/node/column_split_modifier.h"
 
-#include "core/common/resource/resource_parse_utils.h"
-#include "core/components_ng/pattern/linear_split/linear_split_model_ng.h"
+#include "ui/base/utils/utils.h"
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace::NG {
-constexpr bool DEFAULT_COLUMN_SPLIT_RESIZABLE = false;
-constexpr Dimension DEFAULT_DIVIDER_START = Dimension(0.0, DimensionUnit::VP);
-constexpr Dimension DEFAULT_DIVIDER_END = Dimension(0.0, DimensionUnit::VP);
-void SetColumnSplitResizable(ArkUINodeHandle node, ArkUI_Bool resizable)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::COLUMN_SPLIT, resizable);
-}
-
-void ResetColumnSplitResizable(ArkUINodeHandle node)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LinearSplitModelNG::SetResizable(frameNode, NG::SplitType::COLUMN_SPLIT, DEFAULT_COLUMN_SPLIT_RESIZABLE);
-}
-
-void SetColumnSplitDivider(ArkUINodeHandle node, ArkUI_Float32 stVal, int32_t stUnit,
-    ArkUI_Float32 endVal, int32_t endUnit, void* startMarginRawPtr, void* endMarginRawPtr)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LinearSplitModelNG::ResetResObj(frameNode, "columnSplit.divider");
-    Dimension startMarginDimension(stVal, static_cast<DimensionUnit>(stUnit));
-    Dimension endMarginDimension(endVal, static_cast<DimensionUnit>(endUnit));
-    ColumnSplitDivider divider = { startMarginDimension, endMarginDimension };
-    if (SystemProperties::ConfigChangePerform() && startMarginRawPtr) {
-        auto* start = reinterpret_cast<ResourceObject*>(startMarginRawPtr);
-        auto startResObj = AceType::Claim(start);
-        LinearSplitModelNG::RegisterResObj(startResObj, divider, "columnSplit.divider.startMargin");
-    }
-    if (SystemProperties::ConfigChangePerform() && endMarginRawPtr) {
-        auto* end = reinterpret_cast<ResourceObject*>(endMarginRawPtr);
-        auto endResObj = AceType::Claim(end);
-        LinearSplitModelNG::RegisterResObj(endResObj, divider, "columnSplit.divider.endMargin");
-    }
-    LinearSplitModelNG::SetDivider(frameNode, SplitType::COLUMN_SPLIT, divider);
-}
-
-void ResetColumnSplitDivider(ArkUINodeHandle node)
-{
-    auto *frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    LinearSplitModelNG::ResetResObj(frameNode, "columnSplit.divider");
-    LinearSplitModelNG::SetDivider(frameNode, SplitType::COLUMN_SPLIT, { DEFAULT_DIVIDER_START, DEFAULT_DIVIDER_END });
-}
-
 namespace NodeModifier {
 const ArkUIColumnSplitModifier* GetColumnSplitModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUIColumnSplitModifier modifier = {
-        .setColumnSplitDivider = SetColumnSplitDivider,
-        .resetColumnSplitDivider = ResetColumnSplitDivider,
-        .setColumnSplitResizable = SetColumnSplitResizable,
-        .resetColumnSplitResizable = ResetColumnSplitResizable,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-    return &modifier;
+    static const ArkUIColumnSplitModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("ColumnSplit");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIColumnSplitModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
 }
 
 const CJUIColumnSplitModifier* GetCJUIColumnSplitModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const CJUIColumnSplitModifier modifier = {
-        .setColumnSplitDivider = SetColumnSplitDivider,
-        .resetColumnSplitDivider = ResetColumnSplitDivider,
-        .setColumnSplitResizable = SetColumnSplitResizable,
-        .resetColumnSplitResizable = ResetColumnSplitResizable,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-    return &modifier;
+    static const CJUIColumnSplitModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("ColumnSplit");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const CJUIColumnSplitModifier*>(module->GetCjModifier());
+    }
+    return cachedModifier;
 }
-}
+} // namespace NodeModifier
 } // namespace OHOS::Ace::NG

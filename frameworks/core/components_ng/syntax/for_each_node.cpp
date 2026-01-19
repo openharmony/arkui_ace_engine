@@ -40,6 +40,7 @@ RefPtr<ForEachNode> ForEachNode::GetOrCreateForEachNode(int32_t nodeId)
     if (node) {
         return node;
     }
+    ACE_UINODE_TRACE(nodeId);
     node = MakeRefPtr<ForEachNode>(nodeId);
     ElementRegister::GetInstance()->AddUINode(node);
     return node;

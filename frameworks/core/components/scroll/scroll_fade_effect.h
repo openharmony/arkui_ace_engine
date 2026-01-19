@@ -23,7 +23,7 @@
 
 namespace OHOS::Ace {
 
-class ACE_EXPORT ScrollFadeEffect final : public ScrollEdgeEffect {
+class ACE_FORCE_EXPORT ScrollFadeEffect final : public ScrollEdgeEffect {
     DECLARE_ACE_TYPE(ScrollFadeEffect, ScrollEdgeEffect);
 
 public:

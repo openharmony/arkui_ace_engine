@@ -117,6 +117,7 @@ export class EmbeddedComponentModifier extends CommonMethodModifier implements E
         {
             this._onTerminated_0_flag = AttributeUpdaterFlag.UPDATE
             this._onTerminated_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onTerminated_0_flag = AttributeUpdaterFlag.SKIP
@@ -128,6 +129,7 @@ export class EmbeddedComponentModifier extends CommonMethodModifier implements E
         {
             this._onError_0_flag = AttributeUpdaterFlag.UPDATE
             this._onError_0_0value = value
+            this._state.fireChange()
         } else
         {
             this._onError_0_flag = AttributeUpdaterFlag.SKIP

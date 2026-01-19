@@ -61,7 +61,7 @@ private:
     RefPtr<TextElement> GetTextElement(const RefPtr<Element>& flex);
 
     RefPtr<CalendarController> calendarController_;
-    RefPtr<RenderSwiper> renderSwiper_;
+    RefPtr<RenderNode> renderSwiper_;
     std::function<void(const std::string&)> dateEvent_;
 };
 

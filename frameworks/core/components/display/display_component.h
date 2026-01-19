@@ -27,7 +27,7 @@ enum class DisplayStateAttribute {
     OPACITY,
 };
 
-class ACE_EXPORT DisplayComponent : public SoleChildComponent {
+class ACE_FORCE_EXPORT DisplayComponent : public SoleChildComponent {
     DECLARE_ACE_TYPE(DisplayComponent, SoleChildComponent);
 
 public:

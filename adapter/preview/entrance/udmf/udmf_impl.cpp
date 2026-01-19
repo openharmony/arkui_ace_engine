@@ -44,7 +44,17 @@ RefPtr<UnifiedData> UdmfClientImpl::TransformUnifiedDataFromANI(void* rawData)
     return nullptr;
 }
 
+RefPtr<DataLoadParams> UdmfClientImpl::TransformDataLoadParamsFromANI(void* rawData)
+{
+    return nullptr;
+}
+
 void* UdmfClientImpl::TransformUnifiedDataPtr(RefPtr<UnifiedData>& unifiedData)
+{
+    return nullptr;
+}
+
+std::shared_ptr<void> UdmfClientImpl::TransformUnifiedDataSharedPtr(RefPtr<UnifiedData>& unifiedDataImpl)
 {
     return nullptr;
 }
@@ -74,7 +84,7 @@ napi_value UdmfClientImpl::TransformSummary(std::map<std::string, int64_t>& summ
     return nullptr;
 }
 
-void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, void* summaryPtr)
+void UdmfClientImpl::TransformSummaryANI(std::map<std::string, int64_t>& summary, std::shared_ptr<void> summaryPtr)
 {}
 
 RefPtr<UnifiedData> UdmfClientImpl::CreateUnifiedData()

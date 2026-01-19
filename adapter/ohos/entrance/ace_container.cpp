@@ -111,11 +111,40 @@ constexpr uint32_t OHOS_THEME_ID = 125829872;
 
 #ifndef NG_BUILD
 constexpr char ARK_ENGINE_SHARED_LIB[] = "libace_engine_ark.z.so";
+
 const char* GetEngineSharedLibrary()
 {
     return ARK_ENGINE_SHARED_LIB;
 }
 #endif
+
+void EnableSystemParameterDebugBoundaryCallback(const char* key, const char* value, void* context)
+{
+    bool isDebugBoundary = strcmp(value, "true") == 0;
+    SystemProperties::SetDebugBoundaryEnabled(isDebugBoundary);
+    auto container = reinterpret_cast<Platform::AceContainer*>(context);
+    CHECK_NULL_VOID(container);
+    container->RenderLayoutBoundary(isDebugBoundary);
+}
+
+void OnFocusActiveChanged(const char* key, const char* value, void* context)
+{
+    bool focusCanBeActive = true;
+    if (value && strcmp(value, "0") == 0) {
+        focusCanBeActive = false;
+    }
+    if (focusCanBeActive != SystemProperties::GetFocusCanBeActive()) {
+        SystemProperties::SetFocusCanBeActive(focusCanBeActive);
+        if (!focusCanBeActive) {
+            auto container = reinterpret_cast<Platform::AceContainer*>(context);
+            CHECK_NULL_VOID(container);
+            ContainerScope scope(container->GetInstanceId());
+            container->SetIsFocusActive(focusCanBeActive);
+        }
+        LOGI("focusCanBeActive turns to %{public}d", focusCanBeActive);
+    }
+    return;
+}
 
 inline void SetSystemBarPropertyEnableFlag(Rosen::SystemBarProperty& property)
 {
@@ -565,6 +594,7 @@ void AceContainer::Destroy()
     RegisterContainerHandler(nullptr);
     resRegister_.Reset();
     assetManager_.Reset();
+    UnRegisterUIExtDataConsumer();
 }
 
 void AceContainer::DestroyView()
@@ -3379,7 +3409,7 @@ std::shared_ptr<OHOS::AbilityRuntime::Context> AceContainer::GetAbilityContextBy
                 TaskExecutor::TaskType::UI, "ArkUIRecordResAdapter");
         }
     }
-    return isFormRender_ ? nullptr : context->CreateModuleContext(bundle, module);
+    return isFormRender_ ? nullptr : context->CreateModuleOrPluginContext(bundle, module);
 }
 
 void AceContainer::CheckAndSetFontFamily()
@@ -3461,6 +3491,9 @@ void AceContainer::ReleaseResourceAdapter()
             auto moduleName = runtimeContext->GetHapModuleInfo()->name;
             ResourceManager::GetInstance().RemoveResourceAdapter(bundleName, moduleName, instanceId_);
         }
+    } else {
+        ResourceManager::GetInstance().RemoveResourceAdapter("", "", instanceId_);
+        ResourceManager::GetInstance().RemoveResourceAdapter(GetBundleName(), GetModuleName(), instanceId_);
     }
 }
 
@@ -3580,10 +3613,20 @@ void AceContainer::UpdateColorMode(uint32_t colorMode,
     NotifyConfigToSubContainers(parsedConfig, configuration);
 }
 
+bool AceContainer::GetWhiteListStatus()
+{
+    auto appContext = OHOS::AbilityRuntime::Context::GetApplicationContext();
+    // If appContext is null, keep the original logic unchanged.
+    CHECK_NULL_RETURN(appContext, true);
+    // Check if the application is in the white list for configuration updates.
+    auto appConfigUpdateReason = appContext->GetConfigUpdateReason();
+    return appConfigUpdateReason == OHOS::AppExecFwk::ConfigUpdateReason::CONFIG_UPDATE_REASON_IN_WHITE_LIST;
+}
+
 void AceContainer::CheckForceVsync(const ParsedConfig& parsedConfig)
 {
     // the application is in the background and the dark and light colors are switched.
-    if (pipelineContext_ && !pipelineContext_->GetOnShow() && !parsedConfig.colorMode.empty()) {
+    if (pipelineContext_ && !pipelineContext_->GetOnShow() && !parsedConfig.colorMode.empty() && GetWhiteListStatus()) {
         pipelineContext_->SetBackgroundColorModeUpdated(true);
         auto window = pipelineContext_->GetWindow();
         if (window) {
@@ -4543,11 +4586,10 @@ void AceContainer::AddWatchSystemParameter()
         SystemProperties::AddWatchSystemParameter(
             ENABLE_DEBUG_STATEMGR_KEY, rawPtr, SystemProperties::EnableSystemParameterDebugStatemgrCallback);
         SystemProperties::AddWatchSystemParameter(
-            ENABLE_DEBUG_BOUNDARY_KEY, rawPtr, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
+            ENABLE_DEBUG_BOUNDARY_KEY, rawPtr, EnableSystemParameterDebugBoundaryCallback);
         SystemProperties::AddWatchSystemParameter(ENABLE_PERFORMANCE_MONITOR_KEY, rawPtr,
             SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
-        SystemProperties::AddWatchSystemParameter(
-            IS_FOCUS_ACTIVE_KEY, rawPtr, SystemProperties::OnFocusActiveChanged);
+        SystemProperties::AddWatchSystemParameter(IS_FOCUS_ACTIVE_KEY, rawPtr, OnFocusActiveChanged);
     };
     BackgroundTaskExecutor::GetInstance().PostTask(task);
 }
@@ -4568,10 +4610,10 @@ void AceContainer::RemoveWatchSystemParameter()
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_DEBUG_STATEMGR_KEY, this, SystemProperties::EnableSystemParameterDebugStatemgrCallback);
     SystemProperties::RemoveWatchSystemParameter(
-        ENABLE_DEBUG_BOUNDARY_KEY, this, SystemProperties::EnableSystemParameterDebugBoundaryCallback);
+        ENABLE_DEBUG_BOUNDARY_KEY, this, EnableSystemParameterDebugBoundaryCallback);
     SystemProperties::RemoveWatchSystemParameter(
         ENABLE_PERFORMANCE_MONITOR_KEY, this, SystemProperties::EnableSystemParameterPerformanceMonitorCallback);
-    SystemProperties::RemoveWatchSystemParameter(IS_FOCUS_ACTIVE_KEY, this, SystemProperties::OnFocusActiveChanged);
+    SystemProperties::RemoveWatchSystemParameter(IS_FOCUS_ACTIVE_KEY, this, OnFocusActiveChanged);
 }
 
 void AceContainer::UpdateResourceOrientation(int32_t orientation)

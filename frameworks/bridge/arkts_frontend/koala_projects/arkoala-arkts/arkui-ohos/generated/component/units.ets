@@ -25,8 +25,8 @@ import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
 import { Resource } from "global.resource"
 import { extractors } from "#handwritten"
 import { LengthMetrics, LengthMetricsUnit, ColorMetrics } from "arkui.Graphics"
-import { Color, BorderStyle, FontWeight, FontStyle, DividerMode } from "./enums"
-import { OutlineStyle } from "./common"
+import { Color, BorderStyle, FontWeight, FontStyle, DividerMode, PresetFillType } from "./enums"
+import { OutlineStyle, AccessibilityRoleType } from "./common"
 import { LengthMetrics_serializer } from "./../Graphics"
 import { Resource_serializer } from "./../framework/resource"
 export class ColorFilterInternal {
@@ -251,6 +251,21 @@ export interface ChainWeightOptions {
 }
 export interface AccessibilityOptions {
     accessibilityPreferred?: boolean;
+    stateControllerRoleType?: AccessibilityRoleType;
+    stateControllerId?: string;
+    actionControllerRoleType?: AccessibilityRoleType;
+    actionControllerId?: string;
+}
+export interface AccessibilityActionOptions {
+    scrollStep?: int32;
+}
+export interface CacheCountInfo {
+    minCount: int32;
+    maxCount: int32;
+}
+export type ResponsiveFillType = PresetFillType;
+export interface ItemFillPolicy {
+    fillType?: PresetFillType;
 }
 export class ColorFilter_serializer {
     public static write(buffer: SerializerBase, value: ColorFilter): void {
@@ -261,6 +276,30 @@ export class ColorFilter_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return ColorFilterInternal.fromPtr(ptr)
+    }
+}
+export class AccessibilityActionOptions_serializer {
+    public static write(buffer: SerializerBase, value: AccessibilityActionOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForScrollStep  = value.scrollStep
+        if (valueHolderForScrollStep !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForScrollStepTmpValue  = valueHolderForScrollStep!
+            valueSerializer.writeInt32(valueHolderForScrollStepTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): AccessibilityActionOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const scrollStepTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let scrollStepTmpBuf : int32 | undefined = undefined
+        if ((scrollStepTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            scrollStepTmpBuf = valueDeserializer.readInt32()
+        }
+        const scrollStepTmpResult : int32 | undefined = scrollStepTmpBuf
+        let value : AccessibilityActionOptions = ({scrollStep: scrollStepTmpResult} as AccessibilityActionOptions)
+        return value
     }
 }
 export class AccessibilityOptions_serializer {
@@ -274,6 +313,38 @@ export class AccessibilityOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForStateControllerRoleType  = value.stateControllerRoleType
+        if (valueHolderForStateControllerRoleType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStateControllerRoleTypeTmpValue  = (valueHolderForStateControllerRoleType as AccessibilityRoleType)
+            valueSerializer.writeInt32(valueHolderForStateControllerRoleTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForStateControllerId  = value.stateControllerId
+        if (valueHolderForStateControllerId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStateControllerIdTmpValue  = valueHolderForStateControllerId!
+            valueSerializer.writeString(valueHolderForStateControllerIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForActionControllerRoleType  = value.actionControllerRoleType
+        if (valueHolderForActionControllerRoleType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForActionControllerRoleTypeTmpValue  = (valueHolderForActionControllerRoleType as AccessibilityRoleType)
+            valueSerializer.writeInt32(valueHolderForActionControllerRoleTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForActionControllerId  = value.actionControllerId
+        if (valueHolderForActionControllerId !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForActionControllerIdTmpValue  = valueHolderForActionControllerId!
+            valueSerializer.writeString(valueHolderForActionControllerIdTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): AccessibilityOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -283,7 +354,31 @@ export class AccessibilityOptions_serializer {
             accessibilityPreferredTmpBuf = valueDeserializer.readBoolean()
         }
         const accessibilityPreferredTmpResult : boolean | undefined = accessibilityPreferredTmpBuf
-        let value : AccessibilityOptions = ({accessibilityPreferred: accessibilityPreferredTmpResult} as AccessibilityOptions)
+        const stateControllerRoleTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let stateControllerRoleTypeTmpBuf : AccessibilityRoleType | undefined = undefined
+        if ((stateControllerRoleTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            stateControllerRoleTypeTmpBuf = AccessibilityRoleType.fromValue(valueDeserializer.readInt32())
+        }
+        const stateControllerRoleTypeTmpResult : AccessibilityRoleType | undefined = stateControllerRoleTypeTmpBuf
+        const stateControllerIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let stateControllerIdTmpBuf : string | undefined = undefined
+        if ((stateControllerIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            stateControllerIdTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const stateControllerIdTmpResult : string | undefined = stateControllerIdTmpBuf
+        const actionControllerRoleTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let actionControllerRoleTypeTmpBuf : AccessibilityRoleType | undefined = undefined
+        if ((actionControllerRoleTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            actionControllerRoleTypeTmpBuf = AccessibilityRoleType.fromValue(valueDeserializer.readInt32())
+        }
+        const actionControllerRoleTypeTmpResult : AccessibilityRoleType | undefined = actionControllerRoleTypeTmpBuf
+        const actionControllerIdTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let actionControllerIdTmpBuf : string | undefined = undefined
+        if ((actionControllerIdTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            actionControllerIdTmpBuf = (valueDeserializer.readString() as string)
+        }
+        const actionControllerIdTmpResult : string | undefined = actionControllerIdTmpBuf
+        let value : AccessibilityOptions = ({accessibilityPreferred: accessibilityPreferredTmpResult, stateControllerRoleType: stateControllerRoleTypeTmpResult, stateControllerId: stateControllerIdTmpResult, actionControllerRoleType: actionControllerRoleTypeTmpResult, actionControllerId: actionControllerIdTmpResult} as AccessibilityOptions)
         return value
     }
 }
@@ -322,6 +417,22 @@ export class Bias_serializer {
         }
         const verticalTmpResult : double | undefined = verticalTmpBuf
         let value : Bias = ({horizontal: horizontalTmpResult, vertical: verticalTmpResult} as Bias)
+        return value
+    }
+}
+export class CacheCountInfo_serializer {
+    public static write(buffer: SerializerBase, value: CacheCountInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForMinCount  = value.minCount
+        valueSerializer.writeInt32(valueHolderForMinCount)
+        const valueHolderForMaxCount  = value.maxCount
+        valueSerializer.writeInt32(valueHolderForMaxCount)
+    }
+    public static read(buffer: DeserializerBase): CacheCountInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const minCountTmpResult : int32 = valueDeserializer.readInt32()
+        const maxCountTmpResult : int32 = valueDeserializer.readInt32()
+        let value : CacheCountInfo = ({minCount: minCountTmpResult, maxCount: maxCountTmpResult} as CacheCountInfo)
         return value
     }
 }
@@ -514,6 +625,30 @@ export class EdgeStyles_serializer {
         }
         const leftTmpResult : BorderStyle | undefined = leftTmpBuf
         let value : EdgeStyles = ({top: topTmpResult, right: rightTmpResult, bottom: bottomTmpResult, left: leftTmpResult} as EdgeStyles)
+        return value
+    }
+}
+export class ItemFillPolicy_serializer {
+    public static write(buffer: SerializerBase, value: ItemFillPolicy): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForFillType  = value.fillType
+        if (valueHolderForFillType !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFillTypeTmpValue  = (valueHolderForFillType as PresetFillType)
+            valueSerializer.writeInt32(valueHolderForFillTypeTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ItemFillPolicy {
+        let valueDeserializer : DeserializerBase = buffer
+        const fillTypeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fillTypeTmpBuf : PresetFillType | undefined = undefined
+        if ((fillTypeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            fillTypeTmpBuf = PresetFillType.fromValue(valueDeserializer.readInt32())
+        }
+        const fillTypeTmpResult : PresetFillType | undefined = fillTypeTmpBuf
+        let value : ItemFillPolicy = ({fillType: fillTypeTmpResult} as ItemFillPolicy)
         return value
     }
 }
@@ -1416,6 +1551,44 @@ export class Offset_serializer {
         return value
     }
 }
+export class ScrollBarMargin_serializer {
+    public static write(buffer: SerializerBase, value: ScrollBarMargin): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForStart  = value.start
+        if (valueHolderForStart !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForStartTmpValue  = valueHolderForStart!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForStartTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForEnd  = value.end
+        if (valueHolderForEnd !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForEndTmpValue  = valueHolderForEnd!
+            LengthMetrics_serializer.write(valueSerializer, valueHolderForEndTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ScrollBarMargin {
+        let valueDeserializer : DeserializerBase = buffer
+        const startTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let startTmpBuf : LengthMetrics | undefined = undefined
+        if ((startTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            startTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const startTmpResult : LengthMetrics | undefined = startTmpBuf
+        const endTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let endTmpBuf : LengthMetrics | undefined = undefined
+        if ((endTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            endTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
+        }
+        const endTmpResult : LengthMetrics | undefined = endTmpBuf
+        let value : ScrollBarMargin = ({start: startTmpResult, end: endTmpResult} as ScrollBarMargin)
+        return value
+    }
+}
 export class BorderRadiuses_serializer {
     public static write(buffer: SerializerBase, value: BorderRadiuses): void {
         let valueSerializer : SerializerBase = buffer
@@ -1743,10 +1916,10 @@ export class EdgeOutlineWidths_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTopTmpValueForIdx0  = valueHolderForTopTmpValue as string
                 valueSerializer.writeString(valueHolderForTopTmpValueForIdx0)
-            } else if (valueHolderForTopTmpValue instanceof int32) {
+            } else if (valueHolderForTopTmpValue instanceof number) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForTopTmpValueForIdx1  = valueHolderForTopTmpValue as int32
-                valueSerializer.writeInt32(valueHolderForTopTmpValueForIdx1)
+                const valueHolderForTopTmpValueForIdx1  = valueHolderForTopTmpValue as number
+                valueSerializer.writeNumber(valueHolderForTopTmpValueForIdx1)
             } else if (valueHolderForTopTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForTopTmpValueForIdx2  = valueHolderForTopTmpValue as Resource
@@ -1901,10 +2074,10 @@ export class Edges_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForTopTmpValueForIdx0  = valueHolderForTopTmpValue as string
                 valueSerializer.writeString(valueHolderForTopTmpValueForIdx0)
-            } else if (valueHolderForTopTmpValue instanceof int32) {
+            } else if (valueHolderForTopTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForTopTmpValueForIdx1  = valueHolderForTopTmpValue as int32
-                valueSerializer.writeInt32(valueHolderForTopTmpValueForIdx1)
+                const valueHolderForTopTmpValueForIdx1  = valueHolderForTopTmpValue as double
+                valueSerializer.writeNumber(valueHolderForTopTmpValueForIdx1)
             } else if (valueHolderForTopTmpValue instanceof Resource) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForTopTmpValueForIdx2  = valueHolderForTopTmpValue as Resource

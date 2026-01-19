@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/grid/irregular/grid_irregular_filler.h"
 
 #include "core/components_ng/pattern/grid/grid_item_pattern.h"
+#include "core/components_ng/pattern/grid/grid_layout_base_algorithm.h"
 #include "core/components_ng/pattern/grid/irregular/grid_layout_utils.h"
 
 namespace OHOS::Ace::NG {
@@ -205,7 +206,7 @@ std::pair<float, LayoutConstraintF> GridIrregularFiller::MeasureItem(
 {
     auto props = AceType::DynamicCast<GridLayoutProperty>(wrapper_->GetLayoutProperty());
     auto constraint = props->CreateChildConstraint();
-    auto child = wrapper_->GetOrCreateChildByIndex(itemIdx, !isCache, isCache);
+    auto child = GridLayoutBaseAlgorithm::GetGridItem(wrapper_, itemIdx, !isCache, isCache);
     CHECK_NULL_RETURN(child, {});
 
     const auto itemSize = GridLayoutUtils::GetItemSize(info_, wrapper_, itemIdx);

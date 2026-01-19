@@ -110,6 +110,17 @@ void AniThrowError(ani_env* env, ani_int code, const std::string& msg)
     }
 }
 
+ani_object CreateNull(ani_env* env)
+{
+    CHECK_NULL_RETURN(env, nullptr);
+    ani_ref nullObj;
+    if (ANI_OK != env->GetNull(&nullObj)) {
+        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT,  "Get null object failed!");
+        return nullptr;
+    }
+    return static_cast<ani_object>(nullObj);
+}
+
 std::string ANIUtils_ANIStringToStdString(ani_env* env, ani_string ani_str)
 {
     ani_size strSize;
@@ -157,7 +168,11 @@ void TriggerJsCallback(SnapshotAsyncCtx* asyncCtx)
 #endif
     }
     ani_status status = ANI_OK;
-    resultRef[0] = CreateStsError(ctx->env, ctx->errCode, "");
+    if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
+        resultRef[0] = CreateNull(ctx->env);
+    } else {
+        resultRef[0] = CreateStsError(ctx->env, ctx->errCode, "");
+    }
     if (ctx->deferred) {
         // promise
         if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
@@ -430,7 +445,7 @@ static bool GetOptionsRegion(ani_env* env, ani_object options, OHOS::Ace::NG::Sn
     return true;
 }
 
-static bool ParseColorModeOptions(
+static void ParseColorModeOptions(
     ani_env* env, ani_object colorModeObject, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
 {
     ani_ref colorSpaceRef;
@@ -463,29 +478,34 @@ static bool ParseColorModeOptions(
         }
         snapShotOptions.colorSpaceModeOptions.isAuto = isAuto;
     }
-
-    return true;
 }
 
 static bool GetOptionsColorMode(ani_env* env, ani_object options, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
 {
     ani_ref colorModeRef;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "colorMode", &colorModeRef)) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT,
+        TAG_LOGD(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "The \"colorMode\" attribute cannot be obtained from the parameter.");
         return false;
     }
     ani_boolean isColorModeUndefined = true;
     env->Reference_IsUndefined(colorModeRef, &isColorModeUndefined);
     if (isColorModeUndefined) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "The \"colorMode\" attribute is undefined.");
+        TAG_LOGD(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "The \"colorMode\" attribute is undefined.");
+        return false;
+    }
+    ani_boolean isNull = false;
+    env->Reference_IsNull(colorModeRef, &isNull);
+    if (isNull) {
+        TAG_LOGD(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "The \"colorMode\" attribute is null.");
         return false;
     }
 
-    return ParseColorModeOptions(env, static_cast<ani_object>(colorModeRef), snapShotOptions);
+    ParseColorModeOptions(env, static_cast<ani_object>(colorModeRef), snapShotOptions);
+    return true;
 }
 
-static bool ParseDynamicRangeModeOptions(
+static void ParseDynamicRangeModeOptions(
     ani_env* env, ani_object dynamicRangeModeObject, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
 {
     ani_ref dynamicRangeModeRef;
@@ -520,8 +540,6 @@ static bool ParseDynamicRangeModeOptions(
         }
         snapShotOptions.dynamicRangeModeOptions.isAuto = isAuto;
     }
-
-    return true;
 }
 
 static bool GetOptionsDynamicRangeMode(
@@ -529,18 +547,25 @@ static bool GetOptionsDynamicRangeMode(
 {
     ani_ref dynamicRangeModeRef;
     if (ANI_OK != env->Object_GetPropertyByName_Ref(options, "dynamicRangeMode", &dynamicRangeModeRef)) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT,
+        TAG_LOGD(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT,
             "The \"dynamicRangeMode\" attribute cannot be obtained from the parameter.");
         return false;
     }
     ani_boolean isDynamicRangeModeUndefined = true;
     env->Reference_IsUndefined(dynamicRangeModeRef, &isDynamicRangeModeUndefined);
     if (isDynamicRangeModeUndefined) {
-        TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "The \"dynamicRangeMode\" attribute is undefined.");
+        TAG_LOGD(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "The \"dynamicRangeMode\" attribute is undefined.");
+        return false;
+    }
+    ani_boolean isNull = false;
+    env->Reference_IsNull(dynamicRangeModeRef, &isNull);
+    if (isNull) {
+        TAG_LOGD(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "The \"dynamicRangeMode\" attribute is null.");
         return false;
     }
 
-    return ParseDynamicRangeModeOptions(env, static_cast<ani_object>(dynamicRangeModeRef), snapShotOptions);
+    ParseDynamicRangeModeOptions(env, static_cast<ani_object>(dynamicRangeModeRef), snapShotOptions);
+    return true;
 }
 
 static bool GetOptions(ani_env* env, ani_object options, OHOS::Ace::NG::SnapshotOptions& snapShotOptions)
@@ -561,6 +586,77 @@ static bool GetOptions(ani_env* env, ani_object options, OHOS::Ace::NG::Snapshot
     GetOptionsDynamicRangeMode(env, options, snapShotOptions);
 
     return true;
+}
+
+static bool GetNodeIdentity(ani_env* env, ani_object id, OHOS::Ace::NG::NodeIdentity& nodeIdentity)
+{
+    CHECK_NULL_RETURN(env, false);
+    ani_boolean isUndefined = true;
+    if (ANI_OK != env->Reference_IsUndefined(id, &isUndefined)) {
+        return false;
+    }
+    if (isUndefined) {
+        return false;
+    }
+
+    ani_class stringClass {};
+    env->FindClass("std.core.String", &stringClass);
+    ani_boolean isString = ANI_FALSE;
+    env->Object_InstanceOf(id, stringClass, &isString);
+    if (isString) {
+        auto nodeIdStr = ANIUtils_ANIStringToStdString(env, static_cast<ani_string>(id));
+        nodeIdentity.first = nodeIdStr;
+        return true;
+    }
+
+    ani_class intClass {};
+    env->FindClass("std.core.Int", &intClass);
+    ani_boolean isInt = ANI_FALSE;
+    env->Object_InstanceOf(id, intClass, &isInt);
+    if (isInt) {
+        ani_int nodeIdInt;
+        env->Object_CallMethodByName_Int(id, "toInt", ":i", &nodeIdInt);
+        nodeIdentity.second = static_cast<int32_t>(nodeIdInt);
+        return true;
+    }
+
+    return false;
+}
+
+static void HandleSyncSnapshotResult(
+    ani_env* env, const std::pair<int32_t, std::shared_ptr<OHOS::Media::PixelMap>>& pair, ani_object& pixelMap)
+{
+    switch (pair.first) {
+        case OHOS::Ace::ERROR_CODE_NO_ERROR:
+#ifdef PIXEL_MAP_SUPPORTED
+            pixelMap = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pair.second);
+            if (!pixelMap) {
+                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "PixelMapTaiheAni CreatePixelMap failed!");
+            }
+#endif
+            break;
+        case OHOS::Ace::ERROR_CODE_INTERNAL_ERROR:
+            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error!");
+            AniThrowError(env, pair.first, "Internal error!");
+            break;
+        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT:
+            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot timeout!");
+            AniThrowError(env, pair.first, "ComponentSnapshot timeout!");
+            break;
+        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED:
+            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                "Unsupported color space or dynamic range mode in snapshot options!");
+            AniThrowError(env, pair.first, "Unsupported color space or dynamic range mode in snapshot options!");
+            break;
+        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED:
+            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT,
+                "isAuto(true) is not supported for offscreen node snapshots!");
+            AniThrowError(env, pair.first, "isAuto(true) is not supported for offscreen node snapshots!");
+            break;
+        default:
+            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Unknown error code!");
+            break;
+    }
 }
 
 static void GetSnapshot(const std::string& componentId, OHOS::Ace::NG::ComponentSnapshot::JsCallback&& callback,
@@ -613,36 +709,7 @@ static ani_object ANI_GetSync([[maybe_unused]] ani_env* env, ani_string componen
     auto pair = GetSyncSnapshot(componentIdStr, snapshotOptions);
 
     ani_object pixelMap = nullptr;
-
-    switch (pair.first) {
-        case OHOS::Ace::ERROR_CODE_NO_ERROR:
-#ifdef PIXEL_MAP_SUPPORTED
-            pixelMap = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pair.second);
-            if (!pixelMap) {
-                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "PixelMapTaiheAni CreatePixelMap failed!");
-            }
-#endif
-            break;
-        case OHOS::Ace::ERROR_CODE_INTERNAL_ERROR:
-            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error!");
-            AniThrowError(env, pair.first, "Internal error!");
-            break;
-        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT:
-            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot timeout!");
-            AniThrowError(env, pair.first, "ComponentSnapshot timeout!");
-            break;
-        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED:
-            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot mode not supported!");
-            AniThrowError(env, pair.first, "ComponentSnapshot mode not supported!");
-            break;
-        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED:
-            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot auto not supported!");
-            AniThrowError(env, pair.first, "ComponentSnapshot auto not supported!");
-            break;
-        default:
-            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Unkonw error coed!");
-            break;
-    }
+    HandleSyncSnapshotResult(env, pair, pixelMap);
     return pixelMap;
 }
 void GetSnapshotByUniqueId(int32_t uniqueId,
@@ -654,7 +721,7 @@ void GetSnapshotByUniqueId(int32_t uniqueId,
 #endif
 }
 
-static ani_object ANI_GetWithUniqueId([[maybe_unused]] ani_env* env, ani_double id, ani_object options)
+static ani_object ANI_GetWithUniqueId([[maybe_unused]] ani_env* env, ani_int id, ani_object options)
 {
     int32_t uniqueId = static_cast<int32_t>(id);
     OHOS::Ace::NG::SnapshotOptions snapshotOptions;
@@ -674,7 +741,7 @@ std::pair<int32_t, std::shared_ptr<OHOS::Media::PixelMap>> GetSyncSnapshotByUniq
     return { OHOS::Ace::ERROR_CODE_INTERNAL_ERROR, nullptr };
 }
 
-static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_double id, ani_object options)
+static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_int id, ani_object options)
 {
     int32_t uniqueId = static_cast<int32_t>(id);
     OHOS::Ace::NG::SnapshotOptions snapshotOptions;
@@ -683,33 +750,37 @@ static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_dou
     auto pair = GetSyncSnapshotByUniqueId(uniqueId, snapshotOptions);
 
     ani_object pixelMap = nullptr;
-    switch (pair.first) {
-        case OHOS::Ace::ERROR_CODE_NO_ERROR:
-#ifdef PIXEL_MAP_SUPPORTED
-            pixelMap = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pair.second);
-            if (!pixelMap) {
-                TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "PixelMapTaiheAni CreatePixelMap failed!");
-            }
-#endif
-            break;
-        case OHOS::Ace::ERROR_CODE_INTERNAL_ERROR:
-            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error!");
-            AniThrowError(env, pair.first, "Internal error!");
-            break;
-        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_TIMEOUT:
-            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot timeout!");
-            AniThrowError(env, pair.first, "ComponentSnapshot timeout!");
-            break;
-        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_MODE_NOT_SUPPORTED:
-            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot mode not supported!");
-            AniThrowError(env, pair.first, "ComponentSnapshot mode not supported!");
-            break;
-        case OHOS::Ace::ERROR_CODE_COMPONENT_SNAPSHOT_AUTO_NOT_SUPPORTED:
-            TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ComponentSnapshot auto not supported!");
-            AniThrowError(env, pair.first, "ComponentSnapshot auto not supported!");
-            break;
-    }
+    HandleSyncSnapshotResult(env, pair, pixelMap);
     return pixelMap;
+}
+
+void GetSnapshotByRange(const OHOS::Ace::NG::NodeIdentity& startID,
+    const OHOS::Ace::NG::NodeIdentity& endID, const bool& isStartRect,
+    std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
+    const OHOS::Ace::NG::SnapshotOptions& options)
+{
+#ifdef ENABLE_ROSEN_BACKEND
+    OHOS::Ace::NG::ComponentSnapshot::GetWithRange(startID, endID, isStartRect, std::move(callback), options);
+#endif
+}
+
+static ani_object ANI_GetWithRange([[maybe_unused]] ani_env* env, ani_object start, ani_object end,
+    ani_boolean isStartRect, ani_object options)
+{
+    OHOS::Ace::NG::NodeIdentity startID;
+    GetNodeIdentity(env, start, startID);
+
+    OHOS::Ace::NG::NodeIdentity endID;
+    GetNodeIdentity(env, end, endID);
+
+    bool isStart = static_cast<bool>(isStartRect);
+
+    OHOS::Ace::NG::SnapshotOptions snapshotOptions;
+    GetOptions(env, options, snapshotOptions);
+
+    ani_object result = {};
+    GetSnapshotByRange(startID, endID, isStart, CreateCallbackFunc(env, nullptr, result), snapshotOptions);
+    return result;
 }
 
 ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
@@ -743,6 +814,7 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
         ani_native_function { "getSync", nullptr, reinterpret_cast<void*>(ANI_GetSync) },
         ani_native_function { "getWithUniqueId", nullptr, reinterpret_cast<void*>(ANI_GetWithUniqueId) },
         ani_native_function { "getSyncWithUniqueId", nullptr, reinterpret_cast<void*>(ANI_GetSyncWithUniqueId) },
+        ani_native_function { "getWithRange", nullptr, reinterpret_cast<void*>(ANI_GetWithRange) },
     };
     if (ANI_OK != env->Namespace_BindNativeFunctions(ns, methods.data(), methods.size())) {
         TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "ANI BindNativeFunctions failed!");

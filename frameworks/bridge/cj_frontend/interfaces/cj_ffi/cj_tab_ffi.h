@@ -25,7 +25,6 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_transitioneffect.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "core/components/swiper/swiper_controller.h"
-#include "core/components/tab_bar/tab_controller.h"
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/components_ng/pattern/tabs/tabs_controller.h"
 #include "core/components_ng/property/transition_property.h"
@@ -41,7 +40,7 @@ public:
     void PreloadItems(std::set<int32_t> indexSet);
     void SetTabBarTranslate(NG::TranslateOptions options);
     void SetTabBarOpacity(double opacity);
-    const RefPtr<TabController>& GetController() const
+    const RefPtr<AceType>& GetController() const
     {
         return controller_;
     }
@@ -57,7 +56,7 @@ public:
     }
 
 private:
-    RefPtr<TabController> controller_;
+    RefPtr<AceType> controller_;
     RefPtr<NG::TabsControllerNG> swiperController_; // used by ng structure
 };
 

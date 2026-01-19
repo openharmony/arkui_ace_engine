@@ -453,7 +453,7 @@ public:
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage, bool isNeedVisible);
 
     bool IsLastStdChange();
-    void ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+    bool ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination);
     void TransitionWithDialogAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
         const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isPopPage);
@@ -843,6 +843,8 @@ private:
     RefPtr<NavDestinationGroupNode> GetNonTopForceSplitHomeDestination();
     RefPtr<NavDestinationGroupNode> GetVisibleRelatedDestination();
     RefPtr<NavDestinationGroupNode> GetTopRelatedDestination();
+    void ProcessHideNavBarChangeInForceSplit();
+    void ReportPrimaryTopChangeIfNeeded(const WeakPtr<NavDestinationGroupNode>& prePrimaryTop);
     //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;

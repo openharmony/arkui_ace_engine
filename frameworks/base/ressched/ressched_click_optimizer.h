@@ -33,12 +33,12 @@ public:
     bool GetClickExtEnabled()
     {
         return clickExtEnabled_;
-    };
+    }
 
     void SetClickExtEnabled(bool value)
     {
         clickExtEnabled_ = value;
-    };
+    }
 
     int32_t GetDepth()
     {

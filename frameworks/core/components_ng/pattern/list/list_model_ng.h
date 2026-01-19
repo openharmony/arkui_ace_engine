@@ -18,7 +18,7 @@
 #include "base/utils/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/list/list_model.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 namespace OHOS::Ace::NG {
 
@@ -81,7 +81,7 @@ public:
     void SetOnItemDrop(OnItemDropFunc&& onItemDrop) override;
     void SetItemFillPolicy(PresetFillType fillType) override;
     void ResetItemFillPolicy() override;
-    RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize() override;
+    RefPtr<ListChildrenMainSize> GetOrCreateListChildrenMainSize(FrameNode* node = nullptr) override;
     void ParseResObjDividerStrokeWidth(const RefPtr<ResourceObject>& resObj) override;
     void ParseResObjDividerColor(const RefPtr<ResourceObject>& resObj) override;
     void ParseResObjDividerStartMargin(const RefPtr<ResourceObject>& resObj) override;

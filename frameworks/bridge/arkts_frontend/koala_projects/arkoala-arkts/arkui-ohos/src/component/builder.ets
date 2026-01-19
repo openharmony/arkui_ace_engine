@@ -2,7 +2,6 @@ import { int32, int64, float32 } from '@koalaui/common';
 import { KInt, KPointer, KBoolean, NativeBuffer, KStringPtr, wrapCallback } from '@koalaui/interop';
 import { memo, memo_stable } from '@koalaui/runtime/annotations';
 import { ComponentBuilder } from '@koalaui/builderLambda';
-import { conditionScopeImpl, conditionBranchImpl } from './conditionScope';
 import { isDynamicObject } from './interop';
 import { StateMgmtTool } from '#stateMgmtTool';
 
@@ -16,22 +15,6 @@ export class WrappedBuilder<T> {
 
 export function wrapBuilder<T>(builder: T): WrappedBuilder<T> {
     return new WrappedBuilder<T>(builder);
-}
-
-/** @memo:intrinsic */
-export function ConditionScope(
-    /** @memo */
-    content: () => void
-): void {
-    conditionScopeImpl(content);
-}
-
-/** @memo:intrinsic */
-export function ConditionBranch(
-    /** @memo */
-    content: () => void
-): void {
-    conditionBranchImpl(content);
 }
 
 export function makeBuilderParameterProxy<T extends Object>(
@@ -60,7 +43,8 @@ class BuilderLiteralInterfaceProxyHandler implements reflect.InvocationHandler {
         this.source = source;
     }
     get(target: Object, method: reflect.InstanceMethod): Any {
-        const name = method.getName().substring(5);
+        // the prefix is '%%get-', so the method name should start from 6.
+        const name = method.getName().substring(6);
         const propertyGetter: (() => Any) | undefined = this.source.get(name);
         if (propertyGetter) {
             return (propertyGetter as () => Any)();

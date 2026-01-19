@@ -280,6 +280,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractTest036, TestSize.Level1)
     ViewAbstract::ClearWidthOrHeight(true);
     ViewAbstract::SetRenderGroup(false);
     ViewAbstract::SetRenderGroup(nullptr, false);
+    ViewAbstract::SetAdaptiveGroup(true, true);
+    ViewAbstract::SetAdaptiveGroup(true, false);
+    ViewAbstract::BindColorPicker(ColorPlaceholder::NONE);
     ViewAbstract::SetRenderFit(RenderFit::BOTTOM);
     ViewAbstract::SetRenderFit(nullptr, RenderFit::BOTTOM);
     ViewAbstract::UpdateSafeAreaExpandOpts(safeAreaExpandOpts);

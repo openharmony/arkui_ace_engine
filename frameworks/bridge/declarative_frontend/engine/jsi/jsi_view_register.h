@@ -24,7 +24,7 @@ namespace OHOS::Ace::Framework {
 void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSupported = false);
 void JsBindFormViews(BindingTarget globalObj, const std::unordered_set<std::string>& formModuleList,
     void* nativeEngine, bool isReload = false);
-void JsBindFormViewsForJsXNode(BindingTarget globalObj);
+void JsBindFormViewsForJsXNode(BindingTarget globalObj, bool isFull = false);
 
 void UpdateRootComponent(const EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj);
 void JsBindWorkerViews(BindingTarget globalObj, void* nativeEngine);

@@ -476,6 +476,10 @@ export class TabSegmentButtonV2 extends ViewV2 {
     this.initParam('buttonMinHeight', params && 'buttonMinHeight' in params ? params.buttonMinHeight : undefined);
     this.initParam('buttonPadding', params && 'buttonPadding' in params ? params.buttonPadding : undefined);
     this.initParam('languageDirection', params && 'languageDirection' in params ? params.languageDirection : undefined);
+    this.initParam(
+      'backgroundSystemMaterial',
+      params && 'backgroundSystemMaterial' in params ? params.backgroundSystemMaterial : undefined
+    );
     this.finalizeConstruction();
   }
   initialRender() {
@@ -522,6 +526,7 @@ export class TabSegmentButtonV2 extends ViewV2 {
                 buttonMinHeight: this.buttonMinHeight,
                 buttonPadding: this.buttonPadding,
                 languageDirection: this.languageDirection,
+                backgroundSystemMaterial: this.backgroundSystemMaterial,
               },
               undefined,
               elmtId,
@@ -570,6 +575,7 @@ export class TabSegmentButtonV2 extends ViewV2 {
                 buttonMinHeight: this.buttonMinHeight,
                 buttonPadding: this.buttonPadding,
                 languageDirection: this.languageDirection,
+                backgroundSystemMaterial: this.backgroundSystemMaterial,
               };
             };
             componentCall.paramsGenerator_ = paramsLambda;
@@ -606,6 +612,7 @@ export class TabSegmentButtonV2 extends ViewV2 {
               buttonMinHeight: this.buttonMinHeight,
               buttonPadding: this.buttonPadding,
               languageDirection: this.languageDirection,
+              backgroundSystemMaterial: this.backgroundSystemMaterial,
             });
           }
         },
@@ -708,6 +715,9 @@ export class TabSegmentButtonV2 extends ViewV2 {
     if ('languageDirection' in params) {
       this.updateParam('languageDirection', params.languageDirection);
     }
+    if ('backgroundSystemMaterial' in params) {
+      this.updateParam('backgroundSystemMaterial', params.backgroundSystemMaterial);
+    }
   }
   rerender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
@@ -747,6 +757,7 @@ __decorate([Param], TabSegmentButtonV2.prototype, 'buttonBorderRadius', void 0);
 __decorate([Param], TabSegmentButtonV2.prototype, 'buttonMinHeight', void 0);
 __decorate([Param], TabSegmentButtonV2.prototype, 'buttonPadding', void 0);
 __decorate([Param], TabSegmentButtonV2.prototype, 'languageDirection', void 0);
+__decorate([Param], TabSegmentButtonV2.prototype, 'backgroundSystemMaterial', void 0);
 export class CapsuleSegmentButtonV2 extends ViewV2 {
   constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
     super(parent, elmtId, extraInfo);
@@ -821,6 +832,10 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
     this.initParam('buttonMinHeight', params && 'buttonMinHeight' in params ? params.buttonMinHeight : undefined);
     this.initParam('buttonPadding', params && 'buttonPadding' in params ? params.buttonPadding : undefined);
     this.initParam('languageDirection', params && 'languageDirection' in params ? params.languageDirection : undefined);
+    this.initParam(
+      'backgroundSystemMaterial',
+      params && 'backgroundSystemMaterial' in params ? params.backgroundSystemMaterial : undefined
+    );
     this.finalizeConstruction();
   }
   initialRender() {
@@ -867,6 +882,7 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
                 buttonMinHeight: this.buttonMinHeight,
                 buttonPadding: this.buttonPadding,
                 languageDirection: this.languageDirection,
+                backgroundSystemMaterial: this.backgroundSystemMaterial,
               },
               undefined,
               elmtId,
@@ -915,6 +931,7 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
                 buttonMinHeight: this.buttonMinHeight,
                 buttonPadding: this.buttonPadding,
                 languageDirection: this.languageDirection,
+                backgroundSystemMaterial: this.backgroundSystemMaterial,
               };
             };
             componentCall.paramsGenerator_ = paramsLambda;
@@ -951,6 +968,7 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
               buttonMinHeight: this.buttonMinHeight,
               buttonPadding: this.buttonPadding,
               languageDirection: this.languageDirection,
+              backgroundSystemMaterial: this.backgroundSystemMaterial,
             });
           }
         },
@@ -1053,6 +1071,9 @@ export class CapsuleSegmentButtonV2 extends ViewV2 {
     if ('languageDirection' in params) {
       this.updateParam('languageDirection', params.languageDirection);
     }
+    if ('backgroundSystemMaterial' in params) {
+      this.updateParam('backgroundSystemMaterial', params.backgroundSystemMaterial);
+    }
   }
   rerender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
@@ -1092,6 +1113,7 @@ __decorate([Param], CapsuleSegmentButtonV2.prototype, 'buttonBorderRadius', void
 __decorate([Param], CapsuleSegmentButtonV2.prototype, 'buttonMinHeight', void 0);
 __decorate([Param], CapsuleSegmentButtonV2.prototype, 'buttonPadding', void 0);
 __decorate([Param], CapsuleSegmentButtonV2.prototype, 'languageDirection', void 0);
+__decorate([Param], CapsuleSegmentButtonV2.prototype, 'backgroundSystemMaterial', void 0);
 class SimpleSegmentButtonV2 extends ViewV2 {
   constructor(parent, params, __localStorage, elmtId = -1, paramsLambda, extraInfo) {
     super(parent, elmtId, extraInfo);
@@ -1482,6 +1504,10 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     this.initParam('buttonMinHeight', params && 'buttonMinHeight' in params ? params.buttonMinHeight : undefined);
     this.initParam('buttonPadding', params && 'buttonPadding' in params ? params.buttonPadding : undefined);
     this.initParam('languageDirection', params && 'languageDirection' in params ? params.languageDirection : undefined);
+    this.initParam(
+      'backgroundSystemMaterial',
+      params && 'backgroundSystemMaterial' in params ? params.backgroundSystemMaterial : undefined
+    );
     this.itemRects = [];
     this.itemScale = 1;
     this.hoveredItemIndex = -1;
@@ -1525,9 +1551,8 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     this.observeComponentCreation2((elmtId, isInitialRender) => {
       Stack.create();
       Stack.backgroundColor(this.getButtonBackgroundColor());
-      Stack.backgroundEffect(this.buttonBackgroundEffect, {
-        disableSystemAdaptation: true,
-      });
+      Stack.systemMaterial(this.backgroundSystemMaterial);
+      Stack.backgroundEffect(this.buttonBackgroundEffect, { disableSystemAdaptation: true });
       Stack.borderRadius(this.getButtonBorderRadius());
       Stack.clip(false);
       Stack.constraintSize({
@@ -1817,6 +1842,9 @@ class SimpleSegmentButtonV2 extends ViewV2 {
     if ('languageDirection' in params) {
       this.updateParam('languageDirection', params.languageDirection);
     }
+    if ('backgroundSystemMaterial' in params) {
+      this.updateParam('backgroundSystemMaterial', params.backgroundSystemMaterial);
+    }
   }
   rerender() {
     PUV2ViewBase.contextStack && PUV2ViewBase.contextStack.push(this);
@@ -1857,6 +1885,7 @@ __decorate([Param], SimpleSegmentButtonV2.prototype, 'buttonBorderRadius', void 
 __decorate([Param], SimpleSegmentButtonV2.prototype, 'buttonMinHeight', void 0);
 __decorate([Param], SimpleSegmentButtonV2.prototype, 'buttonPadding', void 0);
 __decorate([Param], SimpleSegmentButtonV2.prototype, 'languageDirection', void 0);
+__decorate([Param], SimpleSegmentButtonV2.prototype, 'backgroundSystemMaterial', void 0);
 __decorate([Local], SimpleSegmentButtonV2.prototype, 'itemRects', void 0);
 __decorate([Local], SimpleSegmentButtonV2.prototype, 'itemScale', void 0);
 __decorate([Local], SimpleSegmentButtonV2.prototype, 'hoveredItemIndex', void 0);

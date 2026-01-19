@@ -1,4 +1,4 @@
-# Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+# Copyright (c) 2021-2026 Huawei Device Co., Ltd.
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -14,12 +14,55 @@
 import("//build/ohos.gni")
 import("//foundation/arkui/ace_engine/ace_config.gni")
 
+component_modules = [
+  "counter",
+  "gauge",
+  "hyperlink",
+  "checkbox",
+  "rating",
+  "waterflow",
+  "linear_split",
+  "side_bar",
+  "marquee",
+  "stepper",
+  "radio",
+  "slider",
+]
+component_modules_libs = []
+
+foreach(module, component_modules) {
+  sub_name = string_replace(module, "_", "")
+  module_name = "arkui_$sub_name"
+  ohos_shared_library(module_name) {
+    deps = []
+    if (is_ohos) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_ohos" ]
+    } else if (use_mingw_win) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_windows" ]
+    } else if (use_mac) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_mac" ]
+    } else if (use_linux) {
+      deps += [ "$ace_root/frameworks/core/components_ng/pattern/${module}:ace_core_components_${module}_pattern_ng_linux" ]
+    }
+
+    deps += [
+      "$ace_root/build:libace_compatible",
+      "$ace_root/frameworks/core:ace_container_scope"
+    ]
+
+    part_name = ace_engine_part
+    subsystem_name = ace_engine_subsystem
+  }
+  component_modules_libs += [ ":$module_name" ]
+}
+
 # Install packages
 group("ace_packages") {
   # core library for Ability Cross-platform Environment(ACE) JS
   deps = [
     "$ace_root/adapter/ohos/tools:tools_target",
     "$ace_root/advanced_ui_component:advanced_ui_component",
+    "$ace_root/advanced_ui_component_static:advanced_ui_component_static",
     "$ace_root/build:libace",
     "$ace_root/build:libace_compatible",
     "$ace_root/build:libace_compatible_components",
@@ -41,4 +84,5 @@ group("ace_packages") {
   if (is_asan) {
     deps -= [ "$ace_root/build:libace" ]
   }
+  deps += component_modules_libs
 }

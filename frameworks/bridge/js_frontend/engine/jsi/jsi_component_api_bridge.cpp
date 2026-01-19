@@ -15,7 +15,8 @@
 
 #include "frameworks/bridge/js_frontend/engine/jsi/jsi_component_api_bridge.h"
 
-#include "frameworks/bridge/common/dom/dom_list.h"
+#include "frameworks/compatible/components/list/dom_list.h"
+#include "frameworks/core/components/list/list_compatible_modifier_helper.h"
 
 namespace OHOS::Ace::Framework {
 
@@ -47,7 +48,9 @@ shared_ptr<JsValue> JsiComponentApiBridge::JsGetScrollOffset(const shared_ptr<Js
         }
         auto domList = AceType::DynamicCast<DOMList>(domNode);
         if (domList) {
-            offset = domList->GetCurrentOffset();
+            auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+            CHECK_NULL_VOID(modifier);
+            offset = modifier->getCurrentOffset(domList);
             return;
         }
 
@@ -157,7 +160,9 @@ void JsiComponentApiBridge::JsScrollTo(
         auto domList = AceType::DynamicCast<DOMList>(domNode);
         if (domList) {
             // list has specialized scrollTo method.
-            domList->ScrollToMethod(index);
+            auto* modifier = ListCompatibleModifierHelper::GetListCompatibleModifier();
+            CHECK_NULL_VOID(modifier);
+            modifier->scrollToMethod(domList, index);
             return;
         }
 

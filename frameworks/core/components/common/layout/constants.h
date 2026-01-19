@@ -599,6 +599,7 @@ enum class SrcType {
     RESOURCE_ID, // default resource which src is internal resource id
     PIXMAP,
     ASTC,
+    STREAM,
 };
 
 enum class WrapAlignment {

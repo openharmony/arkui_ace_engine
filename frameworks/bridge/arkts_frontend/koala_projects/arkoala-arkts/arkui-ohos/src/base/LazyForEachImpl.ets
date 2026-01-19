@@ -69,7 +69,8 @@ export function LazyForEachImplForOptions<T>(dataSource: IDataSource<T>,
         return res
     })
     listener.version.get() // subscribe
-    const changeIndex = listener.flush(node.getPeerPtr()) // first item index that's affected by DataChange
+    // first item index that's affected by DataChange
+    const changeIndex = listener.flush(node.getPeerPtr(), pool.activeStart)
     if (changeIndex < Number.POSITIVE_INFINITY) {
         scheduleCallback(() => {
             pool.pruneBy((index: int32) => index >= changeIndex)
@@ -121,14 +122,10 @@ function createLazyNode(isRepeat: boolean): PeerNode {
 }
 
 class LazyItemCompositionContext {
-    private prevFrozen: boolean
     private prevNeedCreate: boolean
     private prevCurrent?: Object
 
     constructor(parentComponent?: Object) {
-        const manager = GlobalStateManager.instance
-        this.prevFrozen = manager.frozen
-        manager.frozen = true
         this.prevNeedCreate = setNeedCreate(true) // ensure synchronous creation of all inner CustomComponent
         this.prevCurrent = CustomComponent.current
         CustomComponent.current = parentComponent // setup CustomComponent context to link with @Provide variables
@@ -137,7 +134,6 @@ class LazyItemCompositionContext {
     exit(): void {
         CustomComponent.current = this.prevCurrent
         setNeedCreate(this.prevNeedCreate)
-        GlobalStateManager.instance.frozen = this.prevFrozen
     }
 }
 
@@ -146,6 +142,7 @@ class LazyItemPool implements Disposable {
     private _parent: PeerNode
     private _componentRoot?: Object
     private _moveFromTo?: [int32, int32] = undefined // used to track moveFromTo in onMove event
+    public activeStart?: int32 
     public total: int32 = 0 // total count of data source
     disposed: boolean = false
 
@@ -232,6 +229,8 @@ class LazyItemPool implements Disposable {
      * @param end 
      */
     updateActiveRange(start: int32, end: int32, cacheStart: int32, cacheEnd: int32, isLoop: boolean) {
+        // update activeStart from backend call
+        this.activeStart = start
         try {
             this.pruneBy(index => {
                 index = this.convertFromToIndexRevert(index)

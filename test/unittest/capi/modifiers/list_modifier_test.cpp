@@ -21,7 +21,7 @@
 #include "core/components_ng/pattern/list/list_event_hub.h"
 #include "core/components_ng/pattern/list/list_layout_property.h"
 #include "core/components_ng/pattern/scrollable/scrollable_theme.h"
-#include "core/components_v2/list/list_properties.h"
+#include "core/components_ng/pattern/list/list_properties.h"
 
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
@@ -240,23 +240,20 @@ HWTEST_F(ListModifierTest, setContentStartOffsetTest, TestSize.Level1)
     auto checkValue = GetAttrValue<std::string>(node_, "contentStartOffset");
     EXPECT_EQ(checkValue, "0.000000");
 
-    auto intNum = Converter::ArkValue<Ark_Float64>(11);
-    auto optIntNum = Converter::ArkValue<Opt_Float64>(intNum);
-    modifier_->setContentStartOffset(node_, &optIntNum);
+    auto inputValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(11.);
+    modifier_->setContentStartOffset(node_, &inputValue);
     checkValue = GetAttrValue<std::string>(node_, "contentStartOffset");
     EXPECT_EQ(checkValue, "11.000000");
 
-    auto floatNum = Converter::ArkValue<Ark_Float64>(22.2f);
-    auto optFloatNum = Converter::ArkValue<Opt_Float64>(floatNum);
-    modifier_->setContentStartOffset(node_, &optFloatNum);
+    inputValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(22.2);
+    modifier_->setContentStartOffset(node_, &inputValue);
     checkValue = GetAttrValue<std::string>(node_, "contentStartOffset");
-    EXPECT_THAT(checkValue, StartsWith("22.2"));
+    EXPECT_EQ(checkValue, "22.200001");
 
-    intNum = Converter::ArkValue<Ark_Float64>(-33);
-    optIntNum = Converter::ArkValue<Opt_Float64>(intNum);
-    modifier_->setContentStartOffset(node_, &optIntNum);
+    inputValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-33.);
+    modifier_->setContentStartOffset(node_, &inputValue);
     checkValue = GetAttrValue<std::string>(node_, "contentStartOffset");
-    EXPECT_THAT(checkValue, StartsWith("-33.000000"));
+    EXPECT_EQ(checkValue, "-33.000000");
 }
 
 /**
@@ -269,23 +266,20 @@ HWTEST_F(ListModifierTest, setContentEndOffsetTest, TestSize.Level1)
     auto checkValue = GetAttrValue<std::string>(node_, "contentEndOffset");
     EXPECT_EQ(checkValue, "0.000000");
 
-    auto intNum = Converter::ArkValue<Ark_Float64>(11);;
-    auto optIntNum = Converter::ArkValue<Opt_Float64>(intNum);
-    modifier_->setContentEndOffset(node_, &optIntNum);
+    auto inputValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(11.);
+    modifier_->setContentEndOffset(node_, &inputValue);
     checkValue = GetAttrValue<std::string>(node_, "contentEndOffset");
     EXPECT_EQ(checkValue, "11.000000");
 
-    auto floatNum = Converter::ArkValue<Ark_Float64>(22.2f);
-    auto optFloatNum = Converter::ArkValue<Opt_Float64>(floatNum);
-    modifier_->setContentEndOffset(node_, &optFloatNum);
+    inputValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(22.2);
+    modifier_->setContentEndOffset(node_, &inputValue);
     checkValue = GetAttrValue<std::string>(node_, "contentEndOffset");
-    EXPECT_THAT(checkValue, StartsWith("22.2"));
+    EXPECT_EQ(checkValue, "22.200001");
 
-    intNum = Converter::ArkValue<Ark_Float64>(-55);
-    optIntNum = Converter::ArkValue<Opt_Float64>(intNum);
-    modifier_->setContentEndOffset(node_, &optIntNum);
+    inputValue = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-55.);
+    modifier_->setContentEndOffset(node_, &inputValue);
     checkValue = GetAttrValue<std::string>(node_, "contentEndOffset");
-    EXPECT_THAT(checkValue, StartsWith("-55"));
+    EXPECT_EQ(checkValue, "-55.000000");
 }
 
 /**
@@ -416,8 +410,7 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
     EXPECT_EQ(gutterCheckValue, "0.00vp");
 
     // lanes, gutter are valid
-    Ark_Union_Number_LengthConstrain value =  Converter::ArkUnion<Ark_Union_I32_LengthConstrain, Ark_Int32>(2);
-    auto optValue = Converter::ArkValue<Opt_Union_I32_LengthConstrain>(value);
+    auto optValue = Converter::ArkUnion<Opt_Union_I32_LengthConstrain_ItemFillPolicy, Ark_Int32>(2);
     auto gutterOpt = Converter::ArkValue<Opt_Dimension>(55.5f);
     modifier_->setLanes(node_, &optValue, &gutterOpt);
     lanesCheckValue = GetAttrValue<std::string>(node_, "lanes");
@@ -440,8 +433,7 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
         .minLength = Converter::ArkValue<Ark_Length>("11fp"),
         .maxLength = Converter::ArkValue<Ark_Length>("77.7px"),
     };
-    value = Converter::ArkUnion<Ark_Union_I32_LengthConstrain, Ark_LengthConstrain>(constraint);
-    optValue = Converter::ArkValue<Opt_Union_I32_LengthConstrain>(value);
+    optValue = Converter::ArkUnion<Opt_Union_I32_LengthConstrain_ItemFillPolicy, Ark_LengthConstrain>(constraint);
     modifier_->setLanes(node_, &optValue, &gutterOpt);
     lanesCheckValue = GetAttrValue<std::string>(node_, "lanes");
     EXPECT_EQ(lanesCheckValue, "1");
@@ -459,8 +451,7 @@ HWTEST_F(ListModifierTest, setLanesTest, TestSize.Level1)
 HWTEST_F(ListModifierTest, setLanesNegativeTest, TestSize.Level1)
 {
     // lanes, gutter are negative
-    Ark_Union_Number_LengthConstrain value = Converter::ArkUnion<Ark_Union_I32_LengthConstrain, Ark_I32>(-2);
-    auto optValue = Converter::ArkValue<Opt_Union_I32_LengthConstrain>(value);
+    auto optValue = Converter::ArkUnion<Opt_Union_I32_LengthConstrain_ItemFillPolicy, Ark_Int32>(-2);
     auto gutterOpt = Converter::ArkValue<Opt_Dimension>("-88px");
     modifier_->setLanes(node_, &optValue, &gutterOpt);
     auto lanesCheckValue = GetAttrValue<std::string>(node_, "lanes");
@@ -597,19 +588,27 @@ HWTEST_F(ListModifierTest, setDividerColorStringTest, TestSize.Level1)
     auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
     auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
     EXPECT_EQ(colorCheckValue, "#11223344");
+}
 
-    divider = Converter::ArkValue<Opt_ListDividerOptions>();
+/**
+ * @tc.name: setDividerEmptyTest
+ * @tc.desc: Check the functionality of ListModifier.setDivider
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListModifierTest, setDividerEmptyTest, TestSize.Level1)
+{
+    auto divider = Converter::ArkValue<Opt_ListDividerOptions>();
     modifier_->setDivider(node_, &divider);
-    fullJson = GetJsonValue(node_);
-    dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
+    auto fullJson = GetJsonValue(node_);
+    auto dividerObject = GetAttrValue<std::unique_ptr<JsonValue>>(fullJson, "divider");
     auto strokeWidthCheckValue = GetAttrValue<std::string>(dividerObject, "strokeWidth");
-    EXPECT_EQ(strokeWidthCheckValue, "0.00vp");
+    EXPECT_EQ(strokeWidthCheckValue, "");
     auto startMarginCheckValue = GetAttrValue<std::string>(dividerObject, "startMargin");
-    EXPECT_EQ(startMarginCheckValue, "0.00vp");
+    EXPECT_EQ(startMarginCheckValue, "");
     auto endMarginCheckValue = GetAttrValue<std::string>(dividerObject, "endMargin");
-    EXPECT_EQ(endMarginCheckValue, "0.00vp");
-    colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
-    EXPECT_EQ(colorCheckValue, "#00000000");
+    EXPECT_EQ(endMarginCheckValue, "");
+    auto colorCheckValue = GetAttrValue<std::string>(dividerObject, "color");
+    EXPECT_EQ(colorCheckValue, "");
 }
 
 /**
@@ -654,7 +653,7 @@ HWTEST_F(ListModifierTest, setOnScrollIndexTest, TestSize.Level1)
         int32_t center;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_Number_Number_Number_Void arkCallback = {
+    Callback_I32_I32_I32_Void arkCallback = {
         .resource = {.resourceId = frameNode->GetId()},
         .call = [](Ark_Int32 nodeId, const Ark_Int32 start, const Ark_Int32 end, const Ark_Int32 center) {
             checkEvent = {
@@ -810,7 +809,7 @@ HWTEST_F(ListModifierTest, setOnItemDragMoveTest, TestSize.Level1)
         int32_t insertIndex;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_ItemDragInfo_Number_Number_Void arkCallback = {
+    Callback_ItemDragInfo_I32_I32_Void arkCallback = {
         .resource = {.resourceId = frameNode->GetId()},
         .call = [](Ark_Int32 nodeId, const Ark_ItemDragInfo event,
                 const Ark_Int32 itemIndex, const Ark_Int32 insertIndex) {
@@ -856,7 +855,7 @@ HWTEST_F(ListModifierTest, setOnItemDragLeaveTest, TestSize.Level1)
         int32_t itemIndex;
     };
     static std::optional<CheckEvent> checkEvent = std::nullopt;
-    Callback_ItemDragInfo_Number_Void arkCallback = {
+    Callback_ItemDragInfo_I32_Void arkCallback = {
         .resource = {.resourceId = frameNode->GetId()},
         .call = [](Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_Int32 itemIndex) {
             checkEvent = {
@@ -867,7 +866,7 @@ HWTEST_F(ListModifierTest, setOnItemDragLeaveTest, TestSize.Level1)
         }
     };
 
-    auto optCallback = Converter::ArkValue<Opt_Callback_ItemDragInfo_Int32_Void>(arkCallback);
+    auto optCallback = Converter::ArkValue<Opt_Callback_ItemDragInfo_I32_Void>(arkCallback);
     modifier_->setOnItemDragLeave(node_, &optCallback);
 
     dragInfo.SetX(135);
@@ -988,8 +987,8 @@ HWTEST_F(ListModifierTest, setOnItemMoveTest, TestSize.Level1)
     static std::optional<CheckEvent> checkEvent = std::nullopt;
     Callback_ItemDragInfo_I32_I32_Boolean_Void arkCallbackDrop = {
         .resource = {.resourceId = frameNode->GetId()},
-        .call = [](Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_I32 itemIndex,
-                const Ark_I32 insertIndex, const Ark_Boolean isSuccess) {
+        .call = [](Ark_Int32 nodeId, const Ark_ItemDragInfo event, const Ark_Int32 itemIndex,
+                const Ark_Int32 insertIndex, const Ark_Boolean isSuccess) {
             checkEvent = {.nodeId = nodeId,
                 .dragInfo = Converter::Convert<ItemDragInfo>(event),
                 .itemIndex = Converter::Convert<int32_t>(itemIndex),

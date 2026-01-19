@@ -58,6 +58,7 @@ namespace  {
     constexpr auto TRACK_SHADOW_RADIUS_THEME_DEFAULT = "0.000000";
     const auto RES_VALUE_NAME = NamedResourceId{"test_value", ResourceType::FLOAT};
     const auto RES_VALUE_ID = IntResourceId{1, ResourceType::FLOAT};
+    Converter::ConvContext s_ctx;
 } // namespace
 
 class DataPanelModifierTest : public ModifierTestBase<GENERATED_ArkUIDataPanelModifier,
@@ -103,28 +104,23 @@ HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestDefaultValues, TestSize.L
 }
 
 // Valid values for attribute 'values' of method 'setDataPanelOptions'
-auto numberArray1 = std::array{ Converter::ArkValue<Ark_Number>(1), Converter::ArkValue<Ark_Number>(2),
-    Converter::ArkValue<Ark_Number>(3)
-};
-Converter::ArkArrayHolder<Array_Number> arrayHolder1(numberArray1);
-Array_Number numberArrayResult1 = arrayHolder1.ArkValue();
+const auto numberArray1 = std::array{ 1.0, 2.0, 3.0 };
+const auto numberArray2 = std::array{ 4.0, 5.0, 6.0 };
 
-auto numberArray2 = std::array{ Converter::ArkValue<Ark_Number>(4.0f), Converter::ArkValue<Ark_Number>(5.0f),
-    Converter::ArkValue<Ark_Number>(6.0f)
-};
-Converter::ArkArrayHolder<Array_Number> arrayHolder2(numberArray2);
-Array_Number numberArrayResult2 = arrayHolder2.ArkValue();
-
-static std::vector<std::tuple<std::string, Array_Number, std::string>> setDataPanelOptionsValuesValidValues = {
-    {"[1,2,3]", numberArrayResult1, "[1,2,3]"},
-    {"[4,5,6]", numberArrayResult2, "[4,5,6]"},
+static std::vector<std::tuple<std::string, Array_Float64, std::string>> setDataPanelOptionsValuesValidValues = {
+    {"[1,2,3]", Converter::ArkValue<Array_Float64>(numberArray1, &s_ctx), "[1,2,3]"},
+    {"[4,5,6]", Converter::ArkValue<Array_Float64>(numberArray2, &s_ctx), "[4,5,6]"},
 };
 
 // Valid values for attribute 'max' of method 'setDataPanelOptions'
-static std::vector<std::tuple<std::string, Opt_Number, std::string>> setDataPanelOptionsMaxValidValues = {
-    {"100.000000", Converter::ArkValue<Opt_Number>(100), "100.000000"},
-    {"1.000000", Converter::ArkValue<Opt_Number>(1), "1.000000"},
-    {"2.000000", Converter::ArkValue<Opt_Number>(2.0f), "2.000000"},
+static std::vector<std::tuple<std::string, Opt_Float64, std::string>> setDataPanelOptionsMaxValidValues = {
+    {"10.000000", Converter::ArkValue<Opt_Float64>(10.0), "10.000000"},
+    {"1.000000", Converter::ArkValue<Opt_Float64>(1.0), "1.000000"},
+    {"2.000000", Converter::ArkValue<Opt_Float64>(2.0), "2.000000"},
+    {"100.000000", Converter::ArkValue<Opt_Float64>(100.0), "100.000000"},
+    // Special case, if 'max' is less or equal 0, it set to sum of values. In our case its [1,2,3]
+    {"0", Converter::ArkValue<Opt_Float64>(0.), "6.000000"},
+    {"-1", Converter::ArkValue<Opt_Float64>(-1.), "6.000000"},
 };
 
 // Valid values for attribute 'type' of method 'setDataPanelOptions'
@@ -151,16 +147,18 @@ HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestValidValues, TestSize.Lev
 
     // Initial setup
     initValueOptions.values = std::get<1>(setDataPanelOptionsValuesValidValues[0]);
-    initValueOptions.max = std::get<1>(setDataPanelOptionsMaxValidValues[0]);
-    initValueOptions.type = std::get<1>(setDataPanelOptionsTypeValidValues[0]);
+    initValueOptions.max = Converter::ArkValue<Opt_Float64>();
+    initValueOptions.type = Converter::ArkValue<Opt_DataPanelType>();
 
     // Verifying attribute's 'values'  values
     inputValueOptions = initValueOptions;
     for (auto&& value: setDataPanelOptionsValuesValidValues) {
         inputValueOptions.values = std::get<1>(value);
-        modifier_->setDataPanelOptions(node_, &inputValueOptions);
-        jsonValue = GetJsonValue(node_);
+        auto node = CreateNode();
+        modifier_->setDataPanelOptions(node, &inputValueOptions);
+        jsonValue = GetJsonValue(node);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUES_NAME);
+        DisposeNode(node);
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
@@ -169,9 +167,11 @@ HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestValidValues, TestSize.Lev
     inputValueOptions = initValueOptions;
     for (auto&& value: setDataPanelOptionsMaxValidValues) {
         inputValueOptions.max = std::get<1>(value);
-        modifier_->setDataPanelOptions(node_, &inputValueOptions);
-        jsonValue = GetJsonValue(node_);
+        auto node = CreateNode();
+        modifier_->setDataPanelOptions(node, &inputValueOptions);
+        jsonValue = GetJsonValue(node);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_NAME);
+        DisposeNode(node);
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
@@ -180,30 +180,26 @@ HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestValidValues, TestSize.Lev
     inputValueOptions = initValueOptions;
     for (auto&& value: setDataPanelOptionsTypeValidValues) {
         inputValueOptions.type = std::get<1>(value);
-        modifier_->setDataPanelOptions(node_, &inputValueOptions);
-        jsonValue = GetJsonValue(node_);
+        auto node = CreateNode();
+        modifier_->setDataPanelOptions(node, &inputValueOptions);
+        jsonValue = GetJsonValue(node);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
+        DisposeNode(node);
         expectedStr = std::get<2>(value);
         EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
     }
 }
 
 //Invalid values attribute 'values'
-auto numberArray3 = std::array{ Converter::ArkValue<Ark_Number>(-1), Converter::ArkValue<Ark_Number>(-2),
-    Converter::ArkValue<Ark_Number>(3), Converter::ArkValue<Ark_Number>(4), Converter::ArkValue<Ark_Number>(5),
-    Converter::ArkValue<Ark_Number>(6), Converter::ArkValue<Ark_Number>(7), Converter::ArkValue<Ark_Number>(8),
-    Converter::ArkValue<Ark_Number>(9), Converter::ArkValue<Ark_Number>(10),
-};
-Converter::ArkArrayHolder<Array_Number> arrayHolder3(numberArray3);
-Array_Number numberArrayResult3 = arrayHolder3.ArkValue();
+auto numberArray3 = std::array{ -1., -2., 3. };
 
-static std::vector<std::tuple<std::string, Array_Number, std::string>> setDataPanelOptionsValuesInvalidValues = {
-    {"[1,2,3]", numberArrayResult3, "[1,2,3]"},
+static std::vector<std::tuple<std::string, Array_Float64, std::string>> setDataPanelOptionsValuesInvalidValues = {
+    {"[-1,-2,3]", Converter::ArkValue<Array_Float64>(numberArray3, &s_ctx), "[0,0,3]"},
 };
 
 // Invalid values for attribute 'max' of method 'setDataPanelOptions'
-static std::vector<std::tuple<std::string, Opt_Number>> setDataPanelOptionsMaxInvalidValues = {
-    {"Ark_Empty()", Converter::ArkValue<Opt_Number>(Ark_Empty())},
+static std::vector<std::tuple<std::string, Opt_Float64>> setDataPanelOptionsMaxInvalidValues = {
+    {"Ark_Empty()", Converter::ArkValue<Opt_Float64>(Ark_Empty())},
 };
 
 // Invalid values for attribute 'type' of method 'setDataPanelOptions'
@@ -227,32 +223,45 @@ HWTEST_F(DataPanelModifierTest, setDataPanelOptionsTestInvalidValues, TestSize.L
     Ark_DataPanelOptions initValueOptions;
 
     // Initial setup
-    initValueOptions.values = std::get<1>(setDataPanelOptionsValuesInvalidValues[0]);
-    initValueOptions.max = std::get<1>(setDataPanelOptionsMaxInvalidValues[0]);
-    initValueOptions.type = std::get<1>(setDataPanelOptionsTypeInvalidValues[0]);
+    initValueOptions.values = std::get<1>(setDataPanelOptionsValuesValidValues[0]);
+    initValueOptions.max = Converter::ArkValue<Opt_Float64>();
+    initValueOptions.type = Converter::ArkValue<Opt_DataPanelType>();
+
+    // Verifying attribute's 'values'  values
+    for (auto&& value: setDataPanelOptionsValuesInvalidValues) {
+        inputValueOptions = initValueOptions;
+        inputValueOptions.values = std::get<1>(value);
+        auto node = CreateNode();
+        modifier_->setDataPanelOptions(node, &inputValueOptions);
+        jsonValue = GetJsonValue(node);
+        resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_VALUES_NAME);
+        DisposeNode(node);
+        expectedStr = std::get<2>(value);
+        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+    }
 
     // Verifying attribute's 'max'  values
     for (auto&& value: setDataPanelOptionsMaxInvalidValues) {
         inputValueOptions = initValueOptions;
-        modifier_->setDataPanelOptions(node_, &inputValueOptions);
         inputValueOptions.max = std::get<1>(value);
-        modifier_->setDataPanelOptions(node_, &inputValueOptions);
-        jsonValue = GetJsonValue(node_);
+        auto node = CreateNode();
+        modifier_->setDataPanelOptions(node, &inputValueOptions);
+        jsonValue = GetJsonValue(node);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_MAX_NAME);
-        expectedStr = ATTRIBUTE_MAX_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        DisposeNode(node);
+        EXPECT_EQ(resultStr, ATTRIBUTE_MAX_DEFAULT_VALUE) << "Passed value is: " << std::get<0>(value);
     }
 
     // Verifying attribute's 'type'  values
     for (auto&& value: setDataPanelOptionsTypeInvalidValues) {
         inputValueOptions = initValueOptions;
-        modifier_->setDataPanelOptions(node_, &inputValueOptions);
         inputValueOptions.type = std::get<1>(value);
-        modifier_->setDataPanelOptions(node_, &inputValueOptions);
-        jsonValue = GetJsonValue(node_);
+        auto node = CreateNode();
+        modifier_->setDataPanelOptions(node, &inputValueOptions);
+        jsonValue = GetJsonValue(node);
         resultStr = GetAttrValue<std::string>(jsonValue, ATTRIBUTE_TYPE_NAME);
-        expectedStr = ATTRIBUTE_TYPE_DEFAULT_VALUE;
-        EXPECT_EQ(resultStr, expectedStr) << "Passed value is: " << std::get<0>(value);
+        DisposeNode(node);
+        EXPECT_EQ(resultStr, ATTRIBUTE_TYPE_DEFAULT_VALUE) << "Passed value is: " << std::get<0>(value);
     }
 }
 
@@ -948,65 +957,50 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestDefaultValues, TestSi
 }
 
 // Valid values for attribute 'radius' of method 'trackShadow'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>> trackShadowRadiusValidValues = {
-    {"0.05f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.05f)),
-        "0.050000"},
-    {"10.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(10.0f)),
-        "10.000000"},
-    {"100.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(100.0f)),
-        "100.000000"},
-    {"5.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)),
-        "5.000000"},
-    {"1.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)),
-        "1.000000"},
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource, std::string>> trackShadowRadiusValidValues = {
+    {"0.05", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.05), "0.050000"},
+    {"10.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(10.0), "10.000000"},
+    {"100.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(100.0), "100.000000"},
+    {"5.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)), "5.000000"},
+    {"1.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)), "1.000000"},
 };
 
 // Valid values for attribute 'offsetX' of method 'trackShadow'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>> trackShadowOffsetXValidValues = {
-    {"0.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0f)),
-        "0.000000"},
-    {"10.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(10.0f)),
-        "10.000000"},
-    {"-0.5f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(-0.5f)),
-        "-0.500000"},
-    {"1.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)),
-        "1.000000"},
-    {"5.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)),
-        "5.000000"},
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource, std::string>> trackShadowOffsetXValidValues = {
+    {"0.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.0), "0.000000"},
+    {"10.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(10.0), "10.000000"},
+    {"-0.5", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-0.5), "-0.500000"},
+    {"1.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)), "1.000000"},
+    {"5.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)), "5.000000"},
 };
 
 // Valid values for attribute 'offsetY' of method 'trackShadow'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource, std::string>> trackShadowOffsetYValidValues = {
-    {"0.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0f)),
-        "0.000000"},
-    {"-100.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(-100.0f)),
-        "-100.000000"},
-    {"5.5f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(5.5f)),
-        "5.500000"},
-    {"5.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)),
-        "5.000000"},
-    {"1.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)),
-        "1.000000"},
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource, std::string>> trackShadowOffsetYValidValues = {
+    {"0.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.0), "0.000000"},
+    {"-100.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-100.0), "-100.000000"},
+    {"5.5", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(5.5), "5.500000"},
+    {"5.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(CreateResource(RES_VALUE_NAME)), "5.000000"},
+    {"1.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Resource>(CreateResource(RES_VALUE_ID)), "1.000000"},
 };
 
 // Invalid values for attribute 'radius' of method 'trackShadow'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShadowRadiusInvalidValues = {
-    {"Ark_Empty()", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
-    {"nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr)},
-    {"0.0f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(0.0f))},
-    {"-20.5f", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Number>(Converter::ArkValue<Ark_Number>(-20.5f))},
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource>> trackShadowRadiusInvalidValues = {
+    {"Ark_Empty()", Converter::ArkUnion<Opt_Union_F64_Resource>(Ark_Empty())},
+    {"nullptr", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Empty>(nullptr)},
+    {"0.0", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(0.0)},
+    {"-20.5", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(-20.5)},
 };
 
 // Invalid values for attribute 'offsetX' of method 'trackShadow'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShadowOffsetXInvalidValues = {
-    {"Ark_Empty()", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
-    {"nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr)},
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource>> trackShadowOffsetXInvalidValues = {
+    {"Ark_Empty()", Converter::ArkUnion<Opt_Union_F64_Resource>(Ark_Empty())},
+    {"nullptr", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Empty>(nullptr)},
 };
 
 // Invalid values for attribute 'offsetY' of method 'trackShadow'
-static std::vector<std::tuple<std::string, Opt_Union_Number_Resource>> trackShadowOffsetYInvalidValues = {
-    {"Ark_Empty()", Converter::ArkUnion<Opt_Union_Number_Resource>(Ark_Empty())},
-    {"nullptr", Converter::ArkUnion<Opt_Union_Number_Resource, Ark_Empty>(nullptr)},
+static std::vector<std::tuple<std::string, Opt_Union_F64_Resource>> trackShadowOffsetYInvalidValues = {
+    {"Ark_Empty()", Converter::ArkUnion<Opt_Union_F64_Resource>(Ark_Empty())},
+    {"nullptr", Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Empty>(nullptr)},
 };
 
 /*
@@ -1026,8 +1020,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestRadiusValidValues, TestSize.Le
 
     // Initial setup
     initValueTrackShadow.radius = std::get<1>(trackShadowRadiusValidValues[0]);
-    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(Ark_Empty());
 
     inputValueTrackShadow = initValueTrackShadow;
@@ -1060,8 +1054,8 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestRadiusInvalidValues, 
 
     // Initial setup
     initValueTrackShadow.radius = std::get<1>(trackShadowRadiusValidValues[0]);
-    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(Ark_Empty());
 
     inputValueTrackShadow = initValueTrackShadow;
@@ -1093,9 +1087,9 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestOffsetXValidValues, TestSize.L
     Ark_DataPanelShadowOptions initValueTrackShadow;
 
     // Initial setup
-    initValueTrackShadow.radius =  Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.radius =  Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.offsetX = std::get<1>(trackShadowOffsetXValidValues[0]);
-    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(Ark_Empty());
 
     inputValueTrackShadow = initValueTrackShadow;
@@ -1127,9 +1121,9 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestOffsetXInvalidValues,
     Ark_DataPanelShadowOptions initValueTrackShadow;
 
     // Initial setup
-    initValueTrackShadow.radius =  Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.radius =  Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.offsetX = std::get<1>(trackShadowOffsetXValidValues[0]);
-    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(Ark_Empty());
 
     inputValueTrackShadow = initValueTrackShadow;
@@ -1161,8 +1155,8 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestOffsetYValidValues, TestSize.L
     Ark_DataPanelShadowOptions initValueTrackShadow;
 
     // Initial setup
-    initValueTrackShadow.radius =  Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.radius =  Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.offsetY = std::get<1>(trackShadowOffsetYValidValues[0]);
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(Ark_Empty());
 
@@ -1195,8 +1189,8 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestOffsetYInvalidValues,
     Ark_DataPanelShadowOptions initValueTrackShadow;
 
     // Initial setup
-    initValueTrackShadow.radius =  Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.radius =  Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.offsetY = std::get<1>(trackShadowOffsetYValidValues[0]);
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(Ark_Empty());
 
@@ -1240,9 +1234,9 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringValidValues, TestSi
     Ark_DataPanelShadowOptions initValueTrackShadow;
 
     // Initial setup
-    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
     auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
     modifier_->setTrackShadow(node_, &optValue);
@@ -1296,9 +1290,9 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorStringInvalidValues, Test
     Ark_DataPanelShadowOptions initValueTrackShadow;
 
     // Initial setup
-    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
     auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
     modifier_->setTrackShadow(node_, &optValue);
@@ -1352,9 +1346,9 @@ HWTEST_F(DataPanelModifierTest, DISABLED_setTrackShadowTestColorNumberValidValue
     Ark_DataPanelShadowOptions initValueTrackShadow;
 
     // Initial setup
-    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
     auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
     modifier_->setTrackShadow(node_, &optValue);
@@ -1408,9 +1402,9 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumValidValues, TestSize
     Ark_DataPanelShadowOptions initValueTrackShadow;
 
     // Initial setup
-    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
     auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
     modifier_->setTrackShadow(node_, &optValue);
@@ -1464,9 +1458,9 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorEnumInvalidValues, TestSi
     Ark_DataPanelShadowOptions initValueTrackShadow;
 
     // Initial setup
-    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
     auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
     modifier_->setTrackShadow(node_, &optValue);
@@ -1520,9 +1514,9 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorResourceValidValues, Test
     Ark_DataPanelShadowOptions initValueTrackShadow;
 
     // Initial setup
-    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
     auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
     modifier_->setTrackShadow(node_, &optValue);
@@ -1576,9 +1570,9 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorLinearGradientValidValues
     Ark_DataPanelShadowOptions initValueTrackShadow;
 
     // Initial setup
-    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
     auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
     modifier_->setTrackShadow(node_, &optValue);
@@ -1628,9 +1622,9 @@ HWTEST_F(DataPanelModifierTest, setTrackShadowTestColorLinearGradientInvalidValu
     Ark_DataPanelShadowOptions initValueTrackShadow;
 
     // Initial setup
-    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
-    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_Number_Resource>(Ark_Empty());
+    initValueTrackShadow.radius = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetX = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
+    initValueTrackShadow.offsetY = Converter::ArkValue<Opt_Union_F64_Resource>(Ark_Empty());
     initValueTrackShadow.colors = Converter::ArkValue<Opt_Array_Union_ResourceColor_LinearGradient>(arkColorArray);
     auto optValue = Converter::ArkValue<Opt_DataPanelShadowOptions>(initValueTrackShadow);
     modifier_->setTrackShadow(node_, &optValue);

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { ImageGenerateState } from "../types/Declaration";
+import { CanvasLayoutDirection, ImageGenerateState } from "../types/Declaration";
 import { MeasureUtils } from "@ohos.arkui.UIContext";
 @ComponentV2
 export declare struct TextInputArea {
@@ -23,11 +23,10 @@ export declare struct TextInputArea {
     isTextEdit: boolean;
     @Local
     inputText: string;
-    @Local
-    userPrompt: string;
+    @Param
+    readonly userPrompt: string;
     @Local
     inputController: TextAreaController;
-    private textAreaPadding;
     private setMaxLines;
     @Local
     originText: string;
@@ -48,8 +47,8 @@ export declare struct TextInputArea {
     isClickKeepLayout: boolean;
     @Local
     inputHeight: Length;
-    @Local
-    imgCounts: number;
+    @Param
+    readonly imgCounts: number;
     @Local
     isEnableTouchUp: boolean;
     @Local
@@ -58,10 +57,17 @@ export declare struct TextInputArea {
     stack: NavPathStack | undefined;
     @Local
     updateInputText: string;
+    @Local
+    textMaxLength: number;
+    @Consumer('globalLayoutDirection')
+    curLayoutDirection: CanvasLayoutDirection;
+    private getTextMaxLength;
     @Monitor('imgCounts', 'isClickKeepLayout', 'updateInputText', 'isSelectedPatches')
     watchKeepLayout(monitor: IMonitor): void;
     @Monitor('userPrompt')
     watchUserPromptChange(monitor: IMonitor): void;
     aboutToAppear(): void;
+    private getDataFromUdmfRetry;
+    private getDataFromUdmf;
     build(): void;
 }

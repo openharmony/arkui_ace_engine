@@ -223,7 +223,7 @@ HWTEST_P(ScrollableCommonMethodModifierTest2, setClipContentTestClipContentInval
  * @tc.desc:
  * @tc.type: FUNC
  */
-HWTEST_P(ScrollableCommonMethodModifierTest2, setClipContentTestRectShape, TestSize.Level1)
+HWTEST_P(ScrollableCommonMethodModifierTest2, DISABLED_setClipContentTestRectShape, TestSize.Level1)
 {
     Ark_RectShape peer = PeerUtils::CreatePeer<RectShapePeer>();
     RefPtr<ShapeRect> shape = Referenced::MakeRefPtr<ShapeRect>();

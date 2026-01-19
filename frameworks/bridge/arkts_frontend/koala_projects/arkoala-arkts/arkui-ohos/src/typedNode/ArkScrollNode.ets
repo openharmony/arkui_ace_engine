@@ -34,7 +34,10 @@ import {
   EdgeEffectOptions,
   AttributeModifier,
   ScrollableCommonMethod,
-  CommonMethod
+  CommonMethod,
+  SizeResult,
+  Bindable,
+  ScrollOnDidZoomCallback
 } from '../framework';
 import { Resource } from 'global.resource'
 export class ArkScrollNode extends ArkScrollableNode implements ScrollAttribute {
@@ -68,6 +71,30 @@ export class ArkScrollNode extends ArkScrollableNode implements ScrollAttribute 
         this.markDirty()
         return this
     }
+    maxZoomScale(value: double | undefined): this {
+        const value_casted = value as (double | undefined)
+        this.getPeer()?.setMaxZoomScaleAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    minZoomScale(value: double | undefined): this {
+        const value_casted = value as (double | undefined)
+        this.getPeer()?.setMinZoomScaleAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    zoomScale(value: double | Bindable<double> | undefined): this {
+        const value_casted = value as (double | Bindable<double> | undefined)
+        this.getPeer()?.setZoomScaleAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    enableBouncesZoom(value: boolean | undefined): this {
+        const value_casted = value as (boolean | undefined)
+        this.getPeer()?.setEnableBouncesZoomAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
     onWillScroll(value: ScrollOnWillScrollCallback | undefined): this {
         const value_casted = value as (ScrollOnWillScrollCallback | undefined)
         this.getPeer()?.setOnWillScrollAttribute(value_casted)
@@ -98,14 +125,32 @@ export class ArkScrollNode extends ArkScrollableNode implements ScrollAttribute 
         this.markDirty()
         return this
     }
+    onDidZoom(value: ScrollOnDidZoomCallback | undefined): this {
+        const value_casted = value as (ScrollOnDidZoomCallback | undefined)
+        this.getPeer()?.setOnDidZoomAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    onZoomStart(value: VoidCallback | undefined): this {
+        const value_casted = value as (VoidCallback | undefined)
+        this.getPeer()?.setOnZoomStartAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
+    onZoomStop(value: VoidCallback | undefined): this {
+        const value_casted = value as (VoidCallback | undefined)
+        this.getPeer()?.setOnZoomStopAttribute(value_casted)
+        this.markDirty()
+        return this
+    }
     scrollBar(value: BarState | undefined): this {
         const value_casted = value as (BarState | undefined)
         this.getPeer()?.setScrollBarAttribute(value_casted)
         this.markDirty()
         return this
     }
-    scrollBarColor(value: Color | int32 | string | undefined): this {
-        const value_casted = value as (Color | int32 | string | undefined)
+    scrollBarColor(value: Color | int32 | string | Resource | undefined): this {
+        const value_casted = value as (Color | int32 | string | Resource | undefined)
         this.getPeer()?.setScrollBarColorAttribute(value_casted)
         this.markDirty()
         return this

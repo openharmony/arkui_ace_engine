@@ -27,6 +27,7 @@
 #include "core/common/page_viewport_config.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/base/inspector.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/manager/load_complete/load_complete_manager.h"
 #include "core/components_ng/pattern/root/root_pattern.h"
@@ -192,12 +193,17 @@ const std::shared_ptr<ResSchedClickOptimizer>& PipelineContext::GetClickOptimize
     return clickOptimizer_;
 }
 
-std::string PipelineContext::GetBundleName()
+std::string PipelineContext::GetBundleName() const
 {
     return "";
 }
 
-std::string PipelineContext::GetModuleName()
+std::string PipelineContext::GetModuleName() const
+{
+    return "";
+}
+
+std::string PipelineContext::GetWindowName() const
 {
     return "";
 }
@@ -380,6 +386,7 @@ void PipelineContext::SetupRootElement()
     dragDropManager_ = MakeRefPtr<DragDropManager>();
     focusManager_ = MakeRefPtr<FocusManager>(AceType::Claim(this));
     sharedTransitionManager_ = MakeRefPtr<SharedOverlayManager>(rootNode_);
+    inspectorOffscreenNodesMgr_ = MakeRefPtr<InspectorOffscreenNodesMgr>();
 }
 
 void PipelineContext::SendEventToAccessibilityWithNode(
@@ -422,6 +429,11 @@ void PipelineContext::OnIdle(int64_t deadline)
     for (const auto& task : tasks) {
         task(deadline, true);
     }
+}
+
+const RefPtr<InspectorOffscreenNodesMgr>& PipelineContext::GetInspectorOffscreenNodesMgr()
+{
+    return inspectorOffscreenNodesMgr_;
 }
 
 void PipelineContext::Destroy()
@@ -645,6 +657,23 @@ bool PipelineContext::CheckOverlayFocus()
 }
 
 void PipelineContext::OnDrawCompleted(const std::string& componentId) {}
+void PipelineContext::OnLayoutChildrenCompleted(const std::string& componentId) {}
+
+void PipelineContext::OnLayoutCompleted(int32_t uniqueId) {}
+void PipelineContext::OnDrawCompleted(int32_t uniqueId) {}
+void PipelineContext::OnDrawChildrenCompleted(int32_t uniqueId) {}
+void PipelineContext::OnLayoutChildrenCompleted(int32_t uniqueId) {}
+
+void PipelineContext::SetNeedRenderNodeByUniqueId(const WeakPtr<FrameNode>& node) {}
+void PipelineContext::SetNeedRenderForLayoutChildrenNode(const WeakPtr<NG::UINode>& node) {}
+
+void PipelineContext::UpdateDrawLayoutChildObserver(
+    int32_t uniqueId, bool isClearLayoutObserver, bool isClearDrawObserver)
+{}
+
+void PipelineContext::UpdateDrawLayoutChildObserver(
+    const std::string& inspectorKey, bool isClearLayoutObserver, bool isClearDrawObserver)
+{}
 
 void PipelineContext::SetNeedRenderNode(const WeakPtr<FrameNode>& node) {}
 
@@ -1568,12 +1597,12 @@ std::string NG::PipelineContext::GetCurrentPageNameCallback()
     return "";
 }
 
-const RefPtr<NG::PageInfo> NG::PipelineContext::GetLastPageInfo()
+const RefPtr<NG::PageInfo> NG::PipelineContext::GetLastPageInfo() const
 {
     return nullptr;
 }
 
-std::string NG::PipelineContext::GetNavDestinationPageName(const RefPtr<NG::PageInfo>& pageInfo)
+std::string NG::PipelineContext::GetNavDestinationPageName(const RefPtr<NG::PageInfo>& pageInfo) const
 {
     return "";
 }
@@ -1621,10 +1650,14 @@ const RefPtr<NG::PostEventManager>& NG::PipelineContext::GetPostEventManager()
     return postEventManager_;
 }
 
+void NG::PipelineContext::SetParentPipeline(const WeakPtr<PipelineBase>& weakPipeline) {}
+
 RefPtr<NG::ContentChangeManager>& NG::PipelineContext::GetContentChangeManager()
 {
     return contentChangeMgr_;
 }
+
+void NG::PipelineContext::GetAppInfo(std::shared_ptr<JsonValue>& root) const {}
 
 void PipelineBase::StartImplicitAnimation(const AnimationOption& option, const RefPtr<Curve>& curve,
     const std::function<void()>& finishCallback, const std::optional<int32_t>& count) {}

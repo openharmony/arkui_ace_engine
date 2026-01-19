@@ -25,7 +25,6 @@
 #include "base/log/log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/system_properties.h"
-#include "bridge/declarative_frontend/engine/bindings.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "core/common/container.h"
@@ -213,6 +212,7 @@ public:
     static void JsBackground(const JSCallbackInfo& info);
     static void JsBindMenu(const JSCallbackInfo& info);
     static void JsBindContextMenu(const JSCallbackInfo& info);
+    static void JsBindContextMenuWithResponse(const JSCallbackInfo& info);
     static void MenuDefaultParam(NG::MenuParam& menuParam);
     static void ParseContentMenuCommonParam(
         const JSCallbackInfo& info, const JSRef<JSObject>& menuObj, NG::MenuParam& menuParam);
@@ -349,6 +349,7 @@ public:
     static void JsOnGestureRecognizerJudgeBegin(const JSCallbackInfo& info);
     static void JsOnTouchTestDone(const JSCallbackInfo& info);
     static void JsClickEffect(const JSCallbackInfo& info);
+    static void JsSetEnableClickSoundEffect(const JSCallbackInfo& info);
     static void JsRestoreId(int32_t restoreId);
     static void JsOnVisibleAreaChange(const JSCallbackInfo& info);
     static void JsOnVisibleAreaApproximateChange(const JSCallbackInfo& info);
@@ -641,6 +642,7 @@ public:
     static void JSRenderGroup(const JSCallbackInfo& info);
     static void JSExcludeFromRenderGroup(const JSCallbackInfo& info);
     static void JSRenderFit(const JSCallbackInfo& info);
+    static void JSUseUnion(const JSCallbackInfo& info);
     static void JsExpandSafeArea(const JSCallbackInfo& info);
     static void JsIgnoreLayoutSafeArea(const JSCallbackInfo& info);
     static void JsGestureModifier(const JSCallbackInfo& info);
@@ -957,8 +959,8 @@ private:
         NG::GradientColor& gradientColor, int32_t& indx);
     static void NewParseRadialGradientColor(NG::Gradient& gradient, RefPtr<ResourceObject>& resObj,
         NG::GradientColor& gradientColor, int32_t& indx);
-    static bool ParseBackgroundBuilder(
-        const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc, std::function<void()>& builderFunc);
+    static bool ParseBackgroundBuilder(const JSCallbackInfo& info, const JSRef<JSVal>& jsFunc,
+        std::function<void()>& builderFunc, RefPtr<ResourceObject>& resObj);
     static int32_t GetStringFormatStartIndex(const JSRef<JSObject>& jsObj);
     static void GetResourceObjectType(const JSRef<JSObject>& jsObj, JSRef<JSVal>& type, int32_t& resTypeValue);
 };

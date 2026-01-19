@@ -60,24 +60,24 @@ export function RepeatImplForOptions<T>(
 }
 
 class RepeatItemImpl<T> implements RepeatItem<T> {
-    item_: T;
+    arr_: RepeatArray<T>;
     index_: int32;
 
-    constructor(initialItem: T, initialIndex: int32) {
-        this.item_ = initialItem;
+    constructor(arr: RepeatArray<T>, initialIndex: int32) {
+        this.arr_ = arr;
         this.index_ = initialIndex;
     }
 
     get item(): T {
-        return this.item_;
+        return this.arr_[this.index_];
+    }
+
+    get arr(): RepeatArray<T> {
+        return this.arr_;
     }
 
     get index(): int32 {
         return this.index_;
-    }
-
-    public updateItem(newItem: T): void {
-        this.item_ = newItem;
     }
 
     public updateIndex(newIndex: int32): void {
@@ -100,25 +100,19 @@ class RepeatDataSource<T> implements IDataSource<T> {
     }
 
     updateData(newArr: RepeatArray<T>, totalCount: int32) {
-        if (this.total_ != totalCount) {
-            this.listener_?.update(
-                Math.min(this.total_, totalCount).toInt(), Number.POSITIVE_INFINITY.toInt(), totalCount - this.total_);
-        }
-        this.total_ = totalCount;
-        // Compare array references first
-        if (this.arr_ === newArr) {
-            return;
-        }
         // Shallow compare: check length and each element by reference
-        if (this.arr_.length !== newArr.length) {
-            this.listener_?.update(0, Number.POSITIVE_INFINITY.toInt(), this.arr_.length - newArr.length);
+        if (totalCount !== this.total_) {
+            this.listener_?.update(0, Number.POSITIVE_INFINITY.toInt(), totalCount - this.total_);
             this.arr_ = newArr;
+            this.total_ = totalCount;
             return;
         }
+        // check each element
         for (let i = 0; i < newArr.length; i++) {
             if (this.arr_[i] !== newArr[i]) {
                 this.listener_?.update(i, Number.POSITIVE_INFINITY.toInt(), 0);
                 this.arr_ = newArr;
+                this.total_ = totalCount;
                 return;
             }
         }
@@ -244,6 +238,22 @@ export class RepeatAttributeImpl<T> implements RepeatAttribute<T> {
 }
 
 /** @memo:intrinsic */
+function getCurrentEnv(): [int32, object | undefined] {
+    return [ObserveSingleton.RenderingComponentV2, ExtendableComponent.current];
+}
+
+/** @memo:intrinsic */
+function wrapBuilder(env: [int32, object | undefined], builder_: () => void): void {
+    const lastRenderingComponent = ObserveSingleton.RenderingComponentV2;
+    const lastExtendableComponent = ExtendableComponent.current;
+    ObserveSingleton.instance.renderingComponent = env[0];
+    ExtendableComponent.current = env[1];
+    builder_();
+    ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
+    ExtendableComponent.current = lastExtendableComponent;
+}
+
+/** @memo:intrinsic */
 function virtualRender<T>(
     arr: RepeatArray<T>,
     attributes: RepeatAttributeImpl<T>,
@@ -259,7 +269,7 @@ function virtualRender<T>(
 
     /** @memo */
     const itemGen = (item: T, index: int32): void => {
-        const ri = new RepeatItemImpl<T>(item, index);
+        const ri = new RepeatItemImpl<T>(arr, index);
         let _type: string = attributes.ttypeGenFunc_(item, index);
         if (!attributes.itemGenFuncs_.has(_type)) {
             _type = REPEAT_EACH_FUNC_TYPE;
@@ -271,17 +281,11 @@ function virtualRender<T>(
          * To optimize performance, insert reuseKey through compiler plugin to the content of itemBuilder.
          */
         if (attributes.reusable_) {
-            const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
-            const currentExtendableComponent = ExtendableComponent.current;
+            const tag = _type + repeatId + '@Repeat';
+            const env = getCurrentEnv();
             NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
-                const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;
-                const lastExtendableComponent = ExtendableComponent.current;
-                ObserveSingleton.instance.renderingComponent = currentRenderingComponent;
-                ExtendableComponent.current = currentExtendableComponent;
-                itemBuilder(ri);
-                ObserveSingleton.instance.renderingComponent = lastRenderingComponent;
-                ExtendableComponent.current = lastExtendableComponent;
-            }, _type + repeatId); // using type as reuseKey
+                wrapBuilder(env, () => { itemBuilder(ri); })
+            }, tag); // using type as reuseKey
         } else {
             itemBuilder(ri);
         }
@@ -305,26 +309,32 @@ function nonVirtualRender<T>(
             return `${idx}__${JSON.stringify(e)}`
         } catch (e) {
             throw new Error(
-                'Repeat: use of default key generator not possible on provided data structure.' +
-                'Need to specify key(). Application Error!')
+                'unstable key generator function. Need to specify Repeat.key()' +
+                'Application Error: ' + (e as Error).message)
         }
     };
     const keyGen = (ele: T, i: int32): KoalaCallsiteKey =>
         keyGenerator ? hashCodeFromString(keyGenerator!(ele, i)) : hashCodeFromString(defaultKey(ele, i));
+
     /** @memo */
     const itemGen = (ele: T, i: int32) => {
         /** @memo */
         const itemGenerator = attributes.itemGenFuncs_.get(REPEAT_EACH_FUNC_TYPE)!;
-        const ri = new RepeatItemImpl<T>(ele, i);
+        const ri = new RepeatItemImpl<T>(arr, i);
+        const env = getCurrentEnv();
         NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
-            itemGenerator(ri);
+            wrapBuilder(env, () => { itemGenerator(ri); })
         });
     };
+
+    const env = getCurrentEnv();
     NodeAttach(() => ForEachNodePeer.create(true), (node: ForEachNodePeer) => {
-        for (let i = 0; i < arr.length; i++) {
-            const e: T = arr[i];
-            memoEntry2<T, int32, void>(__context(), keyGen(e, i), itemGen, e, i);
-        }
+        wrapBuilder(env, () => {
+            for (let i = 0; i < arr.length; i++) {
+                const e: T = arr[i];
+                memoEntry2<T, int32, void>(__context(), keyGen(e, i), itemGen, e, i);
+            }
+        })
         nodeHolder.node = node;
     });
 

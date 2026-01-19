@@ -173,7 +173,7 @@ import image from '@ohos.multimedia.image';
 import uniformTypeDescriptor from '@ohos.data.uniformTypeDescriptor';
 import drawing from '@ohos.graphics.drawing';
 
-type KPointer = LockGrantedCallback;
+type KPointer = long;
 type int32 = int;
 
 type PixelMap = image.PixelMap;

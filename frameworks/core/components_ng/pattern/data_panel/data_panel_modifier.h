@@ -118,6 +118,11 @@ public:
         offset_ = offset;
     };
 
+    void SetContentSize(const SizeF& contentSize)
+    {
+        contentSize_ = contentSize;
+    };
+
     void SetValueColors(const std::vector<Gradient>& valueColors)
     {
         for (size_t i = 0; i < valueColors.size(); ++i) {
@@ -199,6 +204,8 @@ private:
     void PaintColorSegment(RSCanvas& canvas, const LinearData& segmentLinearData) const;
     void PaintSpace(RSCanvas& canvas, const LinearData& segmentLinearData, float spaceWidth) const;
     void PaintTrackBackground(RSCanvas& canvas, ArcData arcData, const Color color) const;
+    void PaintCircleShadow(RSCanvas& canvas, ArcData& arcData) const;
+    void PaintCircleProgress(RSCanvas& canvas, ArcData& arcData) const;
     void PaintProgress(RSCanvas& canvas, ArcData arcData, RSPath& path, RSPath& endPath, bool isShadow) const;
     void GetPaintPath(ArcData& arcData, RSPath& path, RSPath& endPath) const;
     void Path2DArc(
@@ -209,6 +216,7 @@ private:
     RefPtr<PropertyBool> isEffect_;
     size_t dataPanelType_ = 0;
     OffsetF offset_;
+    SizeF contentSize_;
     bool isFirstCreate_ = true;
     bool isHasShadowValue_ = false;
     bool isRtl_ = false;

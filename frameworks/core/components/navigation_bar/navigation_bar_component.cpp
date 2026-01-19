@@ -15,11 +15,13 @@
 
 #include "core/components/navigation_bar/navigation_bar_component.h"
 
+#include "core/common/dynamic_module_helper.h"
 #include "core/components/display/display_component.h"
 #include "core/components/flex/flex_item_component.h"
 #include "core/components/navigation_bar/navigation_bar_element.h"
 #include "core/components/padding/padding_component.h"
 #include "core/components/transform/transform_component.h"
+#include "compatible/components/tab_bar/modifier/tab_modifier_api.h"
 #ifdef WEARABLE_PRODUCT
 #include "core/components/box/box_component.h"
 #include "core/components/button/button_theme.h"
@@ -76,6 +78,17 @@ RefPtr<TextComponent> BuildWatchTitleText(
     return text;
 }
 
+const ArkUIInnerTabBarModifier* GetTabBarInnerModifier()
+{
+    static const ArkUIInnerTabBarModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto loader = DynamicModuleHelper::GetInstance().GetLoaderByName("tab-bar");
+        CHECK_NULL_RETURN(loader, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIInnerTabBarModifier*>(loader->GetCustomModifier());
+    }
+    return cachedModifier;
+}
+
 } // namespace
 
 NavigationBarComponent::NavigationBarComponent(const ComposeId& id, const std::string& name)
@@ -121,7 +134,9 @@ RefPtr<Component> PhoneTitleBarBuilder::BuildTitle(double padding)
 
 void TabBarBuilder::BuildTabBar(const RefPtr<ComponentGroup>& parent)
 {
-    tabBar_->InitNavigationBarStyle();
+    if (auto* modifier = GetTabBarInnerModifier()) {
+        modifier->initNavigationBarStyle(tabBar_);
+    }
     RefPtr<BoxComponent> box = AceType::MakeRefPtr<BoxComponent>();
     box->SetChild(tabBar_);
     box->SetDeliverMinToChild(false);

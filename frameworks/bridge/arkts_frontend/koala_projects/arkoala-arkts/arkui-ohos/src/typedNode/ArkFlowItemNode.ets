@@ -14,7 +14,8 @@
  */
 
 import { ArkBaseNode } from './ArkBaseNode';
-import { FlowItemAttribute, ArkFlowItemPeer, AttributeModifier, CommonMethod } from '../component/flowItem';
+import { FlowItemAttribute, ArkFlowItemPeer } from '../component/flowItem';
+import { AttributeModifier, CommonMethod } from '../component/common';
 export class ArkFlowItemNode extends ArkBaseNode implements FlowItemAttribute {
     constructParam(...param: Object[]): this {
         this.getPeer()?.setFlowItemOptionsAttribute()

@@ -81,9 +81,8 @@ void JSDivider::SetDividerColor(const JSCallbackInfo& info)
     }
     if (SystemProperties::ConfigChangePerform() && dividerResObj) {
         DividerModel::GetInstance()->DividerColor(dividerResObj);
-    } else {
-        DividerModel::GetInstance()->DividerColor(dividerColor);
     }
+    DividerModel::GetInstance()->DividerColor(dividerColor);
 }
 
 void JSDivider::SetStrokeWidth(const JSCallbackInfo& info)

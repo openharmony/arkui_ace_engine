@@ -26,7 +26,7 @@ import { Context, PointerStyle, PixelMap } from '#external';
 import { UIAbilityContext, ExtensionContext } from "#external"
 import { UIContextImpl } from "arkui/base/UIContextImpl"
 import { componentUtils } from '@ohos/arkui/componentUtils';
-import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
+import { componentSnapshot, NodeIdentity } from '@ohos/arkui/componentSnapshot';
 import { dragController } from '@ohos/arkui/dragController';
 import { focusController } from '@ohos/arkui/focusController';
 import { Frame } from 'arkui/Graphics';
@@ -44,7 +44,7 @@ import { DatePickerDialogOptions } from 'arkui/framework';
 import { SheetOptions } from 'arkui/framework';
 import inspector from '@ohos/arkui/inspector';
 import router from '@ohos/router';
-import { ComponentContent } from 'arkui/ComponentContent';
+import { ComponentContent, ComponentContentBase } from 'arkui/ComponentContent';
 import overlayManager from '@ohos/overlayManager';
 import promptAction, { LevelOrder } from '@ohos/promptAction';
 import { LocalStorage } from 'arkui/stateManagement/storage/localStorage';
@@ -58,9 +58,13 @@ import { int32, int64 } from "@koalaui/common";
 import { KPointer } from '@koalaui/interop';
 import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
+import { TextLayoutOptions, Paragraph, StyledString } from 'arkui/framework';
 
 export class UIInspector {
-    public createComponentObserver(id: string): inspector.ComponentObserver | undefined {
+    public createComponentObserver(id: string | int): inspector.ComponentObserver {
+        throw Error("createComponentObserver not implemented in UIInspector!")
+    }
+    public createComponentObserver(id: string): inspector.ComponentObserver {
         throw Error("createComponentObserver not implemented in UIInspector!")
     }
 }
@@ -95,6 +99,9 @@ export class MeasureUtils {
     public measureTextSize(options: MeasureOptions) : SizeOptions {
         throw Error("measureTextSize not implemented in MeasureUtils!")
     }
+    public getParagraphs(styledString: StyledString, options?: TextLayoutOptions): Array<Paragraph> {
+        throw Error("getParagraphs not implemented in MeasureUtils!")
+    }
 }
 
 export class TextMenuController {
@@ -112,6 +119,18 @@ export class Router {
         return this.router_!;
     }
     public pushUrl(options: router.RouterOptions): Promise<void> {
+        throw Error("pushUrl not implemented in Router!");
+    }
+
+    public pushUrl(options: router.RouterOptions, mode: router.RouterMode): Promise<void> {
+        throw Error("pushUrl not implemented in Router!");
+    }
+
+    public pushUrl(options: router.RouterOptions, callback: AsyncCallback<void>): void {
+        throw Error("pushUrl not implemented in Router!");
+    }
+
+    public pushUrl(options: router.RouterOptions, mode: router.RouterMode, callback: AsyncCallback<void>): void {
         throw Error("pushUrl not implemented in Router!");
     }
 
@@ -135,6 +154,18 @@ export class Router {
         throw Error("replaceUrl not implemented in Router!");
     }
 
+    public replaceUrl(options: router.RouterOptions, mode: router.RouterMode): Promise<void> {
+        throw Error("replaceUrl not implemented in Router!");
+    }
+
+    public replaceUrl(options: router.RouterOptions, callback: AsyncCallback<void>): void {
+        throw Error("replaceUrl not implemented in Router!");
+    }
+
+    public replaceUrl(options: router.RouterOptions, mode: router.RouterMode, callback: AsyncCallback<void>): void {
+        throw Error("replaceUrl not implemented in Router!");
+    }
+
     public replaceNamedRoute(options: router.NamedRouterOptions): Promise<void> {
         throw Error("replaceNamedRoute not implemented in Router!");
     }
@@ -151,7 +182,11 @@ export class Router {
         throw Error("replaceNamedRoute not implemented in Router!");
     }
 
-    public back(options?:router.RouterOptions): void {
+    public back(options?: router.RouterOptions): void {
+        throw Error("back not implemented in Router!");
+    }
+
+    public back(index: int, params?: Object): void {
         throw Error("back not implemented in Router!");
     }
 
@@ -160,6 +195,9 @@ export class Router {
     }
     public getLength(): string {
         throw Error("getLength not implemented in Router!");
+    }
+    public getStackSize(): int {
+        throw Error("getStackSize not implemented in Router!")
     }
 
     public getParams(): Object {
@@ -242,29 +280,34 @@ export class ComponentSnapshot {
     }
     //@ts-ignore
     public createFromBuilder(builder: CustomBuilder, callback: AsyncCallback<PixelMap>,
-                             delay?: number, checkImageStatus?: boolean,
+                             delay?: int32, checkImageStatus?: boolean,
                              options?: componentSnapshot.SnapshotOptions): void {
         throw Error("createFromBuilder with callback not implemented in ComponentSnapshot!")
     }
     //@ts-ignore
-    public createFromBuilder(builder: CustomBuilder, delay?: number, checkImageStatus?: boolean,
+    public createFromBuilder(builder: CustomBuilder, delay?: int32, checkImageStatus?: boolean,
                              options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("createFromBuilder with promise not implemented in ComponentSnapshot!")
     }
     public getSync(id: string, options?: componentSnapshot.SnapshotOptions): PixelMap | null {
         throw Error("getSync not implemented in ComponentSnapshot!")
     }
-    public getWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
+    public getWithUniqueId(uniqueId: int32, options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("getWithUniqueId not implemented in ComponentSnapshot!")
     }
 
-    public getSyncWithUniqueId(uniqueId: number, options?: componentSnapshot.SnapshotOptions): PixelMap {
+    public getSyncWithUniqueId(uniqueId: int32, options?: componentSnapshot.SnapshotOptions): PixelMap {
         throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
     }
 
-    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: number, checkImageStatus?: boolean,
+    public createFromComponent<T extends Object>(content: ComponentContent<T>, delay?: int32, checkImageStatus?: boolean,
         options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
         throw Error("getSyncWithUniqueId not implemented in ComponentSnapshot!")
+    }
+
+    public getWithRange(start: NodeIdentity, end: NodeIdentity, isStartRect: boolean,
+        options?: componentSnapshot.SnapshotOptions): Promise<PixelMap> | null {
+        throw Error('getWithRange not implemented in ComponentSnapshot!')
     }
 }
 
@@ -294,6 +337,9 @@ export class DragController {
     }
     public notifyDragStartRequest(requestStatus: dragController.DragStartRequestStatus): void {
         throw Error("setDragEventStrictReportingEnabled not implemented in DragController!")
+    }
+    public enableDropDisallowedBadge(enabled: boolean): void {
+        throw Error('enableDropDisallowedBadge not implemented in DragController!')
     }
 }
 
@@ -494,6 +540,22 @@ export class UIContext {
     constructor() {
     }
     
+    static getCallingScopeUIContext(): UIContext | undefined {
+        return UIContextImpl.getCallingScopeUIContext();
+    }
+
+    static getLastFocusedUIContext(): UIContext | undefined {
+        return UIContextImpl.getLastFocusedUIContext();
+    }
+
+    static getLastForegroundUIContext(): UIContext | undefined {
+        return UIContextImpl.getLastForegroundUIContext();
+    }
+
+    static getAllUIContexts(): Array<UIContext> {
+        return UIContextImpl.getAllUIContexts();
+    }
+
     static resolveUIContext(): ResolvedUIContext {
         let instance = UIContextUtil.resolveUIContext();
         return new ResolvedUIContext(instance[0] as int32, instance[1] as ResolveStrategy);
@@ -521,6 +583,9 @@ export class UIContext {
     }
     public isFollowingSystemFontScale() : boolean {
         throw Error("isFollowingSystemFontScale not implemented in UIContext!")
+    }
+    public setCustomKeyboardContinueFeature(feature: CustomKeyboardContinueFeature): void {
+        throw Error("setCustomKeyboardContinueFeature not implemented in UIContext!")
     }
     public getMaxFontScale() : number {
         throw Error("getMaxFontScale not implemented in UIContext!")
@@ -633,6 +698,10 @@ export class UIContext {
         throw Error("getOverlayManager not implemented in UIContext!")
     }
 
+    public getMagnifier(): Magnifier {
+        throw Error("getMagnifier not implemented in UIContext!")
+    }
+
     public setOverlayManagerOptions(options: OverlayManagerOptions): boolean {
         throw Error("setOverlayManagerOptions not implemented in UIContext!")
     }
@@ -722,6 +791,14 @@ export class UIContext {
     static destroyUIContextWithoutWindow() {
         UIContextImpl.destroyUIContextWithoutWindow()
     }
+    public getPageInfoByUniqueId(id: int): PageInfo {
+        throw Error("getPageInfoByUniqueId(int) not implemented in UIContext!")
+    }
+
+    public getPageInfoByUniqueId(id: number): PageInfo {
+        throw Error("getPageInfoByUniqueId(number) not implemented in UIContext!")
+    }
+
     public getFilteredInspectorTree(filters?: Array<string>): string {
         throw Error("getFilteredInspectorTree not implemented in UIContext!")
     }
@@ -741,16 +818,20 @@ export class UIContext {
         throw Error("requireDynamicSyncScene not implemented in UIContext!");
     }
 
-    public openBindSheet(bindSheetContent: ComponentContent, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
+    public openBindSheet(bindSheetContent: ComponentContentBase, sheetOptions?: SheetOptions, targetId?: int): Promise<void> {
         throw Error("openBindSheet not implemented in UIContext!")
     }
 
-    public updateBindSheet(bindSheetContent: ComponentContent, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
+    public updateBindSheet(bindSheetContent: ComponentContentBase, sheetOptions: SheetOptions, partialUpdate?: boolean): Promise<void> {
         throw Error("updateBindSheet not implemented in UIContext!")
     }
 
-    public closeBindSheet(bindSheetContent: ComponentContent): Promise<void> {
+    public closeBindSheet(bindSheetContent: ComponentContentBase): Promise<void> {
         throw Error("closeBindSheet not implemented in UIContext!")
+    }
+
+    public recycleInvisibleImageMemory(enabled: boolean): void {
+        throw Error("recycleInvisibleImageMemory not implemented in UIContext!")
     }
 
     public bindTabsToScrollable(tabsController: TabsController, scroller: Scroller): void {
@@ -769,10 +850,6 @@ export class UIContext {
     public unbindTabsFromNestedScrollable(tabsController: TabsController, parentScroller: Scroller,
         childScroller: Scroller): void {
         throw Error("unbindTabsFromNestedScrollable not implemented in UIContext!")
-    }
-    
-    public getPageInfoByUniqueId(id: int): PageInfo {
-        throw Error("getPageInfoByUniqueId not implemented in UIContext!")
     }
 }
 export abstract class FrameCallback {
@@ -895,7 +972,16 @@ export class UIObserver {
             this.observerImpl!.offNavDestinationSwitch(callback);
         }
     }
-
+    public onWindowSizeLayoutBreakpointChange(callback: Callback<uiObserver.WindowSizeLayoutBreakpointInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onWindowSizeLayoutBreakpointChange(callback);
+        }
+    }
+    public offWindowSizeLayoutBreakpointChange(callback?: Callback<uiObserver.WindowSizeLayoutBreakpointInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offWindowSizeLayoutBreakpointChange(callback);
+        }
+    }
     public onNavDestinationSwitch(
         observerOptions: uiObserver.NavDestinationSwitchObserverOptions,
         callback: Callback<uiObserver.NavDestinationSwitchInfo>
@@ -997,12 +1083,79 @@ export class UIObserver {
             this.observerImpl!.offDidLayout(callback);
         }
     }
+
+    public onRouterPageSizeChange(callback: Callback<uiObserver.RouterPageInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onRouterPageSizeChange(callback);
+        }
+    }
+
+    public offRouterPageSizeChange(callback?: Callback<uiObserver.RouterPageInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offRouterPageSizeChange(callback);
+        }
+    }
+
+    public onNavDestinationSizeChange(callback: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationSizeChange(callback);
+        }
+    }
+
+    public offNavDestinationSizeChange(callback?: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationSizeChange(callback);
+        }
+    }
+
+    public onNavDestinationSizeChangeByUniqueId(
+        navigationUniqueId: int, callback: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onNavDestinationSizeChangeByUniqueId(navigationUniqueId, callback);
+        }
+    }
+
+    public offNavDestinationSizeChangeByUniqueId(
+        navigationUniqueId: int, callback?: Callback<uiObserver.NavDestinationInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offNavDestinationSizeChangeByUniqueId(navigationUniqueId, callback);
+        }
+    }
+
+    public onTextChange(callback?: Callback<uiObserver.TextChangeEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onTextChange(callback);
+        }
+    }
+    public offTextChange(callback?: Callback<uiObserver.TextChangeEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offTextChange(callback);
+        }
+    }
+    public onTextChange(
+        identity: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TextChangeEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.onTextChange(callback);
+        }
+    }
+    public offTextChange(
+        identity: uiObserver.ObserverOptions, callback?: Callback<uiObserver.TextChangeEventInfo>): void {
+        if (this.observerImpl) {
+            this.observerImpl!.offTextChange(callback);
+        }
+    }
 }
 export interface PageInfo {
         routerPageInfo?: uiObserver.RouterPageInfo;
         navDestinationInfo?: uiObserver.NavDestinationInfo;
 }
 export interface ContentCoverController {}
+
+export class Magnifier {
+    bind(id: string): void {}
+    show(x: double, y: double): void {}
+    unbind(): void {}
+}
 export class DynamicSyncScene {
     private range: ExpectedFrameRateRange;
     constructor(range: ExpectedFrameRateRange) {
@@ -1036,4 +1189,9 @@ export class SwiperDynamicSyncScene extends DynamicSyncScene {
         super.setFrameRateRange(range);
         ArkUIAniModule._Common_SetFrameRateRange(this.nodePtr, range, this.type);
     }
+}
+
+export const enum CustomKeyboardContinueFeature {
+    ENABLED = 0,
+    DISABLED = 1,
 }

@@ -20,6 +20,7 @@
 namespace OHOS::Ace::NG {
 RefPtr<RecycleDummyNode> RecycleDummyNode::CreateRecycleDummyNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto node = MakeRefPtr<RecycleDummyNode>(nodeId);
     return node;
 }

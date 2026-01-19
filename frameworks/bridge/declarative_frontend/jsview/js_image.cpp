@@ -285,7 +285,8 @@ void JSImage::OnComplete(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onComplete");
             func->Execute(info);
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Image.onComplete");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Image.onComplete",
+                ComponentEventType::COMPONENT_EVENT_IMAGE);
         };
         ImageModel::GetInstance()->SetOnComplete(std::move(onComplete));
     }
@@ -301,7 +302,8 @@ void JSImage::OnError(const JSCallbackInfo& args)
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Image.onError");
             func->Execute(info);
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Image.onError");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Image.onError",
+                ComponentEventType::COMPONENT_EVENT_IMAGE);
         };
 
         ImageModel::GetInstance()->SetOnError(onError);
@@ -585,11 +587,15 @@ void JSImage::SetImageBorderRadiusWithResObj(JSRef<JSObject>& object, CalcDimens
     GetBorderRadiusResObj("topRight", object, topRight, topRightResObj);
     GetBorderRadiusResObj("bottomLeft", object, bottomLeft, bottomLeftResObj);
     GetBorderRadiusResObj("bottomRight", object, bottomRight, bottomRightResObj);
+    borderRadiusProperty.radiusTopLeft = topLeft;
+    borderRadiusProperty.radiusTopRight = topRight;
+    borderRadiusProperty.radiusBottomLeft = bottomLeft;
+    borderRadiusProperty.radiusBottomRight = bottomRight;
+    borderRadiusProperty.multiValued = true;
     ParseImageAllBorderRadiusesResObj(
         borderRadiusProperty, topLeftResObj, topRightResObj, bottomLeftResObj, bottomRightResObj);
-    ImageModel::GetInstance()->SetBorderRadius(GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
-    ViewAbstractModel::GetInstance()->SetBorderRadius(
-        GetLocalizedBorderRadius(topLeft, topRight, bottomLeft, bottomRight));
+    ImageModel::GetInstance()->SetBorderRadius(borderRadiusProperty);
+    ViewAbstractModel::GetInstance()->SetBorderRadius(borderRadiusProperty);
 }
 void JSImage::ParseBorderRadius(const JSRef<JSVal>& args)
 {

@@ -1,5 +1,5 @@
- /*
- * Copyright (c) 2021-2025 Huawei Device Co., Ltd.
+/*
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -526,16 +526,7 @@ void JSGrid::SetEditMode(const JSCallbackInfo& info)
 void JSGrid::SetEditModeOptions(const JSCallbackInfo& info)
 {
     NG::EditModeOptions options;
-    if (info.Length() >= 1) {
-        auto value = info[0];
-        if (value->IsObject()) {
-            JSRef<JSObject> obj = JSRef<JSObject>::Cast(value);
-            auto gatherAnimation = obj->GetProperty("enableGatherSelectedItemsAnimation");
-            if (gatherAnimation->IsBoolean()) {
-                options.enableGatherSelectedItemsAnimation = gatherAnimation->ToBoolean();
-            }
-        }
-    }
+    JSScrollable::ParseEditModeOptions(info, options);
     GridModel::GetInstance()->SetEditModeOptions(options);
 }
 
@@ -704,7 +695,8 @@ void JSGrid::JsOnGridDrop(const JSCallbackInfo& info)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Grid.onItemDrop");
         func->ItemDropExecute(dragInfo, itemIndex, insertIndex, isSuccess);
-        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onItemDrop");
+        UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onItemDrop",
+            ComponentEventType::COMPONENT_EVENT_SCROLL);
     };
     GridModel::GetInstance()->SetOnItemDrop(std::move(onItemDrop));
 }
@@ -846,7 +838,8 @@ void JSGrid::JsOnScrollStop(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onScrollStop = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onScrollStop");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onScrollStop",
+                ComponentEventType::COMPONENT_EVENT_SCROLL);
             return;
         };
         GridModel::GetInstance()->SetOnScrollStop(std::move(onScrollStop));
@@ -907,7 +900,8 @@ void JSGrid::JsOnReachStart(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachStart = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onReachStart");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onReachStart",
+                ComponentEventType::COMPONENT_EVENT_SCROLL);
             return;
         };
         GridModel::GetInstance()->SetOnReachStart(std::move(onReachStart));
@@ -920,7 +914,8 @@ void JSGrid::JsOnReachEnd(const JSCallbackInfo& args)
     if (args[0]->IsFunction()) {
         auto onReachEnd = [execCtx = args.GetExecutionContext(), func = JSRef<JSFunc>::Cast(args[0])]() {
             func->Call(JSRef<JSObject>());
-            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onReachEnd");
+            UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Grid.onReachEnd",
+                ComponentEventType::COMPONENT_EVENT_SCROLL);
             return;
         };
         GridModel::GetInstance()->SetOnReachEnd(std::move(onReachEnd));
