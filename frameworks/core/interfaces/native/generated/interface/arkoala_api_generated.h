@@ -2563,6 +2563,8 @@ typedef struct Ark_StackOptions Ark_StackOptions;
 typedef struct Opt_StackOptions Opt_StackOptions;
 typedef struct Ark_StyledStringChangedListener Ark_StyledStringChangedListener;
 typedef struct Opt_StyledStringChangedListener Opt_StyledStringChangedListener;
+typedef struct Ark_SurfaceConfig Ark_SurfaceConfig;
+typedef struct Opt_SurfaceConfig Opt_SurfaceConfig;
 typedef struct Ark_SurfaceRect Ark_SurfaceRect;
 typedef struct Opt_SurfaceRect Opt_SurfaceRect;
 typedef struct Ark_SurfaceRotationOptions Ark_SurfaceRotationOptions;
@@ -17200,6 +17202,14 @@ typedef struct Opt_StyledStringChangedListener {
     Ark_Tag tag;
     Ark_StyledStringChangedListener value;
 } Opt_StyledStringChangedListener;
+typedef struct Ark_SurfaceConfig {
+    /* kind: Interface */
+    Opt_Boolean isOpaque;
+} Ark_SurfaceConfig;
+typedef struct Opt_SurfaceConfig {
+    Ark_Tag tag;
+    Ark_SurfaceConfig value;
+} Opt_SurfaceConfig;
 typedef struct Ark_SurfaceRect {
     /* kind: Interface */
     Opt_Float64 offsetX;
@@ -31379,6 +31389,11 @@ typedef struct GENERATED_ArkUIXComponentControllerAccessor {
                                const Ark_ImageAnalyzerConfig* config,
                                const Callback_Opt_Array_String_Void* outputArgumentForReturningPromise);
     void (*stopImageAnalyzer)(Ark_XComponentController peer);
+    Opt_drawing_Canvas (*lockCanvas)(Ark_XComponentController peer);
+    void (*unlockCanvasAndPost)(Ark_XComponentController peer,
+                                Ark_drawing_Canvas canvas);
+    void (*setXComponentSurfaceConfig)(Ark_XComponentController peer,
+                                       const Ark_SurfaceConfig* config);
     Callback_String_Void (*getOnSurfaceCreated)(Ark_XComponentController peer);
     void (*setOnSurfaceCreated)(Ark_XComponentController peer,
                                 const Callback_String_Void* onSurfaceCreated);

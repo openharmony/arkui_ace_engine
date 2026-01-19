@@ -20422,6 +20422,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     void StopImageAnalyzerImpl(Ark_XComponentController peer)
     {
     }
+    Opt_drawing_Canvas LockCanvasImpl(Ark_XComponentController peer)
+    {
+        return {};
+    }
+    void UnlockCanvasAndPostImpl(Ark_XComponentController peer,
+                                 Ark_drawing_Canvas canvas)
+    {
+    }
+    void SetXComponentSurfaceConfigImpl(Ark_XComponentController peer,
+                                        const Ark_SurfaceConfig* config)
+    {
+    }
     Callback_String_Void GetOnSurfaceCreatedImpl(Ark_XComponentController peer)
     {
         return {};
@@ -24406,6 +24418,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             XComponentControllerAccessor::GetXComponentSurfaceRotationImpl,
             XComponentControllerAccessor::StartImageAnalyzerImpl,
             XComponentControllerAccessor::StopImageAnalyzerImpl,
+            XComponentControllerAccessor::LockCanvasImpl,
+            XComponentControllerAccessor::UnlockCanvasAndPostImpl,
+            XComponentControllerAccessor::SetXComponentSurfaceConfigImpl,
             XComponentControllerAccessor::GetOnSurfaceCreatedImpl,
             XComponentControllerAccessor::SetOnSurfaceCreatedImpl,
             XComponentControllerAccessor::GetOnSurfaceChangedImpl,

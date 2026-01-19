@@ -172,7 +172,7 @@ void SetHdrBrightnessImpl(Ark_NativePointer node,
         XComponentModelNG::HdrBrightness(frameNode, 1.0f);
         return;
     }
-    XComponentModelNG::HdrBrightness(frameNode, *convValue);
+    XComponentModelNG::HdrBrightness(frameNode, std::clamp(*convValue, 0.0f, 1.0f));
     #endif // XCOMPONENT_SUPPORTED
 }
 void SetEnableTransparentLayerImpl(Ark_NativePointer node,

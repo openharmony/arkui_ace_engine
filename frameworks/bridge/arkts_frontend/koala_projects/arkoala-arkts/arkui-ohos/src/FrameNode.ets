@@ -2063,6 +2063,18 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    function getXComponentAttribute(node: FrameNode): XComponentAttribute | undefined {
+        if (node.getType() !== 'XComponent') {
+            return undefined
+        }
+        let xComponentNode = node as XComponentFrameNode
+        if (xComponentNode !== undefined) {
+            return xComponentNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     function createXComponentNodeDefault(context: UIContext): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();

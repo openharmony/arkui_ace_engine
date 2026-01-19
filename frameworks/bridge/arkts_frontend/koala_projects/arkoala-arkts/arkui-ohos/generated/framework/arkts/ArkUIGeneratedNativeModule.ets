@@ -6855,6 +6855,12 @@ export class ArkUIGeneratedNativeModule {
     native static _XComponentController_startImageAnalyzer(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _XComponentController_stopImageAnalyzer(ptr: KPointer): void
+    @ani.unsafe.Quick
+    native static _XComponentController_lockCanvas(ptr: KPointer): KInteropReturnBuffer
+    @ani.unsafe.Direct
+    native static _XComponentController_unlockCanvasAndPost(ptr: KPointer, canvas: KPointer): void
+    @ani.unsafe.Direct
+    native static _XComponentController_setXComponentSurfaceConfig(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _XComponentController_getOnSurfaceCreated(ptr: KPointer): KPointer
     @ani.unsafe.Direct
