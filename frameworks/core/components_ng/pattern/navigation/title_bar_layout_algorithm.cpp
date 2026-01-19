@@ -1090,7 +1090,11 @@ void TitleBarLayoutAlgorithm::InitializeTheme(const RefPtr<TitleBarNode>& titleB
         navBackIconWidth_ = backIconWidth_.ConvertToPx();
         navButtonPadding_ = (menuButtonPadding_ + menuButtonPadding_).ConvertToPx();
         navHorizontalMargin_ = navButtonPadding_ + menuCompPadding_.ConvertToPx();
-        fullModeTitleCenter_ = SystemProperties::GetDeviceType() == DeviceType::TV;
+        auto titleBarLayoutProperty = titleBarNode->GetLayoutProperty<TitleBarLayoutProperty>();
+        CHECK_NULL_VOID(titleBarLayoutProperty);
+        auto curTitleMode = titleBarLayoutProperty->GetTitleModeValue(NavigationTitleMode::FREE);
+        fullModeTitleCenter_ =
+            SystemProperties::GetDeviceType() == DeviceType::TV && curTitleMode != NavigationTitleMode::FREE;
     }
 }
 
