@@ -434,15 +434,11 @@ void SwiperModelStatic::SetMinSize(FrameNode* frameNode, const Dimension& minSiz
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, MinSize, minSize, frameNode);
 }
 
-void SwiperModelStatic::SetPreviousMargin(FrameNode* frameNode, const std::optional<Dimension>& prevMargin,
+void SwiperModelStatic::SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin,
     const std::optional<bool> &ignoreBlank)
 {
     CHECK_NULL_VOID(frameNode);
-    if (prevMargin.has_value() && !prevMargin->IsNegative()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMargin, prevMargin, frameNode);
     CHECK_NULL_VOID(ignoreBlank);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, PrevMarginIgnoreBlank, *ignoreBlank, frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
@@ -450,15 +446,11 @@ void SwiperModelStatic::SetPreviousMargin(FrameNode* frameNode, const std::optio
     pattern->SetPrevMarginIgnoreBlank(*ignoreBlank);
 }
 
-void SwiperModelStatic::SetNextMargin(FrameNode* frameNode, const std::optional<Dimension>& nextMargin,
+void SwiperModelStatic::SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin,
     const std::optional<bool> &ignoreBlank)
 {
     CHECK_NULL_VOID(frameNode);
-    if (nextMargin.has_value() && !nextMargin->IsNegative()) {
-        ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin.value(), frameNode);
-    } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, frameNode);
-    }
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMargin, nextMargin, frameNode);
     CHECK_NULL_VOID(ignoreBlank);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(SwiperLayoutProperty, NextMarginIgnoreBlank, *ignoreBlank, frameNode);
     auto pattern = frameNode->GetPattern<SwiperPattern>();
