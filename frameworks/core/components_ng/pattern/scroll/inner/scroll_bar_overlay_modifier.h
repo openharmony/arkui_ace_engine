@@ -157,6 +157,15 @@ public:
         isNavDestinationShow_ = isNavDestinationShow;
     }
 
+    void SetAdjustOffset(Offset adjustOffset)
+    {
+        adjustOffset_ = adjustOffset;
+    }
+
+    Offset GetAdjustOffset() const
+    {
+        return adjustOffset_;
+    }
 protected:
     std::shared_ptr<AnimationUtils::Animation> hoverAnimation_;
 
@@ -183,6 +192,7 @@ private:
     OpacityAnimationType opacityAnimatingType_ = OpacityAnimationType::NONE;
     PositionMode positionMode_ = PositionMode::RIGHT;
 
+    Offset adjustOffset_;
     bool isScrollable_ = true;
     bool isNavDestinationShow_ = true;
 };
