@@ -53,6 +53,8 @@ constexpr char ANI_SIZE_INNER_CLS[] = "@ohos.arkui.observer.uiObserver.SizeInner
 constexpr char ANI_WINDOW_SIZE_BREAKPOINT_INFO_CLS[] = "arkui.component.enums.WindowSizeLayoutBreakpointInfo";
 constexpr char ANI_WIDTHBREAKPOINT_TYPE[] = "arkui.component.enums.WidthBreakpoint";
 constexpr char ANI_HEIGHTBREAKPOINT_TYPE[] = "arkui.component.enums.HeightBreakpoint";
+constexpr char ROUTER_NAVIGATION_PARAM[] =
+    "X{C{application.UIAbilityContext.UIAbilityContext}C{@ohos.arkui.UIContext.UIContext}}C{std.core.Function1}:";
 } // namespace
 namespace OHOS::Ace {
 class UiObserver {
@@ -1084,7 +1086,7 @@ public:
         ani_class cls;
         env->FindClass(ANI_NAVDESTINATION_INFO_CLS, &cls);
         ani_method navDestinationInfoCtor;
-        env->Class_FindMethod(cls, "<ctor>", nullptr, &navDestinationInfoCtor);
+        env->Class_FindMethod(cls, "<ctor>", ":", &navDestinationInfoCtor);
         env->Object_New(cls, navDestinationInfoCtor, &res);
 
         env->Object_SetPropertyByName_Double(res, "uniqueId", static_cast<ani_double>(info.uniqueId));
@@ -1153,7 +1155,7 @@ public:
         ani_class cls;
         env->FindClass(ANI_ROUTER_INFO_CLS, &cls);
         ani_method routerInfoCtor;
-        env->Class_FindMethod(cls, "<ctor>", nullptr, &routerInfoCtor);
+        env->Class_FindMethod(cls, "<ctor>", ":", &routerInfoCtor);
         env->Object_New(cls, routerInfoCtor, &res);
 
         env->Object_SetPropertyByName_Int(res, "index", static_cast<ani_int>(pageInfo.index));
@@ -1198,7 +1200,7 @@ public:
         ani_class cls;
         env->FindClass(ANI_NAV_SWITCH_INFO, &cls);
         ani_method navSwitchCtor;
-        env->Class_FindMethod(cls, "<ctor>", nullptr, &navSwitchCtor);
+        env->Class_FindMethod(cls, "<ctor>", ":", &navSwitchCtor);
         env->Object_New(cls, navSwitchCtor, &res);
 
         ani_class uiContextUtil;
@@ -2155,7 +2157,20 @@ static void onNavDestinationSwitchContext([[maybe_unused]] ani_env* env, ani_obj
 
     static std::once_flag onceFlag;
     std::call_once(onceFlag, [&env]() {
-        auto navDestinationSwitchCallback = [env](NG::NavDestinationSwitchInfo& info) {
+        ani_vm* vm = nullptr;
+        ani_status status;
+        if ((status = env->GetVM(&vm)) != ANI_OK || !vm) {
+            LOGE("failed to get vm in onNavDestinationSwitchContext, status:%{public}d", static_cast<int32_t>(status));
+            return;
+        }
+        auto navDestinationSwitchCallback = [vm](NG::NavDestinationSwitchInfo& info) {
+            ani_env* env = nullptr;
+            ani_status status;
+            if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || !env) {
+                LOGE("failed to get ani env in onNavDestinationSwitchContext, status:%{public}d",
+                    static_cast<int32_t>(status));
+                return;
+            }
             UiObserver::HandleUIContextNavDestinationSwitch(env, info);
         };
         NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFuncForAni(navDestinationSwitchCallback);
@@ -2236,7 +2251,21 @@ static void onNavDestinationSwitchWithIdContext([[maybe_unused]] ani_env* env, a
 
     static std::once_flag onceFlag;
     std::call_once(onceFlag, [&env]() {
-        auto navDestinationSwitchCallback = [env](NG::NavDestinationSwitchInfo& info) {
+        ani_vm* vm = nullptr;
+        ani_status status;
+        if ((status = env->GetVM(&vm)) != ANI_OK || !vm) {
+            LOGE("failed to get vm in onNavDestinationSwitchWithIdContext, status:%{public}d",
+                static_cast<int32_t>(status));
+            return;
+        }
+        auto navDestinationSwitchCallback = [vm](NG::NavDestinationSwitchInfo& info) {
+            ani_env* env = nullptr;
+            ani_status status;
+            if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || !env) {
+                LOGE("failed to get ani env in onNavDestinationSwitchWithIdContext, status:%{public}d",
+                    static_cast<int32_t>(status));
+                return;
+            }
             UiObserver::HandleUIContextNavDestinationSwitch(env, info);
         };
         NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFuncForAni(navDestinationSwitchCallback);
@@ -2654,10 +2683,25 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
         observer->HandleTabContentUpdate(env, info);
     };
     NG::UIObserverHandler::GetInstance().SetHandleTabContentUpdateFuncForAni(tabContentCallback);
-    auto navDestinationSwitchCallback = [observer, env](NG::NavDestinationSwitchInfo& info) {
-        observer->HandleUIContextNavDestinationSwitch(env, info);
-    };
-    NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFuncForAni(navDestinationSwitchCallback);
+    do {
+        ani_vm* vm = nullptr;
+        ani_status status;
+        if ((status = env->GetVM(&vm)) != ANI_OK || !vm) {
+            LOGE("failed to get vm in CreateObserver for nav switch, status:%{public}d", static_cast<int32_t>(status));
+            break;
+        }
+        auto navDestinationSwitchCallback = [observer, vm](NG::NavDestinationSwitchInfo& info) {
+            ani_env* env = nullptr;
+            ani_status status;
+            if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || !env) {
+                LOGE("failed to get ani env in CreateObserver for nav switch, status:%{public}d",
+                    static_cast<int32_t>(status));
+                return;
+            }
+            observer->HandleUIContextNavDestinationSwitch(env, info);
+        };
+        NG::UIObserverHandler::GetInstance().SetHandleNavDestinationSwitchFuncForAni(navDestinationSwitchCallback);
+    } while (false);
 
     auto routerPageSizeChangeCallback = [observer, env](const NG::RouterPageInfoNG& info) {
         observer->HandleRouterPageSizeChange(env, info);
@@ -2692,31 +2736,30 @@ bool ANI_ConstructorForAni(ani_env* env)
     }
     std::array methods = {
         ani_native_function { "createUIObserver", nullptr, reinterpret_cast<void*>(OHOS::Ace::CreateObserver) },
-        ani_native_function {
-            "onRouterPageUpdate", nullptr, reinterpret_cast<void*>(OHOS::Ace::onRouterPageUpdateContext) },
-        ani_native_function {
-            "offRouterPageUpdate", nullptr, reinterpret_cast<void*>(OHOS::Ace::offRouterPageUpdateContext) },
-        ani_native_function { "onNavDestinationUpdate", "C{std.core.Function1}:",
-            reinterpret_cast<void*>(OHOS::Ace::onNavDestinationUpdateContext) },
-        ani_native_function { "offNavDestinationUpdate", "C{std.core.Function1}:",
-            reinterpret_cast<void*>(OHOS::Ace::offNavDestinationUpdateContext) },
-        ani_native_function {
-            "onNavDestinationUpdate",
+        ani_native_function { "onRouterPageUpdate", ROUTER_NAVIGATION_PARAM,
+            reinterpret_cast<void*>(OHOS::Ace::onRouterPageUpdateContext) },
+        ani_native_function { "offRouterPageUpdate", ROUTER_NAVIGATION_PARAM,
+            reinterpret_cast<void*>(OHOS::Ace::offRouterPageUpdateContext) },
+        ani_native_function { "onNavDestinationUpdate",
+            "C{std.core.Function1}:", reinterpret_cast<void*>(OHOS::Ace::onNavDestinationUpdateContext) },
+        ani_native_function { "offNavDestinationUpdate",
+            "C{std.core.Function1}:", reinterpret_cast<void*>(OHOS::Ace::offNavDestinationUpdateContext) },
+        ani_native_function {"onNavDestinationUpdate",
             "C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Function1}:",
             reinterpret_cast<void*>(OHOS::Ace::OnNavDestinationUpdateWithIdContext) },
         ani_native_function { "offNavDestinationUpdate",
             "C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Function1}:",
             reinterpret_cast<void*>(OHOS::Ace::OffNavDestinationUpdateWithIdContext) },
-        ani_native_function { "onNavDestinationSwitch", "C{std.core.Function1}:",
+        ani_native_function { "onNavDestinationSwitch", ROUTER_NAVIGATION_PARAM,
             reinterpret_cast<void*>(OHOS::Ace::onNavDestinationSwitchContext) },
-        ani_native_function { "offNavDestinationSwitch", "C{std.core.Function1}:",
+        ani_native_function { "offNavDestinationSwitch", ROUTER_NAVIGATION_PARAM,
             reinterpret_cast<void*>(OHOS::Ace::offNavDestinationSwitchContext) },
-        ani_native_function {
-            "onNavDestinationSwitch",
+        ani_native_function { "onNavDestinationSwitch",
+            "X{C{application.UIAbilityContext.UIAbilityContext}C{@ohos.arkui.UIContext.UIContext}}"
             "C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Function1}:",
             reinterpret_cast<void*>(OHOS::Ace::onNavDestinationSwitchWithIdContext) },
-        ani_native_function {
-            "offNavDestinationSwitch",
+        ani_native_function { "offNavDestinationSwitch",
+            "X{C{application.UIAbilityContext.UIAbilityContext}C{@ohos.arkui.UIContext.UIContext}}"
             "C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Function1}:",
             reinterpret_cast<void*>(OHOS::Ace::offNavDestinationSwitchWithIdContext) },
         ani_native_function { "onWindowSizeLayoutBreakpointChange",
@@ -2743,30 +2786,28 @@ bool ANI_ConstructorForAni(ani_env* env)
             "on", NAVDESTINATION_PARAM_WITHID, reinterpret_cast<void*>(OHOS::Ace::OnNavDestinationUpdateWithId) },
         ani_native_function {
             "off", NAVDESTINATION_PARAM_WITHID, reinterpret_cast<void*>(OHOS::Ace::OffNavDestinationUpdateWithId) },
-        ani_native_function { "onNavDestinationUpdate", "C{std.core.Function1}:",
-            reinterpret_cast<void*>(OHOS::Ace::onNavDestinationUpdate) },
-        ani_native_function { "offNavDestinationUpdate", "C{std.core.Function1}:",
-            reinterpret_cast<void*>(OHOS::Ace::offNavDestinationUpdate) },
-        ani_native_function {
-            "onNavDestinationUpdate",
+        ani_native_function { "onNavDestinationUpdate",
+            "C{std.core.Function1}:", reinterpret_cast<void*>(OHOS::Ace::onNavDestinationUpdate) },
+        ani_native_function { "offNavDestinationUpdate",
+            "C{std.core.Function1}:", reinterpret_cast<void*>(OHOS::Ace::offNavDestinationUpdate) },
+        ani_native_function { "onNavDestinationUpdate",
             "C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Function1}:",
             reinterpret_cast<void*>(OHOS::Ace::OnNavDestinationUpdateWithId) },
         ani_native_function { "offNavDestinationUpdate",
             "C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Function1}:",
             reinterpret_cast<void*>(OHOS::Ace::OffNavDestinationUpdateWithId) },
-        ani_native_function { "onRouterPageUpdate", nullptr, reinterpret_cast<void*>(OHOS::Ace::onRouterPageUpdate) },
         ani_native_function {
-            "offRouterPageUpdate", nullptr, reinterpret_cast<void*>(OHOS::Ace::offRouterPageUpdate) },
-        ani_native_function { "onNavDestinationSwitch", "C{std.core.Function1}:",
-            reinterpret_cast<void*>(OHOS::Ace::onNavDestinationSwitch) },
-        ani_native_function { "offNavDestinationSwitch", "C{std.core.Function1}:",
-            reinterpret_cast<void*>(OHOS::Ace::offNavDestinationSwitch) },
+            "onRouterPageUpdate", "C{std.core.Function1}:", reinterpret_cast<void*>(OHOS::Ace::onRouterPageUpdate) },
         ani_native_function {
-            "onNavDestinationSwitch",
+            "offRouterPageUpdate", "C{std.core.Function1}:", reinterpret_cast<void*>(OHOS::Ace::offRouterPageUpdate) },
+        ani_native_function { "onNavDestinationSwitch",
+            "C{std.core.Function1}:", reinterpret_cast<void*>(OHOS::Ace::onNavDestinationSwitch) },
+        ani_native_function { "offNavDestinationSwitch",
+            "C{std.core.Function1}:", reinterpret_cast<void*>(OHOS::Ace::offNavDestinationSwitch) },
+        ani_native_function { "onNavDestinationSwitch",
             "C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Function1}:",
             reinterpret_cast<void*>(OHOS::Ace::onNavDestinationSwitchWithId) },
-        ani_native_function {
-            "offNavDestinationSwitch",
+        ani_native_function { "offNavDestinationSwitch",
             "C{@ohos.arkui.observer.uiObserver.NavDestinationSwitchObserverOptions}C{std.core.Function1}:",
             reinterpret_cast<void*>(OHOS::Ace::offNavDestinationSwitchWithId) },
         ani_native_function { "onTabChange", TAB_CHANGE_PARAM, reinterpret_cast<void*>(OHOS::Ace::OnTabChange) },
