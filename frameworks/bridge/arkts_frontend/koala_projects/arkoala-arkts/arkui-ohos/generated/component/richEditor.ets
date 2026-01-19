@@ -24,7 +24,7 @@ import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { ArkThemeScopeManager } from "#arktheme"
 import { Resource_serializer } from "./../framework/resource"
-import { ComponentContent_serializer } from "./../ComponentContent"
+import { ComponentContentBase_serializer } from "./../ComponentContent"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { VoidCallback, ResourceColor, ResourceStr, Font, Length, Dimension, Padding, BorderRadiuses, Font_serializer, Padding_serializer, BorderRadiuses_serializer } from "./units"
@@ -808,7 +808,7 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._RichEditorAttribute_setSelectedDragPreviewStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCustomKeyboardAttribute(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): void {
+    setCustomKeyboardAttribute(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -817,10 +817,14 @@ export class ArkRichEditorPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((0).toByte())
                 const valueTmpValueForIdx0  = valueTmpValue as CustomBuilder
                 thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValueForIdx0))
-            } else if (valueTmpValue instanceof ComponentContent) {
+            } else if (valueTmpValue instanceof ComponentContentBase) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as ComponentContent
-                ComponentContent_serializer.write(thisSerializer, valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as ComponentContentBase
+                let ptr: KPointer = nullptr
+                if (valueTmpValueForIdx1.getNodePtr() !== undefined) {
+                    ptr = valueTmpValueForIdx1.getNodePtr() as (KPointer)
+                }
+                thisSerializer.writePointer(ptr)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1245,7 +1249,7 @@ export interface RichEditorAttribute extends CommonMethod {
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
         throw new Error("Unimplemented method selectedDragPreviewStyle")
     }
-    customKeyboard(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
         throw new Error("Unimplemented method customKeyboard")
     }
     placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
@@ -1419,7 +1423,7 @@ export class ArkRichEditorStyle extends ArkCommonMethodStyle implements RichEdit
     selectedDragPreviewStyle(value: SelectedDragPreviewStyle | undefined): this {
         return this
     }
-    customKeyboard(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): this {
+    customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
         return this
     }
     placeholder(value: ResourceStr | undefined, style?: PlaceholderStyle): this {
@@ -1841,9 +1845,9 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
         }
         return this
     }
-    public customKeyboard(value: CustomBuilder | ComponentContent | undefined, options?: KeyboardOptions): this {
+    public customKeyboard(value: CustomBuilder | ComponentContentBase | undefined, options?: KeyboardOptions): this {
         if (this.checkPriority("customKeyboard")) {
-            const value_casted = value as (CustomBuilder | ComponentContent | undefined)
+            const value_casted = value as (CustomBuilder | ComponentContentBase | undefined)
             const options_casted = options as (KeyboardOptions | undefined)
             this.getPeer()?.setCustomKeyboardAttribute(value_casted, options_casted)
             return this

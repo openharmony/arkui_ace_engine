@@ -872,7 +872,7 @@ void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
     RichEditorModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
 }
 void SetCustomKeyboardImpl(Ark_NativePointer node,
-                           const Opt_Union_CustomBuilder_ComponentContent* value,
+                           const Opt_Union_CustomBuilder_ComponentContentBase* value,
                            const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -900,7 +900,7 @@ void SetCustomKeyboardImpl(Ark_NativePointer node,
             node);
         RichEditorModelStatic::SetCustomKeyboard(frameNode, nullptr, std::nullopt);
     } else if (value->value.selector == SELECTOR_COMPONENT_CONTENT) {
-        const Ark_ComponentContent& arkContent = value->value.value1;
+        const Ark_ComponentContentBase& arkContent = value->value.value1;
         auto contentPeer = reinterpret_cast<FrameNodePeer*>(arkContent);
         CHECK_NULL_VOID(contentPeer);
         if (auto customKeyboard = FrameNodePeer::GetFrameNodeByPeer(contentPeer)) {
