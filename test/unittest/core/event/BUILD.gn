@@ -14,8 +14,8 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("event_manager_test_ng") {
+  module_name = "Component-Snapshot"
   type = "new"
-  module_output = "events"
   sources = [
     "$ace_root/frameworks/core/event/resample_algo.cpp",
     "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
@@ -28,26 +28,26 @@ ace_unittest("event_manager_test_ng") {
     "event_manager_test_ng_new.cpp",
     "event_manager_test_ng_three.cpp",
     "event_manager_test_ng_two.cpp",
-    "event_manager_test_three_ng.cpp",
     "event_manager_test_ng_two_issuse.cpp",
+    "event_manager_test_three_ng.cpp",
   ]
 }
 
 ace_unittest("click_event_test_ng") {
-  module_output = "events"
+  module_name = "PickerSet-DatePicker/DatePickerDialog"
   type = "new"
   sources = [ "click_event_test_ng.cpp" ]
 }
 
 ace_unittest("coasting_axis_event_test_ng") {
-  module_output = "events"
+  module_name = "DrawingSet-Rect"
   type = "new"
   sources = [ "coasting_axis_event_test_ng.cpp" ]
 }
 
 ace_unittest("drag_event_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "events"
   sources = [
     "drag_event_test_ng.cpp",
     "drag_event_test_ng_property_config.cpp",
@@ -56,14 +56,14 @@ ace_unittest("drag_event_test_ng") {
 }
 
 ace_unittest("drag_drop_event_test_ng") {
+  module_name = "DialogSet-Toast"
   type = "new"
-  module_output = "events"
   sources = [ "./drag_event/drag_drop_event_test_ng.cpp" ]
 }
 
 ace_unittest("drag_event_test_ng_base") {
+  module_name = "StateManagement-InClass"
   type = "new"
-  module_output = "events"
   sources = [
     "./drag_event/drag_event_test_ng_base.cpp",
     "./drag_event/drag_event_test_ng_issue.cpp",
@@ -71,14 +71,14 @@ ace_unittest("drag_event_test_ng_base") {
 }
 
 ace_unittest("event_hub_test_ng") {
+  module_name = "DrawingSet-Rect"
   type = "new"
-  module_output = "events"
   sources = [ "event_hub_test_ng.cpp" ]
 }
 
 ace_unittest("focus_hub_test_ng") {
+  module_name = "ScrollingSet-TabsAndTabContent"
   type = "new"
-  module_output = "events"
   sources = [
     "focus_core/focus_api_test.cpp",
     "focus_core/focus_area_test.cpp",
@@ -92,8 +92,6 @@ ace_unittest("focus_hub_test_ng") {
     "focus_core/page_focus_switch_test.cpp",
     "focus_core/passive_last_focus_test.cpp",
     "focus_hub_test_ng.cpp",
-    "focus_hub_test_ng_three.cpp",
-    "focus_hub_test_ng_two.cpp",
     "focus_hub_test_ng_branch_coverage.cpp",
     "focus_hub_test_ng_for_paint_focus_state.cpp",
     "focus_hub_test_ng_for_property_config.cpp",
@@ -101,38 +99,40 @@ ace_unittest("focus_hub_test_ng") {
     "focus_hub_test_ng_new.cpp",
     "focus_hub_test_ng_new_three.cpp",
     "focus_hub_test_ng_new_two.cpp",
+    "focus_hub_test_ng_three.cpp",
+    "focus_hub_test_ng_two.cpp",
   ]
 }
 
 ace_unittest("gesture_event_hub_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "events"
   sources = [
+    "gesture_event_hub_test_five_ng.cpp",
     "gesture_event_hub_test_ng.cpp",
     "gesture_event_hub_test_ng_coverage.cpp",
     "gesture_event_hub_test_ng_property_config.cpp",
+    "gesture_event_hub_test_ng_two_property_config.cpp",
+    "gesture_event_hub_test_six_ng.cpp",
     "gesture_event_hub_test_three_ng.cpp",
     "gesture_event_hub_test_two_ng.cpp",
-    "gesture_event_hub_test_five_ng.cpp",
-    "gesture_event_hub_test_six_ng.cpp",
-    "gesture_event_hub_test_ng_two_property_config.cpp",
   ]
 }
 
 ace_unittest("input_event_hub_test_ng") {
+  module_name = "CommonEvent-Input"
   type = "new"
-  module_output = "events"
   sources = [ "input_event_hub_test_ng.cpp" ]
 }
 
 ace_unittest("long_press_event_test_ng") {
-  module_output = "events"
+  module_name = "DialogSet-Toast"
   type = "new"
   sources = [ "long_press_event_test_ng.cpp" ]
 }
 
 ace_unittest("mouse_style_manager_test_ng") {
-  module_output = "events"
+  module_name = "FocusManager"
   type = "new"
   sources = [
     "$ace_root/frameworks/base/mousestyle/mouse_style.cpp",
@@ -141,38 +141,38 @@ ace_unittest("mouse_style_manager_test_ng") {
 }
 
 ace_unittest("pan_event_test_ng") {
+  module_name = "CommonEvent-Input"
   type = "new"
-  module_output = "events"
   sources = [ "pan_event_test_ng.cpp" ]
 }
 
 ace_unittest("scrollable_event_test_ng") {
+  module_name = "ScrollingSet-Scrollable"
   type = "new"
-  module_output = "events"
   sources = [ "scrollable_event_test_ng.cpp" ]
 }
 
 ace_unittest("state_style_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "events"
   sources = [ "state_style_manager_test_ng.cpp" ]
 }
 
 ace_unittest("touch_event_test_ng") {
+  module_name = "CommonEvent-Input"
   type = "new"
-  module_output = "events"
   sources = [ "touch_event_test_ng.cpp" ]
 }
 
 ace_unittest("response_ctrl_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "events"
   sources = [ "response_ctrl_test_ng.cpp" ]
 }
 
 ace_unittest("input_event_test_ng") {
+  module_name = "CommonEvent-Input"
   type = "new"
-  module_output = "events"
   sources = [ "input_event_test_ng.cpp" ]
   cflags = [
     "-Dprivate=public",
@@ -181,20 +181,20 @@ ace_unittest("input_event_test_ng") {
 }
 
 ace_unittest("focus_box_test_ng") {
+  module_name = "FocusManager"
   type = "new"
-  module_output = "events"
   sources = [ "focus_box_test_ng.cpp" ]
 }
 
 ace_unittest("axis_event_test_ng") {
+  module_name = "DialogSet-Toast"
   type = "new"
-  module_output = "events"
   sources = [ "axis_event_test_ng.cpp" ]
 }
 
 ace_unittest("focus_event_handler_test_ng") {
+  module_name = "FormAndSelection-Button"
   type = "new"
-  module_output = "events"
   sources = [ "focus_event_handler_test_ng.cpp" ]
 }
 

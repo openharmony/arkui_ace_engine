@@ -14,6 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("menu_test_ng") {
+  module_name = "CommonProperties-LayoutAndBorder"
   type = "new"
   sources = [
     "custommenuitem_pattern_test_ng.cpp",

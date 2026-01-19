@@ -24,6 +24,7 @@ group("dynamic_component_test_group") {
 }
 
 ace_unittest("dynamic_pattern_test") {
+  module_name = "EmbeddedDisPlayCrossThread-DynamicComponent"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
@@ -103,6 +104,7 @@ ace_unittest("dynamic_pattern_test") {
 }
 
 ace_unittest("dynamic_pattern_test_two") {
+  module_name = "Animation-Frame"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
@@ -182,6 +184,7 @@ ace_unittest("dynamic_pattern_test_two") {
 }
 
 ace_unittest("dynamic_pattern_manager_test_ng") {
+  module_name = "NavigationSet-MultiNavigation"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",

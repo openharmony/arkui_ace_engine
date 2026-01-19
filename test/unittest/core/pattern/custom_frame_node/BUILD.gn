@@ -14,6 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("custom_frame_node_test") {
+  module_name = "ImperativeFramework-NodeController"
   type = "new"
   sources = [ "custom_frame_node_test.cpp" ]
 }

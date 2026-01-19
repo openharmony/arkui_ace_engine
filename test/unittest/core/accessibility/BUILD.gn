@@ -15,8 +15,8 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("accessibility_linux_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "basic"
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_manager_ng.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
@@ -27,8 +27,8 @@ ace_unittest("accessibility_linux_test_ng") {
 }
 
 ace_unittest("accessibility_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "basic"
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_manager_ng.cpp",
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
@@ -52,8 +52,8 @@ ace_unittest("accessibility_test_ng") {
 }
 
 ace_unittest("accessibility_adapter_test_ng") {
+  module_name = "Accessibility-AccessibilityManager"
   type = "new"
-  module_output = "basic"
   sources = [
     "$ace_root/adapter/ohos/osal/accessibility/accessibility_hidumper_osal.cpp",
     "$ace_root/adapter/ohos/osal/accessibility/element_info/accessibility_element_info_osal.cpp",
@@ -130,8 +130,8 @@ ace_unittest("accessibility_adapter_test_ng") {
     "$ace_root/interfaces/native/native_interface_accessibility.cpp",
     "$ace_root/test/unittest/core/accessibility/mock_ace_container.cpp",
     "accessibitlity_manager_utils_test.cpp",
-    "focus_move/accessibility_focus_strategy_test.cpp",
     "focus_move/accessibility_focus_move_osal_test.cpp",
+    "focus_move/accessibility_focus_strategy_test.cpp",
     "hidumper/accessibitlity_hidumper_osal_test.cpp",
     "hidumper/accessibitlity_hidumper_test.cpp",
     "js_accessibitlity_manager_test.cpp",
@@ -173,8 +173,8 @@ ace_unittest("accessibility_adapter_test_ng") {
 }
 
 ace_unittest("js_inspector_test") {
+  module_name = "FormAndSelection-Rating"
   type = "new"
-  module_output = "basic"
   sources = [
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_badge.cpp",
     "$ace_root/frameworks/core/accessibility/js_inspector/inspect_button.cpp",

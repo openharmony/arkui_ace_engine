@@ -14,38 +14,38 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("lazy_for_each_syntax_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "syntaxs"
   sources = [
-     "lazy_for_each_syntax_test_ng.cpp",
-     "lazy_for_each_syntax_test_ng_2.cpp"
-    ]
+    "lazy_for_each_syntax_test_ng.cpp",
+    "lazy_for_each_syntax_test_ng_2.cpp",
+  ]
 }
 
 ace_unittest("lazy_for_each_builder_syntax_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "syntaxs"
   sources = [
     "lazy_for_each_builder_syntax_test_ng.cpp",
-    "lazy_for_each_builder_syntax_test_ng_2.cpp"
+    "lazy_for_each_builder_syntax_test_ng_2.cpp",
   ]
 }
 
 ace_unittest("for_each_syntax_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "syntaxs"
   sources = [ "for_each_syntax_test_ng.cpp" ]
 }
 
 ace_unittest("if_else_syntax_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "syntaxs"
   sources = [ "if_else_syntax_test_ng.cpp" ]
 }
 
 ace_unittest("content_slot_syntax_test_ng") {
+  module_name = "Component-Snapshot"
   type = "new"
-  module_output = "syntaxs"
   sources = [
     "$ace_root/frameworks/core/interfaces/native/node/node_content_modifier.cpp",
     "content_slot_syntax_test_ng.cpp",
@@ -53,25 +53,25 @@ ace_unittest("content_slot_syntax_test_ng") {
 }
 
 ace_unittest("repeat_virtual_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "syntaxs"
   sources = [
     "$ace_root/frameworks/core/components_ng/syntax/repeat_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/syntax/repeat_node.cpp",
     "repeat_virtual_test_ng.cpp",
-    "repeat_virtual_test_ng_2.cpp"
+    "repeat_virtual_test_ng_2.cpp",
   ]
 }
 
 ace_unittest("repeat_virtual_2_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "syntaxs"
   sources = [ "repeat_virtual_2_test_ng.cpp" ]
 }
 
 ace_unittest("syntax_arkoala_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "syntaxs"
   sources = [
     "arkoala_for_each_test_ng.cpp",
     "arkoala_if_else_test_ng.cpp",
@@ -80,8 +80,8 @@ ace_unittest("syntax_arkoala_test_ng") {
 }
 
 ace_unittest("parallelize_ui_adapter_node_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
-  module_output = "syntaxs"
   sources = [
     "$ace_root/frameworks/core/components_ng/syntax/arkoala_parallelize_ui_adapter_node.cpp",
     "parallelize_ui_adapter_node_test_ng.cpp",
@@ -96,9 +96,9 @@ group("core_syntax_unittest") {
     ":if_else_syntax_test_ng",
     ":lazy_for_each_builder_syntax_test_ng",
     ":lazy_for_each_syntax_test_ng",
+    ":parallelize_ui_adapter_node_test_ng",
     ":repeat_virtual_2_test_ng",
     ":repeat_virtual_test_ng",
     ":syntax_arkoala_test_ng",
-    ":parallelize_ui_adapter_node_test_ng",
   ]
 }

@@ -14,13 +14,14 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("rating_test_ng") {
+  module_name = "DrawingSet-Polyline"
   type = "new"
   sources = [
     "rating_content_modifier_test_ng.cpp",
     "rating_content_modifier_test_two_ng.cpp",
     "rating_model_static_test_ng.cpp",
     "rating_test_ng.cpp",
-    "rating_test_two_ng.cpp",
     "rating_test_three_ng.cpp",
+    "rating_test_two_ng.cpp",
   ]
 }

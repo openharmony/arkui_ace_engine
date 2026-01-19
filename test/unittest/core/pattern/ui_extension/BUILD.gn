@@ -15,6 +15,7 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("accessibility_session_adapter_ui_extension_test_ng") {
+  module_name = "Accessibility-AccessibilityProperties"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
@@ -55,10 +56,10 @@ ace_unittest("accessibility_session_adapter_ui_extension_test_ng") {
     "$ace_root/test/mock/adapter/mock_ace_container.cpp",
     "$ace_root/test/mock/adapter/mock_ace_extra_input_data.cpp",
     "$ace_root/test/mock/adapter/mock_mmi_event_convertor.cpp",
+    "$ace_root/test/unittest/adapter/ohos/entrance/mock_rs_adapter.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_dynamic_component_renderer_impl.cpp",
     "$ace_root/test/unittest/core/pattern/ui_extension/mock/mock_rosen_render_context.cpp",
     "accessibility_session_adapter_ui_extension_test_ng.cpp",
-    "$ace_root/test/unittest/adapter/ohos/entrance/mock_rs_adapter.cpp",
   ]
   if (is_ohos_standard_system) {
     defines = [
@@ -94,6 +95,7 @@ ace_unittest("accessibility_session_adapter_ui_extension_test_ng") {
 }
 
 ace_unittest("ui_extension_manager_test") {
+  module_name = "UIEngine-DarkMode"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.cpp",
@@ -174,6 +176,7 @@ ace_unittest("ui_extension_manager_test") {
 }
 
 ace_unittest("platform_pattern_test_ng") {
+  module_name = "Animation-Frame"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/dynamic_component_renderer_impl.cpp",
@@ -248,6 +251,7 @@ ace_unittest("platform_pattern_test_ng") {
 }
 
 ace_unittest("modal_ui_extension_proxy_impl_test_ng") {
+  module_name = "EmbeddedDisPlayCrossProcess-UIExtensionComponent"
   type = "new"
 
   sources = [
@@ -291,6 +295,7 @@ ace_unittest("modal_ui_extension_proxy_impl_test_ng") {
 }
 
 ace_unittest("isolated_pattern_test_ng") {
+  module_name = "EmbeddedDisPlayCrossThread-IsolatedComponent"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
@@ -368,6 +373,7 @@ ace_unittest("isolated_pattern_test_ng") {
 }
 
 ace_unittest("platform_event_proxy_test") {
+  module_name = "ImperativeFramework-ComponentContent"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
@@ -444,6 +450,7 @@ ace_unittest("platform_event_proxy_test") {
 }
 
 ace_unittest("security_ui_extension_pattern_test") {
+  module_name = "EmbeddedDisPlayCrossProcess-SecurityUIExtensionComponent"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",
@@ -522,6 +529,7 @@ ace_unittest("security_ui_extension_pattern_test") {
 }
 
 ace_unittest("session_wrapper_impl_test_ng") {
+  module_name = "FormAndSelection-Rating"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
@@ -600,6 +608,7 @@ ace_unittest("session_wrapper_impl_test_ng") {
 }
 
 ace_unittest("session_wrapper_impl_test_new_ng") {
+  module_name = "Animation-Frame"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
@@ -679,6 +688,7 @@ ace_unittest("session_wrapper_impl_test_new_ng") {
 }
 
 ace_unittest("security_session_wrapper_impl_test_ng") {
+  module_name = "FormAndSelection-Rating"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
@@ -760,6 +770,7 @@ ace_unittest("security_session_wrapper_impl_test_ng") {
 }
 
 ace_unittest("preview_session_wrapper_impl_test_ng") {
+  module_name = "Debugger-preview"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/entrance/dynamic_component/uv_task_wrapper_impl.cpp",
@@ -842,6 +853,7 @@ ace_unittest("preview_session_wrapper_impl_test_ng") {
 }
 
 ace_unittest("preview_ui_extension_compontent_test") {
+  module_name = "DrawingSet-Component3D"
   type = "new"
   sources = [
     "$ace_root/adapter/ohos/osal/want_wrap_ohos.cpp",

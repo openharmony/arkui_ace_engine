@@ -14,10 +14,11 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("custom_test_ng") {
+  module_name = "CommonProperties-LayoutAndBorder"
   type = "new"
   sources = [
+    "custom_measure_layout_node_test.cpp",
     "custom_test_ng_first_part.cpp",
     "custom_test_ng_second_part.cpp",
-    "custom_measure_layout_node_test.cpp"
   ]
 }

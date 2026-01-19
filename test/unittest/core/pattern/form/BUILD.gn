@@ -17,8 +17,7 @@ ace_unittest("form_test_ng") {
   flutter_skia = true
   render = true
   type = "new"
-  module_name = "form_fwk"
-  module_output = ""
+  module_name = "NavigationSet-Router"
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/common/form_manager.cpp",
@@ -28,8 +27,8 @@ ace_unittest("form_test_ng") {
     "$ace_root/frameworks/core/components_ng/pattern/form/form_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_scoped_rs_transaction.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/form/form_special_style.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_snapshot_util.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/form/form_special_style.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_paint_property.cpp",
@@ -70,8 +69,7 @@ ace_unittest("form_node_test") {
   flutter_skia = true
   render = true
   type = "new"
-  module_name = "form_fwk"
-  module_output = ""
+  module_name = "TextSet-Text"
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/common/form_manager.cpp",
@@ -81,8 +79,8 @@ ace_unittest("form_node_test") {
     "$ace_root/frameworks/core/components_ng/pattern/form/form_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_scoped_rs_transaction.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/form/form_special_style.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_snapshot_util.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/form/form_special_style.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_paint_property.cpp",
@@ -123,8 +121,7 @@ ace_unittest("form_pattern_test") {
   flutter_skia = true
   render = true
   type = "new"
-  module_name = "form_fwk"
-  module_output = ""
+  module_name = "InfoShowSet-PatternLock"
   sources = [
     "$ace_root/frameworks/core/accessibility/accessibility_session_adapter.cpp",
     "$ace_root/frameworks/core/common/form_manager.cpp",
@@ -134,8 +131,8 @@ ace_unittest("form_pattern_test") {
     "$ace_root/frameworks/core/components_ng/pattern/form/form_node.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_scoped_rs_transaction.cpp",
-    "$ace_root/frameworks/core/components_ng/pattern/form/form_special_style.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/form/form_snapshot_util.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/form/form_special_style.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_overlay_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/shape/shape_paint_property.cpp",
@@ -177,9 +174,9 @@ ohos_unittest("form_special_style_test") {
   module_out_path = "ace_engine/form_fwk"
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/form/form_special_style.cpp",
+    "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
-    "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "form_special_style_test.cpp",
   ]
 
@@ -195,8 +192,8 @@ ohos_unittest("form_special_style_test") {
 ohos_unittest("form_scoped_rs_transaction_test") {
   module_out_path = "ace_engine/form_fwk"
   sources = [
-    "$ace_root/frameworks/core/components_ng/pattern/form/form_scoped_rs_transaction.cpp",
     "$ace_root/frameworks/core/common/container_scope.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/form/form_scoped_rs_transaction.cpp",
     "$ace_root/frameworks/core/components_v2/inspector/inspector_constants.cpp",
     "$ace_root/frameworks/core/pipeline/base/constants.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
