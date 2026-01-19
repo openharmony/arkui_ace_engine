@@ -1500,6 +1500,16 @@ public:
         }
     }
 
+    const RefPtr<FrameNode>& GetCornerMarkNode() const
+    {
+        return cornerMarkNode_;
+    }
+
+    void SetCornerMarkNode(const RefPtr<FrameNode>& cornerMarkNode)
+    {
+        cornerMarkNode_ = cornerMarkNode;
+    }
+
     void AddToOcclusionMap(bool enable);
     void MarkModifyDoneUnsafely();
     void MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag);
@@ -1687,6 +1697,8 @@ private:
 
     void ResetPredictNodes();
     void HandleAreaChangeDestruct();
+    void HandleLanguageConfigurationUpdate(const ConfigurationChange& configurationChange);
+    void HandleColorModeConfigurationUpdate(const ConfigurationChange& configurationChange);
 
     const char* GetPatternTypeName() const;
     const char* GetLayoutPropertyTypeName() const;

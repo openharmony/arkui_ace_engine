@@ -92,6 +92,7 @@ build_component_ng("pattern_ng") {
     "container_picker/container_picker_model_static.cpp",
     "container_picker/container_picker_paint_method.cpp",
     "container_picker/container_picker_pattern.cpp",
+    "corner_mark/corner_mark.cpp",
     "custom/custom_app_bar_node.cpp",
     "custom/custom_measure_layout_node.cpp",
     "custom/custom_measure_layout_param.cpp",

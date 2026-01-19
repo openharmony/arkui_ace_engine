@@ -101,6 +101,7 @@ group("linux_core_unittest") {
     "pattern/common_view:common_view_test_ng",
     "pattern/container_modal:container_modal_pattern_enhance_test_ng",
     "pattern/container_modal:container_modal_test_ng",
+    "pattern/corner_mark:corner_mark_test_ng",
     "pattern/container_modal:container_modal_toolbar_test_ng",
     "pattern/container_modal:container_modal_static_pattern_test",
     "pattern/container_modal:container_modal_static_view_test",
