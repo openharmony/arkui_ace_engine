@@ -684,4 +684,59 @@ HWTEST_F(PixelRoundTestNg, PixelRoundTest012, TestSize.Level0)
     auto paintRect = renderContext->GetPaintRectWithoutTransform();
     EXPECT_EQ(paintRect, RectF(0.0f, 0.0f, 100.0f, 199.5f));
 }
+
+/**
+ * @tc.name: PixelRoundTest013
+ * @tc.desc: Test PixelRoundTest
+ * @tc.type: FUNC
+ */
+HWTEST_F(PixelRoundTestNg, PixelRoundTest013, TestSize.Level0)
+{
+    RefPtr<FrameNode> flexInner;
+    auto flex = CreateFlex([this, &flexInner](FlexModelNG model) {
+        ViewAbstract::SetWidth(CalcLength(500));
+        ViewAbstract::SetHeight(CalcLength(300));
+        flexInner = CreateFlex([this](FlexModelNG model) {
+            ViewAbstract::SetWidth(CalcLength(100.0000001));
+            ViewAbstract::SetHeight(CalcLength(200.0000001));
+            ViewAbstractModelNG model1;
+        });
+    });
+    ASSERT_NE(flex, nullptr);
+    ASSERT_EQ(flex->GetChildren().size(), 1);
+    CreateLayoutTask(flex);
+
+    /* corresponding ets code:
+        Flex() {
+          Flex()
+            .width("100.0000001px")
+            .height("200.0000001px")
+        }
+        .width("500px")
+        .height("300px")
+    */
+
+    // Expect flex's width is 500, height is 300 and offset is [0.0, 0.0].
+    auto geometryNode = flex->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    auto size = geometryNode->GetFrameSize();
+    auto offset = geometryNode->GetFrameOffset();
+    EXPECT_EQ(size, SizeF(500.0f, 300.0f));
+    EXPECT_EQ(offset, OffsetF(0.0f, 0.0f));
+
+    // Expect flexInner's width is 100, height is 199.5 and offset is [0.0, 0.0] before pixel rounding.
+    auto geometryNode1 = flexInner->GetGeometryNode();
+    ASSERT_NE(geometryNode1, nullptr);
+    auto size1 = geometryNode1->GetFrameSize();
+    auto offset1 = geometryNode1->GetFrameOffset();
+    EXPECT_EQ(size1, SizeF(100.0000001f, 200.0000001f));
+    EXPECT_EQ(offset1, OffsetF(0.0f, 0.0f));
+
+    // Expect flexInner's width is 100, height is 200 and offset is [0.0, 0.0] after pixel rounding.
+    auto renderContext = flexInner->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+    renderContext->SavePaintRect(true, 0);
+    auto paintRect = renderContext->GetPaintRectWithoutTransform();
+    EXPECT_EQ(paintRect, RectF(0.0f, 0.0f, 100.0f, 200.0f));
+}
 } // namespace OHOS::Ace::NG
