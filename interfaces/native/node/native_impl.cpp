@@ -267,6 +267,7 @@ void* OH_ArkUI_QueryModuleInterface(ArkUI_NativeAPIVariantKind type, int32_t ver
                     return nullptr;
                 }
             }
+            break;
         }
         case ARKUI_NATIVE_GESTURE: {
             switch (version) {
