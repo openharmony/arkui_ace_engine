@@ -181,7 +181,8 @@ static const uint64_t VSYNC_FIRST_FORCE_ENABLE_TIME_NS =
 enum class WindowChangeType {
     RECT_CHANGE,
     FOLD_STATUS_CHANGE,
-    DISPLAY_ID_CHANGE
+    DISPLAY_ID_CHANGE,
+    SUBWINDOW_ROTATION_CHANGE
 };
 
 #define UICONTENT_IMPL_HELPER(name) _##name = std::make_shared<UIContentImplHelper>(this)
@@ -3823,6 +3824,17 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         SubwindowManager::GetInstance()->SetRect(rect, instanceId_);
         TAG_LOGI(AceLogTag::ACE_WINDOW, "UpdateViewportConfig for subContainer: %{public}s",
             rect.ToString().c_str());
+        if (SystemProperties::IsSuperFoldDisplayDevice() && reason == OHOS::Rosen::WindowSizeChangeReason::ROTATION) {
+            TAG_LOGD(AceLogTag::ACE_WINDOW, "UpdateViewportConfig for subContainer rotation");
+            auto taskExecutor = container->GetTaskExecutor();
+            CHECK_NULL_VOID(taskExecutor);
+            taskExecutor->PostTask(
+                [instanceId = instanceId_] {
+                    ContainerScope scope(instanceId);
+                    ClearAllMenuPopup(instanceId, WindowChangeType::SUBWINDOW_ROTATION_CHANGE);
+                },
+                TaskExecutor::TaskType::UI, "ArkUISubwindowRoationChange");
+        }
     }
     // The density of sub windows related to dialog needs to be consistent with the main window.
     auto modifyConfig = config;
