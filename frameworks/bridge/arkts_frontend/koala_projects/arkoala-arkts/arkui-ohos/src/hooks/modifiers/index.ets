@@ -93,6 +93,8 @@ import { ImageAnimatorModifier } from "./../../ImageAnimatorModifier"
 import { ArkImageSpanComponent, ImageSpanAttribute } from "./../../component/imageSpan"
 import { ArkBaseSpanStyle, BaseSpan } from "./../../component/span"
 import { ImageSpanModifier } from "./../../ImageSpanModifier"
+import { ArkLazyVGridLayoutComponent, LazyVGridLayoutAttribute, LazyGridLayoutAttribute } from "./../../component/lazyGridLayout"
+import { LazyVGridLayoutModifier } from "./../../LazyVGridLayoutModifier"
 import { ArkIndicatorComponentComponent, IndicatorComponentAttribute } from "./../../component/indicatorcomponent"
 import { IndicatorComponentModifier } from "./../../IndicatorComponentModifier"
 import { ArkLineComponent, LineAttribute,ArkLinePeer,LineOptions} from './../../component/line';
@@ -2683,6 +2685,39 @@ export function hookToggleAttributeModifier(component: ArkToggleComponent,
         return componentNew;
     };
     applyAttributeModifierBase(modifier as Object as AttributeModifier<ToggleAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
+}
+
+export function hookLazyVGridLayoutAttributeModifier(component: ArkLazyVGridLayoutComponent,
+    modifier:AttributeModifier<LazyVGridLayoutAttribute> | AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): void {
+    if (modifier === undefined) {
+        return;
+    }
+    let isCommonModifier: boolean = modifier instanceof CommonModifier;
+    if (isCommonModifier) {
+        applyCommonModifier(component.getPeer(), modifier as Object as AttributeModifier<CommonMethod>);
+        return;
+    }
+    let attributeSet = (): LazyVGridLayoutModifier => {
+        let isLazyVGridLayoutModifier: boolean = modifier instanceof LazyVGridLayoutModifier;
+        let initModifier = component.getPeer().attributeSet ? component.getPeer().attributeSet! : new LazyVGridLayoutModifier();
+        if (isLazyVGridLayoutModifier) {
+            let lazyVGridLayoutModifier = modifier as object as LazyVGridLayoutModifier;
+            initModifier.mergeModifier(lazyVGridLayoutModifier);
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        } else {
+            component.getPeer().attributeSet = initModifier;
+            return initModifier;
+        }
+    }
+    let constructParam = (component: ArkCommonMethodComponent, ...params: FixedArray<Object>): void => {
+    };
+    let updaterReceiver = (): ArkLazyVGridLayoutComponent => {
+        let componentNew: ArkLazyVGridLayoutComponent = new ArkLazyVGridLayoutComponent();
+        componentNew.setPeer(component.getPeer());
+        return componentNew;
+    };
+    applyAttributeModifierBase(modifier as Object as AttributeModifier<LazyVGridLayoutAttribute>, attributeSet, constructParam, updaterReceiver, component.getPeer());
 }
 
 export function hookGridAttributeModifier(component: ArkGridComponent,

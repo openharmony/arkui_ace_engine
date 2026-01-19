@@ -98,6 +98,8 @@ arkui_files = [
   "arkui-preprocessed/arkui/ImageModifier.ets",
   "arkui-preprocessed/arkui/ImageSpanModifier.ets",
   "arkui-preprocessed/arkui/IndicatorComponentModifier.ets",
+  "arkui-preprocessed/arkui/LazyGridLayoutModifier.ets",
+  "arkui-preprocessed/arkui/LazyVGridLayoutModifier.ets",
   "arkui-preprocessed/arkui/LineModifier.ets",
   "arkui-preprocessed/arkui/LinearIndicatorModifier.ets",
   "arkui-preprocessed/arkui/ListItemGroupModifier.ets",

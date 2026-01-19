@@ -23,7 +23,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { extractors, AttributeModifier, AttributeUpdater } from "#handwritten"
+import { extractors, AttributeModifier, hookLazyVGridLayoutAttributeModifier, AttributeUpdater } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { LengthMetrics, LengthUnit } from "arkui.Graphics"
 import { Resource } from "global.resource"
@@ -201,7 +201,9 @@ export class ArkLazyVGridLayoutComponent extends ArkLazyGridLayoutAttributeCompo
         return this
     }
     public attributeModifier(value: AttributeModifier<LazyVGridLayoutAttribute> | AttributeModifier<LazyGridLayoutAttribute> | AttributeModifier<CommonMethod> | undefined): this {
-        
+        ModifierStateManager.INSTANCE.scope(() => {
+            hookLazyVGridLayoutAttributeModifier(this, value);
+        })
         return this
     }
     public applyAttributesFinish(): void {
