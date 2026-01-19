@@ -886,8 +886,8 @@ void JSTextField::SetBackgroundColor(const JSCallbackInfo& info)
     }
     Color backgroundColor;
     RefPtr<ResourceObject> resourceObject;
+    UnRegisterResource("backgroundColor");
     if (!ParseJsColor(info[0], backgroundColor, resourceObject)) {
-        UnRegisterResource("backgroundColor");
         TextFieldModel::GetInstance()->ResetBackgroundColor();
         return;
     }

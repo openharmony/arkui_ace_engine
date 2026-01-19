@@ -761,6 +761,9 @@ void SetTextAreaBackgroundColor(ArkUINodeHandle node, uint32_t color, void* resR
         } else {
             resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
         }
+    }
+    TextFieldModelNG::SetBackgroundColor(frameNode, result);
+    if (SystemProperties::ConfigChangePerform()) {
         auto pattern = frameNode->GetPattern();
         CHECK_NULL_VOID(pattern);
         if (resObj) {
@@ -769,7 +772,6 @@ void SetTextAreaBackgroundColor(ArkUINodeHandle node, uint32_t color, void* resR
             pattern->UnRegisterResource("backgroundColor");
         }
     }
-    TextFieldModelNG::SetBackgroundColor(frameNode, result);
 }
 
 void SetTextAreaBackgroundColorWithColorSpace(ArkUINodeHandle node, ArkUI_Uint32 color,
