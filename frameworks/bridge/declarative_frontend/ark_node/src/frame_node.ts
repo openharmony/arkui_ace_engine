@@ -85,9 +85,11 @@ class FrameNode {
   public nodePtr_: NodePtr;
   protected instanceId_?: number;
   private nodeAdapterRef_?: NodeAdapter;
+  public type_: string | undefined;
+  public rawPtr_: number | undefined;
   protected statesChangeHandler_: UIStatesChangeHandlerCallback | undefined;
   protected supportedStates_: number;
-  constructor(uiContext: UIContext, type: string, options?: object) {
+  constructor(uiContext: UIContext, type: string, options?: object, nativePointer?: number) {
     if (uiContext === undefined) {
       throw new BusinessError(401, 'Node constructor error, param uiContext error');
     } else {
@@ -112,9 +114,19 @@ class FrameNode {
     __JSScopeUtil__.syncInstanceId(this.instanceId_);
     if (type === undefined || type === "CustomFrameNode") {
       this.renderNode_ = new RenderNode('CustomFrameNode');
-      result = getUINativeModule().frameNode.createFrameNode(this);
-    } else {
-      result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
+      if (nativePointer === null || nativePointer === undefined) {
+        result = getUINativeModule().frameNode.createFrameNode(this);
+      }
+      else {
+        result = getUINativeModule().frameNode.createTransFrameNode(this, nativePointer);
+      }
+    }
+    else {
+      if (nativePointer === undefined || nativePointer === null) {
+        result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
+      } else {
+        result = getUINativeModule().frameNode.createTransTypedFrameNode(this, type, options, nativePointer);
+      }
     }
     __JSScopeUtil__.restoreInstanceId();
     this._nativeRef = result?.nativeStrongRef;
