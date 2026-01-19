@@ -651,6 +651,8 @@
       vtable?for?OHOS::Ace::NG::TextSelectOverlay;
       vtable?for?OHOS::Ace::NG::ParagraphManager;
 
+      OHOS::Ace::NG::ColorSampler::*;
+
       VTT?for?OHOS::Ace::Player;
       VTT?for?OHOS::Ace::Texture;
       VTT?for?OHOS::Ace::Resource;
