@@ -85,7 +85,8 @@ public:
 
     bool operator==(const DimensionOffset& dimensionOffset) const
     {
-        return deltaX_ == dimensionOffset.deltaX_ && deltaY_ == dimensionOffset.deltaY_ && deltaZ_ == deltaZ_;
+        return deltaX_ == dimensionOffset.deltaX_ && deltaY_ == dimensionOffset.deltaY_ &&
+               deltaZ_ == dimensionOffset.deltaZ_;
     }
 
 private:

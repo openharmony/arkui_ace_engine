@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+set -euo pipefail
+
 execute_script() {
     local working_dir="$1"
     local script_path="$2"
@@ -39,3 +41,5 @@ execute_script "./incremental/runtime" "../../tools/gen_gni.py" "--json" "arktsc
 execute_script "./incremental/common" "../../tools/gen_gni.py" "--json" "arktsconfig.json" "--output" "common.gni" "--gn-tool" "../../../../../../../../../prebuilts/build-tools/linux-x86/bin/gn"
 execute_script "./incremental/compat" "../../tools/gen_gni.py" "--json" "arktsconfig.json" "--output" "compat.gni" "--gn-tool" "../../../../../../../../../prebuilts/build-tools/linux-x86/bin/gn"
 execute_script "./interop" "../tools/gen_gni.py" "--json" "arktsconfig.json" "--output" "interop.gni" "--gn-tool" "../../../../../../../../prebuilts/build-tools/linux-x86/bin/gn"
+
+exit 0
