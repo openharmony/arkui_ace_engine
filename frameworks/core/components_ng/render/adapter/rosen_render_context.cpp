@@ -1198,9 +1198,7 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
     FREE_RS_CONTEXT_CHECK(OnBackgroundImageUpdate, src);
     CHECK_NULL_VOID(rsNode_);
     auto frameNode = GetHost();
-    if (frameNode) {
-        ACE_UINODE_TRACE(frameNode);
-    }
+    ACE_UINODE_TRACE(frameNode);
     if (src.GetSrc().empty() && src.GetPixmap() == nullptr) {
         bgImage_ = nullptr;
         bgLoadingCtx_ = nullptr;
