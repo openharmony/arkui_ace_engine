@@ -771,7 +771,7 @@ ArkUINativeModuleValue CheckboxBridge::JsMark(ArkUIRuntimeCallInfo* runtimeCallI
     }
     auto sizeValue = markObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "size"));
     CalcDimension size;
-    if (!((ArkTSUtils::ParseJsDimensionVp(vm, sizeValue, size)) && (size.Unit() != DimensionUnit::PERCENT) &&
+    if (!((ArkTSUtils::ParseJsDimensionVp(vm, sizeValue, size, false)) && (size.Unit() != DimensionUnit::PERCENT) &&
             (size.ConvertToVp() >= 0))) {
         size = defaultSize;
     }
@@ -779,7 +779,7 @@ ArkUINativeModuleValue CheckboxBridge::JsMark(ArkUIRuntimeCallInfo* runtimeCallI
         nullptr, size.Value(), static_cast<int>(size.Unit()));
     auto strokeWidthValue = markObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "strokeWidth"));
     CalcDimension strokeWidth;
-    if (!((ArkTSUtils::ParseJsDimensionVp(vm, strokeWidthValue, strokeWidth)) &&
+    if (!((ArkTSUtils::ParseJsDimensionVp(vm, strokeWidthValue, strokeWidth, false)) &&
             (strokeWidth.Unit() != DimensionUnit::PERCENT) && (strokeWidth.ConvertToVp() >= 0))) {
         strokeWidth = defaultStroke;
     }
