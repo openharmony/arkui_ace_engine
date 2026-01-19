@@ -3148,6 +3148,18 @@ namespace {
         }
         return type;
     }
+
+    bool HasAccessibilityStateDescription(const RefPtr<AceType>& node)
+    {
+        if (!AceType::InstanceOf<NG::FrameNode>(node)) {
+            return false;
+        }
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(node);
+        CHECK_NULL_RETURN(frameNode, false);
+        auto accessibilityProperty = frameNode->GetAccessibilityProperty<NG::AccessibilityProperty>();
+        CHECK_NULL_RETURN(accessibilityProperty, false);
+        return accessibilityProperty->HasAccessibilityStateDescription();
+    }
 }
 
 bool JsAccessibilityManager::CachePageEventByController(
@@ -3799,7 +3811,7 @@ void JsAccessibilityManager::SendEventToAccessibilityWithNodeInnerAfterRender(
 {
     CHECK_NULL_VOID(context);
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
-    if (ngPipeline) {
+    if (ngPipeline && HasAccessibilityStateDescription(node)) {
         ngPipeline->AddAfterRenderTask(
             [weak = WeakClaim(this), weakNode = WeakClaim(AceType::RawPtr(node)),
                 weakContext = WeakClaim(AceType::RawPtr(context)), accessibilityEvent]() {
@@ -3922,7 +3934,9 @@ void JsAccessibilityManager::SendAccessibilityAsyncEventInnerAfterRender(const A
     auto context = GetPipelineContext().Upgrade();
     CHECK_NULL_VOID(context);
     auto ngPipeline = AceType::DynamicCast<NG::PipelineContext>(context);
-    if (ngPipeline) {
+    RefPtr<NG::FrameNode> node;
+    FindPipelineByElementId(accessibilityEvent.nodeId, node);
+    if (ngPipeline && node && HasAccessibilityStateDescription(node)) {
         ngPipeline->AddAfterRenderTask(
             [weak = WeakClaim(this), accessibilityEvent]() {
                 auto jsAccessibilityManager = weak.Upgrade();

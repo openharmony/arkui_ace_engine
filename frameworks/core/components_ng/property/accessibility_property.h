@@ -621,6 +621,7 @@ public:
 
     void SetAccessibilityStateDescription(const std::string& stateDescription);
     std::string GetAccessibilityStateDescription() const;
+    bool HasAccessibilityStateDescription() const;
 
     void SetActions(const ActionsImpl& actionsImpl);
     bool ActionsDefined(uint32_t action);
