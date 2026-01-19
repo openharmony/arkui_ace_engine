@@ -287,8 +287,15 @@ void ResetContainerPickerIndicator(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    PickerIndicatorStyle indicatorStyle;
-    indicatorStyle.type = 0;
+    PickerIndicatorStyle indicatorStyle = {};
+    indicatorStyle.type = static_cast<int32_t>(PickerIndicatorType::BACKGROUND);
+    indicatorStyle.backgroundColor = Color(Color::TRANSPARENT);
+    BorderRadiusProperty borderRadius;
+    borderRadius.radiusTopLeft = Dimension(0, DimensionUnit::VP);
+    borderRadius.radiusTopRight = Dimension(0, DimensionUnit::VP);
+    borderRadius.radiusBottomLeft = Dimension(0, DimensionUnit::VP);
+    borderRadius.radiusBottomRight = Dimension(0, DimensionUnit::VP);
+    indicatorStyle.borderRadius = borderRadius;
     ContainerPickerModel::SetIndicatorStyle(frameNode, indicatorStyle);
 }
 
