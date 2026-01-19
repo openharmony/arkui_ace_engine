@@ -604,7 +604,7 @@ HWTEST_F(RichEditorModifierTest, DISABLED_setCustomKeyboardTest, TestSize.Level1
     auto options = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
     uiNode = BlankModelNG::CreateFrameNode(NODE_ID);
     auto buildFunc = getBuilderCb();
-    auto optBuildFunc = Converter::ArkUnion<Opt_Union_CustomBuilder_ComponentContent, CustomNodeBuilder>(buildFunc);
+    auto optBuildFunc = Converter::ArkUnion<Opt_Union_CustomBuilder_ComponentContentBase, CustomNodeBuilder>(buildFunc);
     modifier_->setCustomKeyboard(node_, &optBuildFunc, &options);
 
     // Testing callback
