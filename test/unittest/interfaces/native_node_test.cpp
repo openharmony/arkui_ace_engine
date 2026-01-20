@@ -69,6 +69,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutSize001, TestSize.Level1)
      * @tc.steps: step1. Create a node nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = nullptr;
     ArkUI_IntSize size;
 
@@ -96,6 +97,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutSize002, TestSize.Level1)
      * @tc.steps: step1. Create a node not nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = new ArkUI_Node();
     ArkUI_IntSize size;
 
@@ -123,6 +125,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPosition001, TestSize.Level
      * @tc.steps: step1. Create a node nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = nullptr;
     ArkUI_IntOffset localOffset;
 
@@ -150,6 +153,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetParentInPageTree001, TestSize.Lev
      * @tc.steps: step1. Create a node  nullptr.
      * @tc.expect: result is nullptr.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = nullptr;
 
     /**
@@ -176,6 +180,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPositionInWindow001, TestSi
      * @tc.steps: step1. Create a node nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = nullptr;
     ArkUI_IntOffset globalOffset;
 
@@ -203,6 +208,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPositionInWindow002, TestSi
      * @tc.steps: step1. Create a node not nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = new ArkUI_Node();
     ArkUI_IntOffset globalOffset;
 
@@ -230,6 +236,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPositionInScreen001, TestSi
      * @tc.steps: step1. Create a node nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = nullptr;
     ArkUI_IntOffset screenOffset;
 
@@ -257,6 +264,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutPositionInScreen002, TestSi
      * @tc.steps: step1. Create a node not nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = new ArkUI_Node();
     ArkUI_IntOffset screenOffset;
 
@@ -284,6 +292,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow001,
      * @tc.steps: step1. Create a node nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = nullptr;
     ArkUI_IntOffset translateOffset;
 
@@ -311,6 +320,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetPositionWithTranslateInWindow002,
      * @tc.steps: step1. Create a node not nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = new ArkUI_Node();
     ArkUI_IntOffset translateOffset;
 
@@ -338,6 +348,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen001,
      * @tc.steps: step1. Create a node nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = nullptr;
     ArkUI_IntOffset translateOffset;
 
@@ -365,6 +376,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetPositionWithTranslateInScreen002,
      * @tc.steps: step1. Create a node not nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = new ArkUI_Node();
     ArkUI_IntOffset translateOffset;
 
@@ -392,6 +404,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_RegisterSystemColorModeChangeEvent001, TestSiz
      * @tc.steps: step1. Create a node nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = nullptr;
     void* userData = nullptr;
     void (*onColorModeChange)(ArkUI_SystemColorMode colorMode, void* userData) = nullptr;
@@ -420,6 +433,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_RegisterSystemColorModeChangeEvent002, TestSiz
      * @tc.steps: step1. Create a node not nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = new ArkUI_Node();
     void* userData = nullptr;
     void (*onColorModeChange)(ArkUI_SystemColorMode colorMode, void* userData) = nullptr;
@@ -448,6 +462,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_RegisterSystemFontStyleChangeEvent001, TestSiz
      * @tc.steps: step1. Create a node nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = nullptr;
     void* userData = nullptr;
     void (*onFontStyleChange)(ArkUI_SystemFontStyleEvent* event, void* userData) = nullptr;
@@ -476,6 +491,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_RegisterSystemFontStyleChangeEvent002, TestSiz
      * @tc.steps: step1. Create a node not nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = new ArkUI_Node();
     void* userData = nullptr;
     void (*onFontStyleChange)(ArkUI_SystemFontStyleEvent* event, void* userData) = nullptr;
@@ -628,6 +644,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetCustomProperty001, TestSize.Level
      * @tc.steps: step1. Create a node nullptr.
      * @tc.expect: result is ARKUI_ERROR_CODE_PARAM_INVALID.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = nullptr;
     const char* name = "test_name";
     ArkUI_CustomProperty* handle = nullptr;
@@ -656,6 +673,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetCustomProperty002, TestSize.Level
      * @tc.steps: step1. Create name nullptr.
      * @tc.expect: result is ARKUI_ERROR_CODE_PARAM_INVALID.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = new ArkUI_Node();
     const char* name = nullptr;
     ArkUI_CustomProperty* handle = nullptr;
@@ -684,6 +702,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetCustomProperty003, TestSize.Level
      * @tc.steps: step1. Create a node not nullptr.
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
+    ASSERT_TRUE(OHOS::Ace::NodeModel::InitialFullImpl());
     ArkUI_NodeHandle node = new ArkUI_Node();
     const char* name = "test_name";
     ArkUI_CustomProperty* handle = nullptr;
