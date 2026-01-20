@@ -7121,12 +7121,12 @@ export enum SourceType {
     JOYSTICK = 5
 }
 export enum SourceTool {
-    UNKNOWN = 0,
     Unknown = 0,
-    FINGER = 1,
+    UNKNOWN = 0,
     Finger = 1,
-    PEN = 2,
+    FINGER = 1,
     Pen = 2,
+    PEN = 2,
     MOUSE = 7,
     TOUCHPAD = 9,
     JOYSTICK = 10
