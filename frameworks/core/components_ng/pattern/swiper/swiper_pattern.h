@@ -1366,7 +1366,7 @@ private:
     void PropertyPrefMonitor(bool isBeginPerf);
     friend class SwiperHelper;
     void LoadCompleteManagerStartCollect();
-    void LoadCompleteManagerStopCollect(std::optional<int32_t> jumpIndex = std::nullopt);
+    void LoadCompleteManagerStopCollect(bool needSwiperChangeEnd = true);
 
     RefPtr<PanEvent> panEvent_;
     RefPtr<TouchEventImpl> touchEvent_;

@@ -1235,6 +1235,7 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
     if (!isDragging_ || isInit_) {
         SetLazyLoadFeature(true);
     }
+    auto changeEndOldIndex = oldIndex_;
     if (!isInit_) {
         OnIndexChange(true);
         oldIndex_ = currentIndex_;
@@ -1312,13 +1313,14 @@ bool SwiperPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty,
         ResetAnimationParam();
         auto pipeline = GetContext();
         if (pipeline) {
-            pipeline->AddAfterRenderTask([weak = WeakClaim(this), isInit, jumpIndex = jumpIndex_]() {
+            bool needSwiperChangeEnd = isInit || jumpIndex_.value() != changeEndOldIndex;
+            pipeline->AddAfterRenderTask([weak = WeakClaim(this), needSwiperChangeEnd]() {
                 auto swiper = weak.Upgrade();
                 CHECK_NULL_VOID(swiper);
                 PerfMonitor::GetPerfMonitor()->End(PerfConstants::APP_TAB_SWITCH, true);
                 AceAsyncTraceEndCommercial(
                     0, swiper->hasTabsAncestor_ ? APP_TABS_NO_ANIMATION_SWITCH : APP_SWIPER_NO_ANIMATION_SWITCH);
-                swiper->LoadCompleteManagerStopCollect(isInit ? std::nullopt : jumpIndex);
+                swiper->LoadCompleteManagerStopCollect(needSwiperChangeEnd);
             });
         }
         UpdateCurrentIndex(algo->GetCurrentIndex());
@@ -8105,7 +8107,7 @@ void SwiperPattern::LoadCompleteManagerStartCollect()
     }
 }
 
-void SwiperPattern::LoadCompleteManagerStopCollect(std::optional<int32_t> jumpIndex)
+void SwiperPattern::LoadCompleteManagerStopCollect(bool needSwiperChangeEnd)
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
@@ -8115,7 +8117,7 @@ void SwiperPattern::LoadCompleteManagerStopCollect(std::optional<int32_t> jumpIn
     if (IsAutoPlay()) {
         return;
     }
-    if (jumpIndex.has_value() && jumpIndex.value() == currentIndex_) {
+    if (!needSwiperChangeEnd) {
         return;
     }
     if (targetIndex_.has_value() && targetIndex_.value() == currentIndex_) {
