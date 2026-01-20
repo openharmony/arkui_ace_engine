@@ -37,8 +37,7 @@
 #include "core/components_ng/pattern/video/video_full_screen_node.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
 #include "core/components_ng/property/gradient_property.h"
-#include "core/common/dynamic_module_helper.h"
-#include "core/components_ng/pattern/slider/bridge/slider_dynamic_module.h"
+#include "frameworks/core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/node_api.h"
 
 
@@ -88,17 +87,6 @@ enum SliderChangeMode {
     MOVING,
     END,
 };
-
-const ArkUISliderModifier* GetSliderModifier()
-{
-    static const ArkUISliderModifier* cachedModifier = nullptr;
-    if (!cachedModifier) {
-        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Slider");
-        CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const ArkUISliderModifier*>(module->GetDynamicModifier());
-    }
-    return cachedModifier;
-}
 
 std::string IntTimeToText(uint32_t time)
 {
@@ -782,11 +770,10 @@ void VideoPattern::OnPrepared(uint32_t duration, uint32_t currentPos, bool needF
     }
     CHECK_NULL_VOID(controlBar);
     auto sliderNode = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(SLIDER_POS));
-    auto sliderModifier = GetSliderModifier();
+    auto sliderModifier = NodeModifier::GetSliderCustomModifier();
     CHECK_NULL_VOID(sliderModifier);
-    sliderModifier->sliderPaintPropertyUpdateMin(reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(sliderNode)), 0.0f);
-    sliderModifier->sliderPaintPropertyUpdateMax(
-        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(sliderNode)), static_cast<float>(duration_));
+    sliderModifier->sliderPaintPropertyUpdateMin(sliderNode, 0.0f);
+    sliderModifier->sliderPaintPropertyUpdateMax(sliderNode, static_cast<float>(duration_));
     sliderNode->MarkModifyDone();
     auto playBtn = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(0));
     ChangePlayButtonTag(playBtn);
@@ -949,10 +936,9 @@ void VideoPattern::OnUpdateTime(uint32_t time, int pos) const
     if (pos == CURRENT_POS && !isSeeking_) {
         auto sliderNode = DynamicCast<FrameNode>(controlBar->GetChildAtIndex(SLIDER_POS));
         CHECK_NULL_VOID(sliderNode);
-        auto sliderModifier = GetSliderModifier();
+        auto sliderModifier = NodeModifier::GetSliderCustomModifier();
         CHECK_NULL_VOID(sliderModifier);
-        sliderModifier->sliderPatternUpdateValue(
-            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(sliderNode)), static_cast<float>(time));
+        sliderModifier->sliderPatternUpdateValue(sliderNode, static_cast<float>(time));
         sliderNode->MarkModifyDone();
     }
 }
@@ -1310,10 +1296,9 @@ void VideoPattern::UpdateControllerBar()
     if (needControlBar) {
         auto sliderNode = DynamicCast<FrameNode>(controller->GetChildAtIndex(SLIDER_POS));
         CHECK_NULL_VOID(sliderNode);
-        auto sliderModifier = GetSliderModifier();
+        auto sliderModifier = NodeModifier::GetSliderCustomModifier();
         CHECK_NULL_VOID(sliderModifier);
-        sliderModifier->sliderPatternUpdateValue(
-            reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(sliderNode)), static_cast<float>(currentPos_));
+        sliderModifier->sliderPatternUpdateValue(sliderNode, static_cast<float>(currentPos_));
         sliderNode->MarkModifyDone();
 
         auto textNode = DynamicCast<FrameNode>(controller->GetChildAtIndex(CURRENT_POS));
@@ -1561,35 +1546,26 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
     auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
     CHECK_NULL_RETURN(videoTheme, nullptr);
 
-    auto arkUISliderModifier = GetSliderModifier();
-    CHECK_NULL_RETURN(arkUISliderModifier, nullptr);
-
-    auto sliderModifier = GetSliderModifier();
+    auto sliderModifier = NodeModifier::GetSliderCustomModifier();
     CHECK_NULL_RETURN(sliderModifier, nullptr);
-    auto frameNode = reinterpret_cast<FrameNode*>(
-        sliderModifier->createSliderFrameNode(ElementRegister::GetInstance()->MakeUniqueId()));
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    auto sliderNode = AceType::Claim(frameNode);
+    auto sliderNode = sliderModifier->createSliderFrameNode(-1);
     CHECK_NULL_RETURN(sliderNode, nullptr);
 
     auto sliderEdge = videoTheme->GetSliderEdge();
-    ArkUIPaddingType arkPadding;
-    arkPadding.top.string = CalcLength(sliderEdge.Top()).ToString().c_str();
-    arkPadding.bottom.string = CalcLength(sliderEdge.Bottom()).ToString().c_str();
-    arkPadding.start.string = CalcLength(sliderEdge.Left()).ToString().c_str();
-    arkPadding.end.string = CalcLength(sliderEdge.Right()).ToString().c_str();
+    PaddingProperty padding;
+    padding.left = CalcLength(sliderEdge.Left());
+    padding.right = CalcLength(sliderEdge.Right());
+    padding.top = CalcLength(sliderEdge.Top());
+    padding.bottom = CalcLength(sliderEdge.Bottom());
 
-    sliderModifier->sliderLayoutPropertyUpdatePadding(
-        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(sliderNode)), arkPadding);
-    sliderModifier->sliderLayoutPropertyUpdateLayoutWeight(
-        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(sliderNode)), 1.0);
+    sliderModifier->sliderLayoutPropertyUpdatePadding(sliderNode, padding);
+    sliderModifier->sliderLayoutPropertyUpdateLayoutWeight(sliderNode, 1.0);
     std::function<void(float, int32_t)> sliderOnChangeEvent = [weak = WeakClaim(this)](float value, int32_t mode) {
         auto videoPattern = weak.Upgrade();
         CHECK_NULL_VOID(videoPattern);
         videoPattern->OnSliderChange(value, mode);
     };
-    sliderModifier->sliderEventHubSetOnChange(
-        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(sliderNode)), reinterpret_cast<void*>(&sliderOnChangeEvent));
+    sliderModifier->sliderEventHubSetOnChange(sliderNode, reinterpret_cast<void*>(&sliderOnChangeEvent));
     auto focusHub = sliderNode->GetOrCreateFocusHub();
     CHECK_NULL_RETURN(focusHub, nullptr);
     if (InstanceOf<VideoFullScreenPattern>(this)) {
@@ -1603,18 +1579,12 @@ RefPtr<FrameNode> VideoPattern::CreateSlider()
         return videoPattern->HandleSliderKeyEvent(keyEvent);
     });
 
-    sliderModifier->sliderPaintPropertyUpdateMax(
-        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(sliderNode)), static_cast<float>(duration_));
-    sliderModifier->sliderPaintPropertyUpdateSelectGradientColor(
-        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(sliderNode)), videoTheme->GetSelectColor().GetValue());
-    sliderModifier->sliderPaintPropertyUpdateSelectIsResourceColor(
-        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(sliderNode)), true);
-    sliderModifier->sliderPaintPropertyUpdateTrackBackgroundColor(
-        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(sliderNode)), videoTheme->GetTrackBgColor().GetValue());
-    sliderModifier->sliderPaintPropertyUpdateTrackBackgroundIsResourceColor(
-        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(sliderNode)), true);
-    sliderModifier->sliderPaintPropertyUpdateValue(
-        reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(sliderNode)), static_cast<float>(currentPos_));
+    sliderModifier->sliderPaintPropertyUpdateMax(sliderNode, static_cast<float>(duration_));
+    sliderModifier->sliderPaintPropertyUpdateSelectGradientColor(sliderNode, videoTheme->GetSelectColor().GetValue());
+    sliderModifier->sliderPaintPropertyUpdateSelectIsResourceColor(sliderNode, true);
+    sliderModifier->sliderPaintPropertyUpdateTrackBackgroundColor(sliderNode, videoTheme->GetTrackBgColor().GetValue());
+    sliderModifier->sliderPaintPropertyUpdateTrackBackgroundIsResourceColor(sliderNode, true);
+    sliderModifier->sliderPaintPropertyUpdateValue(sliderNode, static_cast<float>(currentPos_));
     sliderNode->MarkModifyDone();
     return sliderNode;
 }

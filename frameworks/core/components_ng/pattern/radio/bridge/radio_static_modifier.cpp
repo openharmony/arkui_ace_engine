@@ -146,6 +146,8 @@ void ContentModifierRadioImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    CHECK_NULL_VOID(contentModifier);
+    CHECK_NULL_VOID(builder);
     auto objectKeeper = std::make_shared<ObjectKeeper>(*contentModifier);
     auto builderFunc = [arkBuilder = CallbackHelper(*builder), node, frameNode, objectKeeper](
         RadioConfiguration config) -> RefPtr<FrameNode> {

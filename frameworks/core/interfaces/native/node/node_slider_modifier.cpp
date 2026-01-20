@@ -48,6 +48,20 @@ const CJUISliderModifier* GetCJUISliderModifier()
     return cachedModifier;
 }
 
+const ArkUISliderCustomModifier* GetSliderCustomModifier()
+{
+    static const ArkUISliderCustomModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Slider");
+        if (module == nullptr) {
+            LOGF("Can't find slider dynamic module");
+            abort();
+        }
+        cachedModifier =
+            reinterpret_cast<const ArkUISliderCustomModifier*>(module->GetCustomModifier("customModifier"));
+    }
+    return cachedModifier;
+}
 
 void SetSliderChange(ArkUINodeHandle node, void* extraParam)
 {
