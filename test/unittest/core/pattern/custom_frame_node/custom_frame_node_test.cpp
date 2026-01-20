@@ -599,4 +599,84 @@ HWTEST_F(CustomFrameNodeTestNg, OnDetachContextTest, TestSize.Level1)
     EXPECT_EQ(context->onWindowStateChangedCallbacks_.find(testNode->GetId()),
         context->onWindowStateChangedCallbacks_.end());
 }
+
+/**
+ * @tc.name: InitializeAccessibility
+ * @tc.desc: Test InitializeAccessibility Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomFrameNodeTestNg, InitializeAccessibilityTest, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Custom
+     * @tc.expected: Create Custom Successfully
+     */
+    auto testNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<CustomPattern>(), true);
+    ASSERT_NE(testNode, nullptr);
+    auto pattern = testNode->GetPattern<CustomPattern>();
+    ASSERT_TRUE(pattern);
+    PipelineContext* context = testNode->GetContext();
+    ASSERT_TRUE(context);
+    /**
+     * @tc.step2: Call InitializeAccessibility Func
+     */
+    pattern->InitializeAccessibility(context);
+    auto nprovider = pattern->GetNativeAccessibilityProvider();
+    ASSERT_TRUE(nprovider);
+}
+
+/**
+ * @tc.name: OnDumpChildInfoTest
+ * @tc.desc: Test OnDumpChildInfo Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomFrameNodeTestNg, OnDumpChildInfoTest, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Custom and CustomAccessibilityChildTreeCallback
+     * @tc.expected: Create Custom and CustomAccessibilityChildTreeCallback Successfully
+     */
+    auto testNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<CustomPattern>(), true);
+    ASSERT_NE(testNode, nullptr);
+    auto pattern = testNode->GetPattern<CustomPattern>();
+    ASSERT_TRUE(pattern);
+    int accessibilityId = 2;
+    auto customAccessibilityChildTreeCallback =
+        std::make_shared<CustomAccessibilityChildTreeCallback>(pattern, accessibilityId);
+    ASSERT_TRUE(customAccessibilityChildTreeCallback);
+    /**
+     * @tc.step2: Call OnDumpChildInfo Func
+     * @tc.expected: ret = false
+     */
+    std::vector<std::string> g_params;
+    std::vector<std::string> info;
+    bool ret = customAccessibilityChildTreeCallback->OnDumpChildInfo(g_params, info);
+    EXPECT_FALSE(ret);
+}
+
+/**
+ * @tc.name: SendThirdAccessibilityProviderTest
+ * @tc.desc: Test SendThirdAccessibilityProvider Func
+ * @tc.type: FUNC
+ */
+HWTEST_F(CustomFrameNodeTestNg, SendThirdAccessibilityProviderTest, TestSize.Level1)
+{
+    /**
+     * @tc.step1: Create Custom and CustomAccessibilityProvider
+     * @tc.expected: Create Custom and CustomAccessibilityProvider Successfully
+     */
+    auto testNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<CustomPattern>(), true);
+    ASSERT_NE(testNode, nullptr);
+    auto pattern = testNode->GetPattern<CustomPattern>();
+    ASSERT_TRUE(pattern);
+    auto customAccessibilityProvider = std::make_shared<CustomAccessibilityProvider>(pattern);
+    ASSERT_TRUE(customAccessibilityProvider);
+    /**
+     * @tc.step2: Call SendThirdAccessibilityProvider Func
+     * @tc.expected: customAccessibilityProvider->thirdAccessibilityManager_ is not null
+     */
+    auto thirdAccessibilityManager = std::make_shared<ThirdAccessibilityManager>();
+    customAccessibilityProvider->SendThirdAccessibilityProvider(thirdAccessibilityManager);
+    EXPECT_TRUE(customAccessibilityProvider->thirdAccessibilityManager_.lock());
+}
 } // namespace OHOS::Ace::NG
