@@ -19,7 +19,7 @@ import { ON, Point } from '@ohos.UiTest';
 const delegator: abilityDelegatorRegistry.AbilityDelegator = abilityDelegatorRegistry.getAbilityDelegator()
 const driver = Driver.create();
 
-export async function FoldSplitContainerStart(done:Function) {
+export async function FoldSplitContainerStart(done: () => void) {
   await delegator.startAbility({
     bundleName: 'cn.ohos.components',
     abilityName: 'EntryAbility'
