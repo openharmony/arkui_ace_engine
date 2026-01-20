@@ -952,6 +952,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/container_picker/container_picker_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/container_picker/container_picker_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/counter/counter_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/corner_mark/corner_mark.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/counter/counter_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/counter/counter_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/counter/counter_node.cpp",

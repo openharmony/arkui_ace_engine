@@ -331,6 +331,7 @@ public:
 
     bool DumpTreeById(int32_t depth, const std::string& id, bool hasJson = false);
     bool DumpTreeByComponentName(const std::string& name);
+    void DumpCornerMarkNode(int32_t depth, bool hasJson);
 
     const std::string& GetTag() const
     {

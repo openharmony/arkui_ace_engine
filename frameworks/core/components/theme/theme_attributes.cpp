@@ -89,6 +89,7 @@ const char THEME_PATTERN_CONTAINER_MODAL[] = "container_modal_pattern";
 const char THEME_PATTERN_SCROLLABLE[] = "scrollable_pattern";
 const char THEME_PATTERN_APP[] = "app_theme_pattern";
 const char THEME_PATTERN_CONTAINER_PICKER[] = "container_picker_pattern";
+const char THEME_PATTERN_CORNER_MARK[] = "corner_mark_pattern";
 
 // pattern general attributes
 const char PATTERN_FG_COLOR[] = "fg_color";

@@ -1345,6 +1345,15 @@ void UINode::DumpTree(int32_t depth, bool hasJson, const std::string& desc)
     if (frameNode && frameNode->GetOverlayNode()) {
         frameNode->GetOverlayNode()->DumpTree(depth + 1, hasJson, "OverlayNode");
     }
+    DumpCornerMarkNode(depth, hasJson);
+}
+
+void UINode::DumpCornerMarkNode(int32_t depth, bool hasJson)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && frameNode->GetCornerMarkNode()) {
+        frameNode->GetCornerMarkNode()->DumpTree(depth + 1, hasJson, "CornerMarkNode");
+    }
 }
 
 bool UINode::DumpTreeByComponentName(const std::string& name)
@@ -2699,6 +2708,9 @@ void UINode::GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& fou
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && frameNode->GetOverlayNode()) {
         frameNode->GetOverlayNode()->GetNodeListByComponentName(depth + 1, foundNodeId, name);
+    }
+    if (frameNode && frameNode->GetCornerMarkNode()) {
+        frameNode->GetCornerMarkNode()->GetNodeListByComponentName(depth + 1, foundNodeId, name);
     }
 }
 

@@ -56,6 +56,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
@@ -1665,20 +1666,10 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         cb(configurationChange);
     }
     if (configurationChange.languageUpdate) {
-        pattern_->OnLanguageConfigurationUpdate();
-        MarkModifyDone();
-        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        HandleLanguageConfigurationUpdate(configurationChange);
     }
     if (configurationChange.colorModeUpdate) {
-        pattern_->OnColorConfigurationUpdate();
-        if (colorModeUpdateCallback_) {
-            // copy it first in case of changing colorModeUpdateCallback_ in the callback
-            auto cb = colorModeUpdateCallback_;
-            cb();
-        }
-        FireColorNDKCallback();
-        MarkModifyDone();
-        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        HandleColorModeConfigurationUpdate(configurationChange);
     }
     if (configurationChange.directionUpdate) {
         pattern_->OnDirectionConfigurationUpdate();
@@ -1711,6 +1702,34 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
     }
     FireFontNDKCallback(configurationChange);
     OnPropertyChangeMeasure();
+}
+
+void FrameNode::HandleLanguageConfigurationUpdate(const ConfigurationChange& configurationChange)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->OnLanguageConfigurationUpdate();
+    MarkModifyDone();
+    MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (cornerMarkNode_) {
+        CornerMark::UpdateCornerMarkNodeLanguage(Claim(this));
+    }
+}
+
+void FrameNode::HandleColorModeConfigurationUpdate(const ConfigurationChange& configurationChange)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->OnColorConfigurationUpdate();
+    if (colorModeUpdateCallback_) {
+        // copy it first in case of changing colorModeUpdateCallback_ in the callback
+        auto cb = colorModeUpdateCallback_;
+        cb();
+    }
+    FireColorNDKCallback();
+    MarkModifyDone();
+    MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    if (cornerMarkNode_) {
+        CornerMark::UpdateCornerMarkNodeColorMode(Claim(this));
+    }
 }
 
 void FrameNode::OnPropertyChangeMeasure() const

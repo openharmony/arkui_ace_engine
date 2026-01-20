@@ -59,6 +59,7 @@
 #include "core/components/theme/app_theme.h"
 #include "core/components/theme/blur_style_theme.h"
 #include "core/components/theme/card_theme.h"
+#include "core/components/theme/corner_mark_theme.h"
 #include "core/components/theme/icon_theme.h"
 #include "core/components/theme/shadow_theme.h"
 #include "core/components/theme/theme_constants_defines.h"
@@ -179,6 +180,7 @@ const std::unordered_map<ThemeType, RefPtr<Theme>(*)(const RefPtr<ThemeConstants
     { NG::LinearIndicatorTheme::TypeId(), &ThemeBuildFunc<NG::LinearIndicatorTheme::Builder> },
     { NG::RefreshThemeNG::TypeId(), &ThemeBuildFunc<NG::RefreshThemeNG::Builder> },
     { NG::ContainerPickerTheme::TypeId(), &ThemeBuildFunc<NG::ContainerPickerTheme::Builder> },
+    { NG::CornerMarkTheme::TypeId(), &ThemeBuildFunc<NG::CornerMarkTheme::Builder> },
 };
 
 template<class T>

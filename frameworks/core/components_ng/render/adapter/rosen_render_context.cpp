@@ -4830,6 +4830,31 @@ bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
     return true;
 }
 
+void RosenRenderContext::AddCornerMarkNodeToChildren(
+    const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes)
+{
+    auto cornerMarkNode = node->GetCornerMarkNode();
+    CHECK_NULL_VOID(cornerMarkNode);
+    auto pipeline = node->GetContext();
+    CHECK_NULL_VOID(pipeline);
+
+    auto cornerMarkNodeProperty = cornerMarkNode->GetLayoutProperty();
+    if (!cornerMarkNodeProperty ||
+        cornerMarkNodeProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        return;
+    }
+
+    if (!CanNodeBeDeleted(cornerMarkNode)) {
+        childNodes.emplace_back(cornerMarkNode);
+        if (pipeline && cornerMarkNode->HasPositionZ()) {
+            pipeline->AddPositionZNode(cornerMarkNode->GetId());
+        }
+    } else {
+        cornerMarkNode->SetDeleteRsNode(true);
+        GetLiveChildren(cornerMarkNode, childNodes);
+    }
+}
+
 void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes)
 {
     CHECK_NULL_VOID(node);
@@ -4855,6 +4880,7 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
             pipeline->AddPositionZNode(accessibilityFocusPaintNode->GetId());
         }
     }
+    AddCornerMarkNodeToChildren(node, childNodes);
     auto overlayNode = node->GetOverlayNode();
     CHECK_NULL_VOID(overlayNode);
     auto property = overlayNode->GetLayoutProperty();

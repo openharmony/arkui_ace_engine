@@ -2161,6 +2161,7 @@ frameworks/core/components/text_overlay/ @huawei_g_five
 frameworks/core/components/text_span/ @huawei_g_five
 frameworks/core/components/texttimer/ @huawei_g_five
 frameworks/core/components/theme/ @arkui_framework_resource
+frameworks/core/components/theme/corner_mark_theme.h @arkui_framework_xnode
 frameworks/core/components/tip/ @arkuipopupwindow_all
 frameworks/core/components/toast/ @arkuipopupwindow_all
 frameworks/core/components/toggle/ @arkuipopupwindow_all
@@ -2461,6 +2462,7 @@ frameworks/core/components_ng/pattern/checkbox/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/checkboxgroup/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/common_view/ @ArkUI_Event
 frameworks/core/components_ng/pattern/container_modal/ @ArkUI_ability_group
+frameworks/core/components_ng/pattern/corner_mark/ @arkui_framework_xnode
 frameworks/core/components_ng/pattern/container_picker/ @arkui001
 frameworks/core/components_ng/pattern/counter/ @huawei_g_five
 frameworks/core/components_ng/pattern/custom/ @arkuilayout1
@@ -3568,6 +3570,7 @@ test/unittest/core/pattern/checkbox/ @arkuipopupwindow_all
 test/unittest/core/pattern/checkboxgroup/ @arkuipopupwindow_all
 test/unittest/core/pattern/common_view/ @arkui_statemgmt
 test/unittest/core/pattern/container_modal/ @ArkUI_ability_group
+test/unittest/core/pattern/corner_mark/ @arkui_framework_xnode
 test/unittest/core/pattern/container_picker/ @arkui001
 test/unittest/core/pattern/counter/ @huawei_g_five
 test/unittest/core/pattern/custom/ @arkuilayout1
