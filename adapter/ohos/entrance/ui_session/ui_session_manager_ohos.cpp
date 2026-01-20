@@ -539,6 +539,7 @@ void UiSessionManagerOhos::RegisterPipeLineGetCurrentPageName(std::function<std:
 
 void UiSessionManagerOhos::GetCurrentPageName()
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     if (pipelineContextPageNameCallback_) {
         auto result = pipelineContextPageNameCallback_();
         SendCurrentPageName(result);
@@ -547,6 +548,7 @@ void UiSessionManagerOhos::GetCurrentPageName()
 
 void UiSessionManagerOhos::SendCurrentPageName(const std::string& result)
 {
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {
@@ -613,11 +615,13 @@ void UiSessionManagerOhos::SendSpecifiedContentOffsets(const std::vector<std::pa
 
 void UiSessionManagerOhos::SaveProcessId(std::string key, int32_t id)
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     processMap_[key] = id;
 }
 
 void UiSessionManagerOhos::EraseProcessId(const std::string& key)
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     processMap_.erase(key);
 }
 
@@ -787,6 +791,7 @@ void UiSessionManagerOhos::RegisterPipeLineExeAppAIFunction(
 
 void UiSessionManagerOhos::ExeAppAIFunction(const std::string& funcName, const std::string& params)
 {
+    std::unique_lock<std::mutex> lock(mutex_);
     if (pipelineExeAppAIFunctionCallback_) {
         auto result = pipelineExeAppAIFunctionCallback_(funcName, params);
         SendExeAppAIFunctionResult(result);
@@ -795,6 +800,7 @@ void UiSessionManagerOhos::ExeAppAIFunction(const std::string& funcName, const s
 
 void UiSessionManagerOhos::SendExeAppAIFunctionResult(uint32_t result)
 {
+    std::shared_lock<std::shared_mutex> reportLock(reportObjectMutex_);
     for (auto& pair : reportObjectMap_) {
         auto reportService = iface_cast<ReportService>(pair.second);
         if (reportService != nullptr) {

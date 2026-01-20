@@ -475,7 +475,7 @@ void UiTranslateManagerImpl::GetAllPixelMap(RefPtr<NG::FrameNode> pageNode)
 
 void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
 {
-    for (const auto& item : currentNode->GetChildren()) {
+    for (const auto& item : currentNode->GetChildren(true)) {
         auto node = AceType::DynamicCast<NG::FrameNode>(item);
         if (node) {
             if (!node->CheckVisibleAndActive()) {

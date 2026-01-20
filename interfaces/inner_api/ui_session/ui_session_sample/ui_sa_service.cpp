@@ -190,7 +190,7 @@ void UiSaService::HandleGetVisibleInspectorTree(sptr<IUiContentService> service,
 {
     bool toFile = params.back() == "-tofile";
     auto visibleInspectorTreeCallBack = [toFile](const std::string& data, int32_t index, bool isEnd) {
-        LOGI("[GetVisibleInspectorTree] data = %{public}s", data.substr(0, 100).c_str());
+        LOGI("[GetVisibleInspectorTree] data = %{public}s", data.substr(0, 200).c_str());
         if (isEnd && toFile) {
             auto filePath = UI_SA_PATH + "arkui_tree_" + GetCurrentTimestampStr() + ".json";
             std::unique_ptr<std::ofstream> ostream = std::make_unique<std::ofstream>(filePath);
@@ -243,14 +243,8 @@ void UiSaService::HandleRegisterContentChangeCallback(sptr<IUiContentService> se
 {
     bool toFile = params.back() == "-tofile";
     auto contentChangeCallback = [toFile](ChangeType type, const std::string& simpleTree) {
-        const char* TYPE_DIR[6] = { "PAGE", "SCROLL", "SWIPER", "TABS", "TEXT", "DIALOG" };
         LOGI("[ContentChangeManager] callback type = %{public}d, tree: %{public}s", type,
-            simpleTree.substr(0, 50).c_str());
-        LOGI("[ContentChangeMgr_json] START Type: %{public}s", TYPE_DIR[(int)type]);
-        for (size_t pos = 0; pos < simpleTree.length(); pos += 50) {
-            LOGI("[ContentChangeMgr_json] %{public}s", simpleTree.substr(pos, 50).c_str());
-        }
-        LOGI("[ContentChangeMgr_json] END   Type: %{public}s", TYPE_DIR[(int)type]);
+            simpleTree.substr(0, 200).c_str());
         if (toFile && simpleTree.length()) {
             auto filePath = UI_SA_PATH + "arkui_simpleTree_" + GetCurrentTimestampStr() + ".json";
             std::unique_ptr<std::ofstream> ostream = std::make_unique<std::ofstream>(filePath);
@@ -356,7 +350,8 @@ void UiSaService::HandleGetWebInfoByRequest(sptr<IUiContentService> service, std
         auto finishCallback = [](int32_t winId, int32_t webId, const std::string& request, const std::string& result,
             WebRequestErrorCode code) {
             LOGI("[GetWebInfoByRequest] finishCallback winId=%{public}d, webId=%{public}d", winId, webId);
-            LOGI("[GetWebInfoByRequest] finishCallback request=%{public}s", request.c_str());
+            LOGI("[GetWebInfoByRequest] finishCallback request=%{public}s", request.substr(0, 200).c_str());
+            LOGI("[GetWebInfoByRequest] finishCallback request.length=%{public}zu", request.length());
             LOGI("[GetWebInfoByRequest] finishCallback result=%{public}s", result.c_str());
             LOGI("[GetWebInfoByRequest] finishCallback code=%{public}d", code);
         };
@@ -372,7 +367,7 @@ void UiSaService::HandleRegisterComponentChangeEventCallback(
     auto finishCallback = [](std::string data) {
         LOGI("[ComponentChangeEvent] data = %{public}s", data.c_str());
     };
-    service->RegisterComponentChangeEventCallback(mask, finishCallback);
+    service->RegisterComponentChangeEventCallback(finishCallback, mask);
     LOGI("[ComponentChangeEvent] call RegisterComponentChangeEventCallback mask=%{public}s",
         std::bitset<BITS_UINT32>(mask).to_string().c_str());
 }
