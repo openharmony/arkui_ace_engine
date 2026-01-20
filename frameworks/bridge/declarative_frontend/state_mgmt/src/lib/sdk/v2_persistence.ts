@@ -88,10 +88,6 @@ class StorageHelper {
     type: TypeConstructorWithArgs<T>,
     keyOrDefaultCreator?: string | StorageDefaultCreator<T>
   ): string | undefined {
-    if (keyOrDefaultCreator === null || keyOrDefaultCreator === undefined) {
-      stateMgmtConsole.applicationWarn(StorageHelper.NULL_OR_UNDEFINED_KEY + ', try to use the type name as key');
-    }
-
     if (typeof keyOrDefaultCreator === 'string') {
       return keyOrDefaultCreator;
     }
@@ -624,7 +620,6 @@ class PersistenceV2Impl extends StorageHelper {
 
   protected getRightGlobalKey<T extends object>(type: TypeConstructorWithArgs<T>, key?: string): string {
     if (key === undefined || key === null) {
-      stateMgmtConsole.applicationWarn(StorageHelper.NULL_OR_UNDEFINED_KEY + ', try to use the type name as key');
       key = this.getTypeName(type);
       if (key === undefined) {
         throw new BusinessError(PERSISTENCE_V2_APPSTORAGE_V2_UNSUPPORTED_TYPE, PersistenceV2Impl.NOT_SUPPORT_TYPE_MESSAGE_);

@@ -1247,7 +1247,7 @@ class ObserveV2 {
           // current computed will be override, and will be GC soon
           // to avoid the Computed be triggered anymore, invalidate it
           this.clearBinding(existingComputed.getComputedId());
-          stateMgmtConsole.warn(`@Computed ${computedPropertyName} in ${owningObjectName} instance with same name already exists.
+          stateMgmtConsole.frequentWarn(`@Computed ${computedPropertyName} in ${owningObjectName} instance with same name already exists.
             The new ${computedPropertyName} will override the previous one, and the old one will no longer take effect.`);
         }
         refs[computedPropertyName] = computed;
