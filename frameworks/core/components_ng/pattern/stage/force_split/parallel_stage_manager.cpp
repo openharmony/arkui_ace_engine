@@ -21,6 +21,7 @@
 #include "base/log/ace_checker.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "core/components_ng/pattern/stage/force_split/parallel_stage_pattern.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 
 namespace OHOS::Ace::NG {
 ParallelStageManager::ParallelStageManager(const RefPtr<FrameNode>& stageNode) : StageManager(stageNode)
@@ -361,6 +362,9 @@ bool ParallelStageManager::PushPageInSplitMode(const RefPtr<FrameNode>& newPageN
     }
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     newPageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (needTransition) {
+        ReportPageTransitionEnd(newPageNode);
+    }
     return true;
 }
 
@@ -578,6 +582,16 @@ bool ParallelStageManager::PopPageInSplitMode(bool needShowNext, bool needTransi
 
     preTopPage->SetChildrenInDestroying();
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (needTransition) {
+        auto stagePattern = AceType::DynamicCast<ParallelStagePattern>(stagePattern_);
+        CHECK_NULL_RETURN(stagePattern, true);
+        auto relatedPage = stagePattern->GetRelatedPage();
+        if (newTopPage == lastPrimaryPage && relatedPage) {
+            ReportPageTransitionEnd(relatedPage);
+        } else {
+            ReportPageTransitionEnd(newTopPage);
+        }
+    }
     return true;
 }
 
@@ -736,6 +750,14 @@ bool ParallelStageManager::PopPageToIndexInSplitMode(int32_t index, bool needSho
     stagePattern->SetPrimaryPage(lastPrimaryPage);
 
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (needTransition) {
+        auto relatedPage = stagePattern->GetRelatedPage();
+        if (toPage == lastPrimaryPage && relatedPage) {
+            ReportPageTransitionEnd(relatedPage);
+        } else {
+            ReportPageTransitionEnd(toPage);
+        }
+    }
     return true;
 }
 
@@ -790,6 +812,7 @@ bool ParallelStageManager::CleanPageStackInSplitMode(const RefPtr<ParallelStageP
         return false;
     }
 
+    bool preHasPrimaryPage = GetLastPrimaryPage() != nullptr;
     bool hasDivider = stagePattern->HasDividerNode();
     auto popSize = pageNumber - 1;
     for (int32_t count = 0; count < popSize; ++count) {
@@ -822,6 +845,9 @@ bool ParallelStageManager::CleanPageStackInSplitMode(const RefPtr<ParallelStageP
     stagePattern->SetPrimaryPage(lastPrimaryPage);
 
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (preHasPrimaryPage && !lastPrimaryPage) {
+        ReportPageTransitionEnd(GetLastPage());
+    }
     return true;
 }
 
@@ -982,6 +1008,9 @@ bool ParallelStageManager::MovePageToFrontInSplitMode(
     FireAutoSave(outPageNode, node);
 
     stageNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (needTransition) {
+        ReportPageTransitionEnd(node);
+    }
     return true;
 }
 
@@ -1427,5 +1456,21 @@ RefPtr<FrameNode> ParallelStageManager::GetRelatedOrPlaceHolderPage()
     auto stagePattern = AceType::DynamicCast<ParallelStagePattern>(stagePattern_);
     CHECK_NULL_RETURN(stagePattern, nullptr);
     return stagePattern->GetRelatedOrPlaceHolderPage();
+}
+
+void ParallelStageManager::ReportPageTransitionEnd(const RefPtr<FrameNode>& page)
+{
+    CHECK_NULL_VOID(page);
+    auto context = page->GetContext();
+    CHECK_NULL_VOID(context);
+    auto mgr = context->GetContentChangeManager();
+    CHECK_NULL_VOID(mgr);
+    context->AddAfterLayoutTask([weakMgr = WeakPtr(mgr), weakNode = WeakPtr(page)]() {
+        auto node = weakNode.Upgrade();
+        CHECK_NULL_VOID(node);
+        auto mgr = weakMgr.Upgrade();
+        CHECK_NULL_VOID(mgr);
+        mgr->OnPageTransitionEnd(node);
+    });
 }
 }

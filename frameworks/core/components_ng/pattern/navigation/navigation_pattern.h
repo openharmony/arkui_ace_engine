@@ -845,6 +845,7 @@ private:
     RefPtr<NavDestinationGroupNode> GetTopRelatedDestination();
     void ProcessHideNavBarChangeInForceSplit();
     void ReportPrimaryTopChangeIfNeeded(const WeakPtr<NavDestinationGroupNode>& prePrimaryTop);
+    void ReportTopDestinationInForceSplit();
     //-------for force split------- end  ------
 
     NavigationMode navigationMode_ = NavigationMode::AUTO;

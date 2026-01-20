@@ -158,6 +158,7 @@ private:
 
     void FireParallelPageShow(const RefPtr<UINode>& node, PageTransitionType transitionType, bool needFocus = true);
     void FireParallelPageHide(const RefPtr<UINode>& node, PageTransitionType transitionType);
+    void ReportPageTransitionEnd(const RefPtr<FrameNode>& page);
 
     std::list<WeakPtr<FrameNode>> secondaryPageStack_;
     bool isInStageOperation_ = false;

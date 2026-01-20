@@ -598,6 +598,15 @@ void NavigationPattern::OnModifyDone()
     ProcessHideNavBarChangeInForceSplit();
 }
 
+void NavigationPattern::ReportTopDestinationInForceSplit()
+{
+    auto stack = GetNavigationStack();
+    CHECK_NULL_VOID(stack);
+    auto topDest = AceType::DynamicCast<FrameNode>(NavigationGroupNode::GetNavDestinationNode(stack->Get()));
+    CHECK_NULL_VOID(topDest);
+    ContentChangeReport(topDest);
+}
+
 void NavigationPattern::ProcessHideNavBarChangeInForceSplit()
 {
     if (!navBarVisibilityChange_) {
@@ -609,6 +618,13 @@ void NavigationPattern::ProcessHideNavBarChangeInForceSplit()
     CHECK_NULL_VOID(context);
     if (!IsForceSplitSupported(context) || !forceSplitSuccess_) {
         return;
+    }
+    if (navBarIsHome_) {
+        context->AddAfterLayoutTask([weakPattern = WeakClaim(this)]() {
+            auto pattern = weakPattern.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            pattern->ReportTopDestinationInForceSplit();
+        });
     }
     auto relatedPage = AceType::DynamicCast<NavDestinationGroupNode>(host->GetRelatedPageDestNode());
     CHECK_NULL_VOID(relatedPage);
@@ -3914,7 +3930,13 @@ void NavigationPattern::StartTransition(const RefPtr<NavDestinationGroupNode>& p
                 auto topDestination = weakTopDestination.Upgrade();
                 navigationPattern->TriggerPerformanceCheck(topDestination, fromPath);
                 navigationPattern->LoadCompleteManagerStopCollect();
-                navigationPattern->ContentChangeReport(topDestination);
+                RefPtr<FrameNode> topNode = topDestination;
+                if (!topNode) {
+                    auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(navigationPattern->GetHost());
+                    CHECK_NULL_VOID(navigationNode);
+                    topNode = AceType::DynamicCast<FrameNode>(navigationNode->GetNavBarOrHomeDestinationNode());
+                }
+                navigationPattern->ContentChangeReport(topNode);
             });
         return;
     }
