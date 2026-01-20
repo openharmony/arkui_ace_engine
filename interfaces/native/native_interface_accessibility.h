@@ -73,6 +73,13 @@ typedef struct ArkUI_AccessibilityProvider ArkUI_AccessibilityProvider;
 typedef struct ArkUI_AccessibilityActionArguments ArkUI_AccessibilityActionArguments;
 
 /**
+ * @brief Defines the pointer to the ArkUI native component object.
+ *
+ * @since 23
+ */
+typedef struct ArkUI_Node* ArkUI_NodeHandle;
+
+/**
  * @brief Defines an enum for accessibility action types.
  *
  * @since 13
@@ -1133,6 +1140,19 @@ int32_t OH_ArkUI_AccessibilityEventSetElementInfo(
 */
 int32_t OH_ArkUI_FindAccessibilityActionArgumentByKey(
     ArkUI_AccessibilityActionArguments* arguments, const char* key, char** value);
+
+/**
+ * @brief Obtains the pointer to the <b> ArkUI_AccessibilityProvider</b>
+ * instance of this <b>ArkUI_NodeHandle</b> instance.
+ *
+ * @param component Indicates the pointer to the <b>ArkUI_NodeHandle</b> instance.
+ * @param provider Indicates the pointer to the <b>ArkUI_AccessibilityProvider</b> instance.
+ * @return Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter error occurs.
+ * @since 23
+ */
+int32_t OH_ArkUI_NativeModule_GetNativeAccessibilityProvider(
+    ArkUI_NodeHandle* node, ArkUI_AccessibilityProvider** provider);
 #ifdef __cplusplus
 };
 #endif

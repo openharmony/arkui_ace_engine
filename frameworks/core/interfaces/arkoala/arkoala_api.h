@@ -112,6 +112,7 @@ struct _ArkUIRenderNode;
 struct _ArkUIRenderModifier;
 struct _ArkUIRSProperty;
 struct ArkUI_GridLayoutOptions;
+struct ArkUI_AccessibilityProvider;
 struct ArkUI_EditModeOptions {
     ArkUI_Bool enableGatherSelectedItemsAnimation;
 };
@@ -7954,6 +7955,7 @@ struct ArkUIFrameNodeModifier {
         ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkUI_Float32 (*windowPosition)[2], ArkUI_Bool useVp);
     ArkUI_Int32 (*convertPositionFromWindow)(
         ArkUINodeHandle node, ArkUI_Float32 (*windowPosition)[2], ArkUI_Float32 (*position)[2], ArkUI_Bool useVp);
+    ArkUI_AccessibilityProvider* (*getAccessibilityProvider)(ArkUINodeHandle node);
 };
 
 struct ArkUINodeContentEvent {
@@ -8094,7 +8096,6 @@ struct ArkUIContainerSpanModifier {
         const ArkUI_Int32* units, ArkUI_Int32 length, void* style);
     void (*resetContainerSpanTextBackgroundStyle)(ArkUINodeHandle node);
 };
-
 typedef void (*CustomDrawFunc)(ArkUINodeHandle node, ArkUIDrawingContext context);
 struct ArkUICustomNodeExtModifier {
     ArkUI_Bool (*parseColorString)(ArkUI_CharPtr colorStr, ArkUI_Uint32* colorValue);
