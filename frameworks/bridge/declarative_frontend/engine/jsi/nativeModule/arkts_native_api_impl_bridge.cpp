@@ -69,7 +69,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_search_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_select_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_stack_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_folder_stack_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_glyph_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_symbol_span_bridge.h"
@@ -503,6 +502,9 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         {"Radio"},
         { "Slider" },
         { "Hyperlink" },
+#ifndef ARKUI_WEARABLE
+        { "FolderStack" },
+#endif
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
@@ -835,27 +837,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "search"), search);
 
     RegisterStackAttributes(object, vm);
-
-#ifndef ARKUI_WEARABLE
-    auto folderStack = panda::ObjectRef::New(vm);
-    folderStack->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableAnimation"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FolderStackBridge::SetEnableAnimation));
-    folderStack->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableAnimation"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FolderStackBridge::ResetEnableAnimation));
-    folderStack->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoHalfFold"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FolderStackBridge::SetAutoHalfFold));
-    folderStack->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoHalfFold"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FolderStackBridge::ResetAutoHalfFold));
-    folderStack->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnFolderStateChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FolderStackBridge::SetOnFolderStateChange));
-    folderStack->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnFolderStateChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FolderStackBridge::ResetOnFolderStateChange));
-    folderStack->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnHoverStatusChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FolderStackBridge::SetOnHoverStatusChange));
-    folderStack->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnHoverStatusChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FolderStackBridge::ResetOnHoverStatusChange));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "folderStack"), folderStack);
-#endif
 
     auto imageSpan = panda::ObjectRef::New(vm);
     imageSpan->Set(vm, panda::StringRef::NewFromUtf8(vm, "setVerticalAlign"),

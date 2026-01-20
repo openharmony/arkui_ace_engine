@@ -713,6 +713,7 @@
       VTT?for?OHOS::Ace::RowSplitComponent;
       VTT?for?OHOS::Ace::ProgressDataPanelComponent;
       VTT?for?OHOS::Ace::PercentageDataPanelComponent;
+      VTT?for?OHOS::Ace::NG::StackLayoutAlgorithm;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;

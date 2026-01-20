@@ -13697,116 +13697,6 @@ if (globalThis.Stack !== undefined) {
 }
 
 /// <reference path='./import.ts' />
-class ArkFolderStackComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  alignContent(value) {
-    modifierWithKey(this._modifiersWithKeys, FolderStackAlignContentModifier.identity, FolderStackAlignContentModifier, value);
-    return this;
-  }
-  enableAnimation(value) {
-    modifierWithKey(this._modifiersWithKeys, FolderStackEnableAnimationModifier.identity, FolderStackEnableAnimationModifier, value);
-    return this;
-  }
-  autoHalfFold(value) {
-    modifierWithKey(this._modifiersWithKeys, FolderStackAutoHalfFoldModifier.identity, FolderStackAutoHalfFoldModifier, value);
-    return this;
-  }
-  onFolderStateChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, FolderStackOnFolderStateChangeModifier.identity,
-      FolderStackOnFolderStateChangeModifier, callback);
-    return this;
-  }
-  onHoverStatusChange(handler) {
-    modifierWithKey(this._modifiersWithKeys, FolderStackOnHoverStatusChangeModifier.identity,
-      FolderStackOnHoverStatusChangeModifier, handler);
-    return this;
-  }
-}
-
-class FolderStackAlignContentModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stack.resetAlignContent(node);
-    } else {
-      getUINativeModule().stack.setAlignContent(node, this.value);
-    }
-  }
-}
-FolderStackAlignContentModifier.identity = Symbol('folderStackAlignContent');
-
-class FolderStackEnableAnimationModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().folderStack.resetEnableAnimation(node);
-    } else {
-      getUINativeModule().folderStack.setEnableAnimation(node, this.value);
-    }
-  }
-}
-FolderStackEnableAnimationModifier.identity = Symbol('folderStackEnableAnimation');
-
-class FolderStackAutoHalfFoldModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().folderStack.resetAutoHalfFold(node);
-    } else {
-      getUINativeModule().folderStack.setAutoHalfFold(node, this.value);
-    }
-  }
-}
-FolderStackAutoHalfFoldModifier.identity = Symbol('folderStackAutoHalfFold');
-
-class FolderStackOnFolderStateChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().folderStack.resetOnFolderStateChange(node);
-    } else {
-      getUINativeModule().folderStack.setOnFolderStateChange(node, this.value);
-    }
-  }
-}
-FolderStackOnFolderStateChangeModifier.identity = Symbol('folderStackOnFolderStateChange');
-
-class FolderStackOnHoverStatusChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().folderStack.resetOnHoverStatusChange(node);
-    } else {
-      getUINativeModule().folderStack.setOnHoverStatusChange(node, this.value);
-    }
-  }
-}
-FolderStackOnHoverStatusChangeModifier.identity = Symbol('folderStackOnHoverStatusChange');
-
-// @ts-ignore
-if (globalThis.FolderStack !== undefined) {
-  globalThis.FolderStack.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkFolderStackComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.FolderStackModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
 class TextEnableDataDetectorModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -38263,6 +38153,18 @@ if (globalThis.QRCode === undefined) {
       getUINativeModule().qrcode.create(value);
     }
   }
+}
+
+// @ts-ignore
+if (globalThis.FolderStack === undefined) {
+  globalThis.FolderStack = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('FolderStack');
+      let module = globalThis.requireNapi('arkui.components.arkfolderstack');
+      module.exportView();
+      getUINativeModule().folderStack.create(params);
+    }
+  };
 }
 
 function getArkUINodeFromNapi() {

@@ -27,17 +27,17 @@ namespace OHOS::Ace::NG {
 RefPtr<FrameNode> FolderStackModelNGStatic::CreateFrameNode(int32_t nodeId)
 {
     auto folderStackGroupNode = FolderStackGroupNode::GetOrCreateGroupNode(
-        V2::FOLDER_STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FolderStackPattern>(); });
+        FOLDER_STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FolderStackPattern>(); });
     if (!folderStackGroupNode->GetHoverNode()) {
         int32_t hoverId = ElementRegister::GetInstance()->MakeUniqueId();
         auto hoverStackNode = HoverStackNode::GetOrCreateHoverStackNode(
-            V2::HOVER_STACK_ETS_TAG, hoverId, []() { return AceType::MakeRefPtr<HoverStackPattern>(); });
+            HOVER_STACK_ETS_TAG, hoverId, []() { return AceType::MakeRefPtr<HoverStackPattern>(); });
         folderStackGroupNode->AddChild(hoverStackNode);
         folderStackGroupNode->SetHoverNode(hoverStackNode);
     }
     if (!folderStackGroupNode->GetControlPartsStackNode()) {
         int32_t controlPartsId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto controlPartsNode = ControlPartsStackNode::GetOrCreateControlPartsStackNode(V2::CONTROL_PARTS_STACK_ETS_TAG,
+        auto controlPartsNode = ControlPartsStackNode::GetOrCreateControlPartsStackNode(CONTROL_PARTS_STACK_ETS_TAG,
             controlPartsId, []() { return AceType::MakeRefPtr<ControlPartsStackPattern>(); });
         folderStackGroupNode->AddChild(controlPartsNode);
         folderStackGroupNode->SetControlPartsStackNode(controlPartsNode);

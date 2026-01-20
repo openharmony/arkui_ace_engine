@@ -13,14 +13,15 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_FOLDER_STACK_BRIDGE_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_FOLDER_STACK_BRIDGE_H
+#ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_FOLDER_STACK_BRIDGE_ARKTS_NATIVE_FOLDER_STACK_BRIDGE_H
+#define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_FOLDER_STACK_BRIDGE_ARKTS_NATIVE_FOLDER_STACK_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 
 namespace OHOS::Ace::NG {
 class FolderStackBridge {
 public:
+    static void RegisterFolderStackAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static ArkUINativeModuleValue SetEnableAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetEnableAnimation(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetAutoHalfFold(ArkUIRuntimeCallInfo* runtimeCallInfo);
@@ -29,7 +30,9 @@ public:
     static ArkUINativeModuleValue ResetOnFolderStateChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetOnHoverStatusChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnHoverStatusChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue CreateFolderStack(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetJsAlignContent(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
-}
+} // namespace OHOS::Ace::NG
 
-#endif  // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_FOLDER_STACK_BRIDGE_H
+#endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_FOLDER_STACK_BRIDGE_ARKTS_NATIVE_FOLDER_STACK_BRIDGE_H

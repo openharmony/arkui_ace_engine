@@ -88,14 +88,15 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Rating", "rating"},
         { "FlowItem", "waterflow" },
         { "WaterFlow", "waterflow" },
-        {"ColumnSplit", "linearsplit"},
-        {"RowSplit", "linearsplit"},
+        { "ColumnSplit", "linearsplit" },
+        { "RowSplit", "linearsplit" },
         {"Marquee", "marquee"},
         { "Stepper", "stepper" },
         { "StepperItem", "stepper" },
         {"Radio", "radio"},
         { "Slider", "slider" },
         { "Hyperlink", "hyperlink" },
+        { "FolderStack", "folderstack" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)
     auto it = soMap.find(name);
