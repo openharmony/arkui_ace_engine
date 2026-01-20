@@ -140,6 +140,56 @@ void callManagedArcScrollIndexHandlerSync(Ark_VMContext vmContext, Ark_Int32 res
     argsSerializer.writeInt32(center);
     KOALA_INTEROP_CALL_VOID(vmContext, 1, sizeof(dataBuffer), dataBuffer);
 }
+void callManagedAnimationEndHandler(Ark_Int32 resourceId, Ark_Int32 index, Ark_SwiperAnimationEvent extraInfo)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_AnimationEndHandler);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(index);
+    SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedAnimationEndHandlerSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Ark_SwiperAnimationEvent extraInfo)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_AnimationEndHandler);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(index);
+    SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
+void callManagedAnimationStartHandler(Ark_Int32 resourceId, Ark_Int32 index, Ark_Int32 targetIndex, Ark_SwiperAnimationEvent extraInfo)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_AnimationStartHandler);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(index);
+    argsSerializer.writeInt32(targetIndex);
+    SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedAnimationStartHandlerSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Ark_Int32 targetIndex, Ark_SwiperAnimationEvent extraInfo)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_AnimationStartHandler);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(index);
+    argsSerializer.writeInt32(targetIndex);
+    SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedAsyncCallback_image_PixelMap_Void(Ark_Int32 resourceId, Ark_image_PixelMap result)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -5591,6 +5641,30 @@ void callManagedGestureRecognizerJudgeBeginCallbackSync(Ark_VMContext vmContext,
     KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
     callData.dispose(callData.data, callData.length);
 }
+void callManagedGestureSwipeHandler(Ark_Int32 resourceId, Ark_Int32 index, Ark_SwiperAnimationEvent extraInfo)
+{
+    CallbackBuffer callbackBuffer = {{}, {}};
+    const Ark_CallbackResource callbackResourceSelf = {resourceId, holdManagedCallbackResource, releaseManagedCallbackResource};
+    callbackBuffer.resourceHolder.holdCallbackResource(&callbackResourceSelf);
+    SerializerBase argsSerializer = SerializerBase((KSerializerBuffer)&(callbackBuffer.buffer), sizeof(callbackBuffer.buffer), &(callbackBuffer.resourceHolder));
+    argsSerializer.writeInt32(Kind_GestureSwipeHandler);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(index);
+    SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
+    enqueueCallback(10, &callbackBuffer);
+}
+void callManagedGestureSwipeHandlerSync(Ark_VMContext vmContext, Ark_Int32 resourceId, Ark_Int32 index, Ark_SwiperAnimationEvent extraInfo)
+{
+    SerializerBase argsSerializer = SerializerBase(nullptr);
+    argsSerializer.writeInt32(10);
+    argsSerializer.writeInt32(Kind_GestureSwipeHandler);
+    argsSerializer.writeInt32(resourceId);
+    argsSerializer.writeInt32(index);
+    SwiperAnimationEvent_serializer::write(argsSerializer, extraInfo);
+    KInteropReturnBuffer callData = argsSerializer.toReturnBuffer();
+    KOALA_INTEROP_CALL_VOID(vmContext, 1, callData.length, callData.data);
+    callData.dispose(callData.data, callData.length);
+}
 void callManagedGetItemMainSizeByIndex(Ark_Int32 resourceId, Ark_Int32 index, Callback_F64_Void continuation)
 {
     CallbackBuffer callbackBuffer = {{}, {}};
@@ -9100,6 +9174,8 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_AccessibilityCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityCallback);
         case Kind_AccessibilityFocusCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityFocusCallback);
         case Kind_AccessibilityTransparentCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityTransparentCallback);
+        case Kind_AnimationEndHandler: return reinterpret_cast<Ark_NativePointer>(callManagedAnimationEndHandler);
+        case Kind_AnimationStartHandler: return reinterpret_cast<Ark_NativePointer>(callManagedAnimationStartHandler);
         case Kind_ArcScrollIndexHandler: return reinterpret_cast<Ark_NativePointer>(callManagedArcScrollIndexHandler);
         case Kind_AsyncCallback_image_PixelMap_Void: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_image_PixelMap_Void);
         case Kind_AsyncCallback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_Void);
@@ -9311,6 +9387,7 @@ Ark_NativePointer getManagedCallbackCaller(CallbackKind kind)
         case Kind_ErrorCallback_Ohos_Base_BusinessError: return reinterpret_cast<Ark_NativePointer>(callManagedErrorCallback_Ohos_Base_BusinessError);
         case Kind_GaugeModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedGaugeModifierBuilder);
         case Kind_GestureRecognizerJudgeBeginCallback: return reinterpret_cast<Ark_NativePointer>(callManagedGestureRecognizerJudgeBeginCallback);
+        case Kind_GestureSwipeHandler: return reinterpret_cast<Ark_NativePointer>(callManagedGestureSwipeHandler);
         case Kind_GetItemMainSizeByIndex: return reinterpret_cast<Ark_NativePointer>(callManagedGetItemMainSizeByIndex);
         case Kind_HoverCallback: return reinterpret_cast<Ark_NativePointer>(callManagedHoverCallback);
         case Kind_ImageCompleteCallback: return reinterpret_cast<Ark_NativePointer>(callManagedImageCompleteCallback);
@@ -9451,6 +9528,8 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_AccessibilityCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityCallbackSync);
         case Kind_AccessibilityFocusCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityFocusCallbackSync);
         case Kind_AccessibilityTransparentCallback: return reinterpret_cast<Ark_NativePointer>(callManagedAccessibilityTransparentCallbackSync);
+        case Kind_AnimationEndHandler: return reinterpret_cast<Ark_NativePointer>(callManagedAnimationEndHandlerSync);
+        case Kind_AnimationStartHandler: return reinterpret_cast<Ark_NativePointer>(callManagedAnimationStartHandlerSync);
         case Kind_ArcScrollIndexHandler: return reinterpret_cast<Ark_NativePointer>(callManagedArcScrollIndexHandlerSync);
         case Kind_AsyncCallback_image_PixelMap_Void: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_image_PixelMap_VoidSync);
         case Kind_AsyncCallback_Void: return reinterpret_cast<Ark_NativePointer>(callManagedAsyncCallback_VoidSync);
@@ -9662,6 +9741,7 @@ Ark_NativePointer getManagedCallbackCallerSync(CallbackKind kind)
         case Kind_ErrorCallback_Ohos_Base_BusinessError: return reinterpret_cast<Ark_NativePointer>(callManagedErrorCallback_Ohos_Base_BusinessErrorSync);
         case Kind_GaugeModifierBuilder: return reinterpret_cast<Ark_NativePointer>(callManagedGaugeModifierBuilderSync);
         case Kind_GestureRecognizerJudgeBeginCallback: return reinterpret_cast<Ark_NativePointer>(callManagedGestureRecognizerJudgeBeginCallbackSync);
+        case Kind_GestureSwipeHandler: return reinterpret_cast<Ark_NativePointer>(callManagedGestureSwipeHandlerSync);
         case Kind_GetItemMainSizeByIndex: return reinterpret_cast<Ark_NativePointer>(callManagedGetItemMainSizeByIndexSync);
         case Kind_HoverCallback: return reinterpret_cast<Ark_NativePointer>(callManagedHoverCallbackSync);
         case Kind_ImageCompleteCallback: return reinterpret_cast<Ark_NativePointer>(callManagedImageCompleteCallbackSync);

@@ -1245,7 +1245,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetItemSizeImpl(Ark_NativePointer node,
-                         const Opt_Union_String_Number* value)
+                         const Opt_Union_String_F64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -1341,7 +1341,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetPopupItemBorderRadiusImpl(Ark_NativePointer node,
-                                      const Opt_Number* value)
+                                      const Opt_Float64* value)
     {
         if (!needGroupedLog(1))
         {
@@ -26002,6 +26002,237 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // AppearSymbolEffectAccessor
+    namespace ArcAlphabetIndexerExtenderAccessor {
+    Ark_NativePointer ArcAlphabetIndexerConstructImpl(Ark_Int32 id,
+                                                      Ark_Int32 flags)
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("arcAlphabetIndexerConstruct(");
+        WriteToString(&out, id);
+        out.append(", ");
+        WriteToString(&out, flags);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    void SetArcAlphabetIndexerInitInfoImpl(Ark_NativePointer node,
+                                           const Array_String* arrayValue,
+                                           const Ark_Union_I32_Bindable* selected)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setArcAlphabetIndexerInitInfo(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, arrayValue);
+        out.append(", ");
+        WriteToString(&out, selected);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ColorImpl(Ark_NativePointer node,
+                   const Opt_ColorMetrics* color)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("color(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, color);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SelectedColorImpl(Ark_NativePointer node,
+                           const Opt_ColorMetrics* color)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("selectedColor(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, color);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void PopupColorImpl(Ark_NativePointer node,
+                        const Opt_ColorMetrics* color)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("popupColor(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, color);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SelectedBackgroundColorImpl(Ark_NativePointer node,
+                                     const Opt_ColorMetrics* color)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("selectedBackgroundColor(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, color);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void PopupBackgroundImpl(Ark_NativePointer node,
+                             const Opt_ColorMetrics* color)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("popupBackground(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, color);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void UsePopupImpl(Ark_NativePointer node,
+                      const Opt_Boolean* enabled)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("usePopup(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, enabled);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SelectedFontImpl(Ark_NativePointer node,
+                          const Opt_Font* font)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("selectedFont(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, font);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void PopupFontImpl(Ark_NativePointer node,
+                       const Opt_Font* font)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("popupFont(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, font);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void FontImpl(Ark_NativePointer node,
+                  const Opt_Font* font)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("font(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, font);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ItemSizeImpl(Ark_NativePointer node,
+                      const Opt_LengthMetrics* size)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("itemSize(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, size);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void SelectedImpl(Ark_NativePointer node,
+                      const Opt_Union_I32_Bindable* index)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("selected(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, index);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void AutoCollapseImpl(Ark_NativePointer node,
+                          const Opt_Boolean* enable)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("autoCollapse(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, enable);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnSelectImpl(Ark_NativePointer node,
+                      const Opt_Callback_I32_Void* handler)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("onSelect(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, handler);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void PopupBackgroundBlurStyleImpl(Ark_NativePointer node,
+                                      const Opt_BlurStyle* style)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("popupBackgroundBlurStyle(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, style);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // ArcAlphabetIndexerExtenderAccessor
     namespace ArcListExtenderAccessor {
     Ark_NativePointer ConstructorImpl()
     {
@@ -26366,6 +26597,292 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     } // ArcScrollBarExtenderAccessor
+    namespace ArcSwiperControllerHelperAccessor {
+    void DestroyPeerImpl(Ark_ArcSwiperControllerHelper peer)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("destroyPeer(");
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    Ark_ArcSwiperControllerHelper ConstructImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return reinterpret_cast<Ark_ArcSwiperControllerHelper>(100);
+        }
+        string out("new ArcSwiperControllerHelper(");
+        out.append(") \n");
+        out.append("[return reinterpret_cast<Ark_ArcSwiperControllerHelper>(100)] \n");
+        appendGroupedLog(1, out);
+        return reinterpret_cast<Ark_ArcSwiperControllerHelper>(100);
+    }
+    Ark_NativePointer GetFinalizerImpl()
+    {
+        if (!needGroupedLog(1))
+        {
+            return fnPtr<KNativePointer>(dummyClassFinalizer);
+        }
+        string out("getFinalizer(");
+        out.append(") \n");
+        out.append("[return fnPtr<KNativePointer>(dummyClassFinalizer)] \n");
+        appendGroupedLog(1, out);
+        return fnPtr<KNativePointer>(dummyClassFinalizer);
+    }
+    void ShowNextImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("showNext(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void ShowPreviousImpl(Ark_NativePointer node)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("showPrevious(");
+        WriteToString(&out, node);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void FinishAnimationImpl(Ark_NativePointer node,
+                             const Opt_VoidCallback* callback_)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("finishAnimation(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, callback_);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // ArcSwiperControllerHelperAccessor
+    namespace ArcSwiperExtenderAccessor {
+    Ark_NativePointer ArcSwiperConstructImpl(Ark_Int32 id,
+                                             Ark_Int32 flags)
+    {
+        if (!needGroupedLog(1))
+        {
+            return nullptr;
+        }
+        string out("arcSwiperConstruct(");
+        WriteToString(&out, id);
+        out.append(", ");
+        WriteToString(&out, flags);
+        out.append(") \n");
+        out.append("[return nullptr] \n");
+        appendGroupedLog(1, out);
+        return nullptr;
+    }
+    void SetConstructInfoImpl(Ark_NativePointer node,
+                              const Opt_ArcSwiperControllerHelper* controller)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setConstructInfo(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, controller);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void IndexImpl(Ark_NativePointer node,
+                   const Opt_Int32* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("index(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void IndicatorImpl(Ark_NativePointer node,
+                       const Opt_Union_ArcDotIndicatorInner_Boolean* style)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("indicator(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, style);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void DurationImpl(Ark_NativePointer node,
+                      const Opt_Int32* duration)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("duration(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, duration);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void VerticalImpl(Ark_NativePointer node,
+                      const Opt_Boolean* isVertical)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("vertical(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, isVertical);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void DisableSwipeImpl(Ark_NativePointer node,
+                          const Opt_Boolean* disabled)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("disableSwipe(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, disabled);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void DigitalCrownSensitivityImpl(Ark_NativePointer node,
+                                     const Opt_CrownSensitivity* sensitivity)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("digitalCrownSensitivity(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, sensitivity);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnChangeImpl(Ark_NativePointer node,
+                      const Opt_Callback_I32_Void* handler)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("onChange(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, handler);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnAnimationStartImpl(Ark_NativePointer node,
+                              const Opt_AnimationStartHandler* handler)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("onAnimationStart(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, handler);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnAnimationEndImpl(Ark_NativePointer node,
+                            const Opt_AnimationEndHandler* handler)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("onAnimationEnd(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, handler);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void OnGestureSwipeImpl(Ark_NativePointer node,
+                            const Opt_GestureSwipeHandler* handler)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("onGestureSwipe(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, handler);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void EffectModeImpl(Ark_NativePointer node,
+                        const Opt_EdgeEffect* edgeEffect)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("effectMode(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, edgeEffect);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void CustomContentTransitionImpl(Ark_NativePointer node,
+                                     const Opt_SwiperContentAnimatedTransition* transition)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("customContentTransition(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, transition);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    void DisableTransitionAnimationImpl(Ark_NativePointer node,
+                                        const Opt_Boolean* disabled)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("disableTransitionAnimation(");
+        WriteToString(&out, node);
+        out.append(", ");
+        WriteToString(&out, disabled);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
+    } // ArcSwiperExtenderAccessor
     namespace AxisEventAccessor {
     void DestroyPeerImpl(Ark_AxisEvent peer)
     {
@@ -50264,6 +50781,29 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct AppearSymbolEffectPeer {
         virtual ~AppearSymbolEffectPeer() = default;
     };
+    const GENERATED_ArkUIArcAlphabetIndexerExtenderAccessor* GetArcAlphabetIndexerExtenderAccessor()
+    {
+        static const GENERATED_ArkUIArcAlphabetIndexerExtenderAccessor ArcAlphabetIndexerExtenderAccessorImpl {
+            ArcAlphabetIndexerExtenderAccessor::ArcAlphabetIndexerConstructImpl,
+            ArcAlphabetIndexerExtenderAccessor::SetArcAlphabetIndexerInitInfoImpl,
+            ArcAlphabetIndexerExtenderAccessor::ColorImpl,
+            ArcAlphabetIndexerExtenderAccessor::SelectedColorImpl,
+            ArcAlphabetIndexerExtenderAccessor::PopupColorImpl,
+            ArcAlphabetIndexerExtenderAccessor::SelectedBackgroundColorImpl,
+            ArcAlphabetIndexerExtenderAccessor::PopupBackgroundImpl,
+            ArcAlphabetIndexerExtenderAccessor::UsePopupImpl,
+            ArcAlphabetIndexerExtenderAccessor::SelectedFontImpl,
+            ArcAlphabetIndexerExtenderAccessor::PopupFontImpl,
+            ArcAlphabetIndexerExtenderAccessor::FontImpl,
+            ArcAlphabetIndexerExtenderAccessor::ItemSizeImpl,
+            ArcAlphabetIndexerExtenderAccessor::SelectedImpl,
+            ArcAlphabetIndexerExtenderAccessor::AutoCollapseImpl,
+            ArcAlphabetIndexerExtenderAccessor::OnSelectImpl,
+            ArcAlphabetIndexerExtenderAccessor::PopupBackgroundBlurStyleImpl,
+        };
+        return &ArcAlphabetIndexerExtenderAccessorImpl;
+    }
+
     const GENERATED_ArkUIAxisEventAccessor* GetAxisEventAccessor()
     {
         static const GENERATED_ArkUIAxisEventAccessor AxisEventAccessorImpl {
@@ -51089,6 +51629,44 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             ArcScrollBarExtenderAccessor::SetArcScrollBarOptionsImpl,
         };
         return &ArcScrollBarExtenderAccessorImpl;
+    }
+
+    const GENERATED_ArkUIArcSwiperControllerHelperAccessor* GetArcSwiperControllerHelperAccessor()
+    {
+        static const GENERATED_ArkUIArcSwiperControllerHelperAccessor ArcSwiperControllerHelperAccessorImpl {
+            ArcSwiperControllerHelperAccessor::DestroyPeerImpl,
+            ArcSwiperControllerHelperAccessor::ConstructImpl,
+            ArcSwiperControllerHelperAccessor::GetFinalizerImpl,
+            ArcSwiperControllerHelperAccessor::ShowNextImpl,
+            ArcSwiperControllerHelperAccessor::ShowPreviousImpl,
+            ArcSwiperControllerHelperAccessor::FinishAnimationImpl,
+        };
+        return &ArcSwiperControllerHelperAccessorImpl;
+    }
+
+    struct ArcSwiperControllerHelperPeer {
+        virtual ~ArcSwiperControllerHelperPeer() = default;
+    };
+    const GENERATED_ArkUIArcSwiperExtenderAccessor* GetArcSwiperExtenderAccessor()
+    {
+        static const GENERATED_ArkUIArcSwiperExtenderAccessor ArcSwiperExtenderAccessorImpl {
+            ArcSwiperExtenderAccessor::ArcSwiperConstructImpl,
+            ArcSwiperExtenderAccessor::SetConstructInfoImpl,
+            ArcSwiperExtenderAccessor::IndexImpl,
+            ArcSwiperExtenderAccessor::IndicatorImpl,
+            ArcSwiperExtenderAccessor::DurationImpl,
+            ArcSwiperExtenderAccessor::VerticalImpl,
+            ArcSwiperExtenderAccessor::DisableSwipeImpl,
+            ArcSwiperExtenderAccessor::DigitalCrownSensitivityImpl,
+            ArcSwiperExtenderAccessor::OnChangeImpl,
+            ArcSwiperExtenderAccessor::OnAnimationStartImpl,
+            ArcSwiperExtenderAccessor::OnAnimationEndImpl,
+            ArcSwiperExtenderAccessor::OnGestureSwipeImpl,
+            ArcSwiperExtenderAccessor::EffectModeImpl,
+            ArcSwiperExtenderAccessor::CustomContentTransitionImpl,
+            ArcSwiperExtenderAccessor::DisableTransitionAnimationImpl,
+        };
+        return &ArcSwiperExtenderAccessorImpl;
     }
 
     const GENERATED_ArkUIDismissDialogActionAccessor* GetDismissDialogActionAccessor()
@@ -54152,9 +54730,12 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetAlertDialogAccessor,
             GetAnimationExtenderAccessor,
             GetAppearSymbolEffectAccessor,
+            GetArcAlphabetIndexerExtenderAccessor,
             GetArcListExtenderAccessor,
             GetArcListItemExtenderAccessor,
             GetArcScrollBarExtenderAccessor,
+            GetArcSwiperControllerHelperAccessor,
+            GetArcSwiperExtenderAccessor,
             GetAxisEventAccessor,
             GetBackgroundColorStyleAccessor,
             GetBaseEventAccessor,

@@ -3482,6 +3482,38 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _AppearSymbolEffect_setScope(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_arcAlphabetIndexerConstruct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_setArcAlphabetIndexerInitInfo(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_color(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_selectedColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_popupColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_selectedBackgroundColor(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_popupBackground(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_usePopup(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_selectedFont(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_popupFont(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_font(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_itemSize(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_selected(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_autoCollapse(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_onSelect(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcAlphabetIndexerExtender_popupBackgroundBlurStyle(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
     native static _ArcListExtender_arcListConstructor(id: KInt): KPointer
     @ani.unsafe.Direct
     native static _ArcListExtender_setArkListOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
@@ -3533,6 +3565,46 @@ export class ArkUIGeneratedNativeModule {
     native static _ArcScrollBarExtender_arcScrollBarConstructor(id: KInt): KPointer
     @ani.unsafe.Direct
     native static _ArcScrollBarExtender_setArcScrollBarOptions(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperControllerHelper_construct(): KPointer
+    @ani.unsafe.Direct
+    native static _ArcSwiperControllerHelper_getFinalizer(): KPointer
+    @ani.unsafe.Direct
+    native static _ArcSwiperControllerHelper_showNext(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperControllerHelper_showPrevious(node: KPointer): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperControllerHelper_finishAnimation(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_arcSwiperConstruct(id: KInt, flags: KInt): KPointer
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_setConstructInfo(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_index(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_indicator(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_duration(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_vertical(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_disableSwipe(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_digitalCrownSensitivity(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_onChange(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_onAnimationStart(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_onAnimationEnd(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_onGestureSwipe(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_effectMode(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_customContentTransition(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    @ani.unsafe.Direct
+    native static _ArcSwiperExtender_disableTransitionAnimation(node: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _AxisEvent_construct(): KPointer
     @ani.unsafe.Direct

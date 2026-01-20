@@ -14,7 +14,7 @@
  */
 
 #include "core/components_ng/pattern/swiper/swiper_model_static.h"
-
+#include "core/components_ng/pattern/swiper/arc_swiper_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_pattern.h"
 #include "core/components_ng/pattern/swiper/swiper_node.h"
 #include "core/components_ng/pattern/swiper/swiper_change_event.h"
@@ -144,6 +144,26 @@ RefPtr<FrameNode> SwiperModelStatic::CreateFrameNode(int32_t nodeId)
     }
     // adapt for capi
     swiperNode = AceType::MakeRefPtr<SwiperNode>(V2::SWIPER_ETS_TAG, nodeId, AceType::MakeRefPtr<SwiperPattern>());
+    swiperNode->InitializePatternAndContext();
+    ElementRegister::GetInstance()->AddUINode(swiperNode);
+    return swiperNode;
+}
+
+RefPtr<FrameNode> SwiperModelStatic::CreateArcFrameNode(int32_t nodeId)
+{
+    auto swiperNode = ElementRegister::GetInstance()->GetSpecificItemById<SwiperNode>(nodeId);
+    if (swiperNode) {
+        if (swiperNode->GetTag() == V2::SWIPER_ETS_TAG) {
+            return swiperNode;
+        }
+        ElementRegister::GetInstance()->RemoveItemSilently(nodeId);
+        auto parent = swiperNode->GetParent();
+        if (parent) {
+            parent->RemoveChild(swiperNode);
+        }
+    }
+    // adapt for capi
+    swiperNode = AceType::MakeRefPtr<SwiperNode>(V2::SWIPER_ETS_TAG, nodeId, AceType::MakeRefPtr<ArcSwiperPattern>());
     swiperNode->InitializePatternAndContext();
     ElementRegister::GetInstance()->AddUINode(swiperNode);
     return swiperNode;
@@ -482,5 +502,32 @@ void SwiperModelStatic::SetOnChangeEvent(FrameNode* frameNode,
 void SwiperModelStatic::SetBindIndicator(FrameNode* frameNode, bool bind)
 {
     SwiperModelNG::SetBindIndicator(frameNode, bind);
+}
+
+void SwiperModelStatic::SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t sensitivity)
+{
+#ifdef SUPPORT_DIGITAL_CROWN
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDigitalCrownSensitivity(static_cast<CrownSensitivity>(sensitivity));
+#endif
+}
+
+void SwiperModelStatic::SetDisableTransitionAnimation(FrameNode* frameNode, bool isDisable)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetDisableTransitionAnimation(isDisable);
+}
+
+void SwiperModelStatic::SetArcDotIndicatorStyle(
+    FrameNode* frameNode, const SwiperArcDotParameters& swiperArcDotParameters)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<SwiperPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetSwiperArcDotParameters(swiperArcDotParameters);
 }
 } // namespace OHOS::Ace::NG
