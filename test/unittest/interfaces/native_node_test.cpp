@@ -70,7 +70,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutSize001, TestSize.Level1)
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_PARAM_INVALID.
      */
     ArkUI_NodeHandle node = nullptr;
-    ArkUI_IntSize size;
+    ArkUI_IntSize size = {0, 0};
 
     /**
      * @tc.steps: step2. Call the function.
@@ -97,7 +97,7 @@ HWTEST_F(NativeNodeTest, OH_ArkUI_NodeUtils_GetLayoutSize002, TestSize.Level1)
      * @tc.expect: result is OHOS::Ace::ERROR_CODE_NO_ERROR.
      */
     ArkUI_NodeHandle node = new ArkUI_Node();
-    ArkUI_IntSize size;
+    ArkUI_IntSize size = {0, 0};
 
     /**
      * @tc.steps: step2. Call the function.
