@@ -7177,6 +7177,19 @@ void impl_EffectComponentInterface_setEffectComponentOptions(Ark_NativePointer t
         GetNodeModifiers()->getEffectComponentModifier()->setEffectComponentOptions(self, static_cast<Opt_EffectComponentOptions*>(&optionsValueTemp));
 }
 KOALA_INTEROP_DIRECT_V3(EffectComponentInterface_setEffectComponentOptions, Ark_NativePointer, KSerializerBuffer, int32_t)
+void impl_EffectComponentAttribute_setAlwaysSnapshot(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+        Ark_NodeHandle self = reinterpret_cast<Ark_NodeHandle>(thisPtr);
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        const auto valueValueTempTmpBuf_runtimeType = static_cast<Ark_RuntimeType>(thisDeserializer.readInt8());
+        Opt_Boolean valueValueTempTmpBuf = {};
+        valueValueTempTmpBuf.tag = valueValueTempTmpBuf_runtimeType == INTEROP_RUNTIME_UNDEFINED ? INTEROP_TAG_UNDEFINED : INTEROP_TAG_OBJECT;
+        if ((valueValueTempTmpBuf_runtimeType) != (INTEROP_RUNTIME_UNDEFINED)) {
+            valueValueTempTmpBuf.value = thisDeserializer.readBoolean();
+        }
+        Opt_Boolean valueValueTemp = valueValueTempTmpBuf;;
+        GetNodeModifiers()->getEffectComponentModifier()->setAlwaysSnapshot(self, static_cast<Opt_Boolean*>(&valueValueTemp));
+}
+KOALA_INTEROP_DIRECT_V3(EffectComponentAttribute_setAlwaysSnapshot, Ark_NativePointer, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_Ellipse_construct(Ark_Int32 id, Ark_Int32 flags) {
         return GetNodeModifiers()->getEllipseModifier()->construct(id, flags);
 }

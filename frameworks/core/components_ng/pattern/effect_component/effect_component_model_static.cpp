@@ -25,4 +25,12 @@ RefPtr<FrameNode> EffectComponentModelStatic::CreateFrameNode(int32_t nodeId)
     return FrameNode::CreateFrameNode(V2::EFFECT_COMPONENT_ETS_TAG, nodeId,
         AceType::MakeRefPtr<EffectComponentPattern>());
 }
+
+void EffectComponentModelStatic::SetAlwaysSnapshot(FrameNode* frameNode, bool boolOpt)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<EffectComponentPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->AlwaysSnapshot(boolOpt);
+}
 } // namespace OHOS::Ace::NG

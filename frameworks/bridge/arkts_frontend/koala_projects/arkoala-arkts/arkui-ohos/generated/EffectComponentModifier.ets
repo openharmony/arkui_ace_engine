@@ -36,14 +36,66 @@ export class EffectComponentModifier extends CommonMethodModifier implements Eff
     applyFocusedAttribute(instance: EffectComponentAttribute): void { }
     applyDisabledAttribute(instance: EffectComponentAttribute): void { }
     applySelectedAttribute(instance: EffectComponentAttribute): void { }
+    _alwaysSnapshot_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
         super.applyModifierPatch(node)
         const peer = node as ArkEffectComponentPeer;
+        const flagArray = this._flagArray;
+        this.applyModifierPatch0(peer, flagArray);
+    }
+    applyModifierPatch0(peer: ArkEffectComponentPeer, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0)
+        {
+            switch (flagArray[0]) {
+                case 1: {
+                    peer.setAlwaysSnapshotAttribute((this._alwaysSnapshot_0_0value as boolean | undefined));
+                    flagArray[0] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[0] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[0] = 0;
+                    peer.setAlwaysSnapshotAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: EffectComponentModifier): void {
         super.mergeModifier(modifier)
         this._state = modifier._state;
+        const flagArray = modifier._flagArray;
+        this.mergeModifier0(modifier, flagArray);
+    }
+    mergeModifier0(modifier: EffectComponentModifier, flagArray: Uint8Array): void {
+        if (flagArray[0] != 0)
+        {
+            switch (flagArray[0]) {
+                case 1:
+                case 3: {
+                    this.alwaysSnapshot(modifier._alwaysSnapshot_0_0value);
+                    break;
+                }
+                default: {
+                    this.alwaysSnapshot((undefined as boolean | undefined));
+                }
+            }
+        }
+    }
+    alwaysSnapshot(value: boolean | undefined): this {
+        if (((this._flagArray[0]) == (0)) || ((this._alwaysSnapshot_0_0value) !== (value)))
+        {
+            this._flagArray[0] = 1;
+            this._alwaysSnapshot_0_0value = value;
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[0] = 3
+        }
+        return this
     }
     public attributeModifier(value: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Not implemented")
