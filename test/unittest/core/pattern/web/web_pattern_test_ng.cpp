@@ -22,6 +22,7 @@
 #define protected public
 #include "core/components/web/resource/web_delegate.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
+#include "test/mock/core/common/mock_container.h"
 #undef protected
 #undef private
 
@@ -540,7 +541,11 @@ HWTEST_F(WebPatternTestNg, InitDragEvent006, TestSize.Level1)
     webPattern->InitDragEvent(gestureHub);
     webPattern->InitDragEvent(gestureHub);
     EXPECT_NE(webPattern->dragEvent_, nullptr);
+    MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrent();
+    MockContainer::Current()->SetIsUIExtensionWindow(false);
     rerult = webPattern->OnCursorChange(OHOS::NWeb::CursorType::CT_CROSS, nullptr);
+    MockContainer::TearDown();
     EXPECT_FALSE(rerult);
     std::shared_ptr<OHOS::NWeb::NWebSelectPopupMenuParamMock> params =
         std::make_shared<OHOS::NWeb::NWebSelectPopupMenuParamMock>();
@@ -652,7 +657,11 @@ HWTEST_F(WebPatternTestNg, WebPatternTestNg_004, TestSize.Level1)
     auto webPattern = frameNode->GetPattern<WebPattern>();
     EXPECT_NE(webPattern, nullptr);
     NWeb::NWebCursorInfoMock info;
+    MockContainer::SetUp();
+    MockContainer::Current()->pipelineContext_ = MockPipelineContext::GetCurrent();
+    MockContainer::Current()->SetIsUIExtensionWindow(false);
     bool rerult = webPattern->OnCursorChange(OHOS::NWeb::CursorType::CT_CONTEXTMENU, nullptr);
+    MockContainer::TearDown();
     EXPECT_FALSE(rerult);
 #endif
 }

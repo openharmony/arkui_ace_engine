@@ -1256,8 +1256,12 @@ private:
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDropMove(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragDrop(const RefPtr<OHOS::Ace::DragEvent>& info);
+    void HandleOnDragDropPlainText(RefPtr<UnifiedData> aceData);
+    void HandleOnDragDropHTML(RefPtr<UnifiedData> aceData);
+    void HandleOnDragDropSpanString(RefPtr<UnifiedData> aceData);
     void HandleOnDragDropFile(RefPtr<UnifiedData> aceData);
     void HandleOnDragDropLink(RefPtr<UnifiedData> aceData);
+    void HandleMouseEventOnDrag(int32_t x, int32_t y);
     void HandleOnDragLeave(int32_t x, int32_t y);
     void HandleOnDragEnd(int32_t x, int32_t y);
     void ResetDragStateValue();
@@ -1467,6 +1471,7 @@ private:
     bool isReceivedArkDrag_ = false;
     bool isW3cDragEvent_ = false;
     bool isDragStartFromWeb_ = false;
+    bool isNeedMouseMoveOnDragEnd_ = false;
     RefPtr<AccessibilitySessionAdapter> accessibilitySessionAdapter_;
 
     bool isNewDragStyle_ = false;
