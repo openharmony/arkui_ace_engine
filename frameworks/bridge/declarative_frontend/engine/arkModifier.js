@@ -1449,7 +1449,6 @@ class LazyArkSideBarContainerComponent extends ArkComponent {
       LazyArkSideBarContainerComponent.module = globalThis.requireNapi('arkui.components.arksidebarcontainer');
     }
     this.lazyComponent = LazyArkSideBarContainerComponent.module.createComponent(nativePtr, classType);
-    console.log('LazyArkSideBarContainerComponent lazyload nativeModule');
   }
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
@@ -1459,43 +1458,43 @@ class LazyArkSideBarContainerComponent extends ArkComponent {
     return this;
   }
   autoHide(value) {
-    this.lazyComponent.autoHide(callback);
+    this.lazyComponent.autoHide(value);
     return this;
   }
   showSideBar(value) {
-    this.lazyComponent.showSideBar(callback);
+    this.lazyComponent.showSideBar(value);
     return this;
   }
   maxSideBarWidth(value) {
-    this.lazyComponent.maxSideBarWidth(callback);
+    this.lazyComponent.maxSideBarWidth(value);
     return this;
   }
   minSideBarWidth(value) {
-    this.lazyComponent.minSideBarWidth(callback);
+    this.lazyComponent.minSideBarWidth(value);
     return this;
   }
   minContentWidth(value) {
-    this.lazyComponent.minContentWidth(callback);
+    this.lazyComponent.minContentWidth(value);
     return this;
   }
   controlButton(value) {
-    this.lazyComponent.controlButton(callback);
+    this.lazyComponent.controlButton(value);
     return this;
   }
   divider(value) {
-    this.lazyComponent.divider(callback);
+    this.lazyComponent.divider(value);
     return this;
   }
   sideBarPosition(value) {
-    this.lazyComponent.sideBarPosition(callback);
+    this.lazyComponent.sideBarPosition(value);
     return this;
   }
   sideBarWidth(value) {
-    this.lazyComponent.sideBarWidth(callback);
+    this.lazyComponent.sideBarWidth(value);
     return this;
   }
   showControlButton(value) {
-    this.lazyComponent.showControlButton(callback);
+    this.lazyComponent.showControlButton(value);
     return this;
   }
 }
