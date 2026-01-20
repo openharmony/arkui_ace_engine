@@ -136,6 +136,9 @@ void CheckBoxGroupModelNG::SetSelectAll(FrameNode* frameNode, bool isSelected)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<CheckBoxGroupPattern>();
     pattern->SetUpdateFlag(true);
+    auto eventHub = frameNode->GetEventHub<CheckBoxGroupEventHub>();
+    CHECK_NULL_VOID(eventHub);
+    eventHub->SetCurrentUIState(UI_STATE_SELECTED, isSelected);
     ACE_UPDATE_NODE_PAINT_PROPERTY(CheckBoxGroupPaintProperty, CheckBoxGroupSelect, isSelected, frameNode);
 }
 

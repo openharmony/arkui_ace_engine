@@ -36,7 +36,6 @@ Framework::ViewAbstractModelImpl* GetViewAbstractModelImpl()
     return &instance;
 }
 } // namespace
-
 } // namespace OHOS::Ace
 #endif
 namespace OHOS::Ace::NG {
@@ -147,14 +146,14 @@ void ResetCheckboxGroupUnSelectedColor(ArkUINodeHandle node)
 
 void SetCheckboxGroupSelectAll(ArkUINodeHandle node, ArkUI_Bool isSelected)
 {
-    auto* frameNode =  GetFrameNode(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxGroupModelNG::SetSelectAll(frameNode, isSelected);
 }
 
 void ResetCheckboxGroupSelectAll(ArkUINodeHandle node)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxGroupModelNG::SetSelectAll(frameNode, false);
 }
@@ -521,6 +520,11 @@ void SetCheckboxGroupSelectAllImpl(ArkUINodeHandle node, ArkUI_Bool isSelected)
     GetCheckboxGroupImpl()->SetSelectAll(isSelected);
 }
 
+void ResetCheckboxGroupSelectAllImpl(ArkUINodeHandle node)
+{
+    GetCheckboxGroupImpl()->SetSelectAll(false);
+}
+
 void SetCheckboxGroupSelectedColorImpl(ArkUINodeHandle node, uint32_t color, void* colorRawPtr)
 {
     GetCheckboxGroupImpl()->SetSelectedColor(Color(color));
@@ -621,7 +625,7 @@ const ArkUICheckboxGroupModifier* GetCheckboxGroupDynamicModifier()
             .setCheckboxGroupUnSelectedColor = nullptr,
             .resetCheckboxGroupUnSelectedColor = ResetCheckboxGroupUnSelectedColorImpl,
             .setCheckboxGroupSelectAll = SetCheckboxGroupSelectAllImpl,
-            .resetCheckboxGroupSelectAll = nullptr,
+            .resetCheckboxGroupSelectAll = ResetCheckboxGroupSelectAllImpl,
             .setCheckboxGroupWidth = nullptr,
             .resetCheckboxGroupWidth = ResetCheckboxGroupWidthImpl,
             .setCheckboxGroupHeight = nullptr,

@@ -15,6 +15,19 @@
 
 const overrideMap = new Map();
 overrideMap.set(
+  'ArkCheckboxComponent',
+  new Map([
+    ['Symbol(width)', (()=>{
+      let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+      return module.CheckboxWidthModifier;
+    })()],
+    ['Symbol(height)', (()=>{
+      let module = globalThis.requireNapi('arkui.components.arkcheckbox');
+      return module.CheckboxHeightModifier;
+    })()],
+  ])
+);
+overrideMap.set(
   'ArkTextComponent',
   new Map([
     ['Symbol(foregroundColor)', TextForegroundColorModifier]

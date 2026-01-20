@@ -18,7 +18,7 @@
 #include "core/components_ng/pattern/checkbox/bridge/checkbox_dynamic_module.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_ng.h"
 
-#ifndef ARKUI_WEARABLE
+#ifdef INCLUDE_GENERATED_SOURCES
 #include "core/components_ng/pattern/checkbox/bridge/checkbox_content_modifier_helper.h"
 #include "core/components_ng/pattern/checkbox/checkbox_model_static.h"
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
@@ -36,7 +36,7 @@ const ArkUICheckboxModifier* GetCheckboxDynamicModifier();
 const CJUICheckboxModifier* GetCJUICheckboxModifier();
 const ArkUICheckboxCustomModifier* GetCheckboxCustomModifier();
 constexpr const char* CUSTOM_MODIFIER = "customModifier";
-#ifndef ARKUI_WEARABLE
+#ifdef INCLUDE_GENERATED_SOURCES
 namespace GeneratedModifier {
 constexpr const char* CONTENT_MODIFIER = "contentModifier";
 const GENERATED_ArkUICheckboxModifier* GetCheckboxStaticModifier();
@@ -57,7 +57,7 @@ const void* CheckboxDynamicModule::GetDynamicModifier()
 
 const void* CheckboxDynamicModule::GetStaticModifier()
 {
-#ifndef ARKUI_WEARABLE
+#ifdef INCLUDE_GENERATED_SOURCES
     return NG::GeneratedModifier::GetCheckboxStaticModifier();
 #else
     return nullptr;
@@ -80,7 +80,7 @@ const void* CheckboxDynamicModule::GetCustomModifier(const std::string& name)
     if (name == NG::CUSTOM_MODIFIER) {
         return NG::GetCheckboxCustomModifier();
     }
-#ifndef ARKUI_WEARABLE
+#ifdef INCLUDE_GENERATED_SOURCES
     if (name == NG::GeneratedModifier::CONTENT_MODIFIER) {
         return NG::GeneratedModifier::GetCheckboxStaticContentModifier();
     }

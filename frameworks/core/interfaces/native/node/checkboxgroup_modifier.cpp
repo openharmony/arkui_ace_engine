@@ -14,7 +14,6 @@
  */
 #include "base/log/log_wrapper.h"
 #include "core/common/dynamic_module_helper.h"
-#include "core/components/checkable/checkable_component.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
 #include "ui/base/utils/utils.h"
 
