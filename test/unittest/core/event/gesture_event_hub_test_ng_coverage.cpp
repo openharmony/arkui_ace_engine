@@ -863,6 +863,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset004, TestSize.Le
     DragPreviewOption option;
     option.isTouchPointCalculationBasedOnFinalPreviewEnable = true;
     frameNode->SetDragPreviewOptions(option);
+    data.displayPoint.SetX(0.0f);
+    data.displayPoint.SetY(0.0f);
     gestureEventHub->GetPixelMapOffset(info, size, data, 1.0f);
     EXPECT_FALSE(NearZero(gestureEventHub->frameNodeSize_.Width()));
     EXPECT_FALSE(NearZero(size.Width()));
@@ -896,6 +898,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset005, TestSize.Le
     PreparedInfoForDrag data;
     data.isSceneBoardTouchDrag = true;
     gestureEventHub->frameNodeSize_ = SizeF(1, 1);
+    data.displayPoint.SetX(0.0f);
+    data.displayPoint.SetY(0.0f);
     gestureEventHub->GetPixelMapOffset(info, size, data, 1.0f);
     EXPECT_FALSE(NearZero(gestureEventHub->frameNodeSize_.Width()));
     EXPECT_FALSE(NearZero(size.Width()));

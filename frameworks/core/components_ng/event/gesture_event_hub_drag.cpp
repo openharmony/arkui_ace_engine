@@ -308,18 +308,22 @@ float GestureEventHub::GetDefaultPixelMapScale(
     return defaultPixelMapScale;
 }
 
-void CheckOffsetInPixelMap(OffsetF& result, const SizeF& size)
+void CheckOffsetInPixelMap(PreparedInfoForDrag& data, OffsetF& result, const SizeF& size)
 {
     if (result.GetX() >= 0.0f) {
+        data.displayPoint.SetX(data.displayPoint.GetX() + result.GetX() + 1);
         result.SetX(-1.0f);
     }
     if (result.GetX() + size.Width() <= 0.0f) {
+        data.displayPoint.SetX(data.displayPoint.GetX() + result.GetX() + size.Width() - 1);
         result.SetX(1.0f - size.Width());
     }
     if (result.GetY() >= 0.0f) {
+        data.displayPoint.SetY(data.displayPoint.GetY() + result.GetY() + 1);
         result.SetY(-1.0f);
     }
     if (result.GetY() + size.Height() <= 0.0f) {
+        data.displayPoint.SetY(data.displayPoint.GetY() + result.GetY() + size.Height() - 1);
         result.SetY(1.0f - size.Height());
     }
 }
@@ -344,7 +348,7 @@ RectF ParseInnerRect(const std::string& extraInfo, const SizeF& size)
 }
 
 OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF& size,
-    const PreparedInfoForDrag& dragInfoData, const float scale, const RectF& innerRect) const
+    PreparedInfoForDrag& dragInfoData, const float scale, const RectF& innerRect) const
 {
     OffsetF result = OffsetF(size.Width() * PIXELMAP_WIDTH_RATE, size.Height() * PIXELMAP_HEIGHT_RATE);
     auto frameNode = GetFrameNode();
@@ -357,7 +361,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
         auto rateY = innerRect.Height() / size.Height();
         result.SetX(rateX * (coordinateX + innerRect.GetOffset().GetX() - info.GetGlobalLocation().GetX()));
         result.SetY(rateY * (coordinateY + innerRect.GetOffset().GetY() - info.GetGlobalLocation().GetY()));
-        CheckOffsetInPixelMap(result, size);
+        CheckOffsetInPixelMap(dragInfoData, result, size);
         return result;
     }
     if (NearZero(frameNodeSize_.Width()) || NearZero(frameNodeSize_.Height()) ||
@@ -391,7 +395,7 @@ OffsetF GestureEventHub::GetPixelMapOffset(const GestureEvent& info, const SizeF
             result.SetY(-rateY * size.Height());
         }
     }
-    CheckOffsetInPixelMap(result, size);
+    CheckOffsetInPixelMap(dragInfoData, result, size);
     TAG_LOGD(AceLogTag::ACE_DRAG, "Get pixelMap offset is %{public}f and %{public}f.", result.GetX(), result.GetY());
     return result;
 }
@@ -1010,6 +1014,8 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
                                 ? dragDropInfo.extraInfo.substr(0, EXTRA_INFO_MAX_LENGTH)
                                 : dragDropInfo.extraInfo;
     auto innerRect = ParseInnerRect(extraInfoLimited, SizeF(width, height));
+    data.displayPoint.SetX(info.GetScreenLocation().GetX());
+    data.displayPoint.SetY(info.GetScreenLocation().GetY());
     auto pixelMapOffset = GetPixelMapOffset(info, SizeF(width, height), data, scale, innerRect);
     windowScale = NearZero(windowScale) ? 1.0f : windowScale;
     dragDropManager->SetPixelMapOffset(pixelMapOffset / windowScale);
@@ -1028,10 +1034,10 @@ void GestureEventHub::OnDragStart(const GestureEvent& info, const RefPtr<Pipelin
     auto windowId = container->GetWindowId();
     ShadowInfoCore shadowInfo { pixelMapDuplicated, pixelMapOffset.GetX(), pixelMapOffset.GetY() };
     auto dragMoveLastPoint = dragDropManager->GetDragMoveLastPointByCurrentPointer(info.GetPointerId());
-    auto screenX = DragDropGlobalController::GetInstance().GetAsyncDragCallback() ?
-        dragMoveLastPoint.GetScreenX() : info.GetScreenLocation().GetX();
-    auto screenY = DragDropGlobalController::GetInstance().GetAsyncDragCallback() ?
-        dragMoveLastPoint.GetScreenY() : info.GetScreenLocation().GetY();
+    auto screenX = DragDropGlobalController::GetInstance().GetAsyncDragCallback() ? dragMoveLastPoint.GetScreenX()
+        : (data.isSceneBoardTouchDrag ? data.displayPoint.GetX() : info.GetScreenLocation().GetX());
+    auto screenY = DragDropGlobalController::GetInstance().GetAsyncDragCallback() ? dragMoveLastPoint.GetScreenY()
+        : (data.isSceneBoardTouchDrag ? data.displayPoint.GetY() : info.GetScreenLocation().GetY());
 
     const int32_t pointerId = info.GetPassThrough() ? info.GetPointerId() % PASS_THROUGH_EVENT_ID : info.GetPointerId();
     const int32_t materialId = frameNode ? DragDropFuncWrapper::ParseUiMaterial(frameNode->GetDragPreviewOption()) : -1;
