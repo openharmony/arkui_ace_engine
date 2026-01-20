@@ -330,7 +330,7 @@ void* OH_ArkUI_DrawContext_GetCanvas(ArkUI_DrawContext* context)
 }
 ArkUI_IntSize OH_ArkUI_DrawContext_GetSize(ArkUI_DrawContext* context)
 {
-    ArkUI_IntSize intSize;
+    ArkUI_IntSize intSize = {0, 0};
     if (context == nullptr) {
         return intSize;
     }

@@ -217,7 +217,7 @@ std::string ArkUINode::GetLayoutPositionInWindow()
 std::string ArkUINode::GetLayoutSize()
 {
     assert(handle_);
-    ArkUI_IntSize intSize = {};
+    ArkUI_IntSize intSize = {0, 0};
     std::string intSizeValue = "";
     auto err = OH_ArkUI_NodeUtils_GetLayoutSize(handle_, &intSize);
     intSizeValue += "GetLayoutSize\n";

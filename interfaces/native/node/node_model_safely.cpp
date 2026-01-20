@@ -432,7 +432,7 @@ int32_t SetLayoutPositionSafely(ArkUI_NodeHandle node, int32_t positionX, int32_
 
 ArkUI_IntSize GetMeasuredSizeSafely(ArkUI_NodeHandle node)
 {
-    ArkUI_IntSize size;
+    ArkUI_IntSize size = {0, 0};
     CHECK_NULL_RETURN(node, size);
     auto* impl = GetFullImpl();
     if (impl->getMultiThreadManagerAPI()->checkOnUIThread()) {
