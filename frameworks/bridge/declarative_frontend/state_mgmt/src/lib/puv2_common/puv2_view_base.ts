@@ -108,6 +108,7 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
   private elmtIdsDelayedUpdate_: Set<number> = new Set();
 
   protected __lifecycle__Internal: CustomComponentLifecycle;
+  public __newLifecycleNeedWork__Internal: boolean = false;
 
   protected static prebuildPhase_: PrebuildPhase = PrebuildPhase.None;
   protected isPrebuilding_: boolean = false;
