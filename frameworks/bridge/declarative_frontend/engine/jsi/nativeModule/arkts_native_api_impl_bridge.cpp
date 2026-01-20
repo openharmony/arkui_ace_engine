@@ -5459,6 +5459,8 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModuleForm(ArkUIRuntimeC
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     auto object = panda::ObjectRef::New(vm);
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadNativeModule"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LoadNativeModule));
     return object;
 }
 

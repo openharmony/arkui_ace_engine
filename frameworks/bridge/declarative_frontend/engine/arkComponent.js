@@ -36379,6 +36379,12 @@ if (globalThis.UIPickerComponent !== undefined) {
   };
 }
 
+function __ArkUI_PreloadDynamicModule__(componentName, abcName) {
+    getUINativeModule().loadNativeModule(componentName);
+    let module = globalThis.requireNapi(abcName);
+    module.exportView();
+}
+
 // @ts-ignore
 if (globalThis.Hyperlink === undefined) {
   globalThis.Hyperlink = {
