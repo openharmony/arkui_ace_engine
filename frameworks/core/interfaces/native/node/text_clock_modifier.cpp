@@ -88,7 +88,6 @@ void ResetFontColor(ArkUINodeHandle node)
     if (SystemProperties::ConfigChangePerform()) {
         TextClockModelNG::SetFontColorByUser(frameNode, false);
         TextClockModelNG::CreateWithTextColorResourceObj(frameNode, nullptr);
-        TextClockModelNG::ResetFontColor(frameNode);
     }
 }
 
