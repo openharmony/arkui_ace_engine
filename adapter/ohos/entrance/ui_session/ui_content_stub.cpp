@@ -485,6 +485,10 @@ int32_t UiContentStub::GetMultiImagesByIdInner(MessageParcel& data, MessageParce
     data.ReadInt32Vector(&arkUIIds);
     std::map<int32_t, std::vector<int32_t>> arkWebs;
     size_t mapSize = data.ReadUint64();
+    constexpr int32_t GET_IMAGES_BY_ID_LOOP_UPPERBOUND = 1000;
+    if (mapSize > GET_IMAGES_BY_ID_LOOP_UPPERBOUND) {
+        return PARAM_INVALID;
+    }
     for (size_t i = 0; i < mapSize; ++i) {
         int32_t webId = data.ReadInt32();
         std::vector<int32_t> webImageIds;

@@ -25,6 +25,10 @@ void AddArkUIImagesByIds(OHOS::MessageParcel& data,
     std::unordered_map<int32_t, std::shared_ptr<OHOS::Media::PixelMap>>& componentImages)
 {
     uint64_t componentImagesSize = data.ReadUint64();
+    constexpr int32_t GET_IMAGES_BY_ID_LOOP_UPPERBOUND = 1000;
+    if (componentImagesSize > GET_IMAGES_BY_ID_LOOP_UPPERBOUND) {
+        return;
+    }
     for (uint64_t i = 0; i < componentImagesSize; ++i) {
         std::shared_ptr<OHOS::Media::PixelMap> pixelMap = nullptr;
         int32_t componentImageId = data.ReadInt32();
@@ -40,9 +44,16 @@ void AddArkWebImagesByIds(OHOS::MessageParcel& data,
     std::map<int32_t, std::map<int32_t, std::shared_ptr<OHOS::Media::PixelMap>>>& webImages)
 {
     uint64_t webImagesAllMapSize = data.ReadUint64();
+    constexpr int32_t GET_IMAGES_BY_ID_LOOP_UPPERBOUND = 1000;
+    if (webImagesAllMapSize > GET_IMAGES_BY_ID_LOOP_UPPERBOUND) {
+        return;
+    }
     for (uint64_t i = 0; i < webImagesAllMapSize; ++i) {
         int32_t webId = data.ReadInt32();
         uint64_t imagesInOneWebSize = data.ReadUint64();
+        if (imagesInOneWebSize > GET_IMAGES_BY_ID_LOOP_UPPERBOUND) {
+            return;
+        }
         std::map<int32_t, std::shared_ptr<OHOS::Media::PixelMap>> imagesInOneWeb;
         for (uint64_t j = 0; j < imagesInOneWebSize; ++j) {
             std::shared_ptr<OHOS::Media::PixelMap> pixelMap = nullptr;

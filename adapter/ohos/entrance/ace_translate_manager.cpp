@@ -316,7 +316,7 @@ void UiTranslateManagerImpl::GetMultiImagesById(uint32_t windowId, const std::ve
         LOGE("UiTranslateManagerImpl::GetMultiImagesById taskExecutor_ doesn't exist");
         return;
     }
-    windowId_ = windowId;
+    windowId_ = static_cast<int32_t>(windowId);
     const size_t totalQueryCnt = 20;
     size_t componentQueryCnt = std::min(totalQueryCnt, arkUIIds.size());
     size_t webQueryCnt = totalQueryCnt - componentQueryCnt;
