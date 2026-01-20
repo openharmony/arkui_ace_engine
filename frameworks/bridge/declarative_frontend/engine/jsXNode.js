@@ -1768,40 +1768,40 @@ class TransFrameNode extends FrameNode {
         return true;
     }
     getRenderNode() {
-        throw Error('frameNode created by transferDynamic not support getRenderNode');
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support getRenderNode');
     }
     getCustomProperty(name) {
-        throw Error('frameNode created by transferDynamic not support getCustomProperty');
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support getCustomProperty');
     }
     get commonAttribute() {
-        throw Error('frameNode created by transferDynamic not support commonAttribute');
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support commonAttribute');
     }
     get commonEvent() {
-        throw Error('frameNode created by transferDynamic not support commonEvent');
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support commonEvent');
     }
     get gestureEvent() {
-        throw Error('frameNode created by transferDynamic not support gestureEvent');
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support gestureEvent');
     }
     setMeasuredSize(size) {
-        throw Error('frameNode created by transferDynamic not support setMeasuredSize');
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support setMeasuredSize');
     }
     setLayoutPosition(position) {
-        throw Error('frameNode created by transferDynamic not support setLayoutPosition');
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support setLayoutPosition');
     }
     measure(constraint) {
-        throw Error('frameNode created by transferDynamic not support measure');
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support measure');
     }
     layout(position) {
-        throw Error('frameNode created by transferDynamic not support layout');
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support layout');
     }
     setNeedsLayout() {
-        throw Error('frameNode created by transferDynamic not support setNeedsLayout');
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support setNeedsLayout');
     }
     invalidate() {
-        throw Error('frameNode created by transferDynamic not support invalidate');
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support invalidate');
     }
     addComponentContent(content) {
-        throw Error('frameNode created by transferDynamic not support addComponentContent');
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support addComponentContent');
     }
 }
 class ImmutableFrameNode extends FrameNode {
