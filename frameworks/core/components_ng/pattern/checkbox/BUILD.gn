@@ -14,7 +14,6 @@
 import("//foundation/arkui/ace_engine/frameworks/core/components_ng/components.gni")
 
 build_component_ng("checkbox_pattern_ng") {
-  is_component_model = true
   sources = [
     # Checkbox
     "checkbox_accessibility_property.cpp",
@@ -65,9 +64,11 @@ build_component_ng("checkbox_pattern_ng") {
   }
 
   if (!build_ohos_sdk) {
-    deps = [
-      "${ace_root}/interfaces/inner_api/ui_session:ui_session",
-    ]
+    if (!is_arkui_x) {
+      deps = [
+        "${ace_root}/interfaces/inner_api/ui_session:ui_session",
+      ]
+    }
     if (is_ohos_standard_system) {
       external_deps = [ "accessibility:accessibility_common" ]
     }
