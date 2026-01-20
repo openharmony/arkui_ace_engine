@@ -1462,5 +1462,17 @@ bool ImageModelNG::GetAntiAlias(FrameNode* frameNode)
     CHECK_NULL_RETURN(paintProperty->GetImagePaintStyle(), false);
     return paintProperty->GetImagePaintStyle()->GetAntiAlias().value_or(false);
 }
+
+void ImageModelNG::SetImageFillSetByUser(FrameNode* frameNode, bool value)
+{
+    CHECK_NULL_VOID(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        if (value) {
+            RefPtr<ResourceObject> resObj;
+            CreateWithResourceObj(frameNode, ImageResourceType::FILL_COLOR, resObj);
+        }
+        ACE_UPDATE_NODE_LAYOUT_PROPERTY(ImageLayoutProperty, ImageFillSetByUser, value, frameNode);
+    }
+}
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_IMAGE_IMAGE_MODEL_NG_CPP

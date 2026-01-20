@@ -179,6 +179,7 @@ public:
     static ImageSourceInfo GetAltPlaceholder(FrameNode* frameNode);
     static void SetAntiAlias(FrameNode* frameNode, bool antiAlias);
     static bool GetAntiAlias(FrameNode* frameNode);
+    static void SetImageFillSetByUser(FrameNode* frameNode, bool value);
 
 private:
     ImagePattern* GetImagePattern();
