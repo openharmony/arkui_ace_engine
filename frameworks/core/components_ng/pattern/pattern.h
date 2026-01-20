@@ -779,6 +779,18 @@ public:
         return RET_SUCCESS;
     };
 
+    bool HandleTextBoxComponentCommand(const std::string& command, std::string& cmd,
+        std::unique_ptr<JsonValue>& json, std::unique_ptr<JsonValue>& params)
+    {
+        json = JsonUtil::ParseJsonString(command);
+        CHECK_NULL_RETURN(json && !json->IsNull(), false);
+        cmd = json->GetString("cmd");
+        CHECK_NULL_RETURN(!cmd.empty(), false);
+        params = json->GetValue("params");
+        CHECK_NULL_RETURN(params && params->IsObject(), false);
+        return true;
+    }
+
     virtual bool BorderUnoccupied() const
     {
         return false;

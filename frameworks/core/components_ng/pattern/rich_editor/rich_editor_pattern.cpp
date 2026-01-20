@@ -1414,6 +1414,58 @@ int32_t RichEditorPattern::AddTextSpan(TextSpanOptions options, TextChangeReason
     return ret;
 }
 
+int32_t RichEditorPattern::OnInjectionEvent(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnInjectionEvent command : %{public}s, nodeId : %{public}d", command.c_str(),
+        frameId_);
+    if (!ParseCommand(command)) {
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
+}
+
+bool RichEditorPattern::ParseCommand(const std::string& command)
+{
+    std::string cmd;
+    std::unique_ptr<JsonValue> json  = nullptr;
+    std::unique_ptr<JsonValue> params = nullptr;
+    if (!HandleTextBoxComponentCommand(command, cmd, json, params)) {
+        return false;
+    }
+    if (cmd == "addText") {
+        std::string valueStr = params->GetString("value");
+        CHECK_NULL_RETURN(!valueStr.empty(), true);
+        int offset = params->GetInt("offset", GetTextContentLength());
+        std::u16string textValue = UtfUtils::Str8ToStr16(valueStr);
+        auto textOptions = TextSpanOptions{ .offset = offset, .value = textValue };
+        AddTextSpan(textOptions, TextChangeReason::INPUT);
+    } else if (cmd == "deleteText") {
+        RangeOptions options;
+        if (params->Contains("start")) {
+            int32_t start = params->GetInt("start");
+            options.start = std::max(0, start);
+        }
+        if (params->Contains("end")) {
+            int32_t end = params->GetInt("end");
+            options.end = std::max(0, end);
+        }
+        DeleteSpans(options, TextChangeReason::INPUT);
+    } else if (cmd == "setText") {
+        std::string valueStr = params->GetString("value");
+        std::u16string textValue = UtfUtils::Str8ToStr16(valueStr);
+        RangeOptions options;
+        DeleteSpans(options, TextChangeReason::INPUT);
+        auto textOptions = TextSpanOptions{ .value = textValue };
+        AddTextSpan(textOptions, TextChangeReason::INPUT);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "OnInjectionEvent unknown cmd : %{public}s", cmd.c_str());
+        return false;
+    }
+    return true;
+}
+
 void RichEditorPattern::AdjustAddPosition(TextSpanOptions& options)
 {
     CHECK_NULL_VOID(IsPreviewTextInputting() && options.offset.has_value());

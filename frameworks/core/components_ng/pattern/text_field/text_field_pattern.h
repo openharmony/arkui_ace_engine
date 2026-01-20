@@ -74,6 +74,7 @@
 #include "core/components_ng/pattern/text_field/text_selector.h"
 #include "core/components_ng/pattern/text_input/text_input_layout_algorithm.h"
 #include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
+#include "interfaces/inner_api/ui_session/param_config.h"
 
 #ifndef ACE_UNITTEST
 #ifdef ENABLE_STANDARD_INPUT
@@ -188,7 +189,8 @@ enum class InputReason {
     DRAG,
     AUTO_FILL,
     AI_WRITE,
-    CANCEL_BUTTON
+    CANCEL_BUTTON,
+    COMMAND_INJECTION
 };
 
 struct PreviewTextInfo {
@@ -733,6 +735,7 @@ public:
     void HandleSetSelectionMultiThread(int32_t start, int32_t end, bool showHandle = true);
     void HandleExtendAction(int32_t action) override;
     void HandleSelect(CaretMoveIntent direction) override;
+    int32_t OnInjectionEvent(const std::string& command) override;
 
     void HandleSelectExtend(CaretMoveIntent direction) override
     {
@@ -1890,6 +1893,8 @@ protected:
     bool selectDetectEnabled_ = true;
 
 private:
+    bool ParseCommand(const std::string& command);
+    void HandleDeleteTextCommand(const std::unique_ptr<JsonValue>& params);
     void OnSyncGeometryNode(const DirtySwapConfig& config) override;
     Offset ConvertTouchOffsetToTextOffset(const Offset& touchOffset);
     void GetTextSelectRectsInRangeAndWillChange();

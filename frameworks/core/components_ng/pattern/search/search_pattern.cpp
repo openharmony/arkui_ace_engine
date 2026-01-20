@@ -1437,6 +1437,40 @@ void SearchPattern::AnimateTouchAndHover(RefPtr<RenderContext>& renderContext, f
         nullptr, Claim(context));
 }
 
+int32_t SearchPattern::OnInjectionEvent(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    TAG_LOGI(AceLogTag::ACE_SEARCH, "OnInjectionEvent command : %{public}s, nodeId : %{public}d", command.c_str(),
+        host->GetId());
+    std::string cmd;
+    std::unique_ptr<JsonValue> json = nullptr;
+    std::unique_ptr<JsonValue> params = nullptr;
+    if (!HandleTextBoxComponentCommand(command, cmd, json, params)) {
+        return RET_FAILED;
+    }
+    if (cmd != "setSearchText") {
+        TAG_LOGE(AceLogTag::ACE_SEARCH, "OnInjectionEvent unknown cmd : %{public}s", cmd.c_str());
+        return RET_FAILED;
+    }
+    // Get TextField child
+    auto textFieldChild = AceType::DynamicCast<FrameNode>(host->GetChildren().front());
+    CHECK_NULL_RETURN(textFieldChild, RET_FAILED);
+    auto textFieldPattern = textFieldChild->GetPattern<TextFieldPattern>();
+    CHECK_NULL_RETURN(textFieldPattern, RET_FAILED);
+    std::string text = params->GetString("value");
+    InputCommandInfo inputCommandInfo;
+    inputCommandInfo.deleteRange = { 0, static_cast<int32_t>(textFieldPattern->GetTextUtf16Value().length()) };
+    inputCommandInfo.insertOffset = 0;
+    inputCommandInfo.insertValue = UtfUtils::Str8ToStr16(text);
+    inputCommandInfo.reason = InputReason::COMMAND_INJECTION;
+    textFieldPattern->AddInputCommand(inputCommandInfo);
+    if (isSearchButtonEnabled_) {
+        OnClickButtonAndImage();
+    }
+    return RET_SUCCESS;
+}
+
 void SearchPattern::AnimateSearchTouchAndHover(RefPtr<RenderContext>& renderContext,
     Color& blendColorFrom, Color& blendColorTo, int32_t duration, const RefPtr<Curve>& curve)
 {
