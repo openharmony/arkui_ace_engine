@@ -18,6 +18,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/render/mock_paragraph.h"
+#include "test/unittest/capi/modifiers/slider_modifier_test.h"
 #include "test/unittest/core/pattern/test_ng.h"
 #include "test/unittest/core/pattern/text/text_base.h"
 
@@ -2145,6 +2146,22 @@ HWTEST_F(TextInputAreaTest, TextInputAreaDeleteBackwardModelNG002, TestSize.Leve
     TextFieldModelNG::DeleteBackward(frameNode_.GetRawPtr());
     FlushLayoutTask(frameNode_);
     EXPECT_NE(pattern_, nullptr);
+}
+
+/**
+ * @tc.name: TextInputAreaDeleteBackwardModelNG003
+ * @tc.desc: test ModelNG DeleteBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextInputAreaDeleteBackwardModelNG003, TestSize.Level1)
+{
+    CreateTextField("挖矿时间到!⛏️", "", [](TextFieldModelNG model) {});
+    GetFocus();
+
+    TextFieldModelNG::DeleteBackward(frameNode_.GetRawPtr());
+    FlushLayoutTask(frameNode_);
+    
+    EXPECT_FALSE(pattern_->IsPreviewTextInputting());
 }
 
 /**
