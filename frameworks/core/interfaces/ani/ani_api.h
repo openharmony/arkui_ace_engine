@@ -274,6 +274,7 @@ struct ArkUIDragControllerAsync {
     ArkUIDragPreviewOption dragPreviewOption;
     std::function<void(std::shared_ptr<ArkUIDragControllerAsync>, const ArkUIDragNotifyMessage&,
         const ArkUIDragStatus)> callBackJsFunction;
+    std::function<void()> destroyJsFunction;
     std::shared_ptr<OHOS::Ace::Ani::DragAction> dragAction = nullptr;
 };
 

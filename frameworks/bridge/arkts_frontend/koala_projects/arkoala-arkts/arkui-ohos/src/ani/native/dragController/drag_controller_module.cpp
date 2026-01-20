@@ -356,6 +356,43 @@ void TriggerJsCallback(std::shared_ptr<ArkUIDragControllerAsync> asyncCtx, ani_r
     asyncCtx->hasHandle = false;
 }
 
+void DestroyBuilderNode(ani_env* env, ani_object destroyCallback)
+{
+    if (!env || !destroyCallback) {
+        return;
+    }
+    std::vector<ani_ref> resultRef;
+    ani_ref fnReturnVal;
+    ani_status status = ANI_OK;
+    if ((status = env->FunctionalObject_Call(static_cast<ani_fn_object>(destroyCallback),
+        resultRef.size(), resultRef.data(), &fnReturnVal)) != ANI_OK) {
+        HILOGE("AceDrag FunctionalObject_Call Failed! status = %{public}d", status);
+    };
+    env->GlobalReference_Delete(destroyCallback);
+}
+
+std::function<void()> CreateDestroyCallBack(ani_env* env, ani_object destroyCallbackObj)
+{
+    if (!env || !destroyCallbackObj) {
+        return nullptr;
+    }
+    ani_ref objectGRef;
+    env->GlobalReference_Create(reinterpret_cast<ani_ref>(destroyCallbackObj), &objectGRef);
+    ani_object destroyCallbackRef = reinterpret_cast<ani_object>(objectGRef);
+    ani_vm* vm = nullptr;
+    env->GetVM(&vm);
+    auto destroyCallback = [vm, destroyCallbackRef]() {
+        CHECK_NULL_VOID(vm);
+        ani_env* env = nullptr;
+        if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
+            return;
+        }
+        CHECK_NULL_VOID(env);
+        DestroyBuilderNode(env, destroyCallbackRef);
+    };
+    return destroyCallback;
+}
+
 ani_object GetDragAndDropInfo(
     ani_env* env, const ArkUIDragStatus dragStatus, ani_object dragEventObj, ani_string extraParams)
 {
@@ -768,6 +805,7 @@ ani_object ANIExecuteDragWithCallback(ani_env* env, [[maybe_unused]] ani_object 
         [](std::shared_ptr<ArkUIDragControllerAsync> asyncCtx, const ArkUIDragNotifyMessage& dragNotifyMsg,
             const ArkUIDragStatus dragStatus) { CallBackJsFunction(asyncCtx, dragNotifyMsg, dragStatus); };
     dragAsyncContext.callBackJsFunction = jsCallback;
+    dragAsyncContext.destroyJsFunction = CreateDestroyCallBack(env, destroyCallbackObj);
 
     const auto* modifier = GetNodeAniModifier();
     if (!modifier || !modifier->getDragControllerAniModifier()) {
@@ -818,6 +856,7 @@ ani_object ANICreateDragAction([[maybe_unused]] ani_env* env, [[maybe_unused]] a
         [](std::shared_ptr<ArkUIDragControllerAsync> asyncCtx, const ArkUIDragNotifyMessage& dragNotifyMsg,
             const ArkUIDragStatus dragStatus) { CallBackJsFunction(asyncCtx, dragNotifyMsg, dragStatus); };
     dragAsyncContext.callBackJsFunction = jsCallback;
+    dragAsyncContext.destroyJsFunction = CreateDestroyCallBack(env, destroyCallbackObj);
     const auto* modifier = GetNodeAniModifier();
     if (!modifier || !modifier->getDragControllerAniModifier()) {
         return dragActionObj;

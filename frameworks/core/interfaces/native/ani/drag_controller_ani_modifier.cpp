@@ -87,7 +87,18 @@ struct DragControllerAsyncCtx {
     NG::DragPreviewOption dragPreviewOption;
     std::function<void(std::shared_ptr<ArkUIDragControllerAsync>, const ArkUIDragNotifyMessage&,
         const ArkUIDragStatus)> callBackJsFunction;
+    std::function<void()> destroyJsFunction;
+
+    void TriggerDestroyCallBack();
 };
+
+void DragControllerAsyncCtx::TriggerDestroyCallBack()
+{
+    if (destroyJsFunction) {
+        destroyJsFunction();
+        destroyJsFunction = nullptr;
+    }
+}
 } // namespace
 void OnMultipleComplete(std::shared_ptr<DragControllerAsyncCtx> asyncCtx);
 void CreatePixelMapArrayByCustom(
@@ -595,6 +606,7 @@ void OnMultipleComplete(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
             LOGI("AceDrag, try to start msdp drag.");
             CHECK_NULL_VOID(asyncCtx);
             ContainerScope scope(asyncCtx->instanceId);
+            asyncCtx->TriggerDestroyCallBack();
             DragState dragState = DragState::PENDING;
             {
                 std::lock_guard<std::mutex> lock(asyncCtx->dragStateMutex);
@@ -801,6 +813,7 @@ void OnComplete(std::shared_ptr<DragControllerAsyncCtx> asyncCtx)
             LOGI("AceDrag, try to start msdp drag.");
             CHECK_NULL_VOID(asyncCtx);
             ContainerScope scope(asyncCtx->instanceId);
+            asyncCtx->TriggerDestroyCallBack();
             DragState dragState = DragState::PENDING;
             {
                 std::lock_guard<std::mutex> lock(asyncCtx->dragStateMutex);
@@ -947,6 +960,7 @@ std::shared_ptr<DragControllerAsyncCtx> ConvertDragControllerAsync(const ArkUIDr
     dragAsyncContext->dragPointerEvent.pointerId = asyncCtx.dragPointerEvent.pointerId;
     dragAsyncContext->dragAction = asyncCtx.dragAction;
     dragAsyncContext->callBackJsFunction = asyncCtx.callBackJsFunction;
+    dragAsyncContext->destroyJsFunction = asyncCtx.destroyJsFunction;
     UpdatePreviewOptionDefaultAttr(dragAsyncContext, asyncCtx);
     UpdateDragPreviewOptionsFromModifier(dragAsyncContext, asyncCtx);
     if (asyncCtx.unifiedData) {
