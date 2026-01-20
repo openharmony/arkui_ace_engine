@@ -1312,7 +1312,7 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
     info.path = info.url + ".js";
 
     PopPage("", false, false);
-
+    auto context = PipelineContext::GetCurrentContext();
     if (info.routerMode == RouterMode::SINGLE) {
         auto pageInfo = FindPageInStack(info.url);
         if (pageInfo.second) {
@@ -1323,6 +1323,9 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
                 pagePattern->FireOnNewParam(target.params);
             }
             MovePageToFront(pageInfo.first, pageInfo.second, info, false, true, false);
+            if (!pageRouterStack_.empty()) {
+                NotifyPageTransitionEnd(context, pageRouterStack_.back().Upgrade());
+            }
             return;
         }
         auto index = FindPageInRestoreStack(info.url);
@@ -1333,7 +1336,11 @@ void PageRouterManager::ReplaceOhmUrl(const RouterPageInfo& target)
         }
     }
 
+    auto preStackSize = pageRouterStack_.size();
     LoadPage(GenerateNextPageId(), info, false, false);
+    if (pageRouterStack_.size() > preStackSize) {
+        NotifyPageTransitionEnd(context, pageRouterStack_.back().Upgrade());
+    }
     auto container = Container::Current();
     CHECK_NULL_VOID(container);
     auto pageUrlChecker = container->GetPageUrlChecker();
