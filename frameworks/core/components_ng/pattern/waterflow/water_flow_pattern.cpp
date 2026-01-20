@@ -349,6 +349,12 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (config.skipMeasure && config.skipLayout) {
         return false;
     }
+
+    if (layoutInfo_->isDataValid_) {
+        GetHost()->ChildrenUpdatedFrom(-1);
+    }
+    layoutInfo_->isDataValid_ = true;
+
     prevOffset_ += layoutInfo_->CalibrateOffset(); // adjust prevOffset_ to keep in sync with calibrated TotalOffset
     if (!layoutInfo_->measureInNextFrame_) {
         TriggerPostLayoutEvents();
@@ -385,11 +391,6 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
     if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {
         MarkDirtyNodeSelf();
     }
-
-    if (layoutInfo_->isDataValid_) {
-        GetHost()->ChildrenUpdatedFrom(-1);
-    }
-    layoutInfo_->isDataValid_ = true;
 
     ChangeAnimateOverScroll();
     ChangeCanStayOverScroll();
