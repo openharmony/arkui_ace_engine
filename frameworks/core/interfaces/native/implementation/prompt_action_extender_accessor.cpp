@@ -330,7 +330,9 @@ auto g_bindMenuOptionsParam = [](const auto& menuOptions, MenuParam& menuParam) 
     menuParam.effectOption = OptConvert<EffectOption>(menuOptions.backgroundEffect);
     menuParam.blurStyleOption = OptConvert<BlurStyleOption>(menuOptions.backgroundBlurStyleOptions);
     menuParam.keyboardAvoidMode = OptConvert<MenuKeyboardAvoidMode>(menuOptions.keyboardAvoidMode);
-    menuParam.minKeyboardAvoidDistance = OptConvert<Dimension>(menuOptions.minKeyboardAvoidDistance);
+    auto convValue = OptConvert<Dimension>(menuOptions.minKeyboardAvoidDistance);
+    Validator::ValidateNonNegative(convValue);
+    menuParam.minKeyboardAvoidDistance = convValue;
     g_parsePreviewAnimationOptions(menuOptions, menuParam);
 };
 

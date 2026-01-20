@@ -4938,7 +4938,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetBindMenu1Impl(Ark_NativePointer node,
-                          const Opt_Boolean* isShow,
+                          const Opt_Union_Boolean_Bindable* isShow,
                           const Opt_Union_Array_MenuElement_CustomBuilder* content,
                           const Opt_MenuOptions* options)
     {
@@ -4989,7 +4989,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
     }
     void SetBindContextMenu1Impl(Ark_NativePointer node,
-                                 const Opt_Boolean* isShown,
+                                 const Opt_Union_Boolean_Bindable* isShown,
                                  const Opt_CustomNodeBuilder* content,
                                  const Opt_ContextMenuOptions* options)
     {

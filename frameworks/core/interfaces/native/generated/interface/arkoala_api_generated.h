@@ -24551,7 +24551,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                          const Opt_Union_Array_MenuElement_CustomBuilder* content,
                          const Opt_MenuOptions* options);
     void (*setBindMenu1)(Ark_NativePointer node,
-                         const Opt_Boolean* isShow,
+                         const Opt_Union_Boolean_Bindable* isShow,
                          const Opt_Union_Array_MenuElement_CustomBuilder* content,
                          const Opt_MenuOptions* options);
     void (*setBindContextMenu0)(Ark_NativePointer node,
@@ -24562,7 +24562,7 @@ typedef struct GENERATED_ArkUICommonMethodModifier {
                                            const Opt_CustomBuilderT_Arkui_Component_Enums_ResponseType* content,
                                            const Opt_ContextMenuOptions* options);
     void (*setBindContextMenu1)(Ark_NativePointer node,
-                                const Opt_Boolean* isShown,
+                                const Opt_Union_Boolean_Bindable* isShown,
                                 const Opt_CustomNodeBuilder* content,
                                 const Opt_ContextMenuOptions* options);
     void (*setBindContentCover0)(Ark_NativePointer node,

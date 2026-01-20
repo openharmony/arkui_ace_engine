@@ -284,7 +284,7 @@ export class CommonMethodModifier implements CommonMethod {
     _bindPopup_0_1value?: PopupOptions | CustomPopupOptions | undefined
     _bindMenu_0_0value?: Array<MenuElement> | CustomBuilder | undefined
     _bindMenu_0_1value?: MenuOptions | undefined
-    _bindMenu_1_0value?: boolean | undefined
+    _bindMenu_1_0value?: boolean | Bindable<boolean> | undefined
     _bindMenu_1_1value?: Array<MenuElement> | CustomBuilder | undefined
     _bindMenu_1_2value?: MenuOptions | undefined
     _bindContextMenu_0_0value?: CustomBuilder | undefined
@@ -292,7 +292,7 @@ export class CommonMethodModifier implements CommonMethod {
     _bindContextMenu_0_2value?: ContextMenuOptions | undefined
     _bindContextMenuWithResponse_0_0value?: CustomBuilderT<ResponseType> | undefined
     _bindContextMenuWithResponse_0_1value?: ContextMenuOptions | undefined
-    _bindContextMenu_1_0value?: boolean | undefined
+    _bindContextMenu_1_0value?: boolean | Bindable<boolean> | undefined
     _bindContextMenu_1_1value?: CustomBuilder | undefined
     _bindContextMenu_1_2value?: ContextMenuOptions | undefined
     _bindContentCover_0_0value?: boolean | Bindable<boolean> | undefined
@@ -3792,7 +3792,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (flagArray[191] as int32) {
                 case 1: {
-                    peer.setBindMenu1Attribute((this._bindMenu_1_0value as boolean | undefined), (this._bindMenu_1_1value as Array<MenuElement> | CustomBuilder | undefined), (this._bindMenu_1_2value as MenuOptions | undefined | undefined));
+                    peer.setBindMenu1Attribute((this._bindMenu_1_0value as boolean | Bindable<boolean> | undefined), (this._bindMenu_1_1value as Array<MenuElement> | CustomBuilder | undefined), (this._bindMenu_1_2value as MenuOptions | undefined | undefined));
                     flagArray[191] = 2;
                     break;
                 }
@@ -3802,7 +3802,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[191] = 0;
-                    peer.setBindMenu1Attribute((undefined as boolean | undefined), (undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined | undefined));
+                    peer.setBindMenu1Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined | undefined));
                 }
             }
         }
@@ -3846,7 +3846,7 @@ export class CommonMethodModifier implements CommonMethod {
         {
             switch (flagArray[194] as int32) {
                 case 1: {
-                    peer.setBindContextMenu1Attribute((this._bindContextMenu_1_0value as boolean | undefined), (this._bindContextMenu_1_1value as CustomBuilder | undefined), (this._bindContextMenu_1_2value as ContextMenuOptions | undefined | undefined));
+                    peer.setBindContextMenu1Attribute((this._bindContextMenu_1_0value as boolean | Bindable<boolean> | undefined), (this._bindContextMenu_1_1value as CustomBuilder | undefined), (this._bindContextMenu_1_2value as ContextMenuOptions | undefined | undefined));
                     flagArray[194] = 2;
                     break;
                 }
@@ -3856,7 +3856,7 @@ export class CommonMethodModifier implements CommonMethod {
                 }
                 default: {
                     flagArray[194] = 0;
-                    peer.setBindContextMenu1Attribute((undefined as boolean | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined | undefined));
+                    peer.setBindContextMenu1Attribute((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined | undefined));
                 }
             }
         }
@@ -6673,7 +6673,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.bindMenu((undefined as boolean | undefined), (undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined | undefined));
+                    this.bindMenu((undefined as boolean | Bindable<boolean> | undefined), (undefined as Array<MenuElement> | CustomBuilder | undefined), (undefined as MenuOptions | undefined | undefined));
                 }
             }
         }
@@ -6712,7 +6712,7 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
-                    this.bindContextMenu((undefined as boolean | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined | undefined));
+                    this.bindContextMenu((undefined as boolean | Bindable<boolean> | undefined), (undefined as CustomBuilder | undefined), (undefined as ContextMenuOptions | undefined | undefined));
                 }
             }
         }
@@ -9311,8 +9311,8 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
-        if (((this._flagArray[191]) == (0)) || ((this._bindMenu_1_0value) !== (isShow)) || (true) || (true))
+    bindMenu(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+        if (((this._flagArray[191]) == (0)) || (true) || (true) || (true))
         {
             this._flagArray[191] = 1
             this._bindMenu_1_0value = isShow
@@ -9352,8 +9352,8 @@ export class CommonMethodModifier implements CommonMethod {
         }
         return this
     }
-    bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
-        if (((this._flagArray[194]) == (0)) || ((this._bindContextMenu_1_0value) !== (isShown)) || (true) || (true))
+    bindContextMenu(isShown: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+        if (((this._flagArray[194]) == (0)) || (true) || (true) || (true))
         {
             this._flagArray[194] = 1
             this._bindContextMenu_1_0value = isShown

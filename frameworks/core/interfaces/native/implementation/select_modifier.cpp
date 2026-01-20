@@ -624,7 +624,7 @@ void SetMinKeyboardAvoidDistanceImpl(Ark_NativePointer node, const Opt_LengthMet
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto convValue = Converter::OptConvertPtr<Dimension>(value);
-    Validator::ValidateNonPercent(convValue);
+    Validator::ValidateNonNegative(convValue);
     SelectModelNG::SetMinKeyboardAvoidDistance(frameNode, convValue);
 }
 void SetMenuAlignImpl(Ark_NativePointer node,

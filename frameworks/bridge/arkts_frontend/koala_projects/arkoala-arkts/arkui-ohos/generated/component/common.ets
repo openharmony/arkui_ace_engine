@@ -5812,12 +5812,20 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBindMenu0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBindMenu1Attribute(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): void {
+    setBindMenu1Attribute(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (isShow !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const isShowTmpValue  = isShow!
-            thisSerializer.writeBoolean(isShowTmpValue)
+            if (isShowTmpValue instanceof boolean) {
+                thisSerializer.writeInt8((0).toByte())
+                const isShowTmpValueForIdx0  = isShowTmpValue as boolean
+                thisSerializer.writeBoolean(isShowTmpValueForIdx0)
+            } else if (isShowTmpValue instanceof Bindable<boolean>) {
+                thisSerializer.writeInt8((1).toByte())
+                const isShowTmpValueForIdx1  = isShowTmpValue as Bindable<boolean>
+                Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5895,12 +5903,20 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuWithResponse(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBindContextMenu1Attribute(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): void {
+    setBindContextMenu1Attribute(isShown: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (isShown !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const isShownTmpValue  = isShown!
-            thisSerializer.writeBoolean(isShownTmpValue)
+            if (isShownTmpValue instanceof boolean) {
+                thisSerializer.writeInt8((0).toByte())
+                const isShownTmpValueForIdx0  = isShownTmpValue as boolean
+                thisSerializer.writeBoolean(isShownTmpValueForIdx0)
+            } else if (isShownTmpValue instanceof Bindable<boolean>) {
+                thisSerializer.writeInt8((1).toByte())
+                const isShownTmpValueForIdx1  = isShownTmpValue as Bindable<boolean>
+                Bindable_Boolean_serializer.write(thisSerializer, isShownTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -8461,7 +8477,7 @@ export interface CommonMethod {
     bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         throw new Error("Unimplemented method bindMenu")
     }
-    bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    bindMenu(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         throw new Error("Unimplemented method bindMenu")
     }
     bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
@@ -8470,7 +8486,7 @@ export interface CommonMethod {
     bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
         throw new Error("Unimplemented method bindContextMenuWithResponse")
     }
-    bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    bindContextMenu(isShown: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
         throw new Error("Unimplemented method bindContextMenu")
     }
     bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
@@ -9305,7 +9321,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         return this
     }
-    bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    bindMenu(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         return this
     }
     bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
@@ -9314,7 +9330,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
         return this
     }
-    bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    bindContextMenu(isShown: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
         return this
     }
     bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
@@ -11481,9 +11497,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    public bindMenu(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         if (this.checkPriority("bindMenu")) {
-            const isShow_casted = isShow as (boolean | undefined)
+            const isShow_casted = isShow as (boolean | Bindable<boolean> | undefined)
             const content_casted = content as (Array<MenuElement> | CustomBuilder | undefined)
             const options_casted = options as (MenuOptions | undefined)
             this.getPeer()?.setBindMenu1Attribute(isShow_casted, content_casted, options_casted)
@@ -11510,9 +11526,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    public bindContextMenu(isShown: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
         if (this.checkPriority("bindContextMenu")) {
-            const isShown_casted = isShown as (boolean | undefined)
+            const isShown_casted = isShown as (boolean | Bindable<boolean> | undefined)
             const content_casted = content as (CustomBuilder | undefined)
             const options_casted = options as (ContextMenuOptions | undefined)
             this.getPeer()?.setBindContextMenu1Attribute(isShown_casted, content_casted, options_casted)
