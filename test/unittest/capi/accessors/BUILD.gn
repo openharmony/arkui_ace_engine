@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("capi_all_accessors_test") {
-  module_name = "DialogSet-Dialog"
+  module_name = "C-API-Main"
   type = "new"
   sources = [
     # place here your UT source code

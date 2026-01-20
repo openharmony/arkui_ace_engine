@@ -16,7 +16,7 @@ import("../../capi_common.gni")
 import("modifiers.gni")
 
 ace_unittest("capi_generated_modifiers_test") {
-  module_name = "FormAndSelection-Slider"
+  module_name = "C-API-Main"
   type = "new"
   sources = [
     "test_fixtures.cpp",

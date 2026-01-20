@@ -55,7 +55,7 @@ action("run_linux_unittest_capi") {
   script = "scripts/run.py"
   args = [
     "--path",
-    "ace_engine/capi",
+    "C-API-Main",
     "--output",
     rebase_path("$root_out_dir/tests/test_result.json", root_build_dir),
   ]
