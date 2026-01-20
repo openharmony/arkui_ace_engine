@@ -8372,7 +8372,9 @@ void RichEditorPattern::SetMagnifierOffsetWithAnimation(Offset offset)
     CHECK_NULL_VOID(magnifierController_);
     auto currentLocalOffset = magnifierController_->GetLocalOffset();
     auto currentOffset = magnifierController_->GetLocalOffsetWithoutTrans().value_or(currentLocalOffset);
-    if (NearEqual(currentOffset.GetY(), offset.GetY(), 0.5f) || !magnifierController_->GetShowMagnifier()) {
+    bool noNeedAnimation = NearEqual(currentOffset.GetY(), offset.GetY(), 0.5f)
+        || !magnifierController_->GetShowMagnifier() || magnifierController_->IsColorModeChange();
+    if (noNeedAnimation) {
         SetMagnifierLocalOffset(offset);
         return;
     }
