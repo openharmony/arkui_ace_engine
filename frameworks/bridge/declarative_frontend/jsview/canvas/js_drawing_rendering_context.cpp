@@ -144,7 +144,7 @@ void JSDrawingRenderingContext::SetUnit(CanvasUnit unit)
 const JSRef<JSObject>& JSDrawingRenderingContext::GetOrCreateContext2D(bool antialias)
 {
     if (!canvasPattern_.Upgrade()) {
-        JSException::Throw(
+        JSException::ThrowBusinessError(
             ERROR_CODE_CANVAS_CONTEXT_NOT_BOUND, "%s", "The drawingContext is not bound to a canvas component.");
         return context2d_;
     }
