@@ -5123,7 +5123,9 @@ void PipelineContext::OnHide()
     if (rootNode && !IsFormRenderExceptDynamicComponent()) {
         rootNode->OnAccessibilityEvent(AccessibilityEventType::PAGE_CLOSE);
     }
-    memoryMgr_->PostMemRecycleTask();
+    if (memoryMgr_) {
+        memoryMgr_->PostMemRecycleTask();
+    }
 }
 
 void PipelineContext::WindowFocus(bool isFocus)
