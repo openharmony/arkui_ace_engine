@@ -449,8 +449,15 @@ HWTEST_F(RichEditorCursorTestNg, CursorMoveEnd001, TestSize.Level2)
  */
 HWTEST_F(RichEditorCursorTestNg, CursorMoveDown001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
     auto richEditorPattern = GetRichEditorPattern();
     ASSERT_NE(richEditorPattern, nullptr);
+
+    /**
+     * @tc.steps: step2. add text span and move cursor
+     */
     AddSpan("hello1");
     richEditorPattern->caretPosition_ = 1;
     OffsetF paintOffset = { -10, 1 };
