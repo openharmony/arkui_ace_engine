@@ -1883,6 +1883,9 @@ RefPtr<Subwindow> SubwindowManager::RemoveSubwindowMapByNodeId(const int32_t nod
             break;
         }
     }
+    if (it == subwindowMap_.end()) {
+        return nullptr;
+    }
     auto subwindow = it->second;
     subwindowMap_.erase(it);
     return subwindow;
