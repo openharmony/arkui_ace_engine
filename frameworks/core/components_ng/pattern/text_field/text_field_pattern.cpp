@@ -13444,4 +13444,9 @@ void TextFieldPattern::SetThemeBorderAttrForTV()
         layoutProperty->UpdateBorderWidth(paintProperty->GetBorderWidthFlagByUserValue());
     }
 }
+
+bool TextFieldPattern::IsPreviewTextInputting() const
+{
+    return GetIsPreviewText() && 0 <= previewTextStart_ && previewTextStart_ <= previewTextEnd_;
+}
 } // namespace OHOS::Ace::NG

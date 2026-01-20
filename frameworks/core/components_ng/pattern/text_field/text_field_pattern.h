@@ -1856,6 +1856,9 @@ public:
         CHECK_NULL_RETURN(theme, false);
         return theme->GetHoverAndPressBgColorEnabled();
     }
+
+    bool IsPreviewTextInputting() const;
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;

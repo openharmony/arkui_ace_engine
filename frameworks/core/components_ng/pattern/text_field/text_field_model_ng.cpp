@@ -18,6 +18,7 @@
 #include <cstddef>
 
 #include "base/geometry/dimension.h"
+#include "base/log/log_wrapper.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/multi_thread.h"
@@ -2858,6 +2859,11 @@ void TextFieldModelNG::DeleteBackward(FrameNode* frameNode)
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     CHECK_NULL_VOID(pattern);
+    if (pattern->IsPreviewTextInputting()) {
+        TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "Skipping delete operation: preview text inputting");
+        return;
+    }
+
     pattern->HandleOnDelete(true);
 }
 

@@ -2148,6 +2148,22 @@ HWTEST_F(TextInputAreaTest, TextInputAreaDeleteBackwardModelNG002, TestSize.Leve
 }
 
 /**
+ * @tc.name: TextInputAreaDeleteBackwardModelNG003
+ * @tc.desc: test ModelNG DeleteBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextInputAreaTest, TextInputAreaDeleteBackwardModelNG003, TestSize.Level1)
+{
+    CreateTextField("DeleteBackward预上屏测试", "", [](TextFieldModelNG model) {});
+    GetFocus();
+
+    TextFieldModelNG::DeleteBackward(frameNode_.GetRawPtr());
+    FlushLayoutTask(frameNode_);
+    
+    EXPECT_FALSE(pattern_->IsPreviewTextInputting());
+}
+
+/**
  * @tc.name: SetCompressLeadingPunctuation001
  * @tc.desc: test TextInputArea set CompressLeadingPunctuation value
  * @tc.type: FUNC
