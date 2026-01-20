@@ -285,7 +285,7 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
     }
     
     __getPeerNode__Internal(): PeerNode | undefined {
-        return this.delegate_!.getPeerNode();
+        return this.delegate_?.getPeerNode();
     }
 
     public __onDumpInspector__Internal(): string {
