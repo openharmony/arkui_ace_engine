@@ -67,4 +67,17 @@ HWTEST_F(MediaQueryTest, GetOrientationTest2, TestSize.Level1)
     SystemProperties::SetDeviceOrientation(-1);
     EXPECT_EQ(Framework::MediaQueryInfo::GetOrientation(nullptr), "landscape");
 }
+
+/**
+ * @tc.name: GetSystemOrientationTest
+ * @tc.desc: Test GetSystemOrientation
+ * @tc.type: FUNC
+ */
+HWTEST_F(MediaQueryTest, GetSystemOrientationTest, TestSize.Level1)
+{
+    auto container = MockContainer::Current();
+    ASSERT_TRUE(container);
+    SystemProperties::SetDeviceOrientation(1);
+    EXPECT_EQ(Framework::MediaQueryInfo::GetSystemOrientation(), "landscape");
+}
 } // namespace OHOS::Ace::NG

@@ -39,7 +39,7 @@ export class MeasurableLayoutableInner implements Measurable, Layoutable {
         }
     }
     
-    uniqueId?: number | undefined;
+    uniqueId?: int32 | undefined;
     measureResult: MeasureResult = {width: 0, height: 0};
 
     public override measure(constraint: ConstraintSizeOptions): MeasureResult | undefined {
@@ -126,7 +126,7 @@ export class DirectionalEdgesTInner implements DirectionalEdgesT<double> {
     end: number;
     top: number;
     bottom: number;
-    constructor(top: number, bottom: number, start: number, end: number )
+    constructor(top: number, bottom: number, start: number, end: number)
     {
         this.start = start;
         this.end = end;
@@ -136,11 +136,19 @@ export class DirectionalEdgesTInner implements DirectionalEdgesT<double> {
 }
 
 export class GeometryInfoInner implements GeometryInfo {
-    width: number = 0;
-    height: number = 0;
-    borderWidth: EdgeWidths = {};
-    margin: Padding = {};
-    padding: Padding = {};
+    width: number;
+    height: number;
+    borderWidth: EdgeWidths;
+    margin: Padding;
+    padding: Padding;
+    constructor(width: number, height: number, borderWidth: EdgeWidths, margin: Padding, padding: Padding)
+    {
+        this.width = width;
+        this.height = height;
+        this.borderWidth = borderWidth;
+        this.margin = margin;
+        this.padding = padding;
+    }
 }
 
 export class SizeResultInner implements SizeResult {
