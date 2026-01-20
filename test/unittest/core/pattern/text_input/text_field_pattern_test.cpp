@@ -2191,6 +2191,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern092, TestSize.Level0)
     auto frameId = tmpHost->GetId();
     Offset offset1(1.0, -1.0);
     pattern->frameRect_ = RectF(0, 0, 0, 0);
+    /**
+     * @tc.steps: step2. change mouse state.
+     */
     pattern->ChangeMouseState(offset1, frameId);
     Offset offset2(1.0, -1.0);
     pattern->frameRect_ = RectF(0, 0, 10, 0);
@@ -2205,6 +2208,9 @@ HWTEST_F(TextFieldPatternTest, TextPattern092, TestSize.Level0)
     // test rtl
     auto layoutProperty = pattern->GetLayoutProperty<TextFieldLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
+    /**
+     * @tc.steps: step3. update layout direction.
+     */
     layoutProperty->UpdateLayoutDirection(TextDirection::RTL);
     pattern->frameRect_ = RectF(0, 0, 0, 0);
     pattern->ChangeMouseState(offset1, frameId);

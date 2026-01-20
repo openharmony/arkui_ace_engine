@@ -770,5 +770,6 @@ void TextSelectOverlay::UpdateAISelectMenu()
     auto manager = GetManager<SelectContentOverlayManager>();
     CHECK_NULL_VOID(manager);
     manager->MarkInfoChange(DIRTY_ALL_MENU_ITEM | DIRTY_SELECT_AI_DETECT);
+    manager->FocusFirstFocusableChildInMenu();
 }
 } // namespace OHOS::Ace::NG
