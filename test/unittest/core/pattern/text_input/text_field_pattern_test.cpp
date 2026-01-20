@@ -3163,6 +3163,21 @@ HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread3, TestSize.Level1
 }
 
 /**
+ * @tc.name: TextFieldPatternTestMultiThread4
+ * @tc.desc: Test ProcessDefaultStyleAndBehaviorsMultiThread
+ */
+HWTEST_F(TextFieldPatternTest, TextFieldPatternTestMultiThread4, TestSize.Level1)
+{
+    CreateTextField();
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->ProcessDefaultStyleAndBehaviorsMultiThread();
+}
+
+/**
  * @tc.name: TextInputResponseAreaGetChildOffset
  * @tc.desc: test TextInputResponseArea GetChildOffset method
  * @tc.type: FUNC
