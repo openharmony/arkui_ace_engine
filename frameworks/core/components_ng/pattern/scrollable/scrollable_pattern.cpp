@@ -45,7 +45,6 @@
 #include "core/components_ng/syntax/lazy_for_each_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_2_node.h"
 #include "core/components_ng/syntax/repeat_virtual_scroll_node.h"
-#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/syntax/arkoala_parallelize_ui_adapter_node.h"
@@ -1810,7 +1809,7 @@ void ScrollablePattern::ScrollTo(float position)
     SetAnimateCanOverScroll(GetCanStayOverScroll());
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
     SetIsOverScroll(GetCanStayOverScroll());
-    ContentChangeReport(GetHost());
+    ContentChangeReport(GetHost(), ContentChangeManager::SCROLL_TO);
 }
 
 void ScrollablePattern::AnimateTo(
@@ -4997,14 +4996,16 @@ void ScrollablePattern::OnSyncGeometryNode(const DirtySwapConfig& config)
     }
 }
 
-void ScrollablePattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode)
+void ScrollablePattern::ContentChangeReport(const RefPtr<FrameNode>& keyNode, uint32_t type)
 {
     auto pipeline = GetContext();
     CHECK_NULL_VOID(pipeline);
     auto mgr = pipeline->GetContentChangeManager();
     CHECK_NULL_VOID(mgr);
+    CHECK_EQUAL_VOID(mgr->IsIgnoringEventType(type), true);
     mgr->OnScrollChangeEnd(keyNode);
 }
+
 void ScrollablePattern::ContentChangeByDetaching(PipelineContext* pipeline)
 {
     CHECK_NULL_VOID(pipeline);

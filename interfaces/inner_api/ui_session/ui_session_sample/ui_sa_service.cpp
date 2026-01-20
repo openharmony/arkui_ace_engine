@@ -38,6 +38,7 @@ constexpr int32_t SIMPLIFYTREE_WITH_PARAMCONFIG = 5;
 constexpr int32_t SEND_COMMAND_WITH_NODEID = 3;
 constexpr int32_t SEND_COMMAND_WITHOUT_NODEID = 2;
 constexpr int32_t CONTENT_CHANGE_EVENT_WITH_CONFIG = 3;
+constexpr int32_t CONTENT_CHANGE_EVENT_WITH_CONFIG_IGNORE = 4;
 constexpr int32_t GET_WEB_INFO_BY_REQUEST_PARAMS = 3;
 
 std::string GetCurrentTimestampStr()
@@ -260,8 +261,11 @@ void UiSaService::HandleRegisterContentChangeCallback(sptr<IUiContentService> se
     ContentChangeConfig config;
     int32_t time = std::atoi((params.size() >= CONTENT_CHANGE_EVENT_WITH_CONFIG ? params[1] : "100").c_str());
     float ratio = std::atof((params.size() >= CONTENT_CHANGE_EVENT_WITH_CONFIG ? params[2] : "0.15").c_str());
+    std::string ignore = (params.size() > CONTENT_CHANGE_EVENT_WITH_CONFIG_IGNORE ||
+        (params.size() == CONTENT_CHANGE_EVENT_WITH_CONFIG_IGNORE && !toFile)) ? params[3] : "";
     config.minReportTime = time;
     config.textContentRatio = ratio;
+    config.ignoreEventType = ignore;
     service->RegisterContentChangeCallback(config, contentChangeCallback);
     LOGI("[ContentChangeManager] call RegisterContentChangeCallback");
 }

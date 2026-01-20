@@ -1789,7 +1789,7 @@ void ListPattern::ScrollTo(float position)
     SetIsOverScroll(GetCanStayOverScroll());
     MarkDirtyNodeSelf();
     isScrollEnd_ = true;
-    ContentChangeReport(GetHost());
+    ContentChangeReport(GetHost(), ContentChangeManager::SCROLL_TO);
 }
 
 void ListPattern::ResetScrollToIndexParams()
