@@ -51,6 +51,8 @@ const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType:
     HoverModeAreaType::BOTTOM_SCREEN };
 const std::vector<LevelMode> DIALOG_LEVEL_MODE = { LevelMode::OVERLAY, LevelMode::EMBEDDED };
 const std::vector<ImmersiveMode> DIALOG_IMMERSIVE_MODE = { ImmersiveMode::DEFAULT, ImmersiveMode::EXTEND};
+const std::vector<DialogDisplayMode> DIALOG_DISPLAY_MODE = {
+    DialogDisplayMode::SCREEN_BASED, DialogDisplayMode::WINDOW_BASED };
 
 #ifdef OHOS_STANDARD_SYSTEM
 bool ContainerIsService()
@@ -708,6 +710,7 @@ struct PromptAsyncContext {
     napi_value dialogImmersiveModeApi = nullptr;
     napi_value focusableApi = nullptr;
     HasInvertColor hasInvertColor;
+    napi_value displayModeApi = nullptr;
 };
 
 void DeleteContextAndThrowError(
@@ -1379,6 +1382,20 @@ int32_t GetDialogKeyboardAvoidMode(napi_env env, napi_value keyboardAvoidModeApi
     return 0;
 }
 
+DialogDisplayMode GetDialogDisplayMode(napi_env env, napi_value displayModeApi)
+{
+    int32_t mode = 0;
+    napi_valuetype valueType = napi_undefined;
+    napi_typeof(env, displayModeApi, &valueType);
+    if (valueType == napi_number) {
+        napi_get_value_int32(env, displayModeApi, &mode);
+    }
+    if (mode >= 0 && mode < static_cast<int32_t>(DIALOG_DISPLAY_MODE.size())) {
+        return DIALOG_DISPLAY_MODE[mode];
+    }
+    return DIALOG_DISPLAY_MODE[0];
+}
+
 void GetDialogLevelModeAndUniqueId(napi_env env, const std::shared_ptr<PromptAsyncContext>& asyncContext,
     LevelMode& dialogLevelMode, int32_t& dialogLevelUniqueId, ImmersiveMode& dialogImmersiveMode)
 {
@@ -1443,6 +1460,7 @@ void GetNapiNamedProperties(napi_env env, napi_value* argv, size_t index,
         napi_get_named_property(env, argv[index], "shadow", &asyncContext->shadowApi);
         napi_get_named_property(env, argv[index], "width", &asyncContext->widthApi);
         napi_get_named_property(env, argv[index], "height", &asyncContext->heightApi);
+        napi_get_named_property(env, argv[index], "displayModeInSubWindow", &asyncContext->displayModeApi);
 
         napi_typeof(env, asyncContext->builder, &valueType);
         if (valueType == napi_function) {
@@ -2803,6 +2821,7 @@ napi_value JSPromptOpenCustomDialog(napi_env env, napi_callback_info info)
         promptDialogAttr.customBuilder = nullptr;
     } else {
         ParseCustomDialogIdCallback(asyncContext, openCallback);
+        promptDialogAttr.dialogDisplayMode = GetDialogDisplayMode(env, asyncContext->displayModeApi);
     }
 
     OpenCustomDialog(env, asyncContext, promptDialogAttr, openCallback);
