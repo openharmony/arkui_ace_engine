@@ -2932,7 +2932,7 @@ std::string static FocusWrapModeToString(FocusWrapMode mode)
 
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    ScrollablePattern::ToJsonValue(json, filter);
+    SelectableContainerPattern::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         return;
