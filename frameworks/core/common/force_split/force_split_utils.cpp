@@ -410,7 +410,7 @@ bool ForceSplitUtils::ParseAppForceSplitConfig(
             isRouter ? "routerSplitOptions" : "navigationSplitOptions");
         return false;
     }
-    config.isArkUIHookEnabled = configJson->GetBool(ENABLE_ARKUI_HOOK_KEY, false);
+    config.isArkUIHookEnabled = configJson->GetBool(ENABLE_REDUCED_CONTAINER_SIZE_KEY, false);
     if (configJson->Contains(HOME_PAGE_KEY)) {
         auto homePageJson = configJson->GetValue(HOME_PAGE_KEY);
         if (!homePageJson->IsString()) {
