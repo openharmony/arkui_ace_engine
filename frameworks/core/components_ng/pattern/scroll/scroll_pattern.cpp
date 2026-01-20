@@ -870,6 +870,18 @@ void ScrollPattern::SetEdgeEffectCallback(const RefPtr<ScrollEdgeEffect>& scroll
     });
 }
 
+void ScrollPattern::BeforeSyncGeometryProperties(const DirtySwapConfig& config)
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto geometryNode = host->GetGeometryNode();
+    CHECK_NULL_VOID(geometryNode);
+    auto selfAdjust = geometryNode->GetSelfAdjust();
+    auto scrollBarOverlayModifier = GetScrollBarOverlayModifier();
+    CHECK_NULL_VOID(scrollBarOverlayModifier);
+    scrollBarOverlayModifier->SetAdjustOffset(Offset(-selfAdjust.GetX(), -selfAdjust.GetY()));
+}
+
 void ScrollPattern::UpdateScrollBarOffset()
 {
     if (freeScroll_) {
