@@ -890,10 +890,10 @@ void SetCustomKeyboardImpl(Ark_NativePointer node,
     if (value->value.selector == SELECTOR_CUSTOM_BUILDER) {
         const CustomNodeBuilder& builder = value->value.value0;
         CallbackHelper(builder).BuildAsync([frameNode, supportAvoidance](const RefPtr<UINode>& uiNode) {
-        auto builder = [uiNode]() {
-            NG::ViewStackProcessor::GetInstance()->Push(uiNode);
-        };
-        RichEditorModelStatic::SetCustomKeyboard(frameNode, std::move(builder), supportAvoidance);
+            auto customNodeBuilder = [uiNode]() {
+                NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+            };
+            RichEditorModelStatic::SetCustomKeyboard(frameNode, std::move(customNodeBuilder), supportAvoidance);
         }, node);
     } else if (value->value.selector == SELECTOR_COMPONENT_CONTENT) {
         const Ark_ComponentContentBase& arkContent = value->value.value1;
