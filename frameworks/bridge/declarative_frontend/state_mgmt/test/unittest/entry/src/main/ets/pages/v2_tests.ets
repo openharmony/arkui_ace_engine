@@ -18,6 +18,7 @@ import { MonitorTestsV2 } from '../../v2_tests/monitorTestsV2'
 import { SyncMonitorTestsV2 } from '../../v2_tests/monitorTestsV2'
 import { ObserveTestsV2 } from '../../v2_tests/observeTestsV2'
 import { RecycleTestsV2 } from '../../v2_tests/recycleTestsV2'
+import { PersistenceV2TestsV2 } from '../../v2_tests/persistenceV2TestsV2.ets'
 import { PageController } from '../../lib/pageController'
 import { TestRunner } from '../../lib/testRunner'
 
@@ -38,6 +39,7 @@ struct Parent {
       TestRunner.bind(this)(new SyncMonitorTestsV2('V2_syncmonitor'));
       TestRunner.bind(this)(new ObserveTestsV2('V2_observe'));
       TestRunner.bind(this)(new RecycleTestsV2('V2_recycle'));
+      TestRunner.bind(this)(new PersistenceV2TestsV2('V2_PersistenceV2TestsV2'));
       router.back();
       PageController.notifyPageFinished();
     }, 100)
