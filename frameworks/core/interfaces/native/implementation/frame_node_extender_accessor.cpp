@@ -1081,7 +1081,8 @@ Ark_NativePointer UnWrapRawPtrImpl(Ark_NativePointer peerNode)
 }
 Ark_UICommonEvent GetCommonEventImpl(Ark_NativePointer peer)
 {
-    auto frameNode = reinterpret_cast<FrameNode*>(peer);
+    auto frameNodePeer = reinterpret_cast<FrameNodePeer*>(peer);
+    auto frameNode = FrameNodePeer::GetFrameNodeByPeer(frameNodePeer);
     CHECK_NULL_RETURN(frameNode, nullptr);
     auto ret = PeerUtils::CreatePeer<UICommonEventPeer>();
     ret->node = frameNode;
