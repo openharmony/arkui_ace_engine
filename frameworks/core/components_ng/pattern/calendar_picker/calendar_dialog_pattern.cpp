@@ -266,7 +266,6 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
                                           : calendarTheme->GetDialogButtonBackgroundColor();
                 button->GetRenderContext()->UpdateBackgroundColor(defaultBGColor);
             }
-            button->MarkModifyDone();
 
             auto text = button->GetChildren().front();
             CHECK_NULL_VOID(text);
@@ -281,6 +280,8 @@ void CalendarDialogPattern::UpdateOptionsButtonColor()
                 textLayoutProperty->UpdateTextColor(pickerTheme->GetOptionStyle(true, false).GetTextColor());
             }
             textNode->MarkModifyDone();
+
+            button->MarkModifyDone();
 
             buttonIndex++;
         }
