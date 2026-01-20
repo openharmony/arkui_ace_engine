@@ -853,6 +853,9 @@ void ScrollBar::ProcessFrictionMotion(double value)
     if (!scrollPositionCallback_(offset, SCROLL_FROM_BAR_FLING, false)) {
         if (frictionController_ && frictionController_->IsRunning()) {
             frictionController_->Stop();
+            if (!dragEndReachEdge_ && isTouchScreen_ && reachBarEdgeOverScroll_) {
+                reachBarEdgeOverScroll_(scrollBarFlingVelocity_);
+            }
         }
     }
     frictionPosition_ = value;
@@ -888,9 +891,7 @@ void ScrollBar::ProcessFrictionMotionStop()
     if (scrollBarOnDidStopFlingCallback_) {
         scrollBarOnDidStopFlingCallback_();
     }
-    if (!dragEndReachEdge_ && isTouchScreen_ && reachBarEdgeOverScroll_) {
-        reachBarEdgeOverScroll_(scrollBarFlingVelocity_);
-    } else if (scrollEndCallback_) {
+    if (scrollEndCallback_ && !(canOverScrollWithDelta_ && canOverScrollWithDelta_(.0f))) {
         scrollEndCallback_();
     }
     isDriving_ = false;
