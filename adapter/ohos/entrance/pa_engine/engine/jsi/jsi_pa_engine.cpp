@@ -736,6 +736,7 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(
     auto nativeEngine = GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, runtime->NewUndefined());
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    AbilityRuntime::HandleScope handleScope(env);
     NAPI_CallingInfo oldCallingInfo;
     NAPI_RemoteObject_saveOldCallingInfo(env, oldCallingInfo);
     NAPI_RemoteObject_setNewCallingInfo(env, callingInfo);
@@ -752,7 +753,6 @@ shared_ptr<JsValue> JsiPaEngine::CallFunc(
         LOGE("JsiPaEngine CallFunc return value is und efined!");
         return runtime->NewUndefined();
     }
-    AbilityRuntime::HandleScope handleScope(env);
     std::vector<napi_value> nativeArgv;
     int32_t length = 0;
 
@@ -797,6 +797,7 @@ shared_ptr<JsValue> JsiPaEngine::CallAsyncFunc(
     auto nativeEngine = GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, runtime->NewUndefined());
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    AbilityRuntime::HandleScope handleScope(env);
     NAPI_CallingInfo oldCallingInfo;
     NAPI_RemoteObject_saveOldCallingInfo(env, oldCallingInfo);
     NAPI_RemoteObject_setNewCallingInfo(env, callingInfo);
@@ -816,7 +817,6 @@ shared_ptr<JsValue> JsiPaEngine::CallAsyncFunc(
         LOGE("JsiPaEngine CallFunc return value is und efined!");
         return runtime->NewUndefined();
     }
-    AbilityRuntime::HandleScope handleScope(env);
     std::vector<napi_value> nativeArgv;
     int32_t length = 0;
     for (auto item : argv) {
@@ -1009,6 +1009,7 @@ int32_t JsiPaEngine::BatchInsert(
     auto nativeEngine = GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, 0);
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    AbilityRuntime::HandleScope handleScope(env);
     napi_value argColumnsNapiValue = nullptr;
     napi_create_array(env, &argColumnsNapiValue);
     bool isArray = false;
@@ -1016,7 +1017,6 @@ int32_t JsiPaEngine::BatchInsert(
         LOGE("JsiPaEngine create array failed");
         return 0;
     }
-    AbilityRuntime::HandleScope handleScope(env);
     int32_t index = 0;
     for (auto value : values) {
         napi_value result = rdbValueBucketNewInstance_(env, const_cast<OHOS::NativeRdb::ValuesBucket&>(value));
@@ -1143,9 +1143,9 @@ int32_t JsiPaEngine::Delete(
     auto nativeEngine = GetNativeEngine();
     CHECK_NULL_RETURN(nativeEngine, 0);
     napi_env env = reinterpret_cast<napi_env>(nativeEngine);
+    AbilityRuntime::HandleScope handleScope(env);
     OHOS::NativeRdb::DataAbilityPredicates* predicatesPtr = new OHOS::NativeRdb::DataAbilityPredicates();
     *predicatesPtr = predicates;
-    AbilityRuntime::HandleScope handleScope(env);
     napi_value argPredicatesNapiValue = dataAbilityPredicatesNewInstance_(env, predicatesPtr);
     if (argPredicatesNapiValue == nullptr) {
         LOGE("JsiPaEngine Delete argPredicatesNativeValue is nullptr");
