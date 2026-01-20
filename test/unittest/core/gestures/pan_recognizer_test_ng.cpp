@@ -971,56 +971,6 @@ HWTEST_F(PanRecognizerTestNg, PanRecognizerTest014, TestSize.Level1)
 }
 
 /**
- * @tc.name: PanRecognizerSendCallbackMsgTest001
- * @tc.desc: Test PanRecognizer function: SendCallbackMsg
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerSendCallbackMsgTest001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create PanRecognizer.
-     */
-    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
-    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
-
-    /**
-     * @tc.steps: step2. call SendCallbackMsg function and compare result.
-     * @tc.steps: case1: onAction is no, *onAction is no
-     * @tc.expected: step2. result equals.
-     */
-    std::unique_ptr<GestureEventFunc> onAction = std::make_unique<GestureEventFunc>();
-    panRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
-    panRecognizer->SendCallbackMsg(onAction, GestureCallbackType::START);
-    EXPECT_EQ(panRecognizer->touchPoints_.size(), 0);
-}
-
-/**
- * @tc.name: PanRecognizerSendCallbackMsgTest002
- * @tc.desc: Test PanRecognizer function: SendCallbackMsg
- * @tc.type: FUNC
- */
-HWTEST_F(PanRecognizerTestNg, PanRecognizerSendCallbackMsgTest002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create PanRecognizer.
-     */
-    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
-    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
-
-    /**
-     * @tc.steps: step2. SendCallbackMsg
-     * @tc.expected: step2. result equals.
-     */
-    TouchEvent touchEvent;
-    panRecognizer->refereeState_ = RefereeState::SUCCEED;
-    panRecognizer->HandleTouchDownEvent(touchEvent);
-    EXPECT_EQ(panRecognizer->touchPoints_.size(), 1);
-    std::unique_ptr<GestureEventFunc> onAction;
-    panRecognizer->SendCallbackMsg(onAction, GestureCallbackType::START);
-    EXPECT_EQ(panRecognizer->touchPoints_.size(), 1);
-}
-
-/**
  * @tc.name: PanRecognizerTest021
  * @tc.desc: Test PanRecognizer function: IsPanGestureAccept
  * @tc.type: FUNC
@@ -1088,5 +1038,55 @@ HWTEST_F(PanRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
     EXPECT_THAT(result, HasSubstr("ST:1"));
     EXPECT_THAT(result, HasSubstr("LA:1"));
     EXPECT_THAT(result, HasSubstr("AG:60"));
+}
+
+/**
+ * @tc.name: PanRecognizerSendCallbackMsgTest001
+ * @tc.desc: Test PanRecognizer function: SendCallbackMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, PanRecognizerSendCallbackMsgTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+
+    /**
+     * @tc.steps: step2. call SendCallbackMsg function and compare result.
+     * @tc.steps: case1: onAction is no, *onAction is no
+     * @tc.expected: step2. result equals.
+     */
+    std::unique_ptr<GestureEventFunc> onAction = std::make_unique<GestureEventFunc>();
+    panRecognizer->inputEventType_ = InputEventType::TOUCH_SCREEN;
+    panRecognizer->SendCallbackMsg(onAction, GestureCallbackType::START);
+    EXPECT_EQ(panRecognizer->touchPoints_.size(), 0);
+}
+
+/**
+ * @tc.name: PanRecognizerSendCallbackMsgTest002
+ * @tc.desc: Test PanRecognizer function: SendCallbackMsg
+ * @tc.type: FUNC
+ */
+HWTEST_F(PanRecognizerTestNg, PanRecognizerSendCallbackMsgTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create PanRecognizer.
+     */
+    RefPtr<PanGestureOption> panGestureOption = AceType::MakeRefPtr<PanGestureOption>();
+    RefPtr<PanRecognizer> panRecognizer = AceType::MakeRefPtr<PanRecognizer>(panGestureOption);
+
+    /**
+     * @tc.steps: step2. SendCallbackMsg
+     * @tc.expected: step2. result equals.
+     */
+    TouchEvent touchEvent;
+    panRecognizer->refereeState_ = RefereeState::SUCCEED;
+    panRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(panRecognizer->touchPoints_.size(), 1);
+    std::unique_ptr<GestureEventFunc> onAction;
+    panRecognizer->SendCallbackMsg(onAction, GestureCallbackType::START);
+    EXPECT_EQ(panRecognizer->touchPoints_.size(), 1);
 }
 } // namespace OHOS::Ace::NG

@@ -20139,6 +20139,48 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
     }
     } // UIListEventAccessor
+    namespace UIObserverGestureEventOpsAccessor {
+    Ark_Int32 SetOnBeforePanStartImpl(Ark_Int32 instanceId,
+                                      const UIObserver_PanListenerCallback* callback)
+    {
+        return {};
+    }
+    Ark_Int32 SetOnBeforePanEndImpl(Ark_Int32 instanceId,
+                                    const UIObserver_PanListenerCallback* callback)
+    {
+        return {};
+    }
+    Ark_Int32 SetOnAfterPanStartImpl(Ark_Int32 instanceId,
+                                     const UIObserver_PanListenerCallback* callback)
+    {
+        return {};
+    }
+    Ark_Int32 SetOnAfterPanEndImpl(Ark_Int32 instanceId,
+                                   const UIObserver_PanListenerCallback* callback)
+    {
+        return {};
+    }
+    Ark_Int32 SetOnWillClickImpl(Ark_Int32 instanceId,
+                                 const UIObserver_ClickEventListenerCallback* callback)
+    {
+        return {};
+    }
+    Ark_Int32 SetOnDidClickImpl(Ark_Int32 instanceId,
+                                const UIObserver_ClickEventListenerCallback* callback)
+    {
+        return {};
+    }
+    Ark_Int32 SetOnWillTapImpl(Ark_Int32 instanceId,
+                               const UIObserver_GestureEventListenerCallback* callback)
+    {
+        return {};
+    }
+    Ark_Int32 SetOnDidTapImpl(Ark_Int32 instanceId,
+                              const UIObserver_GestureEventListenerCallback* callback)
+    {
+        return {};
+    }
+    } // UIObserverGestureEventOpsAccessor
     namespace UIScrollableCommonEventAccessor {
     void DestroyPeerImpl(Ark_UIScrollableCommonEvent peer)
     {
@@ -24514,6 +24556,20 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     struct UIListEventPeer {
         virtual ~UIListEventPeer() = default;
     };
+    const GENERATED_ArkUIUIObserverGestureEventOpsAccessor* GetUIObserverGestureEventOpsAccessor()
+    {
+        static const GENERATED_ArkUIUIObserverGestureEventOpsAccessor UIObserverGestureEventOpsAccessorImpl {
+            UIObserverGestureEventOpsAccessor::SetOnBeforePanStartImpl,
+            UIObserverGestureEventOpsAccessor::SetOnBeforePanEndImpl,
+            UIObserverGestureEventOpsAccessor::SetOnAfterPanStartImpl,
+            UIObserverGestureEventOpsAccessor::SetOnAfterPanEndImpl,
+            UIObserverGestureEventOpsAccessor::SetOnWillClickImpl,
+            UIObserverGestureEventOpsAccessor::SetOnDidClickImpl,
+            UIObserverGestureEventOpsAccessor::SetOnWillTapImpl,
+            UIObserverGestureEventOpsAccessor::SetOnDidTapImpl,
+        };
+        return &UIObserverGestureEventOpsAccessorImpl;
+    }
     const GENERATED_ArkUIUIScrollableCommonEventAccessor* GetUIScrollableCommonEventAccessor()
     {
         static const GENERATED_ArkUIUIScrollableCommonEventAccessor UIScrollableCommonEventAccessorImpl {
@@ -25008,6 +25064,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             GetUIExtensionProxyAccessor,
             GetUIGridEventAccessor,
             GetUIListEventAccessor,
+            GetUIObserverGestureEventOpsAccessor,
             GetUIScrollableCommonEventAccessor,
             GetUIScrollEventAccessor,
             GetUIWaterFlowEventAccessor,

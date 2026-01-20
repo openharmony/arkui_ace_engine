@@ -56,7 +56,7 @@ import { FrameNode, UIStatesChangeHandler, LayoutConstraint, InteractionEventBin
 import { Size, Frame, LengthMetrics, ColorMetrics, Vector2, Vector3, Matrix4, Circle, RoundRect, CommandPath } from "arkui.Graphics"
 import { RenderNode } from "arkui.RenderNode"
 import { default as common2D } from "@ohos.graphics.common2D"
-import { PanDirection, SwipeDirection, GestureMode, GestureEvent, GestureEventInternal, GestureMask } from "./gesture"
+import { PanDirection, SwipeDirection, GestureMode, GestureEvent, GestureEventInternal, GestureMask, GestureRecognizer, GestureRecognizerInternal } from "./gesture"
 import { default as image } from "@ohos.multimedia.image"
 import { font_FontOptions_serializer, font_FontInfo_serializer } from "./../framework/ohos.font"
 import { font_UIFontConfig_serializer } from "./../framework/ohos.font.custom"
@@ -5914,6 +5914,104 @@ export class UIContextGetInfo {
         const enabled_cast = enabled as (boolean | undefined)
         UIContextGetInfo.enableSwipeBack_serialize(enabled_cast)
         return
+    }
+}
+export class UIObserverGestureEventOps {
+    static setOnBeforePanStart_serialize(instanceId: int32, callback: ((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void)): int32 {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        const retval  = ArkUIGeneratedNativeModule._UIObserverGestureEventOps_setOnBeforePanStart(instanceId, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static setOnBeforePanEnd_serialize(instanceId: int32, callback: ((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void)): int32 {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        const retval  = ArkUIGeneratedNativeModule._UIObserverGestureEventOps_setOnBeforePanEnd(instanceId, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static setOnAfterPanStart_serialize(instanceId: int32, callback: ((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void)): int32 {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        const retval  = ArkUIGeneratedNativeModule._UIObserverGestureEventOps_setOnAfterPanStart(instanceId, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static setOnAfterPanEnd_serialize(instanceId: int32, callback: ((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void)): int32 {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        const retval  = ArkUIGeneratedNativeModule._UIObserverGestureEventOps_setOnAfterPanEnd(instanceId, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static setOnWillClick_serialize(instanceId: int32, callback: ((event: ClickEvent,node?: FrameNode) => void)): int32 {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        const retval  = ArkUIGeneratedNativeModule._UIObserverGestureEventOps_setOnWillClick(instanceId, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static setOnDidClick_serialize(instanceId: int32, callback: ((event: ClickEvent,node?: FrameNode) => void)): int32 {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        const retval  = ArkUIGeneratedNativeModule._UIObserverGestureEventOps_setOnDidClick(instanceId, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static setOnWillTap_serialize(instanceId: int32, callback: ((event: GestureEvent,node?: FrameNode) => void)): int32 {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        const retval  = ArkUIGeneratedNativeModule._UIObserverGestureEventOps_setOnWillTap(instanceId, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    static setOnDidTap_serialize(instanceId: int32, callback: ((event: GestureEvent,node?: FrameNode) => void)): int32 {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        thisSerializer.holdAndWriteCallback(callback)
+        const retval  = ArkUIGeneratedNativeModule._UIObserverGestureEventOps_setOnDidTap(instanceId, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
+    public static setOnBeforePanStart(instanceId: int32, callback: ((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void)): int32 {
+        const instanceId_casted = instanceId as (int32)
+        const callback_casted = callback as (((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void))
+        return UIObserverGestureEventOps.setOnBeforePanStart_serialize(instanceId_casted, callback_casted)
+    }
+    public static setOnBeforePanEnd(instanceId: int32, callback: ((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void)): int32 {
+        const instanceId_casted = instanceId as (int32)
+        const callback_casted = callback as (((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void))
+        return UIObserverGestureEventOps.setOnBeforePanEnd_serialize(instanceId_casted, callback_casted)
+    }
+    public static setOnAfterPanStart(instanceId: int32, callback: ((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void)): int32 {
+        const instanceId_casted = instanceId as (int32)
+        const callback_casted = callback as (((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void))
+        return UIObserverGestureEventOps.setOnAfterPanStart_serialize(instanceId_casted, callback_casted)
+    }
+    public static setOnAfterPanEnd(instanceId: int32, callback: ((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void)): int32 {
+        const instanceId_casted = instanceId as (int32)
+        const callback_casted = callback as (((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void))
+        return UIObserverGestureEventOps.setOnAfterPanEnd_serialize(instanceId_casted, callback_casted)
+    }
+    public static setOnWillClick(instanceId: int32, callback: ((event: ClickEvent,node?: FrameNode) => void)): int32 {
+        const instanceId_casted = instanceId as (int32)
+        const callback_casted = callback as (((event: ClickEvent,node?: FrameNode) => void))
+        return UIObserverGestureEventOps.setOnWillClick_serialize(instanceId_casted, callback_casted)
+    }
+    public static setOnDidClick(instanceId: int32, callback: ((event: ClickEvent,node?: FrameNode) => void)): int32 {
+        const instanceId_casted = instanceId as (int32)
+        const callback_casted = callback as (((event: ClickEvent,node?: FrameNode) => void))
+        return UIObserverGestureEventOps.setOnDidClick_serialize(instanceId_casted, callback_casted)
+    }
+    public static setOnWillTap(instanceId: int32, callback: ((event: GestureEvent,node?: FrameNode) => void)): int32 {
+        const instanceId_casted = instanceId as (int32)
+        const callback_casted = callback as (((event: GestureEvent,node?: FrameNode) => void))
+        return UIObserverGestureEventOps.setOnWillTap_serialize(instanceId_casted, callback_casted)
+    }
+    public static setOnDidTap(instanceId: int32, callback: ((event: GestureEvent,node?: FrameNode) => void)): int32 {
+        const instanceId_casted = instanceId as (int32)
+        const callback_casted = callback as (((event: GestureEvent,node?: FrameNode) => void))
+        return UIObserverGestureEventOps.setOnDidTap_serialize(instanceId_casted, callback_casted)
     }
 }
 export class ArkRootPeer extends PeerNode {

@@ -27,6 +27,7 @@
 #include "keyboard_avoid_mode_ani_modifier.h"
 #include "drag_ani_modifier.h"
 #include "drag_controller_ani_modifier.h"
+#include "gesture_event_uiobserver_ani_modifier.h"
 #include "image_ani_modifier.h"
 #include "image_span_ani_modifier.h"
 #include "interop_ani_modifier.h"
@@ -97,6 +98,7 @@ const ArkUIAniModifiers* GetArkUIAniModifiers()
         .getSaveButtonAniModifier = OHOS::Ace::NG::GetSaveButtonAniModifier,
         .getPasteButtonAniModifier = OHOS::Ace::NG::GetPasteButtonAniModifier,
         .getArkUIAniDetachedFreeRootModifier = OHOS::Ace::NG::GetDetachedFreeRootModifier,
+        .getArkUIAniGestureEventUIObserverModifier = OHOS::Ace::NG::GetArkUIAniGestureEventUIObserverModifier,
     };
     return &impl;
 }

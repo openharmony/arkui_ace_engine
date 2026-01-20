@@ -83,6 +83,7 @@ ohos_shared_library("arkoala_native_ani") {
     "styled_string/styled_string_module.cpp",
     "syntax/parallelize_ui_module.cpp",
     "text_based_modifier/text_based_modifier_module.cpp",
+    "uiobserver/gesture_event_uiobserver_module.cpp",
     "utils/ani_trace.cpp",
     "utils/convert_utils.cpp",
     "video/video_module_methods.cpp",

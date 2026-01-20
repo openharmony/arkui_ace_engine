@@ -31,7 +31,7 @@ import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
-import { KeyboardAvoidMode } from '@ohos/arkui/UIContext';
+import { KeyboardAvoidMode, PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback } from '@ohos/arkui/UIContext';
 import { DrawableDescriptor } from '@ohos.arkui.drawableDescriptor';
 import { default as uiObserver }  from '@ohos/arkui/observer';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
@@ -462,4 +462,12 @@ export class ArkUIAniModule {
     // for SecurityComponent
     native static _SaveButton_SetOnClickCallback(ptr: KPointer, value: SaveButtonCallback | undefined): void
     native static _PasteButton_SetOnClickCallback(ptr: KPointer, value: PasteButtonCallback | undefined): void
+
+    // for GestureEvent UIObserver
+    native static _GestureEventUIObserver_SetPanListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: PanListenerCallback): void
+    native static _GestureEventUIObserver_RemovePanListenerCallback(instanceId: KInt, tag: string, callback?: PanListenerCallback): void
+    native static _GestureEventUIObserver_SetClickListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: ClickEventListenerCallback): void
+    native static _GestureEventUIObserver_RemoveClickListenerCallback(instanceId: KInt, tag: string, callback?: ClickEventListenerCallback): void
+    native static _GestureEventUIObserver_SetTapListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: GestureEventListenerCallback): void
+    native static _GestureEventUIObserver_RemoveTapListenerCallback(instanceId: KInt, tag: string, callback?: GestureEventListenerCallback): void
 }
