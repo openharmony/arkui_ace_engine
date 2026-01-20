@@ -4372,6 +4372,10 @@ void SetAspectRatioImpl(Ark_NativePointer node,
         return;
     }
     auto result = Converter::OptConvertPtr<float>(value);
+    if (!result.has_value()) {
+        ViewAbstractModelStatic::ResetAspectRatio(frameNode);
+        return;
+    }
     if (result) {
         auto ratio = result.value();
         if (ratio <= 0.0) {
