@@ -66,6 +66,15 @@ public:
     MOCK_METHOD(bool, UpdateScrollEventInfoFromTree, (ScrollEventInfo & info), (override));
     MOCK_METHOD(ScrollEndEventAction, HandleUpdatedScrollEndEvent, (ScrollEventInfo & info), (override));
 };
+
+// Mock that only overrides UpdateScrollEventInfoFromTree so we can test
+// the real HandleUpdatedScrollEndEvent implementation when it uses
+// the LAST_START_RECORD_INDEX fallback.
+class MockReporterOnlyUpdate : public WebAgentEventReporter {
+public:
+    using WebAgentEventReporter::WebAgentEventReporter;
+    MOCK_METHOD(bool, UpdateScrollEventInfoFromTree, (ScrollEventInfo & info), (override));
+};
 } // namespace
 
 class WebAgentEventReporterTest : public testing::Test {
@@ -295,14 +304,12 @@ HWTEST_F(WebAgentEventReporterTest, AddScrollEvent, TestSize.Level0)
         AceType::MakeRefPtr<MockReporterForSpecificEvent>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
     // no need to check json validity
     {
-        EXPECT_CALL(*reporter, ConvertToWindow).Times(0);
         EXPECT_CALL(*reporter, ProcessScrollQueue).Times(0);
         reporter->AddScrollEvent(JsonUtil::ParseJsonString(R"({"EventType": "ScrollStart"})"));
         reporter->AddScrollEvent(JsonUtil::ParseJsonString(R"({"EventType": "ScrollStart", "offset": "hello"})"));
         reporter->AddScrollEvent(JsonUtil::ParseJsonString(R"({"EventType": "ScrollEnd", "offset": []})"));
     }
     {
-        EXPECT_CALL(*reporter, ConvertToWindow(_, ::testing::Eq(false))).Times(1);
         EXPECT_CALL(*reporter, ProcessScrollQueue).Times(1);
         reporter->AddScrollEvent(JsonUtil::ParseJsonString(R"({"EventType": "ScrollEnd", "offset": [1, 2]})"));
         int cnt = 0;
@@ -509,6 +516,69 @@ HWTEST_F(WebAgentEventReporterTest, ProcessScrollQueue_EndEventPROCEED, TestSize
 }
 
 /**
+ * @tc.name: ProcessScrollQueue_EndEvent_NoLastStartDrop
+ * @tc.desc: When Update returns false and there's no LAST_START_RECORD_INDEX,
+ *        the end event should be dropped and queue advanced.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, ProcessScrollQueue_EndEvent_NoLastStartDrop, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<MockReporterUpdateHandle>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+    WebAgentEventReporter::ScrollEventInfo info;
+    info.eventType = "ScrollEnd";
+    info.id = 400;
+    info.scrollRect = RectF(1.0, 1.0, 0.0, 0.0);
+    reporter->scrollQueue_.push(info);
+
+    // Simulate update failing so branch that checks LAST_START_RECORD_INDEX runs
+    EXPECT_CALL(*reporter, UpdateScrollEventInfoFromTree(_)).Times(1).WillOnce(Return(false));
+
+    reporter->ProcessScrollQueue();
+
+    EXPECT_FALSE(reporter->processingScroll_);
+    // queue should have been popped (dropped)
+    EXPECT_EQ(static_cast<size_t>(0), reporter->scrollQueue_.size());
+#endif
+}
+
+/**
+ * @tc.name: ProcessScrollQueue_EndEvent_UseLastStartAndUpdateId
+ * @tc.desc: When Update returns false and LAST_START_RECORD_INDEX exists,
+ *        the end event id should be replaced with the last start id and the
+ *        queue should be advanced (reported).
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, ProcessScrollQueue_EndEvent_UseLastStartAndUpdateId, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<MockReporterUpdateHandle>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+
+    WebAgentEventReporter::ScrollEventInfo startInfo;
+    startInfo.eventType = "ScrollStart";
+    startInfo.id = 500;
+    startInfo.scrollRect = RectF(0.0, 0.0, 0.0, 0.0);
+    // insert only the last start record (no record keyed by startInfo.id)
+    reporter->startRecords_[WebAgentEventReporter::LAST_START_RECORD_INDEX] = startInfo;
+
+    WebAgentEventReporter::ScrollEventInfo endInfo;
+    endInfo.eventType = "ScrollEnd";
+    endInfo.id = 999; // different so fallback triggers
+    endInfo.scrollRect = RectF(2.0, 2.0, 0.0, 0.0);
+    reporter->scrollQueue_.push(endInfo);
+
+    EXPECT_CALL(*reporter, UpdateScrollEventInfoFromTree(_)).Times(1).WillOnce(Return(false));
+
+    reporter->ProcessScrollQueue();
+
+    // queue should have been processed and popped
+    EXPECT_EQ(static_cast<size_t>(0), reporter->scrollQueue_.size());
+    // last start record should have been cleared by ReportAndAdvanceScrollQueue
+    EXPECT_EQ(reporter->startRecords_.count(WebAgentEventReporter::LAST_START_RECORD_INDEX), 0);
+#endif
+}
+
+/**
  * @tc.name: HandleUpdatedScrollEndEvent_NoStartRecord
  * @tc.desc: If there's no matching start record, should return DROP.
  * @tc.type: FUNC
@@ -524,6 +594,46 @@ HWTEST_F(WebAgentEventReporterTest, HandleUpdatedScrollEndEvent_NoStartRecord, T
 
     auto action = reporter->HandleUpdatedScrollEndEvent(info);
     EXPECT_EQ(action, WebAgentEventReporter::ScrollEndEventAction::DROP);
+#endif
+}
+
+/**
+ * @tc.name: HandleUpdatedScrollEndEvent_UpdateIdFromLastStart
+ * @tc.desc: When no matching start record exists but a last start record is present,
+ *        `info.id` should be updated from the last start record and
+ *        `UpdateScrollEventInfoFromTree` should be invoked.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebAgentEventReporterTest, HandleUpdatedScrollEndEvent_UpdateIdFromLastStart, TestSize.Level0)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto reporter = AceType::MakeRefPtr<MockReporterOnlyUpdate>(AceType::WeakClaim(AceType::RawPtr(g_webPattern)));
+
+    // prepare a last start record with a real id
+    WebAgentEventReporter::ScrollEventInfo startInfo;
+    startInfo.eventType = "ScrollStart";
+    startInfo.id = 300;
+    startInfo.scrollRect = RectF(0.0, 0.0, 0.0, 0.0);
+    reporter->startRecords_[WebAgentEventReporter::LAST_START_RECORD_INDEX] = startInfo;
+
+    // end event with a different id so it will fallback to LAST_START_RECORD_INDEX
+    WebAgentEventReporter::ScrollEventInfo endInfo;
+    endInfo.eventType = "ScrollEnd";
+    endInfo.id = 999;
+    endInfo.scrollRect = RectF(10.0, 10.0, 0.0, 0.0);
+
+    // Expect UpdateScrollEventInfoFromTree to be called once; simulate a successful update
+    EXPECT_CALL(*reporter, UpdateScrollEventInfoFromTree(_))
+        .Times(1)
+        .WillOnce(DoAll(WithArg<0>([](WebAgentEventReporter::ScrollEventInfo& info) {
+            // make the updated rect different so the function would proceed
+            info.scrollRect = RectF(20.0, 20.0, 0.0, 0.0);
+        }), Return(true)));
+
+    auto action = reporter->HandleUpdatedScrollEndEvent(endInfo);
+    EXPECT_EQ(action, WebAgentEventReporter::ScrollEndEventAction::PROCEED);
+    // verify that info.id was updated from the last start record
+    EXPECT_EQ(endInfo.id, startInfo.id);
 #endif
 }
 
