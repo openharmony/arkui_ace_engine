@@ -23,7 +23,7 @@ import {
     CustomLayout, Layoutable, ClassCastError
   } from '@ohos.arkui.component'
   import {
-    State, Observed, PropRef, StorageLink, ObjectLink, StorageProp, Watch, Link
+    State, Observed, PropRef, StorageLink, ObjectLink, StoragePropRef, Watch, Link
   } from '@ohos.arkui.stateManagement';
   import { LengthUnit, LengthMetrics, } from '@ohos.arkui.node';
   import { DividerModifier } from '@ohos.arkui.modifier';
@@ -623,7 +623,7 @@ import {
     };
     @PropRef fontSize: number = 1;
     @State maxLines: int = 1;
-    @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
+    @StoragePropRef('windowStandardHeight') windowStandardHeight: number = 0;
     @Observed
     @State symbolEffect: SymbolEffect = new SymbolEffect();
   

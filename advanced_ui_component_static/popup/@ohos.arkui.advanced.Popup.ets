@@ -56,7 +56,7 @@ import {
 } from '@ohos.arkui.component';
 
 import { Theme } from '@ohos.arkui.theme';
-import { State, Prop, Watch, PropRef } from '@ohos.arkui.stateManagement';
+import { State, Watch, PropRef } from '@ohos.arkui.stateManagement';
 import { LengthMetrics, LengthUnit } from '@ohos.arkui.node';
 import systemDateTime from '@ohos.systemDateTime';
 import resourceManager from '@ohos.resourceManager';

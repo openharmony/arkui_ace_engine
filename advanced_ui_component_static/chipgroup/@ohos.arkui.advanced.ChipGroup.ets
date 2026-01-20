@@ -59,7 +59,6 @@ import {
   Require,
   State,
   Provide,
-  Prop,
   PropRef,
   UIUtils
 } from '@ohos.arkui.stateManagement';

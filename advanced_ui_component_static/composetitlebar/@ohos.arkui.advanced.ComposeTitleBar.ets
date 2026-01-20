@@ -23,7 +23,7 @@ import {
   Margin, ClassCastError
 } from '@ohos.arkui.component';
 import resourceManager from '@ohos.resourceManager';
-import { State, Observed, PropRef, StorageProp, Watch, StorageLink, Provide, Consume, Link } from '@ohos.arkui.stateManagement'
+import { State, Observed, PropRef, StoragePropRef, Watch, StorageLink, Provide, Consume, Link } from '@ohos.arkui.stateManagement'
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier'
 import { UIContext } from '@ohos.arkui.UIContext';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
@@ -836,7 +836,7 @@ struct ComposeTitleBarDialog {
   @StorageLink('mainWindow') mainWindow: Promise<window.Window> | undefined = undefined;
   @State fontSize: number = 1;
   @State maxLines: int = 1;
-  @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
+  @StoragePropRef('windowStandardHeight') windowStandardHeight: number = 0;
   cancel: () => void = () => {
   }
   confirm: () => void = () => {

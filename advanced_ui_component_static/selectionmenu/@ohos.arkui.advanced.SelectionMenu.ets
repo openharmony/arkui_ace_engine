@@ -22,7 +22,7 @@ import {
   OutlineOptions, Padding, ClickEvent, SymbolGlyph, Image, ButtonType, SymbolEffectStrategy, ClassCastError,
   RichEditorTextStyleResult
 } from '@ohos.arkui.component';
-import { State, Observed, PropRef, StorageProp, Watch, StorageLink } from '@ohos.arkui.stateManagement';
+import { State, Observed, PropRef, Watch, StorageLink } from '@ohos.arkui.stateManagement';
 import { Context, UIContext, MeasureUtils } from '@ohos.arkui.UIContext';
 import pasteboard from '@ohos.pasteboard'
 import { BusinessError, RecordData } from '@ohos.base';
