@@ -16,7 +16,7 @@
 // HANDWRITTEN, DO NOT REGENERATE
 
 import { memo } from "@koalaui/runtime/annotations"
-import { NodeAttach, remember } from "@koalaui/runtime"
+import { NodeAttach, remember, once } from "@koalaui/runtime"
 import { ListItemAttribute, ArkListItemComponent, ArkListItemPeer, LazyBuild } from "#generated"
 import { LazyForEachType } from './../PeerNode';
 import { pointer } from '@koalaui/interop'
@@ -40,6 +40,8 @@ export function ListItemImpl(
         const peerPtr : pointer = receiver.getPeer().getPeerPtr()
         const isInLazyForEach : undefined| Boolean = receiver.getPeer()?.parent?.isKind(LazyForEachType)
         receiver.setPeer(undefined)
-        LazyBuild.SetListItemLazyBuilder(peerPtr, content_!)
+        once(() => {
+            LazyBuild.SetListItemLazyBuilder(peerPtr, content_!)
+        })
     })
 }
