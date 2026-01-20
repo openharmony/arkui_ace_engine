@@ -193,6 +193,7 @@ std::unordered_map<int32_t, bool> SPAN_ATTRIBUTES_MAP = {
     { static_cast<int32_t>(NODE_TEXT_TEXT_SHADOW), true },
     { static_cast<int32_t>(NODE_SPAN_TEXT_BACKGROUND_STYLE), true },
     { static_cast<int32_t>(NODE_SPAN_BASELINE_OFFSET), true },
+    { static_cast<int32_t>(NODE_ALLOW_FORCE_DARK), true },
 };
 constexpr int32_t ANIMATION_DURATION_INDEX = 0;
 constexpr int32_t ANIMATION_CURVE_INDEX = 1;
