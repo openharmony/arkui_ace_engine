@@ -387,7 +387,7 @@ HWTEST_F(ListModifierTest, setListOptionsNegativeTest, TestSize.Level1)
     Opt_ListOptions options = Converter::ArkValue<Opt_ListOptions>(listOptions);
     modifier_->setListOptions(node_, &options);
     auto indexCheckValue = GetAttrValue<std::string>(node_, "initialIndex");
-    EXPECT_EQ(indexCheckValue, "-7");
+    EXPECT_EQ(indexCheckValue, "0");
     auto spaceCheckValue = GetAttrValue<std::string>(node_, "space");
     EXPECT_EQ(spaceCheckValue, "-9.00vp");
 }
