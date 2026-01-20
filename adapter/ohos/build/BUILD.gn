@@ -29,6 +29,11 @@ component_modules = [
   "radio",
   "slider",
 ]
+
+if (!ace_engine_feature_wearable) { 
+    component_modules += [ "folder_stack", ] 
+}
+
 component_modules_libs = []
 
 foreach(module, component_modules) {

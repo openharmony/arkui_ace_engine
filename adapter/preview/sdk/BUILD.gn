@@ -153,6 +153,11 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:radio",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:slider",
     ]
+    if (!ace_engine_feature_wearable) { 
+      deps += [
+        "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:folderstack",
+      ]
+    }
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
             "root_out_dir")
@@ -178,6 +183,11 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arkradio.abc",
       "${out_path}/arkui/ace_engine/arkslider.abc",
     ]
+    if (!ace_engine_feature_wearable) { 
+      sources += [
+        "${out_path}/arkui/ace_engine/arkfolderstack.abc",
+      ]
+    }
 
     # Output path description: 
     # "previewer/common/bin/module" is equivalent to the basic path of globalThis.requireNapi().

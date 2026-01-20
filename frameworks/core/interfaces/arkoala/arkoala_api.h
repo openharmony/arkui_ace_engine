@@ -4156,6 +4156,8 @@ struct ArkUIStackModifier {
 };
 
 struct ArkUIFolderStackModifier {
+    void (*createFolderStack)(ArkUI_Uint32 size, ArkUI_CharPtr* upperId);
+    ArkUINodeHandle (*createFolderStackFrameNode)(ArkUI_Uint32 nodeId);
     void (*setEnableAnimation)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableAnimation)(ArkUINodeHandle node);
     void (*setAutoHalfFold)(ArkUINodeHandle node, ArkUI_Bool value);
@@ -4164,6 +4166,7 @@ struct ArkUIFolderStackModifier {
     void (*resetOnFolderStateChange)(ArkUINodeHandle node);
     void (*setOnHoverStatusChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnHoverStatusChange)(ArkUINodeHandle node);
+    void (*setJsAlignContent)(ArkUINodeHandle node, ArkUI_Int32 alignment);
 };
 
 struct ArkUINavigatorModifier {

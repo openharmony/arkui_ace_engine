@@ -740,7 +740,11 @@ void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
 
 void* createFolderStackNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto folderStackModifier = nodeModifier->getFolderStackModifier();
+    CHECK_NULL_RETURN(folderStackModifier, nullptr);
+    return folderStackModifier->createFolderStackFrameNode(nodeId);
 }
 
 void* createFormComponentNode(ArkUI_Int32 nodeId)

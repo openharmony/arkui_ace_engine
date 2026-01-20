@@ -553,6 +553,7 @@ frameworks/bridge/declarative_frontend/ark_component/.gitignore @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/package-lock.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/package.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkflowitem.js @arkuiscroll
+frameworks/bridge/declarative_frontend/ark_component/components/arkfolderstack.js @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/components/arkwaterflow.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/tsconfig.release.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkgauge.js @arkui001
@@ -918,8 +919,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divi
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.h @arkuilayout1
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_folder_stack_bridge.cpp @arkuilayout1
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_folder_stack_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.cpp @form_framework
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h @form_framework
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.cpp @arkui_framework_xnode
@@ -1162,8 +1161,6 @@ frameworks/bridge/declarative_frontend/jsview/js_flex.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_flex.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_flex_impl.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h @arkuilayout1
-frameworks/bridge/declarative_frontend/jsview/js_folder_stack.cpp @arkuilayout1
-frameworks/bridge/declarative_frontend/jsview/js_folder_stack.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_foreach.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_foreach.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_form.cpp @form_framework

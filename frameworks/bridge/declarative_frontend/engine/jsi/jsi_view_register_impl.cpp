@@ -59,7 +59,6 @@
 #include "bridge/declarative_frontend/jsview/js_ellipse_shape.h"
 #include "bridge/declarative_frontend/jsview/js_environment.h"
 #include "bridge/declarative_frontend/jsview/js_flex_impl.h"
-#include "bridge/declarative_frontend/jsview/js_folder_stack.h"
 #include "bridge/declarative_frontend/jsview/js_foreach.h"
 #ifdef FORM_BUTTON_COMPONENT_SUPPORT
 #include "bridge/declarative_frontend/jsview/js_form_button.h"
@@ -464,9 +463,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
     { "Stack", JSStack::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "FolderStack", JSFolderStack::JSBind},
-#endif
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "If", JSIfElse::JSBind },
@@ -560,9 +556,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GridItem", JSGridItem::JSBind },
     { "GridContainer", JSGridContainer::JSBind },
     { "Stack", JSStack::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "FolderStack", JSFolderStack::JSBind},
-#endif
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },

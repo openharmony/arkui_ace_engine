@@ -529,10 +529,6 @@ template("declarative_js_engine") {
       "jsview/models/view_partial_update_model_impl.cpp",
     ]
 
-    if (!ace_engine_feature_wearable) {
-      sources += [ "jsview/js_folder_stack.cpp" ]
-    }
-
     if (ace_engine_feature_enable_digital_crown) {
       sources += [ "engine/functions/js_crown_function.cpp" ]
     }
@@ -1000,10 +996,6 @@ template("declarative_js_engine_ng") {
       "ark_theme/theme_apply/js_theme.cpp",
       "ark_theme/theme_apply/js_with_theme.cpp",
     ]
-
-    if (!ace_engine_feature_wearable) {
-      sources += [ "jsview/js_folder_stack.cpp" ]
-    }
 
     if (ace_engine_feature_enable_digital_crown) {
       sources += [ "engine/functions/js_crown_function.cpp" ]

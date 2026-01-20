@@ -61,7 +61,7 @@ void AssignCast(std::optional<AIImageQuality>& dst, const Ark_image_ResolutionQu
     }
 }
 template<>
-void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src)
 {
     switch (src) {
         case ARK_ALIGNMENT_TOP_START: dst = Alignment::TOP_LEFT; break;
