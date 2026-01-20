@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -1790,10 +1790,56 @@ class TextTimerModifier extends ArkTextTimerComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class TimePickerModifier extends ArkTimePickerComponent {
+
+class LazyArkTimePickerComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkTimePickerComponent.module === undefined) {
+      LazyArkTimePickerComponent.module = globalThis.requireNapi('arkui.components.arktimepicker');
+    }
+    this.lazyComponent = LazyArkTimePickerComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  loop(value) {
+    this.lazyComponent.loop(value);
+  }
+  digitalCrownSensitivity(value) {
+    this.lazyComponent.digitalCrownSensitivity(value);
+  }
+  useMilitaryTime(value) {
+    this.lazyComponent.useMilitaryTime(value);
+  }
+  disappearTextStyle(value) {
+    this.lazyComponent.disappearTextStyle(value);
+  }
+  textStyle(value) {
+    this.lazyComponent.textStyle(value);
+  }
+  selectedTextStyle(value) {
+    this.lazyComponent.selectedTextStyle(value);
+  }
+  enableCascade(value) {
+    this.lazyComponent.enableCascade(value);
+  }
+  onChange(callback) {
+    this.lazyComponent.onChange(value);
+  }
+  dateTimeOptions(value) {
+    this.lazyComponent.dateTimeOptions(value);
+  }
+  enableHapticFeedback(value) {
+    this.lazyComponent.enableHapticFeedback(value);
+  }
+}
+
+class TimePickerModifier extends LazyArkTimePickerComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

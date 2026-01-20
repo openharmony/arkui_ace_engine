@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -44,7 +44,7 @@ constexpr Dimension PICKER_MARGIN_FROM_TITLE_AND_BUTTON = 8.0_vp;
 constexpr Dimension PICKER_MARGIN_FROM_CHECK_BOX = 10.0_vp;
 }
 
-class DatePickerPattern : public LinearLayoutPattern {
+class ACE_FORCE_EXPORT DatePickerPattern : public LinearLayoutPattern {
     DECLARE_ACE_TYPE(DatePickerPattern, LinearLayoutPattern);
 
 public:

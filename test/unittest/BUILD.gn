@@ -1631,6 +1631,8 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/test/mock/core/modifier/mock_radio_modifier.cpp",
     "$ace_root/test/mock/core/modifier/mock_slider_modifier.cpp",
     "$ace_root/test/mock/core/modifier/mock_qrcode_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/time_picker/bridge/timepicker_util.cpp",
+    "$ace_root/frameworks/core/interfaces/native/node/node_timepicker_modifier.cpp",
   ]
   if (ace_engine_feature_enable_split_mode) {
     sources += [

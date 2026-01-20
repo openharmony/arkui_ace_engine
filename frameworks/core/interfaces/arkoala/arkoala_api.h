@@ -4257,6 +4257,26 @@ struct ArkUITimepickerModifier {
     void (*resetTimePickerDigitalCrownSensitivity)(ArkUINodeHandle node);
     void (*setTimepickerOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetTimepickerOnChange)(ArkUINodeHandle node);
+    void (*setTimePickerOnChangeHandler)(ArkUINodeHandle node, void* callback);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
+    void (*create)(void* theme, ArkUI_Bool value);
+    void (*setJSTimepickerStart)(void* value);
+    void (*setJSTimepickerEnd)(void* value);
+    void (*setJSSelectedTime)(void* value);
+    void (*setJSChangeEvent)(void* value);
+    void (*setJSSelectedTextStyle)(void* theme, void* textStyle);
+    void (*setJSDisappearTextStyle)(void* theme, void* textStyle);
+    void (*setJSNormalTextStyle)(void* theme, void* textStyle);
+    void (*updateUserSetSelectColor)();
+    void (*hasUserDefinedDisappearFontFamily)(ArkUI_Bool isHas);
+    void (*hasUserDefinedNormalFontFamily)(ArkUI_Bool isHas);
+    void (*hasUserDefinedSelectedFontFamily)(ArkUI_Bool isHas);
+    void (*setBackgroundColorWithResourceObj)(ArkUI_Uint32 color, void* ojb);
+    void (*setBackgroundColor)(ArkUI_Uint32 color);
+    void (*hasUserDefinedOpacity)();
+    void (*setOnEnterSelectedArea)(ArkUINodeHandle node, void* callback);
+    void (*show)(void* pickerDialog, void* settingData, void* cancelEvent, void* acceptEvent, void* changeEvent,
+        void* enterEvent, void* timePickerDialogEvent, void* buttonInfos);
 };
 
 struct ArkUIVideoModifier {

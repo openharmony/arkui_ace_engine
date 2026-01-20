@@ -592,11 +592,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Tabs", JSTabs::JSBind },
     { "TabContent", JSTabContent::JSBind },
     { "TextPicker", JSTextPicker::JSBind },
-    { "TimePicker", JSTimePicker::JSBind },
     { "UIPickerComponent", JSContainerPicker::JSBind },
 #ifndef ARKUI_WEARABLE
     { "TextPickerDialog", JSTextPickerDialog::JSBind },
-    { "TimePickerDialog", JSTimePickerDialog::JSBind },
 #endif
     { "DatePicker", JSDatePicker::JSBind },
 #ifndef ARKUI_WEARABLE

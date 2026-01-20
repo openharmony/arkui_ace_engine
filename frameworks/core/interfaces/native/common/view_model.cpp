@@ -15,6 +15,8 @@
 
 #include "core/interfaces/native/node/hyperlink_modifier.h"
 
+#include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "base/memory/ace_type.h"
 #include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/group_node.h"
@@ -136,6 +138,7 @@
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/qrcode_modifier.h"
+#include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/components_ng/pattern/plugin/plugin_model_static.h"
@@ -386,7 +389,9 @@ void* createDatePickerNode(ArkUI_Int32 nodeId)
 
 void* createTimePickerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TimePickerModelNG::CreateFrameNode(nodeId);
+    auto* modifier = NG::NodeModifier::GetTimepickerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->createFrameNode(nodeId)));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);

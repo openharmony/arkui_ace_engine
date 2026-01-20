@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2021-2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2021-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -133,7 +133,7 @@ private:
     uint32_t week_ = 0;
 };
 
-class PickerTime final {
+class ACE_FORCE_EXPORT PickerTime final {
 public:
     PickerTime() = default;
     PickerTime(uint32_t hour, uint32_t minute, uint32_t second) : hour_(hour), minute_(minute), second_(second) {}

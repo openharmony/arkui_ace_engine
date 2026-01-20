@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24046,249 +24046,6 @@ class SelectOnSelectModifier extends ModifierWithKey {
 SelectOnSelectModifier.identity = Symbol('selectOnSelect');
 
 /// <reference path='./import.ts' />
-class ArkTimePickerComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  loop(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerLoopModifier.identity, TimepickerLoopModifier, value);
-    return this;
-  }
-  digitalCrownSensitivity(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerDigitalCrownSensitivityModifier.identity, TimepickerDigitalCrownSensitivityModifier, value);
-    return this;
-  }
-  useMilitaryTime(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerUseMilitaryTimeModifier.identity, TimepickerUseMilitaryTimeModifier, value);
-    return this;
-  }
-  disappearTextStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerDisappearTextStyleModifier.identity, TimepickerDisappearTextStyleModifier, value);
-    return this;
-  }
-  textStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerTextStyleModifier.identity, TimepickerTextStyleModifier, value);
-    return this;
-  }
-  selectedTextStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerSelectedTextStyleModifier.identity, TimepickerSelectedTextStyleModifier, value);
-    return this;
-  }
-  enableCascade(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerEnableCascadeModifier.identity, TimepickerEnableCascadeModifier, value);
-    return this;
-  }
-  onChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerOnChangeModifier.identity, TimepickerOnChangeModifier, callback);
-    return this;
-  }
-  dateTimeOptions(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerDateTimeOptionsModifier.identity, TimepickerDateTimeOptionsModifier, value);
-    return this;
-  }
-  enableHapticFeedback(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerEnableHapticFeedbackModifier.identity, TimepickerEnableHapticFeedbackModifier, value);
-    return this;
-  }
-}
-
-class TimepickerDigitalCrownSensitivityModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().timepicker.resetDigitalCrownSensitivity(node);
-    }
-    else {
-      getUINativeModule().timepicker.setDigitalCrownSensitivity(node, this.value);
-    }
-  }
-}
-TimepickerDigitalCrownSensitivityModifier.identity = Symbol('DigitalCrownSensitivity');
-
-class TimepickerTextStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
-    if (reset) {
-      getUINativeModule().timepicker.resetTextStyle(node);
-    }
-    else {
-      getUINativeModule().timepicker.setTextStyle(node, (_b = (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined,
-      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
-      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined,
-      (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
-      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
-      (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
-      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
-      (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
-      _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
-    }
-  }
-  checkObjectDiff() {
-    return true;
-  }
-}
-TimepickerTextStyleModifier.identity = Symbol('textStyle');
-class TimepickerSelectedTextStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
-    if (reset) {
-      getUINativeModule().timepicker.resetSelectedTextStyle(node);
-    }
-    else {
-      getUINativeModule().timepicker.setSelectedTextStyle(node, (_b = (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined,
-      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
-      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined,
-      (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
-      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
-      (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
-      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
-      (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
-      _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
-    }
-  }
-  checkObjectDiff() {
-    return true;
-  }
-}
-TimepickerSelectedTextStyleModifier.identity = Symbol('selectedTextStyle');
-class TimepickerDisappearTextStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
-    if (reset) {
-      getUINativeModule().timepicker.resetDisappearTextStyle(node);
-    }
-    else {
-      getUINativeModule().timepicker.setDisappearTextStyle(node, (_b = (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined,
-      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
-      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined,
-      (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
-      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
-      (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
-      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
-      (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
-      _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
-    }
-  }
-  checkObjectDiff() {
-    return true;
-  }
-}
-TimepickerDisappearTextStyleModifier.identity = Symbol('disappearTextStyle');
-class TimepickerUseMilitaryTimeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().timepicker.resetTimepickerUseMilitaryTime(node);
-    }
-    else {
-      getUINativeModule().timepicker.setTimepickerUseMilitaryTime(node, this.value);
-    }
-  }
-}
-TimepickerUseMilitaryTimeModifier.identity = Symbol('timepickerUseMilitaryTime');
-
-class TimepickerLoopModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().timepicker.resetTimepickerLoop(node);
-    }
-    else {
-      getUINativeModule().timepicker.setTimepickerLoop(node, this.value);
-    }
-  }
-}
-TimepickerLoopModifier.identity = Symbol('timepickerLoop');
-
-class TimepickerEnableCascadeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().timepicker.resetTimepickerEnableCascade(node);
-    }
-    else {
-      getUINativeModule().timepicker.setTimepickerEnableCascade(node, this.value);
-    }
-  }
-}
-TimepickerEnableCascadeModifier.identity = Symbol('timepickerEnableCascade');
-
-class TimepickerDateTimeOptionsModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().timepicker.resetTimepickerDateTimeOptions(node);
-    }
-    else {
-      getUINativeModule().timepicker.setTimepickerDateTimeOptions(node, this.value.hour, this.value.minute, this.value.second);
-    }
-  }
-}
-TimepickerDateTimeOptionsModifier.identity = Symbol('timepickerDateTimeOptions');
-
-class TimepickerEnableHapticFeedbackModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().timepicker.resetTimepickerEnableHapticFeedback(node);
-    }
-    else {
-      getUINativeModule().timepicker.setTimepickerEnableHapticFeedback(node, this.value);
-    }
-  }
-}
-TimepickerEnableHapticFeedbackModifier.identity = Symbol('timepickerEnableHapticFeedback');
-
-class TimepickerOnChangeModifier extends ModifierWithKey
-{
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().timepicker.resetTimepickerOnChange(node);
-    } else {
-      getUINativeModule().timepicker.setTimepickerOnChange(node, this.value);
-    }
-  }
-} 
-TimepickerOnChangeModifier.identity = Symbol('timePickerOnChange');
-// @ts-ignore
-if (globalThis.TimePicker !== undefined) {
-  globalThis.TimePicker.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkTimePickerComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.TimePickerModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
 class ArkTextPickerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -38165,6 +37922,30 @@ if (globalThis.FolderStack === undefined) {
       getUINativeModule().folderStack.create(params);
     }
   };
+}
+
+// @ts-ignore
+if (globalThis.TimePicker === undefined) {
+  globalThis.TimePicker = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule("TimePicker");
+      const module = globalThis.requireNapi('arkui.components.arktimepicker');
+      module.exportView();
+      getUINativeModule().timePicker.create(params);
+    }
+  }
+}
+
+// @ts-ignore
+if (globalThis.TimePickerDialog === undefined) {
+  globalThis.TimePickerDialog = {
+    show: function(params) {
+      getUINativeModule().loadNativeModule("TimePickerDialog");
+      const module = globalThis.requireNapi('arkui.components.arktimepicker');
+      module.exportViewDialog();
+      getUINativeModule().timePickerDialog.show(params);
+    }
+  }
 }
 
 function getArkUINodeFromNapi() {

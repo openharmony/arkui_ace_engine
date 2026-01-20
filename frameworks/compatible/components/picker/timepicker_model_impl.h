@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,10 +16,11 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PICKER_TIMEPICKER_MODEL_IMPL_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPATIBLE_COMPONENTS_PICKER_TIMEPICKER_MODEL_IMPL_H
 
+#include "ui/base/macros.h"
 #include "core/components_ng/pattern/time_picker/timepicker_model.h"
 
 namespace OHOS::Ace::Framework {
-class TimePickerModelImpl : public TimePickerModel {
+class ACE_FORCE_EXPORT TimePickerModelImpl : public TimePickerModel {
 public:
     TimePickerModelImpl() = default;
     ~TimePickerModelImpl() override = default;
@@ -46,7 +47,7 @@ public:
     void UpdateUserSetSelectColor() override {};
 };
 
-class TimePickerDialogModelImpl : public TimePickerDialogModel {
+class ACE_FORCE_EXPORT TimePickerDialogModelImpl : public TimePickerDialogModel {
 public:
     TimePickerDialogModelImpl() = default;
     ~TimePickerDialogModelImpl() override = default;

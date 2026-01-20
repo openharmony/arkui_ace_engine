@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,6 +30,12 @@
 #include "core/components_ng/property/property.h"
 
 namespace OHOS::Ace::NG {
+namespace {
+inline std::string ConvertBoolToString(bool flag)
+{
+    return flag ? "true" : "false";
+}
+}
 class ACE_EXPORT TimePickerLayoutProperty : public PickerLayoutProperty {
     DECLARE_ACE_TYPE(TimePickerLayoutProperty, PickerLayoutProperty);
 
@@ -56,8 +62,8 @@ public:
     {
         PickerLayoutProperty::ToJsonValue(json, filter);
         json->PutExtAttr("useMilitaryTime",
-            V2::ConvertBoolToString(GetIsUseMilitaryTimeValue(false)).c_str(), filter);
-        json->PutExtAttr("loop", V2::ConvertBoolToString(GetLoopValue(true)).c_str(), filter);
+            ConvertBoolToString(GetIsUseMilitaryTimeValue(false)).c_str(), filter);
+        json->PutExtAttr("loop", ConvertBoolToString(GetLoopValue(true)).c_str(), filter);
 
         auto options = JsonUtil::Create(true);
         options->Put("hour", TimeFormat::GetHourFormat(

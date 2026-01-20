@@ -168,6 +168,7 @@
       "OHOS::Ace::GaugeModel::GetInstance()";
       "OHOS::Ace::GaugeModel::instance_";
       "OHOS::Ace::GaugeModel::mutex_";
+      OHOS::Ace::NG::TimePickerModelNG::*;
       OHOS::Ace::GridColModel::*;
       OHOS::Ace::GridModel::*;
       OHOS::Ace::GridItemModel::*;
@@ -362,6 +363,54 @@
       OHOS::Ace::NG::OffscreenCanvasPattern::*;
       OHOS::Ace::NG::CustomNodeBase::*;
       OHOS::Ace::NG::XComponentPattern::*;
+      OHOS::Ace::NG::PickerColumnPattern*;
+      vtable?for?OHOS::Ace::NG::PickerColumnPattern;
+      virtual?thunk?to?OHOS::Ace::NG::PickerColumnPattern::*;
+      OHOS::Ace::FontManager*;
+      OHOS::Ace::NG::TossAnimationController*;
+      OHOS::Ace::NG::PickerAudioHapticFactory*;
+      OHOS::Ace::NG::BorderRadiusPropertyT*;
+      OHOS::Ace::PickerTime*;
+      OHOS::Ace::NG::TextPattern*;
+      vtable?for?OHOS::Ace::NG::TextPattern;
+      virtual?thunk?to?OHOS::Ace::NG::TextPattern::*;
+      VTT?for?OHOS::Ace::NG::TextPattern;
+      OHOS::Ace::NG::TextSelectOverlay*;
+      vtable?for?OHOS::Ace::NG::TextSelectOverlay;
+      virtual?thunk?to?OHOS::Ace::NG::TextSelectOverlay::*;
+      VTT?for?OHOS::Ace::NG::TextSelectOverlay;
+      OHOS::Ace::NG::ParagraphManager*;
+      vtable?for?OHOS::Ace::NG::ParagraphManager;
+      virtual?thunk?to?OHOS::Ace::NG::ParagraphManager::*;
+      VTT?for?OHOS::Ace::NG::ParagraphManager;
+      OHOS::Ace::NG::ButtonPattern*;
+      vtable?for?OHOS::Ace::NG::ButtonPattern;
+      virtual?thunk?to?OHOS::Ace::NG::ButtonPattern::*;
+      VTT?for?OHOS::Ace::NG::ButtonPattern;
+      OHOS::Ace::NG::StackLayoutAlgorithm*;
+      OHOS::Ace::NG::DividerPainter*;
+      OHOS::Ace::NG::DatePickerPattern*;
+      OHOS::Ace::DateTimeSequence*;
+      OHOS::Ace::GaugeMode*;
+      OHOS::Ace::NG::DialogView*;
+      OHOS::Ace::TimePickerDialogModel*;
+      OHOS::Ace::PickerBaseComponent*;
+
+      OHOS::Ace::NG::DividerPattern*;
+      vtable?for?OHOS::Ace::NG::DividerPattern;
+      virtual?thunk?to?OHOS::Ace::NG::DividerPattern::*;
+      VTT?for?OHOS::Ace::NG::DividerPattern;
+      OHOS::Ace::NG::DatePickerDialogView*;
+      OHOS::Ace::Framework::ViewStackProcessor*;
+      OHOS::Ace::PickerTimeComponent*;
+      OHOS::Ace::NG::BorderWidthPropertyT*;
+      OHOS::Ace::Framework::TimePickerModelImpl*;
+      vtable?for?OHOS::Ace::Framework::TimePickerModelImpl;
+      OHOS::Ace::Framework::TimePickerDialogModelImpl*;
+      vtable?for?OHOS::Ace::Framework::TimePickerDialogModelImpl;
+      *OHOS::Ace::NG::Converter::ConvContext::Allocate*;
+      SendArkUISyncEvent;
+
       OHOS::Ace::PipelineBase::Vp2PxWithCurrentDensity*;
       OHOS::Ace::PipelineBase::Px2VpWithCurrentDensity*;
       OHOS::Ace::PipelineBase::GetCurrentContextSafely*;
@@ -846,6 +895,13 @@
 
       "OHOS::Ace::NG::Validator::ValidateNonNegative(std::optional<float>& value)";
 
+
+      OHOS::Ace::NG::Validator::*;
+      OHOS::Ace::NG::Converter::ResourceConverter::*;
+      OHOS::Ace::NG::CommonViewModelNG::CreateFrameNode*;
+      *OHOS::Ace::NG::Converter::Convert*;
+      *OHOS::Ace::NG::Converter::AssignCast*;
+      *OHOS::Ace::NG::Converter::AssignArkValue*;
 
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
       "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";
@@ -1784,6 +1840,7 @@
       OHOS::Ace::V2::SYMBOL_ETS_TAG;
       OHOS::Ace::UINodeTracer::UINodeTracer*;
       OHOS::Ace::ResTracer::~ResTracer*;
+      "OHOS::Ace::ResTracer::ResTracer(unsigned int, unsigned long long)";
       OHOS::Ace::FontManager::AddFontNodeNG*;
       OHOS::Ace::PipelineBase::CheckIfGetTheme*;
       OHOS::Ace::PipelineBase::HyperlinkStartAbility*;
