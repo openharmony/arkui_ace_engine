@@ -23,7 +23,6 @@
 #include "base/geometry/offset.h"
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
-#include "ui/base/macros.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/manager/select_overlay/select_overlay_proxy.h"
 #include "core/components_ng/manager/select_overlay/selection_host.h"
@@ -78,7 +77,7 @@ enum class SelectOverlayMenuId {
     AI_WRITE
 };
 
-class ACE_FORCE_EXPORT SelectOverlayClient : public SelectionHost {
+class SelectOverlayClient : public SelectionHost {
     DECLARE_ACE_TYPE(SelectOverlayClient, SelectionHost);
 
 public:

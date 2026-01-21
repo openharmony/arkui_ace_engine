@@ -787,40 +787,10 @@ class GridRowModifier extends ArkGridRowComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class LazyArkHyperlinkComponent extends ArkComponent {
-  static module = undefined;
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-    if (LazyArkHyperlinkComponent.module === undefined) {
-      LazyArkHyperlinkComponent.module = globalThis.requireNapi('arkui.components.arkhyperlink');
-    }
-    this.lazyComponent = LazyArkHyperlinkComponent.module.createComponent(nativePtr, classType);
-  }
-
-  setMap() {
-    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
-  }
-
-  color(color) {
-    this.lazyComponent.color(color);
-    return this;
-  }
-
-  draggable(draggable) {
-    this.lazyComponent.draggable(draggable);
-    return this;
-  }
-
-  responseRegion(region) {
-    this.lazyComponent.responseRegion(region);
-    return this;
-  }
-}
-class HyperlinkModifier extends LazyArkHyperlinkComponent {
+class HyperlinkModifier extends ArkHyperlinkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
-    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

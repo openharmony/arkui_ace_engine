@@ -1624,7 +1624,6 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/test/mock/core/pattern/mock_indexer_vibrator.cpp",
     "$ace_root/test/mock/core/pattern/mock_picker_haptic_factory.cpp",
     "$ace_root/test/mock/core/pattern/mock_web_pattern.cpp",
-    "$ace_root/test/mock/core/modifier/mock_hyperlink_modifier.cpp",
     "$ace_root/test/mock/core/modifier/mock_flow_item_modifier.cpp",
     "$ace_root/test/mock/core/modifier/mock_node_checkbox_modifier.cpp",
     "$ace_root/test/mock/core/modifier/mock_checkboxgroup_modifier.cpp",
