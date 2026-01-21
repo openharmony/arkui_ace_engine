@@ -14,7 +14,7 @@
  */
 
 import { uiUtils } from './base/uiUtilsImpl';
-import { IMonitor, IMonitorDecoratedVariable, IMonitorPathInfo } from './decorator';
+import { IMonitor, IMonitorDecoratedVariable, IMonitorPathInfo, IVariableOwner } from './decorator';
 import { MonitorFunctionDecorator } from './decoratorImpl/decoratorMonitor';
 import { ExtendableComponent } from '../component/extendableComponent';
 import { BusinessError } from '@ohos.base';
@@ -92,7 +92,7 @@ export class UIUtils {
 
 interface MonitorOptions {
     isSynchronous?: boolean;
-    owner?: ExtendableComponent;
+    owner?: IVariableOwner;
     path?: string | string[];
 }
 
