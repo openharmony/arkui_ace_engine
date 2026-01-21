@@ -5170,3 +5170,17 @@ let DialogDisplayMode;
   DialogDisplayMode[DialogDisplayMode.SCREEN_BASED = 0] = 'SCREEN_BASED';
   DialogDisplayMode[DialogDisplayMode.WINDOW_BASED = 1] = 'WINDOW_BASED';
 })(DialogDisplayMode || (DialogDisplayMode = {}));
+
+let CameraCaptureState;
+(function (CameraCaptureState) {
+  CameraCaptureState[CameraCaptureState.NONE = 0] = 'NONE';
+  CameraCaptureState[CameraCaptureState.PAUSED = 1] = 'PAUSED';
+  CameraCaptureState[CameraCaptureState.ACTIVE = 2] = 'ACTIVE';
+})(CameraCaptureState || (CameraCaptureState = {}));
+
+let MicrophoneCaptureState;
+(function (MicrophoneCaptureState) {
+  MicrophoneCaptureState[MicrophoneCaptureState.NONE = 0] = 'NONE';
+  MicrophoneCaptureState[MicrophoneCaptureState.PAUSED = 1] = 'PAUSED';
+  MicrophoneCaptureState[MicrophoneCaptureState.ACTIVE = 2] = 'ACTIVE';
+})(MicrophoneCaptureState || (MicrophoneCaptureState = {}));
