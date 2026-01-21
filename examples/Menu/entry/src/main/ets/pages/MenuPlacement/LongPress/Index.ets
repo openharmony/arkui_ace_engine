@@ -26,11 +26,12 @@ struct RotationIndex {
   @State message: string = 'test'
 
   private items : ListCategories[] = [
-    {title:"Top", url:"pages/MenuPlacement/LongPress/Top/Index"},
-    {title:"width20%_height50%",url:"pages/MenuPlacement/LongPress/menuWidth"},
-    {title:"width30%_height70%", url:"pages/MenuPlacement/LongPress/menuWidth1"},
-    {title:"width30%_Top", url:"pages/MenuPlacement/LongPress/menuWidth2"},
-    {title:"width30%_Bottom", url:"pages/MenuPlacement/LongPress/menuWidth3"}
+    {title:'Top', url:'pages/MenuPlacement/LongPress/Top/Index'},
+    {title:'Bottom', url:'pages/MenuPlacement/LongPress/Bottom/Index'},
+    {title:'width20%_height50%',url:'pages/MenuPlacement/LongPress/menuWidth'},
+    {title:'width30%_height70%', url:'pages/MenuPlacement/LongPress/menuWidth1'},
+    {title:'width30%_Top', url:'pages/MenuPlacement/LongPress/menuWidth2'},
+    {title:'width30%_Bottom', url:'pages/MenuPlacement/LongPress/menuWidth3'}
   ]
 
   build() {
