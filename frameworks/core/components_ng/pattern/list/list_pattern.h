@@ -53,7 +53,7 @@ struct ListScrollTarget {
     float targetOffset;
 };
 
-class ListPattern : public SelectableContainerPattern {
+class ACE_FORCE_EXPORT ListPattern : public SelectableContainerPattern {
     DECLARE_ACE_TYPE(ListPattern, SelectableContainerPattern);
 
 public:
@@ -61,7 +61,7 @@ public:
     {
         SetEdgeEffect(EdgeEffect::SPRING, false);
     }
-    ~ListPattern() override = default;
+    ~ListPattern() override;
 
     RefPtr<NodePaintMethod> CreateNodePaintMethod() override;
 

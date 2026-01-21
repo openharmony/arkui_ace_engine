@@ -6592,6 +6592,33 @@ struct ArkUIAlphabetIndexerModifier {
     void (*setOnPopupSelected)(ArkUINodeHandle node, void* callback);
     void (*resetOnPopupSelected)(ArkUINodeHandle node);
     void (*createWithResourceObj)(ArkUINodeHandle frameNode, ArkUI_Int32 jsType, void* resObj);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId, ArkUI_Bool isArc);
+    void (*setIndexerChangeEvent)(void* callback);
+    void (*setIndexerCreateChangeEvent)(void* callback);
+    void (*create)(void* arrayValue, ArkUI_Int32 selected, ArkUI_Bool isArc);
+    void* (*getAsyncEventHandlers)(uint32_t kind);
+    void (*setSelectedFontJs)(void* textStyle);
+    void (*setPopupFontJs)(void* textStyle);
+    void (*setFontJs)(void* textStyle);
+    void (*setPopupItemBackgroundColorJs)(void* color);
+    void (*setPopupItemBackgroundColorByUser)(ArkUI_Bool setByUser);
+    void (*setAlphabetIndexerColorJs)(void* color);
+    void (*setAlphabetIndexerColorByUser)(ArkUI_Bool setByUser);
+    void (*setPopupColorJs)(void* color);
+    void (*setPopupColorByUser)(ArkUI_Bool setByUser);
+    void (*setSelectedColorJs)(void* color);
+    void (*setSelectedColorByUser)(ArkUI_Bool setByUser);
+    void (*setPopupBackgroundJs)(void* color);
+    void (*setPopupBackgroundByUser)(ArkUI_Bool setByUser);
+    void (*setSelectedBackgroundColorJs)(void* color);
+    void (*setSelectedBackgroundColorByUser)(ArkUI_Bool setByUser);
+    void (*setPopupUnselectedColorJs)(void* color);
+    void (*setPopupUnselectedColorByUser)(ArkUI_Bool setByUser);
+    void (*setPopupSelectedColorJs)(void* color);
+    void (*setPopupSelectedColorByUser)(ArkUI_Bool setByUser);
+    void (*setPopupTitleBackgroundJs)(void* color);
+    void (*setPopupTitleBackgroundByUser)(ArkUI_Bool setByUser);
+    void (*setPopupPositionJs)(void* x, void* y);
 };
 
 struct ArkUILoadingProgressModifier {

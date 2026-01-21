@@ -18,6 +18,8 @@
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme_utils.h"
 #include "core/components_ng/pattern/indexer/indexer_model.h"
+#include "core/components_ng/pattern/indexer/indexer_model_ng.h"
+#include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::Framework {
 class JSIndexerTheme {
@@ -29,13 +31,16 @@ public:
             // no need to apply custom theme colors
             return;
         }
-
-        IndexerModel::GetInstance()->SetColor(themeColors->FontSecondary());
-        IndexerModel::GetInstance()->SetSelectedColor(themeColors->FontEmphasize());
-        IndexerModel::GetInstance()->SetPopupColor(themeColors->FontEmphasize());
-        IndexerModel::GetInstance()->SetPopupUnselectedColor(themeColors->FontPrimary());
-        IndexerModel::GetInstance()->SetPopupTitleBackground(themeColors->CompBackgroundTertiary());
-        IndexerModel::GetInstance()->SetSelectedBackgroundColor(themeColors->CompEmphasizeSecondary());
+        auto* stack = NG::ViewStackProcessor::GetInstance();
+        CHECK_NULL_VOID(stack);
+        auto frameNode = AceType::DynamicCast<NG::FrameNode>(stack->GetMainFrameNode());
+        CHECK_NULL_VOID(frameNode);
+        NG::IndexerModelNG::SetColor(frameNode, themeColors->FontSecondary());
+        NG::IndexerModelNG::SetSelectedColor(frameNode, themeColors->FontEmphasize());
+        NG::IndexerModelNG::SetPopupColor(frameNode, themeColors->FontEmphasize());
+        NG::IndexerModelNG::SetPopupUnselectedColor(frameNode, themeColors->FontPrimary());
+        NG::IndexerModelNG::SetPopupTitleBackground(frameNode, themeColors->CompBackgroundTertiary());
+        NG::IndexerModelNG::SetSelectedBackgroundColor(frameNode, themeColors->CompEmphasizeSecondary());
     }
 };
 } // namespace OHOS::Ace::Framework

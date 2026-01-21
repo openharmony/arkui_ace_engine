@@ -71,7 +71,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image_animator.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image_span.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_indexer.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_keyboard_avoid.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_foreach.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_lazy_grid.h"
@@ -460,7 +459,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSTextPickerDialog::JSBind(globalObj);
     JSDatePickerDialog::JSBind(globalObj);
 #endif
-    JSIndexer::JSBind(globalObj);
     JSHyperlink::JSBind(globalObj);
     JSActionSheet::JSBind(globalObj);
     JSAlertDialog::JSBind(globalObj);

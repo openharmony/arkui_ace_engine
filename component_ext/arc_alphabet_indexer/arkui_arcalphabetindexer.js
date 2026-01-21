@@ -161,6 +161,10 @@ class ArcAlphabetIndexerItemSizeModifier extends ModifierWithKey {
     }
 }
 
+if (globalThis.ArkAlphabetIndexerComponent === undefined) {
+    globalThis.ArkAlphabetIndexerComponent = globalThis.requireNapi('arkui.components.arkalphabetindexer').ArkAlphabetIndexerComponent;
+}
+
 class ArcAlphabetIndexerComponent extends ArkAlphabetIndexerComponent {
     constructor(nativePtr, classType) {
         super(nativePtr, classType);
@@ -203,7 +207,11 @@ class ArcAlphabetIndexerModifier extends ArcAlphabetIndexerComponent {
     }
 }
 
-class ArcAlphabetIndexer extends AlphabetIndexer {
+if (globalThis.JSAlphabetIndexer === undefined) {
+    globalThis.JSAlphabetIndexer = globalThis.requireNapi('arkui.components.arkalphabetindexer').JSAlphabetIndexer;
+}
+
+class ArcAlphabetIndexer extends JSAlphabetIndexer {
     static attributeModifier(modifier) {
         attributeModifierFunc.call(this, modifier, (nativePtr) => {
             return new ArcAlphabetIndexerComponent(nativePtr);
@@ -213,53 +221,53 @@ class ArcAlphabetIndexer extends AlphabetIndexer {
     }
 
     static create(value) {
-        AlphabetIndexer.createArc(value);
+        globalThis.AlphabetIndexer.createArc(value);
     }
 
     static color(value) {
         if (value) {
             value = value.color;
         }
-        AlphabetIndexer.color(value);
+        globalThis.AlphabetIndexer.color(value);
     }
 
     static selectedColor(value) {
         if (value) {
             value = value.color;
         }
-        AlphabetIndexer.selectedColor(value);
+        globalThis.AlphabetIndexer.selectedColor(value);
     }
 
     static popupColor(value) {
         if (value) {
             value = value.color;
         }
-        AlphabetIndexer.popupColor(value);
+        globalThis.AlphabetIndexer.popupColor(value);
     }
 
     static selectedBackgroundColor(value) {
         if (value) {
             value = value.color;
         }
-        AlphabetIndexer.selectedBackgroundColor(value);
+        globalThis.AlphabetIndexer.selectedBackgroundColor(value);
     }
 
     static popupBackground(value) {
         if (value) {
             value = value.color;
         }
-        AlphabetIndexer.popupBackground(value);
+        globalThis.AlphabetIndexer.popupBackground(value);
     }
 
     static itemSize(value) {
         if (value) {
             value = `${value.value}${LengthUnit[value.unit]}`;
         }
-        AlphabetIndexer.itemSize(value);
+        globalThis.AlphabetIndexer.itemSize(value);
     }
 
     static usePopup(value) {
-        AlphabetIndexer.usingPopup(value);
+        globalThis.AlphabetIndexer.usingPopup(value);
     }
 }
 

@@ -455,7 +455,7 @@ private:
 };
 
 // Explicit instantiation declarations
-extern template class NodeAnimatableProperty<float, AnimatablePropertyFloat>;
+extern template class ACE_FORCE_EXPORT NodeAnimatableProperty<float, AnimatablePropertyFloat>;
 extern template class NodeAnimatableProperty<OffsetF, AnimatablePropertyOffsetF>;
 
 using NodeAnimatablePropertyFloat = NodeAnimatableProperty<float, AnimatablePropertyFloat>;

@@ -32,6 +32,16 @@
 #include "core/components_ng/pattern/pattern.h"
 
 namespace OHOS::Ace::NG {
+
+inline constexpr char TEXT_ETS_TAG[] = "Text";
+inline constexpr char STACK_ETS_TAG[] = "Stack";
+inline constexpr char LIST_ETS_TAG[] = "List";
+inline constexpr char COLUMN_ETS_TAG[] = "Column";
+inline constexpr char LIST_ITEM_ETS_TAG[] = "ListItem";
+inline constexpr char ARC_INDEXER_ETS_TAG[] = "ArcAlphabetIndexer";
+inline constexpr char INDEXER_ETS_TAG[] = "AlphabetIndexer";
+inline constexpr char IMAGE_ETS_TAG[] = "Image";
+
 enum class IndexerCollapsingMode {
     INVALID,
     NONE, // all array should be displayed

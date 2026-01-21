@@ -18,7 +18,7 @@
 #include "frameworks/core/common/container.h"
 #include "frameworks/core/pipeline_ng/pipeline_context.h"
 namespace OHOS::Ace {
-bool TokenTheme::IsDarkMode()
+ACE_FORCE_EXPORT bool TokenTheme::IsDarkMode()
 {
     auto pipelineContext = OHOS::Ace::NG::PipelineContext::GetCurrentContext();
     if (pipelineContext) {

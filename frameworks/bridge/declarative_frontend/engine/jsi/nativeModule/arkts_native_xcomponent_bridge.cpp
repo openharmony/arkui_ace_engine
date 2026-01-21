@@ -18,7 +18,6 @@
 #include "base/utils/utils.h"
 #include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
-#include "bridge/declarative_frontend/jsview/models/indexer_model_impl.h"
 #include "bridge/declarative_frontend/jsview/js_xcomponent.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 

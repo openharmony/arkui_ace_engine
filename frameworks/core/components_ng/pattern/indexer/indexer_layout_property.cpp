@@ -66,7 +66,7 @@ void IndexerLayoutProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const 
     auto defaultFontWeight = indexerTheme->GetPopupTextStyle().GetFontWeight();
     json->PutExtAttr("popupItemFontSize", propFontSize_.value_or(defaultFontSize).ToString().c_str(), filter);
     json->PutExtAttr("popupItemFontWeight",
-        V2::ConvertWrapFontWeightToStirng(propFontWeight_.value_or(defaultFontWeight)).c_str(), filter);
+        ConvertWrapFontWeightToStirng(propFontWeight_.value_or(defaultFontWeight)).c_str(), filter);
     json->PutExtAttr("autoCollapse", propAutoCollapse_.value_or(false) ? "true" : "false", filter);
     json->PutExtAttr("popupHorizontalSpace", propPopupHorizontalSpace_.value_or(
         Dimension(NG::INDEXER_BUBBLE_INVALID_SPACE, DimensionUnit::VP)).ToString().c_str(), filter);
@@ -80,7 +80,7 @@ std::unique_ptr<JsonValue> IndexerLayoutProperty::ToJsonObjectValue(const TextSt
     fontJsonObject->Put("fontSize", textStyle.GetFontSize().ToString().c_str());
     fontJsonObject->Put(
         "fontStyle", textStyle.GetFontStyle() == FontStyle::NORMAL ? "FontStyle::NORMAL" : "FontStyle::ITALIC");
-    fontJsonObject->Put("fontWeight", V2::ConvertWrapFontWeightToStirng(textStyle.GetFontWeight()).c_str());
+    fontJsonObject->Put("fontWeight", ConvertWrapFontWeightToStirng(textStyle.GetFontWeight()).c_str());
     auto fontFamilyVector = textStyle.GetFontFamilies();
     std::string fontFamily;
     for (uint32_t i = 0; i < fontFamilyVector.size(); i++) {

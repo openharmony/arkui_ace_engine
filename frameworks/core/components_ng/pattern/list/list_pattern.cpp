@@ -57,6 +57,8 @@ constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
 #endif
 } // namespace
 
+ListPattern::~ListPattern() = default;
+
 void ListPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();

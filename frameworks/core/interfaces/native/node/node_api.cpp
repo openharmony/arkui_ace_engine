@@ -652,14 +652,6 @@ const ComponentAsyncEventHandler GRID_ITEM_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnGridItemSelect,
 };
 
-const ComponentAsyncEventHandler ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[] = {
-    NodeModifier::SetOnIndexerSelected,
-    NodeModifier::SetOnIndexerRequestPopupData,
-    NodeModifier::SetOnIndexerPopupSelected,
-    NodeModifier::SetIndexerChangeEvent,
-    NodeModifier::SetIndexerCreatChangeEvent,
-};
-
 const ComponentAsyncEventHandler SEARCH_NODE_ASYNC_EVENT_HANDLERS[] = {
     NodeModifier::SetOnSearchSubmit,
     NodeModifier::SetOnSearchChange,
@@ -1139,12 +1131,12 @@ void NotifyComponentAsyncEvent(ArkUINodeHandle node, ArkUIEventSubKind kind, Ark
             break;
         }
         case ARKUI_ALPHABET_INDEXER: {
-            // alphabet indexer event type.
-            if (subKind >= sizeof(ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS) / sizeof(ComponentAsyncEventHandler)) {
-                TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "NotifyComponentAsyncEvent kind:%{public}d NOT IMPLEMENT", kind);
-                return;
+            auto* alphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier();
+            if (alphabetIndexerModifier) {
+                eventHandle = reinterpret_cast<ComponentAsyncEventHandler>(
+                    alphabetIndexerModifier->getAsyncEventHandlers(subKind));
+                CHECK_NULL_VOID(eventHandle);
             }
-            eventHandle = ALPHABET_INDEXER_NODE_ASYNC_EVENT_HANDLERS[subKind];
             break;
         }
         case ARKUI_SEARCH: {

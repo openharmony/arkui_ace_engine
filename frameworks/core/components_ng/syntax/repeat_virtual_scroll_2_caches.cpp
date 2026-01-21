@@ -182,7 +182,8 @@ std::optional<IndexType> RepeatVirtualScroll2Caches::GetL1Index4Node(const RefPt
         const RIDType rid = iter.second;
 
         OptCacheItem cacheItemOpt = GetCacheItem4RID(rid);
-        if (cacheItemOpt.has_value() && cacheItemOpt.value()->node_ == frameNode) {
+        if (cacheItemOpt.has_value() && cacheItemOpt.value()->node_ &&
+            cacheItemOpt.value()->node_->GetFrameChildByIndex(0, false) == frameNode) {
             return ConvertFromToIndexRevert(index); // index in index -> RID
         }
     }

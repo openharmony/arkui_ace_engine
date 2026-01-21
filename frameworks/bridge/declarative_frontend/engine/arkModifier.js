@@ -261,10 +261,140 @@ class CommonModifier extends ArkComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class AlphabetIndexerModifier extends ArkAlphabetIndexerComponent {
+class LazyAlphabetIndexerComponent extends ArkComponent {
+   static module = undefined;
+   constructor(nativePtr, classType) {
+     super(nativePtr, classType);
+     if (LazyAlphabetIndexerComponent.module === undefined) {
+       LazyAlphabetIndexerComponent.module = globalThis.requireNapi('arkui.components.arkalphabetindexer');
+     }
+     this.lazyComponent = LazyAlphabetIndexerComponent.module.createComponent(nativePtr, classType);
+   }
+   setMap() {
+     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+   }
+   onSelected(value) {
+     this.lazyComponent.onSelected(value);
+     return this;
+   }
+   color(value) {
+     this.lazyComponent.color(value);
+     return this;
+   }
+   selectedColor(value) {
+     this.lazyComponent.selectedColor(value);
+     return this;
+   }
+   popupColor(value) {
+     this.lazyComponent.popupColor(value);
+     return this;
+   }
+   selectedBackgroundColor(value) {
+     this.lazyComponent.selectedBackgroundColor(value);
+     return this;
+   }
+   popupBackground(value) {
+     this.lazyComponent.popupBackground(value);
+     return this;
+   }
+   popupSelectedColor(value) {
+     this.lazyComponent.popupSelectedColor(value);
+     return this;
+   }
+   popupUnselectedColor(value) {
+     this.lazyComponent.popupUnselectedColor(value);
+     return this;
+   }
+   popupItemBackgroundColor(value) {
+     this.lazyComponent.popupItemBackgroundColor(value);
+     return this;
+   }
+   usingPopup(value) {
+     this.lazyComponent.usingPopup(value);
+     return this;
+   }
+   selectedFont(value) {
+     this.lazyComponent.selectedFont(value);
+     return this;
+   }
+   popupFont(value) {
+     this.lazyComponent.popupFont(value);
+     return this;
+   }
+   popupItemFont(value) {
+     this.lazyComponent.popupItemFont(value);
+     return this;
+   }
+   itemSize(value) {
+     this.lazyComponent.itemSize(value);
+     return this;
+   }
+   font(value) {
+     this.lazyComponent.font(value);
+     return this;
+   }
+   alignStyle(value, offset) {
+     this.lazyComponent.alignStyle(value, offset);
+     return this;
+   }
+   onSelect(value) {
+     this.lazyComponent.onSelect(value);
+     return this;
+   }
+   onRequestPopupData(value) {
+     this.lazyComponent.onRequestPopupData(value);
+     return this;
+   }
+   onPopupSelect(value) {
+     this.lazyComponent.onPopupSelect(value);
+     return this;
+   }
+   selected(value) {
+     this.lazyComponent.selected(value);
+     return this;
+   }
+   popupPosition(value) {
+     this.lazyComponent.popupPosition(value);
+     return this;
+   }
+   popupItemBorderRadius(value) {
+     this.lazyComponent.popupItemBorderRadius(value);
+     return this;
+   }
+   itemBorderRadius(value) {
+     this.lazyComponent.itemBorderRadius(value);
+     return this;
+   }
+   popupBackgroundBlurStyle(value) {
+     this.lazyComponent.popupBackgroundBlurStyle(value);
+     return this;
+   }
+   popupTitleBackground(value) {
+     this.lazyComponent.popupTitleBackground(value);
+     return this;
+   }
+   width(value) {
+     this.lazyComponent.width(value);
+     return this;
+   }
+   autoCollapse(value) {
+     this.lazyComponent.autoCollapse(value);
+     return this;
+   }
+   enableHapticFeedback(value) {
+     this.lazyComponent.enableHapticFeedback(value);
+     return this;
+   }
+   contentModifier(value) {
+     this.lazyComponent.contentModifier(value);
+     return this;
+   }
+ }
+ class AlphabetIndexerModifier extends LazyAlphabetIndexerComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

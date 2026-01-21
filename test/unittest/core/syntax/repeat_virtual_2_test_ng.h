@@ -40,6 +40,19 @@
 #undef protected
 
 namespace OHOS::Ace::NG {
+class TestUINode : public UINode {
+    DECLARE_ACE_TYPE(TestUINode, UINode);
+
+    bool IsAtomicNode() const override
+    {
+        return true;
+    }
+
+    explicit TestUINode(int32_t nodeId) : UINode("TestUINode", nodeId) {}
+
+    ~TestUINode() override = default;
+};
+
 class RepeatVirtual2TestNg : public testing::Test {
 public:
     void SetUp() override
@@ -52,9 +65,14 @@ public:
         MockPipelineContext::TearDown();
     }
 
+    RefPtr<TestUINode> CreateTestUINode(int32_t nodeId)
+    {
+        return AceType::MakeRefPtr<TestUINode>(nodeId);
+    }
+
     RefPtr<FrameNode> CreateNode(const std::string& tag);
 
-    RefPtr<RepeatVirtualScroll2Node> CreateRepeatVirtualNode(uint32_t totalCount);
+    RefPtr<RepeatVirtualScroll2Node> CreateRepeatVirtualNode(uint32_t arrLen, uint32_t totalCount);
 
     // create ListItemNode with 2 Text Node inside
     RefPtr<FrameNode> CreateListItemNode();

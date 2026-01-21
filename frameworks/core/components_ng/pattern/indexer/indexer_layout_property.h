@@ -26,6 +26,30 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
+inline std::string ConvertWrapFontWeightToStirng(FontWeight fontWeight)
+{
+    static const LinearEnumMapNode<FontWeight, std::string> fontWeightTable[] = {
+        { FontWeight::W100, "100" },
+        { FontWeight::W200, "200" },
+        { FontWeight::W300, "300" },
+        { FontWeight::W400, "400" },
+        { FontWeight::W500, "500" },
+        { FontWeight::W600, "600" },
+        { FontWeight::W700, "700" },
+        { FontWeight::W800, "800" },
+        { FontWeight::W900, "900" },
+        { FontWeight::BOLD, "FontWeight.Bold" },
+        { FontWeight::NORMAL, "FontWeight.Normal" },
+        { FontWeight::BOLDER, "FontWeight.Bolder" },
+        { FontWeight::LIGHTER, "FontWeight.Lighter" },
+        { FontWeight::MEDIUM, "FontWeight.Medium" },
+        { FontWeight::REGULAR, "FontWeight.Regular" },
+    };
+
+    auto index = BinarySearchFindIndex(fontWeightTable, ArraySize(fontWeightTable), fontWeight);
+    return index < 0 ? "FontWeight.Normal" : fontWeightTable[index].value;
+}
+
 class InspectorFilter;
 
 class ACE_EXPORT IndexerLayoutProperty : public LayoutProperty {
