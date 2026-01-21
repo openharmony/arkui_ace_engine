@@ -2467,7 +2467,7 @@ frameworks/core/components_ng/pattern/custom_node_ext/
 frameworks/core/components_ng/pattern/data_panel/ @huawei_g_five
 frameworks/core/components_ng/pattern/dialog/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/divider/ @arkuilayout1
-frameworks/core/components_ng/pattern/effect_component/
+frameworks/core/components_ng/pattern/effect_component/ @arkuicodepulse
 frameworks/core/components_ng/pattern/flex/ @arkuilayout1
 frameworks/core/components_ng/pattern/folder_stack/ @arkuilayout1
 frameworks/core/components_ng/pattern/form/ @form_framework
