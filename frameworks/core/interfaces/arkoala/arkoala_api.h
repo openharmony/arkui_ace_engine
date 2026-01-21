@@ -5953,6 +5953,7 @@ struct ArkUIBlankModifier {
 };
 
 struct ArkUICounterModifier {
+    void (*createModel)();
     void (*setEnableInc)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableInc)(ArkUINodeHandle node);
     void (*setEnableDec)(ArkUINodeHandle node, ArkUI_Bool value);

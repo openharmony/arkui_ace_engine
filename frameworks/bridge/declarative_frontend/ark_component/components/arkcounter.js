@@ -190,7 +190,6 @@ if (globalThis.Counter !== undefined) {
 
 class JSCounter extends JSViewAbstract {
     static create(params) {
-        console.log('JSCounter create nativeModule');
         if (params !== undefined) {
             getUINativeModule().counter.create();
         } else {
@@ -239,15 +238,6 @@ class JSCounter extends JSViewAbstract {
         });
     }
 
-    static onClick(value) {
-        __Common__.onClick(value);
-    }
-    static onKeyEvent(value) {
-        __Common__.onKeyEvent(value);
-    }
-    static onDeleteEvent(value) {
-        __Common__.onDeleteEvent(value);
-    }
     static onAttach(value) {
         __Common__.onAttach(value);
     }
@@ -255,17 +245,13 @@ class JSCounter extends JSViewAbstract {
         __Common__.onAppear(value);
     }
     static onDetach(value) {
-        __Common__.onAttach(value);
+        __Common__.onDetach(value);
     }
     static onDisAppear(value) {
         __Common__.onDisAppear(value);
     }
-
     static onTouch(value) {
         __Common__.onTouch(value);
-    }
-    static onHover(value) {
-        __Common__.onHover(value);
     }
 }
 

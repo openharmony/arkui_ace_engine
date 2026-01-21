@@ -488,4 +488,76 @@ void CounterModelNG::HandleBackgroundColorResource(FrameNode* frameNode, const R
     };
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
+
+void CounterModelNG::CreateCounterModelNG()
+{
+    auto* stack = ViewStackProcessor::GetInstance();
+    auto nodeId = stack->ClaimNodeId();
+    ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", COUNTER_ETS_TAG, nodeId);
+    auto counterNode = CounterNode::GetOrCreateCounterNode(
+        COUNTER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<CounterPattern>(); });
+    auto counterPattern = counterNode->GetPattern<CounterPattern>();
+    CHECK_NULL_VOID(counterPattern);
+    auto pipeline = PipelineBase::GetCurrentContext();
+    CHECK_NULL_VOID(pipeline);
+    auto counterTheme = pipeline->GetTheme<CounterTheme>();
+    CHECK_NULL_VOID(counterTheme);
+    counterNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(counterTheme->GetWidth()), CalcLength(counterTheme->GetHeight())));
+    counterNode->GetRenderContext()->SetClipToFrame(true);
+    counterNode->GetLayoutProperty<LinearLayoutProperty>()->UpdateMainAxisAlign(FlexAlign::CENTER);
+
+    bool hasSubNode = counterPattern->HasSubNode();
+    bool hasContentNode = counterPattern->HasContentNode();
+    bool hasAddNode = counterPattern->HasAddNode();
+    auto subId = counterPattern->GetSubId();
+    auto contentId = counterPattern->GetContentId();
+    auto addId = counterPattern->GetAddId();
+    if (!hasSubNode) {
+        auto subNode = CreateButtonChildStatic(subId, SUB, counterTheme);
+        subNode->MountToParent(counterNode);
+    }
+    if (!hasContentNode) {
+        auto contentNode = CreateContentNodeChild(contentId, counterTheme);
+        contentNode->MountToParent(counterNode);
+    }
+    if (!hasAddNode) {
+        auto addNode = CreateButtonChildStatic(addId, ADD, counterTheme);
+        addNode->MountToParent(counterNode);
+    }
+    stack->Push(counterNode);
+}
+
+RefPtr<FrameNode> CounterModelNG::CreateButtonChildStatic(
+    int32_t id, const std::u16string& symbol, const RefPtr<CounterTheme>& counterTheme)
+{
+    auto buttonNode =
+        FrameNode::GetOrCreateFrameNode(BUTTON_ETS_TAG, id, []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    buttonNode->GetEventHub<ButtonEventHub>()->SetStateEffect(true);
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateType(ButtonType::NORMAL);
+    buttonNode->GetLayoutProperty<ButtonLayoutProperty>()->UpdateCreateWithLabel(false);
+    buttonNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(counterTheme->GetControlWidth()), CalcLength(counterTheme->GetHeight())));
+    buttonNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    buttonNode->GetLayoutProperty()->UpdateBorderWidth(counterTheme->GetBorderWidth());
+    buttonNode->GetRenderContext()->UpdateBorderStyle(counterTheme->GetBorderStyle());
+    buttonNode->GetRenderContext()->UpdateBorderColor(counterTheme->GetBorderColor());
+    buttonNode->MarkModifyDone();
+
+    auto textNode = FrameNode::GetOrCreateFrameNode(TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<TextPattern>(); });
+    textNode->GetRenderContext()->UpdateBackgroundColor(Color::TRANSPARENT);
+    auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
+    if (textLayoutProperty) {
+        textLayoutProperty->UpdateContent(symbol);
+        textLayoutProperty->UpdateTextAlign(TextAlign::CENTER);
+    }
+    textNode->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(counterTheme->GetControlWidth()), CalcLength(counterTheme->GetHeight())));
+    textNode->GetLayoutProperty()->UpdateAlignment(Alignment::CENTER);
+    textNode->MarkModifyDone();
+
+    textNode->MountToParent(buttonNode);
+    return buttonNode;
+}
 } // namespace OHOS::Ace::NG
