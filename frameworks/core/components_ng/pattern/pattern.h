@@ -332,6 +332,11 @@ public:
         return true;
     }
 
+    virtual bool ForceRequestParentMeasure() const
+    {
+        return false;
+    }
+
     virtual void NotifyForNextTouchEvent() {}
 
     virtual bool OnDirtyLayoutWrapperSwap(
