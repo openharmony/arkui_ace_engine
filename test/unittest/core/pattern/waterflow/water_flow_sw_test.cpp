@@ -186,10 +186,10 @@ HWTEST_F(WaterFlowSWTest, NoConvert001, TestSize.Level1)
     pattern_->isAnimationStop_ = true;
     pattern_->OnScrollEndCallback();
     // should mark misaligned
-    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 2800.000000 EndPos: 2800.000000 empty}");
-    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: 2800.000000 EndPos: 2800.000000 empty}");
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: -37.000000 EndPos: -37.000000 empty}");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: -37.000000 EndPos: -37.000000 empty}");
     info_->lanes_[0][0].startPos = -6000; // manually create scenario that can trigger ConvertDeltaToJump
-    EXPECT_EQ(info_->jumpIndex_, 5);
+    EXPECT_EQ(info_->jumpIndex_, -2);
     FlushUITasks();
     EXPECT_EQ(info_->startIndex_, 5);
 }

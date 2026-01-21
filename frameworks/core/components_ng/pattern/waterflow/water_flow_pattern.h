@@ -267,6 +267,12 @@ private:
      */
     WeakPtr<FocusHub> GetNextFocusNode(FocusStep step, const WeakPtr<FocusHub>& currentFocusNode);
 
+    /**
+     * @brief Check if current position is at a section boundary
+     * @return true if at section start, false otherwise
+     */
+    bool IsAtSectionBoundary() const;
+
     void ScrollToFocusItem(int32_t itemIdx);
 
     std::optional<int32_t> targetIndex_;
