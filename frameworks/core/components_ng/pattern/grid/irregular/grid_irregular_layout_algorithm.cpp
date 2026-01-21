@@ -689,8 +689,12 @@ void GridIrregularLayoutAlgorithm::MeasureToTarget()
     GridIrregularFiller filler(&info_, wrapper_);
     FillParams param { crossLens_, crossGap_, mainGap_ };
     if (info_.targetIndex_ < info_.startIndex_) {
-        auto it = info_.FindInMatrix(*info_.targetIndex_);
-        filler.MeasureBackwardToTarget(param, it->first, info_.startMainLineIndex_);
+        if (info_.lineHeightMap_.find(0) != info_.lineHeightMap_.end()) {
+            auto it = info_.FindInMatrix(*info_.targetIndex_);
+            filler.MeasureBackwardToTarget(param, it->first, info_.startMainLineIndex_);
+        } else {
+            filler.MeasureBackwardToTarget(param, 0, info_.startMainLineIndex_);
+        }
     } else {
         filler.FillToTarget(param, *info_.targetIndex_, info_.startMainLineIndex_);
     }
