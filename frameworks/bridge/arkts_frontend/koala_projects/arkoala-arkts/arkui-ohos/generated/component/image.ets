@@ -547,6 +547,18 @@ export class ArkImagePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ImageAttribute_setContentTransition(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setAntialiasedAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._ImageAttribute_setAntialiased(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export type DrawingColorFilter = drawing.ColorFilter;
 export type ResolutionQuality = image.ResolutionQuality;
@@ -698,6 +710,9 @@ export interface ImageAttribute extends CommonMethod {
     contentTransition(value: ContentTransitionEffect | undefined): this {
         throw new Error("Unimplemented method contentTransition")
     }
+    antialiased(value: boolean | undefined): this {
+        throw new Error("Unimplemented method antialiased")
+    }
     attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         throw new Error("Unimplemented method attributeModifier")
     }
@@ -733,6 +748,7 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
     orientation_value?: ImageRotateOrientation | undefined
     supportSvg2_value?: boolean | undefined
     contentTransition_value?: ContentTransitionEffect | undefined
+    antialiased_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined
     setImageOptions(src: image.PixelMap | ResourceStr | DrawableDescriptor | ImageContent | undefined, imageAIOptions?: ImageAIOptions): this {
         return this
@@ -825,6 +841,9 @@ export class ArkImageStyle extends ArkCommonMethodStyle implements ImageAttribut
         return this
     }
     contentTransition(value: ContentTransitionEffect | undefined): this {
+        return this
+    }
+    antialiased(value: boolean | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<ImageAttribute> | AttributeModifier<CommonMethod> | undefined): this {
@@ -1096,6 +1115,14 @@ export class ArkImageComponent extends ArkCommonMethodComponent implements Image
         if (this.checkPriority("contentTransition")) {
             const value_casted = value as (ContentTransitionEffect | undefined)
             this.getPeer()?.setContentTransitionAttribute(value_casted)
+            return this
+        }
+        return this
+    }
+    public antialiased(value: boolean | undefined): this {
+        if (this.checkPriority("antialiased")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setAntialiasedAttribute(value_casted)
             return this
         }
         return this

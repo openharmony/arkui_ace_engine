@@ -146,7 +146,6 @@ void ParseMenuDividerStrokeWidth(EcmaVM* vm, std::vector<Local<JSValueRef>>& arg
             }
         }
     } else {
-        CalcDimension strokeWidth;
         if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_0], strokeWidth)) {
             strokeWidth = Dimension(0.0);
         }
@@ -192,7 +191,6 @@ void ParseMenuDividerStartMargin(EcmaVM* vm, std::vector<Local<JSValueRef>>& arg
             }
         }
     } else {
-        CalcDimension startMargin;
         if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_2], startMargin)) {
             startMargin = Dimension(0.0);
         }
@@ -227,7 +225,6 @@ void ParseMenuDividerEndMargin(EcmaVM* vm, std::vector<Local<JSValueRef>>& args,
             }
         }
     } else {
-        CalcDimension endMargin;
         if (!ArkTSUtils::ParseJsLengthMetrics(vm, args[NUM_3], endMargin)) {
             endMargin = Dimension(0.0);
         }
@@ -391,11 +388,7 @@ bool ParseRadiusOptions(
             args[NUM_3] = secondObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "bottomRight"));
             if (args[NUM_0]->IsUndefined() && args[NUM_1]->IsUndefined() && args[NUM_2]->IsUndefined() &&
                 args[NUM_3]->IsUndefined()) {
-                args[NUM_0] = secondArg;
-                args[NUM_1] = secondArg;
-                args[NUM_2] = secondArg;
-                args[NUM_3] = secondArg;
-                args[NUM_4] = panda::JSValueRef::False(vm);
+                return false;
             } else {
                 args[NUM_4] = panda::JSValueRef::True(vm);
             }
@@ -642,9 +635,10 @@ ArkUINativeModuleValue MenuBridge::SetWidth(ArkUIRuntimeCallInfo* runtimeCallInf
         if (layoutPolicy->IsString(vm)) {
             auto commonModifier = nodeModifiers->getCommonModifier();
             CHECK_NULL_RETURN(commonModifier, panda::JSValueRef::Undefined(vm));
+            nativeNode = reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
             commonModifier->clearWidthOrHeight(nativeNode, true);
             auto policy = CommonBridge::ParseLayoutPolicy(layoutPolicy->ToString(vm)->ToString(vm));
-            commonModifier->setHeightLayoutPolicy(nativeNode, static_cast<ArkUI_Int32>(policy));
+            commonModifier->setWidthLayoutPolicy(nativeNode, static_cast<ArkUI_Int32>(policy) - NUM_1);
             return panda::JSValueRef::Undefined(vm);
         }
     }

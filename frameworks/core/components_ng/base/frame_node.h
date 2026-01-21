@@ -785,6 +785,16 @@ public:
         allowDrop_ = allowDrop;
     }
 
+    void SetEnableClickSoundEffect(bool enabled)
+    {
+        enableClickSoundEffect_ = enabled;
+    }
+
+    bool GetEnableClickSoundEffect()
+    {
+        return enableClickSoundEffect_;
+    }
+
     const std::set<std::string>& GetAllowDrop() const
     {
         return allowDrop_;
@@ -1490,6 +1500,16 @@ public:
         }
     }
 
+    const RefPtr<FrameNode>& GetCornerMarkNode() const
+    {
+        return cornerMarkNode_;
+    }
+
+    void SetCornerMarkNode(const RefPtr<FrameNode>& cornerMarkNode)
+    {
+        cornerMarkNode_ = cornerMarkNode;
+    }
+
     void AddToOcclusionMap(bool enable);
     void MarkModifyDoneUnsafely();
     void MarkDirtyNodeUnsafely(PropertyChangeFlag extraFlag);
@@ -1677,6 +1697,8 @@ private:
 
     void ResetPredictNodes();
     void HandleAreaChangeDestruct();
+    void HandleLanguageConfigurationUpdate(const ConfigurationChange& configurationChange);
+    void HandleColorModeConfigurationUpdate(const ConfigurationChange& configurationChange);
 
     const char* GetPatternTypeName() const;
     const char* GetLayoutPropertyTypeName() const;
@@ -1768,6 +1790,7 @@ private:
 
     ColorMode colorMode_ = ColorMode::LIGHT;
 
+    bool enableClickSoundEffect_ = true;
     bool draggable_ = false;
     bool userSet_ = false;
     bool customerSet_ = false;

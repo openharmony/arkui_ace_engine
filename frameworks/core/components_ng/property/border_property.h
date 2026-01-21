@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -28,7 +28,7 @@ namespace OHOS::Ace::NG {
 class InspectorFilter;
 
 template<typename T>
-struct BorderRadiusPropertyT {
+struct ACE_FORCE_EXPORT BorderRadiusPropertyT {
     std::optional<T> radiusTopLeft;
     std::optional<T> radiusTopRight;
     std::optional<T> radiusBottomRight;
@@ -342,7 +342,7 @@ struct BorderWidthPropertyT {
 };
 
 template<>
-struct BorderWidthPropertyT<Dimension> {
+struct ACE_FORCE_EXPORT BorderWidthPropertyT<Dimension> {
     std::optional<Dimension> leftDimen;
     std::optional<Dimension> topDimen;
     std::optional<Dimension> rightDimen;

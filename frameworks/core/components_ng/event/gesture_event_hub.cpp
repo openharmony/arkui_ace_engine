@@ -109,6 +109,7 @@ bool GestureEventHub::ProcessTouchTestHit(const OffsetF& coordinateOffset, const
 {
     auto host = GetFrameNode();
     CHECK_NULL_RETURN(host, false);
+    ACE_UINODE_TRACE(host);
     auto eventHub = eventHub_.Upgrade();
     auto getEventTargetImpl = eventHub ? eventHub->CreateGetEventTargetImpl() : nullptr;
     if (scrollableActuator_) {
@@ -234,6 +235,8 @@ bool GestureEventHub::ProcessDragEventTouchTestHit(const OffsetF& coordinateOffs
 
 void GestureEventHub::OnModifyDone()
 {
+    auto host = GetFrameNode();
+    ACE_UINODE_TRACE(host);
     if (recreateGesture_) {
         UpdateGestureHierarchy();
         recreateGesture_ = false;
@@ -572,6 +575,8 @@ void GestureEventHub::SetFocusClickEvent(GestureEventFunc&& clickEvent)
 // helper function to ensure clickActuator is initialized
 void GestureEventHub::CheckClickActuator()
 {
+    auto host = GetFrameNode();
+    ACE_UINODE_TRACE(host);
     if (!clickEventActuator_) {
         clickEventActuator_ = MakeRefPtr<ClickEventActuator>(WeakClaim(this));
         clickEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
@@ -1028,6 +1033,8 @@ void GestureEventHub::CopyGestures(const RefPtr<GestureEventHub>& gestureEventHu
 
 void GestureEventHub::CopyEvent(const RefPtr<GestureEventHub>& gestureEventHub)
 {
+    auto host = GetFrameNode();
+    ACE_UINODE_TRACE(host);
     CHECK_NULL_VOID(gestureEventHub);
     auto originalTouchEventActuator = gestureEventHub->touchEventActuator_;
     if (originalTouchEventActuator) {
@@ -1074,6 +1081,8 @@ bool GestureEventHub::IsTextCategoryComponent(const std::string& frameTag)
 
 void GestureEventHub::SetOnTouchEvent(TouchEventFunc&& touchEventFunc)
 {
+    auto host = GetFrameNode();
+    ACE_UINODE_TRACE(host);
     if (!touchEventActuator_) {
         touchEventActuator_ = MakeRefPtr<TouchEventActuator>();
     }
@@ -1091,6 +1100,8 @@ void GestureEventHub::SetFrameNodeCommonOnTouchEvent(TouchEventFunc&& touchEvent
 void GestureEventHub::SetResponseRegionMap(
     const std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>>& responseRegionMap)
 {
+    auto host = GetFrameNode();
+    ACE_UINODE_TRACE(host);
     responseRegionMap_ = responseRegionMap;
     if (!responseRegionMap_.empty()) {
         isResponseRegion_ = true;
@@ -1117,6 +1128,8 @@ std::vector<CalcDimensionRect> GestureEventHub::GetFingerResponseRegionFromMap()
 
 void GestureEventHub::SetResponseRegion(const std::vector<DimensionRect>& responseRegion)
 {
+    auto host = GetFrameNode();
+    ACE_UINODE_TRACE(host);
     responseRegion_ = responseRegion;
     if (!responseRegion_.empty()) {
         isResponseRegion_ = true;
@@ -1206,6 +1219,8 @@ void GestureEventHub::RemoveGesture(const RefPtr<NG::Gesture>& gesture)
 
 void GestureEventHub::AddScrollableEvent(const RefPtr<ScrollableEvent>& scrollableEvent)
 {
+    auto host = GetFrameNode();
+    ACE_UINODE_TRACE(host);
     if (!scrollableActuator_) {
         scrollableActuator_ = MakeRefPtr<ScrollableActuator>(WeakClaim(this));
     }
@@ -1222,6 +1237,8 @@ void GestureEventHub::RemoveScrollableEvent(const RefPtr<ScrollableEvent>& scrol
 
 void GestureEventHub::AddScrollEdgeEffect(const Axis& axis, RefPtr<ScrollEdgeEffect>& scrollEffect)
 {
+    auto host = GetFrameNode();
+    ACE_UINODE_TRACE(host);
     if (!scrollableActuator_) {
         scrollableActuator_ = MakeRefPtr<ScrollableActuator>(WeakClaim(this));
     }
@@ -1346,6 +1363,8 @@ void GestureEventHub::SetRedirectClick(bool redirectClick)
 void GestureEventHub::SetLongPressEvent(
     const RefPtr<LongPressEvent>& event, bool isForDrag, bool isDisableMouseLeft, int32_t duration)
 {
+    auto host = GetFrameNode();
+    ACE_UINODE_TRACE(host);
     if (!longPressEventActuator_) {
         longPressEventActuator_ = MakeRefPtr<LongPressEventActuator>(WeakClaim(this));
         longPressEventActuator_->SetOnAccessibility(GetOnAccessibilityEventFunc());
@@ -1358,6 +1377,8 @@ void GestureEventHub::SetLongPressEvent(
 void GestureEventHub::SetPanEvent(
     const RefPtr<PanEvent>& panEvent, PanDirection direction, int32_t fingers, Dimension distance)
 {
+    auto host = GetFrameNode();
+    ACE_UINODE_TRACE(host);
     if (!panEventActuator_) {
         panEventActuator_ = MakeRefPtr<PanEventActuator>(WeakClaim(this), direction, fingers, distance.ConvertToPx());
     }
@@ -1461,6 +1482,8 @@ const OnChildTouchTestFunc& GestureEventHub::GetOnTouchTestFunc()
 
 void GestureEventHub::SetMouseResponseRegion(const std::vector<DimensionRect>& mouseResponseRegion)
 {
+    auto host = GetFrameNode();
+    ACE_UINODE_TRACE(host);
     mouseResponseRegion_ = mouseResponseRegion;
     if (!mouseResponseRegion_.empty()) {
         isResponseRegion_ = true;

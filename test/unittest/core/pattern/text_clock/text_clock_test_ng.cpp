@@ -1275,7 +1275,7 @@ HWTEST_F(TextClockTestNG, TextClockLayoutPropertyTest007, TestSize.Level0)
      * @tc.expected: step3. check whether the properties is correct.
      */
     EXPECT_FALSE(textLayoutProperty->HasFontSize());
-    EXPECT_TRUE(textLayoutProperty->HasTextColor());
+    EXPECT_FALSE(textLayoutProperty->HasTextColor());
     EXPECT_FALSE(textLayoutProperty->HasItalicFontStyle());
     EXPECT_FALSE(textLayoutProperty->HasFontWeight());
     EXPECT_FALSE(textLayoutProperty->HasFontFamily());
@@ -1776,7 +1776,7 @@ HWTEST_F(TextClockTestNG, BuildContentModifierNode, TestSize.Level0)
 
 /**
  * @tc.name: TextClockTest017
- * @tc.desc: Test ResetTextColor and ResetFontColor of TextClock.
+ * @tc.desc: Test SetTextColor and SetTextColorByUser of TextClock.
  * @tc.type: FUNC
  */
 HWTEST_F(TextClockTestNG, TextClockTest017, TestSize.Level0)
@@ -1792,22 +1792,20 @@ HWTEST_F(TextClockTestNG, TextClockTest017, TestSize.Level0)
     ASSERT_NE(layoutProperty, nullptr);
 
     /**
-     * @tc.steps: step2. test ResetTextColor and ResetFontColor.
+     * @tc.steps: step2. test SetTextColor and SetTextColorByUser.
      * @tc.expected: step2. check whether the properties is correct.
      */
     model.SetTextColor(TEXT_COLOR_VALUE_1);
     EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE_1);
-    model.ResetTextColor();
-    EXPECT_EQ(layoutProperty->GetTextColor().has_value(), false);
+    EXPECT_TRUE(layoutProperty->GetTextColorSetByUserValue());
+    model.SetTextColorByUser(false);
+    EXPECT_FALSE(layoutProperty->GetTextColorSetByUserValue());
 
     model.SetFontColor(frameNode, TEXT_COLOR_VALUE);
     EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
-    model.ResetFontColor(frameNode);
-    EXPECT_EQ(layoutProperty->GetTextColor().has_value(), false);
-    model.SetFontColor(frameNode, TEXT_COLOR_VALUE);
-    EXPECT_EQ(layoutProperty->GetTextColor(), TEXT_COLOR_VALUE);
-    model.ResetFontColor(nullptr);
-    EXPECT_EQ(layoutProperty->GetTextColor().has_value(), true);
+    EXPECT_TRUE(layoutProperty->GetTextColorSetByUserValue());
+    model.SetFontColorByUser(frameNode, false);
+    EXPECT_FALSE(layoutProperty->GetTextColorSetByUserValue());
 }
 
 /**

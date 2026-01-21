@@ -45,7 +45,7 @@ import { ComponentContent } from 'arkui/ComponentContent'
 import { BlendMode } from "../component/common"
 import { InteropNativeModule } from '@koalaui/interop';
 import { ArkUIAniModule } from 'arkui.ani';
-import { hookCustomPropertyImpl, hookAllowDrop } from '#handwritten';
+import { hookCustomPropertyImpl, hookAllowDrop, hookDragPreviewOptions } from '#handwritten';
 import { CustomProperty } from '#generated';
 import { dragController } from "@ohos.arkui.dragController"
 
@@ -438,6 +438,10 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
     public clickEffect(value: ClickEffect | undefined): this {
         return this
     }
+    public enableClickSoundEffect(value: boolean | undefined): this {
+        this.getPeer()?.setEnableClickSoundEffectAttribute(value);
+        return this
+    }
     public onDragStart(value: ((event: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
         this.getPeer()?.setOnDragStartAttribute(value);
         return this
@@ -691,9 +695,11 @@ export class ArkBaseNode extends ComponentBase implements CommonAttribute {
         return this
     }
     public dragPreviewOptions(value: DragPreviewOptions | undefined, options?: DragInteractionOptions): this {
+        hookDragPreviewOptions(this, value, options)
         return this
     }
     public overlay(value: string | CustomBuilder | ComponentContent | undefined, options?: OverlayOptions): this {
+        this.getPeer()?.setOverlayAttribute(value, options)
         return this
     }
     public blendMode(value: BlendMode | undefined, type?: BlendApplyType): this {

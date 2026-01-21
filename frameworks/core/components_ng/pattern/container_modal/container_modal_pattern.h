@@ -27,7 +27,7 @@
 #include "core/pipeline_ng/pipeline_context.h"
 
 namespace OHOS::Ace::NG {
-class ACE_EXPORT ContainerModalPattern : public Pattern {
+class ACE_FORCE_EXPORT ContainerModalPattern : public Pattern {
     DECLARE_ACE_TYPE(ContainerModalPattern, Pattern);
 
 public:

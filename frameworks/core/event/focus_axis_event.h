@@ -249,6 +249,7 @@ public:
         deviceId_ = event.deviceId;
         pressedKeyCodes_ = event.pressedCodes;
         targetDisplayId_ = event.targetDisplayId;
+        action_ = event.action;
     };
     ~FocusAxisEventInfo() override = default;
 
@@ -347,6 +348,11 @@ public:
         return absHat3YValue;
     }
 
+    AxisAction GetAction() const
+    {
+        return action_;
+    }
+
 private:
     float absXValue = 0.0f;
     float absYValue = 0.0f;
@@ -367,6 +373,7 @@ private:
     float absHat2YValue = 0.0f;
     float absHat3XValue = 0.0f;
     float absHat3YValue = 0.0f;
+    AxisAction action_ = AxisAction::NONE;
 };
 
 } // namespace OHOS::Ace::NG

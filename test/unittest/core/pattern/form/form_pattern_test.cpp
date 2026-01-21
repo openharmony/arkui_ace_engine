@@ -1686,6 +1686,13 @@ HWTEST_F(FormPatternTest, FormPatternTest_042, TestSize.Level1)
     RefPtr<FormNode> formNode = CreateFromNode();
     auto pattern = formNode->GetPattern<FormPattern>();
     EXPECT_NE(pattern, nullptr);
+
+    pattern->isUnTrust_ = true;
+    float width = 100;
+    float height = 100;
+    float borderWidth = 100;
+    pattern->FireFormSurfaceChangeCallback(width, height, borderWidth);
+    EXPECT_EQ(pattern->isUnTrust_, false);
 }
 
 /**

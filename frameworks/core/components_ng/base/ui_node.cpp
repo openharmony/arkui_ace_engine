@@ -1345,6 +1345,15 @@ void UINode::DumpTree(int32_t depth, bool hasJson, const std::string& desc)
     if (frameNode && frameNode->GetOverlayNode()) {
         frameNode->GetOverlayNode()->DumpTree(depth + 1, hasJson, "OverlayNode");
     }
+    DumpCornerMarkNode(depth, hasJson);
+}
+
+void UINode::DumpCornerMarkNode(int32_t depth, bool hasJson)
+{
+    auto frameNode = AceType::DynamicCast<FrameNode>(this);
+    if (frameNode && frameNode->GetCornerMarkNode()) {
+        frameNode->GetCornerMarkNode()->DumpTree(depth + 1, hasJson, "CornerMarkNode");
+    }
 }
 
 bool UINode::DumpTreeByComponentName(const std::string& name)
@@ -1438,7 +1447,7 @@ void UINode::DumpSimplifyTreeWithParamConfigInner(int32_t depth, std::shared_ptr
     }
 
     DumpSimplifyTreeBase(current);
-    auto nodeChildren = GetChildren();
+    auto nodeChildren = GetChildren(true);
     DumpSimplifyInfoWithParamConfig(current, config);
     std::list<RefPtr<UINode>> cacheChildren;
     if (GetTag() == V2::JS_LAZY_FOR_EACH_ETS_TAG || GetTag() == V2::JS_REPEAT_ETS_TAG) {
@@ -2666,12 +2675,17 @@ void UINode::SetAncestor(const WeakPtr<UINode>& parent)
 void UINode::FindTopNavDestination(RefPtr<FrameNode>& result)
 {
     auto currentNode = AceType::DynamicCast<FrameNode>(this);
-    if (currentNode && currentNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
-        auto navigationGroupNode = AceType::DynamicCast<NG::NavigationGroupNode>(currentNode);
-        CHECK_NULL_VOID(navigationGroupNode);
-        result = navigationGroupNode->GetTopDestination();
-        return;
+    if (currentNode) {
+        if (!currentNode->CheckVisibleAndActive()) {
+            return;
+        } else if (currentNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
+            auto navigationGroupNode = AceType::DynamicCast<NG::NavigationGroupNode>(currentNode);
+            CHECK_NULL_VOID(navigationGroupNode);
+            result = navigationGroupNode->GetTopDestination();
+            return;
+        }
     }
+    
     for (const auto& item : GetChildren()) {
         item->FindTopNavDestination(result);
         if (result) {
@@ -2694,6 +2708,9 @@ void UINode::GetNodeListByComponentName(int32_t depth, std::vector<int32_t>& fou
     auto frameNode = AceType::DynamicCast<FrameNode>(this);
     if (frameNode && frameNode->GetOverlayNode()) {
         frameNode->GetOverlayNode()->GetNodeListByComponentName(depth + 1, foundNodeId, name);
+    }
+    if (frameNode && frameNode->GetCornerMarkNode()) {
+        frameNode->GetCornerMarkNode()->GetNodeListByComponentName(depth + 1, foundNodeId, name);
     }
 }
 

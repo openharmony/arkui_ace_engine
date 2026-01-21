@@ -14,105 +14,32 @@
  */
 #include "core/interfaces/native/node/node_folder_stack_modifier.h"
 
-#include "core/components_ng/pattern/folder_stack/folder_stack_model_ng.h"
+#include "ui/base/utils/utils.h"
+
+#include "core/common/dynamic_module_helper.h"
 
 namespace OHOS::Ace::NG {
-namespace {
-void SetEnableAnimation(ArkUINodeHandle node, ArkUI_Bool value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    FolderStackModelNG::SetEnableAnimation(frameNode, static_cast<bool>(value));
-}
-
-void ResetEnableAnimation(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    FolderStackModelNG::SetEnableAnimation(frameNode, true);
-}
-
-void SetAutoHalfFold(ArkUINodeHandle node, ArkUI_Bool value)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    FolderStackModelNG::SetAutoHalfFold(frameNode, static_cast<bool>(value));
-}
-
-void ResetAutoHalfFold(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    FolderStackModelNG::SetAutoHalfFold(frameNode, true);
-}
-
-void SetOnFolderStateChange(ArkUINodeHandle node, void* callback)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (callback) {
-        auto onFolderStateChange = reinterpret_cast<std::function<void(const NG::FolderEventInfo&)>*>(callback);
-        FolderStackModelNG::SetOnFolderStateChange(frameNode, std::move(*onFolderStateChange));
-    } else {
-        FolderStackModelNG::SetOnFolderStateChange(frameNode, nullptr);
-    }
-}
-
-void ResetOnFolderStateChange(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    FolderStackModelNG::SetOnFolderStateChange(frameNode, nullptr);
-}
-
-void SetOnHoverStatusChange(ArkUINodeHandle node, void* callback)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    if (callback) {
-        auto onHoverStatusChange = reinterpret_cast<std::function<void(const NG::FolderEventInfo&)>*>(callback);
-        FolderStackModelNG::SetOnHoverStatusChange(frameNode, std::move(*onHoverStatusChange));
-    } else {
-        FolderStackModelNG::SetOnHoverStatusChange(frameNode, nullptr);
-    }
-}
-
-void ResetOnHoverStatusChange(ArkUINodeHandle node)
-{
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_VOID(frameNode);
-    FolderStackModelNG::SetOnHoverStatusChange(frameNode, nullptr);
-}
-} // namespace
 namespace NodeModifier {
 const ArkUIFolderStackModifier* GetFolderStackModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const ArkUIFolderStackModifier modifier = {
-        .setEnableAnimation = SetEnableAnimation,
-        .resetEnableAnimation = ResetEnableAnimation,
-        .setAutoHalfFold = SetAutoHalfFold,
-        .resetAutoHalfFold = ResetAutoHalfFold,
-        .setOnFolderStateChange = SetOnFolderStateChange,
-        .resetOnFolderStateChange = ResetOnFolderStateChange,
-        .setOnHoverStatusChange = SetOnHoverStatusChange,
-        .resetOnHoverStatusChange = ResetOnHoverStatusChange,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-    return &modifier;
+    static const ArkUIFolderStackModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("FolderStack");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const ArkUIFolderStackModifier*>(module->GetDynamicModifier());
+    }
+    return cachedModifier;
 }
 
 const CJUIFolderStackModifier* GetCJUIFolderStackModifier()
 {
-    CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
-    static const CJUIFolderStackModifier modifier = {
-        .setEnableAnimation = SetEnableAnimation,
-        .resetEnableAnimation = ResetEnableAnimation,
-        .setAutoHalfFold = SetAutoHalfFold,
-        .resetAutoHalfFold = ResetAutoHalfFold,
-    };
-    CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
-    return &modifier;
+    static const CJUIFolderStackModifier* cachedModifier = nullptr;
+    if (cachedModifier == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("FolderStack");
+        CHECK_NULL_RETURN(module, nullptr);
+        cachedModifier = reinterpret_cast<const CJUIFolderStackModifier*>(module->GetCjModifier());
+    }
+    return cachedModifier;
 }
-}
-}
+} // namespace NodeModifier
+} // namespace OHOS::Ace::NG

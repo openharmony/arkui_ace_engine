@@ -85,6 +85,7 @@
 #include "frameworks/core/components/xcomponent/xcomponent_component_client.h"
 #include "frameworks/core/components_ng/base/view_stack_processor.h"
 #include "frameworks/core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
+#include "frameworks/core/interfaces/native/node/node_api.h"
 
 #if defined(PREVIEW)
 extern const char _binary_jsMockSystemPlugin_abc_start[];
@@ -814,6 +815,28 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     localRuntime_ = arkRuntime;
     cardRuntime_ = runtime;
     g_declarativeRuntime = runtime;
+    PreLoadArkuiModule(arkRuntime);
+}
+
+void JsiDeclarativeEngineInstance::PreLoadArkuiModule(const shared_ptr<JsRuntime>& runtime)
+{
+    static const std::unordered_map<std::string_view, std::string_view> soMap = {
+        { "Gauge", "gauge" },
+        { "TimePicker", "timepicker" },
+        { "TimePickerDialog", "timepicker" },
+        { "CalendarPicker", "calendarpicker" },
+        { "CalendarPickerDialog", "calendarpicker" }
+    };
+    shared_ptr<JsValue> global = runtime->GetGlobal();
+    shared_ptr<JsValue> func = global->GetProperty(runtime, "_ArkUIPreload_");
+    if (!func || !func->IsFunction(runtime)) {
+        return;
+    }
+    for (const auto& pair : soMap) {
+        std::vector<shared_ptr<JsValue>> argv = { runtime->NewString(std::string(pair.first)),
+            runtime->NewString(std::string(pair.second)) };
+        func->Call(runtime, global, argv, argv.size());
+    }
 }
 
 void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtime)

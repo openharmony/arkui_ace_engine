@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef OHOS_ACE_UI_SERVICE_HILOG_H
-#define OHOS_ACE_UI_SERVICE_HILOG_H
+#ifndef FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_UI_SESSION_LOG_H
+#define FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_UI_SESSION_LOG_H
 
 
 #define UISERVICE_LOG_DOMAIN 0xD003936
@@ -35,12 +35,12 @@
 #define PRINT_LOG(level, fmt, ...)                                                                                     \
     HILOG_IMPL(LOG_CORE, LOG_##level, UISERVICE_LOG_DOMAIN, UISERVICE_LOG_TAG, ACE_FMT_PREFIX fmt, UISERVICE_FILENAME, \
         __LINE__, ##__VA_ARGS__)
-#endif
-#endif
+#endif // IS_RELEASE_VERSION
+#endif // ACE_UNITTEST
 
 #define LOGE(fmt, ...) PRINT_LOG(ERROR, fmt, ##__VA_ARGS__)
 #define LOGW(fmt, ...) PRINT_LOG(WARN, fmt, ##__VA_ARGS__)
 #define LOGI(fmt, ...) PRINT_LOG(INFO, fmt, ##__VA_ARGS__)
 #define LOGD(fmt, ...) PRINT_LOG(DEBUG, fmt, ##__VA_ARGS__)
 
-#endif
+#endif // FOUNDATION_ACE_ADAPTER_OHOS_ENTRANCE_UI_SESSION_LOG_H

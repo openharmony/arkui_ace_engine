@@ -127,11 +127,17 @@
             "@ohos.arkui.stateManagement": [
                 "./arkui/stateManagement"
             ],
+            "@ohos.arkui.ArcAlphabetIndexer": [
+                "./@ohos.arkui.ArcAlphabetIndexer.ets"
+            ],
             "@ohos.arkui.ArcList": [
                 "./@ohos.arkui.ArcList.ets"
             ],
             "@ohos.arkui.ArcScrollBar": [
                 "./@ohos.arkui.ArcScrollBar.ets"
+            ],
+            "@ohos.arkui.ArcSwiper": [
+                "./@ohos.arkui.ArcSwiper.ets"
             ],
             "#arktheme": [
                 "./arkui/theme"

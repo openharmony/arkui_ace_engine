@@ -15,13 +15,13 @@
 
 #include "content_change_manager.h"
 
-#include "base/utils/time_util.h"
+#include <sstream>
+
 #include "base/log/ace_trace.h"
+#include "base/utils/time_util.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
-
-#include <sstream>
 
 namespace OHOS::Ace::NG {
 #ifndef IS_RELEASE_VERSION
@@ -106,6 +106,7 @@ public:
 
         return ret;
     }
+
 private:
     std::string DumpState()
     {
@@ -176,8 +177,7 @@ private:
         return ss.str();
     }
 
-    void DumpReportRecord(std::stringstream& ss,
-        const ReportInfo& reportInfo)
+    void DumpReportRecord(std::stringstream& ss, const ReportInfo& reportInfo)
     {
         ss << "REPORT,";
         OHOS::Ace::ChangeType type = std::get<CHANGE_TYPE_INDEX>(reportInfo);
@@ -249,7 +249,7 @@ void ContentChangeManager::StartContentChangeReport(const ContentChangeConfig& c
     LOGI("[ContentChangeManager] StartContentChangeReport: ratio:%{public}f, minReportTime:%{public}d",
         currentContentChangeConfig_->textContentRatio, currentContentChangeConfig_->minReportTime);
     textContentRatio_ = currentContentChangeConfig_->textContentRatio;
-    textContentInterval_ = currentContentChangeConfig_->minReportTime * NS_PER_MS;
+    textContentInterval_ = static_cast<uint64_t>(currentContentChangeConfig_->minReportTime) * NS_PER_MS;
     for (auto& weak : onContentChangeNodes_) {
         auto node = weak.Upgrade();
         if (!node) {
@@ -308,7 +308,7 @@ void ContentChangeManager::OnPageTransitionEnd(const RefPtr<FrameNode>& keyNode)
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OnPageTransitionEnd");
     auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
-    keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, {false, false, false});
+    keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, { false, false, false });
     UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::PAGE, simpleTree->ToString());
 #ifndef IS_RELEASE_VERSION
     dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::PAGE, keyNode->GetId(), keyNode->GetTag()));
@@ -352,7 +352,7 @@ void ContentChangeManager::OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, b
     ACE_SCOPED_TRACE("[ContentChangeManager] OnDialogChangeEnd");
     auto simpleTree = JsonUtil::CreateSharedPtrJson(true);
     if (isShow) {
-        keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, {false, false, false});
+        keyNode->DumpSimplifyTreeWithParamConfig(0, simpleTree, false, { false, false, false });
     } else {
         simpleTree->Put("$type", keyNode->GetTag().c_str());
     }
@@ -408,7 +408,7 @@ void ContentChangeManager::ProcessSwiperNodes()
     }
 }
 
-void ContentChangeManager::ReportSwiperEvent(const RefPtr<FrameNode> &node, bool hasTabsAncestor)
+void ContentChangeManager::ReportSwiperEvent(const RefPtr<FrameNode>& node, bool hasTabsAncestor)
 {
     auto pattern = node->GetPattern();
     CHECK_NULL_VOID(pattern);
@@ -423,10 +423,10 @@ void ContentChangeManager::ReportSwiperEvent(const RefPtr<FrameNode> &node, bool
         subTreeNode.emplace(keyChild->GetId());
         visibleNode.emplace(keyChild->GetId());
         auto parent = keyChild->GetParent();
-            while (parent && !visibleNode.count(parent->GetId())) {
-                visibleNode.emplace(parent->GetId());
-                parent = parent->GetParent();
-            }
+        while (parent && !visibleNode.count(parent->GetId())) {
+            visibleNode.emplace(parent->GetId());
+            parent = parent->GetParent();
+        }
     }
 
     std::function<std::pair<bool, bool>(const RefPtr<UINode>&)> dumpChecker = [&visibleNode, &subTreeNode]
@@ -439,13 +439,13 @@ void ContentChangeManager::ReportSwiperEvent(const RefPtr<FrameNode> &node, bool
     };
 
     auto rootNode = JsonUtil::CreateSharedPtrJson(true);
-    node->DumpSimplifyTreeWithParamConfig(0, rootNode, true, {false, false, false}, dumpChecker);
+    node->DumpSimplifyTreeWithParamConfig(0, rootNode, true, { false, false, false }, dumpChecker);
 
     if (hasTabsAncestor) {
         auto parent = node->GetParent();
         while (parent) {
             auto jsonNode = JsonUtil::CreateSharedPtrJson(true);
-            parent->DumpSimplifyTreeNode(jsonNode, {false, false, false});
+            parent->DumpSimplifyTreeNode(jsonNode, { false, false, false });
             auto array = JsonUtil::CreateArray(true);
             array->PutRef(std::move(rootNode));
             jsonNode->PutRef("$children", std::move(array));
@@ -461,8 +461,8 @@ void ContentChangeManager::ReportSwiperEvent(const RefPtr<FrameNode> &node, bool
     UiSessionManager::GetInstance()->ReportContentChangeEvent(
         hasTabsAncestor ? ChangeType::TABS : ChangeType::SWIPER, rootNode->ToString());
 #ifndef IS_RELEASE_VERSION
-    dumpMgr_->AddReportRecord(std::make_tuple(hasTabsAncestor ? ChangeType::TABS : ChangeType::SWIPER,
-        node->GetId(), node->GetTag()));
+    dumpMgr_->AddReportRecord(
+        std::make_tuple(hasTabsAncestor ? ChangeType::TABS : ChangeType::SWIPER, node->GetId(), node->GetTag()));
 #endif
 }
 
@@ -477,7 +477,7 @@ void ContentChangeManager::StartTextAABBCollecting()
         return;
     }
 
-    uint64_t curr = GetSysTimestamp();
+    uint64_t curr = static_cast<uint64_t>(GetSysTimestamp());
     if (curr - lastTextReportTime_ < textContentInterval_) {
         return;
     }
@@ -497,7 +497,7 @@ void ContentChangeManager::StopTextAABBCollecting(const RectF& rootRect)
             intersectRect.ToString().c_str(), rootRect.ToString().c_str(), textAABBSize / rootSize);
         if (textAABBSize >= rootSize * textContentRatio_) {
             UiSessionManager::GetInstance()->ReportContentChangeEvent(ChangeType::TEXT, "");
-            lastTextReportTime_ = GetSysTimestamp();
+            lastTextReportTime_ = static_cast<uint64_t>(GetSysTimestamp());
 #ifndef IS_RELEASE_VERSION
             float currRatio = static_cast<float>(textAABBSize) / rootSize;
             dumpMgr_->AddReportRecord(std::make_tuple(ChangeType::TEXT, static_cast<int32_t>(currRatio * FACTOR), ""));

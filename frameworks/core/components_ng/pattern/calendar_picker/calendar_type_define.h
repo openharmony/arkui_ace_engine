@@ -27,6 +27,13 @@
 #include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::NG {
+namespace CalendarPickerConstants {
+const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
+    HoverModeAreaType::BOTTOM_SCREEN };
+}
+
+enum class ArkUIRuntimeCallBackInfoType { STRING, NUMBER, OBJECT, BOOLEAN, FUNCTION };
+
 enum class CalendarEdgeAlign {
     EDGE_ALIGN_START = 0,
     EDGE_ALIGN_CENTER,

@@ -75,6 +75,7 @@ void JSEmbeddedComponent::Create(const JSCallbackInfo& info)
     }
 
     UIExtensionModel::GetInstance()->Create(want, sessionType);
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ViewAbstractModel::GetInstance()->SetWidth(EMBEDDED_COMPONENT_MIN_WIDTH);
     ViewAbstractModel::GetInstance()->SetHeight(EMBEDDED_COMPONENT_MIN_HEIGHT);
     ViewAbstractModel::GetInstance()->SetMinWidth(EMBEDDED_COMPONENT_MIN_WIDTH);
@@ -87,10 +88,12 @@ void JSEmbeddedComponent::OnTerminated(const JSCallbackInfo& info)
         return;
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onTerminated = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                             int32_t code, const RefPtr<WantWrap>& wantWrap) {
+        ACE_UINODE_TRACE(node);
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("EmbeddedComponent.onTerminated");
@@ -121,10 +124,12 @@ void JSEmbeddedComponent::OnError(const JSCallbackInfo& info)
         return;
     }
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), instanceId, node = frameNode](
                        int32_t code, const std::string& name, const std::string& message) {
+        ACE_UINODE_TRACE(node);
         ContainerScope scope(instanceId);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("EmbeddedComponent.onError");
@@ -143,6 +148,7 @@ void JSEmbeddedComponent::OnError(const JSCallbackInfo& info)
 
 void JSEmbeddedComponent::JsWidth(const JSCallbackInfo& info)
 {
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (info[0]->IsUndefined()) {
         return;
     }
@@ -155,6 +161,7 @@ void JSEmbeddedComponent::JsWidth(const JSCallbackInfo& info)
 
 void JSEmbeddedComponent::JsHeight(const JSCallbackInfo& info)
 {
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (info[0]->IsUndefined()) {
         return;
     }

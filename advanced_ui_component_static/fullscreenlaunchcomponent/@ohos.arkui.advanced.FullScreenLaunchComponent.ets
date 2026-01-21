@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -15,12 +15,12 @@
 import hilog from '@ohos.hilog';
 import abilityManager from '@ohos.app.ability.abilityManager';
 import common from '@ohos.app.ability.common';
-import { ErrorCallback, Callback, BusinessError} from '@ohos.base';
+import { ErrorCallback, Callback, BusinessError, RecordData} from '@ohos.base';
 import AtomicServiceOptions from '@ohos.app.ability.AtomicServiceOptions';
 import commonEventManager from '@ohos.commonEventManager';
 import { State, Memo } from '@ohos.arkui.stateManagement';
 import { $$ } from '@kit.ArkUI';
-import { ReceiveCallback, RecordData, Column, Text, Row, UIExtensionComponent, Component, BuilderParam, TerminationInfo, Builder, FlexAlign, ClickEvent, AlertDialogParamWithConfirm, CustomBuilder, ContentCoverOptions } from '@ohos.arkui.component';
+import { ReceiveCallback, Column, Text, Row, UIExtensionComponent, Component, BuilderParam, TerminationInfo, Builder, FlexAlign, ClickEvent, AlertDialogParamWithConfirm, CustomBuilder, ContentCoverOptions } from '@ohos.arkui.component';
 import bundleManager from "@ohos.bundle.bundleManager"
 
 const errCodeAbnormal: number = 100014;
@@ -224,12 +224,12 @@ export struct FullScreenLaunchComponent {
               atomicServiceData[kv[0]] = kv[1];
             }
           }
-          const onReceiveCallback = this.onReceive as ReceiveCallback;
-          onReceiveCallback(atomicServiceData);
+          const onReceiveCallback: ReceiveCallback = this.onReceive as ReceiveCallback;
+          (onReceiveCallback as Callback<Record<string, RecordData>>)(atomicServiceData as Record<string, RecordData>);
         }
         if (data[requestComponentTerminateKey]) {
           this.isShow = false;
         }
-      })
+      } as ReceiveCallback);
   }
 }

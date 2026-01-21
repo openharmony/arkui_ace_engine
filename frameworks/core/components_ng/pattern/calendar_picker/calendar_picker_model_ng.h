@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -39,6 +39,7 @@ public:
     void SetMarkToday(bool isMarkToday) override;
     void CalendarPickerRemoveResObj(const std::string& key) override;
 
+    static void CreateCalendarPicker(const CalendarSettingData& settingData);
     static RefPtr<FrameNode> CreateNode(int32_t nodeId, const CalendarSettingData& settingData);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetTextStyle(FrameNode* frameNode, const PickerTextStyle& textStyle);
@@ -46,6 +47,7 @@ public:
     static void SetPadding(FrameNode* frameNode, const PaddingProperty& padding);
     static void ClearPadding(FrameNode* frameNode);
     static void ClearHeight(FrameNode* frameNode);
+    static void ClearJSHeight(FrameNode* frameNode);
     static void ClearBorderColor(FrameNode* frameNode);
     static void ClearBorderRadius(FrameNode* frameNode);
     static void ClearBorderWidth(FrameNode* frameNode);

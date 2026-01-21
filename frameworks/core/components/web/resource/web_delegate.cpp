@@ -1695,7 +1695,7 @@ void WebDelegate::AddJavascriptInterface(const std::string& objectName, const st
                 std::string permission;
                 // webcontroller not support object, so the object_id param
                 // assign error code
-                delegate->nweb_->RegisterArkJSfunction(
+                delegate->nweb_->RegisterArkJSfunctionV2(
                     objectName, methodList, asyncMethodList,
                     static_cast<int32_t>(JavaScriptObjIdErrorCode::WEBCONTROLLERERROR),
                     permission);
@@ -3061,7 +3061,7 @@ void WebDelegate::InitWebViewWithWindow()
                 std::make_shared<OHOS::NWeb::NWebEngineInitArgsImpl>();
             std::string app_path = GetDataPath();
             if (!app_path.empty()) {
-                initArgs->AddArg(std::string("--arkweb-app-data-dir=").append(app_path));
+                initArgs->AddArg(std::string("--user-data-dir=").append(app_path));
             }
 
             delegate->window_ = delegate->CreateWindow();
@@ -3540,7 +3540,7 @@ void WebDelegate::InitWebViewWithSurface()
             CHECK_NULL_VOID(delegate);
             std::shared_ptr<OHOS::NWeb::NWebEngineInitArgsImpl> initArgs =
                 std::make_shared<OHOS::NWeb::NWebEngineInitArgsImpl>();
-            initArgs->AddArg(std::string("--arkweb-app-data-dir=").append(delegate->bundleDataPath_));
+            initArgs->AddArg(std::string("--user-data-dir=").append(delegate->bundleDataPath_));
             initArgs->AddArg(std::string("--bundle-installation-dir=").append(delegate->bundlePath_));
             initArgs->AddArg(std::string("--lang=").append(AceApplicationInfo::GetInstance().GetLanguage() +
                     "-" + AceApplicationInfo::GetInstance().GetCountryOrRegion()));
@@ -5054,6 +5054,25 @@ void WebDelegate::NotifyMemoryLevel(int32_t level)
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUIWebNotifyMemoryLevel");
+}
+
+void WebDelegate::SetIsOfflineWebComponent()
+{
+    auto context = context_.Upgrade();
+    if (!context) {
+        return;
+    }
+    context->GetTaskExecutor()->PostTask(
+        [weak = WeakClaim(this)]() {
+            auto delegate = weak.Upgrade();
+            if (!delegate) {
+                return;
+            }
+            if (delegate->nweb_) {
+                delegate->nweb_->SetIsOfflineWebComponent();
+            }
+        },
+        TaskExecutor::TaskType::PLATFORM, "ArkUIWebSetIsOfflineWebComponent");
 }
 
 void WebDelegate::SetAudioMuted(bool muted)

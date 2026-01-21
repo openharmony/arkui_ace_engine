@@ -1842,6 +1842,7 @@ protected:
     uint64_t compensationValue_ = 0;
     int64_t recvTime_ = 0;
     int64_t currRecvTime_ = -1;
+    int64_t pipelineCreateTime_ = -1;
     std::once_flag displaySyncFlag_;
     RefPtr<UIDisplaySyncManager> uiDisplaySyncManager_;
 

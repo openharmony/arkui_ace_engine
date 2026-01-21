@@ -99,6 +99,7 @@ void JSIsolatedComponent::Create(const JSCallbackInfo& info)
     UIExtensionModel::GetInstance()->Create(config);
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto instanceId = Container::CurrentId();
     auto weak = AceType::WeakClaim(frameNode);
     worker->RegisterCallbackForWorkerEnv([instanceId, weak, want](napi_env env) {
@@ -108,6 +109,7 @@ void JSIsolatedComponent::Create(const JSCallbackInfo& info)
             [weak, want, env]() {
                 auto frameNode = weak.Upgrade();
                 CHECK_NULL_VOID(frameNode);
+                ACE_UINODE_TRACE(frameNode);
                 UIExtensionModel::GetInstance()->InitializeIsolatedComponent(
                     frameNode, want, env);
             },
@@ -124,11 +126,13 @@ void JSIsolatedComponent::JsOnError(const JSCallbackInfo& info)
 
     WeakPtr<NG::FrameNode> frameNode =
         AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto execCtx = info.GetExecutionContext();
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = Container::CurrentId();
     auto onError = [execCtx, func = std::move(jsFunc), instanceId, node = frameNode]
         (int32_t code, const std::string& name, const std::string& message) {
+            ACE_UINODE_TRACE(node);
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("IsolatedComponent.onError");
@@ -147,6 +151,7 @@ void JSIsolatedComponent::JsOnError(const JSCallbackInfo& info)
 
 void JSIsolatedComponent::Width(const JSCallbackInfo& info)
 {
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     JSViewAbstract::JsWidth(info);
 
     CalcDimension value;
@@ -156,6 +161,7 @@ void JSIsolatedComponent::Width(const JSCallbackInfo& info)
 
 void JSIsolatedComponent::Height(const JSCallbackInfo& info)
 {
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     JSViewAbstract::JsHeight(info);
 
     CalcDimension value;

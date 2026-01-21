@@ -14,6 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("particle_test_ng") {
+  module_name = "Animation-Particle"
   type = "new"
   sources = [
     "$ace_root/frameworks/core/components_ng/pattern/particle/particle_pattern.cpp",

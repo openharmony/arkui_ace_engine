@@ -41,7 +41,6 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_button.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h"
-#include "frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_clipboard.h"
@@ -144,9 +143,6 @@
 #include "frameworks/bridge/js_frontend/engine/jsi/ark_js_value.h"
 #else
 #include "frameworks/bridge/declarative_frontend/jsview/js_pattern_lock.h"
-#ifdef QRCODEGEN_SUPPORT
-#include "frameworks/bridge/declarative_frontend/jsview/js_qrcode.h"
-#endif
 #include "frameworks/bridge/declarative_frontend/jsview/js_relative_container.h"
 #endif
 
@@ -362,10 +358,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSTabs::JSBind(globalObj);
     JSTabContent::JSBind(globalObj);
     JSTabsController::JSBind(globalObj);
-#ifndef ARKUI_WEARABLE
-    JSCalendarPicker::JSBind(globalObj);
-    JSCalendarPickerDialog::JSBind(globalObj);
-#endif
     JSForEach::JSBind(globalObj);
     JSRepeat::JSBind(globalObj);
     JSRepeatVirtualScroll::JSBind(globalObj);
@@ -460,13 +452,11 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSPolyline::JSBind(globalObj);
     JSEllipse::JSBind(globalObj);
     JSTextPicker::JSBind(globalObj);
-    JSTimePicker::JSBind(globalObj);
     JSDatePicker::JSBind(globalObj);
     JSContainerPicker::JSBind(globalObj);
     JSPageTransition::JSBind(globalObj);
 #ifndef ARKUI_WEARABLE
     JSTextPickerDialog::JSBind(globalObj);
-    JSTimePickerDialog::JSBind(globalObj);
     JSDatePickerDialog::JSBind(globalObj);
 #endif
     JSIndexer::JSBind(globalObj);
@@ -523,16 +513,10 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSContainerSpan::JSBind(globalObj);
     JsDragFunction::JSBind(globalObj);
 #ifdef USE_COMPONENTS_LIB
-#ifdef QRCODEGEN_SUPPORT
-    JSBindLibs("arkui.qrcode", "QRCode");
-#endif
     JSBindLibs("arkui.relativeContainer", "RelativeContainer");
     JSBindLibs("arkui.patternlock", "PatternLock");
     JSBindLibs("arkui.patternlockcontroller", "PatternLockController", true);
 #else
-#ifdef QRCODEGEN_SUPPORT
-    JSQRCode::JSBind(globalObj);
-#endif
     JSRelativeContainer::JSBind(globalObj);
     JSPatternLock::JSBind(globalObj);
     JSPatternLockController::JSBind(globalObj);
@@ -540,7 +524,6 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     // add missing binds to ng build
     JSContextMenu::JSBind(globalObj);
 #ifndef CROSS_PLATFORM
-    JSCalendarPicker::JSBind(globalObj);
     JSTextMenu::JSBind(globalObj);
 #ifdef EFFECT_COMPONENT_SUPPORTED
     JSEffectComponent::JSBind(globalObj);

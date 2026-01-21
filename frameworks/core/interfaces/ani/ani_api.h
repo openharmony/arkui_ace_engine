@@ -495,6 +495,7 @@ struct ArkUIAniDragModifier {
     void (*setDragData)(ani_ref event, ani_ref data);
     ani_ref (*getDragData)(ani_ref event);
     void (*getDragSummary)(ani_ref event, SharedPointerWrapper& summaryPtr);
+    void (*setDragDataLoadParams)(ani_ref event, void* dataLoadParams);
     void (*setDragDropInfoPixelMap)(ani_ref event, ani_ref pixelMap);
     void (*setDragDropInfoCustomNode)(ani_ref event, ArkUINodeHandle node);
     void (*setDragDropInfoExtraInfo)(ani_ref event, const char* ptr);
@@ -502,9 +503,12 @@ struct ArkUIAniDragModifier {
     void (*setDragAllowDrop)(ArkUINodeHandle node, char** allowDrops, ArkUI_Int32 length);
     void (*setDragPreview)(ArkUINodeHandle node, ArkUIDragInfo dragInfo);
     void (*setDragPreviewOptions)(ArkUINodeHandle node, ArkUIDragPreviewOption options);
+    void (*enableInternalDropAnimation)(ani_ref event, const std::string& configuration, int32_t& ret);
+    bool (*isOnDropPhase)();
     const char* (*getUdKey)(ani_ref event);
     ani_long (*createUnifiedDataPeer)(void* data);
     SharedPointerWrapper (*getUnifiedData)(ani_long peer);
+    ani_long (*createDataLoadParamsPeer)(void* dataLoadParams);
     void (*getPressedModifierKey)(ani_long nativePtr, char*** keys, ani_int* length);
 };
 struct ArkUIAniXBarModifier {
@@ -863,6 +867,15 @@ struct ArkUIAniDetachedFreeRootModifier {
     ani_long (*constructDetachedFreeRoot)(ani_int);
 };
 
+struct ArkUIAniGestureEventUIObserverModifier {
+    void (*removePanListenerCallback)(
+        const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
+    void (*removeClickListenerCallback)(
+        const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
+    void (*removeTapListenerCallback)(
+        const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
+};
+
 struct ArkUIAniModifiers {
     ArkUI_Int32 version;
     const ArkUIAniImageModifier* (*getImageAniModifier)();
@@ -905,6 +918,7 @@ struct ArkUIAniModifiers {
     const ArkUIAniSaveButtonModifier* (*getSaveButtonAniModifier)();
     const ArkUIAniPasteButtonModifier* (*getPasteButtonAniModifier)();
     const ArkUIAniDetachedFreeRootModifier* (*getArkUIAniDetachedFreeRootModifier)();
+    const ArkUIAniGestureEventUIObserverModifier* (*getArkUIAniGestureEventUIObserverModifier)();
 };
 
 __attribute__((visibility("default"))) const ArkUIAniModifiers* GetArkUIAniModifiers(void);

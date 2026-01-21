@@ -19,11 +19,14 @@
 
 #include "base/log/log.h"
 #include "core/components_ng/base/frame_node.h"
+#include "core/components_ng/manager/drag_drop/drag_drop_global_controller.h"
+#include "core/common/interaction/interaction_interface.h"
 #include "core/common/udmf/udmf_client.h"
 #include "core/gestures/drag_event.h"
 #include "core/interfaces/native/implementation/drag_event_peer.h"
 #include "core/interfaces/native/implementation/pixel_map_peer.h"
 #include "core/interfaces/native/implementation/unified_data_peer.h"
+#include "core/interfaces/native/implementation/data_load_params_peer.h"
 #if defined(PIXEL_MAP_SUPPORTED)
 #include "pixel_map.h"
 #include "base/image/pixel_map.h"
@@ -64,6 +67,19 @@ void GetDragSummary(ani_ref event, SharedPointerWrapper& summaryPtr)
     CHECK_NULL_VOID(dragEvent);
     auto summary = dragEvent->GetSummary();
     UdmfClient::GetInstance()->TransformSummaryANI(summary, summaryPtr.GetSharedPtr());
+}
+
+void SetDragDataLoadParams(ani_ref event, void* dataLoadParams)
+{
+    auto peer = reinterpret_cast<Ark_DragEvent>(event);
+    CHECK_NULL_VOID(peer);
+    auto dragEvent = peer->dragInfo;
+    CHECK_NULL_VOID(dragEvent);
+    CHECK_NULL_VOID(dataLoadParams);
+    RefPtr<DataLoadParams> dataLP = UdmfClient::GetInstance()->TransformDataLoadParamsFromANI(dataLoadParams);
+    CHECK_NULL_VOID(dataLP);
+    dragEvent->SetUseDataLoadParams(true);
+    dragEvent->SetDataLoadParams(dataLP);
 }
 
 void SetDragDropInfoPixelMap(ani_ref event, ani_ref pixelMapPtr)
@@ -181,6 +197,26 @@ void SetDragPreviewOptions(ArkUINodeHandle node, ArkUIDragPreviewOption options)
     frameNode->SetDragPreviewOptions(previewOptions);
 }
 
+void EnableInternalDropAnimation(ani_ref event, const std::string& configuration, int32_t& ret)
+{
+    auto peer = reinterpret_cast<Ark_DragEvent>(event);
+    CHECK_NULL_VOID(peer);
+    auto dragEvent = peer->dragInfo;
+    CHECK_NULL_VOID(dragEvent);
+    auto interactionInterface = OHOS::Ace::InteractionInterface::GetInstance();
+    CHECK_NULL_VOID(interactionInterface);
+    ret = interactionInterface->EnableInternalDropAnimation(configuration);
+    if (ret == 0) {
+        dragEvent->SetNeedDoInternalDropAnimation(true);
+    }
+    return;
+}
+
+bool IsOnDropPhase()
+{
+    return NG::DragDropGlobalController::GetInstance().IsOnOnDropPhase();
+}
+
 const char* GetUdKey(ani_ref event)
 {
     auto peer = reinterpret_cast<Ark_DragEvent>(event);
@@ -209,6 +245,17 @@ SharedPointerWrapper GetUnifiedData(ani_long peer)
     auto unifiedData = unifiedDataPeer->unifiedData;
     CHECK_NULL_RETURN(unifiedData, SharedPointerWrapper());
     return SharedPointerWrapper(UdmfClient::GetInstance()->TransformUnifiedDataSharedPtr(unifiedData));
+}
+
+ani_long CreateDataLoadParamsPeer(void* dataLoadParams)
+{
+    CHECK_NULL_RETURN(dataLoadParams, 0);
+    RefPtr<DataLoadParams> dataLP = UdmfClient::GetInstance()->TransformDataLoadParamsFromANI(dataLoadParams);
+    CHECK_NULL_RETURN(dataLP, 0);
+    auto peerPtr = PeerUtils::CreatePeer<unifiedDataChannel_DataLoadParamsPeer>();
+    CHECK_NULL_RETURN(peerPtr, 0);
+    peerPtr->dataLoadParams = dataLP;
+    return reinterpret_cast<ani_long>(peerPtr);
 }
 
 void GetPressedModifierKey(ani_long nativePtr, char*** keys, ani_int* length)
@@ -267,6 +314,7 @@ const ArkUIAniDragModifier* GetDragAniModifier()
         .setDragData = OHOS::Ace::NG::SetDragData,
         .getDragData = OHOS::Ace::NG::GetDragData,
         .getDragSummary = OHOS::Ace::NG::GetDragSummary,
+        .setDragDataLoadParams = OHOS::Ace::NG::SetDragDataLoadParams,
         .setDragDropInfoPixelMap = OHOS::Ace::NG::SetDragDropInfoPixelMap,
         .setDragDropInfoCustomNode = OHOS::Ace::NG::SetDragDropInfoCustomNode,
         .setDragDropInfoExtraInfo = OHOS::Ace::NG::SetDragDropInfoExtraInfo,
@@ -274,9 +322,12 @@ const ArkUIAniDragModifier* GetDragAniModifier()
         .setDragAllowDrop = OHOS::Ace::NG::SetDragAllowDrop,
         .setDragPreview = OHOS::Ace::NG::SetDragPreview,
         .setDragPreviewOptions = OHOS::Ace::NG::SetDragPreviewOptions,
+        .enableInternalDropAnimation = OHOS::Ace::NG::EnableInternalDropAnimation,
+        .isOnDropPhase = OHOS::Ace::NG::IsOnDropPhase,
         .getUdKey = OHOS::Ace::NG::GetUdKey,
         .createUnifiedDataPeer = OHOS::Ace::NG::CreateUnifiedDataPeer,
         .getUnifiedData = OHOS::Ace::NG::GetUnifiedData,
+        .createDataLoadParamsPeer = OHOS::Ace::NG::CreateDataLoadParamsPeer,
         .getPressedModifierKey = OHOS::Ace::NG::GetPressedModifierKey
     };
     return &impl;

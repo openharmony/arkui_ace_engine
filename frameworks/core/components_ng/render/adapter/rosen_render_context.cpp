@@ -1197,10 +1197,11 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
 {
     FREE_RS_CONTEXT_CHECK(OnBackgroundImageUpdate, src);
     CHECK_NULL_VOID(rsNode_);
+    auto frameNode = GetHost();
+    ACE_UINODE_TRACE(frameNode);
     if (src.GetSrc().empty() && src.GetPixmap() == nullptr) {
         bgImage_ = nullptr;
         bgLoadingCtx_ = nullptr;
-        auto frameNode = GetHost();
         if (frameNode) {
             frameNode->SetColorModeUpdateCallback(nullptr);
         }
@@ -1208,13 +1209,14 @@ void RosenRenderContext::OnBackgroundImageUpdate(const ImageSourceInfo& src)
         return;
     }
     if (!bgLoadingCtx_ || src != bgLoadingCtx_->GetSourceInfo()) {
-        auto frameNode = GetHost();
         auto callback = [src, weak = WeakClaim(this)] {
             auto renderContext = weak.Upgrade();
             CHECK_NULL_VOID(renderContext);
             renderContext->OnBackgroundImageUpdate(src);
         };
-        frameNode->SetColorModeUpdateCallback(std::move(callback));
+        if (frameNode) {
+            frameNode->SetColorModeUpdateCallback(std::move(callback));
+        }
     }
     LoadNotifier bgLoadNotifier(CreateBgImageDataReadyCallback(), CreateBgImageLoadSuccessCallback(), nullptr);
     auto syncMode = GetBackgroundImageSyncMode().value_or(false);
@@ -3978,10 +3980,10 @@ float RosenRenderContext::OnePixelValueRounding(float value)
 float RosenRenderContext::OnePixelValueRounding(float value, bool isRound, bool forceCeil, bool forceFloor)
 {
     float fractials = fmod(value, 1.0f);
-    if (NearEqual(fractials, 0.0f)) {
+    if (fractials == 0.0f) {
         return value;
     }
-    if (LessNotEqual(fractials, 0.0f)) {
+    if (fractials < 0.0f) {
         ++fractials;
     }
     if (forceCeil) {
@@ -4828,6 +4830,31 @@ bool RosenRenderContext::CanNodeBeDeleted(const RefPtr<FrameNode>& node) const
     return true;
 }
 
+void RosenRenderContext::AddCornerMarkNodeToChildren(
+    const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes)
+{
+    auto cornerMarkNode = node->GetCornerMarkNode();
+    CHECK_NULL_VOID(cornerMarkNode);
+    auto pipeline = node->GetContext();
+    CHECK_NULL_VOID(pipeline);
+
+    auto cornerMarkNodeProperty = cornerMarkNode->GetLayoutProperty();
+    if (!cornerMarkNodeProperty ||
+        cornerMarkNodeProperty->GetVisibilityValue(VisibleType::VISIBLE) != VisibleType::VISIBLE) {
+        return;
+    }
+
+    if (!CanNodeBeDeleted(cornerMarkNode)) {
+        childNodes.emplace_back(cornerMarkNode);
+        if (pipeline && cornerMarkNode->HasPositionZ()) {
+            pipeline->AddPositionZNode(cornerMarkNode->GetId());
+        }
+    } else {
+        cornerMarkNode->SetDeleteRsNode(true);
+        GetLiveChildren(cornerMarkNode, childNodes);
+    }
+}
+
 void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes)
 {
     CHECK_NULL_VOID(node);
@@ -4853,6 +4880,7 @@ void RosenRenderContext::GetLiveChildren(const RefPtr<FrameNode>& node, std::lis
             pipeline->AddPositionZNode(accessibilityFocusPaintNode->GetId());
         }
     }
+    AddCornerMarkNodeToChildren(node, childNodes);
     auto overlayNode = node->GetOverlayNode();
     CHECK_NULL_VOID(overlayNode);
     auto property = overlayNode->GetLayoutProperty();

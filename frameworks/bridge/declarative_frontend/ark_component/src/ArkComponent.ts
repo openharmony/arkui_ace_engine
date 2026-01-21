@@ -3710,6 +3710,20 @@ class ClickEffectModifier extends ModifierWithKey<ClickEffect | null> {
   }
 }
 
+class EnableClickSoundEffectModifier extends ModifierWithKey<boolean | undefined> {
+  constructor(value: boolean | undefined) {
+    super(value);
+  }
+  static identity: Symbol = Symbol('enableClickSoundEffect');
+  applyPeer(node: KNode, reset: boolean): void {
+    if (reset) {
+      getUINativeModule().common.resetEnableClickSoundEffect(node);
+    } else {
+      getUINativeModule().common.setEnableClickSoundEffect(node, this.value);
+    }
+  }
+}
+
 class KeyBoardShortCutModifier extends ModifierWithKey<Array<ArkKeyBoardShortCut>> {
   constructor(value: Array<ArkKeyBoardShortCut>) {
     super(value);
@@ -5083,15 +5097,15 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   gesture(gesture: GestureType, mask?: GestureMask): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'gesture not supportted in attributeModifier scenario.');
   }
 
   priorityGesture(gesture: GestureType, mask?: GestureMask): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'priorityGesture not supportted in attributeModifier scenario.');
   }
 
   parallelGesture(gesture: GestureType, mask?: GestureMask): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'priorityGesture not supportted in attributeModifier scenario.');
   }
 
   blur(value: number, options?: BlurOptions): this {
@@ -5486,6 +5500,11 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
     return this;
   }
 
+  enableClickSoundEffect(value: boolean | undefined): this {
+    modifierWithKey(this._modifiersWithKeys, EnableClickSoundEffectModifier.identity, EnableClickSoundEffectModifier, value);
+    return this;
+  }
+
   onDragStart(event: (event?: DragEvent, extraParams?: string) => CustomBuilder | DragItemInfo): this {
     modifierWithKey(this._modifiersWithKeys, DragStartModifier.identity, DragStartModifier, event);
     return this;
@@ -5723,7 +5742,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   bindContextMenu(content: CustomBuilder, responseType: ResponseType, options?: ContextMenuOptions): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindContextMenu not supported in attributeModifier scenario.');
   }
 
   bindContentCover(isShow: boolean, builder: CustomBuilder, type?: ModalTransition | ContentCoverOptions): this {
@@ -5757,7 +5776,7 @@ class ArkComponent implements CommonMethod<CommonAttribute> {
   }
 
   stateStyles(value: StateStyles): this {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'stateStyles not supportted in attributeModifier scenario.');
   }
 
   restoreId(value: number): this {

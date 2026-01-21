@@ -83,8 +83,16 @@ HWTEST_F(UiContentTest, GetUIContent002, TestSize.Level1)
  */
 HWTEST_F(UiContentTest, GetUIContent003, TestSize.Level1)
 {
+    /**
+     * @tc.steps1: Call UIContent::Create function with null parameters
+     * @tc.expected: The returned shared_ptr is valid (not null)
+     */
     std::shared_ptr<UIContent> ret = UIContent::Create(nullptr, nullptr);
     EXPECT_TRUE(ret);
+    /**
+     * @tc.steps2: Call InitializeByNameWithAniStorage function with null page name and storage
+     * @tc.expected: The returned error code is UIContentErrorCode::NO_ERRORS
+     */
     ani_object storage = nullptr;
     UIContentErrorCode errorCode = ret->InitializeByNameWithAniStorage(nullptr, "", storage, 0);
     EXPECT_TRUE(errorCode == UIContentErrorCode::NO_ERRORS);

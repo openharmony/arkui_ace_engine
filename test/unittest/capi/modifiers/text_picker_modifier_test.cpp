@@ -780,19 +780,17 @@ const std::vector<cascade_test_data> textPickerOptionsAsCascadeArray = {
 };
 } // namespace
 
-Ark_TextCascadePickerRangeContent createCascadeLevel1(std::string str)
+Ark_TextCascadePickerRangeContent createCascadeLevel1(std::string str, Converter::ConvContext *ctx)
 {
-    Ark_String itemText = Converter::ArkValue<Ark_String>(str);
     Ark_TextCascadePickerRangeContent item;
-    item.text = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>(itemText);
+    item.text = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>(str, ctx);
     item.children = Converter::ArkValue<Opt_Array_TextCascadePickerRangeContent>(Ark_Empty());
     return item;
 }
 
-void InitChild(Ark_TextCascadePickerRangeContent& child, std::string name)
+void InitChild(Ark_TextCascadePickerRangeContent& child, std::string name, Converter::ConvContext *ctx)
 {
-    Ark_String arkName = Converter::ArkValue<Ark_String>(name);
-    child.text = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>(arkName);
+    child.text = Converter::ArkUnion<Ark_Union_String_Resource, Ark_String>(name, ctx);
 }
 
 void CreateOptions(Array_TextCascadePickerRangeContent& arrayRoot,
@@ -804,7 +802,7 @@ void CreateOptions(Array_TextCascadePickerRangeContent& arrayRoot,
         Ark_Union_Array_String_Array_Array_String_Resource_Array_TextPickerRangeContent_Array_TextCascadePickerRangeContent,
         Array_TextCascadePickerRangeContent>(arrayRoot);
     if (std::get<HAS_VALUES_ID>(value)) {
-        auto arkValue = Converter::ArkValue<Array_ResourceStr>(std::get<VALUES_ID>(value), Converter::FC);
+        auto arkValue = Converter::ArkValue<Array_ResourceStr>(std::get<VALUES_ID>(value), ctx);
         arkTextPickerOptions.value = Converter::ArkUnion<Opt_Union_ResourceStr_Array_ResourceStr_Bindable_Bindable,
             Array_ResourceStr>(arkValue);
     } else {
@@ -870,25 +868,26 @@ void CascadePickerTestProcedure (std::unique_ptr<JsonValue>& jsonValue, cascade_
  */
 HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsCascadeArray, TestSize.Level1)
 {
+    Converter::ConvContext ctx;
     ASSERT_NE(modifier_->setTextPickerOptions, nullptr);
     std::vector<Ark_TextCascadePickerRangeContent> subcategoryVector;
-    subcategoryVector.push_back(createCascadeLevel1(NAME_SUBCATEGORY_2));
-    subcategoryVector.push_back(createCascadeLevel1(NAME_SUBCATEGORY_3));
+    subcategoryVector.push_back(createCascadeLevel1(NAME_SUBCATEGORY_2, &ctx));
+    subcategoryVector.push_back(createCascadeLevel1(NAME_SUBCATEGORY_3, &ctx));
     Converter::ArkArrayHolder<Array_TextCascadePickerRangeContent> holderSubcategoryVector(subcategoryVector);
     Opt_Array_TextCascadePickerRangeContent optArraySubcategory =
         holderSubcategoryVector.OptValue<Opt_Array_TextCascadePickerRangeContent>();
     Ark_TextCascadePickerRangeContent child1;
-    InitChild(child1, NAME_SUBCATEGORY_1);
+    InitChild(child1, NAME_SUBCATEGORY_1, &ctx);
     child1.children = optArraySubcategory;
 
     std::vector<Ark_TextCascadePickerRangeContent> itemVector;
-    itemVector.push_back(createCascadeLevel1(NAME_ITEM_2));
-    itemVector.push_back(createCascadeLevel1(NAME_ITEM_3));
+    itemVector.push_back(createCascadeLevel1(NAME_ITEM_2, &ctx));
+    itemVector.push_back(createCascadeLevel1(NAME_ITEM_3, &ctx));
     Converter::ArkArrayHolder<Array_TextCascadePickerRangeContent> holderItemVector(itemVector);
     Opt_Array_TextCascadePickerRangeContent optArrayItem =
         holderItemVector.OptValue<Opt_Array_TextCascadePickerRangeContent>();
     Ark_TextCascadePickerRangeContent child2;
-    InitChild(child2, NAME_ITEM_1);
+    InitChild(child2, NAME_ITEM_1, &ctx);
     child2.children = optArrayItem;
 
     std::vector<Ark_TextCascadePickerRangeContent> childrenVector;
@@ -898,10 +897,10 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsCascadeArray, TestSize.Le
     Opt_Array_TextCascadePickerRangeContent optArrayChildren =
         holderChildrenVector.OptValue<Opt_Array_TextCascadePickerRangeContent>();
     Ark_TextCascadePickerRangeContent main1;
-    InitChild(main1, NAME_CATEGORY_1);
+    InitChild(main1, NAME_CATEGORY_1, &ctx);
     main1.children = optArrayChildren;
     Ark_TextCascadePickerRangeContent main2;
-    InitChild(main2, NAME_CATEGORY_2);
+    InitChild(main2, NAME_CATEGORY_2, &ctx);
     main2.children = optArrayChildren;
 
     std::vector<Ark_TextCascadePickerRangeContent> rootVector;
@@ -915,7 +914,6 @@ HWTEST_F(TextPickerModifierTest, setTextPickerOptionsAsCascadeArray, TestSize.Le
     std::string expectedStr;
     for (auto&& value: textPickerOptionsAsCascadeArray) {
         Ark_TextPickerOptions arkTextPickerOptions;
-        Converter::ConvContext ctx;
         CreateOptions(arrayRoot, value, arkTextPickerOptions, &ctx);
         Opt_TextPickerOptions inputValueOptions = Converter::ArkValue<Opt_TextPickerOptions>(arkTextPickerOptions);
 

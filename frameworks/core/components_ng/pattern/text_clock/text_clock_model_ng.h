@@ -39,7 +39,7 @@ public:
     void SetOnDateChange(std::function<void(const std::string)>&& onChange) override;
     void SetFontSize(const Dimension& value) override;
     void SetTextColor(const Color& value) override;
-    void ResetTextColor() override;
+    void SetTextColorByUser(bool isSetByUser) override;
     void SetItalicFontStyle(Ace::FontStyle value) override;
     void SetFontWeight(FontWeight value) override;
     void SetFontFamily(const std::vector<std::string>& value) override;
@@ -60,7 +60,6 @@ public:
     static void SetHoursWest(FrameNode* frameNode, float hoursWest);
     static void SetFontColor(FrameNode* frameNode, const Color& value);
     static void SetFontColorByUser(FrameNode* frameNode, bool isSetByUser);
-    static void ResetFontColor(FrameNode* frameNode);
     static void SetFontSize(FrameNode* frameNode, const Dimension& value);
     static void SetFontStyle(FrameNode* frameNode, Ace::FontStyle value);
     static void SetFontWeight(FrameNode* frameNode, FontWeight value);

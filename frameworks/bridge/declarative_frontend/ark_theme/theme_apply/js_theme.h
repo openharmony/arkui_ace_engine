@@ -89,7 +89,7 @@ struct ResourceValue {
     Color colorValue;
 };
 
-class JSThemeColors {
+class ACE_FORCE_EXPORT JSThemeColors {
 public:
     JSThemeColors() = default;
     virtual ~JSThemeColors() = default;

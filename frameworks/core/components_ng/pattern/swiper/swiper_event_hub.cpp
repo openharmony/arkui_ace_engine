@@ -228,11 +228,11 @@ void SwiperEventHub::FireSelectedEvent(int32_t index)
 
 void SwiperEventHub::FireJSChangeEvent(int32_t preIndex, int32_t index)
 {
-    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Swiper.onChange",
-        ComponentEventType::COMPONENT_EVENT_SWIPER);
     auto frameNode = GetFrameNode();
     ACE_SCOPED_TRACE("Swiper FireChangeEvent, id: %d, preIndex: %d, index: %d", frameNode ? frameNode->GetId() : -1,
         preIndex, index);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Swiper.onChange",
+        ComponentEventType::COMPONENT_EVENT_SWIPER);
     NotifySwiperObserver(frameNode, index);
     if (changeEvents_.empty()) {
         return;

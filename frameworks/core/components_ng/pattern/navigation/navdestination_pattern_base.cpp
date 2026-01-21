@@ -455,12 +455,12 @@ void NavDestinationPatternBase::InitOnTouchEvent(const RefPtr<FrameNode>& host)
     CHECK_NULL_VOID(context);
     auto forceSplitMgr = context->GetForceSplitManager();
     CHECK_NULL_VOID(forceSplitMgr);
-    if (touchListener_ || !forceSplitMgr->IsForceSplitSupported(false)) {
+    if (!forceSplitMgr->IsForceSplitSupported(false)) {
         return;
     }
-    auto gesture = host->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    auto touchCallback = [weak = WeakClaim(this)](const TouchEventInfo info) {
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    eventManager->RegisterHitTestFrameNodeListener(host->GetId(), [weak = WeakClaim(this)](const TouchEvent& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
         auto host = pattern->GetHost();
@@ -479,9 +479,7 @@ void NavDestinationPatternBase::InitOnTouchEvent(const RefPtr<FrameNode>& host)
         }
         auto dest = AceType::DynamicCast<NavDestinationGroupNode>(host);
         navPattern->SetIsHomeNodeTouched(dest && dest->GetNavDestinationType() == NavDestinationType::HOME);
-    };
-    touchListener_ = MakeRefPtr<TouchEventImpl>(std::move(touchCallback));
-    gesture->AddTouchEvent(touchListener_);
+    });
 }
 
 void NavDestinationPatternBase::RemoveOnTouchEvent(FrameNode* frameNode)
@@ -491,12 +489,12 @@ void NavDestinationPatternBase::RemoveOnTouchEvent(FrameNode* frameNode)
     CHECK_NULL_VOID(context);
     auto forceSplitMgr = context->GetForceSplitManager();
     CHECK_NULL_VOID(forceSplitMgr);
-    if (!touchListener_ || !forceSplitMgr->IsForceSplitSupported(false)) {
+    if (!forceSplitMgr->IsForceSplitSupported(false)) {
         return;
     }
-    auto gesture = frameNode->GetOrCreateGestureEventHub();
-    CHECK_NULL_VOID(gesture);
-    gesture->RemoveTouchEvent(touchListener_);
-    touchListener_ = nullptr;
+    auto eventManager = context->GetEventManager();
+    CHECK_NULL_VOID(eventManager);
+    eventManager->UnRegisterHitTestFrameNodeListener(frameNode->GetId());
 }
+
 } // namespace OHOS::Ace::NG

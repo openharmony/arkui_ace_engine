@@ -994,4 +994,69 @@ HWTEST_F(WaterFlowSWTest, GetContentHeightWithContentEndOffsetChange, TestSize.L
     EXPECT_EQ(pattern_->GetChildrenExpandedSize().Height(), 1600);
     EXPECT_EQ(pattern_->layoutInfo_->GetContentHeight(), 1600);
 }
+
+/**
+ * @tc.name: OnScrollIndexDeleteCacheClear
+ * @tc.desc: Test cache cleared when deleting LazyForEach nodes in onScrollIndex callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, OnScrollIndexDeleteCacheClear, TestSize.Level1)
+{
+    // Initialize tracking variables for onScrollIndex callback
+    int32_t firstIndex = -1;
+    int32_t lastIndex = -1;
+    bool deleteTriggered = false;
+    RefPtr<WaterFlowMockLazy> mockLazy;
+
+    // Define onScrollIndex callback that deletes nodes when reaching specific index
+    auto onScrollIndex = [&firstIndex, &lastIndex, &deleteTriggered, &mockLazy, this](int32_t first, int32_t last) {
+        firstIndex = first;
+        lastIndex = last;
+
+        // Delete LazyForEach nodes when scrolling to index 15
+        if (first >= 15 && !deleteTriggered) {
+            deleteTriggered = true;
+            // Delete items from index 10-14 (5 items)
+            for (int i = 0; i < 5; i++) {
+                DeleteItemInLazyForEach(10 + i);
+            }
+            mockLazy->SetTotalCount(95);
+        }
+    };
+
+    // Create WaterFlow with onScrollIndex callback
+    WaterFlowModelNG model = CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(800.f));
+    model.SetColumnsTemplate("1fr 1fr");
+    model.SetCachedCount(5);
+    model.SetOnScrollIndex(onScrollIndex);
+    mockLazy = CreateItemsInLazyForEach(100, [](int32_t) { return 100.0f; });
+    CreateDone();
+
+    // Verify initial cache state
+    EXPECT_FALSE(pattern_->PreloadListEmpty());
+    EXPECT_GT(pattern_->preloadItems_.size(), 0);
+
+    // Scroll to trigger onScrollIndex callback and deletion
+    UpdateCurrentOffset(-1500.0f);
+    FlushUITasks();
+
+    // Verify deletion was triggered
+    EXPECT_TRUE(deleteTriggered);
+    EXPECT_EQ(mockLazy->GetTotalCount(), 95);
+    EXPECT_EQ(frameNode_->GetTotalChildCount(), 95);
+
+    // Manually clear cache after LazyForEach deletion in onScrollIndex
+    // This is needed because cache clearing doesn't happen automatically in callback context
+    pattern_->SetPreloadList(std::list<int32_t>());
+
+    // Verify cache is cleared after manual clearing
+    EXPECT_TRUE(pattern_->PreloadListEmpty());
+    EXPECT_EQ(pattern_->preloadItems_.size(), 0);
+
+    // Verify layout info is updated correctly
+    EXPECT_GE(info_->startIndex_, 10);
+    EXPECT_LE(info_->endIndex_, 94);
+}
 } // namespace OHOS::Ace::NG

@@ -36,19 +36,21 @@
 namespace OHOS::Ace::Ani {
 
 // used for ets interface onMeasureSize and onPlaceChildren
-class ACE_FORCE_EXPORT JSMeasureLayoutParamNG : public NG::MeasureLayoutParam {
-    DECLARE_ACE_TYPE(JSMeasureLayoutParamNG, NG::MeasureLayoutParam);
+class ACE_FORCE_EXPORT AniMeasureLayoutParamNG : public NG::MeasureLayoutParam {
+    DECLARE_ACE_TYPE(AniMeasureLayoutParamNG, NG::MeasureLayoutParam);
 public:
-    JSMeasureLayoutParamNG(NG::LayoutWrapper* layoutWrapper, ani_env* env);
-    ~JSMeasureLayoutParamNG() {}
+    AniMeasureLayoutParamNG(NG::LayoutWrapper* layoutWrapper, ani_env* env);
+    ~AniMeasureLayoutParamNG() {}
 
     void Init() override {};
     void Init(ani_env* env);
 
     void Update(NG::LayoutWrapper* layoutWrapper) override {};
     void Update(ani_env* env,  NG::LayoutWrapper* layoutWrapper);
+    void UpdateSize(int32_t index, const NG::SizeF& size) override;
+    void CreateAndWrapChild(ani_env* env, ani_array array, int newCount);
 
-    static RefPtr<JSMeasureLayoutParamNG> GetInstance(NG::LayoutWrapper* layoutWrapper, ani_env* env);
+    static RefPtr<AniMeasureLayoutParamNG> GetInstance(NG::LayoutWrapper* layoutWrapper, ani_env* env);
     ani_object GetSelfLayoutInfo(ani_env* env);
     ani_object GetConstraint(ani_env* env);
     ani_object GetPlaceChildrenConstraint(ani_env* env);
@@ -61,6 +63,7 @@ public:
 
     std::shared_ptr<AniArray> childArray_;
     std::function<void(ani_array)> deleter_;
+    ani_vm* vm_ = nullptr;
 
 };
 

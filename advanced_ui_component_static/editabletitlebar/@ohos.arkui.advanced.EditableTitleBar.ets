@@ -33,7 +33,7 @@ import common from '@ohos.app.ability.common';
 import window from '@ohos.window';
 import { Context } from '@ohos.arkui.UIContext';
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';
-import { State, Observed, Prop, PropRef, StorageProp, StorageLink, Provide, Consume } from '@ohos.arkui.stateManagement'
+import { State, Observed, PropRef, StoragePropRef, StorageLink, Provide, Consume } from '@ohos.arkui.stateManagement'
 import { Configuration } from '@ohos.app.ability.Configuration';
 import AbilityConstant from '@ohos.app.ability.AbilityConstant';
 import ApplicationContext from 'application.ApplicationContext';
@@ -910,7 +910,7 @@ struct EditableTitleBarDialog {
   }
   @PropRef fontSize: number = 1;
   @State maxLines: int = 1;
-  @StorageProp('windowStandardHeight') windowStandardHeight: number = 0;
+  @StoragePropRef('windowStandardHeight') windowStandardHeight: number = 0;
 
   build() {
     if (this.textEditableTitleBarDialog) {

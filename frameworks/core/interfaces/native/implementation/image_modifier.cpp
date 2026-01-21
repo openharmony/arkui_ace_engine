@@ -500,6 +500,13 @@ void SetContentTransitionImpl(Ark_NativePointer node, const Opt_ContentTransitio
         ImageModelStatic::SetContentTransition(frameNode, peer->type_);
     }
 }
+void SetAntialiasedImpl(Ark_NativePointer node, const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    ImageModelStatic::SetAntialiased(frameNode, convValue);
+}
 } // namespace ImageAttributeModifier
 const GENERATED_ArkUIImageModifier* GetImageModifier()
 {
@@ -536,6 +543,7 @@ const GENERATED_ArkUIImageModifier* GetImageModifier()
         ImageAttributeModifier::SetOrientationImpl,
         ImageAttributeModifier::SetSupportSvg2Impl,
         ImageAttributeModifier::SetContentTransitionImpl,
+        ImageAttributeModifier::SetAntialiasedImpl,
     };
     return &ArkUIImageModifierImpl;
 }

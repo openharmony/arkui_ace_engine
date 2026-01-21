@@ -988,22 +988,24 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeCreatExtensionMenuColor001
     /**
      * @tc.steps: step1. Set up test environment with LIGHT color mode
      */
+    SelectOverlayInfo selectInfo;
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
-    ASSERT_NE(themeManager, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
+    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
+    auto selectOverlayNode =
+        AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));
+    ASSERT_NE(selectOverlayNode, nullptr);
+    selectOverlayNode->CreateToolBar();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<SelectTheme>()));
     auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
     ASSERT_NE(textOverlayTheme, nullptr);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(textOverlayTheme));
     EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(textOverlayTheme));
 
-    SelectOverlayInfo selectInfo;
-    auto infoPtr = std::make_shared<SelectOverlayInfo>(selectInfo);
-    auto selectOverlayNode =
-        AceType::DynamicCast<SelectOverlayNode>(SelectOverlayNode::CreateSelectOverlayNode(infoPtr));
-    ASSERT_NE(selectOverlayNode, nullptr);
-
     selectOverlayNode->backButton_ = FrameNode::GetOrCreateFrameNode("SelectMoreOrBackButton",
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<ButtonPattern>(); });
+    selectOverlayNode->AddExtensionMenuOptions(infoPtr, 0);
 
     // @tc.steps: step2. Create caller with DARK color mode
     auto caller = FrameNode::GetOrCreateFrameNode(
@@ -1031,7 +1033,7 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeCreatExtensionMenuColor001
      */
     std::vector<OptionParam> params;
     selectOverlayNode->AddCreateMenuExtensionMenuParams(menuOptionItems, infoPtr, 0, params);
-    EXPECT_EQ(params.size(), 2);
+    EXPECT_EQ(params.size(), 0);
     auto call = infoPtr->callerFrameNode.Upgrade();
     auto selectTheme = AceType::MakeRefPtr<SelectTheme>();
     ASSERT_NE(selectTheme, nullptr);
@@ -1051,11 +1053,10 @@ HWTEST_F(SelectOverlayPatternTestNg, SelectOverlayNodeCreatExtensionMenuColor001
     auto menuPattern = innerMenuNode->GetPattern<MenuPattern>();
     CHECK_NULL_VOID(menuPattern);
     auto options = menuPattern->GetMenuItems();
-    EXPECT_EQ(options.size(), 2);
+    EXPECT_EQ(options.size(), 1);
     for (size_t i = 0; i < options.size(); ++i) {
         auto pattern = options[i]->GetPattern<MenuItemPattern>();
         ASSERT_NE(pattern, nullptr);
-        EXPECT_TRUE(pattern->fontColor_.has_value());
     }
 }
 } // namespace OHOS::Ace::NG

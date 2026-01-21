@@ -986,8 +986,12 @@ errorMap_.set(ERROR_CODE_NODE_IS_NOT_IN_ADOPTED_CHILDREN, "The parameter 'child'
 function getFrameNodeRawPtr(frameNode) {
     return getUINativeModule().frameNode.getFrameNodeRawPtr(frameNode.nodePtr_);
 }
-class FrameNode {
-    constructor(uiContext, type, options) {
+function createFrameNodeByTrans(nativePointer, uiContext, nodeType) {
+return new TransFrameNode(uiContext, nodeType, undefined, nativePointer);
+}
+class FrameNode extends Disposable {
+    constructor(uiContext, type, options, nativePointer) {
+        super();
         if (uiContext === undefined) {
             throw Error('Node constructor error, param uiContext error');
         }
@@ -1013,10 +1017,19 @@ class FrameNode {
         __JSScopeUtil__.syncInstanceId(this.instanceId_);
         if (type === undefined || type === "CustomFrameNode") {
             this.renderNode_ = new RenderNode('CustomFrameNode');
-            result = getUINativeModule().frameNode.createFrameNode(this);
+            if (nativePointer === null || nativePointer === undefined) {
+                result = getUINativeModule().frameNode.createFrameNode(this);
+            }
+            else {
+                result = getUINativeModule().frameNode.createTransFrameNode(this, nativePtr);
+            }
         }
         else {
-            result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
+            if (nativePointer === undefined || nativePointer === null) {
+                result = getUINativeModule().frameNode.createTypedFrameNode(this, type, options);
+            } else {
+                result = getUINativeModule().frameNode.createTransTypedFrameNode(this, type, options, nativePointer);
+            }
         }
         __JSScopeUtil__.restoreInstanceId();
         this._nativeRef = result?.nativeStrongRef;
@@ -1024,6 +1037,8 @@ class FrameNode {
         this.nodePtr_ = this._nativeRef?.getNativeHandle();
         this.renderNode_?.setNodePtr(result?.nativeStrongRef);
         this.renderNode_?.setFrameNode(new WeakRef(this));
+        this.type_ = type;
+        this.rawPtr_ = result?.rawPtr_;
         if (result === undefined || this._nodeId === -1) {
             return;
         }
@@ -1744,6 +1759,51 @@ class FrameNode {
         return false;
     }
 }
+
+class TransFrameNode extends FrameNode {
+    constructor(uiContext, type, options, nativePointer) {
+        super(uiContext, type, options, nativePointer);
+    }
+    isTransferred() {
+        return true;
+    }
+    getRenderNode() {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support getRenderNode');
+    }
+    getCustomProperty(name) {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support getCustomProperty');
+    }
+    get commonAttribute() {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support commonAttribute');
+    }
+    get commonEvent() {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support commonEvent');
+    }
+    get gestureEvent() {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support gestureEvent');
+    }
+    setMeasuredSize(size) {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support setMeasuredSize');
+    }
+    setLayoutPosition(position) {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support setLayoutPosition');
+    }
+    measure(constraint) {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support measure');
+    }
+    layout(position) {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support layout');
+    }
+    setNeedsLayout() {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support setNeedsLayout');
+    }
+    invalidate() {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support invalidate');
+    }
+    addComponentContent(content) {
+        throw new BusinessError(100031, 'frameNode created by transferDynamic not support addComponentContent');
+    }
+}
 class ImmutableFrameNode extends FrameNode {
     isModifiable() {
         return false;
@@ -2024,7 +2084,9 @@ const __creatorMap__ = new Map([
         }],
     ['QRCode', (context) => {
             return new TypedFrameNode(context, 'QRCode', (node, type) => {
-                return new ArkQRCodeComponent(node, type);
+                getUINativeModule().loadNativeModule('QRCode');
+ 	            let module = globalThis.requireNapi('arkui.components.arkqrcode');
+ 	            return module.createComponent(node, type);
             });
         }],
     ['Badge', (context) => {

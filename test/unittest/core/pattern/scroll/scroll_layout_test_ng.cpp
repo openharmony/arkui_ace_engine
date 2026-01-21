@@ -1751,4 +1751,25 @@ HWTEST_F(ScrollLayoutTestNg, LargeScrollOffsetAccuracy, TestSize.Level1)
     FlushUITasks();
     EXPECT_DOUBLE_EQ(pattern_->currentOffset_, -16770000.0625);
 }
+
+/**
+ * @tc.name: ScrollExpandSafeArea
+ * @tc.desc: Test Scroll Set ExpandSafeArea.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollLayoutTestNg, ScrollExpandSafeArea, TestSize.Level1)
+{
+    CreateScroll();
+    CreateContent();
+    CreateScrollDone();
+
+    auto geometryNode = frameNode_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetSelfAdjust(RectF(-10.0f, -10.0f, 1.0f, 1.0f));
+    DirtySwapConfig config;
+    pattern_->BeforeSyncGeometryProperties(config);
+    auto scrollBarOverlayModifier = pattern_->GetScrollBarOverlayModifier();
+    ASSERT_NE(scrollBarOverlayModifier, nullptr);
+    EXPECT_EQ(scrollBarOverlayModifier->GetAdjustOffset(), Offset(10.0f, 10.0f));
+}
 } // namespace OHOS::Ace::NG

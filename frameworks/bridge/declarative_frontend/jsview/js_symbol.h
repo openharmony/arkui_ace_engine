@@ -44,7 +44,8 @@ public:
     static void ParseCommonGradientOptions(const JSRef<JSObject>& optionsObj, SymbolGradient& gradient);
     static void ParseJsColorArray(const JSRef<JSVal>& jsValue, SymbolGradient& gradient);
     static void ParseGradientCenter(const JSRef<JSArray>& centerArray, SymbolGradient& gradient);
-    static void ParseJsValueToFloat(const JSRef<JSObject>& jsObj, int32_t key, float& output);
+    static void ParseJsValueToFloat(
+        const JSRef<JSObject>& jsObj, int32_t key, float& output, RefPtr<ResourceObject>& radiusResObj);
     static void ParseJsValueToDimension(const JSRef<JSObject>& jsObj, int32_t key, std::optional<Dimension>& output);
     static float DirectionToAngle(const JsiRef<JsiValue>& directionValue);
 };

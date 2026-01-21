@@ -166,6 +166,7 @@ template("ace_core_interfaces_native_node") {
         "ani/custom_node_ani_modifier.cpp",
         "ani/detached_free_root_ani_modifier.cpp",
         "ani/drag_ani_modifier.cpp",
+        "ani/gesture_event_uiobserver_ani_modifier.cpp",
         "ani/image_ani_modifier.cpp",
         "ani/image_span_ani_modifier.cpp",
         "ani/interop_ani_modifier.cpp",
@@ -202,6 +203,7 @@ template("ace_core_interfaces_native_node") {
           "ani/common_ani_modifier.cpp",
           "ani/component3d_ani_modifier.cpp",
           "ani/custom_node_ani_modifier.cpp",
+          "ani/gesture_event_uiobserver_ani_modifier.cpp",
           "ani/interop_ani_modifier.cpp",
           "ani/list_ani_modifier.cpp",
           "ani/list_item_group_ani_modifier.cpp",
@@ -282,6 +284,7 @@ template("ace_core_interfaces_native_node") {
     if (!ace_engine_feature_wearable) {
       sources += [
         "node/calendar_picker_modifier.cpp",
+        "node/calendar_picker_dialog_modifier.cpp",
         "node/node_folder_stack_modifier.cpp",
       ]
     }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -652,6 +652,9 @@ public:
     // clickEffect
     static void SetClickEffectLevel(const ClickEffectLevel& level, float scaleValue);
 
+    // enableClickSoundEffect
+    static void SetEnableClickSoundEffect(bool enabled);
+
     // custom animatable property
     static void CreateAnimatablePropertyFloat(
         const std::string& propertyName, float value, const std::function<void(float)>& onCallbackEvent);
@@ -690,10 +693,19 @@ public:
     static void ClearWidthOrHeight(FrameNode* frameNode, bool isWidth);
     static void SetBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value);
     static void SetBorderRadius(FrameNode* frameNode, const Dimension& value);
+    static void SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight);
+    static void SetBorderRadius(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value);
     static void SetBorderWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetBorderWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& left,
+        const std::optional<Dimension>& right, const std::optional<Dimension>& top,
+        const std::optional<Dimension>& bottom);
     static void SetBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
     static void SetBorderColor(FrameNode* frameNode, const Color& value);
+    static void SetBorderColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetOuterBorderColor(FrameNode* frameNode, const Color& value);
     static void SetOuterBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
     static void SetOuterBorderRadius(FrameNode* frameNode, const Dimension& value);
@@ -824,6 +836,7 @@ public:
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
     static void UpdateIgnoreLayoutSafeAreaOpts(FrameNode* frameNode, const IgnoreLayoutSafeAreaOpts& opts);
     static void UpdateLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth);
+    static void UpdateOnlyLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth);
     static void ResetLayoutPolicyProperty(FrameNode* frameNode, bool isWidth);
     static void SetAspectRatio(FrameNode* frameNode, float ratio);
     static void SetAlignSelf(FrameNode* frameNode, FlexAlign value);
@@ -889,6 +902,7 @@ public:
     static void SetHoverEffect(FrameNode* frameNode, HoverEffectType hoverEffect);
     static HoverEffectType GetHoverEffect(FrameNode* frameNode);
     static void SetClickEffectLevel(FrameNode* frameNode, const ClickEffectLevel& level, float scaleValue);
+    static void SetEnableClickSoundEffect(FrameNode* frameNode, bool enabled);
     static void SetKeyboardShortcut(FrameNode* frameNode, const std::string& value,
         const std::vector<ModifierKey>& keys, std::function<void()>&& onKeyboardShortcutAction);
 

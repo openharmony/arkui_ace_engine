@@ -133,4 +133,12 @@ void EventReport::ReportGeneralInteractionError(const GeneralInteractionErrorInf
 void EventReport::ReportWebBlanklessSnapshotTouchEvent(uint64_t startTime, const std::string& touchInfo,
     uint64_t endTime)
 {}
+
+void EventReport::ReportUiExtensionTransparentEvent(const std::string& pageUrl,
+    const std::string& bundleName, const std::string& moduleName)
+{}
+
+void EventReport::ReportMainWindowTransparentEvent(const std::string& pageUrl,
+    const std::string& bundleName, const std::string& moduleName)
+{}
 } // namespace OHOS::Ace

@@ -40,7 +40,8 @@ CustomNode* CustomNodeStatic::ConstructCustomNode(int32_t id, NodeKoalaInfo&& in
 
 CustomMeasureLayoutNode* CustomNodeStatic::ConstructCustomNode(int32_t id,
     std::function<void(NG::LayoutWrapper* layoutWrapper)>&& onMeasureSize,
-    std::function<void(NG::LayoutWrapper* layoutWrapper)>&& onPlaceChildren)
+    std::function<void(NG::LayoutWrapper* layoutWrapper)>&& onPlaceChildren,
+    std::function<void(NG::LayoutWrapper* layoutWrapper)>&& updateParamFunc)
 {
     auto customNode = NG::CustomMeasureLayoutNode::CreateCustomMeasureLayoutNode(id, "");
     customNode->IncRefCount();
@@ -48,16 +49,22 @@ CustomMeasureLayoutNode* CustomNodeStatic::ConstructCustomNode(int32_t id,
         auto customMeasureLayoutNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(customNode);
         customMeasureLayoutNode->SetMeasureFunction(std::move(onMeasureSize));
     } else {
-        TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "onMeasureSize null");
+        TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "onMeasureSize is nullptr");
     }
 
     if (onPlaceChildren) {
         auto customMeasureLayoutNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(customNode);
         customMeasureLayoutNode->SetLayoutFunction(std::move(onPlaceChildren));
     } else {
-        TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "onPlaceChildren null");
+        TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "onPlaceChildren is nullptr");
     }
-    
+
+    if (updateParamFunc) {
+        auto customMeasureLayoutNode = AceType::DynamicCast<NG::CustomMeasureLayoutNode>(customNode);
+        customMeasureLayoutNode->SetUpdateParamFunc(std::move(updateParamFunc));
+    } else {
+        TAG_LOGI(AceLogTag::ACE_NATIVE_NODE, "updateParamFunc is nullptr");
+    }
     return AceType::RawPtr(customNode);
 }
 } // namespace OHOS::Ace::NG

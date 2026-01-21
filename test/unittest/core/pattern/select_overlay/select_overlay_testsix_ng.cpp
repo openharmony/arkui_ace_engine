@@ -74,6 +74,7 @@ public:
 protected:
     std::vector<MenuOptionsParam> GetMenuOptionItems();
     DrawingContext GetDrawingContext(Testing::MockCanvas& canvas);
+    static RefPtr<Theme> GetMockThemeForTest(ThemeType type);
 };
 
 void SelectOverlaySixTestNg::SetUpTestCase()
@@ -125,6 +126,18 @@ DrawingContext SelectOverlaySixTestNg::GetDrawingContext(Testing::MockCanvas& ca
     EXPECT_CALL(canvas, ClipRect(_, _, _)).WillRepeatedly(Return());
     return context;
 }
+
+RefPtr<Theme> SelectOverlaySixTestNg::GetMockThemeForTest(ThemeType type)
+{
+    if (type == SelectTheme::TypeId()) {
+        return AceType::MakeRefPtr<SelectTheme>();
+    }
+    auto textOverlayTheme = AceType::MakeRefPtr<TextOverlayTheme>();
+    textOverlayTheme->showShortcut_ = true;
+    textOverlayTheme->pasteLabel_ = "pasteLabel";
+    return textOverlayTheme;
+}
+
 /**
  * @tc.name: GetCreateMenuOptionsParams005
  * @tc.desc: test GetCreateMenuOptionsParams
@@ -173,7 +186,7 @@ HWTEST_F(SelectOverlaySixTestNg, GetCreateMenuOptionsParams005, TestSize.Level1)
     EXPECT_CALL(*themeManager, GetTheme(_))
         .WillOnce(Return(textOverlayTheme))
         .WillOnce(Return(textOverlayTheme))
-        .WillRepeatedly(Return(selectTheme));
+        .WillRepeatedly(SelectOverlaySixTestNg::GetMockThemeForTest);
     auto menuWrapper = selectOverlayNode->CreateMenuNode(info_);
     EXPECT_NE(menuWrapper, nullptr);
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManagerBase);

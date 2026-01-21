@@ -79,6 +79,7 @@ public:
     bool IsAppropriateType(DragSummaryInfo& dragSummaryInfo, const std::set<std::string>& allowTypes) override;
 
     RefPtr<UnifiedData> TransformUnifiedDataFromANI(void* rawData) override;
+    RefPtr<DataLoadParams> TransformDataLoadParamsFromANI(void* rawData) override;
     void TransformSummaryANI(std::map<std::string, int64_t>& summary, std::shared_ptr<void> summaryPtr) override;
 };
 

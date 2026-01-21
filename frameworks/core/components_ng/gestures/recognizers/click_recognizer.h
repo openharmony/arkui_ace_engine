@@ -127,12 +127,13 @@ private:
     void DeadlineTimer(CancelableCallback<void()>& deadlineTimer, int32_t time);
     Offset ComputeFocusPoint();
 
+    void PlayClickSoundEffect(Offset clickPoint);
     void SendCallbackMsg(const std::unique_ptr<GestureEventFunc>& callback, GestureCallbackType type);
     void HandleReports(const GestureEvent& info, GestureCallbackType type) override;
     GestureJudgeResult TriggerGestureJudgeCallback();
     bool ExceedSlop();
     void InitGlobalValue(SourceType deviceId);
-
+    void HandleReportClick(const GestureEvent& info);
     bool CheckNeedReceiveEvent();
 
     bool IsFormRenderClickRejected(const TouchEvent& event);

@@ -32,6 +32,7 @@ group("core_pattern_unittest") {
     "common_view:common_view_test_ng",
     "container_modal:container_modal_pattern_enhance_test_ng",
     "container_modal:container_modal_test_ng",
+    "corner_mark:corner_mark_test_ng",
     "container_modal:container_modal_toolbar_test_ng",
     "container_modal:container_modal_static_pattern_test",
     "container_modal:container_modal_static_view_test",

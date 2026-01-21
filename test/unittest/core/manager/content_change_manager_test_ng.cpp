@@ -25,6 +25,7 @@
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
+#include "core/components_ng/pattern/swiper/swiper_pattern.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -37,8 +38,6 @@ constexpr int32_t NORMAL_NODE_ID = 0;
 constexpr int32_t TEST_SCROLLING_NODE_ID = 100;
 constexpr int32_t NEVER_ONCE = 0;
 constexpr int32_t AT_LEAST_ONCE = 1;
-constexpr int32_t AT_LEAST_TWICE = 2;
-constexpr int32_t AT_LEAST_THREE_TIMES = 3;
 
 RefPtr<ContentChangeManager> GetContentChangeManager()
 {
@@ -785,15 +784,13 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest012, TestSize.Level
 
     /**
      * @tc.steps: step3. test OnVsyncEnd when changedSwiperNodes_ is not empty.
-     * @tc.expected: ReportContentChangeEvent called accordingly.
+     * @tc.expected: ReportContentChangeEvent will be called.
      */
     ContentChangeConfig config;
     contentChangeMgr->currentContentChangeConfig_ = config;
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
-    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::TABS, _))
-        .Times(AtLeast(AT_LEAST_THREE_TIMES));
-    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SWIPER, _))
-        .Times(AtLeast(AT_LEAST_TWICE));
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _))
+        .Times(AtLeast(AT_LEAST_ONCE));
     contentChangeMgr->OnVsyncEnd(rootRect);
 
     /**
@@ -808,10 +805,96 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest012, TestSize.Level
 
 /**
  * @tc.name: ContentChangeManagerTest013
- * @tc.desc: Test StartTextAABBCollecting
+ * @tc.desc: Test ProcessSwiperNodes
  * @tc.type: FUNC
  */
 HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. test add one node.
+     * @tc.expected: size is correct.
+     */
+    SetChangedSwiperNodes();
+    auto node = FrameNode::CreateFrameNode("frameNode", INITIAL_NODE_SIZE, AceType::MakeRefPtr<Pattern>(), true);
+    auto weak = AceType::WeakClaim(AceType::RawPtr(node));
+    contentChangeMgr->changedSwiperNodes_.emplace(std::make_pair(weak, false));
+    weak.Reset();
+    auto size = static_cast<int32_t>(contentChangeMgr->changedSwiperNodes_.size());
+    EXPECT_EQ(size, INITIAL_NODE_SIZE_PLUS_ONE);
+
+    /**
+     * @tc.steps: step3. test ProcessSwiperNodes when changedSwiperNodes_ is not empty.
+     * @tc.expected: changedSwiperNodes_ is reset.
+     */
+    contentChangeMgr->ProcessSwiperNodes();
+    size = static_cast<int32_t>(contentChangeMgr->changedSwiperNodes_.size());
+    EXPECT_EQ(size, 0);
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest014
+ * @tc.desc: Test ReportSwiperEvent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. test whether can get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+    auto mockUiSessionManager = GetMockUiSessionManager();
+    ASSERT_NE(mockUiSessionManager, nullptr);
+
+    /**
+     * @tc.steps: steps2. create nodes and pattern
+     * @tc.expected: each node and pattern is not nullptr.
+     */
+    auto swiperPattern = AceType::MakeRefPtr<SwiperPattern>();
+    ASSERT_NE(swiperPattern, nullptr);
+    auto tabsNode = FrameNode::CreateFrameNode(V2::TABS_ETS_TAG, 0, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(tabsNode, nullptr);
+    auto swiperNode = FrameNode::CreateFrameNode(V2::SWIPER_ETS_TAG, 1, swiperPattern, true);
+    ASSERT_NE(swiperNode, nullptr);
+    auto itemNode = FrameNode::CreateFrameNode("frameNode", 2, AceType::MakeRefPtr<Pattern>(), true);
+    ASSERT_NE(itemNode, nullptr);
+    SwiperItemInfo swiperItemInfo;
+    swiperItemInfo.node = itemNode;
+    swiperPattern->itemPosition_.emplace(itemNode->GetId(), swiperItemInfo);
+    swiperNode->AddChild(itemNode);
+
+    /**
+     * @tc.steps: steps3. when not hasTabsAncestor, call ReportSwiperEvent
+     * @tc.expected: ReportContentChangeEvent called on type swiper.
+     */
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::SWIPER, _))
+        .Times(AtLeast(AT_LEAST_ONCE));
+    contentChangeMgr->ReportSwiperEvent(swiperNode, false);
+
+    /**
+     * @tc.steps: steps4. when hasTabsAncestor, call ReportSwiperEvent
+     * @tc.expected: ReportContentChangeEvent called on type tabs.
+     */
+    tabsNode->AddChild(swiperNode);
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(ChangeType::TABS, _))
+        .Times(AtLeast(AT_LEAST_ONCE));
+    contentChangeMgr->ReportSwiperEvent(swiperNode, true);
+}
+
+/**
+ * @tc.name: ContentChangeManagerTest015
+ * @tc.desc: Test StartTextAABBCollecting
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest015, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. test whether can get content change manager.
@@ -870,11 +953,11 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest013, TestSize.Level
 }
 
 /**
- * @tc.name: ContentChangeManagerTest014
+ * @tc.name: ContentChangeManagerTest016
  * @tc.desc: Test StopTextAABBCollecting
  * @tc.type: FUNC
  */
-HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest014, TestSize.Level1)
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest016, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. test whether can get content change manager.
@@ -929,11 +1012,11 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest014, TestSize.Level
 }
 
 /**
- * @tc.name: ContentChangeManagerTest015
+ * @tc.name: ContentChangeManagerTest017
  * @tc.desc: Test StopTextAABBCollecting
  * @tc.type: FUNC
  */
-HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest015, TestSize.Level1)
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest017, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. test whether can get content change manager.
@@ -993,11 +1076,11 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest015, TestSize.Level
 }
 
 /**
- * @tc.name: ContentChangeManagerTest016
+ * @tc.name: ContentChangeManagerTest018
  * @tc.desc: Test OnScrollChangeStart
  * @tc.type: FUNC
  */
-HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest016, TestSize.Level1)
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest018, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. test whether can get content change manager.
@@ -1041,11 +1124,11 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest016, TestSize.Level
 }
 
 /**
- * @tc.name: ContentChangeManagerTest017
+ * @tc.name: ContentChangeManagerTest019
  * @tc.desc: Test OnScrollRemoved
  * @tc.type: FUNC
  */
-HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest017, TestSize.Level1)
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest019, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. test whether can get content change manager.

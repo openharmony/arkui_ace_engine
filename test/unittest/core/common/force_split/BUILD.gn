@@ -14,7 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("force_split_utils_test") {
+  module_name = "NavigationSet-NavigationAndNavDestination"
   type = "new"
-  module_output = "common"
   sources = [ "force_split_utils_test.cpp" ]
 }

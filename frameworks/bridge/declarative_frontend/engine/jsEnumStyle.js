@@ -5164,3 +5164,9 @@ let ConsoleMessageSource
   ConsoleMessageSource[ConsoleMessageSource.INTERVENTION = 11] = 'INTERVENTION';
   ConsoleMessageSource[ConsoleMessageSource.RECOMMENDATION = 12] = 'RECOMMENDATION';
 })(ConsoleMessageSource || (ConsoleMessageSource = {}));
+
+let DialogDisplayMode;
+(function (DialogDisplayMode) {
+  DialogDisplayMode[DialogDisplayMode.SCREEN_BASED = 0] = 'SCREEN_BASED';
+  DialogDisplayMode[DialogDisplayMode.WINDOW_BASED = 1] = 'WINDOW_BASED';
+})(DialogDisplayMode || (DialogDisplayMode = {}));

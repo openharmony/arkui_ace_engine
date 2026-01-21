@@ -58,7 +58,7 @@ import { PluginErrorData_serializer, RecordData, PluginErrorCallback, PluginErro
 import { ProgressConfiguration_serializer, ProgressConfiguration } from "./../../component/progress"
 import { RadioConfiguration_serializer, OnRadioChangeCallback, RadioConfiguration } from "./../../component/radio"
 import { RatingConfiguration_serializer, OnRatingChangeCallback, RatingConfiguration } from "./../../component/rating"
-import { ErrorEvent_serializer, MessageEvents_serializer, Event_serializer, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, CustomBuilderT_Arkui_Component_Enums_ResponseType, NavExtender_CreateNavDestination, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Router_BusinessError_Void, RouterFinishCallback, WorkerEventListener, Event } from "./../../component/idlize"
+import { ErrorEvent_serializer, MessageEvents_serializer, Event_serializer, AnimationEndHandler, AnimationStartHandler, Callback_CreateItem, Callback_Extender_OnFinish, Callback_Extender_OnProgress, Callback_Long_Void, Callback_OnDestory_Void, Callback_onMeasureSize_SizeResult, Callback_OnMoveFromTo, Callback_onPlaceChildren_Void, Callback_RangeUpdate, Callback_Size_Void, Callback_StateStylesChange, CustomNodeBuilder, GestureSwipeHandler, CustomBuilderT_Arkui_Component_Enums_ResponseType, NavExtender_CreateNavDestination, NavExtender_OnUpdateStack, NavExtender_PageMapNodeBuilder, RestrictedWorker_onerror_Callback, ErrorEvent, RestrictedWorker_onexit_Callback, RestrictedWorker_onmessage_Callback, MessageEvents, Router_BusinessError_Void, RouterFinishCallback, WorkerEventListener, Event } from "./../../component/idlize"
 import { SliderConfiguration_serializer, SliderChangeMode, SliderConfiguration, SliderTriggerChangeCallback } from "./../../component/slider"
 import { TextClockConfiguration_serializer, TextClockConfiguration } from "./../../component/textClock"
 import { TextTimerConfiguration_serializer, TextTimerConfiguration, TimerCallback } from "./../../component/textTimer"
@@ -131,6 +131,21 @@ export function deserializeAndCallAccessibilityTransparentCallback(thisDeseriali
     const _call  = (ResourceHolder.instance().get(_resourceId) as AccessibilityTransparentCallback)
     let event : TouchEvent = (TouchEvent_serializer.read(thisDeserializer) as TouchEvent)
     _call(event)
+}
+export function deserializeAndCallAnimationEndHandler(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as AnimationEndHandler)
+    let index : int32 = thisDeserializer.readInt32()
+    let extraInfo : SwiperAnimationEvent = SwiperAnimationEvent_serializer.read(thisDeserializer)
+    _call(index, extraInfo)
+}
+export function deserializeAndCallAnimationStartHandler(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as AnimationStartHandler)
+    let index : int32 = thisDeserializer.readInt32()
+    let targetIndex : int32 = thisDeserializer.readInt32()
+    let extraInfo : SwiperAnimationEvent = SwiperAnimationEvent_serializer.read(thisDeserializer)
+    _call(index, targetIndex, extraInfo)
 }
 export function deserializeAndCallArcScrollIndexHandler(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
@@ -2269,6 +2284,13 @@ export function deserializeAndCallGestureRecognizerJudgeBeginCallback(thisDeseri
     const _callResult  = _call(event, current, recognizers, touchRecognizers)
     continuationResult(_callResult)
 }
+export function deserializeAndCallGestureSwipeHandler(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as GestureSwipeHandler)
+    let index : int32 = thisDeserializer.readInt32()
+    let extraInfo : SwiperAnimationEvent = SwiperAnimationEvent_serializer.read(thisDeserializer)
+    _call(index, extraInfo)
+}
 export function deserializeAndCallGetItemMainSizeByIndex(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as GetItemMainSizeByIndex)
@@ -3795,6 +3817,43 @@ export function deserializeAndCallType_WebAttribute_onInterceptRequest(thisDeser
     const _callResult  = _call(value0)
     continuationResult(_callResult)
 }
+export function deserializeAndCallUIObserver_ClickEventListenerCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: ClickEvent,node?: FrameNode) => void))
+    let event : ClickEvent = (ClickEvent_serializer.read(thisDeserializer) as ClickEvent)
+    const nodeTmpBuf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let nodeTmpBuf : FrameNode | undefined = undefined
+    if ((nodeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+        nodeTmpBuf = (FrameNode_serializer.read(thisDeserializer) as FrameNode)
+    }
+    let node : FrameNode | undefined = nodeTmpBuf
+    _call(event, node)
+}
+export function deserializeAndCallUIObserver_GestureEventListenerCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: GestureEvent,node?: FrameNode) => void))
+    let event : GestureEvent = (GestureEvent_serializer.read(thisDeserializer) as GestureEvent)
+    const nodeTmpBuf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let nodeTmpBuf : FrameNode | undefined = undefined
+    if ((nodeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+        nodeTmpBuf = (FrameNode_serializer.read(thisDeserializer) as FrameNode)
+    }
+    let node : FrameNode | undefined = nodeTmpBuf
+    _call(event, node)
+}
+export function deserializeAndCallUIObserver_PanListenerCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as ((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void))
+    let event : GestureEvent = (GestureEvent_serializer.read(thisDeserializer) as GestureEvent)
+    let current : GestureRecognizer = (GestureRecognizer_serializer.read(thisDeserializer) as GestureRecognizer)
+    const nodeTmpBuf_runtimeType  = thisDeserializer.readInt8().toInt()
+    let nodeTmpBuf : FrameNode | undefined = undefined
+    if ((nodeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+        nodeTmpBuf = (FrameNode_serializer.read(thisDeserializer) as FrameNode)
+    }
+    let node : FrameNode | undefined = nodeTmpBuf
+    _call(event, current, node)
+}
 export function deserializeAndCallUIStatesChangeHandler(thisDeserializer: DeserializerBase): void {
         const _resourceId : int32 = thisDeserializer.readInt32()
         const _call  = (ResourceHolder.instance().get(_resourceId) as UIStatesChangeHandler)
@@ -3853,6 +3912,8 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_AccessibilityCallback: return deserializeAndCallAccessibilityCallback(thisDeserializer);
         case CallbackKind.Kind_AccessibilityFocusCallback: return deserializeAndCallAccessibilityFocusCallback(thisDeserializer);
         case CallbackKind.Kind_AccessibilityTransparentCallback: return deserializeAndCallAccessibilityTransparentCallback(thisDeserializer);
+        case CallbackKind.Kind_AnimationEndHandler: return deserializeAndCallAnimationEndHandler(thisDeserializer);
+        case CallbackKind.Kind_AnimationStartHandler: return deserializeAndCallAnimationStartHandler(thisDeserializer);
         case CallbackKind.Kind_ArcScrollIndexHandler: return deserializeAndCallArcScrollIndexHandler(thisDeserializer);
         case CallbackKind.Kind_AsyncCallback_image_PixelMap_Void: return deserializeAndCallAsyncCallback_image_PixelMap_Void(thisDeserializer);
         case CallbackKind.Kind_AsyncCallback_Void: return deserializeAndCallAsyncCallback_Void(thisDeserializer);
@@ -4065,6 +4126,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_ErrorCallback_Ohos_Base_BusinessError: return deserializeAndCallErrorCallback_Ohos_Base_BusinessError(thisDeserializer);
         case CallbackKind.Kind_GaugeModifierBuilder: return deserializeAndCallGaugeModifierBuilder(thisDeserializer);
         case CallbackKind.Kind_GestureRecognizerJudgeBeginCallback: return deserializeAndCallGestureRecognizerJudgeBeginCallback(thisDeserializer);
+        case CallbackKind.Kind_GestureSwipeHandler: return deserializeAndCallGestureSwipeHandler(thisDeserializer);
         case CallbackKind.Kind_GetItemMainSizeByIndex: return deserializeAndCallGetItemMainSizeByIndex(thisDeserializer);
         case CallbackKind.Kind_HoverCallback: return deserializeAndCallHoverCallback(thisDeserializer);
         case CallbackKind.Kind_ImageCompleteCallback: return deserializeAndCallImageCompleteCallback(thisDeserializer);
@@ -4188,6 +4250,9 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Type_CommonMethod_onDragStart: return deserializeAndCallType_CommonMethod_onDragStart(thisDeserializer);
         case CallbackKind.Kind_Type_NavigationAttribute_customNavContentTransition: return deserializeAndCallType_NavigationAttribute_customNavContentTransition(thisDeserializer);
         case CallbackKind.Kind_Type_WebAttribute_onInterceptRequest: return deserializeAndCallType_WebAttribute_onInterceptRequest(thisDeserializer);
+        case CallbackKind.Kind_UIObserver_ClickEventListenerCallback: return deserializeAndCallUIObserver_ClickEventListenerCallback(thisDeserializer);
+        case CallbackKind.Kind_UIObserver_GestureEventListenerCallback: return deserializeAndCallUIObserver_GestureEventListenerCallback(thisDeserializer);
+        case CallbackKind.Kind_UIObserver_PanListenerCallback: return deserializeAndCallUIObserver_PanListenerCallback(thisDeserializer);
         case CallbackKind.Kind_UIStatesChangeHandler: return deserializeAndCallUIStatesChangeHandler(thisDeserializer);
         case CallbackKind.Kind_UpdateTransitionCallback: return deserializeAndCallUpdateTransitionCallback(thisDeserializer);
         case CallbackKind.Kind_VisibleAreaChangeCallback: return deserializeAndCallVisibleAreaChangeCallback(thisDeserializer);

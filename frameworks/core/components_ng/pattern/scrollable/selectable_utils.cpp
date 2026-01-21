@@ -40,7 +40,7 @@ RefPtr<FrameNode> FindItemParentNode(const RefPtr<FrameNode>& frameNode)
 
 PreviewBadge GetSelectedPreviewBadge(const RefPtr<FrameNode>& frameNode)
 {
-    PreviewBadge badge;
+    PreviewBadge badge = {};
     CHECK_NULL_RETURN(frameNode, badge);
     auto parent = FindItemParentNode(frameNode);
     CHECK_NULL_RETURN(parent, badge);

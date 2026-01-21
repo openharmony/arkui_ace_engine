@@ -29,7 +29,7 @@ import { ResourceColor, Length, ResourceStr, Dimension } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
 import { CustomBuilder } from "./builder"
-import { ContentModifier, AttributeModifier, hookGaugeContentModifier, hookGaugeIndicator, hookGaugeAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookGaugeContentModifier, hookGaugeIndicator, hookGaugeTrackShadow, hookGaugeDescription, hookGaugeAttributeModifier, AttributeUpdater } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -185,30 +185,6 @@ export class ArkGaugePeer extends ArkCommonMethodPeer {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         ArkUIGeneratedNativeModule._GaugeAttribute_setStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setDescriptionAttribute(value: CustomBuilder | null | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined && value !== null) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            thisSerializer.holdAndWriteCallback(CallbackTransformer.transformFromCustomBuilder(valueTmpValue))
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._GaugeAttribute_setDescription(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
-    setTrackShadowAttribute(value: GaugeShadowOptions | null | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined && value !== null) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            GaugeShadowOptions_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._GaugeAttribute_setTrackShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
     setPrivacySensitiveAttribute(value: boolean | undefined): void {
@@ -387,7 +363,7 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
     public description(value: CustomBuilder | null | undefined): this {
         if (this.checkPriority("description")) {
             const value_casted = value as (CustomBuilder | null | undefined)
-            this.getPeer()?.setDescriptionAttribute(value_casted)
+            hookGaugeDescription(this, value)
             return this
         }
         return this
@@ -395,7 +371,7 @@ export class ArkGaugeComponent extends ArkCommonMethodComponent implements Gauge
     public trackShadow(value: GaugeShadowOptions | null | undefined): this {
         if (this.checkPriority("trackShadow")) {
             const value_casted = value as (GaugeShadowOptions | null | undefined)
-            this.getPeer()?.setTrackShadowAttribute(value_casted)
+            hookGaugeTrackShadow(this, value)
             return this
         }
         return this

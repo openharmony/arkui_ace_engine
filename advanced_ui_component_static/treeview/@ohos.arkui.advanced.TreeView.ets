@@ -24,7 +24,7 @@ import {
 } from '@ohos.arkui.component';
 
 import {
-  State, AppStorage, Observed, StorageProp, Watch, StorageLink, Provide, Consume, ObjectLink
+  State, AppStorage, Observed, Watch, StorageLink, Provide, Consume, ObjectLink
 } from '@ohos.arkui.stateManagement'
 
 import hilog from '@ohos.hilog';

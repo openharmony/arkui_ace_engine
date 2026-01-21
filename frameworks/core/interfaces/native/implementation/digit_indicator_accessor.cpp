@@ -53,13 +53,24 @@ void DigitFontImpl(Ark_DigitIndicator peer,
                    const Opt_Font* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optDigitFont = Converter::OptConvertPtr<Converter::FontMetaData>(value);
     std::optional<OHOS::Ace::Dimension> fontSize;
     std::optional<OHOS::Ace::FontWeight> fontWeight;
-    if (optDigitFont) {
-        fontSize = optDigitFont->size;
-        fontWeight = optDigitFont->weight;
-    }
+    do {
+        if (!value || value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+            break;
+        }
+        fontWeight = Converter::OptConvert<OHOS::Ace::FontWeight>(value->value.weight);
+        if (value->value.size.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+            break;
+        }
+        if (value->value.size.value.selector == 1) {
+            // fontSize use unit fp when value is typeof number.
+            fontSize = OHOS::Ace::Dimension(
+                Converter::Convert<float>(value->value.size.value.value1), OHOS::Ace::DimensionUnit::FP);
+            break;
+        }
+        fontSize = Converter::OptConvert<OHOS::Ace::Dimension>(value->value.size);
+    } while (false);
     peer->SetFontSize(fontSize);
     peer->SetFontWeight(fontWeight);
 }
@@ -67,13 +78,24 @@ void SelectedDigitFontImpl(Ark_DigitIndicator peer,
                            const Opt_Font* value)
 {
     CHECK_NULL_VOID(peer);
-    auto optSelectedDigitFont = Converter::OptConvertPtr<Converter::FontMetaData>(value);
     std::optional<OHOS::Ace::Dimension> fontSize;
     std::optional<OHOS::Ace::FontWeight> fontWeight;
-    if (optSelectedDigitFont) {
-        fontSize = optSelectedDigitFont->size;
-        fontWeight = optSelectedDigitFont->weight;
-    }
+    do {
+        if (!value || value->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+            break;
+        }
+        fontWeight = Converter::OptConvert<OHOS::Ace::FontWeight>(value->value.weight);
+        if (value->value.size.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+            break;
+        }
+        if (value->value.size.value.selector == 1) {
+            // fontSize use unit fp when value is typeof number.
+            fontSize = OHOS::Ace::Dimension(
+                Converter::Convert<float>(value->value.size.value.value1), OHOS::Ace::DimensionUnit::FP);
+            break;
+        }
+        fontSize = Converter::OptConvert<OHOS::Ace::Dimension>(value->value.size);
+    } while (false);
     peer->SetSelectedFontSize(fontSize);
     peer->SetSelectedFontWeight(fontWeight);
 }

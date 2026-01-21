@@ -14,6 +14,7 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("shape_test_ng") {
+  module_name = "DrawingSet-Shape"
   flutter_skia = true
   render = true
   type = "new"

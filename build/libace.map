@@ -49,10 +49,23 @@
       OHOS::Ace::AceScopedTrace::*;
       OHOS::Ace::ActionSheetModel::*;
       OHOS::Ace::Animator::*;
+      OHOS::Ace::ResTracer::*;
+      OHOS::Ace::UINodeTracer::*;
+      OHOS::Ace::ContainerTracer::*;
       "OHOS::Ace::Backend::Create()";
       "OHOS::Ace::Backend::TypeId()::myTypeId";
       "OHOS::Ace::BaseId::BaseId()";
+      OHOS::Ace::NG::CalendarMonthPattern::GetDaySize*;
+      OHOS::Ace::NG::CalendarMonthPattern::IsLargeSize*;
+      OHOS::Ace::NG::CalendarMonthPattern::FireIsFoldStatusChanged*;
+      OHOS::Ace::NG::CalendarMonthPattern::SetColRowSpace*;
+      OHOS::Ace::NG::CalendarMonthPattern::UpdateDayRadius*;
+      OHOS::Ace::NG::CalendarPattern::UpdateTitleNode*;
+      OHOS::Ace::NG::CalendarPattern::UpdateDayRadius*;
       OHOS::Ace::CalendarPickerModel::*;
+      OHOS::Ace::NG::CalendarPickerModelNG::*;
+      OHOS::Ace::NG::BorderRadiusPropertyT*;
+      OHOS::Ace::NG::BorderWidthPropertyT*;
       OHOS::Ace::ConnectServerManager::*;
       OHOS::Ace::Container::*;
       *OHOS::Ace::Container::IsCurrentUseNewPipeline*;
@@ -132,6 +145,7 @@
       OHOS::Ace::NG::BuildTitleNodeForCj*;
       OHOS::Ace::NG::AddControlButtonsForCj*;
       OHOS::Ace::DynamicModuleHelper::*;
+      OHOS::Ace::NG::DialogView::CreateDialogNode*;
       OHOS::Ace::PixelMap::*;
       OHOS::Ace::MeasureUtil::*;
       OHOS::Ace::ViewPartialUpdateModel::*;
@@ -165,6 +179,7 @@
       "OHOS::Ace::GaugeModel::GetInstance()";
       "OHOS::Ace::GaugeModel::instance_";
       "OHOS::Ace::GaugeModel::mutex_";
+      OHOS::Ace::NG::TimePickerModelNG::*;
       OHOS::Ace::GridColModel::*;
       OHOS::Ace::GridModel::*;
       OHOS::Ace::GridItemModel::*;
@@ -190,7 +205,7 @@
       OHOS::Ace::PatternLockModel::*;
       OHOS::Ace::PolygonModel::*;
       OHOS::Ace::ProgressModel::*;
-      OHOS::Ace::QRCodeModel::*;
+      OHOS::Ace::QRCodeModelNG::*;
       OHOS::Ace::RadioModel::*;
       OHOS::Ace::RectModel::*;
       OHOS::Ace::RefreshModel::*;
@@ -359,6 +374,54 @@
       OHOS::Ace::NG::OffscreenCanvasPattern::*;
       OHOS::Ace::NG::CustomNodeBase::*;
       OHOS::Ace::NG::XComponentPattern::*;
+      OHOS::Ace::NG::PickerColumnPattern*;
+      vtable?for?OHOS::Ace::NG::PickerColumnPattern;
+      virtual?thunk?to?OHOS::Ace::NG::PickerColumnPattern::*;
+      OHOS::Ace::FontManager*;
+      OHOS::Ace::NG::TossAnimationController*;
+      OHOS::Ace::NG::PickerAudioHapticFactory*;
+      OHOS::Ace::NG::BorderRadiusPropertyT*;
+      OHOS::Ace::PickerTime*;
+      OHOS::Ace::NG::TextPattern*;
+      vtable?for?OHOS::Ace::NG::TextPattern;
+      virtual?thunk?to?OHOS::Ace::NG::TextPattern::*;
+      VTT?for?OHOS::Ace::NG::TextPattern;
+      OHOS::Ace::NG::TextSelectOverlay*;
+      vtable?for?OHOS::Ace::NG::TextSelectOverlay;
+      virtual?thunk?to?OHOS::Ace::NG::TextSelectOverlay::*;
+      VTT?for?OHOS::Ace::NG::TextSelectOverlay;
+      OHOS::Ace::NG::ParagraphManager*;
+      vtable?for?OHOS::Ace::NG::ParagraphManager;
+      virtual?thunk?to?OHOS::Ace::NG::ParagraphManager::*;
+      VTT?for?OHOS::Ace::NG::ParagraphManager;
+      OHOS::Ace::NG::ButtonPattern*;
+      vtable?for?OHOS::Ace::NG::ButtonPattern;
+      virtual?thunk?to?OHOS::Ace::NG::ButtonPattern::*;
+      VTT?for?OHOS::Ace::NG::ButtonPattern;
+      OHOS::Ace::NG::StackLayoutAlgorithm*;
+      OHOS::Ace::NG::DividerPainter*;
+      OHOS::Ace::NG::DatePickerPattern*;
+      OHOS::Ace::DateTimeSequence*;
+      OHOS::Ace::GaugeMode*;
+      OHOS::Ace::NG::DialogView*;
+      OHOS::Ace::TimePickerDialogModel*;
+      OHOS::Ace::PickerBaseComponent*;
+
+      OHOS::Ace::NG::DividerPattern*;
+      vtable?for?OHOS::Ace::NG::DividerPattern;
+      virtual?thunk?to?OHOS::Ace::NG::DividerPattern::*;
+      VTT?for?OHOS::Ace::NG::DividerPattern;
+      OHOS::Ace::NG::DatePickerDialogView*;
+      OHOS::Ace::Framework::ViewStackProcessor*;
+      OHOS::Ace::PickerTimeComponent*;
+      OHOS::Ace::NG::BorderWidthPropertyT*;
+      OHOS::Ace::Framework::TimePickerModelImpl*;
+      vtable?for?OHOS::Ace::Framework::TimePickerModelImpl;
+      OHOS::Ace::Framework::TimePickerDialogModelImpl*;
+      vtable?for?OHOS::Ace::Framework::TimePickerDialogModelImpl;
+      *OHOS::Ace::NG::Converter::ConvContext::Allocate*;
+      SendArkUISyncEvent;
+
       OHOS::Ace::PipelineBase::Vp2PxWithCurrentDensity*;
       OHOS::Ace::PipelineBase::Px2VpWithCurrentDensity*;
       OHOS::Ace::PipelineBase::GetCurrentContextSafely*;
@@ -401,6 +464,7 @@
       OHOS::Ace::ParseFontFeatureSettings*;
       OHOS::Ace::UnParseFontFeatureSetting*;
       OHOS::Ace::NG::ConvertToCalcPaddingProperty*;
+      OHOS::Ace::NG::CreateIdealSize*;
       OHOS::Ace::StorageProxy::*;
       OHOS::Ace::EnvironmentProxy::*;
       OHOS::Ace::AceScoringLog::*;
@@ -524,9 +588,15 @@
       "OHOS::Ace::NG::PaintProperty::GetHost() const";
       "OHOS::Ace::NG::PaintProperty::UpdatePaintPropertyHost(OHOS::Ace::NG::PaintProperty const*)";
       OHOS::Ace::NG::InputEventActuator*;
+      OHOS::Ace::V2::BUTTON_ETS_TAG*;
       OHOS::Ace::V2::STACK_ETS_TAG*;
       OHOS::Ace::V2::TEXT_ETS_TAG*;
       OHOS::Ace::V2::ROW_ETS_TAG*;
+      OHOS::Ace::V2::CALENDAR_ETS_TAG*;
+      OHOS::Ace::V2::SCROLL_ETS_TAG*;
+      OHOS::Ace::V2::CALENDAR_PICKER_ETS_TAG*;
+      OHOS::Ace::V2::DIVIDER_ETS_TAG*;
+      OHOS::Ace::V2::SWIPER_ETS_TAG*;
       "OHOS::Ace::NG::PaintWrapper::FlushOverlayModifier()";
       OHOS::Ace::V2::SLIDER_ETS_TAG*;
       OHOS::Ace::ToRSRect*;
@@ -647,6 +717,9 @@
       vtable?for?OHOS::Ace::NG::TextPattern;
       vtable?for?OHOS::Ace::NG::TextSelectOverlay;
       vtable?for?OHOS::Ace::NG::ParagraphManager;
+      vtable?for?OHOS::Ace::NG::QRCodeModelNG;
+
+      OHOS::Ace::NG::ColorSampler::*;
 
       VTT?for?OHOS::Ace::Player;
       VTT?for?OHOS::Ace::Texture;
@@ -687,6 +760,12 @@
       VTT?for?OHOS::Ace::NG::ViewAdvancedRegister;
       VTT?for?OHOS::Ace::NG::ContainerModalView;
       VTT?for?OHOS::Ace::NG::Pattern;
+      VTT?for?OHOS::Ace::NG::ButtonPattern;
+      VTT?for?OHOS::Ace::NG::CalendarPattern;
+      VTT?for?OHOS::Ace::NG::CalendarMonthPattern;
+      VTT?for?OHOS::Ace::NG::DividerPattern;
+      VTT?for?OHOS::Ace::NG::ScrollablePattern;
+      VTT?for?OHOS::Ace::NG::ScrollPattern;
       VTT?for?OHOS::Ace::DrawableDescriptor;
       VTT?for?OHOS::Ace::LayeredDrawableDescriptor;
       VTT?for?OHOS::Ace::PixelMapDrawableDescriptor;
@@ -706,6 +785,7 @@
       VTT?for?OHOS::Ace::RowSplitComponent;
       VTT?for?OHOS::Ace::ProgressDataPanelComponent;
       VTT?for?OHOS::Ace::PercentageDataPanelComponent;
+      VTT?for?OHOS::Ace::NG::StackLayoutAlgorithm;
 
       OHOS::Ace::AceScopedTraceFlag::*;
       OHOS::Ace::AnimationUtils::*;
@@ -839,6 +919,13 @@
       "OHOS::Ace::NG::Validator::ValidateNonNegative(std::optional<float>& value)";
 
 
+      OHOS::Ace::NG::Validator::*;
+      OHOS::Ace::NG::Converter::ResourceConverter::*;
+      OHOS::Ace::NG::CommonViewModelNG::CreateFrameNode*;
+      *OHOS::Ace::NG::Converter::Convert*;
+      *OHOS::Ace::NG::Converter::AssignCast*;
+      *OHOS::Ace::NG::Converter::AssignArkValue*;
+
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
       "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";
 
@@ -920,7 +1007,11 @@
       vtable?for?OHOS::Ace::ProgressDataPanelComponent;
       vtable?for?OHOS::Ace::PercentageDataPanelComponent;
       vtable?for?OHOS::Ace::Framework::ArkJSValue;
-
+      vtable?for?OHOS::Ace::NG::ButtonPattern;
+      vtable?for?OHOS::Ace::NG::CalendarPattern;
+      vtable?for?OHOS::Ace::NG::CalendarMonthPattern;
+      vtable?for?OHOS::Ace::NG::DividerPattern;
+      vtable?for?OHOS::Ace::NG::ScrollPattern;
       VTT?for?OHOS::Ace::NG::AccessibilityProperty;
       VTT?for?OHOS::Ace::NG::BoxLayoutAlgorithm;
       VTT?for?OHOS::Ace::NG::EventHub;
@@ -1574,10 +1665,20 @@
       "OHOS::Ace::RoundToMaxPrecision(double)";
       OHOS::Ace::NG::SwiperPattern::IsAtStart*;
       OHOS::Ace::NG::SwiperPattern::IsAtEnd*;
+      OHOS::Ace::NG::SwiperPattern::GetCurrentIndex*;
+      OHOS::Ace::NG::SwiperPattern::ShowNext*;
+      OHOS::Ace::NG::SwiperPattern::ShowPrevious*;
+      OHOS::Ace::NG::SwiperPattern::SwiperPattern*;
+      OHOS::Ace::NG::ScrollPattern::ScrollPattern*;
+      OHOS::Ace::NG::ScrollablePattern::ScrollablePattern*;
       OHOS::Ace::PipelineBase::GetImageCache*;
+      OHOS::Ace::NG::ContainerModalPattern::GetContainerModalTitleHeight*;
+      OHOS::Ace::Date::CalculateWeekDay*;
+      OHOS::Ace::Date::GetMilliSecondsByDateTime*;
       "OHOS::Ace::ACE_PI";
       "OHOS::Ace::ACE_E";
       "OHOS::Ace::Framework::ArkJSRuntime::GetThreadVm() const";
+      OHOS::Ace::IconTheme::GetIconPath*;
       OHOS::Ace::PipelineBase::GetImageCache*;
 
       #sidebar
@@ -1771,6 +1872,8 @@
       "OHOS::Ace::NG::SwiperPattern::SwiperPattern()";
       VTT?for?OHOS::Ace::NG::LoadingProgressPattern;
       vtable?for?OHOS::Ace::NG::LoadingProgressPattern;
+    OHOS::Ace::NG::CommonBridge::SetBorder*;
+    OHOS::Ace::NG::CommonBridge::ParseLayoutPolicy*;
 
       OHOS::Ace::V2::HYPERLINK_ETS_TAG;
       OHOS::Ace::V2::SYMBOL_ETS_TAG;

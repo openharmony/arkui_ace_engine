@@ -79,7 +79,7 @@ import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, Anim
     DialogExtender, IUIContext, ContextMenu } from '../framework';
 import { EntryPoint, NavInterface } from "../component/customComponent"
 import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
-import { IUIContext, SystemOps } from 'arkui/component/idlize';
+import { IUIContext, SystemOps, UIObserverGestureEventOps } from 'arkui/component/idlize';
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
@@ -88,6 +88,8 @@ import { FreeRootNode } from '../CallbackTransformer';
 export class ContextRecord {
     uiContext?: UIContext
 }
+
+export { UIObserverGestureEventOps };
 
 export class FontImpl extends Font {
     instanceId_: int32;
@@ -1495,7 +1497,11 @@ export class UIContextImpl extends UIContext {
         }
         return contextArray;
     }
+    static availableInstanceIds_: Set<int32> = new Set<int32>();
 
+    public isAvailable() : boolean {
+        return UIContextImpl.availableInstanceIds_.has(this.instanceId_);
+    }
     public getFont() : Font {
         return this.font_;
     }

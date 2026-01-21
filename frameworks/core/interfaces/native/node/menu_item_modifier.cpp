@@ -19,6 +19,7 @@
 #include "frameworks/bridge/common/utils/utils.h"
 
 namespace OHOS::Ace::NG {
+namespace {
 const char DELIMITER = '|';
 constexpr int32_t SIZE_OF_FONT_INFO = 3;
 static const char* ERR_CODE = "-1";
@@ -27,7 +28,7 @@ const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 const Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 
-inline FrameNode* GetFrameNode(ArkUINodeHandle node)
+FrameNode* GetFrameNode(ArkUINodeHandle node)
 {
     return node ? reinterpret_cast<FrameNode*>(node) : ViewStackProcessor::GetInstance()->GetMainFrameNode();
 }
@@ -81,6 +82,7 @@ MenuItemProperties ConvertToMenuItemProperties(const ArkUIMenuItemOptions* optio
     }
     return props;
 }
+} // namespace
 
 void SetMenuItemSelected(ArkUINodeHandle node, ArkUI_Bool value)
 {

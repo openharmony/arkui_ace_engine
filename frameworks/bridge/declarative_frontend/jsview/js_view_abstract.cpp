@@ -9662,6 +9662,7 @@ void JSViewAbstract::JSBind(BindingTarget globalObj)
         "onGestureRecognizerJudgeBegin", &JSViewAbstract::JsOnGestureRecognizerJudgeBegin);
     JSClass<JSViewAbstract>::StaticMethod("onTouchTestDone", &JSViewAbstract::JsOnTouchTestDone);
     JSClass<JSViewAbstract>::StaticMethod("clickEffect", &JSViewAbstract::JsClickEffect);
+    JSClass<JSViewAbstract>::StaticMethod("enableClickSoundEffect", &JSViewAbstract::JsSetEnableClickSoundEffect);
     JSClass<JSViewAbstract>::StaticMethod("debugLine", &JSViewAbstract::JsDebugLine);
     JSClass<JSViewAbstract>::StaticMethod("geometryTransition", &JSViewAbstract::JsGeometryTransition);
     JSClass<JSViewAbstract>::StaticMethod("onAreaChange", &JSViewAbstract::JsOnAreaChange);
@@ -10986,6 +10987,7 @@ void JSViewAbstract::JsOnAxisEvent(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto eventObj = NG::CommonBridge::CreateAxisEventInfo(vm, info);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        ACE_BENCH_MARK_TRACE("OnAxisEvent_end type:%d", info.GetAction());
         func->Call(vm, func.ToLocal(), params, 1);
     };
     ViewAbstractModel::GetInstance()->SetOnAxisEvent(std::move(onAxisEvent));
@@ -11258,6 +11260,18 @@ void JSViewAbstract::JsClickEffect(const JSCallbackInfo& info)
     ViewAbstractModel::GetInstance()->SetClickEffectLevel((ClickEffectLevel)clickEffectLevelValue, scaleNumberValue);
 }
 
+void JSViewAbstract::JsSetEnableClickSoundEffect(const JSCallbackInfo& info)
+{
+    if (info[0]->IsUndefined()) {
+        ViewAbstractModel::GetInstance()->SetEnableClickSoundEffect(true);
+    }
+    bool enabled = true;
+    if (info[0]->IsBoolean()) {
+        enabled = info[0]->ToBoolean();
+    }
+    ViewAbstractModel::GetInstance()->SetEnableClickSoundEffect(enabled);
+}
+
 void JSViewAbstract::JsOnVisibleAreaChange(const JSCallbackInfo& info)
 {
     if (info.Length() < 2 || info.Length() > 3) {
@@ -11522,6 +11536,7 @@ void JSViewAbstract::JsOnFocusAxisEvent(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto eventObj = NG::CommonBridge::CreateFocusAxisEventInfo(vm, info);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        ACE_BENCH_MARK_TRACE("OnFocusAxisEvent_end type:%d", info.GetAction());
         func->Call(vm, func.ToLocal(), params, 1);
     };
     ViewAbstractModel::GetInstance()->SetOnFocusAxisEvent(std::move(onFocusAxisEvent));

@@ -100,6 +100,8 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
     _enhancedImageQuality_0_0value?: image.ResolutionQuality | undefined
     _orientation_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _orientation_0_0value?: ImageRotateOrientation | undefined
+    _antialiased_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _antialiased_0_0value?: boolean | undefined
     applyModifierPatch(node: PeerNode): void {
         this._state.addRef()
         super.applyModifierPatch(node)
@@ -590,6 +592,24 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
                 }
             }
         }
+        if (this._antialiased_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._antialiased_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setAntialiasedAttribute((this._antialiased_0_0value as boolean | undefined));
+                    this._antialiased_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._antialiased_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._antialiased_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setAntialiasedAttribute((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     mergeModifier(modifier: MediaCachedImageModifier): void {
         super.mergeModifier(modifier)
@@ -945,6 +965,19 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
                 }
             }
         }
+        if (modifier._antialiased_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._antialiased_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.antialiased(modifier._antialiased_0_0value);
+                    break;
+                }
+                default: {
+                    this.antialiased((undefined as boolean | undefined));
+                }
+            }
+        }
     }
     alt(value: string | Resource | image.PixelMap | undefined): this {
         if (((this._alt_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
@@ -1267,6 +1300,18 @@ export class MediaCachedImageModifier extends CommonMethodModifier implements Me
         } else
         {
             this._orientation_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    antialiased(value: boolean | undefined): this {
+        if (((this._antialiased_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._antialiased_0_0value) !== (value)))
+        {
+            this._antialiased_0_flag = AttributeUpdaterFlag.UPDATE
+            this._antialiased_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._antialiased_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

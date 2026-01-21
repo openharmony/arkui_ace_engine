@@ -234,6 +234,7 @@ bool NeedCheckComponentSize()
 void CreateInstanceAndSet(NG::UIExtensionConfig& config)
 {
     UIExtensionModel::GetInstance()->Create(config);
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ViewAbstractModel::GetInstance()->SetMinWidth(SECURITY_UEC_MIN_WIDTH);
     ViewAbstractModel::GetInstance()->SetMinHeight(SECURITY_UEC_MIN_HEIGHT);
     if (!NeedCheckComponentSize()) {
@@ -261,10 +262,12 @@ void JSSecurityUIExtensionProxy::On(const JSCallbackInfo& info)
     const RegisterType registerType = GetRegisterType(info[0]->ToString());
     WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(
         NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
     auto instanceId = ContainerScope::CurrentId();
     auto onOnFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
         instanceId, node = frameNode] (const RefPtr<NG::SecurityUIExtensionProxy>& session) {
+            ACE_UINODE_TRACE(node);
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -315,6 +318,7 @@ void JSSecurityUIExtensionProxy::Off(const JSCallbackInfo& info)
         return;
     }
 
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     ContainerScope scope(instanceId_);
     auto engine = EngineHelper::GetCurrentEngine();
     CHECK_NULL_VOID(engine);
@@ -378,6 +382,7 @@ CalcDimension JSSecurityUIExtension::GetSizeValue(const JSCallbackInfo& info)
 
 void JSSecurityUIExtension::JsWidth(const JSCallbackInfo& info)
 {
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CalcDimension value = GetSizeValue(info);
     if (NeedCheckComponentSize() && LessNotEqual(value.Value(), 0.0)) {
         return;
@@ -387,6 +392,7 @@ void JSSecurityUIExtension::JsWidth(const JSCallbackInfo& info)
 
 void JSSecurityUIExtension::JsHeight(const JSCallbackInfo& info)
 {
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CalcDimension value = GetSizeValue(info);
     if (NeedCheckComponentSize() && LessNotEqual(value.Value(), 0.0)) {
         return;
@@ -455,12 +461,14 @@ void JSSecurityUIExtension::OnRemoteReady(const JSCallbackInfo& info)
     }
     WeakPtr<NG::FrameNode> frameNode =
         AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(
         JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onRemoteReady = [execCtx = info.GetExecutionContext(),
         func = std::move(jsFunc), instanceId, node = frameNode]
             (const RefPtr<NG::SecurityUIExtensionProxy>& session) {
+            ACE_UINODE_TRACE(node);
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             auto pipelineContext = PipelineContext::GetCurrentContext();
@@ -485,11 +493,13 @@ void JSSecurityUIExtension::OnReceive(const JSCallbackInfo& info)
     }
     WeakPtr<NG::FrameNode> frameNode =
         AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onReceive = [execCtx = info.GetExecutionContext(),
         func = std::move(jsFunc), instanceId, node = frameNode]
             (const AAFwk::WantParams& wantParams) {
+            ACE_UINODE_TRACE(node);
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("SecurityUIExtensionComponent.UIExtensionDataSession.onReceive");
@@ -516,10 +526,12 @@ void JSSecurityUIExtension::OnError(const JSCallbackInfo& info)
     }
     WeakPtr<NG::FrameNode> frameNode =
         AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
         instanceId, node = frameNode] (int32_t code, const std::string& name, const std::string& message) {
+            ACE_UINODE_TRACE(node);
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("SecurityUIExtensionComponent.onError");
@@ -544,10 +556,12 @@ void JSSecurityUIExtension::OnTerminated(const JSCallbackInfo& info)
     }
     WeakPtr<NG::FrameNode> frameNode =
         AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onTerminated = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
         instanceId, node = frameNode] (int32_t code, const RefPtr<WantWrap>& wantWrap) {
+            ACE_UINODE_TRACE(node);
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("SecurityUIExtensionComponent.onTerminated");
@@ -595,6 +609,7 @@ static CalcDimension GetSizeValue(const JSCallbackInfo& info)
 
 void JSPreviewUIExtension::JsWidth(const JSCallbackInfo& info)
 {
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     JSViewAbstract::JsWidth(info);
     CalcDimension value = GetSizeValue(info);
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -605,6 +620,7 @@ void JSPreviewUIExtension::JsWidth(const JSCallbackInfo& info)
 
 void JSPreviewUIExtension::JsHeight(const JSCallbackInfo& info)
 {
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     JSViewAbstract::JsHeight(info);
     CalcDimension value = GetSizeValue(info);
     if (LessNotEqual(value.Value(), 0.0)) {
@@ -671,11 +687,13 @@ void JSPreviewUIExtension::OnError(const JSCallbackInfo& info)
         return;
     }
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ACE_UINODE_TRACE(frameNode);
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
     auto instanceId = ContainerScope::CurrentId();
     auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
         instanceId, node = AceType::WeakClaim(frameNode)]
         (int32_t code, const std::string& name, const std::string& message) {
+            ACE_UINODE_TRACE(node);
             ContainerScope scope(instanceId);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("PreviewUIExtensionComponent.onError");

@@ -77,6 +77,12 @@ public:
     {
         colorModeChange_ = colorModeChange;
     }
+
+    bool IsColorModeChange() const
+    {
+        return colorModeChange_;
+    }
+
     RefPtr<FrameNode> GetRootNode();
 
     RefPtr<UINode> FindWindowScene(const RefPtr<FrameNode>& targetNode);

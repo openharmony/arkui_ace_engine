@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -40,6 +40,7 @@
 #include "core/components_ng/pattern/rich_editor/rich_editor_model.h"
 #include "core/components_ng/pattern/list/list_properties.h"
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
+#include "ui/base/macros.h"
 #include "ui/view/components/tabs/tabs_data.h"
 
 #include "ace_engine_types.h"
@@ -61,7 +62,7 @@ void AssignCast(std::optional<AIImageQuality>& dst, const Ark_image_ResolutionQu
     }
 }
 template<>
-void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<Alignment>& dst, const Ark_Alignment& src)
 {
     switch (src) {
         case ARK_ALIGNMENT_TOP_START: dst = Alignment::TOP_LEFT; break;
@@ -125,7 +126,7 @@ void AssignCast(std::optional<BindSheetDismissReason>& dst, const Ark_DismissRea
 }
 
 template<>
-void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<BlurStyle>& dst, const Ark_BlurStyle& src)
 {
     switch (src) {
         case ARK_BLUR_STYLE_THIN: dst = BlurStyle::THIN; break;
@@ -236,7 +237,7 @@ ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const enum Ark_Color
 }
 
 template<>
-void AssignCast(std::optional<CrownSensitivity>& dst, const Ark_CrownSensitivity& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<CrownSensitivity>& dst, const Ark_CrownSensitivity& src)
 {
     switch (src) {
         case ARK_CROWN_SENSITIVITY_LOW: dst = CrownSensitivity::LOW; break;
@@ -1942,7 +1943,7 @@ void AssignCast(std::optional<Placement>& dst, const Ark_Placement& src)
 }
 
 template<>
-void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DialogAlignment>& dst, const Ark_DialogAlignment& src)
 {
     switch (src) {
         case ARK_DIALOG_ALIGNMENT_TOP: dst = DialogAlignment::TOP; break;
@@ -2011,7 +2012,7 @@ void AssignCast(std::optional<ResponseType>& dst, const Ark_WebResponseType& src
 }
 
 template<>
-void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat& src)
 {
     switch (src) {
         case ARK_TIME_PICKER_FORMAT_HOUR_MINUTE: dst = TimePickerFormat::HOUR_MINUTE; break;
@@ -2021,7 +2022,7 @@ void AssignCast(std::optional<TimePickerFormat>& dst, const Ark_TimePickerFormat
 }
 
 template<>
-void AssignCast(std::optional<HoverModeAreaType>& dst, const Ark_HoverModeAreaType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<HoverModeAreaType>& dst, const Ark_HoverModeAreaType& src)
 {
     switch (src) {
         case ARK_HOVER_MODE_AREA_TYPE_TOP_SCREEN: dst = HoverModeAreaType::TOP_SCREEN; break;

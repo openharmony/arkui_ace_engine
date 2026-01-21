@@ -20,6 +20,7 @@
 #include "arkoala_api_generated.h"
 
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
+#include "core/interfaces/native/implementation/drawing_canvas_peer_impl.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/reverse_converter.h"
 
@@ -225,6 +226,45 @@ void SetOnSurfaceDestroyedImpl(Ark_XComponentController peer,
     peerImpl->SetOnSurfaceDestroyedEvent(*onSurfaceDestroyed);
 #endif //XCOMPONENT_SUPPORTED
 }
+Opt_drawing_Canvas LockCanvasImpl(Ark_XComponentController peer)
+{
+    auto invalid = Converter::ArkValue<Opt_drawing_Canvas>();
+#ifdef XCOMPONENT_SUPPORTED
+    CHECK_NULL_RETURN(peer, invalid);
+    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_RETURN(peerImpl, invalid);
+    auto canvas = peerImpl->GetCanvas();
+    CHECK_NULL_RETURN(canvas, invalid);
+    return Converter::ArkValue<Opt_drawing_Canvas>(canvas.get());
+#else
+    return invalid;
+#endif // XCOMPONENT_SUPPORTED
+}
+
+void UnlockCanvasAndPostImpl(Ark_XComponentController peer, Ark_drawing_Canvas canvas)
+{
+#ifdef XCOMPONENT_SUPPORTED
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(canvas);
+    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(peerImpl->controller);
+    peerImpl->controller->UnlockCanvasAndPost(canvas->GetCanvas());
+#endif // XCOMPONENT_SUPPORTED
+}
+
+void SetXComponentSurfaceConfigImpl(Ark_XComponentController peer, const Ark_SurfaceConfig* config)
+{
+#ifdef XCOMPONENT_SUPPORTED
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(config);
+    auto peerImpl = reinterpret_cast<XComponentControllerPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    CHECK_NULL_VOID(peerImpl->controller);
+    auto isOpaque = Converter::OptConvert<bool>(config->isOpaque);
+    peerImpl->controller->SetSurfaceConfig(isOpaque.value_or(false));
+#endif // XCOMPONENT_SUPPORTED
+}
 } // XComponentControllerAccessor
 const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccessor()
 {
@@ -239,6 +279,9 @@ const GENERATED_ArkUIXComponentControllerAccessor* GetXComponentControllerAccess
         XComponentControllerAccessor::GetXComponentSurfaceRotationImpl,
         XComponentControllerAccessor::StartImageAnalyzerImpl,
         XComponentControllerAccessor::StopImageAnalyzerImpl,
+        XComponentControllerAccessor::LockCanvasImpl,
+        XComponentControllerAccessor::UnlockCanvasAndPostImpl,
+        XComponentControllerAccessor::SetXComponentSurfaceConfigImpl,
         XComponentControllerAccessor::GetOnSurfaceCreatedImpl,
         XComponentControllerAccessor::SetOnSurfaceCreatedImpl,
         XComponentControllerAccessor::GetOnSurfaceChangedImpl,

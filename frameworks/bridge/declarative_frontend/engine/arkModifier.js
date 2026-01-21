@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -291,10 +291,66 @@ class ButtonModifier extends ArkButtonComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class CalendarPickerModifier extends ArkCalendarPickerComponent {
+
+class LazyArkCalendarPickerComponent extends ArkComponent {
+    static module = undefined;
+    constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkCalendarPickerComponent.module === undefined) {
+      LazyArkCalendarPickerComponent.module = globalThis.requireNapi('arkui.components.arkCalendarpicker');
+    }
+    this.lazyComponent = LazyArkCalendarPickerComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  value(value) {
+    this.lazyComponent.value(value);
+    return this;
+  }
+  edgeAlign(alignType, offset) {
+    this.lazyComponent.edgeAlign(alignType, offset);
+    return this;
+  }
+  textStyle(value) {
+    this.lazyComponent.textStyle(value);
+    return this;
+  }
+  onChange(value) {
+    this.lazyComponent.onChange(value);
+    return this;
+  }
+  padding(value) {
+    this.lazyComponent.padding(value);
+    return this;
+  }
+  border(value) {
+    this.lazyComponent.border(value);
+    return this;
+  }
+  height(value) {
+    this.lazyComponent.height(value);
+    return this;
+  }
+  borderRadius(value) {
+    this.lazyComponent.borderRadius(value);
+    return this;
+  }
+  borderColor(value) {
+    this.lazyComponent.borderColor(value);
+    return this;
+  }
+  markToday(value) {
+    this.lazyComponent.markToday(value);
+    return this;
+  }
+}
+
+class CalendarPickerModifier extends LazyArkCalendarPickerComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
@@ -1159,10 +1215,37 @@ class ProgressModifier extends ArkProgressComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class QRCodeModifier extends ArkQRCodeComponent {
+class LazyArkQRCodeComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkQRCodeComponent.module === undefined) {
+      LazyArkQRCodeComponent.module = globalThis.requireNapi('arkui.components.arkqrcode');
+    }
+    this.lazyComponent = LazyArkQRCodeComponent.module.createComponent(nativePtr, classType);
+    console.log("LazyArkQRCodeComponent lazyload nativeModule");
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  color(value) {
+    this.lazyComponent.color(value);
+    return this;
+  }
+  backgroundColor(value) {
+    this.lazyComponent.backgroundColor(value);
+    return this;
+  }
+  contentOpacity(value) {
+    this.lazyComponent.contentOpacity(value);
+    return this;
+  }
+}
+class QRCodeModifier extends LazyArkQRCodeComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
@@ -1763,10 +1846,56 @@ class TextTimerModifier extends ArkTextTimerComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class TimePickerModifier extends ArkTimePickerComponent {
+
+class LazyArkTimePickerComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkTimePickerComponent.module === undefined) {
+      LazyArkTimePickerComponent.module = globalThis.requireNapi('arkui.components.arktimepicker');
+    }
+    this.lazyComponent = LazyArkTimePickerComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  loop(value) {
+    this.lazyComponent.loop(value);
+  }
+  digitalCrownSensitivity(value) {
+    this.lazyComponent.digitalCrownSensitivity(value);
+  }
+  useMilitaryTime(value) {
+    this.lazyComponent.useMilitaryTime(value);
+  }
+  disappearTextStyle(value) {
+    this.lazyComponent.disappearTextStyle(value);
+  }
+  textStyle(value) {
+    this.lazyComponent.textStyle(value);
+  }
+  selectedTextStyle(value) {
+    this.lazyComponent.selectedTextStyle(value);
+  }
+  enableCascade(value) {
+    this.lazyComponent.enableCascade(value);
+  }
+  onChange(callback) {
+    this.lazyComponent.onChange(value);
+  }
+  dateTimeOptions(value) {
+    this.lazyComponent.dateTimeOptions(value);
+  }
+  enableHapticFeedback(value) {
+    this.lazyComponent.enableHapticFeedback(value);
+  }
+}
+
+class TimePickerModifier extends LazyArkTimePickerComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

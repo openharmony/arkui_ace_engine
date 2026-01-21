@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3502,6 +3502,20 @@ class ClickEffectModifier extends ModifierWithKey {
   }
 }
 ClickEffectModifier.identity = Symbol('clickEffect');
+class EnableClickSoundEffectModifier extends ModifierWithKey {
+  constructor(value) {
+    super(value);
+  }
+  applyPeer(node, reset) {
+    if (reset) {
+      getUINativeModule().common.resetEnableClickSoundEffect(node);
+    }
+    else {
+      getUINativeModule().common.setEnableClickSoundEffect(node, this.value);
+    }
+  }
+}
+EnableClickSoundEffectModifier.identity = Symbol('enableClickSoundEffect');
 class KeyBoardShortCutModifier extends ModifierWithKey {
   constructor(value) {
     super(value);
@@ -4741,13 +4755,13 @@ class ArkComponent {
     return this;
   }
   gesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'gesture not supportted in attributeModifier scenario.');
   }
   priorityGesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'priorityGesture not supportted in attributeModifier scenario.');
   }
   parallelGesture(gesture, mask) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'parallelGesture not supportted in attributeModifier scenario.');
   }
 
   chainMode(direction, style) {
@@ -5123,6 +5137,10 @@ class ArkComponent {
     modifierWithKey(this._modifiersWithKeys, ClickEffectModifier.identity, ClickEffectModifier, value);
     return this;
   }
+  enableClickSoundEffect(value) {
+    modifierWithKey(this._modifiersWithKeys, EnableClickSoundEffectModifier.identity, EnableClickSoundEffectModifier, value);
+    return this;
+  }
   onDragStart(event) {
     modifierWithKey(this._modifiersWithKeys, DragStartModifier.identity, DragStartModifier, event);
     return this;
@@ -5299,7 +5317,7 @@ class ArkComponent {
     return this;
   }
   bindContextMenu(content, responseType, options) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'bindContextMenu not supported in attributeModifier scenario.');
   }
   bindContentCover(isShow, builder, type) {
     throw new Error('Method not implemented.');
@@ -5331,7 +5349,7 @@ class ArkComponent {
     throw new Error('Method not implemented.');
   }
   stateStyles(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'stateStyles not supportted in attributeModifier scenario.');
   }
   restoreId(value) {
     if (typeof value !== 'number') {
@@ -7612,7 +7630,7 @@ class ArkGridComponent extends ArkScrollable {
     return this;
   }
   onScroll(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onScroll not supported in attributeModifier scenario.');
   }
   onReachStart(event) {
     modifierWithKey(this._modifiersWithKeys, GridOnReachStartModifier.identity, GridOnReachStartModifier, event);
@@ -9627,7 +9645,7 @@ class ArkImageAnimatorComponent extends ArkComponent {
     return this;
   }
   preDecode(value) {
-    throw new BusinessError(100201, 'preDecode function not supported in ArkImageAnimatorComponent class.');
+    throw new BusinessError(100201, 'preDecode function not supported in attributeModifier scenario.');
   }
   fillMode(value) {
     modifierWithKey(this._modifiersWithKeys, ImageAnimatorFillModeModifier.identity, ImageAnimatorFillModeModifier, value);
@@ -13360,6 +13378,9 @@ class ArkSpanComponent {
   clickEffect(value) {
     throw new Error('Method not implemented.');
   }
+  enableClickSoundEffect(value) {
+    throw new Error('Method not implemented.');
+  }
   onDragStart(event) {
     throw new Error('Method not implemented.');
   }
@@ -13671,116 +13692,6 @@ if (globalThis.Stack !== undefined) {
       return new ArkStackComponent(nativePtr);
     }, (nativePtr, classType, modifierJS) => {
       return new modifierJS.StackModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
-class ArkFolderStackComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  alignContent(value) {
-    modifierWithKey(this._modifiersWithKeys, FolderStackAlignContentModifier.identity, FolderStackAlignContentModifier, value);
-    return this;
-  }
-  enableAnimation(value) {
-    modifierWithKey(this._modifiersWithKeys, FolderStackEnableAnimationModifier.identity, FolderStackEnableAnimationModifier, value);
-    return this;
-  }
-  autoHalfFold(value) {
-    modifierWithKey(this._modifiersWithKeys, FolderStackAutoHalfFoldModifier.identity, FolderStackAutoHalfFoldModifier, value);
-    return this;
-  }
-  onFolderStateChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, FolderStackOnFolderStateChangeModifier.identity,
-      FolderStackOnFolderStateChangeModifier, callback);
-    return this;
-  }
-  onHoverStatusChange(handler) {
-    modifierWithKey(this._modifiersWithKeys, FolderStackOnHoverStatusChangeModifier.identity,
-      FolderStackOnHoverStatusChangeModifier, handler);
-    return this;
-  }
-}
-
-class FolderStackAlignContentModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().stack.resetAlignContent(node);
-    } else {
-      getUINativeModule().stack.setAlignContent(node, this.value);
-    }
-  }
-}
-FolderStackAlignContentModifier.identity = Symbol('folderStackAlignContent');
-
-class FolderStackEnableAnimationModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().folderStack.resetEnableAnimation(node);
-    } else {
-      getUINativeModule().folderStack.setEnableAnimation(node, this.value);
-    }
-  }
-}
-FolderStackEnableAnimationModifier.identity = Symbol('folderStackEnableAnimation');
-
-class FolderStackAutoHalfFoldModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().folderStack.resetAutoHalfFold(node);
-    } else {
-      getUINativeModule().folderStack.setAutoHalfFold(node, this.value);
-    }
-  }
-}
-FolderStackAutoHalfFoldModifier.identity = Symbol('folderStackAutoHalfFold');
-
-class FolderStackOnFolderStateChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().folderStack.resetOnFolderStateChange(node);
-    } else {
-      getUINativeModule().folderStack.setOnFolderStateChange(node, this.value);
-    }
-  }
-}
-FolderStackOnFolderStateChangeModifier.identity = Symbol('folderStackOnFolderStateChange');
-
-class FolderStackOnHoverStatusChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().folderStack.resetOnHoverStatusChange(node);
-    } else {
-      getUINativeModule().folderStack.setOnHoverStatusChange(node, this.value);
-    }
-  }
-}
-FolderStackOnHoverStatusChangeModifier.identity = Symbol('folderStackOnHoverStatusChange');
-
-// @ts-ignore
-if (globalThis.FolderStack !== undefined) {
-  globalThis.FolderStack.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkFolderStackComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.FolderStackModifier(nativePtr, classType);
     });
   };
 }
@@ -24135,249 +24046,6 @@ class SelectOnSelectModifier extends ModifierWithKey {
 SelectOnSelectModifier.identity = Symbol('selectOnSelect');
 
 /// <reference path='./import.ts' />
-class ArkTimePickerComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  loop(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerLoopModifier.identity, TimepickerLoopModifier, value);
-    return this;
-  }
-  digitalCrownSensitivity(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerDigitalCrownSensitivityModifier.identity, TimepickerDigitalCrownSensitivityModifier, value);
-    return this;
-  }
-  useMilitaryTime(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerUseMilitaryTimeModifier.identity, TimepickerUseMilitaryTimeModifier, value);
-    return this;
-  }
-  disappearTextStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerDisappearTextStyleModifier.identity, TimepickerDisappearTextStyleModifier, value);
-    return this;
-  }
-  textStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerTextStyleModifier.identity, TimepickerTextStyleModifier, value);
-    return this;
-  }
-  selectedTextStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerSelectedTextStyleModifier.identity, TimepickerSelectedTextStyleModifier, value);
-    return this;
-  }
-  enableCascade(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerEnableCascadeModifier.identity, TimepickerEnableCascadeModifier, value);
-    return this;
-  }
-  onChange(callback) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerOnChangeModifier.identity, TimepickerOnChangeModifier, callback);
-    return this;
-  }
-  dateTimeOptions(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerDateTimeOptionsModifier.identity, TimepickerDateTimeOptionsModifier, value);
-    return this;
-  }
-  enableHapticFeedback(value) {
-    modifierWithKey(this._modifiersWithKeys, TimepickerEnableHapticFeedbackModifier.identity, TimepickerEnableHapticFeedbackModifier, value);
-    return this;
-  }
-}
-
-class TimepickerDigitalCrownSensitivityModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().timepicker.resetDigitalCrownSensitivity(node);
-    }
-    else {
-      getUINativeModule().timepicker.setDigitalCrownSensitivity(node, this.value);
-    }
-  }
-}
-TimepickerDigitalCrownSensitivityModifier.identity = Symbol('DigitalCrownSensitivity');
-
-class TimepickerTextStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
-    if (reset) {
-      getUINativeModule().timepicker.resetTextStyle(node);
-    }
-    else {
-      getUINativeModule().timepicker.setTextStyle(node, (_b = (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined,
-      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
-      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined,
-      (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
-      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
-      (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
-      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
-      (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
-      _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
-    }
-  }
-  checkObjectDiff() {
-    return true;
-  }
-}
-TimepickerTextStyleModifier.identity = Symbol('textStyle');
-class TimepickerSelectedTextStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
-    if (reset) {
-      getUINativeModule().timepicker.resetSelectedTextStyle(node);
-    }
-    else {
-      getUINativeModule().timepicker.setSelectedTextStyle(node, (_b = (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined,
-      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
-      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined,
-      (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
-      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
-      (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
-      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
-      (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
-      _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
-    }
-  }
-  checkObjectDiff() {
-    return true;
-  }
-}
-TimepickerSelectedTextStyleModifier.identity = Symbol('selectedTextStyle');
-class TimepickerDisappearTextStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k, _l, _m, _o, _p;
-    if (reset) {
-      getUINativeModule().timepicker.resetDisappearTextStyle(node);
-    }
-    else {
-      getUINativeModule().timepicker.setDisappearTextStyle(node, (_b = (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined,
-      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
-      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined,
-      (_h = (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
-      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined,
-      (_l = (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
-      _k === void 0 ? void 0 : _k.family) !== null && _l !== void 0 ? _l : undefined,
-      (_p = (_o = (_m = this.value) === null || _m === void 0 ? void 0 : _m.font) === null ||
-      _o === void 0 ? void 0 : _o.style) !== null && _p !== void 0 ? _p : undefined);
-    }
-  }
-  checkObjectDiff() {
-    return true;
-  }
-}
-TimepickerDisappearTextStyleModifier.identity = Symbol('disappearTextStyle');
-class TimepickerUseMilitaryTimeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().timepicker.resetTimepickerUseMilitaryTime(node);
-    }
-    else {
-      getUINativeModule().timepicker.setTimepickerUseMilitaryTime(node, this.value);
-    }
-  }
-}
-TimepickerUseMilitaryTimeModifier.identity = Symbol('timepickerUseMilitaryTime');
-
-class TimepickerLoopModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().timepicker.resetTimepickerLoop(node);
-    }
-    else {
-      getUINativeModule().timepicker.setTimepickerLoop(node, this.value);
-    }
-  }
-}
-TimepickerLoopModifier.identity = Symbol('timepickerLoop');
-
-class TimepickerEnableCascadeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().timepicker.resetTimepickerEnableCascade(node);
-    }
-    else {
-      getUINativeModule().timepicker.setTimepickerEnableCascade(node, this.value);
-    }
-  }
-}
-TimepickerEnableCascadeModifier.identity = Symbol('timepickerEnableCascade');
-
-class TimepickerDateTimeOptionsModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().timepicker.resetTimepickerDateTimeOptions(node);
-    }
-    else {
-      getUINativeModule().timepicker.setTimepickerDateTimeOptions(node, this.value.hour, this.value.minute, this.value.second);
-    }
-  }
-}
-TimepickerDateTimeOptionsModifier.identity = Symbol('timepickerDateTimeOptions');
-
-class TimepickerEnableHapticFeedbackModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().timepicker.resetTimepickerEnableHapticFeedback(node);
-    }
-    else {
-      getUINativeModule().timepicker.setTimepickerEnableHapticFeedback(node, this.value);
-    }
-  }
-}
-TimepickerEnableHapticFeedbackModifier.identity = Symbol('timepickerEnableHapticFeedback');
-
-class TimepickerOnChangeModifier extends ModifierWithKey
-{
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().timepicker.resetTimepickerOnChange(node);
-    } else {
-      getUINativeModule().timepicker.setTimepickerOnChange(node, this.value);
-    }
-  }
-} 
-TimepickerOnChangeModifier.identity = Symbol('timePickerOnChange');
-// @ts-ignore
-if (globalThis.TimePicker !== undefined) {
-  globalThis.TimePicker.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkTimePickerComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.TimePickerModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
 class ArkTextPickerComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -24407,10 +24075,10 @@ class ArkTextPickerComponent extends ArkComponent {
     return this;
   }
   onAccept(callback) {
-    throw new BusinessError(100201, 'onAccept function not supported in ArkTextPickerComponent class.');
+    throw new BusinessError(100201, 'onAccept function not supported in attributeModifier scenario.');
   }
   onCancel(callback) {
-    throw new BusinessError(100201, 'onCancel function not supported in ArkTextPickerComponent class.');
+    throw new BusinessError(100201, 'onCancel function not supported in attributeModifier scenario.');
   }
   onChange(callback) {
     modifierWithKey(
@@ -27218,392 +26886,6 @@ class EnableHapticFeedbackModifier extends ModifierWithKey {
 EnableHapticFeedbackModifier.identity = Symbol('enableHapticFeedback');
 
 /// <reference path='./import.ts' />
-class TextStyleModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a, _b, _c, _d, _e, _f, _g, _h;
-    if (reset) {
-      getUINativeModule().calendarPicker.resetTextStyle(node);
-    }
-    else {
-      getUINativeModule().calendarPicker.setTextStyle(node, (_b = (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.color) !== null && _b !== void 0 ? _b : undefined,
-      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null ||
-      _d === void 0 ? void 0 : _d.size) !== null && _e !== void 0 ? _e : undefined, (_h =
-      (_g = (_f = this.value) === null || _f === void 0 ? void 0 : _f.font) === null ||
-      _g === void 0 ? void 0 : _g.weight) !== null && _h !== void 0 ? _h : undefined);
-    }
-  }
-  checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f, _g, _h, _j, _k;
-    if (!(((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.font) === null || _b === void 0 ? void 0 : _b.weight) ===
-    ((_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.font) === null || _d === void 0 ? void 0 : _d.weight))) {
-      return true;
-    }
-    else {
-      return !isBaseOrResourceEqual((_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.color, (_f = this.value) === null ||
-      _f === void 0 ? void 0 : _f.color) ||
-        !isBaseOrResourceEqual((_h = (_g = this.stageValue) === null || _g === void 0 ? void 0 : _g.font) === null ||
-         _h === void 0 ? void 0 : _h.size, (_k = (_j = this.value) === null || _j === void 0 ? void 0 : _j.font) === null ||
-         _k === void 0 ? void 0 : _k.size);
-    }
-  }
-}
-TextStyleModifier.identity = Symbol('textStyle');
-class EdgeAlignModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    let _a, _b, _c, _d, _e, _f, _g, _h;
-    if (reset) {
-      getUINativeModule().calendarPicker.resetEdgeAlign(node);
-    }
-    else {
-      getUINativeModule().calendarPicker.setEdgeAlign(node, (_b = (_a = this.value) === null ||
-      _a === void 0 ? void 0 : _a.alignType) !== null && _b !== void 0 ? _b : undefined,
-      (_e = (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.offset) === null ||
-      _d === void 0 ? void 0 : _d.dx) !== null && _e !== void 0 ? _e : undefined, (_h = (_g =
-      (_f = this.value) === null || _f === void 0 ? void 0 : _f.offset) === null ||
-      _g === void 0 ? void 0 : _g.dy) !== null && _h !== void 0 ? _h : undefined);
-    }
-  }
-  checkObjectDiff() {
-    let _a, _b, _c, _d, _e, _f, _g, _h;
-    if (!(this.stageValue.alignType === this.value.alignType)) {
-      return true;
-    }
-    else {
-      return !isBaseOrResourceEqual((_b = (_a = this.stageValue) === null || _a === void 0 ? void 0 : _a.offset) === null || _b === void 0 ? void 0 : _b.dx, (_d = (_c = this.value) === null || _c === void 0 ? void 0 : _c.offset) === null || _d === void 0 ? void 0 : _d.dx) ||
-        !isBaseOrResourceEqual((_f = (_e = this.stageValue) === null || _e === void 0 ? void 0 : _e.offset) === null || _f === void 0 ? void 0 : _f.dy, (_h = (_g = this.value) === null || _g === void 0 ? void 0 : _g.offset) === null || _h === void 0 ? void 0 : _h.dy);
-    }
-  }
-}
-EdgeAlignModifier.identity = Symbol('edgeAlign');
-class CalendarPickerPaddingModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().calendarPicker.resetCalendarPickerPadding(node);
-    }
-    else {
-      getUINativeModule().calendarPicker.setCalendarPickerPadding(node, this.value.top, this.value.right, this.value.bottom, this.value.left);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue.top, this.value.top) ||
-      !isBaseOrResourceEqual(this.stageValue.right, this.value.right) ||
-      !isBaseOrResourceEqual(this.stageValue.bottom, this.value.bottom) ||
-      !isBaseOrResourceEqual(this.stageValue.left, this.value.left);
-  }
-}
-CalendarPickerPaddingModifier.identity = Symbol('calendarPickerPadding');
-class CalendarPickerBorderModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().calendarPicker.resetCalendarPickerBorder(node);
-    }
-    else {
-      getUINativeModule().calendarPicker.setCalendarPickerBorder(node, this.value.arkWidth.left,
-        this.value.arkWidth.right, this.value.arkWidth.top, this.value.arkWidth.bottom,
-        this.value.arkColor.leftColor, this.value.arkColor.rightColor, this.value.arkColor.topColor,
-        this.value.arkColor.bottomColor, this.value.arkRadius.topLeft, this.value.arkRadius.topRight,
-        this.value.arkRadius.bottomLeft, this.value.arkRadius.bottomRight, this.value.arkStyle.top,
-        this.value.arkStyle.right, this.value.arkStyle.bottom, this.value.arkStyle.left);
-    }
-  }
-  checkObjectDiff() {
-    return this.value.checkObjectDiff(this.stageValue);
-  }
-}
-CalendarPickerBorderModifier.identity = Symbol('calendarPickerBorder');
-
-class CalendarPickerHeightModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().calendarPicker.resetCalendarPickerHeight(node);
-    }
-    else {
-      getUINativeModule().calendarPicker.setCalendarPickerHeight(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-CalendarPickerHeightModifier.identity = Symbol('calendarPickerHeight');
-
-class CalendarPickerBorderRadiusModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().calendarPicker.resetCalendarPickerBorderRadius(node);
-    }
-    else {
-      if (isNumber(this.value) || isString(this.value) || isResource(this.value)) {
-        getUINativeModule().calendarPicker.setCalendarPickerBorderRadius(node, this.value, this.value, this.value, this.value);
-      }
-      else {
-        if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
-            (Object.keys(this.value).indexOf('topEnd') >= 0) ||
-            (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
-            (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
-          getUINativeModule().calendarPicker.setCalendarPickerBorderRadius(node, this.value.topStart, this.value.topEnd, this.value.bottomStart, this.value.bottomEnd);
-        } else {
-          getUINativeModule().calendarPicker.setCalendarPickerBorderRadius(node, this.value.topLeft, this.value.topRight, this.value.bottomLeft, this.value.bottomRight);
-        }
-      }
-    }
-  }
-  checkObjectDiff() {
-    if (!isResource(this.stageValue) && !isResource(this.value)) {
-      if ((Object.keys(this.value).indexOf('topStart') >= 0) ||
-          (Object.keys(this.value).indexOf('topEnd') >= 0) ||
-          (Object.keys(this.value).indexOf('bottomStart') >= 0) ||
-          (Object.keys(this.value).indexOf('bottomEnd') >= 0)) {
-        return !(this.stageValue.topStart === this.value.topStart &&
-          this.stageValue.topEnd === this.value.topEnd &&
-          this.stageValue.bottomStart === this.value.bottomStart &&
-          this.stageValue.bottomEnd === this.value.bottomEnd);
-      }
-      return !(this.stageValue.topLeft === this.value.topLeft &&
-        this.stageValue.topRight === this.value.topRight &&
-        this.stageValue.bottomLeft === this.value.bottomLeft &&
-        this.stageValue.bottomRight === this.value.bottomRight);
-    }
-    else {
-      return true;
-    }
-  }
-}
-CalendarPickerBorderRadiusModifier.identity = Symbol('calendarPickerBorderRadius');
-
-class CalendarPickerBorderColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().calendarPicker.resetCalendarPickerBorderColor(node);
-    }
-    else {
-      const valueType = typeof this.value;
-      if (valueType === 'number' || valueType === 'string' || isResource(this.value)) {
-        getUINativeModule().calendarPicker.setCalendarPickerBorderColor(node, this.value, this.value, this.value, this.value, false);
-      }
-      else {
-        if ((Object.keys(this.value).indexOf('start') >= 0) ||
-            (Object.keys(this.value).indexOf('end') >= 0)) {
-          getUINativeModule().calendarPicker.setCalendarPickerBorderColor(node, this.value.top, this.value.end, this.value.bottom, this.value.start, true);
-        } else {
-          getUINativeModule().calendarPicker.setCalendarPickerBorderColor(node, this.value.top, this.value.right, this.value.bottom, this.value.left, false);
-        }
-      }
-    }
-  }
-  checkObjectDiff() {
-    if (!isResource(this.stageValue) && !isResource(this.value)) {
-      if ((Object.keys(this.value).indexOf('start') >= 0) ||
-          (Object.keys(this.value).indexOf('end') >= 0)) {
-        return !(this.stageValue.start === this.value.start &&
-          this.stageValue.end === this.value.end &&
-          this.stageValue.top === this.value.top &&
-          this.stageValue.bottom === this.value.bottom);
-      }
-      return !(this.stageValue.left === this.value.left &&
-        this.stageValue.right === this.value.right &&
-        this.stageValue.top === this.value.top &&
-        this.stageValue.bottom === this.value.bottom);
-    }
-    else {
-      return true;
-    }
-  }
-}
-CalendarPickerBorderColorModifier.identity = Symbol('calendarPickerBorderColor');
-
-class CalendarPickerMarkTodayModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().calendarPicker.resetCalendarPickerMarkToday(node);
-    }
-    else {
-      getUINativeModule().calendarPicker.setCalendarPickerMarkToday(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-CalendarPickerMarkTodayModifier.identity = Symbol('calendarPickerMarkToday');
-
-class CalendarPickerOnChangeModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().calendarPicker.resetCalendarPickerOnChange(node);
-    } else {
-      getUINativeModule().calendarPicker.setCalendarPickerOnChange(node, this.value);
-    }
-  }
-}
-CalendarPickerOnChangeModifier.identity = Symbol('calendarPickerOnChange');
-
-class ArkCalendarPickerComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  edgeAlign(alignType, offset) {
-    let arkEdgeAlign = new ArkEdgeAlign();
-    arkEdgeAlign.alignType = alignType;
-    arkEdgeAlign.offset = offset;
-    modifierWithKey(this._modifiersWithKeys, EdgeAlignModifier.identity, EdgeAlignModifier, arkEdgeAlign);
-    return this;
-  }
-  textStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, TextStyleModifier.identity, TextStyleModifier, value);
-    return this;
-  }
-  onChange(callback){
-    modifierWithKey(this._modifiersWithKeys, CalendarPickerOnChangeModifier.identity, CalendarPickerOnChangeModifier, callback);
-    return this;
-  }
-  padding(value) {
-    let arkValue = new ArkPadding();
-    if (value !== null && value !== undefined) {
-      if (isLengthType(value) || isResource(value)) {
-        arkValue.top = value;
-        arkValue.right = value;
-        arkValue.bottom = value;
-        arkValue.left = value;
-      }
-      else {
-        arkValue.top = value.top;
-        arkValue.right = value.right;
-        arkValue.bottom = value.bottom;
-        arkValue.left = value.left;
-      }
-      modifierWithKey(this._modifiersWithKeys, CalendarPickerPaddingModifier.identity, CalendarPickerPaddingModifier, arkValue);
-    }
-    else {
-      modifierWithKey(this._modifiersWithKeys, CalendarPickerPaddingModifier.identity, CalendarPickerPaddingModifier, undefined);
-    }
-    return this;
-  }
-  border(value) {
-    let _a, _b, _c, _d;
-    let arkBorder = new ArkBorder();
-    if (isUndefined(value)) {
-      arkBorder = undefined;
-    }
-    if (!isUndefined(value === null || value === void 0 ? void 0 : value.width) && (value === null || value === void 0 ? void 0 : value.width) !== null) {
-      if (isNumber(value.width) || isString(value.width) || isResource(value.width)) {
-        arkBorder.arkWidth.left = value.width;
-        arkBorder.arkWidth.right = value.width;
-        arkBorder.arkWidth.top = value.width;
-        arkBorder.arkWidth.bottom = value.width;
-      }
-      else {
-        arkBorder.arkWidth.left = value.width.left;
-        arkBorder.arkWidth.right = value.width.right;
-        arkBorder.arkWidth.top = value.width.top;
-        arkBorder.arkWidth.bottom = value.width.bottom;
-      }
-    }
-    if (!isUndefined(value === null || value === void 0 ? void 0 : value.color) && (value === null || value === void 0 ? void 0 : value.color) !== null) {
-      if (isNumber(value.color) || isString(value.color) || isResource(value.color)) {
-        arkBorder.arkColor.leftColor = value.color;
-        arkBorder.arkColor.rightColor = value.color;
-        arkBorder.arkColor.topColor = value.color;
-        arkBorder.arkColor.bottomColor = value.color;
-      }
-      else {
-        arkBorder.arkColor.leftColor = value.color.left;
-        arkBorder.arkColor.rightColor = value.color.right;
-        arkBorder.arkColor.topColor = value.color.top;
-        arkBorder.arkColor.bottomColor = value.color.bottom;
-      }
-    }
-    if (!isUndefined(value === null || value === void 0 ? void 0 : value.radius) && (value === null || value === void 0 ? void 0 : value.radius) !== null) {
-      if (isNumber(value.radius) || isString(value.radius) || isResource(value.radius)) {
-        arkBorder.arkRadius.topLeft = value.radius;
-        arkBorder.arkRadius.topRight = value.radius;
-        arkBorder.arkRadius.bottomLeft = value.radius;
-        arkBorder.arkRadius.bottomRight = value.radius;
-      }
-      else {
-        arkBorder.arkRadius.topLeft = (_a = value.radius) === null || _a === void 0 ? void 0 : _a.topLeft;
-        arkBorder.arkRadius.topRight = (_b = value.radius) === null || _b === void 0 ? void 0 : _b.topRight;
-        arkBorder.arkRadius.bottomLeft = (_c = value.radius) === null || _c === void 0 ? void 0 : _c.bottomLeft;
-        arkBorder.arkRadius.bottomRight = (_d = value.radius) === null || _d === void 0 ? void 0 : _d.bottomRight;
-      }
-    }
-    if (!isUndefined(value === null || value === void 0 ? void 0 : value.style) && (value === null || value === void 0 ? void 0 : value.style) !== null) {
-      let arkBorderStyle = new ArkBorderStyle();
-      if (arkBorderStyle.parseBorderStyle(value.style)) {
-        if (!isUndefined(arkBorderStyle.style)) {
-          arkBorder.arkStyle.top = arkBorderStyle.style;
-          arkBorder.arkStyle.left = arkBorderStyle.style;
-          arkBorder.arkStyle.bottom = arkBorderStyle.style;
-          arkBorder.arkStyle.right = arkBorderStyle.style;
-        }
-        else {
-          arkBorder.arkStyle.top = arkBorderStyle.top;
-          arkBorder.arkStyle.left = arkBorderStyle.left;
-          arkBorder.arkStyle.bottom = arkBorderStyle.bottom;
-          arkBorder.arkStyle.right = arkBorderStyle.right;
-        }
-      }
-    }
-    modifierWithKey(this._modifiersWithKeys, CalendarPickerBorderModifier.identity, CalendarPickerBorderModifier, arkBorder);
-    return this;
-  }
-  height(value) {
-    modifierWithKey(this._modifiersWithKeys, CalendarPickerHeightModifier.identity, CalendarPickerHeightModifier, value);
-    return this;
-  }
-  borderRadius(value) {
-    modifierWithKey(this._modifiersWithKeys, CalendarPickerBorderRadiusModifier.identity, CalendarPickerBorderRadiusModifier, value);
-    return this;
-  }
-  borderColor(value) {
-    modifierWithKey(this._modifiersWithKeys, CalendarPickerBorderColorModifier.identity, CalendarPickerBorderColorModifier, value);
-    return this;
-  }
-  markToday(value) {
-    modifierWithKey(this._modifiersWithKeys, CalendarPickerMarkTodayModifier.identity, CalendarPickerMarkTodayModifier, value);
-    return this;
-  }
-}
-// @ts-ignore
-if (globalThis.CalendarPicker !== undefined) {
-  globalThis.CalendarPicker.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkCalendarPickerComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.CalendarPickerModifier(nativePtr, classType);
-    });
-  };
-}
-
-/// <reference path='./import.ts' />
 class ArkDataPanelComponent extends ArkComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
@@ -28567,104 +27849,6 @@ if (globalThis.Progress !== undefined) {
   };
 }
 
-/// <reference path='./import.ts' />
-class ArkQRCodeComponent extends ArkComponent {
-  constructor(nativePtr, classType) {
-    super(nativePtr, classType);
-  }
-  allowChildCount() {
-    return 0;
-  }
-  initialize(value) {
-    modifierWithKey(this._modifiersWithKeys, QRValueModifier.identity, QRValueModifier, value[0]);
-    return this;
-  }
-  color(value) {
-    modifierWithKey(this._modifiersWithKeys, QRColorModifier.identity, QRColorModifier, value);
-    return this;
-  }
-  backgroundColor(value) {
-    modifierWithKey(this._modifiersWithKeys, QRBackgroundColorModifier.identity, QRBackgroundColorModifier, value);
-    return this;
-  }
-  contentOpacity(value) {
-    modifierWithKey(this._modifiersWithKeys, QRContentOpacityModifier.identity, QRContentOpacityModifier, value);
-    return this;
-  }
-}
-class QRValueModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    getUINativeModule().qrcode.setQRValue(node, this.value);
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-QRValueModifier.identity = Symbol('QRCodeValue');
-class QRColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().qrcode.resetQRColor(node);
-    }
-    else {
-      getUINativeModule().qrcode.setQRColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-QRColorModifier.identity = Symbol('color');
-class QRBackgroundColorModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().qrcode.resetQRBackgroundColor(node);
-    }
-    else {
-      getUINativeModule().qrcode.setQRBackgroundColor(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-QRBackgroundColorModifier.identity = Symbol('qrBackgroundColor');
-class QRContentOpacityModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset) {
-      getUINativeModule().qrcode.resetContentOpacity(node);
-    }
-    else {
-      getUINativeModule().qrcode.setContentOpacity(node, this.value);
-    }
-  }
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-QRContentOpacityModifier.identity = Symbol('qrContentOpacity');
-// @ts-ignore
-if (globalThis.QRCode !== undefined) {
-  globalThis.QRCode.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkQRCodeComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.QRCodeModifier(nativePtr, classType);
-    });
-  };
-}
 
 /// <reference path='./import.ts' />
 class ArkRichTextComponent extends ArkComponent {
@@ -32668,7 +31852,7 @@ class ArkGridItemComponent extends ArkComponent {
     return this;
   }
   forceRebuild(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'forceRebuild not supported in attributeModifier scenario.');
   }
   selectable(value) {
     modifierWithKey(this._modifiersWithKeys, GridItemSelectableModifier.identity, GridItemSelectableModifier, value);
@@ -33473,7 +32657,7 @@ class ArkListComponent extends ArkScrollable {
     return this;
   }
   onScroll(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onScroll not supported in attributeModifier scenario.');
   }
   onScrollIndex(event) {
     modifierWithKey(this._modifiersWithKeys, ListOnScrollIndexModifier.identity, ListOnScrollIndexModifier, event);
@@ -33484,7 +32668,7 @@ class ArkListComponent extends ArkScrollable {
     return this;
   }
   onItemDelete(event) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'onItemDelete not supported in attributeModifier scenario.');
   }
   onItemMove(event) {
     modifierWithKey(this._modifiersWithKeys, ListOnItemMoveModifier.identity, ListOnItemMoveModifier, event);
@@ -33672,10 +32856,10 @@ class ArkListItemComponent extends ArkComponent {
     return this;
   }
   sticky(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'sticky not supported in attributeModifier scenario.');
   }
   editable(value) {
-    throw new Error('Method not implemented.');
+    throw new BusinessError(100201, 'editable not supported in attributeModifier scenario.');
   }
   selectable(value) {
     modifierWithKey(this._modifiersWithKeys, ListItemSelectableModifier.identity, ListItemSelectableModifier, value);
@@ -38181,6 +37365,30 @@ if (globalThis.Hyperlink === undefined) {
 }
 
 // @ts-ignore
+if (globalThis.CalendarPicker === undefined) {
+  globalThis.CalendarPicker = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('CalendarPicker');
+      let module = globalThis.requireNapi('arkui.components.arkcalendarpicker');
+      module.exportView();
+      getUINativeModule().calendarPicker.create(params);
+    }
+  }
+}
+
+// @ts-ignore
+if (globalThis.CalendarPickerDialog === undefined) {
+  globalThis.CalendarPickerDialog = {
+    show: function(params) {
+      getUINativeModule().loadNativeModule('CalendarPickerDialog');
+      let module = globalThis.requireNapi('arkui.components.arkcalendarpicker');
+      module.exportDialogView();
+      getUINativeModule().calendarPickerDialog.show(params);
+    }
+  }
+}
+
+// @ts-ignore
 if (globalThis.Gauge === undefined) {
   globalThis.Gauge = {
     create: function(params) {
@@ -38327,6 +37535,53 @@ if (globalThis.Slider === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkslider');
       module.exportView();
       getUINativeModule().slider.create(params);
+    }
+  }
+}
+
+if (globalThis.QRCode === undefined) {
+  globalThis.QRCode = {
+    create: function(value) {
+      getUINativeModule().loadNativeModule("QRCode");
+      let module = globalThis.requireNapi('arkui.components.arkqrcode');
+      module.exportView();
+      getUINativeModule().qrcode.create(value);
+    }
+  }
+}
+
+// @ts-ignore
+if (globalThis.FolderStack === undefined) {
+  globalThis.FolderStack = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule('FolderStack');
+      let module = globalThis.requireNapi('arkui.components.arkfolderstack');
+      module.exportView();
+      getUINativeModule().folderStack.create(params);
+    }
+  };
+}
+
+// @ts-ignore
+if (globalThis.TimePicker === undefined) {
+  globalThis.TimePicker = {
+    create: function(params) {
+      getUINativeModule().loadNativeModule("TimePicker");
+      const module = globalThis.requireNapi('arkui.components.arktimepicker');
+      module.exportView();
+      getUINativeModule().timePicker.create(params);
+    }
+  }
+}
+
+// @ts-ignore
+if (globalThis.TimePickerDialog === undefined) {
+  globalThis.TimePickerDialog = {
+    show: function(params) {
+      getUINativeModule().loadNativeModule("TimePickerDialog");
+      const module = globalThis.requireNapi('arkui.components.arktimepicker');
+      module.exportViewDialog();
+      getUINativeModule().timePickerDialog.show(params);
     }
   }
 }

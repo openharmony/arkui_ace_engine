@@ -69,6 +69,9 @@ void JSInteractableView::JsOnTouch(const JSCallbackInfo& args)
         PipelineContext::SetCallBackNode(node);
         auto eventObj = NG::FrameNodeBridge::CreateTouchEventInfo(vm, info);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        ACE_BENCH_MARK_TRACE("OnTouchEvent_end type:%d",
+            static_cast<int32_t>(info.GetChangedTouches().size() > 0 ?
+            info.GetChangedTouches().front().GetTouchType() : static_cast<TouchType>(0)));
         func->Call(vm, func.ToLocal(), params, 1);
     };
     ViewAbstractModel::GetInstance()->SetOnTouch(std::move(onTouch));

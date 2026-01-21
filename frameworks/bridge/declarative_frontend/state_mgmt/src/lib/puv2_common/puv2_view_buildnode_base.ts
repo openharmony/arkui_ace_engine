@@ -134,7 +134,6 @@ abstract class ViewBuildNodeBase {
     public addChildBuilderNode(child: ViewBuildNodeBase): boolean {
         stateMgmtConsole.debug(`BuildNode ${child?.debugInfo__()} is added to the ${this.debugInfo__()}`);
         if (this.builderNodeWeakrefMap_?.has(child.id__())) {
-            stateMgmtConsole.warn(`${this.debugInfo__()}: addChildBuilderNode '${child?.debugInfo__()}' elmtId already exists ${child.id__()}. Internal error!`);
             return false;
         }
         this.getOrCreateBuilderNodeWeakrefMap().set(child.id__(), new WeakRef(child));

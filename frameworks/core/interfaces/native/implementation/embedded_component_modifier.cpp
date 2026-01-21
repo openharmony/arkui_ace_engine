@@ -30,6 +30,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
+    ACE_UINODE_TRACE(id);
     auto frameNode = UIExtensionStatic::CreateFrameNode(
         id, NG::SessionType::EMBEDDED_UI_EXTENSION);
     CHECK_NULL_RETURN(frameNode, nullptr);
@@ -45,6 +46,7 @@ void SetEmbeddedComponentOptionsImpl(Ark_NativePointer node,
                                      Ark_Want loader,
                                      const Opt_EmbeddedType* type)
 {
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode *>(node));
     LOGE("EmbeddedComponentModifier::SetEmbeddedComponentOptions - is not supported");
 }
 } // EmbeddedComponentInterfaceModifier
@@ -52,11 +54,13 @@ namespace EmbeddedComponentAttributeModifier {
 void SetOnTerminatedImpl(Ark_NativePointer node,
                          const Opt_Callback_TerminationInfo_Void* value)
 {
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode *>(node));
     LOGE("EmbeddedComponentModifier::OnTerminated - is not supported");
 }
 void SetOnErrorImpl(Ark_NativePointer node,
                     const Opt_ErrorCallback_Ohos_Base_BusinessError* value)
 {
+    ACE_UINODE_TRACE(reinterpret_cast<FrameNode *>(node));
     LOGE("EmbeddedComponentModifier::OnError - is not supported");
 }
 } // EmbeddedComponentAttributeModifier

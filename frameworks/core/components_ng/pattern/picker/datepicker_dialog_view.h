@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -30,7 +30,7 @@
 namespace OHOS::Ace::NG {
 class DateTimeAnimationController;
 class DatePickerPattern;
-class ACE_EXPORT DatePickerDialogView {
+class ACE_FORCE_EXPORT DatePickerDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
         const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
@@ -67,6 +67,8 @@ public:
     static RefPtr<FrameNode> CreateTimeNode(std::map<std::string, PickerTime> timePickerProperty,
         const PickerTextProperties& properties, bool useMilitaryTime);
     static RefPtr<FrameNode> CreateLunarSwitchTextNode();
+    static const Dimension ConvertFontScaleValue(
+        const Dimension& fontSizeValue, const Dimension& fontSizeLimit = 0.0_vp, bool isUserSetFont = false);
 
     static bool switchFlag_;
 
@@ -165,8 +167,6 @@ private:
         const RefPtr<FrameNode>& dialogNode);
     static const Dimension ConvertFontSizeLimit(const Dimension& fontSizeValue,
         const Dimension& fontSizeLimit, bool isUserSetFont = false);
-    static const Dimension ConvertFontScaleValue(const Dimension& fontSizeValue,
-        const Dimension& fontSizeLimit = 0.0_vp, bool isUserSetFont = false);
     static const Dimension ConvertTitleFontScaleValue(const Dimension& fontSizeValue);
     static const Dimension AdjustFontSizeScale(const Dimension& fontSizeValue, double fontScale);
     static void GetUserSettingLimit();

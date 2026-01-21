@@ -30,18 +30,18 @@ void FolderStackModelNG::Create(const std::vector<std::string>& itemId)
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
     auto folderStackGroupNode = FolderStackGroupNode::GetOrCreateGroupNode(
-        V2::FOLDER_STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FolderStackPattern>(); });
+        FOLDER_STACK_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<FolderStackPattern>(); });
     folderStackGroupNode->SetItemId(itemId);
     if (!folderStackGroupNode->GetHoverNode()) {
         int32_t hoverId = ElementRegister::GetInstance()->MakeUniqueId();
         auto hoverStackNode = HoverStackNode::GetOrCreateHoverStackNode(
-            V2::HOVER_STACK_ETS_TAG, hoverId, []() { return AceType::MakeRefPtr<HoverStackPattern>(); });
+            HOVER_STACK_ETS_TAG, hoverId, []() { return AceType::MakeRefPtr<HoverStackPattern>(); });
         folderStackGroupNode->AddChild(hoverStackNode);
         folderStackGroupNode->SetHoverNode(hoverStackNode);
     }
     if (!folderStackGroupNode->GetControlPartsStackNode()) {
         int32_t controlPartsId = ElementRegister::GetInstance()->MakeUniqueId();
-        auto controlPartsNode = ControlPartsStackNode::GetOrCreateControlPartsStackNode(V2::CONTROL_PARTS_STACK_ETS_TAG,
+        auto controlPartsNode = ControlPartsStackNode::GetOrCreateControlPartsStackNode(CONTROL_PARTS_STACK_ETS_TAG,
             controlPartsId, []() { return AceType::MakeRefPtr<ControlPartsStackPattern>(); });
         folderStackGroupNode->AddChild(controlPartsNode);
         folderStackGroupNode->SetControlPartsStackNode(controlPartsNode);
@@ -53,6 +53,11 @@ void FolderStackModelNG::Create(const std::vector<std::string>& itemId)
 void FolderStackModelNG::SetAlignment(Alignment alignment)
 {
     ACE_UPDATE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment);
+}
+
+void FolderStackModelNG::SetAlignment(FrameNode* frameNode, Alignment alignment)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(LayoutProperty, Alignment, alignment, frameNode);
 }
 
 void FolderStackModelNG::SetEnableAnimation(FrameNode* frameNode, bool isEnableAnimation)

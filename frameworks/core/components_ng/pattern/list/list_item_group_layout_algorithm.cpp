@@ -260,6 +260,7 @@ void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
     isLayouted_ = true;
+    needAllLayout_ = false;
 }
 
 void ListItemGroupLayoutAlgorithm::CheckUpdateGroupAndItemPos(LayoutWrapper* layoutWrapper,
@@ -557,7 +558,6 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     prevStartPos_ = startPos_;
     prevEndPos_ = endPos_;
     if (needAllLayout_) {
-        needAllLayout_ = false;
         itemPosition_.clear();
         cachedItemPosition_.clear();
         LayoutListItemAll(layoutWrapper, layoutConstraint, startPos);
@@ -1217,6 +1217,9 @@ void ListItemGroupLayoutAlgorithm::UpdateLayoutedItemInfo()
 void ListItemGroupLayoutAlgorithm::CheckRecycle(
     const RefPtr<LayoutWrapper>& layoutWrapper, float startPos, float endPos, float referencePos, bool forwardLayout)
 {
+    if (needAllLayout_) {
+        return;
+    }
     referencePos = UpdateReferencePos(layoutWrapper->GetLayoutProperty(), forwardLayout, referencePos);
     // Mark inactive in wrapper.
     if (forwardLayout) {
@@ -1228,9 +1231,6 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
             cachedItemPosition_.insert(*pos);
             pos = itemPosition_.erase(pos);
         }
-        if (listLayoutProperty_) {
-            UpdateCachedItemPosition(listLayoutProperty_->GetCachedCountWithDefault() * lanes_);
-        }
         return;
     }
     std::list<int32_t> removeIndexes;
@@ -1241,9 +1241,6 @@ void ListItemGroupLayoutAlgorithm::CheckRecycle(
         recycledItemPosition_.insert_or_assign(pos->first, pos->second);
         cachedItemPosition_.insert(*pos);
         removeIndexes.emplace_back(pos->first);
-    }
-    if (listLayoutProperty_) {
-        UpdateCachedItemPosition(listLayoutProperty_->GetCachedCountWithDefault() * lanes_);
     }
     for (const auto& index : removeIndexes) {
         itemPosition_.erase(index);

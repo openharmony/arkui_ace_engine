@@ -119,6 +119,7 @@ adapter/ohos/osal/app_bar_helper_impl.cpp @ArkUI_ability_group
 adapter/ohos/osal/background_task_helper_ohos.cpp @arkui_framework_xnode
 adapter/ohos/osal/background_task_helper_ohos.h @arkui_framework_xnode
 adapter/ohos/osal/BUILD.gn @arkui_architecture
+adapter/ohos/osal/click_sound_effect_manager.cpp @ArkUI_Event
 adapter/ohos/osal/clipboard_impl.cpp @huawei_g_five
 adapter/ohos/osal/input_compatible_manager.cpp @ArkUI_Event
 adapter/ohos/osal/text_translation_adapter.cpp @huawei_g_five
@@ -212,6 +213,7 @@ adapter/ohos/tools/raw_input_injector/ @ArkUI_Event
 adapter/preview/entrance/window_free_container.cpp @arkui_framework_xnode
 adapter/preview/ @arkuilayout1
 adapter/preview/osal/advance/data_detector_adapter.cpp @huawei_g_five
+adapter/preview/osal/click_sound_effect_manager.cpp @ArkUI_Event
 
 [Advanced UI Components]
 advanced_ui_component/arcslider/
@@ -551,6 +553,7 @@ frameworks/bridge/declarative_frontend/ark_component/.gitignore @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/package-lock.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/package.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkflowitem.js @arkuiscroll
+frameworks/bridge/declarative_frontend/ark_component/components/arkfolderstack.js @arkuilayout1
 frameworks/bridge/declarative_frontend/ark_component/components/arkwaterflow.js @arkuiscroll
 frameworks/bridge/declarative_frontend/ark_component/tsconfig.release.json @arkuieco3
 frameworks/bridge/declarative_frontend/ark_component/components/arkgauge.js @arkui001
@@ -894,8 +897,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blan
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_blank_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.cpp @arkuipopupwindow_all
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_button_bridge.h @arkuipopupwindow_all
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.cpp @arkui001
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_calendar_picker_bridge.h @arkui001
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_column_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.cpp @arkui_framework_xnode
@@ -916,8 +917,6 @@ frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divi
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_divider_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_flex_bridge.h @arkuilayout1
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_folder_stack_bridge.cpp @arkuilayout1
-frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_folder_stack_bridge.h @arkuilayout1
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.cpp @form_framework
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_form_component_bridge.h @form_framework
 frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.cpp @arkui_framework_xnode
@@ -1111,8 +1110,6 @@ frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.cpp @arkui0
 frameworks/bridge/declarative_frontend/jsview/js_calendar_controller.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_calendar.cpp @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_calendar.h @arkui001
-frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.cpp @arkui001
-frameworks/bridge/declarative_frontend/jsview/js_calendar_picker.h @arkui001
 frameworks/bridge/declarative_frontend/jsview/js_camera.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_camera.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_circle.cpp @arkuieco3
@@ -1160,8 +1157,6 @@ frameworks/bridge/declarative_frontend/jsview/js_flex.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_flex.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_flex_impl.cpp @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_flex_impl.h @arkuilayout1
-frameworks/bridge/declarative_frontend/jsview/js_folder_stack.cpp @arkuilayout1
-frameworks/bridge/declarative_frontend/jsview/js_folder_stack.h @arkuilayout1
 frameworks/bridge/declarative_frontend/jsview/js_foreach.cpp @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_foreach.h @arkuieco3
 frameworks/bridge/declarative_frontend/jsview/js_form.cpp @form_framework
@@ -1863,6 +1858,7 @@ frameworks/core/common/autofill/ @huawei_g_five
 frameworks/core/common/backend.h
 frameworks/core/common/card_scope.cpp @arondave
 frameworks/core/common/card_scope.h @arondave
+frameworks/core/common/click_effect/click_sound_effect_manager.h @ArkUI_Event
 frameworks/core/common/clipboard/ @huawei_g_five
 frameworks/core/common/connect_server_manager.cpp @arkui_framework_xnode
 frameworks/core/common/connect_server_manager.h @arkui_framework_xnode
@@ -2161,6 +2157,7 @@ frameworks/core/components/text_overlay/ @huawei_g_five
 frameworks/core/components/text_span/ @huawei_g_five
 frameworks/core/components/texttimer/ @huawei_g_five
 frameworks/core/components/theme/ @arkui_framework_resource
+frameworks/core/components/theme/corner_mark_theme.h @arkui_framework_xnode
 frameworks/core/components/tip/ @arkuipopupwindow_all
 frameworks/core/components/toast/ @arkuipopupwindow_all
 frameworks/core/components/toggle/ @arkuipopupwindow_all
@@ -2461,6 +2458,7 @@ frameworks/core/components_ng/pattern/checkbox/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/checkboxgroup/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/common_view/ @ArkUI_Event
 frameworks/core/components_ng/pattern/container_modal/ @ArkUI_ability_group
+frameworks/core/components_ng/pattern/corner_mark/ @arkui_framework_xnode
 frameworks/core/components_ng/pattern/container_picker/ @arkui001
 frameworks/core/components_ng/pattern/counter/ @huawei_g_five
 frameworks/core/components_ng/pattern/custom/ @arkuilayout1
@@ -2469,7 +2467,7 @@ frameworks/core/components_ng/pattern/custom_node_ext/
 frameworks/core/components_ng/pattern/data_panel/ @huawei_g_five
 frameworks/core/components_ng/pattern/dialog/ @arkuipopupwindow_all
 frameworks/core/components_ng/pattern/divider/ @arkuilayout1
-frameworks/core/components_ng/pattern/effect_component/
+frameworks/core/components_ng/pattern/effect_component/ @arkuicodepulse
 frameworks/core/components_ng/pattern/flex/ @arkuilayout1
 frameworks/core/components_ng/pattern/folder_stack/ @arkuilayout1
 frameworks/core/components_ng/pattern/form/ @form_framework
@@ -3568,6 +3566,7 @@ test/unittest/core/pattern/checkbox/ @arkuipopupwindow_all
 test/unittest/core/pattern/checkboxgroup/ @arkuipopupwindow_all
 test/unittest/core/pattern/common_view/ @arkui_statemgmt
 test/unittest/core/pattern/container_modal/ @ArkUI_ability_group
+test/unittest/core/pattern/corner_mark/ @arkui_framework_xnode
 test/unittest/core/pattern/container_picker/ @arkui001
 test/unittest/core/pattern/counter/ @huawei_g_five
 test/unittest/core/pattern/custom/ @arkuilayout1

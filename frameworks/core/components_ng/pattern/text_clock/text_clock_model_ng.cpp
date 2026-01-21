@@ -116,9 +116,9 @@ void TextClockModelNG::SetTextColor(const Color& value)
     ACE_UPDATE_RENDER_CONTEXT(ForegroundColorFlag, true);
 }
 
-void TextClockModelNG::ResetTextColor()
+void TextClockModelNG::SetTextColorByUser(bool isSetByUser)
 {
-    ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColorSetByUser, false);
+    ACE_UPDATE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColorSetByUser, isSetByUser);
 }
 
 void TextClockModelNG::SetItalicFontStyle(Ace::FontStyle value)
@@ -250,11 +250,6 @@ void TextClockModelNG::SetFontColor(FrameNode* frameNode, const Color& value)
 void TextClockModelNG::SetFontColorByUser(FrameNode* frameNode, bool isSetByUser)
 {
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColorSetByUser, isSetByUser, frameNode);
-}
-
-void TextClockModelNG::ResetFontColor(FrameNode* frameNode)
-{
-    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextClockLayoutProperty, TextColorSetByUser, false, frameNode);
 }
 
 void TextClockModelNG::SetFontSize(FrameNode* frameNode, const Dimension& value)

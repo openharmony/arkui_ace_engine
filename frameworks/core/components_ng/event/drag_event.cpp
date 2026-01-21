@@ -74,6 +74,8 @@ DragEventActuator::DragEventActuator(
     const WeakPtr<GestureEventHub>& gestureEventHub, PanDirection direction, int32_t fingers, float distance)
     : gestureEventHub_(gestureEventHub), direction_(direction), fingers_(fingers), distance_(distance)
 {
+    auto frameNode = GetFrameNode();
+    ACE_UINODE_TRACE(frameNode);
     if (fingers_ < PAN_FINGER) {
         fingers_ = PAN_FINGER;
     }
@@ -93,6 +95,13 @@ DragEventActuator::DragEventActuator(
     previewLongPressRecognizer_->SetThumbnailDeadline(PRE_DRAG_TIMER_DEADLINE);
     isNotInPreviewState_ = false;
     isNewFwk_ = false;
+}
+
+RefPtr<FrameNode> DragEventActuator::GetFrameNode() const
+{
+    auto gestureHub = gestureEventHub_.Upgrade();
+    CHECK_NULL_RETURN(gestureHub, nullptr);
+    return gestureHub->GetFrameNode();
 }
 
 DragEventActuator::DragEventActuator(const WeakPtr<GestureEventHub>& gestureEventHub)
@@ -2166,14 +2175,6 @@ void DragEventActuator::PushBackGatherNodeChild(GatherNodeChildInfo& gatherNodeC
 const RefPtr<FrameNode> DragEventActuator::GetItemParentNode() const
 {
     return itemParentNode_.Upgrade();
-}
-
-RefPtr<FrameNode> DragEventActuator::GetFrameNode()
-{
-    auto gestureHub = gestureEventHub_.Upgrade();
-    CHECK_NULL_RETURN(gestureHub, nullptr);
-    auto frameNode = gestureHub->GetFrameNode();
-    return frameNode;
 }
 
 void DragEventActuator::PrepareShadowParametersForDragData(const RefPtr<FrameNode>& frameNode,

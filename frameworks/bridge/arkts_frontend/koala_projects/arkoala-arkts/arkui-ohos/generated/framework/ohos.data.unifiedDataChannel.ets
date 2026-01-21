@@ -22,6 +22,17 @@ import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { TypeChecker } from "#components"
 import { CallbackTransformer } from "./../CallbackTransformer"
+export class unifiedDataChannel_DataLoadParams_serializer {
+    public static write(buffer: SerializerBase, value: unifiedDataChannel.DataLoadParams): void {
+        let valueSerializer : SerializerBase = buffer
+        valueSerializer.writePointer(extractors.toUnifiedDataChannelDataLoadParamsPtr(value))
+    }
+    public static read(buffer: DeserializerBase): unifiedDataChannel.DataLoadParams {
+        let valueDeserializer : DeserializerBase = buffer
+        let ptr : KPointer = valueDeserializer.readPointer()
+        return extractors.fromUnifiedDataChannelDataLoadParamsPtr(ptr)
+    }
+}
 export class unifiedDataChannel_UnifiedData_serializer {
     public static write(buffer: SerializerBase, value: unifiedDataChannel.UnifiedData): void {
         let valueSerializer : SerializerBase = buffer

@@ -1008,6 +1008,9 @@ public:
     void HighlightSpecifiedContent(
         const std::string& content, const std::vector<std::string>& nodeIds, const std::string& configs) override;
 
+    bool ConvertMouseToTouchByWhiteList(MouseInfo& mouseInfo, TouchEventInfo& touchEventInfo);
+    virtual bool IsConvertByWhiteList();
+
     void SetAILinkMenuShow(bool isAILinkMenuShow)
     {
         isAILinkMenuShow_ = isAILinkMenuShow;
@@ -1651,10 +1654,12 @@ private:
     WeakPtr<PipelineContext> pipeline_;
     bool isTextSelectionEnable_ = false;
     bool isMenuShownFromWeb_ = false;
+    bool isMenuShownFromWebBeforeStartClose_ = false;
     bool isLastEventMenuClose_ = false;
     bool isHoverNWeb_ = false;
     bool isUpSupplementDown_ = false;
     bool isSupplementMouseLeave_ = false;
+    int64_t lastMenuCloseTimestamp_ = -1;
 
     OHNativeWindow* pipNativeWindow_ = nullptr;
     std::mutex pipNativeWindowMutex_;

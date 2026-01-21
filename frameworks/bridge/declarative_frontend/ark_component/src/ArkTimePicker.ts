@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -75,9 +75,9 @@ class TimepickerTextStyleModifier extends ModifierWithKey<PickerTextStyle> {
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().timepicker.resetTextStyle(node);
+      getUINativeModule().timePicker.resetTextStyle(node);
     } else {
-      getUINativeModule().timepicker.setTextStyle(node, this.value?.color ?? undefined,
+      getUINativeModule().timePicker.setTextStyle(node, this.value?.color ?? undefined,
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
@@ -98,9 +98,9 @@ class TimepickerSelectedTextStyleModifier extends ModifierWithKey<PickerTextStyl
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().timepicker.resetSelectedTextStyle(node);
+      getUINativeModule().timePicker.resetSelectedTextStyle(node);
     } else {
-      getUINativeModule().timepicker.setSelectedTextStyle(node, this.value?.color ?? undefined,
+      getUINativeModule().timePicker.setSelectedTextStyle(node, this.value?.color ?? undefined,
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
@@ -121,9 +121,9 @@ class TimepickerDisappearTextStyleModifier extends ModifierWithKey<PickerTextSty
 
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().timepicker.resetDisappearTextStyle(node);
+      getUINativeModule().timePicker.resetDisappearTextStyle(node);
     } else {
-      getUINativeModule().timepicker.setDisappearTextStyle(node, this.value?.color ?? undefined,
+      getUINativeModule().timePicker.setDisappearTextStyle(node, this.value?.color ?? undefined,
         this.value?.font?.size ?? undefined,
         this.value?.font?.weight ?? undefined,
         this.value?.font?.family ?? undefined,
@@ -143,9 +143,9 @@ class TimepickerUseMilitaryTimeModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('timepickerUseMilitaryTime');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().timepicker.resetTimepickerUseMilitaryTime(node);
+      getUINativeModule().timePicker.resetTimepickerUseMilitaryTime(node);
     } else {
-      getUINativeModule().timepicker.setTimepickerUseMilitaryTime(node, this.value);
+      getUINativeModule().timePicker.setTimepickerUseMilitaryTime(node, this.value);
     }
   }
 }
@@ -157,9 +157,9 @@ class TimepickerLoopModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('timepickerLoop');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().timepicker.resetTimepickerLoop(node);
+      getUINativeModule().timePicker.resetTimepickerLoop(node);
     } else {
-      getUINativeModule().timepicker.setTimepickerLoop(node, this.value);
+      getUINativeModule().timePicker.setTimepickerLoop(node, this.value);
     }
   }
 }
@@ -171,9 +171,9 @@ class TimepickerDigitalCrownSensitivityModifier extends ModifierWithKey<Optional
   static identity: Symbol = Symbol('timepickerDigitalCrownSensitivity');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().timepicker.resetTimepickerDigitalCrownSensitivity(node);
+      getUINativeModule().timePicker.resetTimepickerDigitalCrownSensitivity(node);
     } else {
-      getUINativeModule().timepicker.setTimepickerDigitalCrownSensitivity(node, this.value);
+      getUINativeModule().timePicker.setTimepickerDigitalCrownSensitivity(node, this.value);
     }
   }
 }
@@ -185,9 +185,9 @@ class TimepickerDateTimeOptionsModifier extends ModifierWithKey<DateTimeOptions>
   static identity: Symbol = Symbol('timepickerDateTimeOptions');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().timepicker.resetTimepickerDateTimeOptions(node);
+      getUINativeModule().timePicker.resetTimepickerDateTimeOptions(node);
     } else {
-      getUINativeModule().timepicker.setTimepickerDateTimeOptions(node, this.value.hour, this.value.minute, this.value.second);
+      getUINativeModule().timePicker.setTimepickerDateTimeOptions(node, this.value.hour, this.value.minute, this.value.second);
     }
   }
 }
@@ -199,9 +199,9 @@ class TimepickerEnableHapticFeedbackModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('timepickerEnableHapticFeedback');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().timepicker.resetTimepickerEnableHapticFeedback(node);
+      getUINativeModule().timePicker.resetTimepickerEnableHapticFeedback(node);
     } else {
-      getUINativeModule().timepicker.setTimepickerEnableHapticFeedback(node, this.value);
+      getUINativeModule().timePicker.setTimepickerEnableHapticFeedback(node, this.value);
     }
   }
 }
@@ -213,9 +213,9 @@ class TimepickerEnableCascadeModifier extends ModifierWithKey<boolean> {
   static identity: Symbol = Symbol('timepickerEnableCascade');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().timepicker.resetTimepickerEnableCascade(node);
+      getUINativeModule().timePicker.resetTimepickerEnableCascade(node);
     } else {
-      getUINativeModule().timepicker.setTimepickerEnableCascade(node, this.value);
+      getUINativeModule().timePicker.setTimepickerEnableCascade(node, this.value);
     }
   }
 }
@@ -228,9 +228,9 @@ class TimepickerOnChangeModifier extends ModifierWithKey<(value:TimePickerResult
   static identity: Symbol = Symbol('timePickerOnChange');
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
-      getUINativeModule().timepicker.resetTimepickerOnChange(node);
+      getUINativeModule().timePicker.resetTimepickerOnChange(node);
     } else {
-      getUINativeModule().timepicker.setTimepickerOnChange(node, this.value);
+      getUINativeModule().timePicker.setTimepickerOnChange(node, this.value);
     }
   }
 }

@@ -50,6 +50,7 @@ RefPtr<FrameNode> UIExtensionModelNG::Create(
     bool isAsyncModalBinding = config.isAsyncModalBinding;
     bool isModal = config.isModal;
     auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
         [isAsyncModalBinding, isModal]() {
             return AceType::MakeRefPtr<UIExtensionPattern>(false, isModal, isAsyncModalBinding);
@@ -78,6 +79,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap,
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
         [transferringCaller]() { return AceType::MakeRefPtr<UIExtensionPattern>(transferringCaller); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
@@ -98,6 +100,7 @@ void UIExtensionModelNG::Create(const RefPtr<OHOS::Ace::WantWrap>& wantWrap, Ses
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::EMBEDDED_COMPONENT_ETS_TAG, nodeId,
         [sessionType]() { return AceType::MakeRefPtr<UIExtensionPattern>(false, false, false, sessionType); });
     auto pattern = frameNode->GetPattern<UIExtensionPattern>();
@@ -135,6 +138,7 @@ void UIExtensionModelNG::CreateDynamicComponent(const UIExtensionConfig& config)
     TAG_LOGI(AceLogTag::ACE_DYNAMIC_COMPONENT, "CreateDynamicComponent");
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = DynamicNode::GetOrCreateDynamicNode(
         V2::DYNAMIC_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<DynamicPattern>(); });
     auto pattern = frameNode->GetPattern<DynamicPattern>();
@@ -149,6 +153,7 @@ void UIExtensionModelNG::CreateIsolatedComponent(const UIExtensionConfig& config
     TAG_LOGI(AceLogTag::ACE_ISOLATED_COMPONENT, "CreateIsolatedComponent");
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(
         V2::ISOLATED_COMPONENT_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<IsolatedPattern>(); });
     auto pattern = frameNode->GetPattern<IsolatedPattern>();
@@ -164,6 +169,7 @@ void UIExtensionModelNG::CreateSecurityUIExtension(const UIExtensionConfig& conf
     TAG_LOGI(AceLogTag::ACE_SECURITYUIEXTENSION, "CreateSecurityUIExtension");
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = FrameNode::GetOrCreateFrameNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, nodeId,
         []() { return AceType::MakeRefPtr<SecurityUIExtensionPattern>(); });
     auto pattern = frameNode->GetPattern<SecurityUIExtensionPattern>();

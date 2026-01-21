@@ -135,11 +135,12 @@
 #include "core/interfaces/native/node/flow_item_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
+#include "core/interfaces/native/node/qrcode_modifier.h"
+#include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/components_ng/pattern/plugin/plugin_model_static.h"
 #endif
-
 namespace OHOS::Ace::NG::GeneratedViewModel {
 
 ArkUIAPICallbackMethod* callbacks = nullptr;
@@ -339,6 +340,7 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
 void* createXComponentNode(ArkUI_Int32 nodeId)
 {
 #ifdef XCOMPONENT_SUPPORTED
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = XComponentModelStatic::CreateFrameNode(nodeId, true);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -385,7 +387,9 @@ void* createDatePickerNode(ArkUI_Int32 nodeId)
 
 void* createTimePickerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TimePickerModelNG::CreateFrameNode(nodeId);
+    auto* modifier = NG::NodeModifier::GetTimepickerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->createFrameNode(nodeId)));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -574,10 +578,13 @@ void* createCustomSpanNode(ArkUI_Int32 nodeId)
 
 void* createQRCodeNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = QRCodeModelNG::CreateFrameNode(nodeId);
+    auto arkUIQRCodeModifier = NG::NodeModifier::GetQRCodeModifier();
+    CHECK_NULL_RETURN(arkUIQRCodeModifier->createFrameNode, nullptr);
+    auto arkUINodeHandle = arkUIQRCodeModifier->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createBadgeNode(ArkUI_Int32 nodeId)
@@ -727,6 +734,7 @@ void* createEllipseNode(ArkUI_Int32 nodeId)
 void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
 {
 #ifdef WINDOW_SCENE_SUPPORTED
+    ACE_UINODE_TRACE(nodeId);
     return nullptr;
 #else
     return nullptr;
@@ -735,7 +743,11 @@ void* createEmbeddedComponentNode(ArkUI_Int32 nodeId)
 
 void* createFolderStackNode(ArkUI_Int32 nodeId)
 {
-    return nullptr;
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto folderStackModifier = nodeModifier->getFolderStackModifier();
+    CHECK_NULL_RETURN(folderStackModifier, nullptr);
+    return folderStackModifier->createFolderStackFrameNode(nodeId);
 }
 
 void* createFormComponentNode(ArkUI_Int32 nodeId)
@@ -873,6 +885,7 @@ void* createPatternLockNode(ArkUI_Int32 nodeId)
 void* createPluginComponentNode(ArkUI_Int32 nodeId)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = PluginModelStatic::CreateFrameNode(nodeId);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();

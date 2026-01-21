@@ -1945,4 +1945,34 @@ HWTEST_F(ListGroupAlgTestNg, OnDirtyLayoutWrapperSwap001, TestSize.Level1)
     FlushUITasks();
     EXPECT_TRUE(pattern_->lanesItemRange_.empty());
 }
+
+/**
+ * @tc.name: FixHeightTest001
+ * @tc.desc: Test ListItemGroup set fix height.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListGroupAlgTestNg, FixHeightTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create ListItemGroup with fix height
+     */
+    ListModelNG model = CreateList();
+    model.SetStackFromEnd(true);
+    model.SetLanes(2);
+    ListItemGroupModelNG groupModel = CreateListItemGroup();
+    ViewAbstract::SetWidth(CalcLength(FILL_LENGTH));
+    ViewAbstract::SetHeight(CalcLength(100));
+    CreateListItems(2, V2::ListItemStyle::NONE);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Update ListItem size.
+     * @tc.expected: List mark dirty.
+     */
+    auto groupNode = GetChildFrameNode(frameNode_, 0);
+    auto itemNode0 = GetChildFrameNode(groupNode, 0);
+    ASSERT_NE(itemNode0, nullptr);
+    itemNode0->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    EXPECT_TRUE(frameNode_->CheckNeedForceMeasureAndLayout());
+}
 } // namespace OHOS::Ace::NG

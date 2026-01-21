@@ -262,6 +262,17 @@ export namespace extractors {
     throw new Error("fromUiEffectVisualEffectPtr is not implemented.")
   }
 
+  export function toUnifiedDataChannelDataLoadParamsPtr(
+    value: unifiedDataChannel.DataLoadParams
+  ): KPointer {
+    return ArkUIAniModule._Extractors_toUnifiedDataChannelDataLoadParamsPtr(value);
+  }
+  export function fromUnifiedDataChannelDataLoadParamsPtr(
+    ptr: KPointer
+  ): unifiedDataChannel.DataLoadParams {
+    return ArkUIAniModule._Extractors_fromUnifiedDataChannelDataLoadParamsPtr(ptr);
+  }
+
   export function toUnifiedDataChannelUnifiedDataPtr(
     value: unifiedDataChannel.UnifiedData
   ): KPointer {

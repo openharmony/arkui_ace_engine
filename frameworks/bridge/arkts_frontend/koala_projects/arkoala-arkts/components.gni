@@ -17,8 +17,10 @@
 
 arkui_files = [
   "arkui-preprocessed/@ohos.animator.ets",
+  "arkui-preprocessed/@ohos.arkui.ArcAlphabetIndexer.ets",
   "arkui-preprocessed/@ohos.arkui.ArcList.ets",
   "arkui-preprocessed/@ohos.arkui.ArcScrollBar.ets",
+  "arkui-preprocessed/@ohos.arkui.ArcSwiper.ets",
   "arkui-preprocessed/@ohos.arkui.Parallelize.ets",
   "arkui-preprocessed/@ohos.arkui.Prefetcher.ets",
   "arkui-preprocessed/@ohos.arkui.UIContext.ets",
@@ -98,6 +100,8 @@ arkui_files = [
   "arkui-preprocessed/arkui/ImageModifier.ets",
   "arkui-preprocessed/arkui/ImageSpanModifier.ets",
   "arkui-preprocessed/arkui/IndicatorComponentModifier.ets",
+  "arkui-preprocessed/arkui/LazyGridLayoutModifier.ets",
+  "arkui-preprocessed/arkui/LazyVGridLayoutModifier.ets",
   "arkui-preprocessed/arkui/LineModifier.ets",
   "arkui-preprocessed/arkui/LinearIndicatorModifier.ets",
   "arkui-preprocessed/arkui/ListItemGroupModifier.ets",
@@ -591,8 +595,10 @@ arkui_path_keys = [
   "arkui.UserView",
   "@ohos.arkui.component",
   "@ohos.arkui.stateManagement",
+  "@ohos.arkui.ArcAlphabetIndexer",
   "@ohos.arkui.ArcList",
   "@ohos.arkui.ArcScrollBar",
+  "@ohos.arkui.ArcSwiper",
   "#arktheme",
 ]
 
@@ -643,7 +649,9 @@ arkui_path_values = [
   "arkui-preprocessed/arkui/UserView.ets",
   "arkui-preprocessed/arkui/framework",
   "arkui-preprocessed/arkui/stateManagement",
+  "arkui-preprocessed/@ohos.arkui.ArcAlphabetIndexer.ets",
   "arkui-preprocessed/@ohos.arkui.ArcList.ets",
   "arkui-preprocessed/@ohos.arkui.ArcScrollBar.ets",
+  "arkui-preprocessed/@ohos.arkui.ArcSwiper.ets",
   "arkui-preprocessed/arkui/theme",
 ]

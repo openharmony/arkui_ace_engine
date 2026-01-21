@@ -57,8 +57,23 @@ export class ArkEffectComponentPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._EffectComponentInterface_setEffectComponentOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setAlwaysSnapshotAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._EffectComponentAttribute_setAlwaysSnapshot(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
 }
 export interface EffectComponentAttribute extends CommonMethod {
+    alwaysSnapshot(value: boolean | undefined): this {
+        throw new Error("Unimplemented method alwaysSnapshot")
+    }
     setEffectComponentOptions(options?: EffectComponentOptions): this {
         throw new Error("Unimplemented method setEffectComponentOptions")
     }
@@ -67,7 +82,11 @@ export interface EffectComponentAttribute extends CommonMethod {
     }
 }
 export class ArkEffectComponentStyle extends ArkCommonMethodStyle implements EffectComponentAttribute {
+    alwaysSnapshot_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<EffectComponentAttribute> | AttributeModifier<CommonMethod> | undefined
+    alwaysSnapshot(value: boolean | undefined): this {
+        return this
+    }
     setEffectComponentOptions(options?: EffectComponentOptions): this {
         return this
     }
@@ -95,6 +114,14 @@ export class ArkEffectComponentComponent extends ArkCommonMethodComponent implem
         if (this.checkPriority("setEffectComponentOptions")) {
             const options_casted = options as (EffectComponentOptions | undefined)
             this.getPeer()?.setEffectComponentOptionsAttribute(options_casted)
+            return this
+        }
+        return this
+    }
+    public alwaysSnapshot(value: boolean | undefined): this {
+        if (this.checkPriority("alwaysSnapshot")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setAlwaysSnapshotAttribute(value_casted)
             return this
         }
         return this

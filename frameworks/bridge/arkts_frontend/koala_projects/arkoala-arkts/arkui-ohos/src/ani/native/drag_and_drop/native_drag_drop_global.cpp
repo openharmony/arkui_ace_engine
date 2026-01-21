@@ -138,6 +138,57 @@ ani_string DragEveStartDataLoading([[maybe_unused]] ani_env* env, [[maybe_unused
     return result.value_or(value);
 }
 
+void DragEventSetDataLoadParams([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object data)
+{
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    auto dataValue = OHOS::UDMF::AniConverter::UnwrapDataLoadParams(env, data);
+    auto dataLoadParams = reinterpret_cast<void*>(&dataValue);
+    if (!dragEvent || !dataLoadParams) {
+        return;
+    }
+    const auto* modifier = GetNodeAniModifier();
+    if (!modifier || !modifier->getDragAniModifier() || !env) {
+        return;
+    }
+    modifier->getDragAniModifier()->setDragDataLoadParams(dragEvent, dataLoadParams);
+}
+
+void DragEventEnableInternalDropAnimation([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
+    [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_string configuration)
+{
+    auto dragEvent = reinterpret_cast<ani_ref>(pointer);
+    const auto* modifier = GetNodeAniModifier();
+    if (!dragEvent || !modifier || !modifier->getDragAniModifier() || !env) {
+        return;
+    }
+
+    auto isOnDrop = modifier->getDragAniModifier()->isOnDropPhase();
+    if (!isOnDrop) {
+        AniUtils::AniThrow(env, "Operation not allowed for current phase.", ERROR_CODE_DRAG_DATA_NOT_ONDROP);
+        return;
+    }
+
+    auto configStr = AniUtils::ANIStringToStdString(env, configuration);
+    int32_t ret;
+    modifier->getDragAniModifier()->enableInternalDropAnimation(dragEvent, configStr, ret);
+    switch (ret) {
+        case ERROR_CODE_NO_ERROR:
+            break;
+        case ERROR_CODE_PARAM_INVALID:
+            AniUtils::AniThrow(env, "Invalid input parameter.", ERROR_CODE_PARAM_INVALID);
+            break;
+        case ERROR_CODE_VERIFICATION_FAILED:
+            AniUtils::AniThrow(env, "Permission verification failed.", ERROR_CODE_VERIFICATION_FAILED);
+            break;
+        case ERROR_CODE_SYSTEMCAP_ERROR:
+            AniUtils::AniThrow(env, "Capability not supported.", ERROR_CODE_SYSTEMCAP_ERROR);
+            break;
+        default:
+            HILOGE("AceDrag Enable internal drop animation failed, return value is %{public}d", ret);
+    }
+}
+
 void DragEventSetPixelMap([[maybe_unused]] ani_env* env, [[maybe_unused]] ani_object object,
     [[maybe_unused]] ani_long pointer, [[maybe_unused]] ani_object pixelMap)
 {
@@ -623,5 +674,17 @@ ani_object ExtractorFromPtrToUnifiedData(ani_env* env, [[maybe_unused]] ani_obje
         return result_obj;
     }
     return unifiedData_obj;
+}
+
+ani_long ExtractorFromDataLoadParamsToPtr(ani_env* env, [[maybe_unused]] ani_object object, ani_long dataLoadParams)
+{
+    ani_long result_obj = {};
+    return result_obj;
+}
+
+ani_object ExtractorFromPtrToDataLoadParams(ani_env* env, [[maybe_unused]] ani_object object, ani_long pointer)
+{
+    ani_object result_obj = {};
+    return result_obj;
 }
 } // namespace OHOS::Ace::Ani

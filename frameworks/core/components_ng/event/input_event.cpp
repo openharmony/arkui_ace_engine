@@ -25,6 +25,8 @@ InputEventActuator::InputEventActuator(const WeakPtr<InputEventHub>& inputEventH
     CHECK_NULL_VOID(refInputEventHub);
     auto frameNode = refInputEventHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
+    auto nodeId = frameNode->GetId();
+    ACE_UINODE_TRACE(nodeId);
     axisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag(), frameNode->GetId());
     coastingAxisEventTarget_ = MakeRefPtr<AxisEventTarget>(frameNode->GetTag(), frameNode->GetId());
 }

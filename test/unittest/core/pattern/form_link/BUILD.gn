@@ -15,7 +15,6 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("form_link_test") {
   type = "new"
-  module_name = "form_fwk"
-  module_output = ""
+  module_name = "ScrollingSet-Refresh"
   sources = [ "form_link_test.cpp" ]
 }

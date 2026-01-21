@@ -941,27 +941,7 @@ void ProgressPattern::OnColorConfigurationUpdate()
     CHECK_NULL_VOID(theme);
     auto pops = host->GetPaintProperty<ProgressPaintProperty>();
     CHECK_NULL_VOID(pops);
-    const auto& type = pops->GetProgressType();
-    if (!pops->GetGradientColorSetByUserValue(false)) {
-        Color colorVal;
-        Color endColor;
-        Color beginColor;
-        NG::Gradient gradient;
-        endColor = theme->GetRingProgressEndSideColor();
-        beginColor = theme->GetRingProgressBeginSideColor();
-        colorVal = (type == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedSelectColor()
-                                                                 : theme->GetTrackParseFailedSelectedColor();
-        NG::GradientColor endSideColor;
-        NG::GradientColor beginSideColor;
-        endSideColor.SetLinearColor(LinearColor(endColor));
-        endSideColor.SetDimension(Dimension(0.0f));
-        beginSideColor.SetLinearColor(LinearColor(beginColor));
-        beginSideColor.SetDimension(Dimension(1.0f));
-        gradient.AddColor(endSideColor);
-        gradient.AddColor(beginSideColor);
-        pops->UpdateGradientColor(gradient);
-        pops->UpdateColor(colorVal);
-    }
+    ProcessColorOnColorConfigurationUpdate();
     if (pops->GetCapsuleStyleSetByUserValue(false) && !pops->GetCapsuleStyleFontColorSetByUserValue(false)) {
         auto textHost = AceType::DynamicCast<FrameNode>(host->GetChildAtIndex(0));
         CHECK_NULL_VOID(textHost);
@@ -970,6 +950,55 @@ void ProgressPattern::OnColorConfigurationUpdate()
         textLayoutProperty->UpdateTextColor(theme->GetTextColor());
         textHost->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         pops->UpdateTextColor(theme->GetTextColor());
+    }
+    const auto& type = pops->GetProgressType();
+    if (!pops->GetBackgroundColorSetByUserValue(false)) {
+        Color colorVal = (type == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedBgColor()
+                         : (type == ProgressType::RING)  ? theme->GetRingProgressParseFailedBgColor()
+                                                         : theme->GetTrackParseFailedBgColor();
+        pops->UpdateBackgroundColor(colorVal);
+    }
+}
+
+void ProgressPattern::ProcessColorOnColorConfigurationUpdate()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto theme = pipeline->GetTheme<ProgressTheme>();
+    CHECK_NULL_VOID(theme);
+    auto pops = host->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(pops);
+    const auto& type = pops->GetProgressType();
+    if (!pops->GetGradientColorSetByUserValue(false)) {
+        Color colorVal;
+        Color beginColor;
+        Color endColor;
+        NG::Gradient gradient;
+        NG::GradientColor beginSideColor;
+        NG::GradientColor endSideColor;
+        colorVal = (type == ProgressType::CAPSULE) ? theme->GetCapsuleParseFailedSelectColor()
+                                                   : theme->GetTrackParseFailedSelectedColor();
+        if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
+            endColor = (type == ProgressType::RING || type == ProgressType::SCALE)
+                           ? theme->GetRingProgressEndSideColor()
+                           : colorVal;
+            beginColor = (type == ProgressType::RING || type == ProgressType::SCALE)
+                             ? theme->GetRingProgressBeginSideColor()
+                             : colorVal;
+        } else {
+            endColor = theme->GetRingProgressEndSideColor();
+            beginColor = theme->GetRingProgressBeginSideColor();
+        }
+        beginSideColor.SetLinearColor(LinearColor(beginColor));
+        beginSideColor.SetDimension(Dimension(1.0f));
+        endSideColor.SetLinearColor(LinearColor(endColor));
+        endSideColor.SetDimension(Dimension(0.0f));
+        gradient.AddColor(endSideColor);
+        gradient.AddColor(beginSideColor);
+        pops->UpdateGradientColor(gradient);
+        pops->UpdateColor(colorVal);
     }
 }
 } // namespace OHOS::Ace::NG

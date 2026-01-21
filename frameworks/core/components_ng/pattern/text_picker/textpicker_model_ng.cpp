@@ -100,6 +100,7 @@ void TextPickerModelNG::Create(RefPtr<PickerTheme> pickerTheme, uint32_t columnK
 {
     auto* stack = ViewStackProcessor::GetInstance();
     auto nodeId = stack->ClaimNodeId();
+    ACE_UINODE_TRACE(nodeId);
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", V2::TEXT_PICKER_ETS_TAG, nodeId);
     auto textPickerNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
@@ -173,6 +174,7 @@ RefPtr<FrameNode> TextPickerModelNG::CreateColumnNode(uint32_t columnKind, uint3
     auto columnNode =
         FrameNode::GetOrCreateFrameNode(V2::COLUMN_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         []() { return AceType::MakeRefPtr<TextPickerColumnPattern>(); });
+    ACE_UINODE_TRACE(columnNode);
     if (columnKind == ICON) {
         for (uint32_t index = 0; index < showCount; index++) {
             auto row = FrameNode::CreateFrameNode(
@@ -246,6 +248,7 @@ RefPtr<FrameNode> TextPickerModelNG::CreateButtonNode()
 
 RefPtr<FrameNode> TextPickerModelNG::CreateFrameNode(int32_t nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto textPickerNode = FrameNode::GetOrCreateFrameNode(
         V2::TEXT_PICKER_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<TextPickerPattern>(); });
     auto pipeline = PipelineBase::GetCurrentContextSafely();

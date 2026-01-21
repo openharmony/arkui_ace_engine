@@ -84,6 +84,7 @@ public:
         (DragSummaryInfo& dragSummaryInfo, (const std::set<std::string>& allowTypes)), (override));
     MOCK_METHOD(RefPtr<DataLoadParams>, TransformDataLoadParams, (napi_env env, napi_value napiValue), (override));
     MOCK_METHOD(RefPtr<DataLoadParams>, TransformDataLoadParamsForNative, (void* rawData), (override));
+    MOCK_METHOD(RefPtr<DataLoadParams>, TransformDataLoadParamsFromANI, (void* rawData), (override));
     MOCK_METHOD(int32_t, SetDelayInfo, (RefPtr<DataLoadParams> dataLoadParams, std::string& key), (override));
 };
 class MockUnifiedData : public UnifiedData {

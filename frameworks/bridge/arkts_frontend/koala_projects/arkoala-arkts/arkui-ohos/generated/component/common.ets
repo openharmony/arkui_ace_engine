@@ -20,7 +20,7 @@ import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
-import { extractors, DrawModifier, GestureModifier, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDrop, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary } from "#handwritten"
+import { extractors, DrawModifier, GestureModifier, hookId, hookStateStyleImpl, hookGesture, hookPriorityGesture, hookParallelGesture, hookGestureModifier, hookCustomPropertyImpl, hookDrawModifier, CustomStyles, ContentModifier, hookCommonMethodAttributeModifier, AttributeModifier, AttributeUpdater, hookCommonShapeMethodAttributeModifier, hookScrollableCommonMethodAttributeModifier, hookAllowDrop, hookDragPreviewOptions, hookDragEventStartDataLoading, hookDragEventGetSummary, hookDragEventSetDataLoadParams, hookEnableInternalDropAnimation } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { default as unifiedDataChannel } from "@ohos.data.unifiedDataChannel"
 import { DrawContext, LengthMetrics, ColorMetrics } from "arkui.Graphics"
@@ -83,7 +83,7 @@ import { curves_ICurve_serializer } from "./../framework/ohos.curves"
 import { SymbolGlyphModifier_serializer } from "./../SymbolGlyphModifier"
 import { Want_serializer } from "./../framework/ohos.app.ability.Want"
 import { UIContext_serializer } from "./../framework/ohos.arkui.UIContext"
-import { unifiedDataChannel_UnifiedData_serializer, unifiedDataChannel_Summary_serializer } from "./../framework/ohos.data.unifiedDataChannel"
+import { unifiedDataChannel_UnifiedData_serializer, unifiedDataChannel_Summary_serializer, unifiedDataChannel_DataLoadParams_serializer } from "./../framework/ohos.data.unifiedDataChannel"
 import { OnScrollFrameBeginCallback } from "./scroll"
 // instructive change start
 import { _animateTo, _animationStart, _animationStop } from "arkui/base/ArkAnimation"
@@ -677,6 +677,7 @@ export interface DragEvent {
     getDisplayId(): int32
     getDragSource(): string
     isRemote(): boolean
+    setDataLoadParams(dataLoadParams: unifiedDataChannel.DataLoadParams): void
     enableInternalDropAnimation(configuration: string): void
     getGlobalDisplayX(): double
     getGlobalDisplayY(): double
@@ -786,9 +787,12 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     public isRemote(): boolean {
         return this.isRemote_serialize()
     }
+    public setDataLoadParams(dataLoadParams: unifiedDataChannel.DataLoadParams): void {
+        hookDragEventSetDataLoadParams(this, dataLoadParams)
+        return
+    }
     public enableInternalDropAnimation(configuration: string): void {
-        const configuration_casted = configuration as (string)
-        this.enableInternalDropAnimation_serialize(configuration_casted)
+        hookEnableInternalDropAnimation(this, configuration)
         return
     }
     public getGlobalDisplayX(): double {
@@ -893,6 +897,12 @@ export class DragEventInternal implements MaterializedBase,DragEvent {
     isRemote_serialize(): boolean {
         const retval  = ArkUIGeneratedNativeModule._DragEvent_isRemote(this.peer!.ptr)
         return retval
+    }
+    setDataLoadParams_serialize(dataLoadParams: unifiedDataChannel.DataLoadParams): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        unifiedDataChannel_DataLoadParams_serializer.write(thisSerializer, dataLoadParams)
+        ArkUIGeneratedNativeModule._DragEvent_setDataLoadParams(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     enableInternalDropAnimation_serialize(configuration: string): void {
         ArkUIGeneratedNativeModule._DragEvent_enableInternalDropAnimation(this.peer!.ptr, configuration)
@@ -1396,7 +1406,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
 }
 export interface Layoutable {
     measureResult: MeasureResult
-    uniqueId?: number | undefined
+    uniqueId?: int32 | undefined
     layout(position: Position): void
     getMargin(): DirectionalEdgesT<number> | undefined
     getPadding(): DirectionalEdgesT<number> | undefined
@@ -1413,11 +1423,11 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
     set measureResult(measureResult: MeasureResult) {
         this.setMeasureResult(measureResult)
     }
-    get uniqueId(): number | undefined {
+    get uniqueId(): int32 | undefined {
         return this.getUniqueId()
     }
-    set uniqueId(uniqueId: number | undefined) {
-        const uniqueId_NonNull  = (uniqueId as number)
+    set uniqueId(uniqueId: int32 | undefined) {
+        const uniqueId_NonNull  = (uniqueId as int32)
         this.setUniqueId(uniqueId_NonNull)
     }
     constructor(peerPtr: KPointer) {
@@ -1458,11 +1468,11 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
         this.setMeasureResult_serialize(measureResult_casted)
         return
     }
-    private getUniqueId(): number | undefined {
+    private getUniqueId(): int32 | undefined {
         return this.getUniqueId_serialize()
     }
-    private setUniqueId(uniqueId: number | undefined): void {
-        const uniqueId_casted = uniqueId as (number | undefined)
+    private setUniqueId(uniqueId: int32 | undefined): void {
+        const uniqueId_casted = uniqueId as (int32 | undefined)
         this.setUniqueId_serialize(uniqueId_casted)
         return
     }
@@ -1502,23 +1512,23 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
         ArkUIGeneratedNativeModule._Layoutable_setMeasureResult(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    private getUniqueId_serialize(): number | undefined {
+    private getUniqueId_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._Layoutable_getUniqueId(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = (retvalDeserializer.readInt32() as int32)
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int32 | undefined = buffer
         return returnResult
     }
-    private setUniqueId_serialize(uniqueId: number | undefined): void {
+    private setUniqueId_serialize(uniqueId: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (uniqueId !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const uniqueIdTmpValue  = uniqueId!
-            thisSerializer.writeNumber(uniqueIdTmpValue)
+            thisSerializer.writeInt32(uniqueIdTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -1578,7 +1588,7 @@ export class LayoutPolicy implements MaterializedBase {
     }
 }
 export interface Measurable {
-    uniqueId?: number | undefined
+    uniqueId?: int32 | undefined
     measure(constraint: ConstraintSizeOptions): MeasureResult | undefined
     getMargin(): DirectionalEdgesT<number> | undefined
     getPadding(): DirectionalEdgesT<number> | undefined
@@ -1589,11 +1599,11 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
     public getPeer(): Finalizable | undefined {
         return this.peer
     }
-    get uniqueId(): number | undefined {
+    get uniqueId(): int32 | undefined {
         return this.getUniqueId()
     }
-    set uniqueId(uniqueId: number | undefined) {
-        const uniqueId_NonNull  = (uniqueId as number)
+    set uniqueId(uniqueId: int32 | undefined) {
+        const uniqueId_NonNull  = (uniqueId as int32)
         this.setUniqueId(uniqueId_NonNull)
     }
     constructor(peerPtr: KPointer) {
@@ -1625,11 +1635,11 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
     public getBorderWidth(): DirectionalEdgesT<number> | undefined {
         return this.getBorderWidth_serialize()
     }
-    private getUniqueId(): number | undefined {
+    private getUniqueId(): int32 | undefined {
         return this.getUniqueId_serialize()
     }
-    private setUniqueId(uniqueId: number | undefined): void {
-        const uniqueId_casted = uniqueId as (number | undefined)
+    private setUniqueId(uniqueId: int32 | undefined): void {
+        const uniqueId_casted = uniqueId as (int32 | undefined)
         this.setUniqueId_serialize(uniqueId_casted)
         return
     }
@@ -1660,23 +1670,23 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         const returnResult : DirectionalEdgesT<number> = DirectionalEdgesT_serializer.read(retvalDeserializer)
         return returnResult
     }
-    private getUniqueId_serialize(): number | undefined {
+    private getUniqueId_serialize(): int32 | undefined {
         const retval  = ArkUIGeneratedNativeModule._Measurable_getUniqueId(this.peer!.ptr)
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
         const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
-        let buffer : number | undefined = undefined
+        let buffer : int32 | undefined = undefined
         if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
-            buffer = (retvalDeserializer.readNumber() as number)
+            buffer = (retvalDeserializer.readInt32() as int32)
         }
-        const returnResult : number | undefined = buffer
+        const returnResult : int32 | undefined = buffer
         return returnResult
     }
-    private setUniqueId_serialize(uniqueId: number | undefined): void {
+    private setUniqueId_serialize(uniqueId: int32 | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (uniqueId !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const uniqueIdTmpValue  = uniqueId!
-            thisSerializer.writeNumber(uniqueIdTmpValue)
+            thisSerializer.writeInt32(uniqueIdTmpValue)
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -4248,6 +4258,18 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setClickEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
+    setEnableClickSoundEffectAttribute(value: boolean | undefined): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (value !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueTmpValue  = value!
+            thisSerializer.writeBoolean(valueTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CommonMethod_setEnableClickSoundEffect(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+    }
     setOnDragStartAttribute(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
@@ -5790,12 +5812,20 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBindMenu0(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBindMenu1Attribute(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): void {
+    setBindMenu1Attribute(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (isShow !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const isShowTmpValue  = isShow!
-            thisSerializer.writeBoolean(isShowTmpValue)
+            if (isShowTmpValue instanceof boolean) {
+                thisSerializer.writeInt8((0).toByte())
+                const isShowTmpValueForIdx0  = isShowTmpValue as boolean
+                thisSerializer.writeBoolean(isShowTmpValueForIdx0)
+            } else if (isShowTmpValue instanceof Bindable<boolean>) {
+                thisSerializer.writeInt8((1).toByte())
+                const isShowTmpValueForIdx1  = isShowTmpValue as Bindable<boolean>
+                Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -5873,12 +5903,20 @@ export class ArkCommonMethodPeer extends PeerNode {
         ArkUIGeneratedNativeModule._CommonMethod_setBindContextMenuWithResponse(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setBindContextMenu1Attribute(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): void {
+    setBindContextMenu1Attribute(isShown: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (isShown !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const isShownTmpValue  = isShown!
-            thisSerializer.writeBoolean(isShownTmpValue)
+            if (isShownTmpValue instanceof boolean) {
+                thisSerializer.writeInt8((0).toByte())
+                const isShownTmpValueForIdx0  = isShownTmpValue as boolean
+                thisSerializer.writeBoolean(isShownTmpValueForIdx0)
+            } else if (isShownTmpValue instanceof Bindable<boolean>) {
+                thisSerializer.writeInt8((1).toByte())
+                const isShownTmpValueForIdx1  = isShownTmpValue as Bindable<boolean>
+                Bindable_Boolean_serializer.write(thisSerializer, isShownTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -7099,12 +7137,12 @@ export enum SourceType {
     JOYSTICK = 5
 }
 export enum SourceTool {
-    UNKNOWN = 0,
     Unknown = 0,
-    FINGER = 1,
+    UNKNOWN = 0,
     Finger = 1,
-    PEN = 2,
+    FINGER = 1,
     Pen = 2,
+    PEN = 2,
     MOUSE = 7,
     TOUCHPAD = 9,
     JOYSTICK = 10
@@ -7303,6 +7341,7 @@ export type UnifiedData = unifiedDataChannel.UnifiedData;
 export type Summary = unifiedDataChannel.Summary;
 export type UniformDataType = uniformTypeDescriptor.UniformDataType;
 export type DataSyncOptions = unifiedDataChannel.GetDataParams;
+export type DataLoadParams = unifiedDataChannel.DataLoadParams;
 export type SpringLoadingContext = dragController.SpringLoadingContext;
 export type DragSpringLoadingConfiguration = dragController.DragSpringLoadingConfiguration;
 export enum DragResult {
@@ -8144,6 +8183,9 @@ export interface CommonMethod {
     clickEffect(value: ClickEffect | null | undefined): this {
         throw new Error("Unimplemented method clickEffect")
     }
+    enableClickSoundEffect(value: boolean | undefined): this {
+        throw new Error("Unimplemented method enableClickSoundEffect")
+    }
     onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
         throw new Error("Unimplemented method onDragStart")
     }
@@ -8435,7 +8477,7 @@ export interface CommonMethod {
     bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         throw new Error("Unimplemented method bindMenu")
     }
-    bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    bindMenu(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         throw new Error("Unimplemented method bindMenu")
     }
     bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
@@ -8444,7 +8486,7 @@ export interface CommonMethod {
     bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
         throw new Error("Unimplemented method bindContextMenuWithResponse")
     }
-    bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    bindContextMenu(isShown: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
         throw new Error("Unimplemented method bindContextMenu")
     }
     bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
@@ -8595,6 +8637,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     alignRules_value?: AlignRuleOption | LocalizedAlignRuleOptions | undefined
     aspectRatio_value?: number | undefined
     clickEffect_value?: ClickEffect | null | undefined
+    enableClickSoundEffect_value?: boolean | undefined
     onDragStart_value?: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined
     onDragEnter_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
     onDragMove_value?: ((event: DragEvent,extraParams?: string) => void) | undefined
@@ -8984,6 +9027,9 @@ export class ArkCommonMethodStyle implements CommonMethod {
     clickEffect(value: ClickEffect | null | undefined): this {
         return this
     }
+    enableClickSoundEffect(value: boolean | undefined): this {
+        return this
+    }
     onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
         return this
     }
@@ -9275,7 +9321,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     bindMenu(content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         return this
     }
-    bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    bindMenu(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         return this
     }
     bindContextMenu(content: CustomBuilder | undefined, responseType: ResponseType | undefined, options?: ContextMenuOptions): this {
@@ -9284,7 +9330,7 @@ export class ArkCommonMethodStyle implements CommonMethod {
     bindContextMenuWithResponse(content: CustomBuilderT<ResponseType> | undefined, options?: ContextMenuOptions): this {
         return this
     }
-    bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    bindContextMenu(isShown: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
         return this
     }
     bindContentCover(isShow: boolean | Bindable<boolean> | undefined, builder: CustomBuilder | undefined, type?: ModalTransition): this {
@@ -10619,6 +10665,14 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
+    public enableClickSoundEffect(value: boolean | undefined): this {
+        if (this.checkPriority("enableClickSoundEffect")) {
+            const value_casted = value as (boolean | undefined)
+            this.getPeer()?.setEnableClickSoundEffectAttribute(value_casted)
+            return this
+        }
+        return this
+    }
     public onDragStart(value: ((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined): this {
         if (this.checkPriority("onDragStart")) {
             const value_casted = value as (((event: DragEvent,extraParams?: string) => CustomBuilder | DragItemInfo) | undefined)
@@ -11443,9 +11497,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public bindMenu(isShow: boolean | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
+    public bindMenu(isShow: boolean | Bindable<boolean> | undefined, content: Array<MenuElement> | CustomBuilder | undefined, options?: MenuOptions): this {
         if (this.checkPriority("bindMenu")) {
-            const isShow_casted = isShow as (boolean | undefined)
+            const isShow_casted = isShow as (boolean | Bindable<boolean> | undefined)
             const content_casted = content as (Array<MenuElement> | CustomBuilder | undefined)
             const options_casted = options as (MenuOptions | undefined)
             this.getPeer()?.setBindMenu1Attribute(isShow_casted, content_casted, options_casted)
@@ -11472,9 +11526,9 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         }
         return this
     }
-    public bindContextMenu(isShown: boolean | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
+    public bindContextMenu(isShown: boolean | Bindable<boolean> | undefined, content: CustomBuilder | undefined, options?: ContextMenuOptions): this {
         if (this.checkPriority("bindContextMenu")) {
-            const isShown_casted = isShown as (boolean | undefined)
+            const isShown_casted = isShown as (boolean | Bindable<boolean> | undefined)
             const content_casted = content as (CustomBuilder | undefined)
             const options_casted = options as (ContextMenuOptions | undefined)
             this.getPeer()?.setBindContextMenu1Attribute(isShown_casted, content_casted, options_casted)

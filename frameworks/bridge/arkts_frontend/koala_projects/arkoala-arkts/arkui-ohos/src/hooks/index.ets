@@ -56,7 +56,7 @@ import { InteropNativeModule } from "@koalaui/interop"
 import { ErrorCallback } from "@ohos.base";
 import { NavPathStack, NavigationModuleInfo, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent } from "../component/navigation"
 import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
-import { PageMapBuilder } from "../component/builder";
+import { CustomBuilder, PageMapBuilder } from '../component/builder';
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
 import { ArkImageComponent, ResourceStr, ImageContent, ImageAIOptions, ArkImagePeer, ImageErrorCallback, ArkTabsComponent } from "#generated";
 import { ArkWaterFlowComponent, WaterFlowOptions } from '#generated';
@@ -87,8 +87,8 @@ import { WebHandWritten } from "./WebHandWritten";
 import { ArkSaveButtonComponent, ArkSaveButtonPeer, SaveButtonCallback, ArkPasteButtonComponent, ArkPasteButtonPeer, PasteButtonCallback } from '#generated';
 import { SaveButtonOpsHandWritten } from './SaveButtonOpsHandWritten';
 import { PasteButtonOpsHandWritten } from './PasteButtonOpsHandWritten';
-import { ArkGaugeComponent, ArkGaugePeer, GaugeIndicatorOptions } from "#generated";
-import { GaugeExtender } from "#generated"
+import { ArkDataPanelComponent, ArkDataPanelPeer, DataPanelShadowOptions, ArkGaugeComponent, ArkGaugePeer, GaugeIndicatorOptions, GaugeShadowOptions } from '#generated';
+import { DataPanelExtender, GaugeExtender } from '#generated';
 
 export function hookId(component: object, value?: string) {}
 
@@ -201,9 +201,10 @@ export function hookAllowDrop(node: ArkCommonMethodComponent | ArkCommonMethodPe
   }
 }
 
-export function hookDragPreviewOptions(node: ArkCommonMethodComponent | ArkCommonMethodPeer, value: DragPreviewOptions | undefined, options?: DragInteractionOptions) {
-  if (node instanceof ArkCommonMethodComponent) {
-    let nodeComponent = node as ArkCommonMethodComponent
+export function hookDragPreviewOptions(node: ArkCommonMethodComponent | ArkCommonMethodPeer | ArkBaseNode,
+  value: DragPreviewOptions | undefined, options?: DragInteractionOptions) {
+  if (node instanceof ArkCommonMethodComponent || node instanceof ArkBaseNode) {
+    let nodeComponent = node as (ArkCommonMethodComponent | ArkBaseNode)
     ArkUIAniModule._Drag_Set_DragPreviewOptions(nodeComponent.getPeer().getPeerPtr(), value, options)
   } else if (node instanceof ArkCommonMethodPeer) {
     let nodePeer = node as ArkCommonMethodPeer
@@ -218,6 +219,14 @@ export function hookDragEventStartDataLoading(event: DragEventInternal, options:
 
 export function hookDragEventGetSummary(event: DragEventInternal) : unifiedDataChannel.Summary | undefined {
   return ArkUIAniModule._DragEvent_Get_Summary(event.peer!.ptr)
+}
+
+export function hookDragEventSetDataLoadParams(event: DragEventInternal, dataLoadParams: unifiedDataChannel.DataLoadParams) {
+  ArkUIAniModule._DragEvent_Set_Data_LoadParams(event.peer!.ptr, dataLoadParams)
+}
+
+export function hookEnableInternalDropAnimation(event: DragEventInternal, configuration: string) {
+  return ArkUIAniModule._DragEvent_Enable_InternalDropAnimation(event.peer!.ptr, configuration)
 }
 
 class StateStyleModifierState extends ModifierState {
@@ -838,20 +847,65 @@ export function hookGaugeIndicator(receiver: ArkGaugeComponent | ArkGaugePeer,
   const gaugePeer: ArkGaugePeer =
     receiver instanceof ArkGaugeComponent ? (receiver as ArkGaugeComponent).getPeer() :
       (receiver as ArkGaugePeer);
-  if (!gaugePeer) {
+  if (!gaugePeer || !gaugePeer.peer || !gaugePeer.peer.ptr) {
     return;
   }
 
   let value_casted: GaugeIndicatorOptions | undefined;
-  if (value === undefined) {
-    value_casted = {
-      icon: undefined,
-      space: undefined
-    }
-  } else if (value === null) {
-    value_casted = undefined;
+  if (value === null) {
+    GaugeExtender.nullIndicator(gaugePeer.peer.ptr);
   } else {
-    value_casted = value as (GaugeIndicatorOptions | undefined)
+    GaugeExtender.setIndicator(gaugePeer.peer.ptr, value);
   }
-  GaugeExtender.setIndicator(gaugePeer.peer.ptr, value_casted)
+}
+
+export function hookGaugeTrackShadow(receiver: ArkGaugeComponent | ArkGaugePeer,
+  value: GaugeShadowOptions | null | undefined): void {
+
+  const gaugePeer: ArkGaugePeer =
+    receiver instanceof ArkGaugeComponent ? (receiver as ArkGaugeComponent).getPeer() :
+      (receiver as ArkGaugePeer);
+  if (!gaugePeer || !gaugePeer.peer || !gaugePeer.peer.ptr) {
+    return;
+  }
+
+  if (value === null) {
+    GaugeExtender.nullTrackShadow(gaugePeer.peer.ptr);
+  } else {
+    GaugeExtender.setTrackShadow(gaugePeer.peer.ptr, value);
+  }
+}
+
+export function hookGaugeDescription(receiver: ArkGaugeComponent | ArkGaugePeer,
+  value: CustomBuilder | null | undefined): void {
+
+  const gaugePeer: ArkGaugePeer =
+    receiver instanceof ArkGaugeComponent ? (receiver as ArkGaugeComponent).getPeer() :
+      (receiver as ArkGaugePeer);
+  if (!gaugePeer || !gaugePeer.peer || !gaugePeer.peer.ptr) {
+    return;
+  }
+
+  if (value === null) {
+    GaugeExtender.nullDescription(gaugePeer.peer.ptr);
+  } else {
+    GaugeExtender.setDescription(gaugePeer.peer.ptr, value)
+  }
+}
+
+export function hookDataPanelTrackShadow(receiver: ArkDataPanelComponent | ArkDataPanelPeer,
+  value: DataPanelShadowOptions | null | undefined): void {
+
+  const dataPanelPeer: ArkDataPanelPeer =
+    receiver instanceof ArkDataPanelComponent ? (receiver as ArkDataPanelComponent).getPeer() :
+      (receiver as ArkDataPanelPeer);
+  if (!dataPanelPeer || !dataPanelPeer.peer || !dataPanelPeer.peer.ptr) {
+    return;
+  }
+
+  if (value === null) {
+    DataPanelExtender.nullTrackShadow(dataPanelPeer.peer.ptr);
+  } else {
+    DataPanelExtender.setTrackShadow(dataPanelPeer.peer.ptr, value);
+  }
 }

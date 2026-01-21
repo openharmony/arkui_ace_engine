@@ -134,10 +134,12 @@ if (is_ohos_standard_system) {
     deps = [
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:flowitem",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:counter",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:calendarpicker",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:gauge",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:hyperlink",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkbox",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:checkboxgroup",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:qrcode",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:rating",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:waterflow",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:columnsplit",
@@ -151,17 +153,25 @@ if (is_ohos_standard_system) {
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:stepperitem",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:radio",
       "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:slider",
+      "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:timepicker",
     ]
+    if (!ace_engine_feature_wearable) { 
+      deps += [
+        "$ace_root/frameworks/bridge/declarative_frontend/ark_component/components:folderstack",
+      ]
+    }
     out_path = get_label_info(
             "$ace_root/frameworks/bridge/declarative_frontend:ark_modifier",
             "root_out_dir")
     sources = [
       "${out_path}/arkui/ace_engine/arkflowitem.abc",
       "${out_path}/arkui/ace_engine/arkcounter.abc",
+      "${out_path}/arkui/ace_engine/arkcalendarpicker.abc",
       "${out_path}/arkui/ace_engine/arkgauge.abc",
       "${out_path}/arkui/ace_engine/arkhyperlink.abc",
       "${out_path}/arkui/ace_engine/arkcheckbox.abc",
       "${out_path}/arkui/ace_engine/arkcheckboxgroup.abc",
+      "${out_path}/arkui/ace_engine/arkqrcode.abc",
       "${out_path}/arkui/ace_engine/arkrating.abc",
       "${out_path}/arkui/ace_engine/arkwaterflow.abc",
       "${out_path}/arkui/ace_engine/arkcolumnsplit.abc",
@@ -175,7 +185,13 @@ if (is_ohos_standard_system) {
       "${out_path}/arkui/ace_engine/arkstepperitem.abc",
       "${out_path}/arkui/ace_engine/arkradio.abc",
       "${out_path}/arkui/ace_engine/arkslider.abc",
+      "${out_path}/arkui/ace_engine/arktimepicker.abc",
     ]
+    if (!ace_engine_feature_wearable) { 
+      sources += [
+        "${out_path}/arkui/ace_engine/arkfolderstack.abc",
+      ]
+    }
 
     # Output path description: 
     # "previewer/common/bin/module" is equivalent to the basic path of globalThis.requireNapi().

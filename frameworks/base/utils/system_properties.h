@@ -762,6 +762,8 @@ public:
 
     static std::string GetDebugInspectorId();
 
+    static bool GetEventBenchMarkEnabled();
+
     static double GetSrollableVelocityScale();
 
     static double GetSrollableFriction();
@@ -889,6 +891,7 @@ private:
     static bool rosenBackendEnabled_;
     static bool windowAnimationEnabled_;
     static bool debugEnabled_;
+    static bool eventBenchMarkEnabled_;
     static std::string configDeviceType_;
     static bool compatibleInputTransEnabled_;
     static float scrollCoefficients_;

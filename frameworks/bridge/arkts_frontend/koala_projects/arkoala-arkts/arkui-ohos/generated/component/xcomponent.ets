@@ -18,6 +18,8 @@
 
 import { SerializerBase, DeserializerBase, Finalizable, runtimeType, RuntimeType, toPeerPtr, KPointer, MaterializedBase, NativeBuffer, nullptr, KInt, KBoolean, KStringPtr, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
 import { ImageAnalyzerConfig_serializer, ImageAnalyzerConfig, ImageAIOptions, ImageAIOptions_serializer } from "./imageCommon"
+import { drawing_Canvas_serializer } from "./../framework/ohos.graphics.drawing"
+import { default as drawing } from "@ohos.graphics.drawing"
 import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
 import { unsafeCast, int32, int64, float32 } from "@koalaui/common"
 import { CallbackTransformer } from "./../CallbackTransformer"
@@ -25,7 +27,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
 import { VoidCallback } from "./units"
-import { AttributeModifier, hookXComponentAttributeModifier, AttributeUpdater, hookSetXComponentOptions, hookXComponentStartImageAnalyzer } from "#handwritten"
+import { extractors, AttributeModifier, hookXComponentAttributeModifier, AttributeUpdater, hookSetXComponentOptions, hookXComponentStartImageAnalyzer } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -85,6 +87,19 @@ export class XComponentController implements MaterializedBase {
     }
     public stopImageAnalyzer(): void {
         this.stopImageAnalyzer_serialize()
+        return
+    }
+    public lockCanvas(): drawing.Canvas | null {
+        return this.lockCanvas_serialize()
+    }
+    public unlockCanvasAndPost(canvas: drawing.Canvas): void {
+        const canvas_casted = canvas as (drawing.Canvas)
+        this.unlockCanvasAndPost_serialize(canvas_casted)
+        return
+    }
+    public setXComponentSurfaceConfig(config: SurfaceConfig): void {
+        const config_casted = config as (SurfaceConfig)
+        this.setXComponentSurfaceConfig_serialize(config_casted)
         return
     }
     private getOnSurfaceCreated(): ((surfaceId: string) => void) {
@@ -149,6 +164,26 @@ export class XComponentController implements MaterializedBase {
     }
     stopImageAnalyzer_serialize(): void {
         ArkUIGeneratedNativeModule._XComponentController_stopImageAnalyzer(this.peer!.ptr)
+    }
+    lockCanvas_serialize(): drawing.Canvas | null {
+        const retval  = ArkUIGeneratedNativeModule._XComponentController_lockCanvas(this.peer!.ptr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : drawing.Canvas | null = null
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = (drawing_Canvas_serializer.read(retvalDeserializer) as drawing.Canvas)
+        }
+        const returnResult : drawing.Canvas | null = buffer
+        return returnResult
+    }
+    unlockCanvasAndPost_serialize(canvas: drawing.Canvas): void {
+        ArkUIGeneratedNativeModule._XComponentController_unlockCanvasAndPost(this.peer!.ptr, extractors.toDrawingCanvasPtr(canvas))
+    }
+    setXComponentSurfaceConfig_serialize(config: SurfaceConfig): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        SurfaceConfig_serializer.write(thisSerializer, config)
+        ArkUIGeneratedNativeModule._XComponentController_setXComponentSurfaceConfig(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
     private getOnSurfaceCreated_serialize(): ((surfaceId: string) => void) {
         const retval  = ArkUIGeneratedNativeModule._XComponentController_getOnSurfaceCreated(this.peer!.ptr)
@@ -293,6 +328,9 @@ export interface SurfaceRect {
 export type NativeXComponentPointer = int64;
 export interface SurfaceRotationOptions {
     lock?: boolean;
+}
+export interface SurfaceConfig {
+    isOpaque?: boolean;
 }
 export interface XComponentOptions {
     type: XComponentType;
@@ -468,6 +506,30 @@ export function XComponentImpl(
     })
 }
 
+export class SurfaceConfig_serializer {
+    public static write(buffer: SerializerBase, value: SurfaceConfig): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForIsOpaque  = value.isOpaque
+        if (valueHolderForIsOpaque !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForIsOpaqueTmpValue  = valueHolderForIsOpaque!
+            valueSerializer.writeBoolean(valueHolderForIsOpaqueTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): SurfaceConfig {
+        let valueDeserializer : DeserializerBase = buffer
+        const isOpaqueTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let isOpaqueTmpBuf : boolean | undefined = undefined
+        if ((isOpaqueTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            isOpaqueTmpBuf = valueDeserializer.readBoolean()
+        }
+        const isOpaqueTmpResult : boolean | undefined = isOpaqueTmpBuf
+        let value : SurfaceConfig = ({isOpaque: isOpaqueTmpResult} as SurfaceConfig)
+        return value
+    }
+}
 export class SurfaceRect_serializer {
     public static write(buffer: SerializerBase, value: SurfaceRect): void {
         let valueSerializer : SerializerBase = buffer

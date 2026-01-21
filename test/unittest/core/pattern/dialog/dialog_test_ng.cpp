@@ -475,7 +475,7 @@ HWTEST_F(DialogPatternTestNg, ToJsonValue, TestSize.Level1)
     pattern->title_ = TITLE;
     pattern->message_ = MESSAGE;
     /**
-     * @tc.steps: step3. test AlertDialog with button color and text color
+     * @tc.steps: step3. test AlertDialog with button color and text color.
      * @tc.expected: json->GetKey() equal to "".
      */
     std::unique_ptr<JsonValue> json = JsonUtil::Create(true);
@@ -583,7 +583,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest001, TestSize.Level1)
 HWTEST_F(DialogPatternTestNg, DialogPatternTest002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. set properties
+     * @tc.steps: step1. set properties.
      */
     const DialogType types[] = { DialogType::ALERT_DIALOG, DialogType::ACTION_SHEET, DialogType::COMMON };
     SetDialogTheme();
@@ -839,7 +839,7 @@ HWTEST_F(DialogPatternTestNg, CustomDialogTestNg006, TestSize.Level1)
 HWTEST_F(DialogPatternTestNg, DialogPatternTest005, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. set properties
+     * @tc.steps: step1. set properties.
      */
     const DialogType types[] = { DialogType::ALERT_DIALOG, DialogType::ACTION_SHEET, DialogType::COMMON };
     SetDialogTheme();
@@ -883,7 +883,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest005, TestSize.Level1)
 HWTEST_F(DialogPatternTestNg, DialogPatternTest006, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. set properties
+     * @tc.steps: step1. set properties.
      */
     const DialogButtonDirection directions[] = { DialogButtonDirection::AUTO, DialogButtonDirection::HORIZONTAL,
         DialogButtonDirection::VERTICAL };
@@ -916,7 +916,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest006, TestSize.Level1)
 HWTEST_F(DialogPatternTestNg, DialogPatternTest007, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. set properties
+     * @tc.steps: step1. set properties.
      * @tc.expected: step1. Create Dialog and get DialogPattern successfully.
      */
     SetDialogTheme();
@@ -932,7 +932,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest007, TestSize.Level1)
     ASSERT_NE(dialogPattern, nullptr);
     auto dialogTheme = AceType::MakeRefPtr<DialogTheme>();
     /**
-     * @tc.steps: step2. Call OnColorConfigurationUpdate
+     * @tc.steps: step2. Call OnColorConfigurationUpdate.
      * @tc.expected: step2. cover branch customStyle == false.
      */
     dialogPattern->OnColorConfigurationUpdate();
@@ -950,7 +950,7 @@ HWTEST_F(DialogPatternTestNg, DialogPatternTest007, TestSize.Level1)
     EXPECT_TRUE(dialogPattern);
     ASSERT_NE(dialogPattern, nullptr);
     /**
-     * @tc.steps: step4. Call OnColorConfigurationUpdate
+     * @tc.steps: step4. Call OnColorConfigurationUpdate.
      * @tc.expected: step4. cover branch menuNode_ is not null.
      */
     dialogPattern->OnColorConfigurationUpdate();
@@ -1284,8 +1284,8 @@ HWTEST_F(DialogPatternTestNg, DialogLayoutAlgorithm003, TestSize.Level1)
     DialogLayoutAlgorithm algorithm;
 
     /**
-     * @tc.steps: step2. execute Distribute
-     * @tc.expected: prop is set as expected
+     * @tc.steps: step2. execute Distribute.
+     * @tc.expected: prop is set as expected.
      */
     float scrollHeight = 10.0f, listHeight = 10.0f, restHeight = 4.0f;
     algorithm.Distribute(scrollHeight, listHeight, restHeight);

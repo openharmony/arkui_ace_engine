@@ -2063,6 +2063,18 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    function getXComponentAttribute(node: FrameNode): XComponentAttribute | undefined {
+        if (node.getType() !== 'XComponent') {
+            return undefined
+        }
+        let xComponentNode = node as XComponentFrameNode
+        if (xComponentNode !== undefined) {
+            return xComponentNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     function createXComponentNodeDefault(context: UIContext): XComponentFrameNode {
         let xcFrameNode = new XComponentFrameNode(context, 'XComponent', (node: FrameNode, type: ModifierType): ArkXComponentNode => {
             let arknode = new ArkXComponentNode();
@@ -2120,6 +2132,66 @@ export namespace typeNode {
         let imageNode = node as ImageFrameNode
         if (imageNode !== undefined) {
             return imageNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    function getRadioAttribute(node: FrameNode): RadioAttribute | undefined {
+        if (node.getType() !== 'Radio') {
+            return undefined
+        }
+        let radioNode = node as RadioFrameNode
+        if (radioNode !== undefined) {
+            return radioNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    function getToggleAttribute(node: FrameNode): ToggleAttribute | undefined {
+        if (node.getType() !== 'Toggle') {
+            return undefined
+        }
+        let toggleNode = node as ToggleFrameNode
+        if (toggleNode !== undefined) {
+            return toggleNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    function getSliderAttribute(node: FrameNode): SliderAttribute | undefined {
+        if (node.getType() !== 'Slider') {
+            return undefined
+        }
+        let sliderNode = node as SliderFrameNode
+        if (sliderNode !== undefined) {
+            return sliderNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    function getButtonAttribute(node: FrameNode): ButtonAttribute | undefined {
+        if (node.getType() !== 'Button') {
+            return undefined
+        }
+        let buttonNode = node as ButtonFrameNode
+        if (buttonNode !== undefined) {
+            return buttonNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
+    function getCheckboxAttribute(node: FrameNode): CheckboxAttribute | undefined {
+        if (node.getType() !== "Checkbox") {
+            return undefined
+        }
+        let checkboxNode = node as CheckboxFrameNode
+        if (checkboxNode !== undefined) {
+            return checkboxNode.attribute
         }
         return undefined
     }

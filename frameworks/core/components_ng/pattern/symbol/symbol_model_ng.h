@@ -63,6 +63,8 @@ public:
     static void ResetShaderStyle(FrameNode* frameNode);
     static void RegisterSymbolFontColorResource(FrameNode* frameNode, const std::string& key,
         std::vector<Color>& symbolColor, const std::vector<std::pair<int32_t, RefPtr<ResourceObject>>>& resObjArr);
+private:
+    static void SetSymbolShadowResObj(FrameNode* frameNode, const SymbolShadow& symbolShadow);
 };
 } // namespace OHOS::Ace::NG
 

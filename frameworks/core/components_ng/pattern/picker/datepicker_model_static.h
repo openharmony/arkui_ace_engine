@@ -21,9 +21,18 @@
 namespace OHOS::Ace::NG {
 class ACE_EXPORT DatePickerModelStatic {
 public:
+    static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
     static void SetOnChange(FrameNode* frameNode, DateChangeEvent&& onChange);
     static void SetChangeEvent(FrameNode* frameNode, DateChangeEvent&& onChange);
     static void SetSelectedDate(FrameNode* frameNode, const int64_t& value);
+private:
+    static RefPtr<FrameNode> CreateStackNode();
+    static RefPtr<FrameNode> CreateColumnNode();
+    static RefPtr<FrameNode> CreateButtonNode();
+    static void CreateDateColumn(const RefPtr<FrameNode>& columnNode, const RefPtr<FrameNode>& dateNode);
+    static void SetupDateOrder(const RefPtr<FrameNode>& dateNode, const std::string& dateOrder,
+        const RefPtr<FrameNode>& yearColumnNode, const RefPtr<FrameNode>& monthColumnNode,
+        const RefPtr<FrameNode>& dayColumnNode, bool hasYearNode, bool hasMonthNode, bool hasDayNode);
 };
 
 } // namespace OHOS::Ace::NG

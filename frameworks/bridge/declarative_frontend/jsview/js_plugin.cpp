@@ -70,6 +70,7 @@ void JSPlugin::Create(const JSCallbackInfo& info)
     auto dataValue = obj->GetProperty("data");
 
     PluginModel::GetInstance()->Create(pluginInfo);
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (dataValue->IsObject()) {
         PluginModel::GetInstance()->SetData(dataValue->ToString());
     }
@@ -77,6 +78,7 @@ void JSPlugin::Create(const JSCallbackInfo& info)
 
 void JSPlugin::JsSize(const JSCallbackInfo& info)
 {
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     if (!info[0]->IsObject()) {
         return;
     }
@@ -97,6 +99,7 @@ void JSPlugin::JsSize(const JSCallbackInfo& info)
 
 void JSPlugin::JsWidth(const JSCallbackInfo& info)
 {
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
@@ -111,6 +114,7 @@ void JSPlugin::JsWidth(const JSCallbackInfo& info)
 
 void JSPlugin::JsHeight(const JSCallbackInfo& info)
 {
+    ACE_UINODE_TRACE(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     CalcDimension value;
     if (!ParseJsDimensionVp(info[0], value)) {
         return;
@@ -128,9 +132,11 @@ void JSPlugin::JsOnComplete(const JSCallbackInfo& info)
 #if defined(PLUGIN_COMPONENT_SUPPORTED)
     if (info[0]->IsFunction()) {
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        ACE_UINODE_TRACE(frameNode);
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto OnComplete = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                                 const std::string& param) {
+            ACE_UINODE_TRACE(node);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Plugin.OnComplete");
             PipelineContext::SetCallBackNode(node);
@@ -146,9 +152,11 @@ void JSPlugin::JsOnError(const JSCallbackInfo& info)
 #if defined(PLUGIN_COMPONENT_SUPPORTED)
     if (info[0]->IsFunction()) {
         auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+        ACE_UINODE_TRACE(frameNode);
         auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[0]));
         auto onError = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = frameNode](
                             const std::string& param) {
+            ACE_UINODE_TRACE(node);
             JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
             ACE_SCORING_EVENT("Plugin.OnComplete");
             std::vector<std::string> keys = { "errcode", "msg" };

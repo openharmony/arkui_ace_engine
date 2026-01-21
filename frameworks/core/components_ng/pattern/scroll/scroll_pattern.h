@@ -41,7 +41,7 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ScrollPattern : public ScrollablePattern {
+class ACE_FORCE_EXPORT ScrollPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ScrollPattern, ScrollablePattern);
 
 public:
@@ -446,6 +446,7 @@ private:
     bool SetScrollProperties(const RefPtr<LayoutWrapper>& dirty, const RefPtr<FrameNode>& host);
     std::string GetScrollSnapPagination() const;
     void OnColorModeChange(uint32_t colorMode) override;
+    void BeforeSyncGeometryProperties(const DirtySwapConfig& config) override;
 
     double currentOffset_ = 0.0;
     double lastOffset_ = 0.0;

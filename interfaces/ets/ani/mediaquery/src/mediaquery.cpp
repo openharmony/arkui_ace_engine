@@ -54,7 +54,7 @@ struct MediaQueryResult {
             return;
         }
         ani_method method;
-        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &method)) {
+        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &method)) {
             return;
         }
         env->Object_New(cls, method, &result, match, media);
@@ -80,7 +80,7 @@ struct MediaQueryResult {
             return;
         }
         ani_method method;
-        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &method)) {
+        if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "zC{std.core.String}:", &method)) {
             return;
         }
         ani_size nr_refs = 16;
@@ -438,7 +438,7 @@ static ani_object JSMatchMediaSync([[maybe_unused]] ani_env *env, ani_string con
     }
 
     ani_method ctor;
-    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", nullptr, &ctor)) {
+    if (ANI_OK != env->Class_FindMethod(cls, "<ctor>", "l:", &ctor)) {
         return mediaquery_obj;
     }
 

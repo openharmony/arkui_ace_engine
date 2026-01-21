@@ -112,6 +112,7 @@ struct _ArkUIRenderNode;
 struct _ArkUIRenderModifier;
 struct _ArkUIRSProperty;
 struct ArkUI_GridLayoutOptions;
+struct ArkUI_AccessibilityProvider;
 struct ArkUI_EditModeOptions {
     ArkUI_Bool enableGatherSelectedItemsAnimation;
 };
@@ -2577,6 +2578,32 @@ struct ArkUISelectedDragPreviewStyle {
     ArkUI_Uint32 color;
 };
 
+struct ArkUIBorderWidthOption {
+    ArkUI_Float32 value;
+    ArkUI_Int32 unit;
+    ArkUI_Bool hasValue;
+};
+
+struct ArkUIBorderRadiusOption {
+    ArkUI_Float32 value;
+    ArkUI_Int32 unit;
+    ArkUI_Bool hasValue;
+};
+
+struct ArkUIBorderRadiusesResObj {
+    void* radiusesResObj;
+    ArkUI_Bool hasValue;
+};
+
+struct CalendarPickerDialogOption {
+    void* dialogProperties;
+    void* settingData;
+    void* dialogEvent;
+    void* dialogCancelEvent;
+    void* dialogLifeCycleEvent;
+    void* buttonInfos;
+};
+
 struct ArkUICommonModifier {
     ArkUI_Int32 (*setOnTouchTestDoneCallback)(ArkUINodeHandle node, void* userData,
         void (*touchTestDone)(
@@ -2890,6 +2917,9 @@ struct ArkUICommonModifier {
     ArkUI_Int32 (*getHoverEffect)(ArkUINodeHandle node);
     void (*setClickEffect)(ArkUINodeHandle node, ArkUI_Int32 level, ArkUI_Float32 scaleValue);
     void (*resetClickEffect)(ArkUINodeHandle node);
+    void (*setEnableClickSoundEffect)(ArkUINodeHandle node, ArkUI_Bool value);
+    void (*resetEnableClickSoundEffect)(ArkUINodeHandle node);
+    ArkUI_Bool (*getEnableClickSoundEffect)(ArkUINodeHandle node);
     void (*setKeyBoardShortCut)(
         ArkUINodeHandle node, ArkUI_CharPtr value, const ArkUI_Int32* keysIntArray, ArkUI_Int32 length);
     void (*resetKeyBoardShortCut)(ArkUINodeHandle node);
@@ -3760,6 +3790,7 @@ struct ArkUIImageModifier {
     void (*setAntiAlias)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetAntiAlias)(ArkUINodeHandle node);
     ArkUI_Int32 (*getAntiAlias)(ArkUINodeHandle node);
+    void (*setImageFillSetByUser)(ArkUINodeHandle node, ArkUI_Bool value);
 };
 
 struct ArkUIColumnModifier {
@@ -4152,6 +4183,8 @@ struct ArkUIStackModifier {
 };
 
 struct ArkUIFolderStackModifier {
+    void (*createFolderStack)(ArkUI_Uint32 size, ArkUI_CharPtr* upperId);
+    ArkUINodeHandle (*createFolderStackFrameNode)(ArkUI_Uint32 nodeId);
     void (*setEnableAnimation)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetEnableAnimation)(ArkUINodeHandle node);
     void (*setAutoHalfFold)(ArkUINodeHandle node, ArkUI_Bool value);
@@ -4160,6 +4193,7 @@ struct ArkUIFolderStackModifier {
     void (*resetOnFolderStateChange)(ArkUINodeHandle node);
     void (*setOnHoverStatusChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnHoverStatusChange)(ArkUINodeHandle node);
+    void (*setJsAlignContent)(ArkUINodeHandle node, ArkUI_Int32 alignment);
 };
 
 struct ArkUINavigatorModifier {
@@ -4250,6 +4284,26 @@ struct ArkUITimepickerModifier {
     void (*resetTimePickerDigitalCrownSensitivity)(ArkUINodeHandle node);
     void (*setTimepickerOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetTimepickerOnChange)(ArkUINodeHandle node);
+    void (*setTimePickerOnChangeHandler)(ArkUINodeHandle node, void* callback);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
+    void (*create)(void* theme, ArkUI_Bool value);
+    void (*setJSTimepickerStart)(void* value);
+    void (*setJSTimepickerEnd)(void* value);
+    void (*setJSSelectedTime)(void* value);
+    void (*setJSChangeEvent)(void* value);
+    void (*setJSSelectedTextStyle)(void* theme, void* textStyle);
+    void (*setJSDisappearTextStyle)(void* theme, void* textStyle);
+    void (*setJSNormalTextStyle)(void* theme, void* textStyle);
+    void (*updateUserSetSelectColor)();
+    void (*hasUserDefinedDisappearFontFamily)(ArkUI_Bool isHas);
+    void (*hasUserDefinedNormalFontFamily)(ArkUI_Bool isHas);
+    void (*hasUserDefinedSelectedFontFamily)(ArkUI_Bool isHas);
+    void (*setBackgroundColorWithResourceObj)(ArkUI_Uint32 color, void* ojb);
+    void (*setBackgroundColor)(ArkUI_Uint32 color);
+    void (*hasUserDefinedOpacity)();
+    void (*setOnEnterSelectedArea)(ArkUINodeHandle node, void* callback);
+    void (*show)(void* pickerDialog, void* settingData, void* cancelEvent, void* acceptEvent, void* changeEvent,
+        void* enterEvent, void* timePickerDialogEvent, void* buttonInfos);
 };
 
 struct ArkUIVideoModifier {
@@ -6697,9 +6751,46 @@ struct ArkUICalendarPickerModifier {
     void (*resetCalendarPickerBorderWidth)(ArkUINodeHandle node);
     void (*setCalendarPickerOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetCalendarPickerOnChange)(ArkUINodeHandle node);
-
+    ArkUINodeHandle (*jsShowCalendarPicker)(
+        void* dialogProperties, void* settingData, void* buttonInfos, void* dialogEvent, void* dialogCancelEvent);
+    void (*jsCreate)(void* param);
+    ArkUINodeHandle (*jsCreateById)(ArkUI_Int32 id);
+    void (*jsCalendarPickerRemoveResObj)(ArkUINodeHandle node, const ArkUI_CharPtr key);
+    void (*jsRemoveResObj)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*jSResetResObj)(ArkUINodeHandle node, ArkUI_CharPtr key);
+    void (*parseJSEdgeAlignResObjArray)(ArkUINodeHandle node, void* edgeAlignResObj);
+    void (*setJSBorderColor)(ArkUINodeHandle node, const uint32_t value);
+    void (*setJSBorderColorProperty)(ArkUINodeHandle node, void *colorProperty);
+    void (*setJSBorderColorResObj)(ArkUINodeHandle node, void *colorResPtr);
+    void (*setJSBorderRadius)(ArkUINodeHandle node, const ArkUI_Float32 value, const ArkUI_Int32 unit);
+    void (*setJSBorderRadiusArray)(ArkUINodeHandle node, const ArkUIBorderRadiusOption *values, ArkUI_Int32 length);
+    void (*setJSBorderRadiusProperty)(ArkUINodeHandle node, void *radiusProperty);
+    void (*setJSBorderRadiusResObj)(ArkUINodeHandle node, void *radiusResPtrs);
+    void (*setJsBorderStyle)(ArkUINodeHandle node,  const ArkUI_Int32 style);
+    void (*setJSBorderStyleArray)(ArkUINodeHandle node, const ArkUI_Int32* styles, ArkUI_Int32 length);
+    void (*setJSBorderWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
+    void (*setJSBorderWidthArray)(ArkUINodeHandle node, const ArkUIBorderWidthOption *values, ArkUI_Int32 length);
+    void (*setJSBorderWidthIsLocalized)(
+        ArkUINodeHandle node, const ArkUIBorderWidthOption* values, ArkUI_Int32 length, bool isLocalized);
+    void (*setJSBorderWidthProperty)(ArkUINodeHandle node, void *widthPropertyPtr);
+    void (*setJSBorderWidthResObj)(ArkUINodeHandle node, void *widthResObj);
+    void (*setJsEdgeAlign)(ArkUINodeHandle node, void* offset, int32_t alignType);
+    void (*setJSHeight)(
+        ArkUINodeHandle node, const ArkUI_Float32 value, const ArkUI_Int32 unit, const std::string calcValue);
+    void (*setJSHeightResObj)(ArkUINodeHandle node, void *heightResPtr);
+    void (*setJSPaddingProperty)(ArkUINodeHandle node, void* padding);
+    void (*setJSTextStyle)(ArkUINodeHandle node, void* textStyleResPtr);
+    void (*updateOnlyLayoutPolicyProperty)(ArkUINodeHandle node, ArkUI_Int32 layoutPolicy,  bool isWidth);
+    void (*setJSRenderStrategy)(ArkUINodeHandle node, ArkUI_Int32 renderStrategy);
+    void (*clearJSWidthOrHeight)(ArkUINodeHandle node, bool isWidth);
+    void (*clearJSHeight)(ArkUINodeHandle node);
+    void (*setCalendarPickerOnChangeExtraParam)(ArkUINodeHandle node, void* extraParam);
 };
 
+struct ArkUICalendarPickerDialogModifier {
+    void (*jsRemoveResObj)(ArkUI_CharPtr key);
+    void (*show)(const CalendarPickerDialogOption* option);
+};
 struct ArkUIRatingModifier {
     void (*setStars)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*setRatingStepSize)(ArkUINodeHandle node, ArkUI_Float32 value);
@@ -7641,16 +7732,18 @@ struct ArkUIDataPanelModifier {
 };
 
 struct ArkUIQRCodeModifier {
+    void (*createModel)(ArkUI_CharPtr value);
     void (*setQRColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setQRColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
     void (*resetQRColor)(ArkUINodeHandle node);
     void (*setQRBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
     void (*setQRBackgroundColorPtr)(ArkUINodeHandle node, ArkUI_Uint32 color, void* colorRawPtr);
-    void (*resetQRBackgroundColor)(ArkUINodeHandle node);
+    void (*resetQRBackgroundColor)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*setContentOpacity)(ArkUINodeHandle node, ArkUI_Float32 opacity);
     void (*setContentOpacityPtr)(ArkUINodeHandle node, ArkUI_Float32 opacity, void* opacityRawPtr);
     void (*resetContentOpacity)(ArkUINodeHandle node);
     void (*setQRValue)(ArkUINodeHandle node, ArkUI_CharPtr value);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 
 struct ArkUIFormComponentModifier {
@@ -7949,6 +8042,7 @@ struct ArkUIFrameNodeModifier {
         ArkUINodeHandle node, ArkUI_Float32 (*position)[2], ArkUI_Float32 (*windowPosition)[2], ArkUI_Bool useVp);
     ArkUI_Int32 (*convertPositionFromWindow)(
         ArkUINodeHandle node, ArkUI_Float32 (*windowPosition)[2], ArkUI_Float32 (*position)[2], ArkUI_Bool useVp);
+    ArkUI_AccessibilityProvider* (*getAccessibilityProvider)(ArkUINodeHandle node);
 };
 
 struct ArkUINodeContentEvent {
@@ -8089,7 +8183,6 @@ struct ArkUIContainerSpanModifier {
         const ArkUI_Int32* units, ArkUI_Int32 length, void* style);
     void (*resetContainerSpanTextBackgroundStyle)(ArkUINodeHandle node);
 };
-
 typedef void (*CustomDrawFunc)(ArkUINodeHandle node, ArkUIDrawingContext context);
 struct ArkUICustomNodeExtModifier {
     ArkUI_Bool (*parseColorString)(ArkUI_CharPtr colorStr, ArkUI_Uint32* colorValue);
@@ -8314,6 +8407,7 @@ struct ArkUINodeModifiers {
     const ArkUIImageAnimatorModifier* (*getImageAnimatorModifier)();
     const ArkUISideBarContainerModifier* (*getSideBarContainerModifier)();
     const ArkUICalendarPickerModifier* (*getCalendarPickerModifier)();
+    const ArkUICalendarPickerDialogModifier* (*getCalendarPickerDialogModifier)();
     const ArkUITextInputModifier* (*getTextInputModifier)();
     const ArkUITabsModifier* (*getTabsModifier)();
     const ArkUIStepperItemModifier* (*getStepperItemModifier)();

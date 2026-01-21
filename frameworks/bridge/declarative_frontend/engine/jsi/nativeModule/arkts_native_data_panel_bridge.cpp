@@ -425,6 +425,7 @@ ArkUINativeModuleValue DataPanelBridge::SetContentModifierBuilder(ArkUIRuntimeCa
     DataPanelModelNG::SetBuilderFunc(frameNode,
         [vm, frameNode, globalObj = std::move(globalObj), containerId](
             DataPanelConfiguration config) -> RefPtr<FrameNode> {
+            LocalScope pandaScope(vm);
             ContainerScope scope(containerId);
             CHECK_NULL_RETURN(Container::Current(), nullptr);
             CHECK_NULL_RETURN(Container::Current()->GetFrontend(), nullptr);
@@ -439,7 +440,6 @@ ArkUINativeModuleValue DataPanelBridge::SetContentModifierBuilder(ArkUIRuntimeCa
             obj->SetNativePointerFieldCount(vm, 1);
             obj->SetNativePointerField(vm, 0, static_cast<void*>(frameNode));
             panda::Local<panda::JSValueRef> params[NUM_2] = { context, obj };
-            LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
             auto jsObject = globalObj.ToLocal();
             auto makeFunc = jsObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "makeContentModifierNode"));

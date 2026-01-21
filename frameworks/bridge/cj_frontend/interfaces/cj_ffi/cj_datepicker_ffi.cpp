@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,6 +18,7 @@
 #include "cj_lambda.h"
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_view_abstract_ffi.h"
 #include "bridge/common/utils/utils.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/pattern/picker/picker_data.h"
 #include "core/components_ng/pattern/picker/picker_theme.h"
 #include "core/components_ng/pattern/picker/picker_type_define.h"
@@ -45,7 +46,16 @@ DatePickerDialogModel* DatePickerDialogModel::GetInstance()
 
 TimePickerModel* TimePickerModel::GetInstance()
 {
-    std::call_once(onceFlag_, []() { timePickerInstance_.reset(new NG::TimePickerModelNG()); });
+    // Dynamically load the independently compiled so library
+    // from frameworks/core/components_ng/pattern/time_picker directory
+    auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("TimePicker");
+    if (module == nullptr) {
+        LOGF("Can't find TimePicker dynamic module");
+        abort();
+    }
+    auto* model = reinterpret_cast<const NG::TimePickerModelNG*>(module->GetModel());
+    CHECK_NULL_RETURN(model, nullptr);
+    std::call_once(onceFlag_, [model]() { timePickerInstance_.reset(const_cast<NG::TimePickerModelNG*>(model)); });
 
     return timePickerInstance_.get();
 }

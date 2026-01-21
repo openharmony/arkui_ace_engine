@@ -632,7 +632,7 @@ void TextFieldPattern::ProcessDefaultStyleAndBehaviorsMultiThread()
     auto dragDropManager = pipeline->GetDragDropManager();
     CHECK_NULL_VOID(dragDropManager);
     dragDropManager->AddTextFieldDragFrameNode(frameNode->GetId(), AceType::WeakClaim(AceType::RawPtr(frameNode)));
-    if (textfieldPaintProperty->HasPaddingByUser()) {
+    if (!textfieldPaintProperty->HasPaddingByUser()) {
         PaddingProperty paddings;
         auto themePadding = textFieldTheme->GetPadding();
         paddings.top = NG::CalcLength(themePadding.Top().ConvertToPx());

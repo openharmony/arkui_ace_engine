@@ -1831,6 +1831,54 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionList005, TestSize.Level1)
 }
 
 /**
+ * @tc.name: FrameNodeGetResponseRegionList006
+ * @tc.desc: Test method GetResponseRegionList
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionList006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    frameNode->isActive_ = true;
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+
+    /**
+     * @tc.steps: step2. call GetResponseRegionList.
+     * @tc.expected: expect GetResponseRegionList is not empty.
+     */
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap;
+    auto toolType = NG::ResponseRegionSupportedTool::FINGER;
+    CalcDimension xDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension yDimen = CalcDimension(0.0, DimensionUnit::VP);
+    CalcDimension widthDimen = CalcDimension(0.0, DimensionUnit::CALC);
+    CalcDimension heightDimen = CalcDimension(0.0, DimensionUnit::CALC);
+    CalcDimensionRect dimenRect(widthDimen, heightDimen, xDimen, yDimen);
+    regionMap[toolType].push_back(dimenRect);
+    auto gestureEventHub = FRAME_NODE2->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    gestureEventHub->SetResponseRegionMap(regionMap);
+
+    DimensionRect responseRect(Dimension(0), Dimension(0), DimensionOffset(OFFSETF));
+    std::vector<DimensionRect> responseRegion;
+    responseRegion.emplace_back(responseRect);
+    gestureEventHub->SetResponseRegion(responseRegion);
+
+    auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
+    frameNode->GetResponseRegionListForTouch(paintRect);
+    
+    auto region = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 0);
+    EXPECT_EQ(region.size(), 1);
+
+    auto region1 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 1);
+    EXPECT_EQ(region1.size(), 1);
+
+    auto region2 = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 2);
+    EXPECT_EQ(region2.size(), 1);
+}
+
+/**
  * @tc.name: FrameNodeTouchToJsonValue03
  * @tc.desc: Test the function TouchToJsonValue
  * @tc.type: FUNC
@@ -1868,4 +1916,34 @@ HWTEST_F(FrameNodeTestNg, FrameNodeTouchToJsonValue03, TestSize.Level1)
     EXPECT_FALSE(jsonValue->GetBool("enabled", false));
 }
 
+/**
+ * @tc.name: FrameNodeSetEnableClickSoundEffect001
+ * @tc.desc: Test method SetEnableClickSoundEffect
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeSetEnableClickSoundEffect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create frameNode.
+     */
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    EXPECT_NE(frameNode->pattern_, nullptr);
+    frameNode->isActive_ = true;
+    frameNode->GetEventHub<EventHub>()->SetEnabled(true);
+
+    /**
+     * @tc.steps: step2. call SetEnableClickSoundEffect.
+     * @tc.expected: expect GetEnableClickSoundEffect is true.
+     */
+    bool enable = frameNode->GetEnableClickSoundEffect();
+    EXPECT_EQ(enable, true);
+
+    frameNode->SetEnableClickSoundEffect(false);
+    enable = frameNode->GetEnableClickSoundEffect();
+    EXPECT_EQ(enable, false);
+
+    frameNode->SetEnableClickSoundEffect(true);
+    enable = frameNode->GetEnableClickSoundEffect();
+    EXPECT_EQ(enable, true);
+}
 } // namespace OHOS::Ace::NG

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -14,10 +14,14 @@
  */
 
 #include "core/components_ng/pattern/picker/datepicker_accessibility_property.h"
+#include "core/interfaces/native/node/view_model.h"
+#include "core/interfaces/native/node/node_timepicker_modifier.h"
 
 #include "base/utils/utils.h"
+#include "core/common/dynamic_module_helper.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/pattern/picker/datepicker_pattern.h"
+#include "core/components_ng/pattern/time_picker/bridge/timepicker_util.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -79,52 +83,9 @@ std::string DatePickerAccessibilityProperty::GetShowTimePickerText() const
 {
     auto frameNode = host_.Upgrade();
     CHECK_NULL_RETURN(frameNode, "");
-    auto parentNode = frameNode->GetParentFrameNode();
-    CHECK_NULL_RETURN(parentNode, "");
-    auto timeNode = AceType::DynamicCast<FrameNode>(parentNode->GetChildAtIndex(1));
-    CHECK_NULL_RETURN(timeNode, "");
-    auto timePickerRowPattern = timeNode->GetPattern<NG::TimePickerRowPattern>();
-    CHECK_NULL_RETURN(timePickerRowPattern, "");
-    auto allChildNode = timePickerRowPattern->GetAllChildNode();
-    auto hourColumn = allChildNode["hour"].Upgrade();
-    CHECK_NULL_RETURN(hourColumn, "");
-    auto hourPickerColumnPattern = hourColumn->GetPattern<TimePickerColumnPattern>();
-    CHECK_NULL_RETURN(hourPickerColumnPattern, "");
-    auto minuteColumn = allChildNode["minute"].Upgrade();
-    CHECK_NULL_RETURN(minuteColumn, "");
-    auto minutePickerColumnPattern = minuteColumn->GetPattern<TimePickerColumnPattern>();
-    CHECK_NULL_RETURN(minutePickerColumnPattern, "");
-
-    std::string result;
-    auto options = timePickerRowPattern->GetOptions();
-    if (options.find(hourColumn) != options.end()) {
-        std::string hour = options[hourColumn][hourPickerColumnPattern->GetCurrentIndex()];
-        result += hour;
-    }
-    if (options.find(minuteColumn) != options.end()) {
-        std::string minute = options[minuteColumn][minutePickerColumnPattern->GetCurrentIndex()];
-        result += COLON + minute;
-    }
-    if (timePickerRowPattern->GetHasSecond()) {
-        auto secondColumn = allChildNode["second"].Upgrade();
-        CHECK_NULL_RETURN(secondColumn, "");
-        auto secondPickerColumnPattern = secondColumn->GetPattern<TimePickerColumnPattern>();
-        CHECK_NULL_RETURN(secondPickerColumnPattern, "");
-        if (options.find(secondColumn) != options.end()) {
-            std::string second = options[secondColumn][secondPickerColumnPattern->GetCurrentIndex()];
-            result += COLON + second;
-        }
-    }
-    if (!timePickerRowPattern->GetHour24()) {
-        auto amPmColumn = allChildNode["amPm"].Upgrade();
-        CHECK_NULL_RETURN(amPmColumn, "");
-        auto amPmPickerColumnPattern = amPmColumn->GetPattern<TimePickerColumnPattern>();
-        CHECK_NULL_RETURN(amPmPickerColumnPattern, "");
-        auto optionIndex = amPmPickerColumnPattern->GetCurrentIndex();
-        if (optionIndex >= 0) {
-            result = timePickerRowPattern->GetOptionValue(amPmColumn, optionIndex).append(" ") + result;
-        }
-    }
+    auto* modifier = NG::NodeModifier::GetTimepickerCustomModifier();
+    CHECK_NULL_RETURN(modifier, "");
+    auto result = modifier->getShowTimePickerText(frameNode);
     return result;
 }
 } // namespace OHOS::Ace::NG

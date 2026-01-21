@@ -1328,6 +1328,9 @@ void FocusHub::OnFocusNode(bool currentHasFocused)
     pipeline->AddAfterLayoutTask([weak = WeakClaim(this)]() {
         auto focusHub = weak.Upgrade();
         CHECK_NULL_VOID(focusHub);
+        ACE_BENCH_MARK_TRACE("OnFocusEvent_end node(%s/%d)",
+            (focusHub->GetFrameNode() ? focusHub->GetFrameNode()->GetTag().c_str() : ""),
+            (focusHub->GetFrameNode() ? focusHub->GetFrameNode()->GetId() : 0));
         auto onFocusCallback = focusHub->GetOnFocusCallback();
         if (onFocusCallback) {
             onFocusCallback();
@@ -1368,6 +1371,9 @@ void FocusHub::OnBlurNode()
     CHECK_NULL_VOID(pipeline);
     pipeline->AddAfterLayoutTask([focusHub = Claim(this)]() {
         CHECK_NULL_VOID(focusHub);
+        ACE_BENCH_MARK_TRACE("OnBlurEvent_end node(%s/%d)",
+            (focusHub->GetFrameNode() ? focusHub->GetFrameNode()->GetTag().c_str() : ""),
+            (focusHub->GetFrameNode() ? focusHub->GetFrameNode()->GetId() : 0));
         auto onBlurCallback = focusHub->GetOnBlurCallback();
         if (onBlurCallback) {
             onBlurCallback();

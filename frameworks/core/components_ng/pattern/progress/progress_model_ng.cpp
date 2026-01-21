@@ -82,6 +82,7 @@ void ProgressModelNG::Create(double min, double value, double cachedValue, doubl
 
     auto pros = frameNode->GetPaintProperty<ProgressPaintProperty>();
     if (pros) {
+        pros->ResetBackgroundColorSetByUser();
         pros->ResetCapsuleStyleFontColorSetByUser();
         pros->ResetCapsuleStyleSetByUser();
         pros->ResetGradientColorSetByUser();
@@ -151,21 +152,22 @@ void ProgressModelNG::ResetGradientColor()
 
 void ProgressModelNG::SetBackgroundColor(const Color& value)
 {
-    auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<ProgressPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->SetUserInitiatedBgColor(true);
     ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColor, value);
 }
 
-void ProgressModelNG::ResetBackgroundColor()
+void ProgressModelNG::SetBackgroundColorByUser(bool value)
 {
     auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<ProgressPattern>();
     CHECK_NULL_VOID(pattern);
-    pattern->SetUserInitiatedBgColor(false);
+    pattern->SetUserInitiatedBgColor(value);
+    ACE_UPDATE_PAINT_PROPERTY(ProgressPaintProperty, BackgroundColorSetByUser, value);
+}
+
+void ProgressModelNG::ResetBackgroundColor()
+{
+    SetBackgroundColorByUser(false);
     ACE_RESET_PAINT_PROPERTY_WITH_FLAG(ProgressPaintProperty, BackgroundColor, PROPERTY_UPDATE_RENDER);
 }
 

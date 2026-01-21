@@ -220,6 +220,10 @@ Ark_Boolean IsRemoteImpl(Ark_DragEvent peer)
     auto isRemote = peer->dragInfo->isRemoteDev();
     return Converter::ArkValue<Ark_Boolean>(isRemote);
 }
+void SetDataLoadParamsImpl(Ark_DragEvent peer,
+                           const Ark_unifiedDataChannel_DataLoadParams* dataLoadParams)
+{
+}
 void EnableInternalDropAnimationImpl(Ark_DragEvent peer,
                                      const Ark_String* configuration)
 {
@@ -318,6 +322,7 @@ const GENERATED_ArkUIDragEventAccessor* GetDragEventAccessor()
         DragEventAccessor::GetDisplayIdImpl,
         DragEventAccessor::GetDragSourceImpl,
         DragEventAccessor::IsRemoteImpl,
+        DragEventAccessor::SetDataLoadParamsImpl,
         DragEventAccessor::ExecuteDropAnimationImpl,
         DragEventAccessor::EnableInternalDropAnimationImpl,
         DragEventAccessor::GetGlobalDisplayXImpl,

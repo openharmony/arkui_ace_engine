@@ -49,8 +49,20 @@ arkui_modules = [
   "stepperitem",
   "radio",
   "slider",
+  "timepicker",
+  "calendarpicker",
   "hyperlink",
 ]
+
+if (qrcodegen_support) {
+    arkui_modules += [ "qrcode" ]
+}
+
+if (!ace_engine_feature_wearable) {
+  arkui_modules += [
+    "folderstack",
+  ]
+}
 
 module_targets = []
 

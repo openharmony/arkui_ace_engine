@@ -45,7 +45,10 @@ if (is_arkui_x) {
 }
 
 if (!is_arkui_x) {
-  common_napi_libs += [ "arkui/container_utils" ]
+  common_napi_libs += [
+    "arkui/container_utils",
+    "arkui/color_sampler",
+  ]
 }
 
 template("ace_napi_lib") {

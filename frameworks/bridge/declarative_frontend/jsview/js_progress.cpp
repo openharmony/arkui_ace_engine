@@ -145,6 +145,10 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
     NG::Gradient gradient;
     bool gradientColorByUser = true;
     RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+
+    if (SystemProperties::ConfigChangePerform()) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::COLOR, nullptr);
+    }
     if (ConvertGradientColor(info[0], gradient)) {
         ProgressModel::GetInstance()->SetGradientColor(gradient);
     } else {
@@ -156,11 +160,9 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
                                                                  : theme->GetTrackParseFailedSelectedColor();
             if (Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY_THREE)) {
                 endColor = (g_progressType == ProgressType::RING || g_progressType == ProgressType::SCALE)
-                               ? theme->GetRingProgressEndSideColor()
-                               : colorVal;
+                    ? theme->GetRingProgressEndSideColor() : colorVal;
                 beginColor = (g_progressType == ProgressType::RING || g_progressType == ProgressType::SCALE)
-                                 ? theme->GetRingProgressBeginSideColor()
-                                 : colorVal;
+                    ? theme->GetRingProgressBeginSideColor() : colorVal;
             } else {
                 endColor = theme->GetRingProgressEndSideColor();
                 beginColor = theme->GetRingProgressBeginSideColor();
@@ -191,6 +193,26 @@ void JSProgress::SetColor(const JSCallbackInfo& info)
 
 void JSProgress::SetCircularStyle(const JSCallbackInfo& info)
 {
+    if (SystemProperties::ConfigChangePerform()) {
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::SmoothEffect, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::LSStrokeWidth, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::LSSweepingEffect, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::LSStrokeRadius, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::RingStrokeWidth, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::RingShadow, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::RingStatus, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::RingSweepingEffect, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::CapsuleBorderWidth, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::CapsuleBorderColor, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::CapsuleSweepingEffect, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::ShowDefaultPercentage, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::Text, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::FontSize, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::FontColor, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::FontWeight, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::PSStrokeWidth, nullptr);
+        ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::PSScaleWidth, nullptr);
+    }
     if (!info[0]->IsObject()) {
         return;
     }
@@ -341,6 +363,7 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
     bool state = CheckColor(info[0], colorVal, V2::PROGRESS_ETS_TAG, V2::ATTRS_COMMON_BACKGROUND_COLOR, bgColorResObj);
     if (SystemProperties::ConfigChangePerform()) {
         ProgressModel::GetInstance()->CreateWithResourceObj(JsProgressResourceType::BackgroundColor, bgColorResObj);
+        ProgressModel::GetInstance()->SetBackgroundColorByUser(state);
     }
     if (!state) {
         RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
@@ -349,7 +372,6 @@ void JSProgress::JsBackgroundColor(const JSCallbackInfo& info)
                    : (g_progressType == ProgressType::RING)  ? theme->GetRingProgressParseFailedBgColor()
                                                              : theme->GetTrackParseFailedBgColor();
     }
-
     ProgressModel::GetInstance()->SetBackgroundColor(colorVal);
 }
 

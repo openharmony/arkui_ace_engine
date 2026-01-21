@@ -266,5 +266,19 @@ HWTEST_F(ScrollBarOverlayTestNg, StartOpacityAnimation005, TestSize.Level1)
     scrollBarOverlayModifier.StartOpacityAnimation(opacityAnimationType);
     EXPECT_NE(scrollBarOverlayModifier.opacityAnimatingType_, OpacityAnimationType::NONE);
 }
+
+/**
+ * @tc.name: AdjustOffset
+ * @tc.desc: Test StartOpacityAnimation
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollBarOverlayTestNg, AdjustOffset, TestSize.Level1)
+{
+    Offset offset(10.0, 10.0);
+    ScrollBarOverlayModifier scrollBarOverlayModifier;
+    scrollBarOverlayModifier.SetAdjustOffset(offset);
+    Offset offsetGet =  scrollBarOverlayModifier.GetAdjustOffset();
+    EXPECT_EQ(offset, offsetGet);
+}
 } // namespace OHOS::Ace::NG
 

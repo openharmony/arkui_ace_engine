@@ -259,7 +259,7 @@ class ObservedUtil {
           if (!Utils.isNull(sourceProto)) {
             // second get prototype for source target
             const sourceTarget = Object.getPrototypeOf(sourceProto);
-            className = sourceTarget ? sourceProto.constructor.name : '';
+            className = sourceTarget ? sourceTarget.constructor.name : '';
           }
           decoratorInfos = this.getV1TrackDecorator(proSubs, decoratorInfos, className);
         } else {

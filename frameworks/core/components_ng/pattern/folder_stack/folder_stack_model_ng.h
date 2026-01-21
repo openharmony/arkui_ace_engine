@@ -21,6 +21,9 @@
 #include "core/components_ng/pattern/folder_stack/folder_stack_model.h"
 
 namespace OHOS::Ace::NG {
+const char FOLDER_STACK_ETS_TAG[] = "Folder";
+const char HOVER_STACK_ETS_TAG[] = "Hover";
+const char CONTROL_PARTS_STACK_ETS_TAG[] = "ControlParts";
 class ACE_EXPORT FolderStackModelNG : public FolderStackModel {
 public:
     void Create(const std::vector<std::string>& itemId) override;
@@ -35,6 +38,7 @@ public:
     static void SetOnHoverStatusChange(
         FrameNode* frameNode, std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange);
     void SetOnHoverStatusChange(std::function<void(const NG::FolderEventInfo& folderEventInfo)>&& onChange) override;
+    static void SetAlignment(FrameNode* frameNode, Alignment alignment);
 
 private:
     void Create() override;

@@ -14,11 +14,13 @@
 import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("geometry_transition_test_ng") {
+  module_name = "Animation-GeometryTransition"
   type = "new"
   sources = [ "geometry_transition_test_ng.cpp" ]
 }
 
 ace_unittest("callback_thread_wrapper_test") {
+  module_name = "ScrollingSet-Refresh"
   type = "new"
   sources = [ "callback_thread_wrapper_test.cpp" ]
 }

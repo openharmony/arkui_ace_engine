@@ -59,6 +59,7 @@ Ark_NativePointer ConstructImpl(Ark_Int32 id,
                                 Ark_Int32 flags)
 {
 #ifdef PLUGIN_COMPONENT_SUPPORTED
+    ACE_UINODE_TRACE(id);
     auto frameNode = PluginModelStatic::CreateFrameNode(id);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
@@ -76,6 +77,7 @@ void SetPluginComponentOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     CHECK_NULL_VOID(options);
+    ACE_UINODE_TRACE(frameNode);
 
     auto optInfoData = Converter::OptConvert<PluginComponentOptions>(*options);
     PluginModelStatic::SetRequestPluginInfo(frameNode, optInfoData ? optInfoData->requestPluginInfo : std::nullopt);
@@ -90,12 +92,15 @@ void SetOnCompleteImpl(Ark_NativePointer node,
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         PluginModelStatic::SetOnComplete(frameNode, nullptr);
         return;
     }
-    auto onComplete = [arkCallback = CallbackHelper(*optValue)](const std::string& param) -> void {
+    auto onComplete = [arkCallback = CallbackHelper(*optValue), node = AceType::WeakClaim(frameNode)](
+        const std::string& param) -> void {
+        ACE_UINODE_TRACE(node);
         arkCallback.Invoke();
     };
     PluginModelStatic::SetOnComplete(frameNode, std::move(onComplete));
@@ -107,12 +112,15 @@ void SetOnErrorImpl(Ark_NativePointer node,
 #ifdef PLUGIN_COMPONENT_SUPPORTED
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
+    ACE_UINODE_TRACE(frameNode);
     auto optValue = Converter::GetOptPtr(value);
     if (!optValue) {
         PluginModelStatic::SetOnError(frameNode, nullptr);
         return;
     }
-    auto onError = [arkCallback = CallbackHelper(*optValue)](const std::string& param) -> void {
+    auto onError = [arkCallback = CallbackHelper(*optValue), node = AceType::WeakClaim(frameNode)](
+        const std::string& param) -> void {
+        ACE_UINODE_TRACE(node);
         auto json = JsonUtil::ParseJsonString(param);
         Ark_PluginErrorData errorData;
         errorData.errcode = Converter::ArkValue<Ark_Int32>(StringUtils::StringToInt(json->GetString("errcode")));

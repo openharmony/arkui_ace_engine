@@ -56,6 +56,7 @@
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/exposure_processor.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/common/resource/resource_parse_utils.h"
 #include "core/components_ng/base/extension_handler.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
@@ -573,6 +574,8 @@ FrameNode::~FrameNode()
 
 void FrameNode::CreateEventHubInner()
 {
+    auto nodeId = GetId();
+    ACE_UINODE_TRACE(nodeId);
     if (eventHub_ || !pattern_) {
         return;
     }
@@ -1663,20 +1666,10 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
         cb(configurationChange);
     }
     if (configurationChange.languageUpdate) {
-        pattern_->OnLanguageConfigurationUpdate();
-        MarkModifyDone();
-        MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        HandleLanguageConfigurationUpdate(configurationChange);
     }
     if (configurationChange.colorModeUpdate) {
-        pattern_->OnColorConfigurationUpdate();
-        if (colorModeUpdateCallback_) {
-            // copy it first in case of changing colorModeUpdateCallback_ in the callback
-            auto cb = colorModeUpdateCallback_;
-            cb();
-        }
-        FireColorNDKCallback();
-        MarkModifyDone();
-        MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+        HandleColorModeConfigurationUpdate(configurationChange);
     }
     if (configurationChange.directionUpdate) {
         pattern_->OnDirectionConfigurationUpdate();
@@ -1709,6 +1702,34 @@ void FrameNode::OnConfigurationUpdate(const ConfigurationChange& configurationCh
     }
     FireFontNDKCallback(configurationChange);
     OnPropertyChangeMeasure();
+}
+
+void FrameNode::HandleLanguageConfigurationUpdate(const ConfigurationChange& configurationChange)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->OnLanguageConfigurationUpdate();
+    MarkModifyDone();
+    MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+    if (cornerMarkNode_) {
+        CornerMark::UpdateCornerMarkNodeLanguage(Claim(this));
+    }
+}
+
+void FrameNode::HandleColorModeConfigurationUpdate(const ConfigurationChange& configurationChange)
+{
+    CHECK_NULL_VOID(pattern_);
+    pattern_->OnColorConfigurationUpdate();
+    if (colorModeUpdateCallback_) {
+        // copy it first in case of changing colorModeUpdateCallback_ in the callback
+        auto cb = colorModeUpdateCallback_;
+        cb();
+    }
+    FireColorNDKCallback();
+    MarkModifyDone();
+    MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    if (cornerMarkNode_) {
+        CornerMark::UpdateCornerMarkNodeColorMode(Claim(this));
+    }
 }
 
 void FrameNode::OnPropertyChangeMeasure() const
@@ -1967,6 +1988,8 @@ void FrameNode::SetOnAreaChangeCallback(OnAreaChangedFunc&& callback)
 
 void FrameNode::TriggerOnAreaChangeCallback(uint64_t nanoTimestamp, int32_t areaChangeMinDepth)
 {
+    ACE_BENCH_MARK_TRACE("TriggerOnAreaChange_node(%s/%d/%s/%s) active:%d isOnMainTree:%d", tag_.c_str(), nodeId_,
+        std::to_string(accessibilityId_).c_str(), GetInspectorId().value_or("").c_str(), isActive_, IsOnMainTree());
     if (!IsActive()) {
         if (IsDebugInspectorId()) {
             TAG_LOGD(AceLogTag::ACE_UIEVENT, "OnAreaChange Node(%{public}s/%{public}d) is inActive", tag_.c_str(),
@@ -2193,6 +2216,9 @@ void FrameNode::TriggerVisibleAreaChangeCallback(
     ProcessThrottledVisibleCallback(forceDisappear);
     auto hasInnerCallback = eventHub_->HasVisibleAreaCallback(false);
     auto hasUserCallback = eventHub_->HasVisibleAreaCallback(true);
+    ACE_BENCH_MARK_TRACE("TriggerVisibleAreaChange_node(%s/%d/%s/%s) [%d/%d/%d/%d]", tag_.c_str(), nodeId_,
+        std::to_string(accessibilityId_).c_str(), GetInspectorId().value_or("").c_str(), isActive_, IsOnMainTree(),
+        hasInnerCallback, hasUserCallback);
     if (!hasInnerCallback && !hasUserCallback) {
         ClearCachedIsFrameDisappear();
         return;
@@ -3142,6 +3168,9 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
 
 bool FrameNode::IsNeedRequestParentMeasure() const
 {
+    if (pattern_->ForceRequestParentMeasure()) {
+        return true;
+    }
     auto layoutFlag = layoutProperty_->GetPropertyChangeFlag();
     if (layoutFlag == PROPERTY_UPDATE_BY_CHILD_REQUEST) {
         const auto& calcLayoutConstraint = layoutProperty_->GetCalcLayoutConstraint();
@@ -3700,13 +3729,15 @@ void FrameNode::ParseRegionAndAdd(const CalcDimensionRect& region, const ScalePr
     auto y = ParseDimensionToPx(region.GetY(), scaleProperty, rect.Height());
     auto width = ParseDimensionToPx(region.GetWidth(), scaleProperty, rect.Width());
     auto height = ParseDimensionToPx(region.GetHeight(), scaleProperty, rect.Height());
-    if (!x.has_value() || !y.has_value() || !width.has_value() || !height.has_value()) {
+    if (!x.has_value() || !y.has_value()) {
         responseRegionResult.emplace_back(rect);
         return;
     }
-    if (width.value() < 0.0 || height.value() < 0.0) {
-        responseRegionResult.emplace_back(rect);
-        return;
+    if (!width.has_value() || LessOrEqual(width.value(), 0.0)) {
+        width = rect.Width();
+    }
+    if (!height.has_value() || LessOrEqual(height.value(), 0.0)) {
+        height = rect.Height();
     }
     RectF regionFloat(
         rect.GetOffset().GetX() + x.value(), rect.GetOffset().GetY() + y.value(), width.value(), height.value());
@@ -4097,6 +4128,8 @@ void FrameNode::OnHoverWithHightLight(bool isHover) const
 
 RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub()
 {
+    auto nodeId = GetId();
+    ACE_UINODE_TRACE(nodeId);
     if (focusHub_) {
         return focusHub_;
     }
@@ -4111,6 +4144,8 @@ RefPtr<FocusHub> FrameNode::GetOrCreateFocusHub()
 
 const RefPtr<DragDropRelatedConfigurations>& FrameNode::GetOrCreateDragDropRelatedConfigurations()
 {
+    auto nodeId = GetId();
+    ACE_UINODE_TRACE(nodeId);
     if (dragDropRelatedConfigurations_) {
         return dragDropRelatedConfigurations_;
     }

@@ -50,14 +50,18 @@ public:
     void SetEffect(bool isCloseEffect) override;
     void SetValueColors(const std::vector<Gradient>& valueColors) override;
     void SetTrackBackground(const Color& trackBackgroundColor) override;
+    void ResetTrackBackground() override;
     void SetStrokeWidth(const Dimension& strokeWidth) override;
+    void ResetStrokeWidth() override;
     void SetShadowOption(const DataPanelShadow& shadowOption) override;
     void CreateWithResourceObj(DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj) override;
     void SetValueColorsSetByUser(bool value) override;
 
     static void SetCloseEffect(FrameNode* frameNode, bool isClose);
     static void SetTrackBackground(FrameNode* frameNode, const Color& trackBackgroundColor);
+    static void ResetTrackBackground(FrameNode* frameNode);
     static void SetStrokeWidth(FrameNode* frameNode, const Dimension& strokeWidth);
+    static void ResetStrokeWidth(FrameNode* frameNode);
     static void SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption);
     static void SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors);
     static void SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCallback&& jsMake);

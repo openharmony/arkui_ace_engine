@@ -811,7 +811,9 @@ auto g_bindMenuOptionsParam = [](
     menuParam.effectOption = OptConvert<EffectOption>(menuOptions.backgroundEffect);
     menuParam.blurStyleOption = OptConvert<BlurStyleOption>(menuOptions.backgroundBlurStyleOptions);
     menuParam.keyboardAvoidMode = OptConvert<MenuKeyboardAvoidMode>(menuOptions.keyboardAvoidMode);
-    menuParam.minKeyboardAvoidDistance = OptConvert<Dimension>(menuOptions.minKeyboardAvoidDistance);
+    auto convValue = OptConvert<Dimension>(menuOptions.minKeyboardAvoidDistance);
+    Validator::ValidateNonNegative(convValue);
+    menuParam.minKeyboardAvoidDistance = convValue;
 };
 
 auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,
@@ -4372,6 +4374,10 @@ void SetAspectRatioImpl(Ark_NativePointer node,
         return;
     }
     auto result = Converter::OptConvertPtr<float>(value);
+    if (!result.has_value()) {
+        ViewAbstractModelStatic::ResetAspectRatio(frameNode);
+        return;
+    }
     if (result) {
         auto ratio = result.value();
         if (ratio <= 0.0) {
@@ -4403,6 +4409,18 @@ void SetClickEffectImpl(Ark_NativePointer node,
                          : DEFAULT_SCALE_LIGHT;
     }
     ViewAbstractModelStatic::SetClickEffectLevel(frameNode, level, scaleValue);
+}
+void SetEnableClickSoundEffectImpl(Ark_NativePointer node,
+                                   const Opt_Boolean* value)
+{
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto convValue = Converter::OptConvertPtr<bool>(value);
+    if (!convValue) {
+        frameNode->SetEnableClickSoundEffect(true);
+        return;
+    }
+    frameNode->SetEnableClickSoundEffect(*convValue);
 }
 void SetOnDragStartImpl(Ark_NativePointer node,
                         const Opt_Type_CommonMethod_onDragStart* value)
@@ -6009,13 +6027,12 @@ void CallMenuOnModifyDone(RefPtr<UINode> uiNode)
 }
 void BindMenuBase(Ark_NativePointer node,
     const Opt_Boolean *isShow,
-    const bool setShow,
     const Opt_Union_Array_MenuElement_CustomBuilder* content,
-    const Opt_MenuOptions* options)
+    const Opt_MenuOptions* options,
+    MenuParam& menuParam)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    MenuParam menuParam;
     menuParam.placement = Placement::BOTTOM_LEFT;
     menuParam.isShowInSubWindow = false;
     auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
@@ -6023,7 +6040,6 @@ void BindMenuBase(Ark_NativePointer node,
     auto theme = pipeline->GetTheme<SelectTheme>();
     CHECK_NULL_VOID(theme);
     menuParam.isShowInSubWindow = theme->GetExpandDisplay();
-    menuParam.setShow = setShow;
     menuParam.isShow = Converter::OptConvertPtr<bool>(isShow).value_or(menuParam.isShow);
     auto menuOptions = Converter::OptConvertPtr<Ark_MenuOptions>(options);
     if (menuOptions) {
@@ -6056,15 +6072,25 @@ void SetBindMenu0Impl(Ark_NativePointer node,
                       const Opt_Union_Array_MenuElement_CustomBuilder* content,
                       const Opt_MenuOptions* options)
 {
+    MenuParam menuParam;
     auto show = ArkValue<Opt_Boolean>(false);
-    BindMenuBase(node, &show, false, content, options);
+    menuParam.setShow = false;
+    BindMenuBase(node, &show, content, options, menuParam);
 }
 void SetBindMenu1Impl(Ark_NativePointer node,
-                      const Opt_Boolean* isShow,
+                      const Opt_Union_Boolean_Bindable* isShow,
                       const Opt_Union_Array_MenuElement_CustomBuilder* content,
                       const Opt_MenuOptions* options)
 {
-    BindMenuBase(node, isShow, true, content, options);
+    MenuParam menuParam;
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::function<void(const std::string&)> changeEvent;
+    auto isShowValue = ProcessBindableIsShow(frameNode, isShow, changeEvent);
+    auto isShown = ArkValue<Opt_Boolean>(isShowValue.value_or(false));
+    menuParam.setShow = true;
+    menuParam.onStateChange = std::move(changeEvent);
+    BindMenuBase(node, &isShown, content, options, menuParam);
 }
 void BindContextMenuToSelectableItems(Ark_NativePointer node)
 {
@@ -6245,14 +6271,19 @@ void SetBindContextMenuWithResponseImpl(Ark_NativePointer node,
     BindContextMenuToSelectableItems(node);
 }
 void SetBindContextMenu1Impl(Ark_NativePointer node,
-                             const Opt_Boolean* isShown,
+                             const Opt_Union_Boolean_Bindable* isShow,
                              const Opt_CustomNodeBuilder* content,
                              const Opt_ContextMenuOptions* options)
 {
     MenuParam menuParam;
     menuParam.contextMenuRegisterType = NG::ContextMenuRegisterType::CUSTOM_TYPE;
-    menuParam.isShow = Converter::OptConvertPtr<bool>(isShown).value_or(menuParam.isShow);
+    auto frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_VOID(frameNode);
+    std::function<void(const std::string&)> changeEvent;
+    auto isShowValue = ProcessBindableIsShow(frameNode, isShow, changeEvent);
+    menuParam.isShow = isShowValue.value_or(menuParam.isShow);
     menuParam.setShow = true;
+    menuParam.onStateChange = std::move(changeEvent);
     auto type = Converter::ArkValue<Opt_ResponseType>(ARK_RESPONSE_TYPE_LONG_PRESS);
     BindContextMenuBase(node, content, &type, options, menuParam);
     BindContextMenuToSelectableItems(node);
@@ -6750,6 +6781,7 @@ const GENERATED_ArkUICommonMethodModifier* GetCommonMethodModifier()
         CommonMethodModifier::SetAlignRulesImpl,
         CommonMethodModifier::SetAspectRatioImpl,
         CommonMethodModifier::SetClickEffectImpl,
+        CommonMethodModifier::SetEnableClickSoundEffectImpl,
         CommonMethodModifier::SetOnDragStartImpl,
         CommonMethodModifier::SetOnDragEnterImpl,
         CommonMethodModifier::SetOnDragMoveImpl,

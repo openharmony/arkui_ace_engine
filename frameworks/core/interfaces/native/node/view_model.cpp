@@ -16,12 +16,13 @@
 #include "core/interfaces/native/node/view_model.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
+#include "core/interfaces/native/node/calendar_picker_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
-
 #include "core/interfaces/native/node/flow_item_modifier.h"
 #include "core/interfaces/native/node/water_flow_modifier.h"
-
+#include "core/interfaces/native/node/node_timepicker_modifier.h"
 #include "core/interfaces/native/node/radio_modifier.h"
+#include "core/interfaces/native/node/qrcode_modifier.h"
 
 #include "base/memory/ace_type.h"
 #include "base/utils/multi_thread.h"
@@ -89,7 +90,6 @@
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
 #include "core/components_ng/pattern/image_animator/image_animator_model_ng.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_component/ui_extension_adapter.h"
-
 namespace OHOS::Ace::NG::ViewModel {
 
 ArkUIAPICallbackMethod* callbacks = nullptr;
@@ -307,6 +307,7 @@ void* createComponentRootNode(ArkUI_Int32 nodeId)
 #ifdef XCOMPONENT_SUPPORTED
 void* createXComponentNode(ArkUI_Int32 nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, "", XComponentType::SURFACE, "");
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -314,6 +315,7 @@ void* createXComponentNode(ArkUI_Int32 nodeId)
 
 void* createXComponentTextureNode(ArkUI_Int32 nodeId)
 {
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = XComponentModelNG::CreateFrameNode(nodeId, "", XComponentType::TEXTURE, "");
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -321,6 +323,7 @@ void* createXComponentTextureNode(ArkUI_Int32 nodeId)
 
 void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& params)
 {
+    ACE_UINODE_TRACE(nodeId);
     ArkUI_XComponent_Params* xcParams = (ArkUI_XComponent_Params*)(&params);
     CHECK_NULL_RETURN(xcParams, nullptr);
     auto frameNode = XComponentModelNG::CreateTypeNode(nodeId, xcParams);
@@ -333,6 +336,7 @@ void* createXComponentNodeWithParams(ArkUI_Int32 nodeId, const ArkUI_Params& par
 void* createEmbeddedComponent(ArkUI_Int32 nodeId)
 {
     RefPtr<OHOS::Ace::WantWrap> want = nullptr;
+    ACE_UINODE_TRACE(nodeId);
     auto frameNode = UIExtensionAdapter::CreateEmbeddedComponent(nodeId, want);
     if (frameNode) {
         frameNode->IncRefCount();
@@ -379,7 +383,9 @@ void* createDatePickerNode(ArkUI_Int32 nodeId)
 
 void* createTimePickerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = TimePickerModelNG::CreateFrameNode(nodeId);
+    auto* modifier = NG::NodeModifier::GetTimepickerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->createFrameNode(nodeId)));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -395,7 +401,9 @@ void* createTextPickerNode(ArkUI_Int32 nodeId)
 
 void* createCalendarPickerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = CalendarPickerModelNG::CreateFrameNode(nodeId);
+    auto modifier = NodeModifier::GetCalendarPickerModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    auto frameNode = AceType::Claim(reinterpret_cast<FrameNode*>(modifier->jsCreateById(nodeId)));
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
     return AceType::RawPtr(frameNode);
@@ -586,10 +594,13 @@ void* createCustomSpanNode(ArkUI_Int32 nodeId)
 #ifdef QRCODEGEN_SUPPORT
 void* createQRcodeNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = QRCodeModelNG::CreateFrameNode(nodeId);
+    auto arkUIQRCodeModifier = NG::NodeModifier::GetQRCodeModifier();
+    CHECK_NULL_RETURN(arkUIQRCodeModifier->createFrameNode, nullptr);
+    auto arkUINodeHandle = arkUIQRCodeModifier->createFrameNode(nodeId);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 #endif
 

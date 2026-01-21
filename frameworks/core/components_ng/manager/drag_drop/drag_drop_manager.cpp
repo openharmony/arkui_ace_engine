@@ -1755,6 +1755,7 @@ void DragDropManager::onDragCancel()
 void DragDropManager::FireOnDragEventWithDragType(const RefPtr<EventHub>& eventHub, DragEventType type,
     RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams)
 {
+    ACE_BENCH_MARK_TRACE("onDragEnter/onDragMove/onDragLeave_end");
     switch (type) {
         case DragEventType::ENTER: {
             eventHub->FireCustomerOnDragFunc(DragFuncType::DRAG_ENTER, event, extraParams);
@@ -2418,7 +2419,11 @@ Offset DragDropManager::CalcContentTrationOffset(
 {
     auto originPoint = info.originOffset;
     auto scalX = info.dragPreviewRect.Width() / info.originPreviewRect.Width() * info.scale;
-    originPoint.SetX(originPoint.GetX() - pixelMapOffset_.GetX() + info.originPreviewRect.Width() * (1 - scalX));
+    if (AceApplicationInfo::GetInstance().IsRightToLeft()) {
+        originPoint.SetX(originPoint.GetX() - pixelMapOffset_.GetX());
+    } else {
+        originPoint.SetX(originPoint.GetX() - pixelMapOffset_.GetX() + info.originPreviewRect.Width() * (1 - scalX));
+    }
     originPoint.SetY(originPoint.GetY() - pixelMapOffset_.GetY());
     auto touchOffset = DragDropManager::GetTouchOffsetRelativeToSubwindow(Container::CurrentId(), x, y);
     Offset newOffset { touchOffset.GetX() - originPoint.GetX(), touchOffset.GetY() - originPoint.GetY() };

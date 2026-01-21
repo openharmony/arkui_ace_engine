@@ -39,7 +39,9 @@ public:
     virtual void SetEffect(bool isCloseEffect) = 0;
     virtual void SetValueColors(const std::vector<NG::Gradient>& valueColors) = 0;
     virtual void SetTrackBackground(const Color& trackBackgroundColor) = 0;
+    virtual void ResetTrackBackground() = 0;
     virtual void SetStrokeWidth(const Dimension& strokeWidth) = 0;
+    virtual void ResetStrokeWidth() = 0;
     virtual void SetShadowOption(const OHOS::Ace::NG::DataPanelShadow& shadowOption) = 0;
     virtual void CreateWithResourceObj(DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetValueColorsSetByUser(bool value) = 0;

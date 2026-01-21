@@ -113,6 +113,7 @@ enum class InputOperation {
     SET_PREVIEW_TEXT,
     SET_PREVIEW_FINISH,
     INPUT,
+    PERFORM_ACTION,
 };
 
 struct PasswordModeStyle {
@@ -219,6 +220,11 @@ struct InputCommandInfo {
     int32_t insertOffset;
     std::u16string insertValue;
     InputReason reason;
+};
+
+struct PerformActionInfo {
+    TextInputAction action;
+    bool forceCloseKeyboard;
 };
 
 struct TouchAndMoveCaretState {
@@ -520,6 +526,7 @@ public:
 
     FocusPattern GetFocusPattern() const override;
     FocusPattern GetFocusPatternMultiThread() const;
+    virtual void PerformActionOperation(PerformActionInfo info);
     void PerformAction(TextInputAction action, bool forceCloseKeyboard = false) override;
     void UpdateEditingValue(const std::shared_ptr<TextEditingValue>& value, bool needFireChangeEvent = true) override;
     void UpdateInputFilterErrorText(const std::u16string& errorText) override;
@@ -1849,6 +1856,9 @@ public:
         CHECK_NULL_RETURN(theme, false);
         return theme->GetHoverAndPressBgColorEnabled();
     }
+
+    bool IsPreviewTextInputting() const;
+
 protected:
     virtual void InitDragEvent();
     void OnAttachToMainTree() override;
@@ -2351,6 +2361,7 @@ private:
     std::queue<InsertCommandInfo> insertCommands_;
     std::queue<InputCommandInfo> inputCommands_;
     std::queue<InputOperation> inputOperations_;
+    std::queue<PerformActionInfo> performActionOperations_;
     bool leftMouseCanMove_ = false;
     bool isLongPress_ = false;
     bool isEdit_ = false;

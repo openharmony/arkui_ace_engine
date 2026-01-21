@@ -567,6 +567,7 @@ constexpr double ZOOMIN_PUBLIC_ERRAND = 0.4444;
 constexpr int32_t ZOOM_CONVERT_NUM = 10;
 constexpr int32_t POPUP_CALCULATE_RATIO = 2;
 constexpr int32_t MIN_ACCESSIBILITY_FOCUS_SIZE = 2;
+constexpr int32_t MENU_WINDOW_ENTER_LIMIT_TIME = 300;
 
 constexpr int32_t PINCH_START_TYPE = 1;
 constexpr int32_t PINCH_UPDATE_TYPE = 3;
@@ -1209,9 +1210,13 @@ void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
     if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_APPEAR) {
         isMenuShownFromWeb_ = true;
         isLastEventMenuClose_ = false;
+        isMenuShownFromWebBeforeStartClose_ = true;
+    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR) {
+       isMenuShownFromWebBeforeStartClose_ = false;
+       isLastEventMenuClose_ = true;
+       lastMenuCloseTimestamp_ = GetCurrentTimestamp();
     } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_DISAPPEAR) {
         isMenuShownFromWeb_ = false;
-        isLastEventMenuClose_ = true;
         if (!isFocus_) {
             CHECK_NULL_VOID(delegate_);
             delegate_->SetBlurReason(OHOS::NWeb::BlurReason::VIEW_SWITCH);
@@ -1996,7 +2001,15 @@ void WebPattern::InitMouseEvent(const RefPtr<InputEventHub>& inputHub)
     auto mouseTask = [weak = WeakClaim(this)](MouseInfo& info) {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
+
         TouchEventInfo touchEventInfo("touchEvent");
+
+        if (pattern->ConvertMouseToTouchByWhiteList(info, touchEventInfo)) {
+            pattern->isMouseEvent_ = false;
+            pattern->HandleTouchEvent(touchEventInfo);
+            return;
+        }
+
         if (EventInfoConvertor::ConvertMouseToTouchIfNeeded(info, touchEventInfo)) {
             TAG_LOGI(AceLogTag::ACE_WEB, "Convert mouse event to touch event: button %{public}d, action %{public}d.",
                 (int)info.GetButton(), (int)info.GetAction());
@@ -2297,7 +2310,7 @@ void WebPattern::WebSendMouseEvent(const MouseInfo& info, int32_t clickNum)
 
 bool WebPattern::CheckShouldBlockMouseEvent(const MouseInfo &info)
 {
-    if (isMenuShownFromWeb_) {
+    if (isMenuShownFromWebBeforeStartClose_) {
         if (info.GetAction() == MouseAction::PRESS) {
             // When menu is showing ,the action down will be costed,
             isUpSupplementDown_ = true;
@@ -2328,7 +2341,8 @@ void WebPattern::SupplementMouseEventsIfNeeded(
     const MouseInfo &info, int32_t clickNum, std::vector<int32_t> pressedCodes)
 {
     CHECK_NULL_VOID(delegate_);
-    if (isLastEventMenuClose_ && info.GetAction() == MouseAction::WINDOW_ENTER) {
+    if (isLastEventMenuClose_ && info.GetAction() == MouseAction::WINDOW_ENTER &&
+        GetCurrentTimestamp() - lastMenuCloseTimestamp_ < MENU_WINDOW_ENTER_LIMIT_TIME) {
         // When the menu is closed and the mouse is inside the menu, a mouseMove event needs to be supplemented.
         isSupplementMouseLeave_ = false;
         TAG_LOGI(AceLogTag::ACE_WEB, "LastEvent is bindMenu close, WINDOW_ENTER only supplement mouseMove");
@@ -4694,6 +4708,10 @@ void WebPattern::InitInOfflineMode()
     if (isOfflineWebEvictFrameBuffersEnable_) {
         pipelineContext->AddWindowStateChangedCallback(host->GetId());
         offlineWebNodeId_ = host->GetId();
+        NodeStatus nodeStatus = host->GetNodeStatus();
+        if (nodeStatus == NodeStatus::BUILDER_NODE_OFF_MAINTREE) {
+            delegate_->SetIsOfflineWebComponent();
+        }
     }
     int width = 0;
     int height = 0;
@@ -10213,4 +10231,58 @@ void WebPattern::HighlightSpecifiedContent(
             TAG_LOGD(AceLogTag::ACE_WEB, "HighlightSpecifiedContent result = %{public}s ", result.c_str());
         });
 }
+
+bool WebPattern::ConvertMouseToTouchByWhiteList(MouseInfo& mouseInfo, TouchEventInfo& touchEventInfo)
+{
+    if (mouseInfo.GetButton() != MouseButton::LEFT_BUTTON) {
+        return false;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebPattern::ConvertMouseToTouchByWhiteList: IsConvertByWhiteList %{public}d.",
+        IsConvertByWhiteList());
+
+    if (!IsConvertByWhiteList()) {
+        return false;
+    }
+
+    TAG_LOGI(AceLogTag::ACE_WEB,
+        "WebPattern::ConvertMouseToTouchByWhiteList: Action %{public}d, Button %{public}d",
+        static_cast<int32_t>(mouseInfo.GetAction()), static_cast<int32_t>(mouseInfo.GetButton()));
+
+    // Only process PRESS/MOVE/RELEASE/CANCEL event
+    TouchLocationInfo touchLocationInfo(0);
+    switch (mouseInfo.GetAction()) {
+        case MouseAction::PRESS:
+            touchLocationInfo.SetTouchType(TouchType::DOWN);
+            break;
+        case MouseAction::RELEASE:
+            touchLocationInfo.SetTouchType(TouchType::UP);
+            break;
+        case MouseAction::MOVE:
+            touchLocationInfo.SetTouchType(TouchType::MOVE);
+            break;
+        case MouseAction::CANCEL:
+            touchLocationInfo.SetTouchType(TouchType::CANCEL);
+            break;
+        default:
+            TAG_LOGW(AceLogTag::ACE_WEB, "Mouse action is not match, skip convert.");
+            return false;
+    }
+    touchLocationInfo.SetLocalLocation(mouseInfo.GetLocalLocation());
+    touchLocationInfo.SetScreenLocation(mouseInfo.GetScreenLocation());
+    touchLocationInfo.SetTimeStamp(mouseInfo.GetTimeStamp());
+
+    touchEventInfo.AddChangedTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.AddTouchLocationInfo(std::move(touchLocationInfo));
+    touchEventInfo.SetSourceDevice(SourceType::TOUCH);
+    touchEventInfo.SetTouchEventsEnd(true);
+    return true;
+}
+
+bool WebPattern::IsConvertByWhiteList()
+{
+    return EventInfoConvertor::IfNeedMouseTransform();
+}
+
 } // namespace OHOS::Ace::NG

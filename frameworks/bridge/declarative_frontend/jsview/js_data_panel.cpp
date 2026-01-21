@@ -195,17 +195,14 @@ void JSDataPanel::TrackBackground(const JSCallbackInfo& info)
         if (state) {
             DataPanelModel::GetInstance()->SetTrackBackground(color);
         } else {
-            RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
-            color = theme->GetBackgroundColor();
-            DataPanelModel::GetInstance()->SetTrackBackground(color);
+            DataPanelModel::GetInstance()->ResetTrackBackground();
         }
     } else {
-        RefPtr<ResourceObject> resObj;
         if (!ParseJsColor(info[0], color)) {
-            RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
-            color = theme->GetBackgroundColor();
+            DataPanelModel::GetInstance()->ResetTrackBackground();
+        } else {
+            DataPanelModel::GetInstance()->SetTrackBackground(color);
         }
-        DataPanelModel::GetInstance()->SetTrackBackground(color);
     }
 }
 
@@ -215,7 +212,6 @@ void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
         return;
     }
 
-    RefPtr<DataPanelTheme> theme = GetTheme<DataPanelTheme>();
     CalcDimension strokeWidthDimension;
     RefPtr<ResourceObject> resObj;
     if (SystemProperties::ConfigChangePerform()) {
@@ -224,26 +220,30 @@ void JSDataPanel::StrokeWidth(const JSCallbackInfo& info)
         if (state) {
             DataPanelModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
         } else {
-            strokeWidthDimension = theme->GetThickness();
-            DataPanelModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+            DataPanelModel::GetInstance()->ResetStrokeWidth();
         }
     } else {
         if (!ParseJsDimensionVp(info[0], strokeWidthDimension)) {
-            strokeWidthDimension = theme->GetThickness();
+            DataPanelModel::GetInstance()->ResetStrokeWidth();
+        } else {
+            DataPanelModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
         }
     }
 
     // If the parameter value is string(''), parse result 0.
     // The value of 0 is allowed, but the value of string('') is not allowed, so use theme value.
-    if (info[0]->IsString() && (info[0]->ToString().empty() || !StringUtils::StringToDimensionWithUnitNG(
-        info[0]->ToString(), strokeWidthDimension))) {
-        strokeWidthDimension = theme->GetThickness();
+    if (info[0]->IsString()) {
+        if (info[0]->ToString().empty() ||
+            !StringUtils::StringToDimensionWithUnitNG(info[0]->ToString(), strokeWidthDimension)) {
+            DataPanelModel::GetInstance()->ResetStrokeWidth();
+        } else {
+            DataPanelModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
+        }
     }
 
     if (strokeWidthDimension.IsNegative() || strokeWidthDimension.Unit() == DimensionUnit::PERCENT) {
-        strokeWidthDimension = theme->GetThickness();
+        DataPanelModel::GetInstance()->ResetStrokeWidth();
     }
-    DataPanelModel::GetInstance()->SetStrokeWidth(strokeWidthDimension);
 }
 
 void JSDataPanel::ShadowOption(const JSCallbackInfo& info)

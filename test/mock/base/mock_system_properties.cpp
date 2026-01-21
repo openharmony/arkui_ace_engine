@@ -59,6 +59,7 @@ constexpr float defaultAnimationScale = 1.0f;
 bool SystemProperties::extSurfaceEnabled_ = false;
 uint32_t SystemProperties::dumpFrameCount_ = 0;
 bool SystemProperties::debugEnabled_ = false;
+bool SystemProperties::eventBenchMarkEnabled_ = false;
 DebugFlags SystemProperties::debugFlags_ = 0;
 bool SystemProperties::containerDeleteFlag_ = false;
 bool SystemProperties::layoutDetectEnabled_ = false;
@@ -290,6 +291,11 @@ bool SystemProperties::IsBigFoldProduct()
 std::string SystemProperties::GetDebugInspectorId()
 {
     return "N/A";
+}
+
+bool SystemProperties::GetEventBenchMarkEnabled()
+{
+    return false;
 }
 
 double SystemProperties::GetSrollableVelocityScale()

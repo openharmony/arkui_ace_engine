@@ -2052,6 +2052,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_ArcDotIndicatorInner_Boolean& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_Boolean_MenuMaskType& src)
 {
     switch (src.selector) {
@@ -3527,6 +3542,8 @@ ASSIGN_OPT(Opt_AccessibilityFocusCallback)
 ASSIGN_OPT(Opt_AccessibilityAction)
 ASSIGN_OPT(Opt_AccessibilityActionInterceptResult)
 ASSIGN_OPT(Opt_AccessibilityTransparentCallback)
+ASSIGN_OPT(Opt_AnimationEndHandler)
+ASSIGN_OPT(Opt_AnimationStartHandler)
 ASSIGN_OPT(Opt_ArcScrollIndexHandler)
 ASSIGN_OPT(Opt_AccessibilityHoverType)
 ASSIGN_OPT(Opt_AccessibilityRoleType)
@@ -3536,6 +3553,8 @@ ASSIGN_OPT(Opt_Alignment)
 ASSIGN_OPT(Opt_AnimationMode)
 ASSIGN_OPT(Opt_AnimationStatus)
 ASSIGN_OPT(Opt_AppRotation)
+ASSIGN_OPT(Opt_ArcDirectionInner)
+ASSIGN_OPT(Opt_ArcSwiperControllerHelper)
 ASSIGN_OPT(Opt_ArrowPointPosition)
 ASSIGN_OPT(Opt_ArrowPosition)
 ASSIGN_OPT(Opt_AttributeUpdaterFlag)
@@ -4085,6 +4104,7 @@ ASSIGN_OPT(Opt_uiObserver_NavDestinationState)
 ASSIGN_OPT(Opt_uiObserver_NavigationInfo)
 ASSIGN_OPT(Opt_uiObserver_RouterPageState)
 ASSIGN_OPT(Opt_UndoStyle)
+ASSIGN_OPT(Opt_unifiedDataChannel_DataLoadParams)
 ASSIGN_OPT(Opt_unifiedDataChannel_UnifiedData)
 ASSIGN_OPT(Opt_uniformTypeDescriptor_UniformDataType)
 ASSIGN_OPT(Opt_Union_Boolean_I32)
@@ -4477,6 +4497,7 @@ ASSIGN_OPT(Opt_EditableTextOnChangeCallback)
 ASSIGN_OPT(Opt_ErrorCallback_Ohos_Base_BusinessError)
 ASSIGN_OPT(Opt_GaugeModifierBuilder)
 ASSIGN_OPT(Opt_GestureRecognizerJudgeBeginCallback)
+ASSIGN_OPT(Opt_GestureSwipeHandler)
 ASSIGN_OPT(Opt_GetItemMainSizeByIndex)
 ASSIGN_OPT(Opt_HoverCallback)
 ASSIGN_OPT(Opt_ImageCompleteCallback)
@@ -4608,6 +4629,9 @@ ASSIGN_OPT(Opt_TransitionFinishCallback)
 ASSIGN_OPT(Opt_Type_CommonMethod_onDragStart)
 ASSIGN_OPT(Opt_Type_NavigationAttribute_customNavContentTransition)
 ASSIGN_OPT(Opt_Type_WebAttribute_onInterceptRequest)
+ASSIGN_OPT(Opt_UIObserver_ClickEventListenerCallback)
+ASSIGN_OPT(Opt_UIObserver_GestureEventListenerCallback)
+ASSIGN_OPT(Opt_UIObserver_PanListenerCallback)
 ASSIGN_OPT(Opt_UIStatesChangeHandler)
 ASSIGN_OPT(Opt_UpdateTransitionCallback)
 ASSIGN_OPT(Opt_VisibleAreaChangeCallback)
@@ -4912,6 +4936,7 @@ ASSIGN_OPT(Opt_SslErrorEvent)
 ASSIGN_OPT(Opt_StackOptions)
 ASSIGN_OPT(Opt_StyledStringChangedListener)
 ASSIGN_OPT(Opt_SurfaceRect)
+ASSIGN_OPT(Opt_SurfaceConfig)
 ASSIGN_OPT(Opt_SurfaceRotationOptions)
 ASSIGN_OPT(Opt_SwiperAutoFill)
 ASSIGN_OPT(Opt_SwiperContentAnimatedTransition)
@@ -5053,6 +5078,7 @@ ASSIGN_OPT(Opt_AlertDialogButtonOptions)
 ASSIGN_OPT(Opt_AlphabetIndexerOptions)
 ASSIGN_OPT(Opt_AnimateParam)
 ASSIGN_OPT(Opt_ApplicationInfo)
+ASSIGN_OPT(Opt_ArcDotIndicatorInner)
 ASSIGN_OPT(Opt_BackgroundBlurStyleOptions)
 ASSIGN_OPT(Opt_BackgroundEffectOptions)
 ASSIGN_OPT(Opt_Bindable_Arkui_Component_Units_ResourceStr)
@@ -5183,6 +5209,7 @@ ASSIGN_OPT(Opt_Tuple_Union_ResourceColor_LinearGradient_F64)
 ASSIGN_OPT(Opt_Tuple_Union_ResourceColor_Undefined_F64)
 ASSIGN_OPT(Opt_UnderlineColor)
 ASSIGN_OPT(Opt_Union_AlignRuleOption_LocalizedAlignRuleOptions)
+ASSIGN_OPT(Opt_Union_ArcDotIndicatorInner_Boolean)
 ASSIGN_OPT(Opt_Union_Boolean_MenuMaskType)
 ASSIGN_OPT(Opt_Union_Boolean_PopupMaskType)
 ASSIGN_OPT(Opt_Union_CanvasRenderingContext2D_DrawingRenderingContext)

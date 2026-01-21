@@ -872,7 +872,7 @@ void SetSelectedDragPreviewStyleImpl(Ark_NativePointer node,
     RichEditorModelStatic::SetSelectedDragPreviewStyle(frameNode, convValue);
 }
 void SetCustomKeyboardImpl(Ark_NativePointer node,
-                           const Opt_Union_CustomBuilder_ComponentContent* value,
+                           const Opt_Union_CustomBuilder_ComponentContentBase* value,
                            const Opt_KeyboardOptions* options)
 {
     auto frameNode = reinterpret_cast<FrameNode*>(node);
@@ -889,18 +889,15 @@ void SetCustomKeyboardImpl(Ark_NativePointer node,
     }
     if (value->value.selector == SELECTOR_CUSTOM_BUILDER) {
         const CustomNodeBuilder& builder = value->value.value0;
-        CallbackHelper helper(builder);
-        helper.BuildAsync(
+        CallbackHelper(builder).BuildAsync(
             [frameNode, supportAvoidance](const RefPtr<UINode>& uiNode) {
-                if (auto customKeyboard = AceType::DynamicCast<FrameNode>(uiNode)) {
-                    RichEditorModelStatic::SetCustomKeyboardWithNode(
-                        frameNode, AceType::RawPtr(customKeyboard), supportAvoidance.value_or(false));
-                }
-            },
-            node);
-        RichEditorModelStatic::SetCustomKeyboard(frameNode, nullptr, std::nullopt);
+                auto customNodeBuilder = [uiNode]() {
+                    NG::ViewStackProcessor::GetInstance()->Push(uiNode);
+                };
+                RichEditorModelStatic::SetCustomKeyboard(frameNode, std::move(customNodeBuilder), supportAvoidance);
+            }, node);
     } else if (value->value.selector == SELECTOR_COMPONENT_CONTENT) {
-        const Ark_ComponentContent& arkContent = value->value.value1;
+        const Ark_ComponentContentBase& arkContent = value->value.value1;
         auto contentPeer = reinterpret_cast<FrameNodePeer*>(arkContent);
         CHECK_NULL_VOID(contentPeer);
         if (auto customKeyboard = FrameNodePeer::GetFrameNodeByPeer(contentPeer)) {

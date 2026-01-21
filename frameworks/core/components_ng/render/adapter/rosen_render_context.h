@@ -506,6 +506,7 @@ public:
     RefPtr<FrameNode> GetFrameNodeById(int32_t frameNodeId);
     bool CanNodeBeDeleted(const RefPtr<FrameNode>& node) const;
     void GetLiveChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
+    void AddCornerMarkNodeToChildren(const RefPtr<FrameNode>& node, std::list<RefPtr<FrameNode>>& childNodes);
     void AddRsNodeForCapture();
     static bool initDrawNodeChangeCallback_;
     static bool initPropertyNodeChangeCallback_;

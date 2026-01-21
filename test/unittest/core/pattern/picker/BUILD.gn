@@ -15,8 +15,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 ace_unittest("date_picker_test_ng") {
   type = "new"
-  module_name = "Component-Picker"
-  module_output = ""
+  module_name = "C-API-Node"
   sources = [
     "date_picker_column_layout_algorithm_test_ng.cpp",
     "date_picker_column_test_ng.cpp",

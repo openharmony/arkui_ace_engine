@@ -787,6 +787,49 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar013, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleDragScrollBar014
+ * @tc.desc: Test sliding the scrollBar downwards so that it does not reach the bottom
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar014, TestSize.Level1)
+{
+    ScrollModelNG model = CreateScroll();
+    model.SetEdgeEffect(EdgeEffect::SPRING, true);
+    CreateContent();
+    CreateScrollDone();
+
+    auto mockScrollSpringEffect = AceType::MakeRefPtr<MockScrollSpringEffect>();
+    pattern_->scrollEffect_ = mockScrollSpringEffect;
+    EXPECT_CALL(*mockScrollSpringEffect, ProcessScrollOver(_)).Times(0);
+
+    float dragDelta = 100;
+    uint64_t TIME_1 = 1000 * 1000 * 1;
+    uint64_t TIME_2 = 1000 * 1000 * 2 + 1;
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::TOUCH_SCREEN);
+    scrollBar_->HandleDragStart(info);
+
+    info.SetMainDelta(dragDelta);
+    scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+    float expectOffset = -dragDelta / VERTICAL_RATIO;
+    EXPECT_TRUE(Position(expectOffset));
+
+    MockPipelineContext::GetCurrentContext()->SetVsyncTime(TIME_1);
+    info.SetMainVelocity(100.f);
+    MockAnimationManager::GetInstance().SetTicks(TICK);
+    scrollBar_->HandleDragEnd(info);
+
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+    MockPipelineContext::GetCurrentContext()->SetVsyncTime(TIME_2);
+
+    scrollBar_->frictionMotion_->NotifyListener(100.f);
+    MockAnimationManager::GetInstance().Tick();
+    FlushUITasks();
+}
+
+/**
  * @tc.name: HandleDragEndScrollBar001
  * @tc.desc: Test handleDragEnd in Horizontal and RTL layout
  * @tc.type: FUNC

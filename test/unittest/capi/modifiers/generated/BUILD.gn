@@ -16,8 +16,8 @@ import("../../capi_common.gni")
 import("modifiers.gni")
 
 ace_unittest("capi_generated_modifiers_test") {
+  module_name = "C-API-Main"
   type = "new"
-  module_output = "capi"
   sources = [
     "test_fixtures.cpp",
     "test_fixtures_enums.cpp",

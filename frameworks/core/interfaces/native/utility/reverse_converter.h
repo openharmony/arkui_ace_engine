@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_REVERSE_CONVERTER_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_UTILITY_REVERSE_CONVERTER_H
 
+#include "ui/base/macros.h"
 #pragma once
 
 // SORTED_SECTION
@@ -297,7 +298,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_CrownAction& dst, const CrownAction& src);
     void AssignArkValue(Ark_Color& dst, const Color& src);
     void AssignArkValue(Ark_Date& dst, const PickerDate& src);
-    void AssignArkValue(Ark_Date& dst, const std::string& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_Date& dst, const std::string& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Dimension& dst, const Dimension& src, ConvContext *ctx);
     void AssignArkValue(Ark_Dimension& dst, const char* src);
     void AssignArkValue(Ark_Dimension& dst, const float& src);
@@ -321,7 +322,7 @@ namespace OHOS::Ace::NG::Converter {
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Float64& dst, const Dimension& src);
     void AssignArkValue(Ark_Float64& dst, const LeadingMargin& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Float64& dst, const double& src);
-    void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
     void AssignArkValue(Ark_FontWeight& dst, OHOS::Ace::FontWeight src);
     void AssignArkValue(Ark_Frame& dst, const RectF& src);
@@ -388,6 +389,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_OffsetResult& dst, const Offset& src, ConvContext *ctx);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src, ConvContext *ctx);
     void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src);
+    void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src, ConvContext *ctx);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_Position& dst, const OffsetF& src, ConvContext *ctx);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);
@@ -448,7 +450,7 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_TextVerticalAlign& dst, const TextVerticalAlign& src);
     void AssignArkValue(Ark_TextVerticalAlign& dst, const int32_t& src);
     void AssignArkValue(Ark_ThreatType& dst, const ThreatType& src);
-    void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src);
+    ACE_FORCE_EXPORT void AssignArkValue(Ark_TimePickerResult& dst, const std::string& src);
     void AssignArkValue(Ark_TouchObject& dst, const OHOS::Ace::TouchLocationInfo& src);
     void AssignArkValue(Ark_TouchType& dst, const TouchType& src);
     void AssignArkValue(Ark_TransitionEdge& dst, const TransitionEdge& src);
@@ -481,14 +483,15 @@ namespace OHOS::Ace::NG::Converter {
 
     // Passthrough version
     template<typename T>
-    void AssignArkValue(T &dst, const T& src, ConvContext *ctx)
+    ACE_FORCE_EXPORT void AssignArkValue(T &dst, const T& src, ConvContext *ctx)
     {
         dst = src;
     }
 
     template<typename To, typename From>
-    std::enable_if_t<std::is_pointer_v<To> && std::is_pointer_v<From> && std::is_assignable_v<To&, From>>
-    AssignArkValue(To& dst, const From& src)
+    ACE_FORCE_EXPORT
+        std::enable_if_t<std::is_pointer_v<To> && std::is_pointer_v<From> && std::is_assignable_v<To&, From>>
+        AssignArkValue(To& dst, const From& src)
     {
         dst = src;
     }
@@ -498,14 +501,14 @@ namespace OHOS::Ace::NG::Converter {
         std::enable_if_t<!IsOptional<To>::value &&
             !IsArray<To>::value &&
             !IsMap<To>::value, bool> = false>
-    void AssignArkValue(To& dts, const From& src, ConvContext *ctx)
+    ACE_FORCE_EXPORT void AssignArkValue(To& dts, const From& src, ConvContext *ctx)
     {
         AssignArkValue(dts, src);
     }
 
     // Handle optional types
     template<typename To, typename From, std::enable_if_t<IsOptional<To>::value, bool> = true>
-    void AssignArkValue(To& dst, const From& src, ConvContext *ctx = nullptr)
+    ACE_FORCE_EXPORT void AssignArkValue(To& dst, const From& src, ConvContext *ctx = nullptr)
     {
         if constexpr (std::is_same_v<From, Ark_Empty> || std::is_same_v<From, std::nullopt_t>) {
             dst.tag = INTEROP_TAG_UNDEFINED;
@@ -516,7 +519,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename To, typename From, std::enable_if_t<IsOptional<To>::value, bool> = true>
-    void AssignArkValue(To& dst, const std::optional<From>& src, ConvContext *ctx = nullptr)
+    ACE_FORCE_EXPORT void AssignArkValue(To& dst, const std::optional<From>& src, ConvContext *ctx = nullptr)
     {
         if (src.has_value()) {
             dst.tag = INTEROP_TAG_OBJECT;
@@ -534,7 +537,7 @@ namespace OHOS::Ace::NG::Converter {
 
     // Array with context
     template<typename To, typename Cont>
-    std::enable_if_t<IsArray<To>::value> AssignArkValue(To& dst, const Cont& src, ConvContext *ctx)
+    ACE_FORCE_EXPORT std::enable_if_t<IsArray<To>::value> AssignArkValue(To& dst, const Cont& src, ConvContext *ctx)
     {
         using Val = std::remove_pointer_t<decltype(dst.array)>;
         dst = ctx->AllocateArray<To>(src.size());
@@ -545,7 +548,7 @@ namespace OHOS::Ace::NG::Converter {
 
     // Map with context
     template<typename To, typename Cont>
-    std::enable_if_t<IsMap<To>::value> AssignArkValue(To& dst, const Cont& src, ConvContext *ctx)
+    ACE_FORCE_EXPORT std::enable_if_t<IsMap<To>::value> AssignArkValue(To& dst, const Cont& src, ConvContext *ctx)
     {
         using KeyT = std::remove_pointer_t<decltype(dst.keys)>;
         using ValT = std::remove_pointer_t<decltype(dst.values)>;

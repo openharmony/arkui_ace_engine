@@ -42,7 +42,6 @@
 #include "bridge/declarative_frontend/jsview/js_button.h"
 #include "bridge/declarative_frontend/jsview/js_calendar.h"
 #include "bridge/declarative_frontend/jsview/js_calendar_controller.h"
-#include "bridge/declarative_frontend/jsview/js_calendar_picker.h"
 #include "bridge/declarative_frontend/jsview/js_circle.h"
 #include "bridge/declarative_frontend/jsview/js_circle_shape.h"
 #include "bridge/declarative_frontend/jsview/js_clipboard.h"
@@ -59,7 +58,6 @@
 #include "bridge/declarative_frontend/jsview/js_ellipse_shape.h"
 #include "bridge/declarative_frontend/jsview/js_environment.h"
 #include "bridge/declarative_frontend/jsview/js_flex_impl.h"
-#include "bridge/declarative_frontend/jsview/js_folder_stack.h"
 #include "bridge/declarative_frontend/jsview/js_foreach.h"
 #ifdef FORM_BUTTON_COMPONENT_SUPPORT
 #include "bridge/declarative_frontend/jsview/js_form_button.h"
@@ -112,9 +110,6 @@
 #include "bridge/declarative_frontend/jsview/js_polygon.h"
 #include "bridge/declarative_frontend/jsview/js_polyline.h"
 #include "bridge/declarative_frontend/jsview/js_progress.h"
-#ifdef QRCODEGEN_SUPPORT
-#include "bridge/declarative_frontend/jsview/js_qrcode.h"
-#endif
 #include "bridge/declarative_frontend/jsview/js_rect.h"
 #include "bridge/declarative_frontend/jsview/js_rect_shape.h"
 #include "bridge/declarative_frontend/jsview/js_recycle_view.h"
@@ -460,16 +455,10 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "NativeChildrenMainSize", JSListChildrenMainSize::JSBind },
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "CalendarPicker", JSCalendarPicker::JSBind },
-#endif
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
     { "Stack", JSStack::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "FolderStack", JSFolderStack::JSBind},
-#endif
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "If", JSIfElse::JSBind },
@@ -487,9 +476,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Polygon", JSPolygon::JSBind },
     { "Polyline", JSPolyline::JSBind },
     { "Ellipse", JSEllipse::JSBind },
-#ifdef QRCODEGEN_SUPPORT
-    { "QRCode", JSQRCode::JSBind },
-#endif
     { "Piece", JSPiece::JSBind },
     { "DataPanel", JSDataPanel::JSBind },
     { "Badge", JSBadge::JSBind },
@@ -556,9 +542,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "LoadingProgress", JSLoadingProgress::JSBind },
     { "Image", JSImage::JSBind },
     { "ImageAnimator", JSImageAnimator::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "CalendarPicker", JSCalendarPicker::JSBind },
-#endif
     { "Progress", JSProgress::JSBind },
     { "Column", JSColumn::JSBind },
     { "Row", JSRow::JSBind },
@@ -566,9 +549,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "GridItem", JSGridItem::JSBind },
     { "GridContainer", JSGridContainer::JSBind },
     { "Stack", JSStack::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "FolderStack", JSFolderStack::JSBind},
-#endif
     { "ForEach", JSForEach::JSBind },
     { "Divider", JSDivider::JSBind },
     { "Swiper", JSSwiper::JSBind },
@@ -591,9 +571,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "ToolBarItem", JSToolBarItem::JSBind },
     { "Blank", JSBlank::JSBind },
     { "Calendar", JSCalendar::JSBind },
-#ifndef ARKUI_WEARABLE
-    { "CalendarPickerDialog", JSCalendarPickerDialog::JSBind },
-#endif
     { "Rect", JSRect::JSBind },
     { "Shape", JSShape::JSBind },
     { "Path", JSPath::JSBind },
@@ -605,11 +582,9 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "Tabs", JSTabs::JSBind },
     { "TabContent", JSTabContent::JSBind },
     { "TextPicker", JSTextPicker::JSBind },
-    { "TimePicker", JSTimePicker::JSBind },
     { "UIPickerComponent", JSContainerPicker::JSBind },
 #ifndef ARKUI_WEARABLE
     { "TextPickerDialog", JSTextPickerDialog::JSBind },
-    { "TimePickerDialog", JSTimePickerDialog::JSBind },
 #endif
     { "DatePicker", JSDatePicker::JSBind },
 #ifndef ARKUI_WEARABLE
@@ -638,9 +613,6 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextArea", JSTextArea::JSBind },
     { "TextInput", JSTextInput::JSBind },
     { "TextClock", JSTextClock::JSBind },
-#ifdef QRCODEGEN_SUPPORT
-    { "QRCode", JSQRCode::JSBind },
-#endif
 #ifdef FORM_SUPPORTED
     { "FormComponent", JSForm::JSBind },
     { "FormMenuItem", JSFormMenuItem::JSBind },

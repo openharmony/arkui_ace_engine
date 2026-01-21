@@ -198,4 +198,19 @@ HWTEST_F(TextFieldPatternTesteleven, TextInputAreaDeleteBackwardModel001, TestSi
     EXPECT_EQ(pattern_->GetTextValue(), "挖矿时间到!");
 }
 
+/**
+ * @tc.name: TextInputAreaDeleteBackwardModel002
+ * @tc.desc: test DeleteBackward
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTesteleven, TextInputAreaDeleteBackwardModel002, TestSize.Level1)
+{
+    CreateTextField("DeleteBackward预上屏测试", "", [](TextFieldModelNG model) {});
+    GetFocus();
+
+    pattern_->textFieldController_->DeleteBackward();
+    FlushLayoutTask(frameNode_);
+    
+    EXPECT_FALSE(pattern_->IsPreviewTextInputting());
+}
 } // namespace OHOS::Ace::NG

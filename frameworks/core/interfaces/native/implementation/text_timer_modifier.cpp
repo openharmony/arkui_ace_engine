@@ -124,7 +124,13 @@ void SetFontColorImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(context);
     auto theme = context->GetTheme<TextTheme>();
     CHECK_NULL_VOID(theme);
-    TextTimerModelStatic::SetFontColor(frameNode, color.value_or(theme->GetTextStyle().GetTextColor()));
+    if (color.has_value()) {
+        TextTimerModelStatic::SetFontColor(frameNode, color.value());
+        TextTimerModelStatic::SetTextColorByUser(frameNode, true);
+    } else {
+        TextTimerModelStatic::SetFontColor(frameNode, theme->GetTextStyle().GetTextColor());
+        TextTimerModelStatic::SetTextColorByUser(frameNode, false);
+    }
 }
 void SetFontSizeImpl(Ark_NativePointer node,
                      const Opt_Length* value)
@@ -137,7 +143,13 @@ void SetFontSizeImpl(Ark_NativePointer node,
     }
     Validator::ValidateNonNegative(convValue);
     Validator::ValidateNonPercent(convValue);
-    TextTimerModelStatic::SetFontSize(frameNode, convValue.value_or(DEFAULT_FONT_SIZE));
+    if (convValue.has_value()) {
+        TextTimerModelStatic::SetFontSize(frameNode, convValue.value());
+        TextTimerModelStatic::SetFontSizeByUser(frameNode, true);
+    } else {
+        TextTimerModelStatic::SetFontSize(frameNode, DEFAULT_FONT_SIZE);
+        TextTimerModelStatic::SetFontSizeByUser(frameNode, false);
+    }
 }
 void SetFontStyleImpl(Ark_NativePointer node,
                       const Opt_FontStyle* value)
@@ -153,7 +165,13 @@ void SetFontWeightImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     auto weight = Converter::OptConvertPtr<Ace::FontWeight>(value);
-    TextTimerModelStatic::SetFontWeight(frameNode, weight.value_or(DEFAULT_FONT_WEIGHT));
+    if (weight.has_value()) {
+        TextTimerModelStatic::SetFontWeight(frameNode, weight.value());
+        TextTimerModelStatic::SetFontWeightByUser(frameNode, true);
+    } else {
+        TextTimerModelStatic::SetFontWeight(frameNode, DEFAULT_FONT_WEIGHT);
+        TextTimerModelStatic::SetFontWeightByUser(frameNode, false);
+    }
 }
 void SetFontFamilyImpl(Ark_NativePointer node,
                        const Opt_ResourceStr* value)
@@ -164,12 +182,14 @@ void SetFontFamilyImpl(Ark_NativePointer node,
     auto optValue = Converter::OptConvertPtr<Converter::FontFamilies>(value);
     if (!optValue) {
         TextTimerModelStatic::SetFontFamily(frameNode, DEFAULT_FONT_FAMILY);
+        TextTimerModelStatic::SetFontFamilyByUser(frameNode, false);
         return;
     }
     if (auto fontfamiliesOpt = optValue; fontfamiliesOpt) {
         families = fontfamiliesOpt->families;
     }
     TextTimerModelStatic::SetFontFamily(frameNode, families);
+    TextTimerModelStatic::SetFontFamilyByUser(frameNode, true);
 }
 // fix Opt_Callback_Number_Number_Void > Opt_Callback_Int64_Int64_Void this is time so int64 is required
 void SetOnTimerImpl(Ark_NativePointer node,

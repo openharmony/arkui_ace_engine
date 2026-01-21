@@ -18,9 +18,7 @@
 #include <cstdint>
 #include <sstream>
 #include <sys/stat.h>
-#ifdef PIXEL_MAP_SUPPORTED
 #include "pixel_map_taihe_ani.h"
-#endif
 
 #include "core/common/ace_engine.h"
 #include "frameworks/base/error/error_code.h"
@@ -158,14 +156,12 @@ void TriggerJsCallback(SnapshotAsyncCtx* asyncCtx)
     ctx->env->GetUndefined(&resultRef[1]);
 
     if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
-#ifdef PIXEL_MAP_SUPPORTED
         ani_object pixmapItem = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(ctx->env, ctx->pixmap);
         if (pixmapItem) {
             resultRef[1] = pixmapItem;
         } else {
             TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "PixelMapTaiheAni CreatePixelMap failed!");
         }
-#endif
     }
     ani_status status = ANI_OK;
     if (ctx->errCode == OHOS::Ace::ERROR_CODE_NO_ERROR) {
@@ -628,12 +624,10 @@ static void HandleSyncSnapshotResult(
 {
     switch (pair.first) {
         case OHOS::Ace::ERROR_CODE_NO_ERROR:
-#ifdef PIXEL_MAP_SUPPORTED
             pixelMap = OHOS::Media::PixelMapTaiheAni::CreateEtsPixelMap(env, pair.second);
             if (!pixelMap) {
                 TAG_LOGE(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "PixelMapTaiheAni CreatePixelMap failed!");
             }
-#endif
             break;
         case OHOS::Ace::ERROR_CODE_INTERNAL_ERROR:
             TAG_LOGW(OHOS::Ace::AceLogTag::ACE_COMPONENT_SNAPSHOT, "Internal error!");
@@ -662,9 +656,7 @@ static void HandleSyncSnapshotResult(
 static void GetSnapshot(const std::string& componentId, OHOS::Ace::NG::ComponentSnapshot::JsCallback&& callback,
     const OHOS::Ace::NG::SnapshotOptions& options)
 {
-#ifdef ENABLE_ROSEN_BACKEND
     OHOS::Ace::NG::ComponentSnapshot::Get(componentId, std::move(callback), options);
-#endif
 }
 
 static void ANI_GetWithCallback([[maybe_unused]] ani_env* env,
@@ -694,10 +686,7 @@ static ani_object ANI_GetWithPromise([[maybe_unused]] ani_env* env, ani_string c
 std::pair<int32_t, std::shared_ptr<OHOS::Media::PixelMap>> GetSyncSnapshot(
     const std::string& componentId, const OHOS::Ace::NG::SnapshotOptions& options)
 {
-#ifdef ENABLE_ROSEN_BACKEND
     return OHOS::Ace::NG::ComponentSnapshot::GetSync(componentId, options);
-#endif
-    return { OHOS::Ace::ERROR_CODE_INTERNAL_ERROR, nullptr };
 }
 
 static ani_object ANI_GetSync([[maybe_unused]] ani_env* env, ani_string componentId, ani_object options)
@@ -716,9 +705,7 @@ void GetSnapshotByUniqueId(int32_t uniqueId,
     std::function<void(std::shared_ptr<OHOS::Media::PixelMap>, int32_t, std::function<void()>)>&& callback,
     const OHOS::Ace::NG::SnapshotOptions& options)
 {
-#ifdef ENABLE_ROSEN_BACKEND
     OHOS::Ace::NG::ComponentSnapshot::GetByUniqueId(uniqueId, std::move(callback), options);
-#endif
 }
 
 static ani_object ANI_GetWithUniqueId([[maybe_unused]] ani_env* env, ani_int id, ani_object options)
@@ -735,10 +722,7 @@ static ani_object ANI_GetWithUniqueId([[maybe_unused]] ani_env* env, ani_int id,
 std::pair<int32_t, std::shared_ptr<OHOS::Media::PixelMap>> GetSyncSnapshotByUniqueId(
     int32_t uniqueId, const OHOS::Ace::NG::SnapshotOptions& options)
 {
-#ifdef ENABLE_ROSEN_BACKEND
     return OHOS::Ace::NG::ComponentSnapshot::GetSyncByUniqueId(uniqueId, options);
-#endif
-    return { OHOS::Ace::ERROR_CODE_INTERNAL_ERROR, nullptr };
 }
 
 static ani_object ANI_GetSyncWithUniqueId([[maybe_unused]] ani_env* env, ani_int id, ani_object options)

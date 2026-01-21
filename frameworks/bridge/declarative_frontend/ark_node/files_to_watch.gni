@@ -23,6 +23,7 @@ ark_x_node_files_to_watch = [
     "src/frame_node.ts",
     "src/render_node.ts",
     "src/xcomponent_node.ts",
+    "src/trans_frame_node.ts",
     "src/content.ts",
     "src/component_content.ts",
     "src/node_content.ts",

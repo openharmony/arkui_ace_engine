@@ -31,7 +31,7 @@ import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
-import { KeyboardAvoidMode } from '@ohos/arkui/UIContext';
+import { KeyboardAvoidMode, PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback } from '@ohos/arkui/UIContext';
 import { DrawableDescriptor } from '@ohos.arkui.drawableDescriptor';
 import { default as uiObserver }  from '@ohos/arkui/observer';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
@@ -200,6 +200,8 @@ export class ArkUIAniModule {
     native static _DragEvent_Get_Data(ptr: KLong) : unifiedDataChannel.UnifiedData
     native static _DragEvent_Get_Summary(ptr: KLong) : unifiedDataChannel.Summary | undefined
     native static _DragEvent_Start_Data_Loading(ptr: KLong, data : unifiedDataChannel.GetDataParams) : string | undefined
+    native static _DragEvent_Set_Data_LoadParams(ptr: KLong, data : unifiedDataChannel.DataLoadParams) : void
+    native static _DragEvent_Enable_InternalDropAnimation(ptr: KLong, configuration: string) : void
     native static _DragEvent_Set_PixelMap(ptr: KLong, pixelMap: image.PixelMap) : void
     native static _DragEvent_Set_ExtraInfo(ptr: KLong, extraInfo: string) : void
     native static _DragEvent_Set_CustomNode(ptr: KLong, customNode: KPointer) : void
@@ -209,6 +211,8 @@ export class ArkUIAniModule {
     native static _Drag_Set_DragPreviewOptions(ptr: KPointer, value: DragPreviewOptions | undefined, options?: DragInteractionOptions): void
     native static _Extractors_toUnifiedDataChannelUnifiedDataPtr(value: unifiedDataChannel.UnifiedData) : KPointer
     native static _Extractors_fromUnifiedDataChannelUnifiedDataPtr(ptr: KPointer) : unifiedDataChannel.UnifiedData
+    native static _Extractors_toUnifiedDataChannelDataLoadParamsPtr(value: unifiedDataChannel.DataLoadParams) : KPointer
+    native static _Extractors_fromUnifiedDataChannelDataLoadParamsPtr(ptr: KPointer) : unifiedDataChannel.DataLoadParams
 
     native static _createDragEventAccessorWithPointer(input: KPointer) : KPointer
     native static _getDragEventPointer(input: KPointer): KPointer
@@ -458,4 +462,12 @@ export class ArkUIAniModule {
     // for SecurityComponent
     native static _SaveButton_SetOnClickCallback(ptr: KPointer, value: SaveButtonCallback | undefined): void
     native static _PasteButton_SetOnClickCallback(ptr: KPointer, value: PasteButtonCallback | undefined): void
+
+    // for GestureEvent UIObserver
+    native static _GestureEventUIObserver_SetPanListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: PanListenerCallback): void
+    native static _GestureEventUIObserver_RemovePanListenerCallback(instanceId: KInt, tag: string, callback?: PanListenerCallback): void
+    native static _GestureEventUIObserver_SetClickListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: ClickEventListenerCallback): void
+    native static _GestureEventUIObserver_RemoveClickListenerCallback(instanceId: KInt, tag: string, callback?: ClickEventListenerCallback): void
+    native static _GestureEventUIObserver_SetTapListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: GestureEventListenerCallback): void
+    native static _GestureEventUIObserver_RemoveTapListenerCallback(instanceId: KInt, tag: string, callback?: GestureEventListenerCallback): void
 }

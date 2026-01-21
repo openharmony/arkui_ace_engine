@@ -160,18 +160,20 @@ void JSTextClock::SetTextColor(const JSCallbackInfo& info)
                                                                : ParseJsColor(info[0], textColor);
     if (SystemProperties::ConfigChangePerform()) {
         TextClockModel::GetInstance()->CreateWithTextColorResourceObj(resObj);
-        if (!colorParsed) {
-            TextClockModel::GetInstance()->ResetTextColor();
+    }
+
+    if (!colorParsed && !JSTextClockTheme::ObtainTextColor(textColor)) {
+        auto pipelineContext = PipelineContext::GetCurrentContext();
+        CHECK_NULL_VOID(pipelineContext);
+        auto theme = pipelineContext->GetTheme<TextTheme>();
+        textColor = theme->GetTextStyle().GetTextColor();
+        if (SystemProperties::ConfigChangePerform()) {
+            TextClockModel::GetInstance()->SetTextColor(textColor);
+            TextClockModel::GetInstance()->SetTextColorByUser(false);
             return;
         }
-    } else {
-        if (!colorParsed) {
-            auto pipelineContext = PipelineContext::GetCurrentContext();
-            CHECK_NULL_VOID(pipelineContext);
-            auto theme = pipelineContext->GetTheme<TextTheme>();
-            textColor = theme->GetTextStyle().GetTextColor();
-        }
     }
+
     TextClockModel::GetInstance()->SetTextColor(textColor);
 }
 

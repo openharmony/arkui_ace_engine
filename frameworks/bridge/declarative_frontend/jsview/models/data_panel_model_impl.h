@@ -26,7 +26,9 @@ public:
     void SetEffect(bool isCloseEffect) override;
     void SetValueColors(const std::vector<NG::Gradient>& valueColors) override {}
     void SetTrackBackground(const Color& trackBackgroundColor) override {}
+    void ResetTrackBackground() override {}
     void SetStrokeWidth(const Dimension& strokeWidth) override {}
+    void ResetStrokeWidth() override {}
     void SetShadowOption(const OHOS::Ace::NG::DataPanelShadow& shadowOption) override {}
     void CreateWithResourceObj(DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj) override {}
     void SetValueColorsSetByUser(bool value) override {};

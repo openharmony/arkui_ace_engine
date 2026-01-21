@@ -827,6 +827,7 @@ void ImagePattern::InitFromThemeIfNeed()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto pipeline = host->GetContext();
     CHECK_NULL_VOID(pipeline);
 
@@ -905,6 +906,7 @@ void ImagePattern::CreateObscuredImage()
     CHECK_NULL_VOID(layoutConstraint);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto sourceInfo = props->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     auto reasons = host->GetRenderContext()->GetObscured().value_or(std::vector<ObscuredReasons>());
     if (reasons.size() && layoutConstraint->selfIdealSize.IsValid()) {
@@ -919,6 +921,7 @@ ImageDfxConfig ImagePattern::CreateImageDfxConfig(const ImageSourceInfo& src)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, ImageDfxConfig());
+    ACE_UINODE_TRACE(host);
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_RETURN(renderContext, ImageDfxConfig());
     return {
@@ -940,6 +943,10 @@ void ImagePattern::ClearReloadFlagsAfterLoad()
 
 void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
 {
+    auto host = GetHost();
+    if (host) {
+        ACE_UINODE_TRACE(host);
+    }
     if (loadingCtx_) {
         auto srcKey = src.GetKey();
         auto loadKey = loadingCtx_->GetSourceInfo().GetKey();
@@ -964,7 +971,6 @@ void ImagePattern::LoadImage(const ImageSourceInfo& src, bool needLayout)
     if (!needLayout) {
         loadingCtx_->FinishMeasure();
     } else {
-        auto host = GetHost();
         CHECK_NULL_VOID(host);
         auto pipeline = host->GetContext();
         if (pipeline && host->GetId() != INVALID_ID) {
@@ -983,6 +989,7 @@ void ImagePattern::LoadAltImage(const ImageSourceInfo& altImageSourceInfo)
     if (!altLoadingCtx_ || altLoadingCtx_->GetSourceInfo() != altImageSourceInfo ||
         (altLoadingCtx_ && altImageSourceInfo.IsSvg())) {
         auto host = GetHost();
+        ACE_UINODE_TRACE(host);
 
         altImageDfxConfig_ = CreateImageDfxConfig(altImageSourceInfo);
         altLoadingCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
@@ -998,6 +1005,7 @@ void ImagePattern::LoadImageDataIfNeed()
     CHECK_NULL_VOID(imageLayoutProperty);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto src = imageLayoutProperty->GetImageSourceInfo().value_or(ImageSourceInfo(""));
     UpdateInternalResource(src);
 
@@ -1198,6 +1206,7 @@ void ImagePattern::InitOnKeyEvent()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto hub = host->GetEventHub<EventHub>();
     CHECK_NULL_VOID(hub);
     auto focusHub = hub->GetOrCreateFocusHub();
@@ -1665,6 +1674,7 @@ void ImagePattern::InitCopy()
 
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     auto gestureHub = host->GetOrCreateGestureEventHub();
     gestureHub->SetLongPressEvent(longPressEvent_);
 
@@ -2754,6 +2764,10 @@ void ImagePattern::LoadAltErrorImage(const ImageSourceInfo& altErrorImageSourceI
         CreateLoadFailCallbackForAltError());
     if (!altErrorCtx_ || altErrorCtx_->GetSourceInfo() != altErrorImageSourceInfo ||
         (altErrorCtx_ && altErrorImageSourceInfo.IsSvg())) {
+        auto host = GetHost();
+        if (host) {
+            ACE_UINODE_TRACE(host);
+        }
         altErrorImageDfxConfig_ = CreateImageDfxConfig(altErrorImageSourceInfo);
         altErrorCtx_ = AceType::MakeRefPtr<ImageLoadingContext>(
             altErrorImageSourceInfo, std::move(altLoadNotifier), false, isSceneBoardWindow_, altErrorImageDfxConfig_);

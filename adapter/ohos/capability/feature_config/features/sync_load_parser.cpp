@@ -43,7 +43,12 @@ ParseErrCode SyncLoadParser::ParseFeatureParam(xmlNode& node)
         return PARSE_TYPE_ERROR;
     }
     auto deadline = StringUtils::StringToInt(responseDeadlineStr, FeatureParamManager::DEFAULT_SYNCLOAD_DEADLINE);
-    instance.SetSyncLoadEnableParam(enabled, deadline * FeatureParamManager::MS_TO_NS);
+    
+    auto startupDelayStr = ExtractPropertyValue("startupDelay", node);
+    int64_t startupDelay = StringUtils::StringToInt(startupDelayStr, 0);
+
+    instance.SetSyncLoadEnableParam(enabled, deadline * FeatureParamManager::MS_TO_NS,
+        startupDelay * FeatureParamManager::MS_TO_NS);
     return PARSE_EXEC_SUCCESS;
 }
 

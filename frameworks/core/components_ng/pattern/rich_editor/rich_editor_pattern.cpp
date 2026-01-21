@@ -1186,7 +1186,7 @@ void RichEditorPattern::OnDetachFromMainTree()
 
 void RichEditorPattern::OnAttachToFrameNode()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "OnAttachToFrameNode");
+    ACE_SCOPED_TRACE("RichEditorPattern::OnAttachToFrameNode");
     auto frameNode = GetHost();
     THREAD_SAFE_NODE_CHECK(frameNode, OnAttachToFrameNode);
     CHECK_NULL_VOID(frameNode);
@@ -7502,13 +7502,9 @@ void RichEditorPattern::HandleSelect(CaretMoveIntent direction)
 
 void RichEditorPattern::ClearOperationRecords()
 {
-    TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "ClearOperationRecords");
     undoManager_->ClearUndoRedoRecords();
     previewInputRecord_.Reset();
     ClearRedoOperationRecords();
-    if (operationRecords_.empty()) {
-        return;
-    }
     operationRecords_.clear();
 }
 
@@ -8376,7 +8372,9 @@ void RichEditorPattern::SetMagnifierOffsetWithAnimation(Offset offset)
     CHECK_NULL_VOID(magnifierController_);
     auto currentLocalOffset = magnifierController_->GetLocalOffset();
     auto currentOffset = magnifierController_->GetLocalOffsetWithoutTrans().value_or(currentLocalOffset);
-    if (NearEqual(currentOffset.GetY(), offset.GetY(), 0.5f) || !magnifierController_->GetShowMagnifier()) {
+    bool noNeedAnimation = NearEqual(currentOffset.GetY(), offset.GetY(), 0.5f)
+        || !magnifierController_->GetShowMagnifier() || magnifierController_->IsColorModeChange();
+    if (noNeedAnimation) {
         SetMagnifierLocalOffset(offset);
         return;
     }

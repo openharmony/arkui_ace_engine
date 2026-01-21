@@ -21,19 +21,21 @@ COMMON_SRC = [
 
 # Test original top-down WaterFlow
 ace_unittest("water_flow_test_original") {
+  module_name = "ScrollingSet-WaterFlowAndFlowItem"
   type = "new"
   sources = [
+    "water_flow_layout_info_test.cpp",
     "water_flow_misc_test.cpp",
     "water_flow_property_test.cpp",
     "water_flow_regular_test.cpp",
     "water_flow_top_down_test.cpp",
-    "water_flow_layout_info_test.cpp",
   ]
   sources += COMMON_SRC
 }
 
 # Test segmented top-down WaterFlow
 ace_unittest("water_flow_test_segmented") {
+  module_name = "ScrollingSet-WaterFlowAndFlowItem"
   type = "new"
   defines = [ "TEST_SEGMENTED_WATER_FLOW" ]
   sources = [
@@ -49,6 +51,7 @@ ace_unittest("water_flow_test_segmented") {
 
 # ----------- Test in Sliding Window LayoutMode
 ace_unittest("water_flow_test_sw") {
+  module_name = "ScrollingSet-WaterFlowAndFlowItem"
   type = "new"
   defines = [ "TEST_WATER_FLOW_SW" ]
   sources = [
@@ -62,9 +65,10 @@ ace_unittest("water_flow_test_sw") {
 }
 
 ace_unittest("water_flow_static_test") {
+  module_name = "ScrollingSet-ScrollBar"
   type = "new"
   sources = [
-    "water_flow_test_ng.cpp",
     "water_flow_static_test.cpp",
+    "water_flow_test_ng.cpp",
   ]
 }

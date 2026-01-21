@@ -15,9 +15,12 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
+#include "ark_native_engine.h"
 #include "arkts_utils.h"
 #include "ecmascript/napi/include/jsnapi.h"
 #include "jsnapi_expo.h"
+#include "native_engine.h"
+#include "ui/base/utils/utils.h"
 
 #include "base/utils/utils.h"
 #include "base/i18n/localization.h"
@@ -33,9 +36,22 @@
 #include "frameworks/core/common/resource/resource_configuration.h"
 #include "frameworks/core/common/resource/resource_parse_utils.h"
 #include "frameworks/core/components/text_overlay/text_overlay_theme.h"
+#include "frameworks/core/components/theme/shadow_theme.h"
 
+using namespace OHOS::Ace::Framework;
 namespace OHOS::Ace::NG {
 namespace {
+const char TOP_PROPERTY[] = "top";
+const char RIGHT_PROPERTY[] = "right";
+const char BOTTOM_PROPERTY[] = "bottom";
+const char LEFT_PROPERTY[] = "left";
+const char END_PROPERTY[] = "end";
+const char START_PROPERTY[] = "start";
+const char TOP_START_PROPERTY[] = "topStart";
+const char TOP_END_PROPERTY[] = "topEnd";
+const char BOTTOM_START_PROPERTY[] = "bottomStart";
+const char BOTTOM_END_PROPERTY[] = "bottomEnd";
+
 std::string GetBundleNameFromContainer()
 {
     auto container = Container::Current();
@@ -274,6 +290,49 @@ void ArkTSUtils::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj,
     resObj->SetColor((colorMode == ColorMode::DARK) ? curColor : color);
 }
 
+void ArkTSUtils::CompleteResourceObjectFromColor(RefPtr<ResourceObject>& resObj, Color& color, bool state)
+{
+    if (!state || !SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+
+    auto node = NG::ViewStackProcessor::GetInstance()->GetMainElementNode();
+    CHECK_NULL_VOID(node);
+
+    auto instanceId = Container::CurrentIdSafely();
+    auto nodeTag = node->GetTag();
+    auto invertFunc = ColorInverter::GetInstance().GetInvertFunc(instanceId, nodeTag);
+    CHECK_NULL_VOID(invertFunc);
+
+    auto localColorMode = node->GetLocalColorMode();
+    if (localColorMode == ColorMode::LIGHT) {
+        resObj = nullptr;
+        return;
+    }
+    bool hasDarkRes = CheckDarkResource(resObj);
+    if (localColorMode == ColorMode::DARK) {
+        if (!hasDarkRes) {
+            color = Color(invertFunc(color.GetValue()));
+        }
+        resObj = nullptr;
+        return;
+    }
+    auto colorMode = Container::CurrentColorMode();
+    Color curColor = color;
+    if ((colorMode == ColorMode::DARK) && !hasDarkRes) {
+        color = Color(invertFunc(color.GetValue()));
+    }
+    if (!resObj) {
+        resObj = AceType::MakeRefPtr<ResourceObject>();
+        resObj->SetIsResource(false);
+        resObj->SetInstanceId(instanceId);
+    }
+    resObj->SetNodeTag(nodeTag);
+    resObj->SetColorMode(colorMode);
+    resObj->SetHasDarkRes(hasDarkRes);
+    resObj->SetColor(((colorMode == ColorMode::DARK) ? curColor : color));
+}
+
 bool ArkTSUtils::ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, Color& result)
 {
     RefPtr<ResourceObject> resourceObject;
@@ -303,6 +362,32 @@ bool ArkTSUtils::ParseJsColor(const EcmaVM* vm, const Local<JSValueRef>& value, 
         }
         state = ParseJsColorFromResource(vm, value, result, resourceObject);
         CompleteResourceObjectFromColor(resourceObject, result, state, nodeInfo);
+        return state;
+    }
+    return state;
+}
+
+bool ArkTSUtils::ParseJsColor(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, Color& result, RefPtr<ResourceObject>& resObj)
+{
+    bool state = false;
+    if (jsValue->IsNumber()) {
+        result = Color(ColorAlphaAdapt(jsValue->ToNumber(vm)->Int32Value(vm)));
+        CompleteResourceObjectFromColor(resObj, result, true);
+        return true;
+    }
+    if (jsValue->IsString(vm)) {
+        state = Color::ParseColorString(jsValue->ToString(vm)->ToString(vm), result);
+        CompleteResourceObjectFromColor(resObj, result, state);
+        return state;
+    }
+    if (jsValue->IsObject(vm)) {
+        if (ParseColorMetricsToColor(vm, jsValue, result, resObj)) {
+            CompleteResourceObjectFromColor(resObj, result, true);
+            return true;
+        }
+        state = ParseJsColorFromResource(vm, jsValue, result, resObj);
+        CompleteResourceObjectFromColor(resObj, result, state);
         return state;
     }
     return state;
@@ -431,9 +516,14 @@ std::string ToString(const EcmaVM* vm,  Local<JSValueRef>& jsVal)
     return jsVal->ToString(vm)->ToString(vm);
 }
 
-RefPtr<ResourceObject> GetResourceObject(const EcmaVM* vm, const Local<JSValueRef>& jsObj)
+RefPtr<ResourceObject> ArkTSUtils::GetResourceObject(const EcmaVM* vm, const Local<JSValueRef>& jsObj)
 {
     auto obj = jsObj->ToObject(vm);
+    return GetResourceObject(vm, obj);
+}
+
+RefPtr<ResourceObject> ArkTSUtils::GetResourceObject(const EcmaVM* vm, const Local<panda::ObjectRef>& obj)
+{
     auto id = obj->Get(vm, panda::ExternalStringCache::GetCachedString(vm,
         static_cast<int32_t>(Framework::ArkUIIndex::ID)))->Int32Value(vm);
     auto type = obj->Get(vm, panda::ExternalStringCache::GetCachedString(vm,
@@ -739,7 +829,7 @@ bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueR
 bool ArkTSUtils::ParseJsColorFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Color& result,
     RefPtr<ResourceObject>& resourceObject)
 {
-    auto obj = jsObj ->ToObject(vm);
+    auto obj = jsObj->ToObject(vm);
     auto resId = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "id"));
     if (!resId->IsNumber()) {
         return false;
@@ -1472,8 +1562,8 @@ bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue
     return ParseJsMedia(vm, jsValue, result, resourceObject);
 }
 
-bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result,
-    RefPtr<ResourceObject>& resourceObject)
+bool ArkTSUtils::ParseJsMedia(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+    RefPtr<ResourceObject>& resourceObject, bool isJsView)
 {
     if (!jsValue->IsObject(vm) && !jsValue->IsString(vm)) {
         return false;
@@ -1490,13 +1580,13 @@ bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue
         if (!resId->IsNumber()) {
             return false;
         }
-        return ParseJsMediaFromResource(vm, jsValue, result, resourceObject);
+        return ParseJsMediaFromResource(vm, jsValue, result, resourceObject, isJsView);
     }
     return false;
 }
 
-bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result,
-    RefPtr<ResourceObject>& resourceObject)
+bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
+    RefPtr<ResourceObject>& resourceObject, bool isJsView)
 {
     auto jsObj = jsValue->ToObject(vm);
     auto type = jsObj->Get(vm,
@@ -1542,6 +1632,10 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM *vm, const Local<JSValueR
         }
         if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
             result = resourceWrapper->GetMediaPath(resId->Uint32Value(vm));
+            return true;
+        }
+        if (isJsView && resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING)) {
+            result = resourceWrapper->GetString(resId->Int32Value(vm));
             return true;
         }
         return false;
@@ -2428,6 +2522,17 @@ bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsVa
     }
     symbolId = symbol;
     return true;
+}
+
+double ArkTSUtils::GetArrayLength(const EcmaVM* vm, Local<panda::ArrayRef> array)
+{
+    auto arrayLength = 0;
+    if (array->IsProxy(vm)) {
+        arrayLength = array->Get(vm, "length")->IsNumber() ? array->Get(vm, "length")->ToNumber(vm)->Value() : 0;
+    } else {
+        arrayLength = array->Length(vm);
+    }
+    return arrayLength;
 }
 
 BorderStyle ArkTSUtils::ConvertBorderStyle(int32_t value)
@@ -3712,6 +3817,1166 @@ bool ArkTSUtils::GetNativeNode(const EcmaVM* vm, const Local<JSValueRef>& value,
         return true;
     }
 
+    return false;
+}
+
+void ArkTSUtils::ParseShadowOffsetXY(const EcmaVM* vm, const Local<JSValueRef>& jsObj, Shadow& shadow)
+{
+    CalcDimension offsetX;
+    RefPtr<ResourceObject> xResObj;
+    if (ArkTSUtils::ParseJsResource(vm, ArkTSUtils::GetProperty(vm, jsObj, "offsetX"), offsetX, xResObj)) {
+        if (SystemProperties::ConfigChangePerform() && xResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& xResObj, Shadow& shadow) {
+                CalcDimension xValue;
+                ResourceParseUtils::ParseResResource(xResObj, xValue);
+                shadow.SetOffsetX(xValue.Value());
+            };
+            shadow.AddResource("shadow.offsetX", xResObj, std::move(updateFunc));
+        }
+        shadow.SetOffsetX(offsetX.Value());
+    } else {
+        if (ParseJsDimensionVp(vm, GetProperty(vm, jsObj, "offsetX"), offsetX)) {
+            shadow.SetOffsetX(offsetX.Value());
+        }
+    }
+    CalcDimension offsetY;
+    RefPtr<ResourceObject> yResObj;
+    auto jsOffsetY = GetProperty(vm, jsObj, static_cast<int32_t>(Framework::ArkUIIndex::OFFSET_Y));
+    if (ParseJsResource(vm, jsOffsetY, offsetY, yResObj)) {
+        if (yResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& yResObj, Shadow& shadow) {
+                CalcDimension yValue;
+                ResourceParseUtils::ParseResResource(yResObj, yValue);
+                shadow.SetOffsetY(yValue.Value());
+            };
+            shadow.AddResource("shadow.offsetY", yResObj, std::move(updateFunc));
+        }
+        shadow.SetOffsetY(offsetY.Value());
+    } else {
+        if (ParseJsDimensionVp(vm, jsOffsetY, offsetY)) {
+            shadow.SetOffsetY(offsetY.Value());
+        }
+    }
+}
+
+void ArkTSUtils::ParseShadowPropsUpdate(
+    const EcmaVM* vm, const Local<JSValueRef>& jsObj, double& radius, Shadow& shadow)
+{
+    if (jsObj->IsUndefined()) {
+        return;
+    }
+    RefPtr<ResourceObject> radiusResObj;
+    ParseJsDouble(
+        vm, GetProperty(vm, jsObj, static_cast<int32_t>(Framework::ArkUIIndex::RADIUS)), radius, radiusResObj);
+    if (SystemProperties::ConfigChangePerform() && radiusResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& radiusResObj, Shadow& shadow) {
+            double radius = 0.0;
+            ResourceParseUtils::ParseResDouble(radiusResObj, radius);
+            if (LessNotEqual(radius, 0.0)) {
+                radius = 0.0;
+            }
+            shadow.SetBlurRadius(radius);
+        };
+        shadow.AddResource("shadow.radius", radiusResObj, std::move(updateFunc));
+    }
+}
+
+bool ArkTSUtils::GetShadowFromTheme(
+    const EcmaVM* vm, ShadowStyle shadowStyle, Shadow& shadow, const bool configChangePerform)
+{
+    CHECK_NULL_RETURN(vm, false);
+    ViewAbstractModel::GetInstance()->RemoveResObj("shadowStyle");
+    auto colorMode = Container::CurrentColorMode();
+    if (shadowStyle == ShadowStyle::None) {
+        return true;
+    }
+
+    auto container = Container::Current();
+    CHECK_NULL_RETURN(container, false);
+    auto pipelineContext = container->GetPipelineContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+
+    auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+    if (!shadowTheme) {
+        return false;
+    }
+    shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+    if (configChangePerform) {
+        auto frameNode = NG::ViewStackProcessor::GetInstance()->GetMainFrameNode();
+        CHECK_NULL_RETURN(frameNode, false);
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_RETURN(pattern, false);
+        RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+        auto&& updateFunc = [shadowStyle, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+            auto frameNode = weak.Upgrade();
+            CHECK_NULL_VOID(frameNode);
+            auto colorMode = Container::CurrentColorMode();
+            auto container = Container::Current();
+            CHECK_NULL_VOID(container);
+            auto pipelineContext = container->GetPipelineContext();
+            CHECK_NULL_VOID(pipelineContext);
+            auto shadowTheme = pipelineContext->GetTheme<ShadowTheme>();
+            if (!shadowTheme) {
+                return;
+            }
+            Shadow shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
+            ACE_UPDATE_NODE_RENDER_CONTEXT(BackShadow, shadow, frameNode);
+        };
+        updateFunc(resObj);
+        pattern->AddResObj("shadowStyle", resObj, std::move(updateFunc));
+        return false;
+    }
+    return true;
+}
+
+bool ArkTSUtils::ParseJsShadowColorStrategy(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, ShadowColorStrategy& strategy)
+{
+    CHECK_NULL_RETURN(vm, false);
+    if (jsValue->IsString(vm)) {
+        std::string colorStr = jsValue->ToString(vm)->ToString(vm);
+        if (colorStr.compare("average") == 0) {
+            strategy = ShadowColorStrategy::AVERAGE;
+            return true;
+        } else if (colorStr.compare("primary") == 0) {
+            strategy = ShadowColorStrategy::PRIMARY;
+            return true;
+        }
+    }
+    return false;
+}
+
+void ArkTSUtils::ParseBlurOption(const EcmaVM* vm, const Local<JSValueRef>& jsBlurOption, BlurOption& blurOption)
+{
+    auto blurOptionProperty = GetProperty(vm, jsBlurOption, "grayscale");
+    if (blurOptionProperty->IsArray(vm)) {
+        Local<panda::ArrayRef> params = blurOptionProperty->ToObject(vm);
+        auto grey1 = panda::ArrayRef::GetValueAt(vm, params, 0)->ToNumber(vm)->Int32Value(vm);
+        auto grey2 = panda::ArrayRef::GetValueAt(vm, params, 1)->ToNumber(vm)->Int32Value(vm);
+        std::vector<float> greyVec(2); // 2 number
+        greyVec[0] = grey1;
+        greyVec[1] = grey2;
+        blurOption.grayscale = greyVec;
+    }
+}
+
+void ArkTSUtils::ParseInactiveColor(const EcmaVM* vm, const Local<JSValueRef>& jsOption, BlurStyleOption& styleOption)
+{
+    RefPtr<ResourceObject> inactiveColorResObj;
+    if (ParseJsColor(vm, GetProperty(vm, jsOption, "inactiveColor"), styleOption.inactiveColor, inactiveColorResObj)) {
+        styleOption.isValidColor = true;
+    }
+
+    if (SystemProperties::ConfigChangePerform() && inactiveColorResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, BlurStyleOption& styleOption) {
+            Color inactiveColorValue;
+            ResourceParseUtils::ParseResColor(resObj, inactiveColorValue);
+            styleOption.inactiveColor = inactiveColorValue;
+            styleOption.isValidColor = true;
+        };
+        styleOption.AddResource(
+            "backgroundBlurStyle.backgroundBlurStyleOptions.inactiveColor", inactiveColorResObj, std::move(updateFunc));
+    }
+}
+
+void ArkTSUtils::ParseBlurStyleOption(const EcmaVM* vm, const Local<JSValueRef>& jsOption, BlurStyleOption& styleOption)
+{
+    if (jsOption->IsUndefined()) {
+        return;
+    }
+    auto colorMode = static_cast<int32_t>(ThemeColorMode::SYSTEM);
+    ParseJsInt32(vm, GetProperty(vm, jsOption, "colorMode"), colorMode);
+    if (colorMode >= static_cast<int32_t>(ThemeColorMode::SYSTEM) &&
+        colorMode <= static_cast<int32_t>(ThemeColorMode::DARK)) {
+        styleOption.colorMode = static_cast<ThemeColorMode>(colorMode);
+    }
+    auto adaptiveColor = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    ParseJsInt32(vm, GetProperty(vm, jsOption, "adaptiveColor"), adaptiveColor);
+    if (adaptiveColor >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+        adaptiveColor <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+        styleOption.adaptiveColor = static_cast<AdaptiveColor>(adaptiveColor);
+    }
+
+    // policy
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    ParseJsInt32(vm, GetProperty(vm, jsOption, "policy"), policy);
+    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
+        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+        styleOption.policy = static_cast<BlurStyleActivePolicy>(policy);
+    }
+
+    // blurType
+    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    ParseJsInt32(vm, GetProperty(vm, jsOption, "type"), blurType);
+    if (blurType >= static_cast<int32_t>(BlurType::WITHIN_WINDOW) &&
+        blurType <= static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
+        styleOption.blurType = static_cast<BlurType>(blurType);
+    }
+
+    // inactiveColor
+    ParseInactiveColor(vm, jsOption, styleOption);
+
+    // scale
+    if (GetProperty(vm, jsOption, "scale")->IsNumber()) {
+        double scale = GetProperty(vm, jsOption, "scale")->ToNumber(vm)->Int32Value(vm);
+        styleOption.scale = std::clamp(scale, 0.0, 1.0);
+    }
+
+    if (GetProperty(vm, jsOption, "blurOptions")->IsObject(vm)) {
+        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions")->ToObject(vm);
+        BlurOption blurOption;
+        ParseBlurOption(vm, jsBlurOption, blurOption);
+        styleOption.blurOption = blurOption;
+    }
+}
+
+void ArkTSUtils::JsOpacity(const EcmaVM* vm, const Local<JSValueRef>& jsOpacity)
+{
+    ViewAbstractModel::GetInstance()->RemoveResObj("viewAbstract.opacity");
+    double opacity = 0.0;
+    RefPtr<ResourceObject> opacityResObj;
+    if (!ParseJsDouble(vm, jsOpacity, opacity, opacityResObj)) {
+        ViewAbstractModel::GetInstance()->SetOpacity(1.0f);
+        return;
+    }
+    if (SystemProperties::ConfigChangePerform() && opacityResObj) {
+        ViewAbstractModel::GetInstance()->CreateWithOpacityResourceObj(opacityResObj);
+        return;
+    }
+    if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
+        opacity = std::clamp(opacity, 0.0, 1.0);
+    } else {
+        if (opacity > 1.0 || LessNotEqual(opacity, 0.0)) {
+            opacity = 1.0;
+        }
+    }
+    ViewAbstractModel::GetInstance()->SetOpacity(opacity);
+}
+
+void ArkTSUtils::GetEffectOptionColor(const EcmaVM* vm, const Local<JSValueRef>& jsOption, EffectOption& effectOption)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        ParseJsColor(vm, GetProperty(vm, jsOption, "color"), effectOption.color);
+    } else {
+        RefPtr<ResourceObject> colorResObj;
+        ParseJsColor(vm, GetProperty(vm, jsOption, "color"), effectOption.color, colorResObj);
+        if (colorResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, EffectOption& effectOption) {
+                Color effectOptionColor;
+                ResourceParseUtils::ParseResColor(colorResObj, effectOptionColor);
+                effectOption.color = effectOptionColor;
+            };
+            effectOption.AddResource("backgroundEffect.color", colorResObj, std::move(updateFunc));
+        }
+    }
+}
+
+void ArkTSUtils::GetEffectOptionInactiveColorUpdate(
+    const RefPtr<ResourceObject>& inactiveColorObj, EffectOption& effectOption)
+{
+    if (inactiveColorObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& inactiveColorObj, EffectOption& effectOption) {
+            Color effectOptionInactiveColor;
+            ResourceParseUtils::ParseResColor(inactiveColorObj, effectOptionInactiveColor);
+            effectOption.inactiveColor = effectOptionInactiveColor;
+        };
+        effectOption.AddResource("backgroundEffect.inactiveColor", inactiveColorObj, std::move(updateFunc));
+    }
+}
+
+void ArkTSUtils::GetEffectOptionInactiveColor(
+    const EcmaVM* vm, const Local<JSValueRef>& jsOption, EffectOption& effectOption)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        if (ParseJsColor(vm, GetProperty(vm, jsOption, "inactiveColor"), effectOption.inactiveColor)) {
+            effectOption.isValidColor = true;
+        }
+    } else {
+        RefPtr<ResourceObject> inactiveColorObj;
+        if (ParseJsColor(
+                vm, GetProperty(vm, jsOption, "inactiveColor"), effectOption.inactiveColor, inactiveColorObj)) {
+            GetEffectOptionInactiveColorUpdate(inactiveColorObj, effectOption);
+            effectOption.isValidColor = true;
+        }
+    }
+}
+
+void ArkTSUtils::ParseEffectOption(const EcmaVM* vm, const Local<JSValueRef>& jsOption, EffectOption& effectOption)
+{
+    CHECK_NULL_VOID(vm);
+    CalcDimension radius;
+    if (!ParseJsDimensionVp(vm, GetProperty(vm, jsOption, "radius"), radius) || LessNotEqual(radius.Value(), 0.0f)) {
+        radius.SetValue(0.0f);
+    }
+    effectOption.radius = radius;
+
+    double saturation = 1.0f;
+    if (GetProperty(vm, jsOption, "saturation")->IsNumber()) {
+        saturation = GetProperty(vm, jsOption, "saturation")->ToNumber(vm)->Value();
+        saturation = (saturation > 0.0f || NearZero(saturation)) ? saturation : 1.0f;
+    }
+    effectOption.saturation = saturation;
+
+    double brightness = 1.0f;
+    if (GetProperty(vm, jsOption, "brightness")->IsNumber()) {
+        brightness = GetProperty(vm, jsOption, "brightness")->ToNumber(vm)->Int32Value(vm);
+        brightness = (brightness > 0.0f || NearZero(brightness)) ? brightness : 1.0f;
+    }
+    effectOption.brightness = brightness;
+
+    GetEffectOptionColor(vm, jsOption, effectOption);
+
+    auto adaptiveColorValue = static_cast<int32_t>(AdaptiveColor::DEFAULT);
+    auto adaptiveColor = AdaptiveColor::DEFAULT;
+    ParseJsInt32(vm, GetProperty(vm, jsOption, "adaptiveColor"), adaptiveColorValue);
+    if (adaptiveColorValue >= static_cast<int32_t>(AdaptiveColor::DEFAULT) &&
+        adaptiveColorValue <= static_cast<int32_t>(AdaptiveColor::AVERAGE)) {
+        adaptiveColor = static_cast<AdaptiveColor>(adaptiveColorValue);
+    }
+    effectOption.adaptiveColor = adaptiveColor;
+
+    // policy
+    auto policy = static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_ACTIVE);
+    ParseJsInt32(vm, GetProperty(vm, jsOption, "policy"), policy);
+    if (policy >= static_cast<int32_t>(BlurStyleActivePolicy::FOLLOWS_WINDOW_ACTIVE_STATE) &&
+        policy <= static_cast<int32_t>(BlurStyleActivePolicy::ALWAYS_INACTIVE)) {
+        effectOption.policy = static_cast<BlurStyleActivePolicy>(policy);
+    }
+
+    // blurType
+    auto blurType = static_cast<int32_t>(BlurType::WITHIN_WINDOW);
+    ParseJsInt32(vm, GetProperty(vm, jsOption, "type"), blurType);
+    if (blurType >= static_cast<int32_t>(BlurType::WITHIN_WINDOW) &&
+        blurType <= static_cast<int32_t>(BlurType::BEHIND_WINDOW)) {
+        effectOption.blurType = static_cast<BlurType>(blurType);
+    }
+
+    // inactiveColor
+    GetEffectOptionInactiveColor(vm, jsOption, effectOption);
+
+    BlurOption blurOption;
+    if (GetProperty(vm, jsOption, "blurOptions")->IsObject(vm)) {
+        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions")->ToString(vm);
+        ParseBlurOption(vm, jsBlurOption, blurOption);
+        effectOption.blurOption = blurOption;
+    }
+}
+
+template<typename T>
+T ArkTSUtils::GetPropertyValue(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, int32_t propertyIndex, T defaultValue)
+{
+    static_assert(
+        !std::is_const_v<T> && !std::is_reference_v<T>, "Cannot convert value to reference or cv-qualified types!");
+
+    Local<panda::StringRef> stringRef = panda::ExternalStringCache::GetCachedString(vm, propertyIndex);
+    auto jsObj = jsValue->ToObject(vm);
+    Local<JSValueRef> valueRef = jsObj->Get(vm, stringRef);
+    if constexpr (std::is_same<T, bool>::value) {
+        return valueRef->IsBoolean() ? valueRef->BooleaValue(vm) : defaultValue;
+    } else if constexpr (std::is_arithmetic<T>::value) {
+        return valueRef->IsNumber() ? Framework::JsiValueConvertor::fromJsiValue<T>(vm, valueRef) : defaultValue;
+    } else if constexpr (std::is_same_v<T, std::string>) {
+        return valueRef->IsString(vm) ? valueRef->ToString(vm)->ToString(vm) : defaultValue;
+    } else {
+        LOGW("Get property value failed.");
+    }
+    return defaultValue;
+}
+
+bool ArkTSUtils::ParseShadowProps(
+    const EcmaVM* vm, const Local<JSValueRef>& jsValue, Shadow& shadow, const bool configChangePerform, bool needResObj)
+{
+    CHECK_NULL_RETURN(vm, false);
+    int32_t shadowStyle = 0;
+    if (ArkTSUtils::ParseJsIntegerWithResource(vm, jsValue, shadowStyle)) {
+        auto style = static_cast<ShadowStyle>(shadowStyle);
+        return GetShadowFromTheme(vm, style, shadow, configChangePerform);
+    }
+    if (!jsValue->IsObject(vm)) {
+        return false;
+    }
+    auto jsObj = jsValue->ToObject(vm);
+    double radius = 0.0;
+    ParseShadowPropsUpdate(vm, jsObj, radius, shadow);
+    if (LessNotEqual(radius, 0.0)) {
+        radius = 0.0;
+    }
+    shadow.SetBlurRadius(radius);
+    ParseShadowOffsetXY(vm, jsObj, shadow);
+
+    Color color;
+    ShadowColorStrategy shadowColorStrategy;
+    auto jsColor = ArkTSUtils::GetProperty(vm, jsObj, static_cast<int32_t>(Framework::ArkUIIndex::COLOR));
+    RefPtr<ResourceObject> colorResObj;
+    if (ParseJsShadowColorStrategy(vm, jsColor, shadowColorStrategy)) {
+        shadow.SetShadowColorStrategy(shadowColorStrategy);
+    } else if (ArkTSUtils::ParseJsColor(vm, jsColor, color, colorResObj)) {
+        if (needResObj && colorResObj) {
+            auto jsObj = jsColor->ToObject(vm);
+            CompleteResourceObject(vm, jsObj);
+            colorResObj = GetResourceObject(vm, jsObj);
+        }
+        if ((SystemProperties::ConfigChangePerform() || needResObj) && colorResObj) {
+            auto&& updateFunc = [](const RefPtr<ResourceObject>& colorResObj, Shadow& shadow) {
+                Color colorValue;
+                ResourceParseUtils::ParseResColor(colorResObj, colorValue);
+                shadow.SetColor(colorValue);
+            };
+            shadow.AddResource("shadow.colorValue", colorResObj, std::move(updateFunc));
+        }
+        shadow.SetColor(color);
+    }
+
+    int32_t type = static_cast<int32_t>(ShadowType::COLOR);
+    ArkTSUtils::ParseJsIntegerWithResource(
+        vm, ArkTSUtils::GetProperty(vm, jsObj, static_cast<int32_t>(Framework::ArkUIIndex::TYPE)), type);
+    if (type != static_cast<int32_t>(ShadowType::BLUR)) {
+        type = static_cast<int32_t>(ShadowType::COLOR);
+    }
+    shadow.SetShadowType(static_cast<ShadowType>(type));
+    bool isFilled = GetPropertyValue<bool>(vm, jsObj, static_cast<int32_t>(Framework::ArkUIIndex::FILL), false);
+    shadow.SetIsFilled(isFilled);
+    return true;
+}
+
+void GetBorderRadiusByLengthMetrics(
+    EcmaVM* vm, const char* key, const panda::Local<panda::ObjectRef>& object, CalcDimension& radius)
+{
+    if (object->Has(vm, panda::StringRef::NewFromUtf8(vm, key))) {
+        panda::Local<panda::JSValueRef> propertyValue = object->Get(vm, panda::StringRef::NewFromUtf8(vm, key));
+        if (propertyValue->IsObject(vm)) {
+            panda::Local<panda::ObjectRef> startObj = propertyValue->ToObject(vm);
+            ArkTSUtils::ParseJsLengthMetrics(vm, startObj, radius);
+        }
+    }
+}
+
+void GetBorderRadiusResObj(EcmaVM* vm, const char* key, panda::Local<panda::ObjectRef> object, CalcDimension& radius,
+    RefPtr<ResourceObject>& resObj)
+{
+    auto property = object->Get(vm, panda::StringRef::NewFromUtf8(vm, key));
+    ArkTSUtils::ParseJsDimensionVp(vm, property, radius, resObj);
+}
+
+bool ArkTSUtils::ParseAllBorderRadiuses(EcmaVM* vm, panda::Local<panda::ObjectRef> object,
+    BorderRadiusOption& borderRadius, std::shared_ptr<TextBackgroundStyle>& textBackgroundStyle)
+{
+    if (object->Has(vm, panda::StringRef::NewFromUtf8(vm, TOP_START_PROPERTY)) ||
+        object->Has(vm, panda::StringRef::NewFromUtf8(vm, TOP_END_PROPERTY)) ||
+        object->Has(vm, panda::StringRef::NewFromUtf8(vm, BOTTOM_START_PROPERTY)) ||
+        object->Has(vm, panda::StringRef::NewFromUtf8(vm, BOTTOM_END_PROPERTY))) {
+        CalcDimension topStart;
+        CalcDimension topEnd;
+        CalcDimension bottomStart;
+        CalcDimension bottomEnd;
+        GetBorderRadiusByLengthMetrics(vm, TOP_START_PROPERTY, object, topStart);
+        GetBorderRadiusByLengthMetrics(vm, TOP_END_PROPERTY, object, topEnd);
+        GetBorderRadiusByLengthMetrics(vm, BOTTOM_START_PROPERTY, object, bottomStart);
+        GetBorderRadiusByLengthMetrics(vm, BOTTOM_END_PROPERTY, object, bottomEnd);
+        borderRadius.topLeft = topStart;
+        borderRadius.topRight = topEnd;
+        borderRadius.bottomLeft = bottomStart;
+        borderRadius.bottomRight = bottomEnd;
+        return true;
+    }
+    RefPtr<ResourceObject> resObjTopLeft;
+    RefPtr<ResourceObject> resObjTopRight;
+    RefPtr<ResourceObject> resObjBottomLeft;
+    RefPtr<ResourceObject> resObjBottomRight;
+    GetBorderRadiusResObj(vm, "topLeft", object, borderRadius.topLeft, resObjTopLeft);
+    GetBorderRadiusResObj(vm, "topRight", object, borderRadius.topRight, resObjTopRight);
+    GetBorderRadiusResObj(vm, "bottomLeft", object, borderRadius.bottomLeft, resObjBottomLeft);
+    GetBorderRadiusResObj(vm, "bottomRight", object, borderRadius.bottomRight, resObjBottomRight);
+
+    ArkTSUtils::RegisterTextBackgroundStyleResource(
+        textBackgroundStyle, resObjTopLeft, resObjTopRight, resObjBottomLeft, resObjBottomRight);
+    return false;
+}
+
+#define ADDRESOURCE_UPDATE_FUNC(property, resObj, radiusMember, resourceName)                 \
+    RefPtr<ResourceObject> resObj;                                                            \
+    auto value##property = object->Get(vm, panda::StringRef::NewFromUtf8(vm, #property));               \
+    ArkTSUtils::ParseJsDimensionVp(vm, value##property, property, resObj);                              \
+    if (resObj) {                                                                             \
+        auto&& updateFunc = [](const RefPtr<ResourceObject>&(resObj),                         \
+                                NG::BorderRadiusProperty& borderRadiusProperty) {             \
+            CalcDimension property;                                                           \
+            ResourceParseUtils::ParseResDimensionVp(resObj, property);                        \
+            if (LessNotEqual((property).Value(), 0.0f)) {                                     \
+                (property).Reset();                                                           \
+            }                                                                                 \
+            borderRadiusProperty.radiusMember = property;                                     \
+        };                                                                                    \
+        borderRadius.AddResource(resourceName, resObj, std::move(updateFunc));                \
+    }
+
+inline panda::Local<panda::StringRef> GetCachedString(EcmaVM* vm, Framework::ArkUIIndex index)
+{
+    return panda::ExternalStringCache::GetCachedString(vm, static_cast<int32_t>(index));
+}
+
+void ParseAllBorderRadiuses(
+    EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, NG::BorderRadiusProperty& borderRadius)
+{
+    CalcDimension topLeft;
+    CalcDimension topRight;
+    CalcDimension bottomLeft;
+    CalcDimension bottomRight;
+    bool hasSetBorderRadius = false;
+    if (object->Has(vm, GetCachedString(vm, Framework::ArkUIIndex::TOP_START)) ||
+        object->Has(vm, GetCachedString(vm, Framework::ArkUIIndex::TOP_END)) ||
+        object->Has(vm, GetCachedString(vm, Framework::ArkUIIndex::BOTTOM_START)) ||
+        object->Has(vm, GetCachedString(vm, Framework::ArkUIIndex::BOTTOM_END))) {
+        CalcDimension topStart;
+        CalcDimension topEnd;
+        CalcDimension bottomStart;
+        CalcDimension bottomEnd;
+        GetBorderRadiusByLengthMetrics(vm, TOP_START_PROPERTY, object, topStart);
+        GetBorderRadiusByLengthMetrics(vm, TOP_END_PROPERTY, object, topEnd);
+        GetBorderRadiusByLengthMetrics(vm, BOTTOM_START_PROPERTY, object, bottomStart);
+        GetBorderRadiusByLengthMetrics(vm, BOTTOM_END_PROPERTY, object, bottomEnd);
+        topLeft = topStart;
+        topRight = topEnd;
+        bottomLeft = bottomStart;
+        bottomRight = bottomEnd;
+        hasSetBorderRadius = true;
+    } else {
+        ADDRESOURCE_UPDATE_FUNC(topLeft, topLeftResObj, radiusTopLeft, "borderRadius.topLeft");
+        ADDRESOURCE_UPDATE_FUNC(topRight, topRightResObj, radiusTopRight, "borderRadius.topRight");
+        ADDRESOURCE_UPDATE_FUNC(bottomLeft, bottomLeftResObj, radiusBottomLeft, "borderRadius.bottomLeft");
+        ADDRESOURCE_UPDATE_FUNC(bottomRight, bottomRightResObj, radiusBottomRight, "borderRadius.bottomRight");
+    }
+    if (LessNotEqual(topLeft.Value(), 0.0f)) {
+        topLeft.Reset();
+    }
+    if (LessNotEqual(topRight.Value(), 0.0f)) {
+        topRight.Reset();
+    }
+    if (LessNotEqual(bottomLeft.Value(), 0.0f)) {
+        bottomLeft.Reset();
+    }
+    if (LessNotEqual(bottomRight.Value(), 0.0f)) {
+        bottomRight.Reset();
+    }
+    auto isRtl = hasSetBorderRadius && AceApplicationInfo::GetInstance().IsRightToLeft();
+    borderRadius.radiusTopLeft = isRtl ? topRight : topLeft;
+    borderRadius.radiusTopRight = isRtl ? topLeft : topRight;
+    borderRadius.radiusBottomLeft = isRtl ? bottomRight : bottomLeft;
+    borderRadius.radiusBottomRight = isRtl ? bottomLeft : bottomRight;
+    borderRadius.multiValued = true;
+}
+
+bool ArkTSUtils::ParseAllBorderRadiuses(
+    EcmaVM* vm, panda::Local<panda::ObjectRef> object, BorderRadiusOption& borderRadius)
+{
+    std::shared_ptr<TextBackgroundStyle> textBackgroundStyle = std::make_shared<TextBackgroundStyle>();
+    return ParseAllBorderRadiuses(vm, object, borderRadius, textBackgroundStyle);
+}
+
+void RegisterRadiusesResObj(
+    const std::string& key, NG::BorderRadiusProperty& borderRadius, const RefPtr<ResourceObject>& resObj)
+{
+    if (!resObj) {
+        return;
+    }
+    auto updateFunc = [key](const RefPtr<ResourceObject>& resObj, NG::BorderRadiusProperty& borderRadius) {
+        CalcDimension result;
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        if (key == "borderRadius.topLeft") {
+            borderRadius.radiusTopLeft = result;
+        } else if (key == "borderRadius.topRight") {
+            borderRadius.radiusTopRight = result;
+        } else if (key == "borderRadius.bottomLeft") {
+            borderRadius.radiusBottomLeft = result;
+        } else if (key == "borderRadius.bottomRight") {
+            borderRadius.radiusBottomRight = result;
+        }
+    };
+    borderRadius.AddResource(key, resObj, std::move(updateFunc));
+}
+
+void ParseAllBorderRadiusesResObj(NG::BorderRadiusProperty& borderRadius, const RefPtr<ResourceObject>& topLeftResObj,
+    const RefPtr<ResourceObject>& topRightResObj, const RefPtr<ResourceObject>& bottomLeftResObj,
+    const RefPtr<ResourceObject>& bottomRightResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    borderRadius.resMap_.clear();
+    RegisterRadiusesResObj("borderRadius.topLeft", borderRadius, topLeftResObj);
+    RegisterRadiusesResObj("borderRadius.topRight", borderRadius, topRightResObj);
+    RegisterRadiusesResObj("borderRadius.bottomLeft", borderRadius, bottomLeftResObj);
+    RegisterRadiusesResObj("borderRadius.bottomRight", borderRadius, bottomRightResObj);
+}
+
+NG::BorderRadiusProperty ArkTSUtils::BorderRadiusProperty(EcmaVM* vm, panda::Local<panda::ObjectRef> object,
+    BorderRadiusOption& borderRadius)
+{
+    NG::BorderRadiusProperty borderRadiusProperty;
+    if (SystemProperties::ConfigChangePerform()) {
+        return borderRadiusProperty;
+    }
+    RefPtr<ResourceObject> topLeftResObj;
+    RefPtr<ResourceObject> topRightResObj;
+    RefPtr<ResourceObject> bottomLeftResObj;
+    RefPtr<ResourceObject> bottomRightResObj;
+
+    GetBorderRadiusResObj(vm, "topLeft", object, borderRadius.topLeft, topLeftResObj);
+    GetBorderRadiusResObj(vm, "topRight", object, borderRadius.topRight, topRightResObj);
+    GetBorderRadiusResObj(vm, "bottomLeft", object, borderRadius.bottomLeft, bottomLeftResObj);
+    GetBorderRadiusResObj(vm, "bottomRight", object, borderRadius.bottomRight, bottomRightResObj);
+    borderRadiusProperty.radiusTopLeft = borderRadius.topLeft;
+    borderRadiusProperty.radiusTopRight = borderRadius.topRight;
+    borderRadiusProperty.radiusBottomLeft = borderRadius.bottomLeft;
+    borderRadiusProperty.radiusBottomRight = borderRadius.bottomRight;
+    borderRadiusProperty.multiValued = true;
+    ParseAllBorderRadiusesResObj(
+        borderRadiusProperty, topLeftResObj, topRightResObj, bottomLeftResObj, bottomRightResObj);
+    return borderRadiusProperty;
+}
+
+BorderStyleOption ArkTSUtils::ParseBorderStyle(EcmaVM* vm, panda::Local<panda::ObjectRef> object)
+{
+    BorderStyleOption borderStyleOption;
+    std::optional<BorderStyle> styleLeft;
+    std::optional<BorderStyle> styleRight;
+    std::optional<BorderStyle> styleTop;
+    std::optional<BorderStyle> styleBottom;
+    auto leftValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::LEFT));
+    if (leftValue->IsNumber()) {
+        styleLeft = ArkTSUtils::ConvertBorderStyle(leftValue->ToNumber(vm)->Int32Value(vm));
+    }
+    auto rightValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::RIGHT));
+    if (rightValue->IsNumber()) {
+        styleRight = ArkTSUtils::ConvertBorderStyle(rightValue->ToNumber(vm)->Int32Value(vm));
+    }
+    auto topValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::TOP));
+    if (topValue->IsNumber()) {
+        styleTop = ArkTSUtils::ConvertBorderStyle(topValue->ToNumber(vm)->Int32Value(vm));
+    }
+    auto bottomValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::BOTTOM));
+    if (bottomValue->IsNumber()) {
+        styleBottom = ArkTSUtils::ConvertBorderStyle(bottomValue->ToNumber(vm)->Int32Value(vm));
+    }
+    borderStyleOption.styleLeft = styleLeft;
+    borderStyleOption.styleRight = styleRight;
+    borderStyleOption.styleTop = styleTop;
+    borderStyleOption.styleBottom = styleBottom;
+    return borderStyleOption;
+}
+
+LayoutCalPolicy ArkTSUtils::ParseLayoutPolicy(const std::string& layoutPolicy)
+{
+    if (layoutPolicy == "matchParent") {
+        return LayoutCalPolicy::MATCH_PARENT;
+    }
+    if (layoutPolicy == "wrapContent") {
+        return LayoutCalPolicy::WRAP_CONTENT;
+    }
+    if (layoutPolicy == "fixAtIdealSize") {
+        return LayoutCalPolicy::FIX_AT_IDEAL_SIZE;
+    }
+    return LayoutCalPolicy::NO_MATCH;
+}
+
+void CheckDimensionUnit(CalcDimension& checkDimension, bool notPercent, bool notNegative)
+{
+    if (notPercent && checkDimension.Unit() == DimensionUnit::PERCENT) {
+        checkDimension.Reset();
+        return;
+    }
+    if (notNegative && checkDimension.IsNegative()) {
+        checkDimension.Reset();
+        return;
+    }
+}
+
+void ParseEdgeWidths(EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, CommonCalcDimension& commonCalcDimension,
+    bool notNegative)
+{
+    CalcDimension left;
+    auto leftValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::LEFT));
+    if (ArkTSUtils::ParseJsDimensionVp(vm, leftValue, left)) {
+        CheckDimensionUnit(left, true, notNegative);
+        commonCalcDimension.left = left;
+    }
+    CalcDimension right;
+    auto rightValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::RIGHT));
+    if (ArkTSUtils::ParseJsDimensionVp(vm, rightValue, right)) {
+        CheckDimensionUnit(right, true, notNegative);
+        commonCalcDimension.right = right;
+    }
+    CalcDimension top;
+    auto topValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::TOP));
+    if (ArkTSUtils::ParseJsDimensionVp(vm, topValue, top)) {
+        CheckDimensionUnit(top, true, notNegative);
+        commonCalcDimension.top = top;
+    }
+    CalcDimension bottom;
+    auto bottomValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::BOTTOM));
+    if (ArkTSUtils::ParseJsDimensionVp(vm, bottomValue, bottom)) {
+        CheckDimensionUnit(bottom, true, notNegative);
+        commonCalcDimension.bottom = bottom;
+    }
+}
+
+bool ArkTSUtils::ParseCommonEdgeWidths(EcmaVM* vm, const panda::Local<panda::ObjectRef>& object,
+    CommonCalcDimension& commonCalcDimension, bool notNegative)
+{
+    if (ArkTSUtils::CheckLengthMetrics(vm, object)) {
+        LocalizedCalcDimension localizedCalcDimension;
+        ParseLocalizedEdgeWidths(vm, object, localizedCalcDimension, notNegative);
+        commonCalcDimension.top = localizedCalcDimension.top;
+        commonCalcDimension.bottom = localizedCalcDimension.bottom;
+        commonCalcDimension.left = localizedCalcDimension.start;
+        commonCalcDimension.right = localizedCalcDimension.end;
+        return true;
+    }
+    if (!SystemProperties::ConfigChangePerform()) {
+        ParseEdgeWidths(vm, object, commonCalcDimension, notNegative);
+    }
+    return false;
+}
+
+void RegisterEdgesWidthResObj(
+    const std::string& key, NG::BorderWidthProperty& borderWidth, const RefPtr<ResourceObject>& resObj)
+{
+    if (!resObj) {
+        return;
+    }
+    auto updateFunc = [key](const RefPtr<ResourceObject>& resObj, NG::BorderWidthProperty& borderWidth) {
+        CalcDimension result;
+        ResourceParseUtils::ParseResDimensionVp(resObj, result);
+        if (key == "borderWidth.left") {
+            borderWidth.leftDimen = result;
+        } else if (key == "borderWidth.right") {
+            borderWidth.rightDimen = result;
+        } else if (key == "borderWidth.top") {
+            borderWidth.topDimen = result;
+        } else if (key == "borderWidth.bottom") {
+            borderWidth.bottomDimen = result;
+        }
+        borderWidth.multiValued = true;
+    };
+    borderWidth.AddResource(key, resObj, std::move(updateFunc));
+}
+
+void ParseEdgeWidthsResObjFunc(NG::BorderWidthProperty& borderWidth, RefPtr<ResourceObject> leftResObj,
+    RefPtr<ResourceObject> rightResObj, RefPtr<ResourceObject> topResObj, RefPtr<ResourceObject> bottomResObj)
+{
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    borderWidth.resMap_.clear();
+    RegisterEdgesWidthResObj("borderWidth.left", borderWidth, leftResObj);
+    RegisterEdgesWidthResObj("borderWidth.right", borderWidth, rightResObj);
+    RegisterEdgesWidthResObj("borderWidth.top", borderWidth, topResObj);
+    RegisterEdgesWidthResObj("borderWidth.bottom", borderWidth, bottomResObj);
+}
+
+void ArkTSUtils::ParseEdgeWidthsResObj(
+    EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, NG::BorderWidthProperty& borderWidth, bool notNegative)
+{
+    CalcDimension left;
+    RefPtr<ResourceObject> leftResObj;
+    auto leftValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::LEFT));
+    if (ArkTSUtils::ParseJsDimensionVp(vm, leftValue, left, leftResObj)) {
+        CheckDimensionUnit(left, true, notNegative);
+        borderWidth.leftDimen = left;
+        borderWidth.multiValued = true;
+    }
+    CalcDimension right;
+    RefPtr<ResourceObject> rightResObj;
+    auto rightValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::RIGHT));
+    if (ArkTSUtils::ParseJsDimensionVp(vm, rightValue, right, rightResObj)) {
+        CheckDimensionUnit(right, true, notNegative);
+        borderWidth.rightDimen = right;
+        borderWidth.multiValued = true;
+    }
+    CalcDimension top;
+    RefPtr<ResourceObject> topResObj;
+    auto topValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::TOP));
+    if (ArkTSUtils::ParseJsDimensionVp(vm, topValue, top, topResObj)) {
+        CheckDimensionUnit(top, true, notNegative);
+        borderWidth.topDimen = top;
+        borderWidth.multiValued = true;
+    }
+    CalcDimension bottom;
+    RefPtr<ResourceObject> bottomResObj;
+    auto bottomValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::BOTTOM));
+    if (ArkTSUtils::ParseJsDimensionVp(vm, bottomValue, bottom, bottomResObj)) {
+        CheckDimensionUnit(bottom, true, notNegative);
+        borderWidth.bottomDimen = bottom;
+        borderWidth.multiValued = true;
+    }
+    ParseEdgeWidthsResObjFunc(borderWidth, leftResObj, rightResObj, topResObj, bottomResObj);
+}
+
+void ArkTSUtils::ParseLocalizedEdgeWidths(EcmaVM* vm, const panda::Local<panda::ObjectRef>& object,
+    LocalizedCalcDimension& localizedCalcDimension, bool notNegative)
+{
+    auto jsStart = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::START));
+    if (jsStart->IsObject(vm)) {
+        auto startObj = jsStart->ToObject(vm);
+        CalcDimension calcDimension;
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, startObj, calcDimension)) {
+            CheckDimensionUnit(calcDimension, true, notNegative);
+            localizedCalcDimension.start = calcDimension;
+        }
+    }
+    auto jsEnd = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::END));
+    if (jsEnd->IsObject(vm)) {
+        auto endObj = jsEnd->ToObject(vm);
+        CalcDimension calcDimension;
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, endObj, calcDimension)) {
+            CheckDimensionUnit(calcDimension, true, notNegative);
+            localizedCalcDimension.end = calcDimension;
+        }
+    }
+    auto jsTop = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::TOP));
+    if (jsTop->IsObject(vm)) {
+        auto topObj = jsTop->ToObject(vm);
+        CalcDimension calcDimension;
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, topObj, calcDimension)) {
+            CheckDimensionUnit(calcDimension, true, notNegative);
+            localizedCalcDimension.top = calcDimension;
+        }
+    }
+    auto jsBottom = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::BOTTOM));
+    if (jsBottom->IsObject(vm)) {
+        auto bottomObj = jsBottom->ToObject(vm);
+        CalcDimension calcDimension;
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, bottomObj, calcDimension)) {
+            CheckDimensionUnit(calcDimension, true, notNegative);
+            localizedCalcDimension.bottom = calcDimension;
+        }
+    }
+}
+
+bool ArkTSUtils::IsBorderWidthObjUndefined(EcmaVM* vm, const panda::Local<panda::JSValueRef>& args)
+{
+    if (!args->IsObject(vm)) {
+        return false;
+    }
+    panda::Local<panda::ObjectRef> obj = args->ToObject(vm);
+    if (obj->IsUndefined()) {
+        return true;
+    }
+    // filter dynamic $r raw input
+    if (obj->Has(vm, panda::StringRef::NewFromUtf8(vm, "id"))) {
+        return false;
+    }
+    if ((!obj->Has(vm, panda::StringRef::NewFromUtf8(vm, TOP_PROPERTY)) ||
+            obj->Get(vm, panda::StringRef::NewFromUtf8(vm, TOP_PROPERTY))->IsUndefined()) &&
+        (!obj->Has(vm, panda::StringRef::NewFromUtf8(vm, RIGHT_PROPERTY)) ||
+            obj->Get(vm, panda::StringRef::NewFromUtf8(vm, RIGHT_PROPERTY))->IsUndefined()) &&
+        (!obj->Has(vm, panda::StringRef::NewFromUtf8(vm, BOTTOM_PROPERTY)) ||
+            obj->Get(vm, panda::StringRef::NewFromUtf8(vm, BOTTOM_PROPERTY))->IsUndefined()) &&
+        (!obj->Has(vm, panda::StringRef::NewFromUtf8(vm, LEFT_PROPERTY)) ||
+            obj->Get(vm, panda::StringRef::NewFromUtf8(vm, LEFT_PROPERTY))->IsUndefined()) &&
+        (!obj->Has(vm, panda::StringRef::NewFromUtf8(vm, START_PROPERTY)) ||
+            obj->Get(vm, panda::StringRef::NewFromUtf8(vm, START_PROPERTY))->IsUndefined()) &&
+        (!obj->Has(vm, panda::StringRef::NewFromUtf8(vm, END_PROPERTY)) ||
+            obj->Get(vm, panda::StringRef::NewFromUtf8(vm, END_PROPERTY))->IsUndefined())) {
+        return true;
+    }
+
+    return false;
+}
+
+void RegisterLocalizedBorderColor(
+    const std::string& key, NG::BorderColorProperty& borderColors, const RefPtr<ResourceObject>& resObj)
+{
+    if (!resObj) {
+        return;
+    }
+    auto updateFunc = [key](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+        Color result;
+        ResourceParseUtils::ParseResColor(resObj, result);
+        if (key == "borderColor.start") {
+            borderColors.startColor = result;
+        } else if (key == "borderColor.end") {
+            borderColors.endColor = result;
+        } else if (key == "borderColor.top") {
+            borderColors.topColor = result;
+        } else if (key == "borderColor.bottom") {
+            borderColors.bottomColor = result;
+        }
+    };
+    borderColors.AddResource(key, resObj, std::move(updateFunc));
+}
+
+NG::BorderColorProperty ArkTSUtils::GetLocalizedBorderColor(const CommonColor& commonColor)
+{
+    NG::BorderColorProperty borderColors;
+    borderColors.startColor = commonColor.left;
+    borderColors.endColor = commonColor.right;
+    borderColors.topColor = commonColor.top;
+    borderColors.bottomColor = commonColor.bottom;
+    if (!SystemProperties::ConfigChangePerform()) {
+        return borderColors;
+    }
+    RegisterLocalizedBorderColor("borderColor.start", borderColors, commonColor.leftResObj);
+    RegisterLocalizedBorderColor("borderColor.end", borderColors, commonColor.rightResObj);
+    RegisterLocalizedBorderColor("borderColor.top", borderColors, commonColor.topResObj);
+    RegisterLocalizedBorderColor("borderColor.bottom", borderColors, commonColor.bottomResObj);
+    borderColors.multiValued = true;
+    return borderColors;
+}
+
+void ParseEdgeColors(EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, CommonColor& commonColor)
+{
+    Color left;
+    RefPtr<ResourceObject> leftResObj;
+    auto leftValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::LEFT));
+    if (ArkTSUtils::ParseJsColor(vm, leftValue, left, leftResObj)) {
+        commonColor.left = left;
+    }
+    Color right;
+    RefPtr<ResourceObject> rightResObj;
+    auto rightValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::RIGHT));
+    if (ArkTSUtils::ParseJsColor(vm, rightValue, right, rightResObj)) {
+        commonColor.right = right;
+    }
+    Color top;
+    RefPtr<ResourceObject> topResObj;
+    auto topValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::TOP));
+    if (ArkTSUtils::ParseJsColor(vm, topValue, top, topResObj)) {
+        commonColor.top = top;
+    }
+    Color bottom;
+    RefPtr<ResourceObject> bottomResObj;
+    auto bottomValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::BOTTOM));
+    if (ArkTSUtils::ParseJsColor(vm, bottomValue, bottom, bottomResObj)) {
+        commonColor.bottom = bottom;
+    }
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (leftResObj) {
+        commonColor.leftResObj = leftResObj;
+    }
+    if (rightResObj) {
+        commonColor.rightResObj = rightResObj;
+    }
+    if (topResObj) {
+        commonColor.topResObj = topResObj;
+    }
+    if (bottomResObj) {
+        commonColor.bottomResObj = bottomResObj;
+    }
+}
+
+void ParseLocalizedEdgeColors(EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, LocalizedColor& localizedColor)
+{
+    Color start;
+    RefPtr<ResourceObject> startResObj;
+    auto startValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::START));
+    if (ArkTSUtils::ParseJsColor(vm, startValue, start, startResObj)) {
+        localizedColor.start = start;
+    }
+    Color end;
+    RefPtr<ResourceObject> endResObj;
+    auto endValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::END));
+    if (ArkTSUtils::ParseJsColor(vm, endValue, end, endResObj)) {
+        localizedColor.end = end;
+    }
+    Color top;
+    RefPtr<ResourceObject> topResObj;
+    auto topValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::TOP));
+    if (ArkTSUtils::ParseJsColor(vm, topValue, top, topResObj)) {
+        localizedColor.top = top;
+    }
+    Color bottom;
+    RefPtr<ResourceObject> bottomResObj;
+    auto bottomValue = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::BOTTOM));
+    if (ArkTSUtils::ParseJsColor(vm, bottomValue, bottom, bottomResObj)) {
+        localizedColor.bottom = bottom;
+    }
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (startResObj) {
+        localizedColor.startResObj = startResObj;
+    }
+    if (endResObj) {
+        localizedColor.endResObj = endResObj;
+    }
+    if (topResObj) {
+        localizedColor.topResObj = topResObj;
+    }
+    if (bottomResObj) {
+        localizedColor.bottomResObj = bottomResObj;
+    }
+}
+
+bool ArkTSUtils::ParseCommonEdgeColors(EcmaVM* vm, const panda::Local<panda::ObjectRef>& object,
+    CommonColor& commonColor)
+{
+    if (object->Has(vm, GetCachedString(vm, Framework::ArkUIIndex::START)) ||
+        object->Has(vm, GetCachedString(vm, Framework::ArkUIIndex::END))) {
+        LocalizedColor localizedColor;
+        ParseLocalizedEdgeColors(vm, object, localizedColor);
+        commonColor.top = localizedColor.top;
+        commonColor.bottom = localizedColor.bottom;
+        commonColor.left = localizedColor.start;
+        commonColor.right = localizedColor.end;
+        commonColor.topResObj = localizedColor.topResObj;
+        commonColor.bottomResObj = localizedColor.bottomResObj;
+        commonColor.leftResObj = localizedColor.startResObj;
+        commonColor.rightResObj = localizedColor.endResObj;
+        return true;
+    }
+    ParseEdgeColors(vm, object, commonColor);
+    return false;
+}
+
+NG::BorderColorProperty ArkTSUtils::GetBorderColor(const CommonColor& commonColor)
+{
+    NG::BorderColorProperty borderColors;
+    borderColors.leftColor = commonColor.left;
+    borderColors.rightColor = commonColor.right;
+    borderColors.topColor = commonColor.top;
+    borderColors.bottomColor = commonColor.bottom;
+    if (!SystemProperties::ConfigChangePerform()) {
+        return borderColors;
+    }
+    if (commonColor.leftResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.leftColor = result;
+        };
+        borderColors.AddResource("borderColor.left", commonColor.leftResObj, std::move(updateFunc));
+    }
+    if (commonColor.rightResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.rightColor = result;
+        };
+        borderColors.AddResource("borderColor.right", commonColor.rightResObj, std::move(updateFunc));
+    }
+    if (commonColor.topResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.topColor = result;
+        };
+        borderColors.AddResource("borderColor.top", commonColor.topResObj, std::move(updateFunc));
+    }
+    if (commonColor.bottomResObj) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.bottomColor = result;
+        };
+        borderColors.AddResource("borderColor.bottom", commonColor.bottomResObj, std::move(updateFunc));
+    }
+    borderColors.multiValued = true;
+    return borderColors;
+}
+
+void ParseLocalizedMarginOrLocalizedPaddingCorner(
+    EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, LocalizedCalcDimension& localizedCalcDimension)
+{
+    auto jsStart = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::START));
+    if (jsStart->IsObject(vm)) {
+        panda::Local<panda::ObjectRef> startObj = jsStart->ToObject(vm);
+        CalcDimension calcDimension;
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, startObj, calcDimension)) {
+            localizedCalcDimension.start = calcDimension;
+        }
+    }
+    auto jsEnd = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::END));
+    if (jsEnd->IsObject(vm)) {
+        panda::Local<panda::ObjectRef> endObj = jsEnd->ToObject(vm);
+        CalcDimension calcDimension;
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, endObj, calcDimension)) {
+            localizedCalcDimension.end = calcDimension;
+        }
+    }
+    auto jsTop = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::TOP));
+    if (jsTop->IsObject(vm)) {
+        panda::Local<panda::ObjectRef> topObj = jsTop->ToObject(vm);
+        CalcDimension calcDimension;
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, topObj, calcDimension)) {
+            localizedCalcDimension.top = calcDimension;
+        }
+    }
+    auto jsBottom = object->Get(vm, GetCachedString(vm, Framework::ArkUIIndex::BOTTOM));
+    if (jsBottom->IsObject(vm)) {
+        panda::Local<panda::ObjectRef> bottomObj = jsBottom->ToObject(vm);
+        CalcDimension calcDimension;
+        if (ArkTSUtils::ParseJsLengthMetrics(vm, bottomObj, calcDimension)) {
+            localizedCalcDimension.bottom = calcDimension;
+        }
+    }
+}
+
+void ArkTSUtils::ParseMarginOrPaddingCorner(
+    EcmaVM* vm, const panda::Local<panda::ObjectRef>& obj, CommonCalcDimension& commonCalcDimension)
+{
+    CalcDimension leftDimen;
+    RefPtr<ResourceObject> leftResObj;
+    auto leftValue = GetCachedString(vm, Framework::ArkUIIndex::LEFT);
+    if (ArkTSUtils::ParseJsDimensionVp(vm, obj->Get(vm, leftValue), leftDimen, leftResObj)) {
+        commonCalcDimension.left = leftDimen;
+    }
+    CalcDimension rightDimen;
+    RefPtr<ResourceObject> rightResObj;
+    auto rightValue = GetCachedString(vm, Framework::ArkUIIndex::RIGHT);
+    if (ArkTSUtils::ParseJsDimensionVp(vm, obj->Get(vm, rightValue), rightDimen, rightResObj)) {
+        commonCalcDimension.right = rightDimen;
+    }
+    CalcDimension topDimen;
+    RefPtr<ResourceObject> topResObj;
+    auto topValue = GetCachedString(vm, Framework::ArkUIIndex::TOP);
+    if (ArkTSUtils::ParseJsDimensionVp(vm, obj->Get(vm, topValue), topDimen, topResObj)) {
+        commonCalcDimension.top = topDimen;
+    }
+    CalcDimension bottomDimen;
+    RefPtr<ResourceObject> bottomResObj;
+    auto bottomValue = GetCachedString(vm, Framework::ArkUIIndex::BOTTOM);
+    if (ArkTSUtils::ParseJsDimensionVp(vm, obj->Get(vm, bottomValue), bottomDimen, bottomResObj)) {
+        commonCalcDimension.bottom = bottomDimen;
+    }
+    if (!SystemProperties::ConfigChangePerform()) {
+        return;
+    }
+    if (leftResObj) {
+        commonCalcDimension.leftResObj = leftResObj;
+    }
+    if (rightResObj) {
+        commonCalcDimension.rightResObj = rightResObj;
+    }
+    if (topResObj) {
+        commonCalcDimension.topResObj = topResObj;
+    }
+    if (bottomResObj) {
+        commonCalcDimension.bottomResObj = bottomResObj;
+    }
+}
+
+bool ArkTSUtils::ParseCommonMarginOrPaddingCorner(
+    EcmaVM* vm, const panda::Local<panda::ObjectRef>& object, CommonCalcDimension& commonCalcDimension)
+{
+    if (ArkTSUtils::CheckLengthMetrics(vm, object)) {
+        LocalizedCalcDimension localizedCalcDimension;
+        ParseLocalizedMarginOrLocalizedPaddingCorner(vm, object, localizedCalcDimension);
+        commonCalcDimension.top = localizedCalcDimension.top;
+        commonCalcDimension.bottom = localizedCalcDimension.bottom;
+        commonCalcDimension.left = localizedCalcDimension.start;
+        commonCalcDimension.right = localizedCalcDimension.end;
+        return true;
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        ParseMarginOrPaddingCorner(vm, object, commonCalcDimension);
+    } else {
+        ParseMarginOrPaddingCorner(vm, object, commonCalcDimension.top, commonCalcDimension.bottom,
+            commonCalcDimension.left, commonCalcDimension.right);
+    }
     return false;
 }
 } // namespace OHOS::Ace::NG

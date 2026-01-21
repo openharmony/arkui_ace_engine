@@ -28,7 +28,7 @@ import { ArkCommonMethodPeer, CommonMethod, MultiShadowOptions, CommonConfigurat
 import { ResourceColor, Length } from "./units"
 import { Color } from "./enums"
 import { Resource } from "global.resource"
-import { ContentModifier, AttributeModifier, hookDataPanelContentModifier, hookDataPanelAttributeModifier, AttributeUpdater } from "#handwritten"
+import { ContentModifier, AttributeModifier, hookDataPanelContentModifier, hookDataPanelTrackShadow, hookDataPanelAttributeModifier, AttributeUpdater } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
@@ -189,18 +189,6 @@ export class ArkDataPanelPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._DataPanelAttribute_setStrokeWidth(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setTrackShadowAttribute(value: DataPanelShadowOptions | null | undefined): void {
-        const thisSerializer : SerializerBase = SerializerBase.hold()
-        if (value !== undefined && value !== null) {
-            thisSerializer.writeInt8(RuntimeType.OBJECT)
-            const valueTmpValue  = value!
-            DataPanelShadowOptions_serializer.write(thisSerializer, valueTmpValue)
-        } else {
-            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
-        }
-        ArkUIGeneratedNativeModule._DataPanelAttribute_setTrackShadow(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
-        thisSerializer.release()
-    }
 }
 export enum DataPanelType {
     LINE = 0,
@@ -335,7 +323,7 @@ export class ArkDataPanelComponent extends ArkCommonMethodComponent implements D
     public trackShadow(value: DataPanelShadowOptions | null | undefined): this {
         if (this.checkPriority("trackShadow")) {
             const value_casted = value as (DataPanelShadowOptions | null | undefined)
-            this.getPeer()?.setTrackShadowAttribute(value_casted)
+            hookDataPanelTrackShadow(this, value)
             return this
         }
         return this

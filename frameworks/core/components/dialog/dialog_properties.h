@@ -116,6 +116,11 @@ enum class ImmersiveMode {
     EXTEND,
 };
 
+enum class DialogDisplayMode {
+    SCREEN_BASED = 0,
+    WINDOW_BASED = 1
+};
+
 class DialogAlignmentUtils {
 public:
     static std::string ConvertDialogAlignmentToString(DialogAlignment dialogAlignment)
@@ -321,6 +326,7 @@ struct DialogProperties {
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     WeakPtr<NG::UINode> customCNode;
     std::function<void(const WeakPtr<NG::UINode> node)> destroyCallback;
+    DialogDisplayMode dialogDisplayMode = DialogDisplayMode::SCREEN_BASED;
 };
 
 struct PromptDialogAttr {
@@ -373,6 +379,7 @@ struct PromptDialogAttr {
     int32_t dialogLevelUniqueId = -1;
     ImmersiveMode dialogImmersiveMode = ImmersiveMode::DEFAULT;
     WeakPtr<NG::UINode> customCNode;
+    DialogDisplayMode dialogDisplayMode = DialogDisplayMode::SCREEN_BASED;
 };
 
 enum class PromptActionCommonState {

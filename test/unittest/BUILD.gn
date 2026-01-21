@@ -55,7 +55,7 @@ action("run_linux_unittest_capi") {
   script = "scripts/run.py"
   args = [
     "--path",
-    "ace_engine/capi",
+    "C-API-Main",
     "--output",
     rebase_path("$root_out_dir/tests/test_result.json", root_build_dir),
   ]
@@ -411,6 +411,7 @@ ohos_source_set("ace_components_manager") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
+    "$ace_root/adapter/ohos/osal/click_sound_effect_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/avoid_info/avoid_info_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/content_change_manager/content_change_manager.cpp",
     "$ace_root/frameworks/core/components_ng/manager/display_sync/ui_display_sync.cpp",
@@ -951,6 +952,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/container_picker/container_picker_paint_method.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/container_picker/container_picker_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/counter/counter_layout_algorithm.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/corner_mark/corner_mark.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/counter/counter_model_ng.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/counter/counter_model_static.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/counter/counter_node.cpp",
@@ -1433,6 +1435,7 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_paint_property.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_pattern.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_pattern_multi_thread.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/swiper/swiper_ui_session_adapter.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_layout_algorithm.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/swiper_indicator/circle_dot_indicator/circle_dot_indicator_paint_method.cpp",
@@ -1628,6 +1631,11 @@ ohos_source_set("ace_components_pattern") {
     "$ace_root/test/mock/core/modifier/mock_water_flow_modifier.cpp",
     "$ace_root/test/mock/core/modifier/mock_radio_modifier.cpp",
     "$ace_root/test/mock/core/modifier/mock_slider_modifier.cpp",
+    "$ace_root/test/mock/core/modifier/mock_qrcode_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/time_picker/bridge/timepicker_util.cpp",
+    "$ace_root/frameworks/core/interfaces/native/node/node_timepicker_modifier.cpp",
+    "$ace_root/frameworks/core/interfaces/native/node/calendar_picker_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/calendar/calendar_utils.cpp",
   ]
   if (ace_engine_feature_enable_split_mode) {
     sources += [

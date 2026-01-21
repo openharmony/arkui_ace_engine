@@ -27,6 +27,7 @@ public:
     static void SetDefaultArrowStyle(FrameNode* frameNode);
     static void SetArrowStyle(FrameNode* frameNode, const SwiperArrowParameters& swiperArrowParameters);
     static RefPtr<FrameNode> CreateFrameNode(int32_t nodeId);
+    static RefPtr<FrameNode> CreateArcFrameNode(int32_t nodeId);
     static RefPtr<SwiperController> GetSwiperController(FrameNode* frameNode);
     static void SetIndex(FrameNode* frameNode, uint32_t index);
     static void SetAutoPlay(FrameNode* frameNode, bool autoPlay);
@@ -66,13 +67,16 @@ public:
     static void SetDisplayCount(FrameNode* frameNode, int32_t displayCount);
     static void ResetDisplayCount(FrameNode* frameNode);
     static void SetMinSize(FrameNode* frameNode, const Dimension& minSize);
-    static void SetPreviousMargin(FrameNode* frameNode, const std::optional<Dimension>& prevMargin,
+    static void SetPreviousMargin(FrameNode* frameNode, const Dimension& prevMargin,
         const std::optional<bool> &ignoreBlank = false);
-    static void SetNextMargin(FrameNode* frameNode, const std::optional<Dimension>& nextMargin,
+    static void SetNextMargin(FrameNode* frameNode, const Dimension& nextMargin,
         const std::optional<bool> &ignoreBlank = false);
     static void SetOnChangeEvent(FrameNode* frameNode,
         std::function<void(const BaseEventInfo* info)>&& onChangeEvent);
     static void SetBindIndicator(FrameNode* frameNode, bool bind);
+    static void SetDigitalCrownSensitivity(FrameNode* frameNode, int32_t sensitivity);
+    static void SetDisableTransitionAnimation(FrameNode* frameNode, bool isDisable);
+    static void SetArcDotIndicatorStyle(FrameNode* frameNode, const SwiperArcDotParameters& swiperArcDotParameters);
 };
 } // namespace OHOS::Ace::NG
 

@@ -72,7 +72,6 @@ private:
     static void RegisterPathAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPolygonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterPolylineAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterCalendarPickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterFormAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterMenuItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -81,7 +80,6 @@ private:
     static void RegisterDatePickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterSelectAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterTimepickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextpickerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterThemeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterDataPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
@@ -96,7 +94,6 @@ private:
     static void RegisterListAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterGridAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static void RegisterQRCodeAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterLoadingProgressAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterTextClockAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
     static void RegisterListItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
