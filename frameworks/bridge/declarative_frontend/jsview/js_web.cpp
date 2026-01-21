@@ -4626,6 +4626,8 @@ void JSWeb::JavaScriptProxy(const JSCallbackInfo& args)
     if (args.Length() < 1 || !args[0]->IsObject()) {
         return;
     }
+    execCtx = args.GetExecutionContext();
+    JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
     auto paramObject = JSRef<JSObject>::Cast(args[0]);
     auto controllerObj = paramObject->GetProperty("controller");
     auto object = JSRef<JSVal>::Cast(paramObject->GetProperty("object"));
