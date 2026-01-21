@@ -41,7 +41,7 @@
 namespace OHOS::Ace::NG {
 class InspectorFilter;
 
-class ScrollPattern : public ScrollablePattern {
+class ACE_FORCE_EXPORT ScrollPattern : public ScrollablePattern {
     DECLARE_ACE_TYPE(ScrollPattern, ScrollablePattern);
 
 public:

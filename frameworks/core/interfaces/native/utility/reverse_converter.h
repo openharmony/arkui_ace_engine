@@ -483,14 +483,15 @@ namespace OHOS::Ace::NG::Converter {
 
     // Passthrough version
     template<typename T>
-    void AssignArkValue(T &dst, const T& src, ConvContext *ctx)
+    ACE_FORCE_EXPORT void AssignArkValue(T &dst, const T& src, ConvContext *ctx)
     {
         dst = src;
     }
 
     template<typename To, typename From>
-    std::enable_if_t<std::is_pointer_v<To> && std::is_pointer_v<From> && std::is_assignable_v<To&, From>>
-    AssignArkValue(To& dst, const From& src)
+    ACE_FORCE_EXPORT
+        std::enable_if_t<std::is_pointer_v<To> && std::is_pointer_v<From> && std::is_assignable_v<To&, From>>
+        AssignArkValue(To& dst, const From& src)
     {
         dst = src;
     }
@@ -500,14 +501,14 @@ namespace OHOS::Ace::NG::Converter {
         std::enable_if_t<!IsOptional<To>::value &&
             !IsArray<To>::value &&
             !IsMap<To>::value, bool> = false>
-    void AssignArkValue(To& dts, const From& src, ConvContext *ctx)
+    ACE_FORCE_EXPORT void AssignArkValue(To& dts, const From& src, ConvContext *ctx)
     {
         AssignArkValue(dts, src);
     }
 
     // Handle optional types
     template<typename To, typename From, std::enable_if_t<IsOptional<To>::value, bool> = true>
-    void AssignArkValue(To& dst, const From& src, ConvContext *ctx = nullptr)
+    ACE_FORCE_EXPORT void AssignArkValue(To& dst, const From& src, ConvContext *ctx = nullptr)
     {
         if constexpr (std::is_same_v<From, Ark_Empty> || std::is_same_v<From, std::nullopt_t>) {
             dst.tag = INTEROP_TAG_UNDEFINED;
@@ -518,7 +519,7 @@ namespace OHOS::Ace::NG::Converter {
     }
 
     template<typename To, typename From, std::enable_if_t<IsOptional<To>::value, bool> = true>
-    void AssignArkValue(To& dst, const std::optional<From>& src, ConvContext *ctx = nullptr)
+    ACE_FORCE_EXPORT void AssignArkValue(To& dst, const std::optional<From>& src, ConvContext *ctx = nullptr)
     {
         if (src.has_value()) {
             dst.tag = INTEROP_TAG_OBJECT;
@@ -536,7 +537,7 @@ namespace OHOS::Ace::NG::Converter {
 
     // Array with context
     template<typename To, typename Cont>
-    std::enable_if_t<IsArray<To>::value> AssignArkValue(To& dst, const Cont& src, ConvContext *ctx)
+    ACE_FORCE_EXPORT std::enable_if_t<IsArray<To>::value> AssignArkValue(To& dst, const Cont& src, ConvContext *ctx)
     {
         using Val = std::remove_pointer_t<decltype(dst.array)>;
         dst = ctx->AllocateArray<To>(src.size());
@@ -547,7 +548,7 @@ namespace OHOS::Ace::NG::Converter {
 
     // Map with context
     template<typename To, typename Cont>
-    std::enable_if_t<IsMap<To>::value> AssignArkValue(To& dst, const Cont& src, ConvContext *ctx)
+    ACE_FORCE_EXPORT std::enable_if_t<IsMap<To>::value> AssignArkValue(To& dst, const Cont& src, ConvContext *ctx)
     {
         using KeyT = std::remove_pointer_t<decltype(dst.keys)>;
         using ValT = std::remove_pointer_t<decltype(dst.values)>;

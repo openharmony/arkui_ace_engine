@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -16,11 +16,12 @@
 #include "bridge/cj_frontend/interfaces/cj_ffi/cj_calendar_picker_ffi.h"
 
 #include "cj_lambda.h"
-
+#include "base/log/log_wrapper.h"
+#include "core/common/dynamic_module_helper.h"
 #include "bridge/common/utils/utils.h"
 #include "core/components/calendar/calendar_theme.h"
 #include "core/components/dialog/dialog_theme.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_picker_model.h"
+#include "core/components_ng/pattern/calendar_picker/calendar_picker_model_ng.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
 using namespace OHOS::Ace;
@@ -332,6 +333,19 @@ void CalendarPickerDialogShow(const NativeCalendarDialogOptions& options,
         properties, settingData, dialogEvent, dialogCancelEvent, dialogLifeCycleEvent, buttonInfos);
 }
 
+NG::CalendarPickerModelNG* GetCalendarPickerModel()
+{
+    static NG::CalendarPickerModelNG* cachedModel = nullptr;
+    if (!cachedModel) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("CalendarPicker");
+        if (module == nullptr) {
+            LOGF("Can't find calendarPicker dynamic module");
+            abort();
+        }
+        cachedModel = reinterpret_cast<NG::CalendarPickerModelNG*>(module->GetModel());
+    }
+    return cachedModel;
+}
 } // namespace
 
 extern "C" {
@@ -341,7 +355,7 @@ void FfiOHOSAceFrameworkCalendarPickerCreate(double size, int32_t unit, FfiTime 
     CalcDimension dayRadius = { size, DimensionUnit(unit) };
     settingData.selectedDate = ParseDate(date);
     settingData.dayRadius = dayRadius;
-    CalendarPickerModel::GetInstance()->Create(settingData);
+    GetCalendarPickerModel()->Create(settingData);
 }
 
 void FfiOHOSAceFrameworkCalendarPickerSetEdgeAlign(int32_t alignType, NativeOffset offset)
@@ -350,7 +364,7 @@ void FfiOHOSAceFrameworkCalendarPickerSetEdgeAlign(int32_t alignType, NativeOffs
     CalcDimension dx = CalcDimension(offset.dx.value, DimensionUnit(offset.dx.unitType));
     CalcDimension dy = CalcDimension(offset.dy.value, DimensionUnit(offset.dy.unitType));
     DimensionOffset offset_ = DimensionOffset(dx, dy);
-    CalendarPickerModel::GetInstance()->SetEdgeAlign(alignType_, offset_);
+    GetCalendarPickerModel()->SetEdgeAlign(alignType_, offset_);
 }
 
 void FfiOHOSAceFrameworkCalendarPickerSetTextStyle(
@@ -362,7 +376,7 @@ void FfiOHOSAceFrameworkCalendarPickerSetTextStyle(
     textStyle.fontSize = fontSize;
     textStyle.fontWeight = ConvertStrToFontWeight(weight);
     textStyle.fontFamily = ConvertStrToFontFamilies(family);
-    CalendarPickerModel::GetInstance()->SetTextStyle(textStyle);
+    GetCalendarPickerModel()->SetTextStyle(textStyle);
 }
 
 void FfiOHOSAceFrameworkCalendarPickerSetOnChange(void (*callback)(FfiTime))
@@ -373,7 +387,7 @@ void FfiOHOSAceFrameworkCalendarPickerSetOnChange(void (*callback)(FfiTime))
         auto time = GetFfiTime(info);
         func(time);
     };
-    CalendarPickerModel::GetInstance()->SetOnChange(std::move(onChange));
+    GetCalendarPickerModel()->SetOnChange(std::move(onChange));
 }
 
 void FfiOHOSAceFrameworkCalendarPickerDialogShow(NativeCalendarDialogOptions options)

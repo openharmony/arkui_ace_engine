@@ -66,7 +66,6 @@
 #include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/bubble/bubble_event_hub.h"
 #include "core/components_ng/pattern/bubble/bubble_pattern.h"
-#include "core/components_ng/pattern/calendar_picker/calendar_dialog_view.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/dialog/dialog_view.h"
@@ -95,6 +94,8 @@
 #include "core/components_ng/pattern/toast/toast_pattern.h"
 #include "core/components_ng/pattern/ui_extension/ui_extension_model.h"
 #include "core/components_ng/pattern/video/video_full_screen_pattern.h"
+#include "core/interfaces/arkoala/arkoala_api.h"
+#include "core/interfaces/native/node/calendar_picker_modifier.h"
 #ifdef WEB_SUPPORTED
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
@@ -3952,11 +3953,21 @@ void OverlayManager::ShowCalendarDialog(const DialogProperties& dialogProps, con
 {
     TAG_LOGD(AceLogTag::ACE_OVERLAY, "show calendar dialog enter");
 #ifndef ARKUI_WEARABLE
-    auto dialogNode = CalendarDialogView::Show(dialogProps, settingData,
-        buttonInfos, std::move(dialogEvent), std::move(dialogCancelEvent));
-    RegisterDialogCallback(dialogNode, std::move(dialogLifeCycleEvent));
-    BeforeShowDialog(dialogNode);
-    OpenDialogAnimation(dialogNode, dialogProps, false);
+    auto modifier = NodeModifier::GetCalendarPickerModifier();
+    CHECK_NULL_VOID(modifier);
+    ArkUINodeHandle node =
+        modifier->jsShowCalendarPicker(reinterpret_cast<void*>(const_cast<DialogProperties*>(&dialogProps)),
+            reinterpret_cast<void*>(const_cast<CalendarSettingData*>(&settingData)),
+            reinterpret_cast<void*>(const_cast<std::vector<ButtonInfo>*>(&buttonInfos)),
+            reinterpret_cast<void*>(&dialogEvent), reinterpret_cast<void*>(&dialogCancelEvent));
+    CHECK_NULL_VOID(node);
+    FrameNode* dialogNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(dialogNode);
+    auto dialogRefNode = AceType::Claim<FrameNode>(dialogNode);
+    CHECK_NULL_VOID(dialogRefNode);
+    RegisterDialogCallback(dialogRefNode, std::move(dialogLifeCycleEvent));
+    BeforeShowDialog(dialogRefNode);
+    OpenDialogAnimation(dialogRefNode, dialogProps, false);
 #endif
 }
 

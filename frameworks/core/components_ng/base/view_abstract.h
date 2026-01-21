@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -693,10 +693,19 @@ public:
     static void ClearWidthOrHeight(FrameNode* frameNode, bool isWidth);
     static void SetBorderRadius(FrameNode* frameNode, const BorderRadiusProperty& value);
     static void SetBorderRadius(FrameNode* frameNode, const Dimension& value);
+    static void SetBorderRadius(FrameNode* frameNode, const std::optional<Dimension>& radiusTopLeft,
+        const std::optional<Dimension>& radiusTopRight, const std::optional<Dimension>& radiusBottomLeft,
+        const std::optional<Dimension>& radiusBottomRight);
+    static void SetBorderRadius(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetBorderWidth(FrameNode* frameNode, const BorderWidthProperty& value);
     static void SetBorderWidth(FrameNode* frameNode, const Dimension& value);
+    static void SetBorderWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
+    static void SetBorderWidth(FrameNode* frameNode, const std::optional<Dimension>& left,
+        const std::optional<Dimension>& right, const std::optional<Dimension>& top,
+        const std::optional<Dimension>& bottom);
     static void SetBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
     static void SetBorderColor(FrameNode* frameNode, const Color& value);
+    static void SetBorderColor(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj);
     static void SetOuterBorderColor(FrameNode* frameNode, const Color& value);
     static void SetOuterBorderColor(FrameNode* frameNode, const BorderColorProperty& value);
     static void SetOuterBorderRadius(FrameNode* frameNode, const Dimension& value);
@@ -827,6 +836,7 @@ public:
     static void UpdateSafeAreaExpandOpts(FrameNode* frameNode, const SafeAreaExpandOpts& opts);
     static void UpdateIgnoreLayoutSafeAreaOpts(FrameNode* frameNode, const IgnoreLayoutSafeAreaOpts& opts);
     static void UpdateLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth);
+    static void UpdateOnlyLayoutPolicyProperty(FrameNode* frameNode, const LayoutCalPolicy layoutPolicy, bool isWidth);
     static void ResetLayoutPolicyProperty(FrameNode* frameNode, bool isWidth);
     static void SetAspectRatio(FrameNode* frameNode, float ratio);
     static void SetAlignSelf(FrameNode* frameNode, FlexAlign value);

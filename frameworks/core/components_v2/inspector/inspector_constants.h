@@ -119,7 +119,7 @@ ACE_EXPORT extern const char CONTROL_PARTS_STACK_ETS_TAG[];
 
 // swiper
 ACE_EXPORT extern const char SWIPER_COMPONENT_TAG[];
-ACE_EXPORT extern const char SWIPER_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char SWIPER_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_INDICATOR_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_LEFT_ARROW_ETS_TAG[];
 ACE_EXPORT extern const char SWIPER_RIGHT_ARROW_ETS_TAG[];
@@ -293,7 +293,7 @@ ACE_EXPORT extern const char PLACEHOLDER_SPAN_ETS_TAG[];
 
 // text
 ACE_EXPORT extern const char TEXT_COMPONENT_TAG[];
-ACE_EXPORT extern const char TEXT_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char TEXT_ETS_TAG[];
 
 // blank
 ACE_EXPORT extern const char BOX_COMPONENT_TAG[];
@@ -301,7 +301,7 @@ ACE_EXPORT extern const char BLANK_ETS_TAG[];
 
 // button
 ACE_EXPORT extern const char BUTTON_COMPONENT_TAG[];
-ACE_EXPORT extern const char BUTTON_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char BUTTON_ETS_TAG[];
 
 // recycle
 ACE_EXPORT extern const char RECYCLE_VIEW_ETS_TAG[];
@@ -314,7 +314,7 @@ ACE_EXPORT extern const char OPTION_ETS_TAG[];
 
 // divider
 ACE_EXPORT extern const char DIVIDER_COMPONENT_TAG[];
-ACE_EXPORT extern const char DIVIDER_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char DIVIDER_ETS_TAG[];
 
 // checkbox
 ACE_EXPORT extern const char CHECKBOX_COMPONENT_TAG[];
@@ -332,15 +332,15 @@ ACE_EXPORT extern const char TOGGLE_ETS_TAG[];
 
 // scroll
 ACE_EXPORT extern const char SCROLL_COMPONENT_TAG[];
-ACE_EXPORT extern const char SCROLL_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char SCROLL_ETS_TAG[];
 
 // calendar
 ACE_EXPORT extern const char CALENDAR_COMPONENT_TAG[];
-ACE_EXPORT extern const char CALENDAR_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char CALENDAR_ETS_TAG[];
 
 // calendarPicker
 ACE_EXPORT extern const char CALENDAR_PICKER_COMPONENT_TAG[];
-ACE_EXPORT extern const char CALENDAR_PICKER_ETS_TAG[];
+ACE_FORCE_EXPORT extern const char CALENDAR_PICKER_ETS_TAG[];
 
 // badge
 ACE_EXPORT extern const char BADGE_COMPONENT_TAG[];
