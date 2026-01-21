@@ -23,7 +23,7 @@ ACE_FORCE_EXPORT const GENERATED_ArkUIHyperlinkModifier* GetHyperlinkModifier()
     static const GENERATED_ArkUIHyperlinkModifier* cachedModifier = nullptr;
 
     if (cachedModifier == nullptr) {
-        auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("hyperlink");
+        auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("Hyperlink");
         CHECK_NULL_RETURN(module, nullptr);
         cachedModifier = reinterpret_cast<const GENERATED_ArkUIHyperlinkModifier*>(module->GetStaticModifier());
     }
