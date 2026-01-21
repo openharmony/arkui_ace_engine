@@ -2985,6 +2985,7 @@ void SetBorderImageImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     RefPtr<BorderImage> borderImage = AceType::MakeRefPtr<BorderImage>();
     auto optValue = Converter::GetOptPtr(value);
+    CHECK_NULL_VOID(optValue);
     uint8_t bitSet = 0;
     Converter::VisitUnion(optValue->source,
         [frameNode, &bitSet](const Ark_LinearGradientOptions& src) {
