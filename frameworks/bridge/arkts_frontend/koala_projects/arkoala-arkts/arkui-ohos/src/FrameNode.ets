@@ -240,7 +240,7 @@ export class FrameNode implements MaterializedBase {
     get gestureEvent(): UIGestureEvent {
         if (this._gestureEvent === undefined) {
             this._gestureEvent = new UIGestureEvent();
-            this._gestureEvent!.setPeer(PeerNode.findPeerByNativeId(this.peer!.ptr as KPointer));
+            this._gestureEvent!.setPeer(PeerNode.findPeerByNativeId(this._nodeId));
         }
         return this._gestureEvent as UIGestureEvent;
     }
