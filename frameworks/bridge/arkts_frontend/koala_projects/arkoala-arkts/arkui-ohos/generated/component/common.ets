@@ -1407,7 +1407,7 @@ export class KeyEventInternal implements MaterializedBase,KeyEvent {
 export interface Layoutable {
     measureResult: MeasureResult
     uniqueId?: int32 | undefined
-    layout(position: Position): void
+    layout(position: Position | undefined): void
     getMargin(): DirectionalEdgesT<number> | undefined
     getPadding(): DirectionalEdgesT<number> | undefined
     getBorderWidth(): DirectionalEdgesT<number> | undefined
@@ -1446,8 +1446,8 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
     public static fromPtr(ptr: KPointer): LayoutableInternal {
         return new LayoutableInternal(ptr)
     }
-    public layout(position: Position): void {
-        const position_casted = position as (Position)
+    public layout(position: Position | undefined): void {
+        const position_casted = position as (Position | undefined)
         this.layout_serialize(position_casted)
         return
     }
@@ -1476,9 +1476,15 @@ export class LayoutableInternal implements MaterializedBase,Layoutable {
         this.setUniqueId_serialize(uniqueId_casted)
         return
     }
-    layout_serialize(position: Position): void {
+    layout_serialize(position: Position | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        Position_serializer.write(thisSerializer, position)
+        if (position !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const positionTmpValue  = position!
+            Position_serializer.write(thisSerializer, positionTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         ArkUIGeneratedNativeModule._Layoutable_layout(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
@@ -1589,7 +1595,7 @@ export class LayoutPolicy implements MaterializedBase {
 }
 export interface Measurable {
     uniqueId?: int32 | undefined
-    measure(constraint: ConstraintSizeOptions): MeasureResult | undefined
+    measure(constraint: ConstraintSizeOptions | undefined): MeasureResult | undefined
     getMargin(): DirectionalEdgesT<number> | undefined
     getPadding(): DirectionalEdgesT<number> | undefined
     getBorderWidth(): DirectionalEdgesT<number> | undefined
@@ -1622,8 +1628,8 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
     public static fromPtr(ptr: KPointer): MeasurableInternal {
         return new MeasurableInternal(ptr)
     }
-    public measure(constraint: ConstraintSizeOptions): MeasureResult | undefined {
-        const constraint_casted = constraint as (ConstraintSizeOptions)
+    public measure(constraint: ConstraintSizeOptions | undefined): MeasureResult | undefined {
+        const constraint_casted = constraint as (ConstraintSizeOptions | undefined)
         return this.measure_serialize(constraint_casted)
     }
     public getMargin(): DirectionalEdgesT<number> | undefined {
@@ -1643,13 +1649,24 @@ export class MeasurableInternal implements MaterializedBase,Measurable {
         this.setUniqueId_serialize(uniqueId_casted)
         return
     }
-    measure_serialize(constraint: ConstraintSizeOptions): MeasureResult {
+    measure_serialize(constraint: ConstraintSizeOptions | undefined): MeasureResult | undefined {
         const thisSerializer : SerializerBase = SerializerBase.hold()
-        ConstraintSizeOptions_serializer.write(thisSerializer, constraint)
+        if (constraint !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const constraintTmpValue  = constraint!
+            ConstraintSizeOptions_serializer.write(thisSerializer, constraintTmpValue)
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const retval  = ArkUIGeneratedNativeModule._Measurable_measure(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
         let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
-        const returnResult : MeasureResult = MeasureResult_serializer.read(retvalDeserializer)
+        const buffer_runtimeType  = retvalDeserializer.readInt8().toInt()
+        let buffer : MeasureResult | undefined = undefined
+        if ((buffer_runtimeType) != (RuntimeType.UNDEFINED)) {
+            buffer = MeasureResult_serializer.read(retvalDeserializer)
+        }
+        const returnResult : MeasureResult | undefined = buffer
         return returnResult
     }
     getMargin_serialize(): DirectionalEdgesT<number> | undefined {
