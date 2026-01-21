@@ -31,17 +31,16 @@ void OffscreenCanvasPeer::SetOptions(const double cw, const double ch)
 }
 ImageBitmapPeer* OffscreenCanvasPeer::TransferToImageBitmap()
 {
-    CHECK_NULL_RETURN(offscreenCanvasPattern, nullptr);
-    CHECK_NULL_RETURN(offscreenCanvasContext, nullptr);
     auto bitmap = OHOS::Ace::NG::PeerUtils::CreatePeer<ImageBitmapPeer>();
-    CHECK_NULL_RETURN(bitmap, nullptr);
+    CHECK_NULL_RETURN(offscreenCanvasPattern, bitmap);
+    CHECK_NULL_RETURN(offscreenCanvasContext, bitmap);
     OHOS::Ace::ContainerScope scope(OHOS::Ace::Container::CurrentIdSafely());
     auto pixelMap = offscreenCanvasPattern->TransferToImageBitmap();
     ImageBitmapPeer::LoadImageConstructor(bitmap, pixelMap);
 #ifndef PIXEL_MAP_SUPPORTED
     auto imageData = offscreenCanvasPattern->GetImageData(0, 0, width, height);
     if (imageData == nullptr) {
-        return nullptr;
+        return bitmap;
     }
     bitmap->SetImageData(std::make_shared<OHOS::Ace::ImageData>(*imageData));
 #endif
