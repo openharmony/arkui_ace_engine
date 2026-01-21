@@ -2231,11 +2231,8 @@ void ListLayoutAlgorithm::SyncGeometry(RefPtr<LayoutWrapper>& wrapper, bool isDi
     CHECK_NULL_VOID(wrapper);
     auto host = wrapper->GetHostNode();
     CHECK_NULL_VOID(host);
-    if (!(isDirty && host->IsGeometrySizeChange())) {
+    if (!(isDirty && host->IsGeometrySizeChange() && !host->IsActive())) {
         host->ForceSyncGeometryNode();
-    } else if (host->IsActive()) {
-        DirtySwapConfig emptyConfig;
-        host->SyncGeometryNode(true, emptyConfig);
     }
     host->ResetLayoutAlgorithm();
     host->RebuildRenderContextTree();

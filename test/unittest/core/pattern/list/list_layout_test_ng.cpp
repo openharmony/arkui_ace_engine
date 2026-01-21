@@ -3189,6 +3189,55 @@ HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ListRepeatCacheCount007
+ * @tc.desc: List cacheCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListLayoutTestNg, ListRepeatCacheCount007, TestSize.Level1)
+{
+    ListModelNG model = CreateList();
+    model.SetSpace(Dimension(SPACE));
+    model.SetCachedCount(2, true);
+    ViewStackProcessor::GetInstance()->StartGetAccessRecordingFor(GetElmtId());
+    CreateRepeatVirtualScrollNode(10, [this](int32_t idx) {
+        CreateListItem();
+        ViewStackProcessor::GetInstance()->Pop();
+        ViewStackProcessor::GetInstance()->StopGetAccessRecording();
+    });
+    CreateDone();
+
+    /**
+     * @tc.steps: step1. Check Repeat frameCount
+     * @tc.expected: ListItem 4 is cached
+     */
+    auto repeat = AceType::DynamicCast<RepeatVirtualScrollNode>(frameNode_->GetChildAtIndex(0));
+    EXPECT_NE(repeat, nullptr);
+    auto listPattern = frameNode_->GetPattern<ListPattern>();
+    FlushIdleTask(listPattern);
+    int32_t childrenCount = repeat->GetChildren().size();
+    EXPECT_EQ(childrenCount, 6);
+    auto cachedItem = frameNode_->GetChildByIndex(4)->GetHostNode();
+    auto cachedItem5 = frameNode_->GetChildByIndex(5)->GetHostNode();
+    EXPECT_EQ(cachedItem->IsActive(), true);
+    EXPECT_EQ(GetChildY(frameNode_, 4), HEIGHT + 4 * SPACE);
+
+    /**
+     * @tc.steps: step2. Update item4 size
+     * @tc.expected: force sync geometry.
+     */
+    bool sizeChanged = false;
+    cachedItem->SetOnSizeChangeCallback(
+        [&sizeChanged](const RectF& oldRect, const RectF& rect) { sizeChanged = true; });
+    cachedItem->GetLayoutProperty()->UpdateUserDefinedIdealSize(
+        CalcSize(CalcLength(1.0, DimensionUnit::PERCENT), CalcLength(150)));
+    cachedItem->SetLayoutDirtyMarked(true);
+    cachedItem->CreateLayoutTask();
+    EXPECT_EQ(cachedItem5->GetGeometryNode()->GetFrameOffset().GetY(), 550);
+    FlushUITasks(frameNode_);
+    EXPECT_EQ(cachedItem5->GetGeometryNode()->GetFrameOffset().GetY(), 600);
+}
+
+/**
  * @tc.name: GetRepeatCountInfo001
  * @tc.desc: Test the GetRepeatCountInfo when the child of List is Repeat.
  * @tc.type: FUNC
