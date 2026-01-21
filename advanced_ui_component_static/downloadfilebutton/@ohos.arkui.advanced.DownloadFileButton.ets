@@ -79,6 +79,8 @@ export interface DownloadStyleOptions {
 
 const MARGIN_DEFAULT = '0vp';
 
+const SPACE_DEFAULT = '4vp';
+
 @Component
 export struct DownloadFileButton {
   contentOptions: DownloadContentOptions = {
@@ -94,7 +96,7 @@ export struct DownloadFileButton {
     fontFamily: 'HarmonyOS Sans',
     fontColor: '#ffffffff',
     iconColor: '#ffffffff',
-    textIconSpace: '4vp'
+    textIconSpace: SPACE_DEFAULT
   } as DownloadStyleOptions;
 
   private getTextContent(downloadDescription: DownloadDescription | undefined): Resource | undefined {
@@ -123,9 +125,9 @@ export struct DownloadFileButton {
       .fontFamily(this.styleOptions.fontFamily)
       .margin({
         top: this.styleOptions.layoutDirection === DownloadLayoutDirection.VERTICAL ?
-          (this.styleOptions.textIconSpace || '4vp') : MARGIN_DEFAULT,
+          (this.styleOptions.textIconSpace || SPACE_DEFAULT) : MARGIN_DEFAULT,
         left: this.styleOptions.layoutDirection === DownloadLayoutDirection.HORIZONTAL ?
-          (this.styleOptions.textIconSpace || '4vp') : MARGIN_DEFAULT
+          (this.styleOptions.textIconSpace || SPACE_DEFAULT) : MARGIN_DEFAULT
       })
   }
 
