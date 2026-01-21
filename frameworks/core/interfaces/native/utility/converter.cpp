@@ -2484,7 +2484,7 @@ std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src, DimensionUnit 
             std::optional<std::string> optStr = Converter::OptConvert<std::string>(value);
             if (optStr.has_value()) {
                 Dimension value;
-                auto result = ConvertFromString(optStr.value(), defaultUnit, value);
+                auto result = StringUtils::StringToDimensionWithUnitNG(optStr.value(), value, defaultUnit);
                 if (result) {
                     dimension = value;
                 }
