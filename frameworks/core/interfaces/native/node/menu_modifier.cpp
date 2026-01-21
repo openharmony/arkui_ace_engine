@@ -20,6 +20,7 @@
 #include "core/components_ng/property/border_property.h"
 
 namespace OHOS::Ace::NG {
+namespace {
 const char DELIMITER = '|';
 constexpr int32_t SIZE_OF_FONT_INFO = 3;
 constexpr int COUNT_PROP = 4;
@@ -32,7 +33,7 @@ const std::string DEFAULT_FONT_FAMILY = "HarmonyOS Sans";
 const Ace::FontStyle DEFAULT_FONT_STYLE = Ace::FontStyle::NORMAL;
 const std::vector<OHOS::Ace::FontStyle> FONT_STYLES = { OHOS::Ace::FontStyle::NORMAL, OHOS::Ace::FontStyle::ITALIC };
 
-inline FrameNode* GetFrameNode(ArkUINodeHandle node)
+FrameNode* GetFrameNode(ArkUINodeHandle node)
 {
     return node ? reinterpret_cast<FrameNode*>(node) : ViewStackProcessor::GetInstance()->GetMainFrameNode();
 }
@@ -103,6 +104,7 @@ void ResetMenuDivider(ArkUINodeHandle node, bool isGroupDivider)
             isGroupDivider ? MenuColorType::GROUP_DIVIDER_COLOR : MenuColorType::DIVIDER_COLOR);
     }
 }
+} // namespace
 
 void SetMenuFontColor(ArkUINodeHandle node, uint32_t color)
 {

@@ -149,7 +149,7 @@ void ParseMenuItemOptionsResource(EcmaVM* vm, const Local<ObjectRef>& menuItemOb
     if (symbolStart->IsObject(vm)) {
         SetSymbolOptionApply(vm, parseResult.startSymbolApply, symbolStart);
         menuItemOptions.startSymbolApply = reinterpret_cast<void*>(&parseResult.startSymbolApply);
-    } else if (ArkTSUtils::ParseJsMedia(vm, startIcon, parseResult.startIconPath, parseResult.startIconObj)) {
+    } else if (ArkTSUtils::ParseJsMedia(vm, startIcon, parseResult.startIconPath, parseResult.startIconObj, true)) {
         std::string bundleName;
         std::string moduleName;
         ArkTSUtils::GetJsMediaBundleInfo(vm, startIcon, bundleName, moduleName);
@@ -163,7 +163,7 @@ void ParseMenuItemOptionsResource(EcmaVM* vm, const Local<ObjectRef>& menuItemOb
     if (symbolEnd->IsObject(vm)) {
         SetSymbolOptionApply(vm, parseResult.endSymbolApply, symbolEnd);
         menuItemOptions.endSymbolApply = reinterpret_cast<void*>(&parseResult.endSymbolApply);
-    } else if (ArkTSUtils::ParseJsMedia(vm, endIcon, parseResult.endIconPath, parseResult.endIconObj)) {
+    } else if (ArkTSUtils::ParseJsMedia(vm, endIcon, parseResult.endIconPath, parseResult.endIconObj, true)) {
         std::string bundleName;
         std::string moduleName;
         ArkTSUtils::GetJsMediaBundleInfo(vm, endIcon, bundleName, moduleName);
@@ -486,6 +486,7 @@ ArkUINativeModuleValue MenuItemBridge::SetSelectIcon(ArkUIRuntimeCallInfo* runti
     Local<JSValueRef> inputArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
+    bool isJsView = IsJsView(firstArg, vm);
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::JSValueRef::Undefined(vm));
     auto menuItemModifier = nodeModifiers->getMenuItemModifier();
@@ -499,7 +500,7 @@ ArkUINativeModuleValue MenuItemBridge::SetSelectIcon(ArkUIRuntimeCallInfo* runti
     } else if (inputArg->IsString(vm)) {
         icon = inputArg->ToString(vm)->ToString(vm);
         isShow = true;
-    } else if (ArkTSUtils::ParseJsMedia(vm, inputArg, icon, selectIconResObj)) {
+    } else if (ArkTSUtils::ParseJsMedia(vm, inputArg, icon, selectIconResObj, isJsView)) {
         isShow = true;
     } else if (inputArg->IsObject(vm)) {
         isShow = true;
