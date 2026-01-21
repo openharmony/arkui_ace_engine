@@ -364,8 +364,6 @@ export class ArkUIExtensionComponentComponent extends ArkCommonMethodComponent i
 export function UIExtensionComponentImpl(
     @memo
     style: ((attributes: UIExtensionComponentAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkUIExtensionComponentComponent>((): ArkUIExtensionComponentComponent => {
         return new ArkUIExtensionComponentComponent()
@@ -374,7 +372,6 @@ export function UIExtensionComponentImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
