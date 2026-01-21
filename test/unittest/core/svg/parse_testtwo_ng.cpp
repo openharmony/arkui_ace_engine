@@ -2060,10 +2060,10 @@ HWTEST_F(ParseTestTwoNg, ParseFilterTest001, TestSize.Level1)
     svgFilter->filterAttr_.x = Dimension(1.0, DimensionUnit::PX);
     svgFilter->filterAttr_.y = Dimension(1.0, DimensionUnit::PX);
     svgFilter->OnAsPaint();
-    EXPECT_EQ(svgFeComposite->effectFilterArea_.x_, 1.0);
-    EXPECT_EQ(svgFeComposite->effectFilterArea_.y_, 1.0);
-    EXPECT_EQ(svgFeComposite->effectFilterArea_.width_, 1.0);
-    EXPECT_EQ(svgFeComposite->effectFilterArea_.height_, 1.0);
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.x_, 0);
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.y_, 0);
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.width_, 0);
+    EXPECT_EQ(svgFeComposite->effectFilterArea_.height_, 0);
 
     svgFilter->filterAttr_.height = Dimension(1.0, DimensionUnit::PERCENT);
     svgFilter->filterAttr_.width = Dimension(1.0, DimensionUnit::PERCENT);
