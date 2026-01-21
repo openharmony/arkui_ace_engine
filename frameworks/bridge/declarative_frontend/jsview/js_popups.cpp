@@ -18,6 +18,7 @@
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 
 #include "base/log/ace_scoring_log.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/jsview/js_view_context.h"
@@ -2249,6 +2250,12 @@ void JSViewAbstract::ParseSheetStyle(
     auto scrollSizeMode = paramObj->GetProperty("scrollSizeMode");
     auto keyboardAvoidMode = paramObj->GetProperty("keyboardAvoidMode");
     auto uiContextObj = paramObj->GetProperty("uiContext");
+    auto systemMaterialObj = paramObj->GetProperty("systemMaterial");
+    if (systemMaterialObj->IsObject()) {
+        const auto* material = CreateUiMaterialFromNapiValue(systemMaterialObj);
+        sheetStyle.systemMaterial = material->Copy();
+    }
+    
     if (uiContextObj->IsObject()) {
         JSRef<JSObject> obj = JSRef<JSObject>::Cast(uiContextObj);
         auto prop = obj->GetProperty("instanceId_");

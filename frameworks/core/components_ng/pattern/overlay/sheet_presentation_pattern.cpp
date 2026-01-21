@@ -110,7 +110,7 @@ void SheetPresentationPattern::OnModifyDone()
             options.blurStyle = blurStyle;
             renderContext->UpdateBackgroundColor(Color::TRANSPARENT);
             renderContext->UpdateBackBlurStyle(sheetStyle.backgroundBlurStyle.value_or(options));
-        } else {
+        } else if (!sheetStyle.systemMaterial) {
             renderContext->UpdateBackgroundColor(
                 sheetStyle.backgroundColor.value_or(sheetTheme->GetSheetBackgoundColor()));
         }
@@ -437,6 +437,9 @@ void SheetPresentationPattern::SetSheetBorderWidth(bool isPartialUpdate)
     auto renderContext = host->GetRenderContext();
     CHECK_NULL_VOID(renderContext);
     renderContext->SetClipToBounds(true);
+    if (sheetStyle.systemMaterial) {
+        return;
+    }
     if (sheetStyle.borderWidth.has_value()) {
         auto borderWidth = sheetStyle.borderWidth.value();
         borderWidth = GetSheetObject()->PostProcessBorderWidth(borderWidth);
@@ -544,7 +547,7 @@ void SheetPresentationPattern::SetShadowStyle(bool isFocused)
     auto layoutProperty = host->GetLayoutProperty<SheetPresentationProperty>();
     CHECK_NULL_VOID(layoutProperty);
     auto sheetStyle = layoutProperty->GetSheetStyleValue();
-    if (sheetStyle.shadow.has_value()) {
+    if (sheetStyle.shadow.has_value() || sheetStyle.systemMaterial) {
         return;
     }
     auto pipeline = host->GetContext();
@@ -4677,6 +4680,20 @@ void SheetPresentationPattern::UpdateSheetParamResource(const RefPtr<FrameNode>&
     }
     if (sheetStyle.shadow.has_value()) {
         RegisterShadowRes(sheetNode);
+    }
+    RemoveSheetResourceByMaterial(sheetNode, sheetStyle);
+}
+
+void SheetPresentationPattern::RemoveSheetResourceByMaterial(
+    const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle)
+{
+    if (sheetStyle.systemMaterial) {
+        CHECK_NULL_VOID(sheetNode);
+        auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        CHECK_NULL_VOID(pattern);
+        pattern->RemoveResObj("sheetPage.backgroundColor");
+        pattern->RemoveResObj("sheetPage.border");
+        pattern->RemoveResObj("sheetPage.shadow");
     }
 }
 

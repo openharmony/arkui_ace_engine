@@ -22976,6 +22976,7 @@ typedef struct Ark_SheetOptions {
     Opt_Boolean showInSubWindow;
     Opt_Placement placement;
     Opt_Boolean placementOnTarget;
+    Opt_uiMaterial_Material systemMaterial;
 } Ark_SheetOptions;
 typedef struct Opt_SheetOptions {
     Ark_Tag tag;
