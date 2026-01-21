@@ -1364,6 +1364,42 @@ HWTEST_F(SheetPresentationTestFiveNg, UpdateMaskBackgroundColor002, TestSize.Lev
 
 /**
  * @tc.name: CalculateSheetRadius001
+ * @tc.desc: Test bindSheet radius render strategy.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestFiveNg, ClipSheetNode001, TestSize.Level1)
+{
+    SheetPresentationTestFiveNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode(
+        "Sheet", 101, AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetTheme = AceType::MakeRefPtr<SheetTheme>();
+    SheetPresentationTestFiveNg::SetSheetTheme(sheetTheme);
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    ASSERT_NE(sheetPattern, nullptr);
+    sheetPattern->UpdateSheetType();
+    sheetPattern->InitSheetObject();
+    ASSERT_NE(sheetPattern->GetSheetObject(), nullptr);
+    auto layoutProperty = sheetPattern->GetLayoutProperty<SheetPresentationProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    auto geometryNode = sheetNode->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(1000, 1500));
+
+    SheetStyle sheetStyle;
+    sheetStyle.sheetType = SheetType::SHEET_BOTTOM;
+    sheetStyle.radiusRenderStrategy = RenderStrategy::OFFSCREEN;
+    layoutProperty->UpdateSheetStyle(sheetStyle);
+    sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    sheetPattern->ClipSheetNode();
+    auto renderContext = sheetNode->GetRenderContext();
+    EXPECT_EQ(renderContext->propRenderStrategy_.has_value(), true);
+    EXPECT_EQ(renderContext->propRenderStrategy_.value(), RenderStrategy::OFFSCREEN);
+    SheetPresentationTestFiveNg::TearDownTestCase();
+}
+
+/**
+ * @tc.name: CalculateSheetRadius001
  * @tc.desc: Test bindSheet supports configuring corner radius.
  * @tc.type: FUNC
  */
