@@ -208,6 +208,13 @@ void JSWaterFlowSectionsBinding::Destructor(JSWaterFlowSections* section)
 void JSWaterFlowSectionsBinding::OnSectionChanged(const JSCallbackInfo& info)
 {
     JSWaterFlowSections* jsWaterFlowSections = JSRef<JSObject>::Cast(info.This())->Unwrap<JSWaterFlowSections>();
+    auto infoThis = info.This()->GetHandle();
+    if (infoThis.ToLocal()->IsProxy(infoThis.GetEcmaVM())) {
+        panda::Local<panda::ProxyRef> thisProxiedObj = static_cast<panda::Local<panda::ProxyRef>>(infoThis.ToLocal());
+        jsWaterFlowSections = static_cast<JSWaterFlowSections*>(
+            panda::Local<panda::ObjectRef>(thisProxiedObj->GetTarget(infoThis.GetEcmaVM()))
+                ->GetNativePointerField(infoThis.GetEcmaVM(), 0));
+    }
     if (jsWaterFlowSections == nullptr) {
         return;
     }
