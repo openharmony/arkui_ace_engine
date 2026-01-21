@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -404,6 +404,8 @@ export class ArkUIAniModule {
     native static _TraceEnd(): void
     native static _AsyncTraceBegin(traceName: string, taskId: KInt): void
     native static _AsyncTraceEnd(traceName: string, taskId: KInt): void
+    native static _StartProfiler(asptFileName: string, interval: KInt): void
+    native static _StopProfiler(): void
     native static _GetColorValue(color: number | string): KUInt
     native static _GetStringColorValue(color: string): KUInt
     native static _GetNumberColorValue(color: number): KUInt
