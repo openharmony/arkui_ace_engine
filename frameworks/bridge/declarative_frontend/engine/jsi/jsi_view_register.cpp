@@ -340,7 +340,7 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
     }
 #ifdef DYNAMIC_COMPONENT_SUPPORT
     auto container = Container::Current();
-    if (container && container->IsDynamicRender()) {
+    if (container && container->GetUIContentType() == UIContentType::ISOLATED_COMPONENT) {
         LOGD("load dynamic component card through named route");
         panda::Local<panda::FunctionRef> objSupplier = firstArg;
         std::vector<Local<JSValueRef>> argv;
@@ -357,7 +357,31 @@ panda::Local<panda::JSValueRef> JsRegisterNamedRoute(panda::JsiRuntimeCallInfo* 
     if (!thirdArg->IsObject(vm)) {
         return panda::JSValueRef::Undefined(vm);
     }
-
+#ifdef DYNAMIC_COMPONENT_SUPPORT
+    if (container && container->GetUIContentType() == UIContentType::DYNAMIC_COMPONENT) {
+        LOGD("load dynamic component card through named route");
+        std::string bundleName;
+        std::string moduleName;
+        std::string pagePath;
+        std::string pageFullPath;
+        std::string ohmUrl;
+        if (!JsiDeclarativeEngine::ParseNamedRouterParams(
+            vm, thirdArg->ToObject(vm), bundleName, moduleName, pagePath, pageFullPath, ohmUrl)) {
+            LOGE("parse named router params failed!");
+        }
+        LOGI("RegisterNamedRouter: [%{public}s][%{public}s][%{public}s][%{public}s][%{public}s]",
+            bundleName.c_str(), moduleName.c_str(), pagePath.c_str(), pageFullPath.c_str(), ohmUrl.c_str());
+        LOGI("ContainerBundleInfo: [%{public}s][%{public}s]",
+            container->GetBundleName().c_str(), container->GetModuleName().c_str());
+        if (moduleName == container->GetModuleName()) {
+            panda::Local<panda::FunctionRef> objSupplier = firstArg;
+            std::vector<Local<JSValueRef>> argv;
+            auto obj = objSupplier->Call(vm, JSNApi::GetGlobalObject(vm), argv.data(), 0);
+            UpdateCardRootComponent(vm, obj->ToObject(vm));
+            return panda::JSValueRef::Undefined(vm);
+        }
+    }
+#endif
     JsiDeclarativeEngine::AddToNamedRouterMap(vm,
         panda::Global<panda::FunctionRef>(vm, Local<panda::FunctionRef>(firstArg)),
         secondArg->ToString(vm)->ToString(vm), thirdArg->ToObject(vm));

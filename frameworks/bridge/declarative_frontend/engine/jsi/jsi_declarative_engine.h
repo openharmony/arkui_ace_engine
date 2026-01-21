@@ -506,6 +506,9 @@ public:
 #endif
     static void AddToNamedRouterMap(const EcmaVM* vm, panda::Global<panda::FunctionRef> pageGenerator,
         const std::string& namedRoute, panda::Local<panda::ObjectRef> params);
+    static bool ParseNamedRouterParams(
+        const EcmaVM* vm, const panda::Local<panda::ObjectRef>& params, std::string& bundleName,
+        std::string& moduleName, std::string& pagePath, std::string& pageFullPath, std::string& ohmUrl);
     static void AddToNavigationBuilderMap(std::string name,
         panda::Global<panda::ObjectRef> builderFunc);
     /**
