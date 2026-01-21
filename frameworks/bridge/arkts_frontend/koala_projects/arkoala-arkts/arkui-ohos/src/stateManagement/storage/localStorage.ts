@@ -173,7 +173,7 @@ export class LocalStorage {
      * @since 20
      */
     public ref<T>(propName: string): AbstractProperty<T> | undefined {
-        return this.store_.ref<T>(propName) as AbstractProperty<T> | undefined;
+        return this.store_.ref<T>(propName);
     }
 
     /**
@@ -215,7 +215,7 @@ export class LocalStorage {
      * @since 20
      */
     public link<T>(propName: string): SubscribedAbstractProperty<T> | undefined {
-        return this.store_.ref<T>(propName);
+        return this.store_.link<T>(propName);
     }
 
     /**
@@ -232,7 +232,7 @@ export class LocalStorage {
      * @since 20
      */
     public setAndLink<T>(propName: string, defaultValue: T): SubscribedAbstractProperty<T> | undefined {
-        return this.store_.setAndRef<T>(propName, defaultValue);
+        return this.store_.setAndLink<T>(propName, defaultValue);
     }
 
     /**
