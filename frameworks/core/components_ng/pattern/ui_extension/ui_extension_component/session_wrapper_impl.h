@@ -112,7 +112,7 @@ public:
     void NotifyHostWindowMode(int32_t mode) override;
     void ReDispatchWantParams() override;
     void UpdateConfigParamByContainerHandler(AAFwk::WantParams& configParam);
-
+    bool RefreshOccupiedAreaChangeInfo();
 private:
     int32_t GetFrameNodeId() const;
     void InitAllCallback();
@@ -162,6 +162,7 @@ private:
     std::weak_ptr<Rosen::RSTransaction> transaction_;
     std::shared_ptr<AAFwk::Want> customWant_;
     OHOS::Rosen::SubSystemId subSystemId_ = OHOS::Rosen::SubSystemId::ARKUI_UIEXT;
+    sptr<Rosen::OccupiedAreaChangeInfo> occupiedAreaChangeInfo_;
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_UI_EXTENSION_UEC_SESSION_WRAPPER_IMPL_H
