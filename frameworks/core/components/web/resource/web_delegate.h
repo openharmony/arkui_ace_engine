@@ -1536,6 +1536,7 @@ public:
     void OnStatusBarClick();
     bool IsQuickMenuShow();
     void WebScrollStopFling();
+    void RequestWebDomJsonString(const std::function<void(const std::string)>&& callback);
 private:
     void InitWebEvent();
     void RegisterWebEvent();

@@ -1499,4 +1499,5 @@ void WebDelegate::OnRequestAutofill(int32_t menuType) {}
 void WebDelegate::OnSwitchFreeMultiWindow(bool enable) {}
 void WebDelegate::RegisterFreeMultiWindowListener() {}
 void WebDelegate::UnregisterFreeMultiWindowListener() {}
+void WebDelegate::RequestWebDomJsonString(const std::function<void(const std::string)>&& callback) {}
 } // namespace OHOS::Ace

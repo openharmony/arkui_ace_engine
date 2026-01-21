@@ -45,6 +45,8 @@ constexpr char WEB_NATIVE_FUNC_SCROLL[] = "scrollInfo";
 constexpr int32_t WEB_NATIVE_PARAM_SIZE = 1;
 constexpr int32_t WEB_NATIVE_PARAM_INDEX = 0;
 
+constexpr char WEB_INTERFACE_REQUEST_DOM_TREE[] = "RequestArkWebDomTree";
+
 struct ActiveNode {
     int32_t id;
     std::string tagName;
@@ -87,6 +89,7 @@ public:
 
     void CreateFromJsonString(const std::string& jsonString);
     void UpdateScrollInfoFromJsonString(const std::string& jsonString);
+    std::unique_ptr<JsonValue> CreateTempFromJsonString(const std::string& jsonString);
 
     bool IsValid()
     {
@@ -134,6 +137,7 @@ private:
     std::shared_ptr<const ActiveDocument> active_;
 
     std::shared_ptr<WebDomNode> CreateNode(std::unique_ptr<JsonValue>& json);
+    ActiveNode CreateActiveNode(std::unique_ptr<JsonValue>& json);
     void UpdateNodeScrollInfo(WebDomNode* node, const OffsetF& delta);
     ActiveNode BuildActiveNode(const std::shared_ptr<WebDomNode>& domNode,
         int32_t parentId) const;

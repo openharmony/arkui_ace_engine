@@ -9344,6 +9344,20 @@ void WebPattern::GetWebInfoByRequest(uint32_t windowId, int32_t webId, const std
     void(int32_t, int32_t, const std::string&, const std::string&, WebRequestErrorCode)>& finishCallback)
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "GetWebInfoByRequest WebId:%{public}d, request:%{public}s", webId, request.c_str());
+    if (request == WEB_INTERFACE_REQUEST_DOM_TREE) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern RequestArkWebDomTree");
+        delegate_->RequestWebDomJsonString(
+            [weak = AceType::WeakClaim(this), windowId, webId, request, finishCallback](std::string result){
+                TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern RequestArkWebDomTree callback");
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                auto offset = pattern->GetCoordinatePoint().value_or(OffsetF());
+                pattern->webDomDocument_->UpdateOffset(offset);
+                auto jsonValue = pattern->webDomDocument_->CreateTempFromJsonString(result);
+                finishCallback(windowId, webId, request, jsonValue->ToString(), WebRequestErrorCode::OK);
+            });
+        return;
+    }
     return;
 }
 
