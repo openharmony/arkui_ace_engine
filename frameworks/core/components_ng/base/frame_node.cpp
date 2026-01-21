@@ -3168,6 +3168,9 @@ void FrameNode::MarkDirtyNode(bool isMeasureBoundary, bool isRenderBoundary, Pro
 
 bool FrameNode::IsNeedRequestParentMeasure() const
 {
+    if (pattern_->ForceRequestParentMeasure()) {
+        return true;
+    }
     auto layoutFlag = layoutProperty_->GetPropertyChangeFlag();
     if (layoutFlag == PROPERTY_UPDATE_BY_CHILD_REQUEST) {
         const auto& calcLayoutConstraint = layoutProperty_->GetCalcLayoutConstraint();
