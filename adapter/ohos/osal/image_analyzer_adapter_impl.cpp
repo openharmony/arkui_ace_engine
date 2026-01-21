@@ -47,6 +47,11 @@ void ImageAnalyzerAdapterImpl::SetImageAnalyzerConfig(void* config, bool isOptio
     }
 }
 
+void* ImageAnalyzerAdapterImpl::GetNapiEnv() const
+{
+    return env_;
+}
+
 void* ImageAnalyzerAdapterImpl::GetImageAnalyzerConfig()
 {
     napi_escapable_handle_scope scope = nullptr;

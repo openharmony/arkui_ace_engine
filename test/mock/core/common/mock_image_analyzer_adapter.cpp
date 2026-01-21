@@ -35,4 +35,9 @@ ImageAnalyzerAdapter* CreateImageAnalyzerAdapter()
 {
     return nullptr;
 }
+
+void* ImageAnalyzerAdapter::GetNapiEnv() const
+{
+    return nullptr;
+}
 } // namespace OHOS::Ace
