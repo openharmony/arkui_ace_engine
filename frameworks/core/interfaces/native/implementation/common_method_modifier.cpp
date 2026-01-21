@@ -814,6 +814,8 @@ auto g_bindMenuOptionsParam = [](
     auto convValue = OptConvert<Dimension>(menuOptions.minKeyboardAvoidDistance);
     Validator::ValidateNonNegative(convValue);
     menuParam.minKeyboardAvoidDistance = convValue;
+    auto material = OptConvert<UiMaterial*>(menuOptions.systemMaterial).value_or(nullptr);
+    menuParam.systemMaterial = material ? material->Copy() : nullptr;
 };
 
 auto g_bindContextMenuParams = [](MenuParam& menuParam, const std::optional<Ark_ContextMenuOptions>& menuOption,

@@ -14491,6 +14491,18 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
+    void SetMenuSystemMaterialImpl(Ark_NativePointer node,
+                               const Opt_uiMaterial_Material* value)
+    {
+        if (!needGroupedLog(1))
+        {
+            return;
+        }
+        string out("setMenuSystemMaterial(");
+        WriteToString(&out, value);
+        out.append(") \n");
+        appendGroupedLog(1, out);
+    }
     void SetMenuAlignImpl(Ark_NativePointer node,
                           const Opt_MenuAlignType* alignType,
                           const Opt_Offset* offset)

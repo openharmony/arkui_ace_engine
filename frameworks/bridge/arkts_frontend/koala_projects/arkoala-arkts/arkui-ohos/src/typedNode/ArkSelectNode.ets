@@ -26,6 +26,7 @@ import {
 import { Resource } from "global.resource";
 import { ContentModifier, hookSelectSetDividerMethod } from "#handwritten";
 import { hookSelectContentModifier } from '../hooks/content_modifiers/ContentModifierHooks';
+import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
 
 export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
     constructParam(...param: Object[]): this {
@@ -232,6 +233,12 @@ export class ArkSelectNode extends ArkBaseNode implements SelectAttribute {
     backgroundColor(value: ResourceColor | undefined): this {
         const value_casted = value as (ResourceColor | undefined)
         this.getPeer()?.setBackgroundColorAttribute(value_casted)
+        this.markDirty();
+        return this;
+    }
+    menuSystemMaterial(value: uiMaterial.Material | undefined): this {
+        const value_casted = value as (uiMaterial.Material | undefined)
+        this.getPeer()?.setMenuSystemMaterialAttribute(value_casted)
         this.markDirty();
         return this;
     }

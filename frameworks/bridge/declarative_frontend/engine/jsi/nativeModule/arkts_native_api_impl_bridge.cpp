@@ -2294,6 +2294,10 @@ void ArkUINativeModule::RegisterSelectAttributes(Local<panda::ObjectRef> object,
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetMinKeyboardAvoidDistance));
     select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMinKeyboardAvoidDistance"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetMinKeyboardAvoidDistance));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuSystemMaterial"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::SetMenuSystemMaterial));
+    select->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuSystemMaterial"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SelectBridge::ResetMenuSystemMaterial));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "select"), select);
 }
 

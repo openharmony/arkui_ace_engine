@@ -1034,6 +1034,22 @@ void ResetMinKeyboardAvoidDistance(ArkUINodeHandle node)
     SelectModelNG::SetMinKeyboardAvoidDistance(frameNode, std::nullopt);
 }
 
+void SetMenuSystemMaterial(ArkUINodeHandle node, void* menuSystemMaterial)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* castMenuSystemMaterial = reinterpret_cast<UiMaterial*>(menuSystemMaterial);
+    auto refPtrMenuSystemMaterial = castMenuSystemMaterial ? castMenuSystemMaterial->Copy() : nullptr;
+    SelectModelNG::SetMenuSystemMaterial(frameNode, refPtrMenuSystemMaterial);
+}
+
+void ResetMenuSystemMaterial(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    SelectModelNG::SetMenuSystemMaterial(frameNode, nullptr);
+}
+
 namespace NodeModifier {
 const ArkUISelectModifier* GetSelectModifier()
 {
@@ -1115,6 +1131,8 @@ const ArkUISelectModifier* GetSelectModifier()
         .resetMenuKeyboardAvoidMode = ResetMenuKeyboardAvoidMode,
         .setMinKeyboardAvoidDistance = SetMinKeyboardAvoidDistance,
         .resetMinKeyboardAvoidDistance = ResetMinKeyboardAvoidDistance,
+        .setMenuSystemMaterial = SetMenuSystemMaterial,
+        .resetMenuSystemMaterial = ResetMenuSystemMaterial,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 

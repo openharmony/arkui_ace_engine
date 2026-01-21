@@ -23,6 +23,10 @@
 #include "core/components_ng/property/measure_property.h"
 #include "core/components_ng/property/transition_property.h"
 
+namespace OHOS::Ace {
+class UiMaterial;
+}
+
 namespace OHOS::Ace::NG {
 
 enum class MenuType {
@@ -134,6 +138,7 @@ struct MenuParam {
     std::optional<AvailableLayoutAreaMode> availableLayoutAreaMode;
     std::optional<MenuKeyboardAvoidMode> keyboardAvoidMode;
     std::optional<Dimension> minKeyboardAvoidDistance;
+    RefPtr<UiMaterial> systemMaterial;
     bool isDarkMode = false;
     bool isWithTheme = false;
     bool reuse = true;
