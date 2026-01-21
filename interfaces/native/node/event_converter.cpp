@@ -430,6 +430,18 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_CONTAINER_PICKER_SCROLL_STOP;
         case NODE_RICH_EDITOR_ON_SELECTION_CHANGE:
             return ON_RICH_EDITOR_ON_SELECTION_CHANGE;
+        case NODE_RICH_EDITOR_ON_READY:
+            return ON_RICH_EDITOR_ON_READY;
+        case NODE_RICH_EDITOR_ON_PASTE:
+            return ON_RICH_EDITOR_ON_PASTE;
+        case NODE_RICH_EDITOR_ON_EDITING_CHANGE:
+            return ON_RICH_EDITOR_ON_EDITING_CHANGE;
+        case NODE_RICH_EDITOR_ON_SUBMIT:
+            return ON_RICH_EDITOR_ON_SUBMIT;
+        case NODE_RICH_EDITOR_ON_CUT:
+            return ON_RICH_EDITOR_ON_CUT;
+        case NODE_RICH_EDITOR_ON_COPY:
+            return ON_RICH_EDITOR_ON_COPY;
         default:
             return -1;
     }
@@ -730,6 +742,18 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_PICKER_EVENT_ON_SCROLL_STOP;
         case ON_RICH_EDITOR_ON_SELECTION_CHANGE:
             return NODE_RICH_EDITOR_ON_SELECTION_CHANGE;
+        case ON_RICH_EDITOR_ON_READY:
+            return NODE_RICH_EDITOR_ON_READY;
+        case ON_RICH_EDITOR_ON_PASTE:
+            return NODE_RICH_EDITOR_ON_PASTE;
+        case ON_RICH_EDITOR_ON_EDITING_CHANGE:
+            return NODE_RICH_EDITOR_ON_EDITING_CHANGE;
+        case  ON_RICH_EDITOR_ON_SUBMIT:
+            return NODE_RICH_EDITOR_ON_SUBMIT;
+        case ON_RICH_EDITOR_ON_CUT:
+            return NODE_RICH_EDITOR_ON_CUT;
+        case ON_RICH_EDITOR_ON_COPY:
+            return NODE_RICH_EDITOR_ON_COPY;
         default:
             return -1;
     }
@@ -845,6 +869,12 @@ bool ConvertEvent(ArkUINodeEvent* origin, ArkUI_NodeEvent* event)
         case CHILD_TOUCH_TEST_EVENT: {
             event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_INPUT_EVENT);
             ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->touchTestInfo.subKind);
+            event->kind = ConvertToNodeEventType(subKind);
+            return true;
+        }
+        case PREVENTABLE_EVENT: {
+            event->category = static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT);
+            ArkUIEventSubKind subKind = static_cast<ArkUIEventSubKind>(origin->preventableEvent.subKind);
             event->kind = ConvertToNodeEventType(subKind);
             return true;
         }
@@ -1119,6 +1149,19 @@ ArkUI_TextChangeEvent* OH_ArkUI_NodeEvent_GetTextChangeEvent(ArkUI_NodeEvent* ev
     }
     return const_cast<ArkUI_TextChangeEvent*>(
         reinterpret_cast<const ArkUI_TextChangeEvent*>(&(originNodeEvent->textChangeEvent)));
+}
+
+ArkUI_PreventableEvent* OH_ArkUI_NodeEvent_GetPreventableEvent(ArkUI_NodeEvent* event)
+{
+    if (!event || event->category != static_cast<int32_t>(NODE_EVENT_CATEGORY_COMPONENT_EVENT)) {
+        return nullptr;
+    }
+    const auto* originNodeEvent = reinterpret_cast<ArkUINodeEvent*>(event->origin);
+    if (!originNodeEvent) {
+        return nullptr;
+    }
+    return const_cast<ArkUI_PreventableEvent*>(
+        reinterpret_cast<const ArkUI_PreventableEvent*>(&(originNodeEvent->preventableEvent)));
 }
 
 void* OH_ArkUI_NodeEvent_GetUserData(ArkUI_NodeEvent* event)

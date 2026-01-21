@@ -24,6 +24,7 @@
 #include "node_model.h"
 #include "node_transition.h"
 #include "progress_option.h"
+#include "rich_editor_native_impl.h"
 #include "text_native_impl.h"
 #include "waterflow_section_option.h"
 #include "foundation/arkui/ace_engine/frameworks/core/event/mouse_event.h"
@@ -5425,6 +5426,59 @@ void ResetRichEditorDataDetectorConfig(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
     fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorDataDetectorConfigWithEvent(node->uiNodeHandle);
+}
+
+int32_t SetRichEditorPlaceholder(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item && item->object, ERROR_CODE_PARAM_INVALID);
+    auto* options = reinterpret_cast<ArkUI_RichEditorPlaceholderOptions*>(item->object);
+    ArkUIRichEditorPlaceholderOptionsStruct placeholderOptions;
+    placeholderOptions.value = options->value;
+    placeholderOptions.fontWeight = options->fontWeight;
+    placeholderOptions.fontSize = options->fontSize;
+    placeholderOptions.fontFamily = options->fontFamily;
+    placeholderOptions.fontStyle = options->fontStyle;
+    placeholderOptions.fontColor = options->fontColor;
+    GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->setRichEditorNapiPlaceholder(
+        node->uiNodeHandle, &placeholderOptions);
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetRichEditorPlaceholder(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->resetRichEditorPlaceholder(node->uiNodeHandle);
+}
+
+int32_t SetRichEditorStyledStringController(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    CHECK_NULL_RETURN(item && item->object, ERROR_CODE_PARAM_INVALID);
+    auto* controller = reinterpret_cast<ArkUI_RichEditorStyledStringController*>(item->object);
+    controller->node = node;
+    return ERROR_CODE_NO_ERROR;
+}
+
+int32_t SetRichEditorSupportPreviewText(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->setRichEditorSupportPreviewText(
+        node->uiNodeHandle, static_cast<uint32_t>(item->value[0].i32));
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetRichEditorSupportPreviewText(ArkUI_NodeHandle node)
+{
+    GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->resetRichEditorSupportPreviewText(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetRichEditorSupportPreviewText(ArkUI_NodeHandle node)
+{
+    g_numberValues[0].i32 = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->
+        getRichEditorSupportPreviewText(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
 }
 
 int32_t SetPlaceholderColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
@@ -13567,14 +13621,24 @@ int32_t SetEditMenuOption(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item
         editMenuParam.clickUserData = menuOptions->clickUserData;
     }
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextModifier()->setTextEditMenuOptions(node->uiNodeHandle, &editMenuParam);
+    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+        fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorNapiEditMenuOptions(
+            node->uiNodeHandle, &editMenuParam);
+    } else {
+        fullImpl->getNodeModifiers()->getTextModifier()->setTextEditMenuOptions(node->uiNodeHandle, &editMenuParam);
+    }
     return ERROR_CODE_NO_ERROR;
 }
 
 void ResetEditMenuOption(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getTextModifier()->resetTextEditMenuOptions(node->uiNodeHandle);
+    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+        fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorEditMenuOptions(
+            node->uiNodeHandle);
+    } else {
+        fullImpl->getNodeModifiers()->getTextModifier()->resetTextEditMenuOptions(node->uiNodeHandle);
+    }
 }
 
 int32_t SetTextBindSelectionMenu(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)

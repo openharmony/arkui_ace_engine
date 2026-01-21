@@ -6136,6 +6136,64 @@ typedef enum {
     NODE_RICH_EDITOR_DATA_DETECTOR_CONFIG,
 
     /**
+     * @brief Set the edit menu options of the rich editor.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the edit menu options of rich editor. The parameter type is {@link OH_ArkUI_EditMenuOptions}.\n
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_EDIT_MENU_OPTIONS,
+
+    /**
+     * @brief Set the placeholder options of the rich editor.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the placeholder options of rich editor. The parameter type is 
+     * {@link ArkUI_RichEditorPlaceholderOptions }.\n
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_PLACEHOLDER,
+
+    /**
+     * @brief Set the styled string controller of the rich editor.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .object: the styled string controller of rich editor. The parameter type is
+     * {@link ArkUI_RichEditorStyledStringController }.\n
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_STYLED_STRING_CONTROLLER,
+
+    /**
+     * @brief Defines whether enable preview text.
+     * This attribute can be set, reset, and obtained as required through APIs.
+     *
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
+     * .value[0].i32: whether to enable. The value <b>true</b> means to enable, and
+     * <b>false</b> means the opposite.\n
+     * \n
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * value[0].i32: whether to enable.\n
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_ENABLE_PREVIEW_TEXT,
+
+    /**
+     * @brief Gets the TextLayoutManager of the rich editor.
+     *
+     * Format of the return value {@link ArkUI_AttributeItem}:\n
+     * .object: the layout manager of rich editor.\n
+     * The parameter type is {@link OH_ArkUI_TextLayoutManager}.\n
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_LAYOUT_MANAGER,
+
+    /**
      * @brief Defines the alignment mode of the child components in the container. This attribute can be set, reset,
      * and obtained as required through APIs.
      *
@@ -8381,6 +8439,16 @@ typedef struct {
 } ArkUI_TextChangeEvent;
 
 /**
+ * @brief Defines a interceptable data structure for component events.
+ *
+ * @since 24
+ */
+typedef struct {
+    /** Bool data */
+    bool prevent;
+} ArkUI_PreventableEvent;
+
+/**
  * @brief Enumerates the event types supported by the NativeNode component.
  *
  * @since 12
@@ -9322,18 +9390,101 @@ typedef enum {
     NODE_CHECKBOX_GROUP_EVENT_ON_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_CHECKBOX_GROUP,
 
     /**
-      * @brief Defines the event triggered when selection area or caret position is changed in
-      * <b>ARKUI_NODE_RICH_EDITOR</b> component.
-      *
-      * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * @brief Defines the event triggered when selection area or caret position is changed in
+     * <b>ARKUI_NODE_RICH_EDITOR</b> component.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
      * {@link ArkUI_NodeComponentEvent}. \n
      * {@link ArkUI_NodeComponentEvent} contains two parameters: \n
      * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: start index of selection area. \n
      * <b>ArkUI_NodeComponentEvent.data[1].i32</b>: end index of selection area. \n
-      *
-      * @since 24
-      */
+     *
+     * @since 24
+     */
     NODE_RICH_EDITOR_ON_SELECTION_CHANGE = MAX_NODE_SCOPE_NUM * ARKUI_NODE_RICH_EDITOR,
+
+    /**
+ 	 * @brief Defines the event triggered when the <b>ARKUI_NODE_RICH_EDITOR</b> component is initialized
+     * for the first time.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_ON_READY,
+ 	 
+    /**
+     * @brief Defines the event triggered when the paste button on the pasteboard, which displays when the
+     * <b>ARKUI_NODE_RICH_EDITOR</b> component is long pressed, is clicked.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_PreventableEvent}. \n
+     * {@link ArkUI_PreventableEvent} contains one parameter:\n
+     * <b>ArkUI_PreventableEvent.prevent</b>:  Whether intercept component default behavior,
+     * true means intercept component default behavior, false means not intercept component default behavior.
+     *
+     * The default value is false.\n
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_ON_PASTE,
+
+    /**
+     * @brief Defines the event triggered when the <b>ARKUI_NODE_RICH_EDITOR</b> component editing state has changed.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: the editing state of component.
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_ON_EDITING_CHANGE,
+ 	 
+    /**
+     * @brief Defines the event triggered when the Enter key of the RichEditor method is pressed.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_NodeComponentEvent}. \n
+     * {@link ArkUI_NodeComponentEvent} contains one parameter:\n
+     * <b>ArkUI_NodeComponentEvent.data[0].i32</b>: Enter key type of the input method.
+     * 
+     * @since 24
+     */
+    NODE_RICH_EDITOR_ON_SUBMIT,
+ 	 
+    /**
+     * @brief Defines the event triggered when the cut button on the pasteboard, which displays when the
+     * <b>ARKUI_NODE_RICH_EDITOR</b> component is long pressed, is clicked.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_PreventableEvent}. \n
+     * {@link ArkUI_PreventableEvent} contains one parameter:\n
+     * <b>ArkUI_PreventableEvent.prevent</b>:  Whether intercept component default behavior,
+     * true means intercept component default behavior, false means not intercept component default behavior.
+     *
+     * The default value is false.\n
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_ON_CUT,
+ 	 
+    /**
+     * @brief Defines the event triggered when the copy button on the pasteboard, which displays when the content of the
+     * <b>ARKUI_NODE_RICH_EDITOR</b> component is selected, is clicked.
+     *
+     * When the event callback occurs, the union type in the {@link ArkUI_NodeEvent} object is
+     * {@link ArkUI_PreventableEvent}. \n
+     * {@link ArkUI_PreventableEvent} contains one parameter:\n
+     * <b>ArkUI_PreventableEvent.prevent</b>:  Whether intercept component default behavior,
+     * true means intercept the default behavior of components, false means not intercept the default behavior of components.
+     *
+     * The default value is false.\n
+     *
+     * @since 24
+     */
+    NODE_RICH_EDITOR_ON_COPY,
 
     /**
      * @brief Defines the event triggered when the index of the currently displayed element of this
@@ -10174,6 +10325,15 @@ ArkUI_StringAsyncEvent* OH_ArkUI_NodeEvent_GetStringAsyncEvent(ArkUI_NodeEvent* 
  * @since 16
  */
 ArkUI_TextChangeEvent* OH_ArkUI_NodeEvent_GetTextChangeEvent(ArkUI_NodeEvent* event);
+
+/**
+ * @brief Obtain data of the ArkUI_PreventableEvent type.
+ *
+ * @param event Indicates the pointer to the component event.
+ * @return Returns the pointer to the data of the ArkUI_PreventableEvent type.
+ * @since 24
+ */
+ArkUI_PreventableEvent* OH_ArkUI_NodeEvent_GetPreventableEvent(ArkUI_NodeEvent* event);
 
 /**
  * @brief Obtains the custom data in a component event.

@@ -79,6 +79,15 @@ public:
     void SetSingleLine(bool enabled) override;
     void ResetSingleLine() override;
 
+    static void SetCaretOffset(FrameNode* frameNode, int32_t caretPosition);
+    static int32_t GetCaretOffset(FrameNode* frameNode);
+    static void SetSelection(FrameNode* frameNode, int32_t selectionStart, int32_t selectionEnd,
+        const std::optional<SelectionOptions>& options);
+    static void StopEditing(FrameNode* frameNode);
+    static bool IsEditing(FrameNode* frameNode);
+    static RectF GetCaretRect(FrameNode* frameNode);
+    static void DeleteBackward(FrameNode* frameNode);
+    static PreviewTextInfo GetPreviewTextInfo(FrameNode* frameNode);
     static RefPtr<FrameNode> CreateRichEditorStyledStringNode(int32_t nodeId);
     static void SetSelectDetectEnable(FrameNode* frameNode, const bool value);
     static bool GetSelectDetectEnable(FrameNode* frameNode);
@@ -118,9 +127,20 @@ public:
     static TextInputAction GetEnterKeyType(FrameNode* frameNode);
     void SetOnSubmit(std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& func) override;
     static void SetOnSubmit(FrameNode* frameNode, std::function<void(int32_t, NG::TextFieldCommonEvent&)>&& callback);
+    static size_t GetLineCount(FrameNode* frameNode);
+    static TextLineMetrics GetLineMetrics(FrameNode* frameNode, int32_t lineNumber);
+    static std::vector<ParagraphManager::TextBox> GetRectsForRange(FrameNode* frameNode, int32_t start, int32_t end,
+        RectHeightStyle heightStyle, RectWidthStyle widthStyle);
+    static PositionWithAffinity GetGlyphPositionAtCoordinate(FrameNode* frameNode, int32_t x, int32_t y);
+    static void SetTypingParagraphStyle(FrameNode* frameNode,
+        std::optional<struct UpdateParagraphStyle> typingParagraphStyle);
+    static void SetTypingStyle(FrameNode* frameNode, std::optional<struct UpdateSpanStyle> typingStyle,
+            std::optional<TextStyle> textStyle);
+    static std::optional<struct UpdateSpanStyle> GetTypingStyle(FrameNode* frameNode);
     static void SetAboutToIMEInput(FrameNode* frameNode, std::function<bool(const RichEditorInsertValue&)>&& callback);
     static void SetRequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
     static void SetSupportPreviewText(FrameNode* frameNode, bool value);
+    static bool IsSupportPreviewText(FrameNode* frameNode);
     static void SetSelectionMenuOptions(FrameNode* frameNode,
         const OnCreateMenuCallback&& onCreateMenuCallback, const OnMenuItemClickCallback&& onMenuItemClick,
         const OnPrepareMenuCallback&& onPrepareMenuCallback);

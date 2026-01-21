@@ -93,6 +93,161 @@ FontWeight ConvertStrToFontWeight(ArkUI_CharPtr weight, FontWeight defaultFontWe
     std::string weightStr(weight);
     return StringUtils::StringToFontWeight(weightStr, defaultFontWeight);
 }
+
+ArkUITextMenuItemArray ConvertToArkUITextMenuItemArray(
+    ArkUITextMenuItem* textMenuItems, const std::vector<NG::MenuItemParam>& itemPrams)
+{
+    ArkUITextMenuItemArray itemArray;
+    itemArray.items = nullptr;
+    itemArray.length = 0;
+    CHECK_NULL_RETURN(textMenuItems, itemArray);
+    for (size_t i = 0; i < itemPrams.size(); ++i) {
+        const auto& itemParam = itemPrams[i];
+        if (itemParam.menuOptionsParam.content.has_value()) {
+            textMenuItems[i].content = itemParam.menuOptionsParam.content.value().c_str();
+        }
+        if (itemParam.menuOptionsParam.icon.has_value()) {
+            textMenuItems[i].icon = itemParam.menuOptionsParam.icon.value().c_str();
+        }
+        if (itemParam.menuOptionsParam.labelInfo.has_value()) {
+            textMenuItems[i].labelInfo = itemParam.menuOptionsParam.labelInfo.value().c_str();
+        }
+        textMenuItems[i].id = SelectOverlayNode::ConvertToIntMenuId(itemParam.menuOptionsParam.id);
+    }
+    itemArray.items = textMenuItems;
+    itemArray.length = itemPrams.size();
+    return itemArray;
+}
+
+std::vector<NG::MenuOptionsParam> ConvertToMenuOptionsParams(const ArkUITextMenuItemArray& itemArray)
+{
+    std::vector<NG::MenuOptionsParam> outOptionVec;
+    CHECK_NULL_RETURN(itemArray.items, outOptionVec);
+    for (uint32_t i = 0; i < itemArray.length; ++i) {
+        NG::MenuOptionsParam menuOption;
+        auto& item = itemArray.items[i];
+        if (item.content) {
+            menuOption.content = std::string(item.content);
+        }
+        if (item.isDelContent) {
+            delete[] item.content;
+        }
+        if (item.icon) {
+            menuOption.icon = std::string(item.icon);
+        }
+        if (item.isDelIcon) {
+            delete[] item.icon;
+        }
+        if (item.labelInfo) {
+            menuOption.labelInfo = std::string(item.labelInfo);
+        }
+        if (item.isDelLabel) {
+            delete[] item.labelInfo;
+        }
+        menuOption.id = SelectOverlayNode::ConvertToStrMenuId(item.id);
+        outOptionVec.push_back(menuOption);
+    }
+    delete[] itemArray.items;
+    return outOptionVec;
+}
+
+NG::OnCreateMenuCallback WrapOnCreateMenuCallback(ArkUIEditOptionsParam* optionsParam)
+{
+    NG::OnCreateMenuCallback onCreateMenuCallback =
+        [adapterCallback = optionsParam->createAdapterCallback, userCallback = optionsParam->onCreateMenu,
+            userData = optionsParam->createUserData](const std::vector<NG::MenuItemParam>& itemParams) {
+            if (adapterCallback) {
+                ArkUITextMenuItem menuItems[itemParams.size()];
+                auto inItemArray = ConvertToArkUITextMenuItemArray(menuItems, itemParams);
+                auto outItemArray = adapterCallback(userCallback, userData, &inItemArray);
+                return ConvertToMenuOptionsParams(outItemArray);
+            }
+            std::vector<NG::MenuOptionsParam> outOptionVec(itemParams.size());
+            std::transform(itemParams.begin(), itemParams.end(), std::back_inserter(outOptionVec),
+                [](const NG::MenuItemParam& itemParam) { return itemParam.menuOptionsParam; });
+            return outOptionVec;
+        };
+    return onCreateMenuCallback;
+}
+
+NG::OnMenuItemClickCallback WrapOnMenuItemClickCallback(ArkUIEditOptionsParam* optionsParam)
+{
+    NG::OnMenuItemClickCallback onMenuItemClick =
+        [adapterCallback = optionsParam->itemClickAdapterCallback, userCallback = optionsParam->onMenuItemClick,
+            userData = optionsParam->clickUserData](const NG::MenuItemParam& itemParam) {
+            if (adapterCallback) {
+                ArkUITextMenuItem menuItem;
+                if (itemParam.menuOptionsParam.content.has_value()) {
+                    menuItem.content = itemParam.menuOptionsParam.content.value().c_str();
+                }
+                if (itemParam.menuOptionsParam.icon.has_value()) {
+                    menuItem.icon = itemParam.menuOptionsParam.icon.value().c_str();
+                }
+                if (itemParam.menuOptionsParam.labelInfo.has_value()) {
+                    menuItem.labelInfo = itemParam.menuOptionsParam.labelInfo.value().c_str();
+                }
+                menuItem.id = SelectOverlayNode::ConvertToIntMenuId(itemParam.menuOptionsParam.id);
+                return adapterCallback(userCallback, userData, &menuItem, itemParam.start, itemParam.end);
+            }
+            return false;
+        };
+    return onMenuItemClick;
+}
+
+NG::OnPrepareMenuCallback WrapOnPrepareMenuCallback(ArkUIEditOptionsParam* optionsParam)
+{
+    NG::OnPrepareMenuCallback onPrepareMenuCallback =
+        [adapterCallback = optionsParam->prepareAdapterCallback, userCallback = optionsParam->onPrepareMenu,
+            userData = optionsParam->prepareUserData](const std::vector<NG::MenuItemParam>& itemParams) {
+            if (adapterCallback) {
+                ArkUITextMenuItem menuItems[itemParams.size()];
+                auto inItemArray = ConvertToArkUITextMenuItemArray(menuItems, itemParams);
+                auto outItemArray = adapterCallback(userCallback, userData, &inItemArray);
+                return ConvertToMenuOptionsParams(outItemArray);
+            }
+            std::vector<NG::MenuOptionsParam> outOptionVec(itemParams.size());
+            std::transform(itemParams.begin(), itemParams.end(), std::back_inserter(outOptionVec),
+                [](const NG::MenuItemParam& itemParam) { return itemParam.menuOptionsParam; });
+            return outOptionVec;
+        };
+    return onPrepareMenuCallback;
+}
+
+ArkUITextLineMetrics Convert(const TextLineMetrics& textLineMetrics)
+{
+    ArkUITextLineMetrics lineMetrics;
+    lineMetrics.ascender = textLineMetrics.ascender;
+    lineMetrics.descender = textLineMetrics.descender;
+    lineMetrics.capHeight = textLineMetrics.capHeight;
+    lineMetrics.xHeight = textLineMetrics.xHeight;
+    lineMetrics.width = textLineMetrics.width;
+    lineMetrics.height = textLineMetrics.height;
+    lineMetrics.x = textLineMetrics.x;
+    lineMetrics.y = textLineMetrics.y;
+    lineMetrics.startIndex = textLineMetrics.startIndex;
+    lineMetrics.endIndex = textLineMetrics.endIndex;
+    FontMetrics firstCharMetrics = textLineMetrics.firstCharMetrics;
+    ArkUIFontMetrics fontMetrics;
+    fontMetrics.fFlags = firstCharMetrics.fFlags;
+    fontMetrics.fTop = firstCharMetrics.fTop;
+    fontMetrics.fAscent = firstCharMetrics.fAscent;
+    fontMetrics.fDescent = firstCharMetrics.fDescent;
+    fontMetrics.fBottom = firstCharMetrics.fBottom;
+    fontMetrics.fLeading = firstCharMetrics.fLeading;
+    fontMetrics.fAvgCharWidth = firstCharMetrics.fAvgCharWidth;
+    fontMetrics.fMaxCharWidth = firstCharMetrics.fMaxCharWidth;
+    fontMetrics.fXMin = firstCharMetrics.fXMin;
+    fontMetrics.fXMax = firstCharMetrics.fXMax;
+    fontMetrics.fXHeight = firstCharMetrics.fXHeight;
+    fontMetrics.fCapHeight = firstCharMetrics.fCapHeight;
+    fontMetrics.fUnderlineThickness = firstCharMetrics.fUnderlineThickness;
+    fontMetrics.fUnderlinePosition = firstCharMetrics.fUnderlinePosition;
+    fontMetrics.fStrikeoutThickness = firstCharMetrics.fStrikeoutThickness;
+    fontMetrics.fStrikeoutPosition = firstCharMetrics.fStrikeoutPosition;
+    lineMetrics.firstCharMetrics = fontMetrics;
+    return lineMetrics;
+}
+
 namespace {
 
 thread_local std::string g_strValue;
@@ -2421,156 +2576,7 @@ ArkUITextLineMetrics GetLineMetrics(ArkUINodeHandle node, ArkUI_Int32 lineNumber
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, {});
     TextLineMetrics textLineMetrics = TextModelNG::GetLineMetrics(frameNode, lineNumber);
-    ArkUITextLineMetrics lineMetrics;
-    lineMetrics.ascender = textLineMetrics.ascender;
-    lineMetrics.descender = textLineMetrics.descender;
-    lineMetrics.capHeight = textLineMetrics.capHeight;
-    lineMetrics.xHeight = textLineMetrics.xHeight;
-    lineMetrics.width = textLineMetrics.width;
-    lineMetrics.height = textLineMetrics.height;
-    lineMetrics.x = textLineMetrics.x;
-    lineMetrics.y = textLineMetrics.y;
-    lineMetrics.startIndex = textLineMetrics.startIndex;
-    lineMetrics.endIndex = textLineMetrics.endIndex;
-    FontMetrics firstCharMetrics = textLineMetrics.firstCharMetrics;
-    ArkUIFontMetrics fontMetrics;
-    fontMetrics.fFlags = firstCharMetrics.fFlags;
-    fontMetrics.fTop = firstCharMetrics.fTop;
-    fontMetrics.fAscent = firstCharMetrics.fAscent;
-    fontMetrics.fDescent = firstCharMetrics.fDescent;
-    fontMetrics.fBottom = firstCharMetrics.fBottom;
-    fontMetrics.fLeading = firstCharMetrics.fLeading;
-    fontMetrics.fAvgCharWidth = firstCharMetrics.fAvgCharWidth;
-    fontMetrics.fMaxCharWidth = firstCharMetrics.fMaxCharWidth;
-    fontMetrics.fXMin = firstCharMetrics.fXMin;
-    fontMetrics.fXMax = firstCharMetrics.fXMax;
-    fontMetrics.fXHeight = firstCharMetrics.fXHeight;
-    fontMetrics.fCapHeight = firstCharMetrics.fCapHeight;
-    fontMetrics.fUnderlineThickness = firstCharMetrics.fUnderlineThickness;
-    fontMetrics.fUnderlinePosition = firstCharMetrics.fUnderlinePosition;
-    fontMetrics.fStrikeoutThickness = firstCharMetrics.fStrikeoutThickness;
-    fontMetrics.fStrikeoutPosition = firstCharMetrics.fStrikeoutPosition;
-    lineMetrics.firstCharMetrics = fontMetrics;
-    return lineMetrics;
-}
-
-ArkUITextMenuItemArray ConvertToArkUITextMenuItemArray(
-    ArkUITextMenuItem* textMenuItems, const std::vector<NG::MenuItemParam>& itemPrams)
-{
-    ArkUITextMenuItemArray itemArray;
-    itemArray.items = nullptr;
-    itemArray.length = 0;
-    CHECK_NULL_RETURN(textMenuItems, itemArray);
-    for (size_t i = 0; i < itemPrams.size(); ++i) {
-        const auto& itemParam = itemPrams[i];
-        if (itemParam.menuOptionsParam.content.has_value()) {
-            textMenuItems[i].content = itemParam.menuOptionsParam.content.value().c_str();
-        }
-        if (itemParam.menuOptionsParam.icon.has_value()) {
-            textMenuItems[i].icon = itemParam.menuOptionsParam.icon.value().c_str();
-        }
-        if (itemParam.menuOptionsParam.labelInfo.has_value()) {
-            textMenuItems[i].labelInfo = itemParam.menuOptionsParam.labelInfo.value().c_str();
-        }
-        textMenuItems[i].id = SelectOverlayNode::ConvertToIntMenuId(itemParam.menuOptionsParam.id);
-    }
-    itemArray.items = textMenuItems;
-    itemArray.length = itemPrams.size();
-    return itemArray;
-}
-
-std::vector<NG::MenuOptionsParam> ConvertToMenuOptionsParams(const ArkUITextMenuItemArray& itemArray)
-{
-    std::vector<NG::MenuOptionsParam> outOptionVec;
-    CHECK_NULL_RETURN(itemArray.items, outOptionVec);
-    for (uint32_t i = 0; i < itemArray.length; ++i) {
-        NG::MenuOptionsParam menuOption;
-        auto& item = itemArray.items[i];
-        if (item.content) {
-            menuOption.content = std::string(item.content);
-        }
-        if (item.isDelContent) {
-            delete[] item.content;
-        }
-        if (item.icon) {
-            menuOption.icon = std::string(item.icon);
-        }
-        if (item.isDelIcon) {
-            delete[] item.icon;
-        }
-        if (item.labelInfo) {
-            menuOption.labelInfo = std::string(item.labelInfo);
-        }
-        if (item.isDelLabel) {
-            delete[] item.labelInfo;
-        }
-        menuOption.id = SelectOverlayNode::ConvertToStrMenuId(item.id);
-        outOptionVec.push_back(menuOption);
-    }
-    delete[] itemArray.items;
-    return outOptionVec;
-}
-
-NG::OnCreateMenuCallback WrapOnCreateMenuCallback(ArkUIEditOptionsParam* optionsParam)
-{
-    NG::OnCreateMenuCallback onCreateMenuCallback =
-        [adapterCallback = optionsParam->createAdapterCallback, userCallback = optionsParam->onCreateMenu,
-            userData = optionsParam->createUserData](const std::vector<NG::MenuItemParam>& itemParams) {
-            if (adapterCallback) {
-                ArkUITextMenuItem menuItems[itemParams.size()];
-                auto inItemArray = ConvertToArkUITextMenuItemArray(menuItems, itemParams);
-                auto outItemArray = adapterCallback(userCallback, userData, &inItemArray);
-                return ConvertToMenuOptionsParams(outItemArray);
-            }
-            std::vector<NG::MenuOptionsParam> outOptionVec(itemParams.size());
-            std::transform(itemParams.begin(), itemParams.end(), std::back_inserter(outOptionVec),
-                [](const NG::MenuItemParam& itemParam) { return itemParam.menuOptionsParam; });
-            return outOptionVec;
-        };
-    return onCreateMenuCallback;
-}
-
-NG::OnMenuItemClickCallback WrapOnMenuItemClickCallback(ArkUIEditOptionsParam* optionsParam)
-{
-    NG::OnMenuItemClickCallback onMenuItemClick =
-        [adapterCallback = optionsParam->itemClickAdapterCallback, userCallback = optionsParam->onMenuItemClick,
-            userData = optionsParam->clickUserData](const NG::MenuItemParam& itemParam) {
-            if (adapterCallback) {
-                ArkUITextMenuItem menuItem;
-                if (itemParam.menuOptionsParam.content.has_value()) {
-                    menuItem.content = itemParam.menuOptionsParam.content.value().c_str();
-                }
-                if (itemParam.menuOptionsParam.icon.has_value()) {
-                    menuItem.icon = itemParam.menuOptionsParam.icon.value().c_str();
-                }
-                if (itemParam.menuOptionsParam.labelInfo.has_value()) {
-                    menuItem.labelInfo = itemParam.menuOptionsParam.labelInfo.value().c_str();
-                }
-                menuItem.id = SelectOverlayNode::ConvertToIntMenuId(itemParam.menuOptionsParam.id);
-                return adapterCallback(userCallback, userData, &menuItem, itemParam.start, itemParam.end);
-            }
-            return false;
-        };
-    return onMenuItemClick;
-}
-
-NG::OnPrepareMenuCallback WrapOnPrepareMenuCallback(ArkUIEditOptionsParam* optionsParam)
-{
-    NG::OnPrepareMenuCallback onPrepareMenuCallback =
-        [adapterCallback = optionsParam->prepareAdapterCallback, userCallback = optionsParam->onPrepareMenu,
-            userData = optionsParam->prepareUserData](const std::vector<NG::MenuItemParam>& itemParams) {
-            if (adapterCallback) {
-                ArkUITextMenuItem menuItems[itemParams.size()];
-                auto inItemArray = ConvertToArkUITextMenuItemArray(menuItems, itemParams);
-                auto outItemArray = adapterCallback(userCallback, userData, &inItemArray);
-                return ConvertToMenuOptionsParams(outItemArray);
-            }
-            std::vector<NG::MenuOptionsParam> outOptionVec(itemParams.size());
-            std::transform(itemParams.begin(), itemParams.end(), std::back_inserter(outOptionVec),
-                [](const NG::MenuItemParam& itemParam) { return itemParam.menuOptionsParam; });
-            return outOptionVec;
-        };
-    return onPrepareMenuCallback;
+    return Convert(textLineMetrics);
 }
 
 void SetTextEditMenuOptions(ArkUINodeHandle node, ArkUIEditOptionsParam* optionsParam)

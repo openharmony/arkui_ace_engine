@@ -82,6 +82,21 @@ void RichEditorPreviewTextTestNg::TearDownTestSuite()
 }
 
 /**
+ * @tc.name: IsSupportPreviewText001
+ * @tc.desc: test IsSupportPreviewText
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorPreviewTextTestNg, IsSupportPreviewText001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    EXPECT_TRUE(richEditorPattern->IsSupportPreviewText());
+    richEditorPattern->isTextPreviewSupported_ = false;
+    EXPECT_FALSE(richEditorPattern->IsSupportPreviewText());
+}
+
+/**
  * @tc.name: SetPreviewText001
  * @tc.desc: test setPreviewText and decoration available
  * @tc.type: FUNC

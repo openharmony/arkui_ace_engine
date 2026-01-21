@@ -4160,6 +4160,8 @@ int32_t SelectOverlayNode::ConvertToIntMenuId(const std::string& menuId)
         { OH_DEFAULT_AI_MENU_ADDRESS, NativeMenuId::ID_AI_MENU_ADDRESS },
         { OH_DEFAULT_AI_MENU_DATETIME, NativeMenuId::ID_AI_MENU_DATETIME },
         { OH_DEFAULT_ASK_CELIA, NativeMenuId::ID_ASK_CELIA },
+        { OH_DEFAULT_AUTO_FILL, NativeMenuId::ID_AUTO_FILL },
+        { OH_DEFAULT_PASSWORD_VAULT, NativeMenuId::ID_PASSWORD_VAULT },
     };
     auto iter = menuIdMap.find(menuId);
     if (iter != menuIdMap.end()) {
@@ -4187,9 +4189,11 @@ std::string SelectOverlayNode::ConvertToStrMenuId(int32_t menuId)
         { NativeMenuId::ID_AI_MENU_ADDRESS, OH_DEFAULT_AI_MENU_ADDRESS },
         { NativeMenuId::ID_AI_MENU_DATETIME, OH_DEFAULT_AI_MENU_DATETIME },
         { NativeMenuId::ID_ASK_CELIA, OH_DEFAULT_ASK_CELIA },
+        { NativeMenuId::ID_AUTO_FILL, OH_DEFAULT_AUTO_FILL },
+        { NativeMenuId::ID_PASSWORD_VAULT, OH_DEFAULT_PASSWORD_VAULT },
     };
     auto nativeMenuIdStart = static_cast<int32_t>(NativeMenuId::ID_CUT);
-    auto nativeMenuIdEnd = static_cast<int32_t>(NativeMenuId::ID_ASK_CELIA);
+    auto nativeMenuIdEnd = static_cast<int32_t>(NativeMenuId::ID_PASSWORD_VAULT);
     if (menuId < nativeMenuIdStart || menuId > nativeMenuIdEnd) {
         return std::to_string(menuId);
     }

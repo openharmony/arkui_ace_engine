@@ -843,6 +843,26 @@ typedef enum {
 } ArkUI_AccessibilityActionType;
 
 /**
+ * @brief Define line break types.
+ *
+ * @since 24
+ */
+typedef enum {
+    /**
+     * Places as many words on a line as possible
+     * and moves to the next line only if no more words can fit into the same line.
+     */
+    ARKUI_LINE_BREAK_STRATEGY_GREEDY = 0,
+    /**
+     * Fills in lines as much as possible on the basis of BALANCED,
+     * which may results in a large blank area on the last line.
+     */
+    ARKUI_LINE_BREAK_STRATEGY_HIGH_QUALITY,
+    /** Without splitting words, the width of each line in a paragraph is the same as much as possible. */
+    ARKUI_LINE_BREAK_STRATEGY_BALANCE,
+} ArkUI_LineBreakStrategy;
+
+/**
  * @brief 定义组件无障碍状态。
  *
  * @since 12
@@ -6549,9 +6569,24 @@ typedef enum {
     ARKUI_TEXT_MENU_ITEM_ID_ASK_AI = 15,
 
     /**
+     * Indicates the TextMenuItemId for auto fill.
+     *
+     * @since 24
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_AUTO_FILL = 16,
+
+    /**
+     * Indicates the TextMenuItemId for password vault.
+     *
+     * @since 24
+     */
+    ARKUI_TEXT_MENU_ITEM_ID_PASSWORD_VAULT = 17,
+
+    /**
      * Inclusive begin of app-reserved ID range.
      */
     ARKUI_TEXT_MENU_ITEM_ID_APP_RESERVED_BEGIN = 10000,
+
     /**
      * Inclusive end of app-reserved ID range.
      */
@@ -7569,6 +7604,1164 @@ ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_SetEnablePreviewMenu(
  */
 ArkUI_ErrorCode OH_ArkUI_TextDataDetectorConfig_GetEnablePreviewMenu(
     ArkUI_TextDataDetectorConfig* config, bool* enablePreviewMenu);
+
+/**
+ * @brief Defines prompt options when rich editor is no input.
+ *
+ * @since 24
+ */
+typedef struct ArkUI_RichEditorPlaceholderOptions ArkUI_RichEditorPlaceholderOptions;
+
+/**
+ * @brief Create a configuration object for placeholder options.
+ * @return A pointer to the configuration object.
+ * @since 24
+ */
+ArkUI_RichEditorPlaceholderOptions* OH_ArkUI_RichEditorPlaceholderOptions_Create();
+
+/**
+ * @brief Disposes of placeholder options.
+ *
+ * @param options <b>RichEditor</b> placeholder options.
+ * @since 24
+ */
+void OH_ArkUI_RichEditorPlaceholderOptions_Dispose(ArkUI_RichEditorPlaceholderOptions* options);
+
+/**
+ * @brief Set the hint text of placeholder options.
+ *
+ * @param options <b>RichEditor</b> placeholder options.
+ * @param value The hint text.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorPlaceholderOptions_SetValue(
+    ArkUI_RichEditorPlaceholderOptions* options, const char* value);
+
+/**
+ * @brief Get the hint text of placeholder options.
+ *
+ * @param options <b>RichEditor</b> placeholder options.
+ * @param buffer The buffer to which hint text writes to the memory,
+ *               memory space needs to be allocated by the developer.
+ * @param bufferSize The buffer size
+ * @param writeLength Indicates the string length actually written to the buffer
+ *                    when returning {@link ARKUI_ERROR_CODE_NO_ERROR}.
+ *                    Indicates the minimum buffer size that can accommodate the target
+ *                    when {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} is returned.
+ * @return The error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the node, buffer or writeLength is null.
+ *         {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} If the buffer size is less than the minimum buffer size.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorPlaceholderOptions_GetValue(
+    ArkUI_RichEditorPlaceholderOptions* options, char* buffer, int32_t bufferSize, int32_t* writeLength);
+
+/**
+ * @brief Set font size of placeholder options.
+ *
+ * @param options <b>RichEditor</b> placeholder options.
+ * @param fontSize The font sise.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorPlaceholderOptions_SetFontSize(
+    ArkUI_RichEditorPlaceholderOptions* options, float fontSize);
+
+/**
+ * @brief Get font size of placeholder options.
+ *
+ * @param options <b>RichEditor</b> placeholder options.
+ * @param fontSize The font sise.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorPlaceholderOptions_GetFontSize(
+    ArkUI_RichEditorPlaceholderOptions* options, float* fontSize);
+
+/**
+ * @brief Set font weight of placeholder options.
+ *
+ * @param options <b>RichEditor</b> placeholder options.
+ * @param fontWeight The font weight.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorPlaceholderOptions_SetFontWeight(
+    ArkUI_RichEditorPlaceholderOptions* options, uint32_t fontWeight);
+
+/**
+ * @brief Get font weight of placeholder options.
+ *
+ * @param options <b>RichEditor</b> placeholder options.
+ * @param fontWeight The font weight.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorPlaceholderOptions_GetFontWeight(
+    ArkUI_RichEditorPlaceholderOptions* options, uint32_t* fontWeight);
+
+/**
+ * @brief Set the font family of placeholder options.
+ *
+ * @param options <b>RichEditor</b> placeholder options.
+ * @param fontFamily The font family.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorPlaceholderOptions_SetFontFamily(
+    ArkUI_RichEditorPlaceholderOptions* options, const char* fontFamily);
+
+/**
+ * @brief Get the font family of placeholder options.
+ *
+ * @param options <b>RichEditor</b> placeholder options.
+ * @param buffer The buffer to which font family writes to the memory,
+ *               memory space needs to be allocated by the developer.
+ * @param bufferSize The buffer size
+ * @param writeLength Indicates the string length actually written to the buffer
+ *                    when returning {@link ARKUI_ERROR_CODE_NO_ERROR}.
+ *                    Indicates the minimum buffer size that can accommodate the target
+ *                    when {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} is returned.
+ * @return The error code.
+ *         {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         {@link ARKUI_ERROR_CODE_PARAM_INVALID} if the node, buffer or writeLength is null.
+ *         {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} If the buffer size is less than the minimum buffer size.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorPlaceholderOptions_GetFontFamily(
+    ArkUI_RichEditorPlaceholderOptions* options, char* buffer, int32_t bufferSize, int32_t* writeLength);
+
+/**
+ * @brief Set the font style of placeholder options.
+ *
+ * @param options <b>RichEditor</b> placeholder options.
+ * @param fontStyle The font style.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorPlaceholderOptions_SetFontStyle(
+    ArkUI_RichEditorPlaceholderOptions* options, ArkUI_FontStyle fontStyle);
+
+/**
+ * @brief Get the font style of placeholder options.
+ *
+ * @param options <b>RichEditor</b> placeholder options.
+ * @param fontStyle The font style.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorPlaceholderOptions_GetFontStyle(
+    ArkUI_RichEditorPlaceholderOptions* options, ArkUI_FontStyle* fontStyle);
+
+/**
+ * @brief Set the font color of placeholder options.
+ *
+ * @param options <b>RichEditor</b> placeholder options.
+ * @param fontStyle The font color.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorPlaceholderOptions_SetFontColor(
+    ArkUI_RichEditorPlaceholderOptions* options, uint32_t fontColor);
+
+/**
+ * @brief Get the font color of placeholder options.
+ *
+ * @param options <b>RichEditor</b> placeholder options.
+ * @param fontStyle The font color.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorPlaceholderOptions_GetFontColor(ArkUI_RichEditorPlaceholderOptions* options,
+    uint32_t* fontColor);
+
+/**
+ * @brief Defines styled string controller for rich editor.
+ * @since 24
+ */
+typedef struct ArkUI_RichEditorStyledStringController ArkUI_RichEditorStyledStringController;
+
+/**
+ * @brief Create a styled string controller object for rich editor .
+ * @return A pointer to the styled string controller object.
+ * @since 24
+ */
+ArkUI_RichEditorStyledStringController* OH_ArkUI_RichEditorStyledStringController_Create();
+
+/**
+ * @brief Disposes of styled string controller.
+ *
+ * @param controller <b>RichEditor</b> styled string controller.
+ * @since 24
+ */
+void OH_ArkUI_RichEditorStyledStringController_Dispose(ArkUI_RichEditorStyledStringController* controller);
+
+/**
+ * @brief Set caret offset with styled string controller.
+ *
+ * @param controller <b>RichEditor</b> styled string controller.
+ * @param caretOffset caret position.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorStyledStringController_SetCaretOffset(
+    ArkUI_RichEditorStyledStringController* controller, int32_t caretOffset);
+
+/**
+ * @brief Get caret offset with styled string controller.
+ *
+ * @param controller <b>RichEditor</b> styled string controller.
+ * @param caretOffset caret position.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorStyledStringController_GetCaretOffset(
+    ArkUI_RichEditorStyledStringController* controller, int32_t* caretOffset);
+
+/**
+ * @brief Set selection area with styled string controller.
+ *
+ * @param controller <b>RichEditor</b> styled string controller.
+ * @param start selection area start.
+ * @param end selection area end.
+ * @param menuPolicy selection area menu policy.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorStyledStringController_SetSelection(
+    ArkUI_RichEditorStyledStringController* controller, uint32_t start, uint32_t end, ArkUI_MenuPolicy menuPolicy);
+
+/**
+ * @brief Get editing state of rich editor with styled string controller.
+ *
+ * @param controller <b>RichEditor</b> styled string controller.
+ * @param isEditing editing state.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorStyledStringController_IsEditing(
+    ArkUI_RichEditorStyledStringController* controller, bool* isEditing);
+
+/**
+ * @brief Exit editing state of rich editor with styled string controller.
+ *
+ * @param controller <b>RichEditor</b> styled string controller.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorStyledStringController_StopEditing(
+    ArkUI_RichEditorStyledStringController* controller);
+
+/**
+ * @brief Get pre-screen text position with styled string controller.
+ *
+ * @param controller <b>RichEditor</b> styled string controller.
+ * @param offset pre-screen text position.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorStyledStringController_GetPreviewTextOffset(
+    ArkUI_RichEditorStyledStringController* controller, uint32_t* offset);
+
+/**
+ * @brief Get pre-screen text content with styled string controller.
+ *
+ * @param controller <b>RichEditor</b> styled string controller.
+ * @param buffer The buffer to which pre-screen text content writes to the memory,
+ *               memory space needs to be allocated by the developer.
+ * @param bufferSize The buffer size
+ * @param writeLength Indicates the string length actually written to the buffer
+ *                    when returning {@link ARKUI_ERROR_CODE_NO_ERROR}.
+ *                    Indicates the minimum buffer size that can accommodate the target
+ *                    when {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} is returned.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorStyledStringController_GetPreviewTextValue(
+    ArkUI_RichEditorStyledStringController* controller, char* buffer, int32_t bufferSize, int32_t* writeLength);
+
+/**
+ * @brief Get caret rect with styled string controller.
+ *
+ * @param controller <b>RichEditor</b> styled string controller.
+ * @param rect caret area info.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorStyledStringController_GetCaretRect(
+    ArkUI_RichEditorStyledStringController* controller, ArkUI_Rect* rect);
+
+/**
+ * @brief Delete character with styled string controller.
+ *
+ * @param controller <b>RichEditor</b> styled string controller.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorStyledStringController_DeleteBackward(
+    ArkUI_RichEditorStyledStringController* controller);
+
+/**
+ * @brief Defines paragraph style for rich editor.
+ * @since 24
+ */
+typedef struct ArkUI_RichEditorParagraphStyle ArkUI_RichEditorParagraphStyle;
+
+/**
+ * @brief Create a paragraph style object for rich editor.
+ * @return A pointer to the paragraph style object.
+ * @since 24
+ */
+ArkUI_RichEditorParagraphStyle* OH_ArkUI_RichEditorParagraphStyle_Create();
+
+/**
+ * @brief Disposes of paragraph style object.
+ *
+ * @param style <b>RichEditor</b> paragraph style.
+ * @since 24
+ */
+void OH_ArkUI_RichEditorParagraphStyle_Dispose(ArkUI_RichEditorParagraphStyle* style);
+
+/**
+ * @brief Set text aligment in paragraph style.
+ *
+ * @param style paragraph style.
+ * @param align text aligment.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_SetTextAlign(
+    ArkUI_RichEditorParagraphStyle* style, ArkUI_TextAlignment align);
+
+/**
+ * @brief Get text aligment in paragraph style.
+ *
+ * @param style paragraph style.
+ * @param align text aligment.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_GetTextAlign(
+    ArkUI_RichEditorParagraphStyle* style, ArkUI_TextAlignment* align);
+
+/**
+ * @brief Set pixelmap of leading margin in paragraph style.
+ *
+ * @param style paragraph style.
+ * @param pixelmap pixelmap of leading margin.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_SetLeadingMarginPixelMap(
+    ArkUI_RichEditorParagraphStyle* style, struct OH_PixelmapNative* pixelmap);
+
+/**
+ * @brief Get pixelmap of leading margin in paragraph style.
+ *
+ * @param style paragraph style.
+ * @param pixelmap pixelmap of leading margin.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_GetLeadingMarginPixelMap(
+    ArkUI_RichEditorParagraphStyle* style, struct OH_PixelmapNative** pixelmap);
+
+/**
+ * @brief Set width of leading margin in paragraph style.
+ *
+ * @param style paragraph style.
+ * @param width width of leading margin.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_SetLeadingMarginWidth(ArkUI_RichEditorParagraphStyle* style,
+    uint32_t width);
+
+/**
+ * @brief Get width of leading margin in paragraph style.
+ *
+ * @param style paragraph style.
+ * @param width width of leading margin.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_GetLeadingMarginWidth(ArkUI_RichEditorParagraphStyle* style,
+    uint32_t* width);
+
+/**
+ * @brief Get height of leading margin in paragraph style.
+ *
+ * @param style paragraph style.
+ * @param height height of leading margin.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_SetLeadingMarginHeight(ArkUI_RichEditorParagraphStyle* style,
+    uint32_t height);
+
+/**
+ * @brief Get height of leading margin in paragraph style.
+ *
+ * @param style paragraph style.
+ * @param height height of leading margin.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_GetLeadingMarginHeight(ArkUI_RichEditorParagraphStyle* style,
+    uint32_t* height);
+
+/**
+ * @brief Set word break of paragraph style.
+ *
+ * @param style paragraph style.
+ * @param wordBreak word break.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_SetWordBreak(ArkUI_RichEditorParagraphStyle* style,
+    ArkUI_WordBreak wordBreak);
+
+/**
+ * @brief Get word break of paragraph style.
+ *
+ * @param style paragraph style.
+ * @param wordBreak word break.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_GetWordBreak(ArkUI_RichEditorParagraphStyle* style,
+    ArkUI_WordBreak* wordBreak);
+
+/**
+ * @brief Set line break strategy of paragraph style.
+ *
+ * @param style paragraph style.
+ * @param lineBreakStrategy line break strategy.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_SetLineBreakStrategy(ArkUI_RichEditorParagraphStyle* style,
+    ArkUI_LineBreakStrategy lineBreakStrategy);
+
+/**
+ * @brief Get line break strategy of paragraph style.
+ *
+ * @param style paragraph style.
+ * @param lineBreakStrategy line break strategy.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_GetLineBreakStrategy(ArkUI_RichEditorParagraphStyle* style,
+    ArkUI_LineBreakStrategy* lineBreakStrategy);
+
+/**
+ * @brief Set paragraph spacing of paragraph style.
+ *
+ * @param style paragraph style.
+ * @param paragraphSpacing paragraph spacing.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_SetParagraphSpacing(ArkUI_RichEditorParagraphStyle* style,
+    uint32_t paragraphSpacing);
+
+/**
+ * @brief Get paragraph spacing of paragraph style.
+ *
+ * @param style paragraph style.
+ * @param paragraphSpacing paragraph spacing.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_GetParagraphSpacing(ArkUI_RichEditorParagraphStyle* style,
+    uint32_t* paragraphSpacing);
+
+/**
+ * @brief Set text vertical alignment of paragraph style.
+ *
+ * @param style paragraph style.
+ * @param verticalAlignment text vertical alignment.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_SetTextVerticalAlign(ArkUI_RichEditorParagraphStyle* style,
+    ArkUI_TextVerticalAlignment verticalAlignment);
+
+/**
+ * @brief Get text vertical alignment of paragraph style.
+ *
+ * @param style paragraph style.
+ * @param verticalAlignment text vertical alignment.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_GetTextVerticalAlign(ArkUI_RichEditorParagraphStyle* style,
+    ArkUI_TextVerticalAlignment* verticalAlignment);
+
+/**
+ * @brief Set text direction of paragraph style.
+ *
+ * @param style paragraph style.
+ * @param textDirection text direction.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_SetTextDirection(ArkUI_RichEditorParagraphStyle* style,
+    ArkUI_TextDirection textDirection);
+
+/**
+ * @brief Get text direction of paragraph style.
+ *
+ * @param style paragraph style.
+ * @param textDirection text direction.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorParagraphStyle_GetTextDirection(ArkUI_RichEditorParagraphStyle* style,
+    ArkUI_TextDirection* textDirection);
+
+/**
+ * @brief Set preset paragraph style with styled string controller.
+ *
+ * @param controller <b>RichEditor</b> styled string controller.
+ * @param style preset paragraph style.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorStyledStringController_SetTypingParagraphStyle(
+    ArkUI_RichEditorStyledStringController* controller, ArkUI_RichEditorParagraphStyle* style);
+
+/**
+ * @brief Defines shadow options.
+ * @since 24
+ */
+typedef struct ArkUI_ShadowOptions ArkUI_ShadowOptions;
+
+/**
+ * @brief Create a shadow options object.
+ * @return A pointer to the shadow options object.
+ * @since 24
+ */
+ArkUI_ShadowOptions* OH_ArkUI_ShadowOptions_Create();
+
+/**
+ * @brief Disposes the object pointing to shadow options.
+ *
+ * @param options Pointer to the object to be disposed.
+ * @since 24
+ */
+void OH_ArkUI_ShadowOptions_Dispose(ArkUI_ShadowOptions* options);
+
+/**
+ * @brief Set blur radius of the shadow options.
+ *
+ * @param options shadow options.
+ * @param radius blur radius of the shadow.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_ShadowOptions_SetRadius(ArkUI_ShadowOptions* options, float radius);
+
+/**
+ * @brief Get blur radius of the shadow options.
+ *
+ * @param options shadow options.
+ * @param radius blur radius of the shadow.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_ShadowOptions_GetRadius(ArkUI_ShadowOptions* options, float* radius);
+
+/**
+ * @brief Set shadow type of the shadow options.
+ *
+ * @param options shadow options.
+ * @param type shadow type.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_ShadowOptions_SetType(ArkUI_ShadowOptions* options, ArkUI_ShadowType type);
+
+/**
+ * @brief Get shadow type of the shadow options.
+ *
+ * @param options shadow options.
+ * @param type shadow type.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_ShadowOptions_GetType(ArkUI_ShadowOptions* options, ArkUI_ShadowType* type);
+
+/**
+ * @brief Set shadow color of the shadow options.
+ *
+ * @param options shadow options.
+ * @param color shadow color.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_ShadowOptions_SetColor(ArkUI_ShadowOptions* options, uint32_t color);
+
+/**
+ * @brief Get shadow color of the shadow options.
+ *
+ * @param options shadow options.
+ * @param color shadow color.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_ShadowOptions_GetColor(ArkUI_ShadowOptions* options, uint32_t* color);
+
+/**
+ * @brief Set offset of the shadow along the x-axis.
+ *
+ * @param options shadow options.
+ * @param offsetX offset of the shadow along the x-axis.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_ShadowOptions_SetOffsetX(ArkUI_ShadowOptions* options, float offsetX);
+
+/**
+ * @brief Get offset of the shadow along the x-axis.
+ *
+ * @param options shadow options.
+ * @param offsetX offset of the shadow along the x-axis.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_ShadowOptions_GetOffsetX(ArkUI_ShadowOptions* options, float* offsetX);
+
+/**
+ * @brief Set offset of the shadow along the y-axis.
+ *
+ * @param options shadow options.
+ * @param offsetX offset of the shadow along the y-axis.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_ShadowOptions_SetOffsetY(ArkUI_ShadowOptions* options, float offsetY);
+
+/**
+ * @brief Get offset of the shadow along the y-axis.
+ *
+ * @param options shadow options.
+ * @param offsetX offset of the shadow along the y-axis.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_ShadowOptions_GetOffsetY(ArkUI_ShadowOptions* options, float* offsetY);
+
+/**
+ * @brief Set whether to fill the inside of the component with shadow.
+ *
+ * @param options shadow options.
+ * @param isFill whether to fill the inside of the component with shadow.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_ShadowOptions_SetFill(ArkUI_ShadowOptions* options, bool isFill);
+
+/**
+ * @brief Get whether to fill the inside of the component with shadow.
+ *
+ * @param options shadow options.
+ * @param isFill whether to fill the inside of the component with shadow.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_ShadowOptions_GetFill(ArkUI_ShadowOptions* options, bool* isFill);
+
+/**
+ * @brief Defines text style for rich editor.
+ * @since 24
+ */
+typedef struct ArkUI_RichEditorTextStyle ArkUI_RichEditorTextStyle;
+
+/**
+ * @brief Create a text style object.
+ * @return A pointer to the text style object.
+ * @since 24
+ */
+ArkUI_RichEditorTextStyle* OH_ArkUI_RichEditorTextStyle_Create();
+
+/**
+ * @brief Disposes the object pointing to text style.
+ *
+ * @param style Pointer to the object to be disposed.
+ * @since 24
+ */
+void OH_ArkUI_RichEditorTextStyle_Dispose(ArkUI_RichEditorTextStyle* style);
+
+/**
+ * @brief Set font color of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param color font color.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_SetFontColor(ArkUI_RichEditorTextStyle* style, uint32_t color);
+
+/**
+ * @brief Get font color of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param color font color.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_GetFontColor(ArkUI_RichEditorTextStyle* style, uint32_t* color);
+
+/**
+ * @brief Set font size of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param size font size.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_SetFontSize(ArkUI_RichEditorTextStyle* style, float size);
+
+/**
+ * @brief Get font size of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param size font size.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_GetFontSize(ArkUI_RichEditorTextStyle* style, float* size);
+
+/**
+ * @brief Set font style of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param fontStyle font style.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_SetFontStyle(ArkUI_RichEditorTextStyle* style, ArkUI_FontStyle fontStyle);
+
+/**
+ * @brief Get font style of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param fontStyle font style.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_GetFontStyle(ArkUI_RichEditorTextStyle* style, ArkUI_FontStyle* fontStyle);
+
+/**
+ * @brief Set font weight of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param fontWeight font weight.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_SetFontWeight(ArkUI_RichEditorTextStyle* style, uint32_t fontWeight);
+
+/**
+ * @brief Get font weight of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param fontWeight font weight.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_GetFontWeight(ArkUI_RichEditorTextStyle* style, uint32_t* fontWeight);
+
+/**
+ * @brief Set font family of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param fontFamily font family.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_SetFontFamily(ArkUI_RichEditorTextStyle* style, const char* fontFamily);
+
+/**
+ * @brief Get font family of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param buffer The buffer to which font family content writes to the memory,
+ *               memory space needs to be allocated by the developer.
+ * @param bufferSize The buffer size
+ * @param writeLength Indicates the string length actually written to the buffer
+ *                    when returning {@link ARKUI_ERROR_CODE_NO_ERROR}.
+ *                    Indicates the minimum buffer size that can accommodate the target
+ *                    when {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} is returned.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_GetFontFamily(ArkUI_RichEditorTextStyle* style,
+    char* buffer, int32_t bufferSize, int32_t* writeLength);
+
+/**
+ * @brief Set text decoration options of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param options text decoration options.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_SetDecoration(ArkUI_RichEditorTextStyle* style,
+    ArkUI_DecorationStyleOptions* options);
+
+/**
+ * @brief Get text decoration options of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param options text decoration options.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_GetDecoration(ArkUI_RichEditorTextStyle* style,
+    ArkUI_DecorationStyleOptions* options);
+
+/**
+ * @brief Set text shadow options of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param options text shadow options.
+ * @param length the length of text shadow options.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_SetTextShadows(ArkUI_RichEditorTextStyle* style,
+    const ArkUI_ShadowOptions** options, int32_t length);
+
+/**
+ * @brief Get text shadow options of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param shadowOptions text shadow options.
+ * @param shadowOptionsSize the size of text shadow options.
+ * @param writeLength the real size of text shadow options in rich text style.
+ * @return Returns the result code.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_GetTextShadows(ArkUI_RichEditorTextStyle* style,
+    ArkUI_ShadowOptions** shadowOptions, uint32_t shadowOptionsSize, uint32_t* writeLength);
+
+/**
+ * @brief Set text line height of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param lineHeight text line height.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_SetLineHeight(ArkUI_RichEditorTextStyle* style, int32_t lineHeight);
+
+/**
+ * @brief Get text line height of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param lineHeight text line height.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_GetLineHeight(ArkUI_RichEditorTextStyle* style, int32_t* lineHeight);
+
+/**
+ * @brief Set letter spacing of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param letterSpacing letter spacing.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_SetLetterSpacing(ArkUI_RichEditorTextStyle* style, int32_t letterSpacing);
+
+/**
+ * @brief Get letter spacing of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param letterSpacing letter spacing.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_GetLetterSpacing(ArkUI_RichEditorTextStyle* style, int32_t* letterSpacing);
+
+/**
+ * @brief Set font feature of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param letterSpacing font feature.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_SetFontFeature(ArkUI_RichEditorTextStyle* style, const char* fontFeature);
+
+/**
+ * @brief Get font feature of the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param buffer The buffer to which font feature content writes to the memory,
+ *               memory space needs to be allocated by the developer.
+ * @param bufferSize The buffer size
+ * @param writeLength Indicates the string length actually written to the buffer
+ *                    when returning {@link ARKUI_ERROR_CODE_NO_ERROR}.
+ *                    Indicates the minimum buffer size that can accommodate the target
+ *                    when {@link ARKUI_ERROR_CODE_BUFFER_SIZE_ERROR} is returned.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_GetFontFeature(ArkUI_RichEditorTextStyle* style, char* buffer,
+    int32_t bufferSize, int32_t* writeLength);
+
+/**
+ * @brief Set whether half leading is enabled in the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param halfLeading whether half leading is enabled.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_SetHalfLeading(ArkUI_RichEditorTextStyle* style, bool halfLeading);
+
+/**
+ * @brief Get whether half leading is enabled in the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param halfLeading whether half leading is enabled.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_GetHalfLeading(ArkUI_RichEditorTextStyle* style, bool* halfLeading);
+
+/**
+ * @brief Set text background color in the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param color text background color.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_SetTextBackgroundColor(ArkUI_RichEditorTextStyle* style, uint32_t color);
+
+/**
+ * @brief Get text background color in the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param color text background color.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_GetTextBackgroundColor(ArkUI_RichEditorTextStyle* style, uint32_t* color);
+
+/**
+ * @brief Set the rounded corner radius of the text background in the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param topLeft radius of the upper left corner of text background.
+ * @param topRight radius of the upper right  corner of text background.
+ * @param bottomLeft radius of the lower left corner of text background.
+ * @param bottomRight radius of the lower right corner of text background.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_SetTextBackgroundRadius(ArkUI_RichEditorTextStyle* style, float topLeft,
+    float topRight, float bottomLeft, float bottomRight);
+
+/**
+ * @brief Get the rounded corner radius of the text background in the text style.
+ *
+ * @param style <b>RichEditor</b> text style.
+ * @param topLeft radius of the upper left corner of text background.
+ * @param topRight radius of the upper right  corner of text background.
+ * @param bottomLeft radius of the lower left corner of text background.
+ * @param bottomRight radius of the lower right corner of text background.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorTextStyle_GetTextBackgroundRadius(ArkUI_RichEditorTextStyle* style, float* topLeft,
+    float* topRight, float* bottomLeft, float* bottomRight);
+
+/**
+ * @brief Set the preset typing style with styled string controller.
+ *
+ * @param controller <b>RichEditor</b> styled string controller.
+ * @param style the preset typing style.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorStyledStringController_SetTypingStyle(
+    ArkUI_RichEditorStyledStringController* controller, ArkUI_RichEditorTextStyle* style);
+
+/**
+ * @brief Get the preset typing style with styled string controller.
+ *
+ * @param controller <b>RichEditor</b> styled string controller.
+ * @param style the preset typing style.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorStyledStringController_GetTypingStyle(
+    ArkUI_RichEditorStyledStringController* controller, ArkUI_RichEditorTextStyle* style);
 
 /**
  * @brief Defines the scale options for matrix scaling.

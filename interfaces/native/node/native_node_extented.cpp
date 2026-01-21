@@ -1483,7 +1483,12 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetLineCount(ArkUI_TextLayoutManager*
     ArkUI_NodeHandle node = layoutManager->node;
     CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    *outLineCount = fullImpl->getNodeModifiers()->getTextModifier()->getLineCount(node->uiNodeHandle);
+    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+        *outLineCount = fullImpl->getNodeModifiers()->getRichEditorModifier()->
+            getRichEditorLineCount(node->uiNodeHandle);
+    } else {
+        *outLineCount = fullImpl->getNodeModifiers()->getTextModifier()->getLineCount(node->uiNodeHandle);
+    }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1498,9 +1503,15 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetRectsForRange(ArkUI_TextLayoutMana
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    *outTextBoxes = reinterpret_cast<OH_Drawing_TextBox*>(
-        fullImpl->getNodeModifiers()->getTextModifier()->getRectsForRange(node->uiNodeHandle, start, end,
-            static_cast<ArkUI_Int32>(heightStyle), static_cast<ArkUI_Int32>(widthStyle)));
+    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+        *outTextBoxes = reinterpret_cast<OH_Drawing_TextBox*>(
+            fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorRectsForRange(node->uiNodeHandle,
+                start, end, static_cast<ArkUI_Int32>(heightStyle), static_cast<ArkUI_Int32>(widthStyle)));
+    } else {
+        *outTextBoxes = reinterpret_cast<OH_Drawing_TextBox*>(
+            fullImpl->getNodeModifiers()->getTextModifier()->getRectsForRange(node->uiNodeHandle, start, end,
+                static_cast<ArkUI_Int32>(heightStyle), static_cast<ArkUI_Int32>(widthStyle)));
+    }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
@@ -1511,25 +1522,39 @@ ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetGlyphPositionAtCoordinate(
     ArkUI_NodeHandle node = layoutManager->node;
     CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(
-        fullImpl->getNodeModifiers()->getTextModifier()->getGlyphPositionAtCoordinate(node->uiNodeHandle, dx, dy));
+    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+        *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(fullImpl->getNodeModifiers()->
+            getRichEditorModifier()->getRichEditorGlyphPositionAtCoordinate(node->uiNodeHandle, dx, dy));
+    } else {
+        *outPos = reinterpret_cast<OH_Drawing_PositionAndAffinity*>(
+            fullImpl->getNodeModifiers()->getTextModifier()->getGlyphPositionAtCoordinate(node->uiNodeHandle, dx, dy));
+    }
     return ARKUI_ERROR_CODE_NO_ERROR;
 }
 
 ArkUI_ErrorCode OH_ArkUI_TextLayoutManager_GetLineMetrics(ArkUI_TextLayoutManager* layoutManager,
     int32_t lineNumber, OH_Drawing_LineMetrics* outMetrics)
 {
-    CHECK_NULL_RETURN(layoutManager, ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(layoutManager && outMetrics, ARKUI_ERROR_CODE_PARAM_INVALID);
     ArkUI_NodeHandle node = layoutManager->node;
     CHECK_NULL_RETURN(node, ARKUI_ERROR_CODE_PARAM_INVALID);
-    CHECK_NULL_RETURN(outMetrics, ARKUI_ERROR_CODE_PARAM_INVALID);
     auto* fullImpl = OHOS::Ace::NodeModel::GetFullImpl();
-    int32_t lineCount = fullImpl->getNodeModifiers()->getTextModifier()->getLineCount(node->uiNodeHandle);
+    int32_t lineCount = 0;
+    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+        lineCount = fullImpl->getNodeModifiers()->getRichEditorModifier()->getRichEditorLineCount(node->uiNodeHandle);
+    } else {
+        lineCount = fullImpl->getNodeModifiers()->getTextModifier()->getLineCount(node->uiNodeHandle);
+    }
     if (lineNumber < 0 || lineNumber >= lineCount) {
         return ARKUI_ERROR_CODE_PARAM_INVALID;
     }
-    ArkUITextLineMetrics lineMetrics =
-        fullImpl->getNodeModifiers()->getTextModifier()->getLineMetrics(node->uiNodeHandle, lineNumber);
+    ArkUITextLineMetrics lineMetrics;
+    if (node->type == ARKUI_NODE_RICH_EDITOR) {
+        lineMetrics = fullImpl->getNodeModifiers()->getRichEditorModifier()->
+            getRichEditorLineMetrics(node->uiNodeHandle, lineNumber);
+    } else {
+        lineMetrics = fullImpl->getNodeModifiers()->getTextModifier()->getLineMetrics(node->uiNodeHandle, lineNumber);
+    }
     outMetrics->ascender = lineMetrics.ascender;
     outMetrics->descender = lineMetrics.descender;
     outMetrics->capHeight = lineMetrics.capHeight;
