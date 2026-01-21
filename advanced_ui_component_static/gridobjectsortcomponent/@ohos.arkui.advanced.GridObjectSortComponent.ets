@@ -1152,6 +1152,7 @@ export struct GridObjectSortComponent {
     }
     .padding({ left: MARGIN_EIGHT, right: MARGIN_EIGHT } as Padding)
     .width('100%')
+    .visibility(this.isStartDrag && select.id === this.dragContent.id ? Visibility.None : Visibility.Visible)
   }
 
   handleAddIconClick(content: GridObjectSortComponentItem): void {
