@@ -1872,6 +1872,8 @@
       "OHOS::Ace::NG::SwiperPattern::SwiperPattern()";
       VTT?for?OHOS::Ace::NG::LoadingProgressPattern;
       vtable?for?OHOS::Ace::NG::LoadingProgressPattern;
+    OHOS::Ace::NG::CommonBridge::SetBorder*;
+    OHOS::Ace::NG::CommonBridge::ParseLayoutPolicy*;
     };
   local:
     *;
