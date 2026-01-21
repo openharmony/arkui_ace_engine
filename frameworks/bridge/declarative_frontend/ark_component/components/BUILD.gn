@@ -49,7 +49,6 @@ arkui_modules = [
   "stepperitem",
   "radio",
   "slider",
-  "hyperlink",
   "timepicker",
   "calendarpicker",
 ]

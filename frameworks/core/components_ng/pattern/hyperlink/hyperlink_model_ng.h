@@ -20,23 +20,20 @@
 #include "core/components_ng/pattern/hyperlink/hyperlink_model.h"
 
 namespace OHOS::Ace::NG {
-class ACE_FORCE_EXPORT HyperlinkModelNG : public HyperlinkModel {
+class ACE_EXPORT HyperlinkModelNG : public HyperlinkModel {
 public:
     void Create(const std::string& address, const std::string& content) override;
-    static void CreateFrameNode(const std::string& address, const std::string& content);
     void Pop() override {};
     void SetColor(const Color& value) override;
     void SetDraggable(bool draggable) override;
     void SetResponseRegion(bool isUserSetResponseRegion) override;
     static void SetColor(FrameNode* frameNode, const Color& value);
     static void SetDraggable(FrameNode* frameNode, bool draggable);
-    static void SetResponseRegion(FrameNode* frameNode, bool isUserSetResponseRegion);
     static void SetResponseRegion(
         FrameNode* frameNode, const std::vector<DimensionRect>& regions, bool isUserSetResponseRegion);
-    static void PopStatic() {};
 
 private:
-    static void SetTextStyle(const RefPtr<FrameNode>& textNode, const std::string& content, const std::string& address);
+    void SetTextStyle(const RefPtr<FrameNode>& textNode, const std::string& content, const std::string& address);
 };
 } // namespace OHOS::Ace::NG
 
