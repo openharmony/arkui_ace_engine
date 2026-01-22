@@ -35,7 +35,7 @@ struct WindowTypeConfig {
     bool isSceneBoardWindow = false;
 };
 
-class SafeAreaManager : public virtual AceType {
+class ACE_FORCE_EXPORT SafeAreaManager : public virtual AceType {
     DECLARE_ACE_TYPE(SafeAreaManager, AceType);
 
 public:

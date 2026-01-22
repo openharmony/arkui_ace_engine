@@ -39,7 +39,6 @@
 
 namespace OHOS::Ace::NG {
 class InspectorFilter;
-class MenuItemPattern;
 
 class SelectPattern : public Pattern {
     DECLARE_ACE_TYPE(SelectPattern, Pattern);
@@ -268,13 +267,13 @@ public:
     std::function<void(WeakPtr<NG::FrameNode>)>& GetTextModifier();
     std::function<void(WeakPtr<NG::FrameNode>)>& GetArrowModifier();
     void ResetOptionToInitProps(
-        const RefPtr<MenuItemPattern>& optionPattern, const RefPtr<MenuItemPattern>& selectingOptionPattern = nullptr);
-    void ResetSelectedOptionToInitProps(const RefPtr<MenuItemPattern>& optionPattern);
-    void UpdateOptionCustomProperties(const RefPtr<MenuItemPattern>& optionPattern);
-    void UpdateSelectedOptionCustomProperties(const RefPtr<MenuItemPattern>& optionPattern);
-    void ResetLastSelectedOptionFlags(const RefPtr<MenuItemPattern>& optionPattern);
-    void UpdateOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern);
-    void UpdateSelectedOptionFontFromPattern(const RefPtr<MenuItemPattern>& optionPattern);
+        const RefPtr<NG::FrameNode>& optionNode, const RefPtr<NG::FrameNode>& selectingOptionNode = nullptr);
+    void ResetSelectedOptionToInitProps(const RefPtr<NG::FrameNode>& optionNode);
+    void UpdateOptionCustomProperties(const RefPtr<NG::FrameNode>& optionNode);
+    void UpdateSelectedOptionCustomProperties(const RefPtr<NG::FrameNode>& optionNode);
+    void ResetLastSelectedOptionFlags(const RefPtr<NG::FrameNode>& optionNode);
+    void ACE_FORCE_EXPORT UpdateOptionFontFromPattern(const RefPtr<NG::FrameNode>& optionNode);
+    void ACE_FORCE_EXPORT UpdateSelectedOptionFontFromPattern(const RefPtr<NG::FrameNode>& optionNode);
     void SetMenuOutline(const MenuParam& menuParam);
     void UpdateComponentColor(const Color& color, const SelectColorType selectColorType);
     void SetColorByUser(const RefPtr<FrameNode>& host, const RefPtr<SelectTheme>& theme);

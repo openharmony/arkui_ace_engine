@@ -29,6 +29,7 @@
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/bar_item_event_hub.h"
@@ -75,8 +76,10 @@ bool NavigationTitleUtil::BuildMoreButton(bool isButtonEnabled, const RefPtr<Nav
     if (menuOptions.mbOptions.bgOptions.effectOption.has_value()) {
         menuParam.backgroundEffectOption = menuOptions.mbOptions.bgOptions.effectOption.value();
     }
-    auto barMenuNode = MenuView::Create(
-        std::move(params), menuItemNode->GetId(), menuItemNode->GetTag(), MenuType::NAVIGATION_MENU, menuParam);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    auto barMenuNode = menuViewModifier ? menuViewModifier->createWithOptionParams(
+        std::move(params), menuItemNode->GetId(), menuItemNode->GetTag(),
+        MenuType::NAVIGATION_MENU, menuParam) : nullptr;
     BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, menuParam);
     auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
     InitTitleBarButtonEvent(menuItemNode, iconNode, true);

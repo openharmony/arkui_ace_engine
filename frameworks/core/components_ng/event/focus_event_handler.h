@@ -103,7 +103,7 @@ enum class OnKeyEventType : int32_t {
     CONTEXT_MENU = 1,
 };
 
-class FocusEventHandler : public virtual FocusState {
+class ACE_FORCE_EXPORT FocusEventHandler : public virtual FocusState {
     DECLARE_ACE_TYPE(FocusEventHandler, FocusState);
 public:
     FocusEventHandler() = default;

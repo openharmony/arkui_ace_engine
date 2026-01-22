@@ -17,8 +17,11 @@
 
 #include "base/utils/multi_thread.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/select/select_layout_property.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -607,9 +610,9 @@ void SelectModelNG::SetColorStatus(FrameNode* frameNode, const SelectColorType& 
     CHECK_NULL_VOID(pattern);
     auto menuNode = pattern->GetMenuNode();
     CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->SetDisableMenuBgColorByUser(true);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->setDisableMenuBgColorByUser(menuNode, true);
 }
 
 void SelectModelNG::CreateWithColorResourceObj(
@@ -796,24 +799,26 @@ void SelectModelNG::InitSelect(FrameNode* frameNode, const std::vector<SelectPar
     pattern->BuildChild();
     // create menu node
     if (!pattern->GetMenuNode()) {
-        auto menuWrapper = MenuView::Create(params, select->GetId(), V2::SELECT_ETS_TAG);
+        const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+        auto menuWrapper = menuViewModifier ? menuViewModifier->createWithSelectParams(
+            params, select->GetId(), V2::SELECT_ETS_TAG, false) : nullptr;
         pattern->SetMenuNode(menuWrapper);
         pattern->InitSelected();
     } else {
         auto menuNode = pattern->GetMenuNode();
         CHECK_NULL_VOID(menuNode);
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
-        menuPattern->UpdateSelectParam(params);
+        const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+        CHECK_NULL_VOID(menuModifier);
+        menuModifier->updateSelectParam(menuNode, params);
     }
     // store option pointers in select
     auto menuContainer = pattern->GetMenuNode();
     CHECK_NULL_VOID(menuContainer);
     pattern->ClearOptions();
-    auto menuPattern = menuContainer->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto options = menuPattern->GetOptions();
-    menuPattern->SetSelectProperties(params);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    auto options = menuModifier->getOptions(menuContainer);
+    menuModifier->setSelectProperties(menuContainer, params);
     for (auto&& option : options) {
         pattern->AddOptionNode(option);
     }
@@ -1029,9 +1034,9 @@ void SelectModelNG::ResetBuilderFunc(FrameNode* frameNode)
     CHECK_NULL_VOID(pattern);
     auto menuNode = pattern->GetMenuNode();
     CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->ResetBuilderFunc();
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->resetBuilderFunc(menuNode);
 }
 
 void SelectModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SelectMakeCallback&& makeFunc)
@@ -1041,9 +1046,9 @@ void SelectModelNG::SetBuilderFunc(FrameNode* frameNode, NG::SelectMakeCallback&
     CHECK_NULL_VOID(pattern);
     auto menuNode = pattern->GetMenuNode();
     CHECK_NULL_VOID(menuNode);
-    auto menuPattern = menuNode->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    menuPattern->SetBuilderFunc(std::move(makeFunc));
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    menuModifier->setBuilderFunc(menuNode, std::move(makeFunc));
 }
 
 void SelectModelNG::SetChangeValue(FrameNode* frameNode, int index, const std::string& value)

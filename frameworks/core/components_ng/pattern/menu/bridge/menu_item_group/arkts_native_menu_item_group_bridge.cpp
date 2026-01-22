@@ -12,10 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_item_group_bridge.h"
+#include "core/components_ng/pattern/menu/bridge/menu_item_group/arkts_native_menu_item_group_bridge.h"
 
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
-#include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
 using namespace OHOS::Ace::Framework;
 
@@ -160,5 +160,22 @@ ArkUINativeModuleValue MenuItemGroupBridge::SetMenuItemGroupFooter(ArkUIRuntimeC
     }
 
     return panda::JSValueRef::Undefined(vm);
+}
+
+void MenuItemGroupBridge::RegisterMenuItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
+{
+    const char* functionNames[] = {
+        "create",
+        "setMenuItemGroupHeader",
+        "setMenuItemGroupFooter",
+    };
+    Local<JSValueRef> funcValues[] = {
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemGroupBridge::CreateMenuItemGroup),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemGroupBridge::SetMenuItemGroupHeader),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemGroupBridge::SetMenuItemGroupFooter),
+    };
+    auto menuItemGroup =
+        panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "menuitemgroup"), menuItemGroup);
 }
 } // namespace OHOS::Ace::NG

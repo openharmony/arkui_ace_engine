@@ -508,7 +508,7 @@ void SetRangeUpdater(Ark_NodeHandle nodePtr, int updaterId)
         continuations.emplace(continuation->Id(), continuation);
         auto requestFunc = [updaterId, id = continuation->Id()](int start, int end) {
             ArkUINodeEvent event;
-            event.kind = ArkUIEventCategory::CALLBACK_EVENT;
+            event.kind = ArkUIEventCategory::CALL_BACK_EVENT;
             event.callback.id = updaterId;
             event.callback.continuationId = id;
             event.callback.numArgs = 2;
@@ -524,7 +524,7 @@ void SetRangeUpdater(Ark_NodeHandle nodePtr, int updaterId)
         continuations.emplace(continuation->Id(), continuation);
         auto requestFunc = [updaterId, id = continuation->Id()](int start, int end) {
             ArkUINodeEvent event;
-            event.kind = ArkUIEventCategory::CALLBACK_EVENT;
+            event.kind = ArkUIEventCategory::CALL_BACK_EVENT;
             event.callback.id = updaterId;
             event.callback.continuationId = id;
             event.callback.numArgs = 2;

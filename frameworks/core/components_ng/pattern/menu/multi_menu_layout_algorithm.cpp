@@ -18,6 +18,7 @@
 #include "core/components/common/layout/grid_system_manager.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_layout_property.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_node.h"
@@ -25,15 +26,16 @@
 
 namespace OHOS::Ace::NG {
 namespace {
+
 struct SelectOverlayRightClickMenuLayoutHelper {
     static bool IsAdjustLayoutConstraints(RefPtr<MenuPattern>& outterMenuPattern, RefPtr<FrameNode>& menuWrapperNode,
         const RefPtr<LayoutWrapper>& child)
     {
         bool rightClickMenuNeedAdjust = menuWrapperNode->GetInspectorIdValue("") == SelectOverlayRrightClickMenuWrapper
             && outterMenuPattern->IsSelectOverlayRightClickMenu() &&
-            child->GetHostTag() == V2::RELATIVE_CONTAINER_ETS_TAG;
+            child->GetHostTag() == RELATIVE_CONTAINER_ETS_TAG;
         bool extensionMenuNeedAdjust = outterMenuPattern->IsSelectOverlayExtensionMenu() &&
-            child->GetHostTag() == V2::RELATIVE_CONTAINER_ETS_TAG;
+            child->GetHostTag() == RELATIVE_CONTAINER_ETS_TAG;
 
         if (rightClickMenuNeedAdjust || extensionMenuNeedAdjust) {
             return true;
@@ -95,7 +97,7 @@ struct SelectOverlayRightClickMenuLayoutHelper {
         /* Only for security component paste button of text selectoverlay right click menu */
         if (menuWrapperNode->GetInspectorIdValue("") != SelectOverlayRrightClickMenuWrapper ||
             !outterMenuPattern->IsSelectOverlayRightClickMenu() ||
-            child->GetHostTag() != V2::RELATIVE_CONTAINER_ETS_TAG) {
+            child->GetHostTag() != RELATIVE_CONTAINER_ETS_TAG) {
             return;
         }
         childLayoutProperty->UpdateUserDefinedIdealSize(

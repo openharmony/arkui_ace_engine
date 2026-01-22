@@ -86,6 +86,9 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"Indexer", "indexer"},
         { "Hyperlink", "hyperlink" },
         {"SymbolGlyph", "symbol"},
+        { "Menu", "menu" },
+        { "MenuItem", "menu" },
+        { "MenuItemGroup", "menu" },
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {

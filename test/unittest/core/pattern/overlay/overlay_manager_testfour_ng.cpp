@@ -523,7 +523,8 @@ HWTEST_F(OverlayManagerTestFourNg, ShowFilterAnimation001, TestSize.Level1)
     RefPtr<FrameNode> frameNode = FrameNode::GetOrCreateFrameNode(V2::MENU_ETS_TAG, TARGET_ID,
         []() { return AceType::MakeRefPtr<MenuPattern>(TARGET_ID, "Menu", MenuType::MENU); });
     ASSERT_NE(frameNode, nullptr);
-    OverlayManager overlayManager(frameNode);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(frameNode);
+    ASSERT_NE(overlayManager, nullptr);
     RefPtr<FrameNode> columnNode = FrameNode::GetOrCreateFrameNode(
         V2::MENU_ETS_TAG, 1, []() { return AceType::MakeRefPtr<MenuPattern>(1, "Menu", MenuType::MENU); });
     auto menuWrapperNode =
@@ -531,7 +532,7 @@ HWTEST_F(OverlayManagerTestFourNg, ShowFilterAnimation001, TestSize.Level1)
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(AceType::MakeRefPtr<MenuTheme>()));
-    overlayManager.ShowFilterAnimation(columnNode, menuWrapperNode);
+    overlayManager->ShowFilterAnimation(columnNode, menuWrapperNode);
     auto menuWrapperPattern = menuWrapperNode->GetPattern<MenuWrapperPattern>();
     ASSERT_NE(menuWrapperPattern, nullptr);
     menuWrapperPattern->hoverScaleInterruption_ = true;
@@ -542,8 +543,8 @@ HWTEST_F(OverlayManagerTestFourNg, ShowFilterAnimation001, TestSize.Level1)
     pipelineContext->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
     menuTheme->hoverImageDelayDurationForInterrupt_ = 10;
     MockPipelineContext::GetCurrent()->FlushUITasks();
-    overlayManager.ShowFilterAnimation(columnNode, menuWrapperNode);
-    EXPECT_TRUE(overlayManager.previewFilterTask_);
+    overlayManager->ShowFilterAnimation(columnNode, menuWrapperNode);
+    EXPECT_TRUE(overlayManager->previewFilterTask_);
 }
 
 /**

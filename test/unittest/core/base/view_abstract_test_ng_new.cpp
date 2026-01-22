@@ -1280,7 +1280,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuBorderRadius001, TestSize.Level1)
 
     auto menu =
         FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
-    overlayManager->menuMap_[targetId] = menu;
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetId] = menu;
     auto menuNode = overlayManager->GetMenuNode(targetId);
     ASSERT_NE(menuNode, nullptr);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
@@ -1332,7 +1334,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuTransition001, TestSize.Level1)
 
     auto menu =
         FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
-    overlayManager->menuMap_[targetId] = menu;
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetId] = menu;
     auto menuNode = overlayManager->GetMenuNode(targetId);
     ASSERT_NE(menuNode, nullptr);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();
@@ -1391,7 +1395,9 @@ HWTEST_F(ViewAbstractTestNg, ViewAbstractMenuTransition002, TestSize.Level1)
 
     auto menu =
         FrameNode::CreateFrameNode("targetNode", targetId, AceType::MakeRefPtr<MenuWrapperPattern>(targetId), false);
-    overlayManager->menuMap_[targetId] = menu;
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_[targetId] = menu;
     auto menuNode = overlayManager->GetMenuNode(targetId);
     ASSERT_NE(menuNode, nullptr);
     auto wrapperPattern = menuNode->GetPattern<MenuWrapperPattern>();

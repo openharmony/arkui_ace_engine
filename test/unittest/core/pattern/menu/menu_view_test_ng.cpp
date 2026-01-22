@@ -44,6 +44,7 @@
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item_group/menu_item_group_view.h"
+#include "core/components_ng/pattern/menu/menu_manager.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
@@ -344,31 +345,35 @@ HWTEST_F(MenuViewTestNg, SkipMenuTest002, TestSize.Level1)
     /**
      * @tc.steps: step1. Create a overlayManger
      */
-    auto overlayManger = AceType::MakeRefPtr<OverlayManager>(nullptr);
+    auto rootNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
+    ASSERT_NE(rootNode, nullptr);
+    auto overlayManager = AceType::MakeRefPtr<OverlayManager>(rootNode);
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
     /**
      * @tc.steps: step2. skip menu show with target id
      * @tc.expected: check the skip ids not empty.
      */
-    overlayManger->SkipMenuShow(TARGET_ID);
-    ASSERT_FALSE(overlayManger->skipTargetIds_.empty());
+    overlayManager->SkipMenuShow(TARGET_ID);
+    ASSERT_FALSE(menuManager->skipTargetIds_.empty());
     /**
      * @tc.steps: step3. skip menu show with target id again
      * @tc.expected: The skip id is not added repeatedly.
      */
-    overlayManger->SkipMenuShow(TARGET_ID);
-    EXPECT_EQ(overlayManger->skipTargetIds_.size(), 1);
+    overlayManager->SkipMenuShow(TARGET_ID);
+    EXPECT_EQ(menuManager->skipTargetIds_.size(), 1);
     /**
      * @tc.steps: step4. search targetId will skip
      * @tc.expected: Return true skip the menu show.
      */
-    EXPECT_TRUE(overlayManger->CheckSkipMenuShow(TARGET_ID));
+    EXPECT_TRUE(overlayManager->CheckSkipMenuShow(TARGET_ID));
     /**
      * @tc.steps: step5. resume the target menu show
      * @tc.expected: Remove success and CheckSkipMenuShow return false.
      */
-    overlayManger->ResumeMenuShow(TARGET_ID);
-    ASSERT_TRUE(overlayManger->skipTargetIds_.empty());
-    EXPECT_FALSE(overlayManger->CheckSkipMenuShow(TARGET_ID));
+    overlayManager->ResumeMenuShow(TARGET_ID);
+    ASSERT_TRUE(menuManager->skipTargetIds_.empty());
+    EXPECT_FALSE(overlayManager->CheckSkipMenuShow(TARGET_ID));
 }
 
 /**

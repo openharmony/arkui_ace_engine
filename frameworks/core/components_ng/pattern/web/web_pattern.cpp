@@ -75,6 +75,9 @@
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_item_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
 #include "core/components_ng/pattern/overlay/overlay_manager.h"
 #include "core/components_ng/pattern/refresh/refresh_pattern.h"
 #include "core/components_ng/pattern/select_overlay/select_overlay_pattern.h"
@@ -90,6 +93,7 @@
 #include "core/event/touch_event.h"
 #include "core/event/event_info_convertor.h"
 #include "core/event/statusbar/statusbar_event_proxy.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "common_event_manager.h"
 #include "frameworks/base/utils/system_properties.h"
@@ -100,6 +104,7 @@
 #include "web_statusbar_click.h"
 #include "web_pattern.h"
 #include "nweb_handler.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -6686,7 +6691,9 @@ void WebPattern::OnSelectPopupMenu(std::shared_ptr<OHOS::NWeb::NWebSelectPopupMe
         });
     }
     bool autoWrapFlag = true;
-    auto menu = MenuView::Create(selectParam, id, host->GetTag(), autoWrapFlag);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_VOID(menuViewModifier);
+    auto menu = menuViewModifier->createWithSelectParams(selectParam, id, host->GetTag(), autoWrapFlag);
     CHECK_NULL_VOID(menu);
     auto menuWrapperPattern = menu->GetPattern<MenuWrapperPattern>();
     CHECK_NULL_VOID(menuWrapperPattern);
@@ -6954,25 +6961,21 @@ void WebPattern::InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNod
     int32_t selectedIndex = params->GetSelectedItem();
     TAG_LOGD(AceLogTag::ACE_WEB, "InitSelectPopupMenuViewOption selectedIndex:%{public}d", selectedIndex);
 
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(menuItemModifier);
     for (auto &&option : options) {
         optionIndex++;
         CHECK_NULL_VOID(option);
-        auto optionPattern = option->GetPattern<MenuItemPattern>();
-        CHECK_NULL_VOID(optionPattern);
-        auto optionPaintProperty = option->GetPaintProperty<MenuItemPaintProperty>();
-        CHECK_NULL_VOID(optionPaintProperty);
-        optionPaintProperty->SetIdealWidthForWeb(width - OPTION_MARGIN.ConvertToPx());
-        optionPattern->SetFontSize(Dimension(params->GetItemFontSize() * dipScale));
+        menuItemModifier->setIdealWidthForWeb(option, width - OPTION_MARGIN.ConvertToPx());
+        menuItemModifier->setFontSize(option, Dimension(params->GetItemFontSize() * dipScale));
         if (selectedIndex == optionIndex) {
-            optionPattern->SetFontColor(SELECTED_OPTION_FONT_COLOR);
-            optionPattern->SetBgColor(SELECTED_OPTION_BACKGROUND_COLOR);
-            optionPattern->UpdateNextNodeDivider(false);
-            optionPaintProperty->UpdateNeedDivider(false);
+            menuItemModifier->setFontColor(option, SELECTED_OPTION_FONT_COLOR, true);
+            menuItemModifier->setBgColor(option, SELECTED_OPTION_BACKGROUND_COLOR);
+            menuItemModifier->updateNextNodeDivider(option, false);
+            menuItemModifier->updateNeedDivider(option, false);
         }
-        auto hub = option->GetEventHub<MenuItemEventHub>();
-        CHECK_NULL_VOID(hub);
         if (optionIndex >= 0 && static_cast<uint32_t>(optionIndex) < items.size()) {
-            hub->SetEnabled(items[optionIndex]->GetIsEnabled());
+            menuItemModifier->setEnabled(option, items[optionIndex]->GetIsEnabled());
             auto focusHub = option->GetFocusHub();
             if (focusHub) {
                 focusHub->SetEnabled(items[optionIndex]->GetIsEnabled());
@@ -6983,7 +6986,7 @@ void WebPattern::InitSelectPopupMenuViewOption(const std::vector<RefPtr<FrameNod
             CHECK_NULL_VOID(callback);
             callback->Continue(indices);
         };
-        hub->SetOnSelect(std::move(selectCallback));
+        menuItemModifier->setOnSelect(option, std::move(selectCallback));
         option->MarkModifyDone();
     }
 }
@@ -6996,10 +6999,10 @@ void WebPattern::InitSelectPopupMenuView(RefPtr<FrameNode>& menuWrapper,
     CHECK_NULL_VOID(menuWrapper);
     auto menu = AceType::DynamicCast<FrameNode>(menuWrapper->GetChildAtIndex(0));
     CHECK_NULL_VOID(menu);
-    auto menuPattern = menu->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
 
-    InitSelectPopupMenuViewOption(menuPattern->GetOptions(), callback, params, dipScale);
+    InitSelectPopupMenuViewOption(menuModifier->getOptions(menu), callback, params, dipScale);
 }
 
 OffsetF WebPattern::GetSelectPopupPostion(std::shared_ptr<OHOS::NWeb::NWebSelectMenuBound> bound)
@@ -8511,15 +8514,18 @@ void WebPattern::OnShowAutofillPopup(
     for (auto& item : menu_items) {
         selectParam.push_back({ item, "" });
     }
-    auto menu = MenuView::Create(selectParam, id, host->GetTag());
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_VOID(menuViewModifier);
+    auto menu = menuViewModifier->createWithSelectParams(selectParam, id, host->GetTag(), false);
     CHECK_NULL_VOID(menu);
     auto context = PipelineContext::GetCurrentContext();
     CHECK_NULL_VOID(context);
     auto menuContainer = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
     CHECK_NULL_VOID(menuContainer);
-    auto menuPattern = menuContainer->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto options = menuPattern->GetOptions();
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    auto options = menuModifier->getOptions(menuContainer);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     for (auto &&option : options) {
         auto selectCallback = [weak = WeakClaim(this)](int32_t index) {
             auto webPattern = weak.Upgrade();
@@ -8528,12 +8534,12 @@ void WebPattern::OnShowAutofillPopup(
         };
         auto optionNode = AceType::DynamicCast<FrameNode>(option);
         if (optionNode) {
-            auto hub = optionNode->GetEventHub<MenuItemEventHub>();
-            auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
-            if (!hub || !optionPattern) {
+            CHECK_NULL_CONTINUE(menuItemModifier);
+            if (!menuItemModifier->hasMenuItemEventHub(optionNode) ||
+                !menuItemModifier->hasMenuItemPattern(optionNode)) {
                 continue;
             }
-            hub->SetOnSelect(std::move(selectCallback));
+            menuItemModifier->setOnSelect(optionNode, std::move(selectCallback));
             optionNode->MarkModifyDone();
         }
     }
@@ -8566,14 +8572,17 @@ void WebPattern::OnShowAutofillPopupV2(
     menuParam.isShowInSubWindow = false;
     auto dataListNode = CreateDataListFrameNode(OffsetF(offsetX, offsetY), height, width);
     CHECK_NULL_VOID(dataListNode);
-    auto menu = MenuView::Create(std::move(optionParam), dataListNode->GetId(), dataListNode->GetTag(),
-        MenuType::MENU, menuParam);
+    const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+    CHECK_NULL_VOID(menuViewModifier);
+    auto menu = menuViewModifier->createWithOptionParams(
+        std::move(optionParam), dataListNode->GetId(), dataListNode->GetTag(), MenuType::MENU, menuParam);
     CHECK_NULL_VOID(menu);
     auto menuContainer = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
     CHECK_NULL_VOID(menuContainer);
-    auto menuPattern = menuContainer->GetPattern<MenuPattern>();
-    CHECK_NULL_VOID(menuPattern);
-    auto options = menuPattern->GetOptions();
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_VOID(menuModifier);
+    auto options = menuModifier->getOptions(menuContainer);
+    const auto* menuItemModifier = NG::NodeModifier::GetMenuItemInnerModifier();
     for (auto &&option : options) {
         auto selectCallback = [weak = WeakClaim(this)](int32_t index) {
             auto webPattern = weak.Upgrade();
@@ -8582,12 +8591,12 @@ void WebPattern::OnShowAutofillPopupV2(
         };
         auto optionNode = AceType::DynamicCast<FrameNode>(option);
         if (optionNode) {
-            auto hub = optionNode->GetEventHub<MenuItemEventHub>();
-            auto optionPattern = optionNode->GetPattern<MenuItemPattern>();
-            if (!hub || !optionPattern) {
+            CHECK_NULL_CONTINUE(menuItemModifier);
+            if (!menuItemModifier->hasMenuItemEventHub(optionNode) ||
+                !menuItemModifier->hasMenuItemPattern(optionNode)) {
                 continue;
             }
-            hub->SetOnSelect(std::move(selectCallback));
+            menuItemModifier->setOnSelect(optionNode, std::move(selectCallback));
             optionNode->MarkModifyDone();
         }
     }

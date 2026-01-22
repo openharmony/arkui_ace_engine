@@ -23,7 +23,6 @@
 
 #include "base/log/ace_scoring_log.h"
 #include "base/log/log_wrapper.h"
-#include "bridge/declarative_frontend/ark_theme/theme_apply/js_menu_item_theme.h"
 #include "bridge/declarative_frontend/engine/functions/js_click_function.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/jsview/js_utils.h"
@@ -35,14 +34,42 @@
 #include "core/components_ng/base/view_abstract_model.h"
 #include "core/components_ng/base/view_stack_model.h"
 #include "core/components_ng/pattern/form/form_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_item/menu_item_model.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_model_ng.h"
-#include "core/components_ng/pattern/menu/menu_model.h"
 #include "core/components_ng/pattern/menu/menu_model_ng.h"
+#include "core/common/dynamic_module_helper.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
 
 namespace OHOS::Ace {
 std::unique_ptr<MenuItemModel> MenuItemModel::instance_ = nullptr;
 std::mutex MenuItemModel::mutex_;
+
+NG::MenuItemModelNG* GetMenuItemModel()
+{
+    static NG::MenuItemModelNG* menuItemModel = nullptr;
+    if (menuItemModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("MenuItem");
+        if (module == nullptr) {
+            LOGF("Can't find MenuItem dynamic module");
+            abort();
+        }
+        menuItemModel = reinterpret_cast<NG::MenuItemModelNG*>(module->GetModel());
+    }
+    return menuItemModel;
+}
+
+NG::MenuModelNG* GetMenuModel()
+{
+    static NG::MenuModelNG* menuModel = nullptr;
+    if (menuModel == nullptr) {
+        auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("Menu");
+        if (module == nullptr) {
+            LOGF("Can't find Menu dynamic module");
+            abort();
+        }
+        menuModel = reinterpret_cast<NG::MenuModelNG*>(module->GetModel());
+    }
+    return menuModel;
+}
 
 MenuItemModel* MenuItemModel::GetInstance()
 {
@@ -50,10 +77,10 @@ MenuItemModel* MenuItemModel::GetInstance()
         std::lock_guard<std::mutex> lock(mutex_);
         if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::MenuItemModelNG());
+            instance_.reset(GetMenuItemModel());
 #else
             if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::MenuItemModelNG());
+                instance_.reset(GetMenuItemModel());
             } else {
                 instance_.reset(new Framework::MenuItemModelImpl());
             }
@@ -72,10 +99,10 @@ MenuModel* MenuModel::GetInstance()
         std::lock_guard<std::mutex> lock(mutex_);
         if (!instance_) {
 #ifdef NG_BUILD
-            instance_.reset(new NG::MenuModelNG());
+            instance_.reset(GetMenuModel());
 #else
             if (Container::IsCurrentUseNewPipeline()) {
-                instance_.reset(new NG::MenuModelNG());
+                instance_.reset(GetMenuModel());
             } else {
                 instance_.reset(new Framework::MenuModelImpl());
             }
@@ -203,7 +230,9 @@ void JSFormMenuItem::Create(const JSCallbackInfo& info)
         }
         MenuItemModel::GetInstance()->Create(menuItemProps);
     }
-    JSMenuItemTheme::ApplyTheme();
+    auto modifier = NG::NodeModifier::GetMenuItemInnerModifier();
+    CHECK_NULL_VOID(modifier);
+    modifier->menuItemApplyTheme();
 }
 
 void JSFormMenuItem::JSBind(BindingTarget globalObj)

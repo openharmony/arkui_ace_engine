@@ -44,11 +44,8 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_span_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_loading_progress_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_destination_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_nav_router_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_item_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_menu_item_group_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_date_picker_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigation_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_navigator_bridge.h"
@@ -507,6 +504,9 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "Hyperlink" },
         { "SymbolGlyph" },
         {"Richeditor"},
+        { "Menu" },
+        { "MenuItem" },
+        { "MenuItemGroup" },
     };
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
@@ -1549,9 +1549,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterPolylineAttributes(object, vm);
     RegisterTabAttributes(object, vm);
     RegisterTabContentAttributes(object, vm);
-    RegisterMenuItemGroupAttributes(object, vm);
-    RegisterMenuItemAttributes(object, vm);
-    RegisterMenuAttributes(object, vm);
     RegisterDatePickerAttributes(object, vm);
     RegisterSwiperAttributes(object, vm);
     RegisterSelectAttributes(object, vm);
@@ -2783,98 +2780,6 @@ void ArkUINativeModule::RegisterPolylineAttributes(Local<panda::ObjectRef> objec
     polyline->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPoints"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), PolylineBridge::ResetPoints));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "polyline"), polyline);
-}
-
-void ArkUINativeModule::RegisterMenuItemGroupAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto menuitemgroup = panda::ObjectRef::New(vm);
-    menuitemgroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "createMenuItemGroup"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemGroupBridge::CreateMenuItemGroup));
-    menuitemgroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuItemGroupHeader"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemGroupBridge::SetMenuItemGroupHeader));
-    menuitemgroup->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuItemGroupFooter"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemGroupBridge::SetMenuItemGroupFooter));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "menuitemgroup"), menuitemgroup);
-}
-
-void ArkUINativeModule::RegisterMenuItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto menuitem = panda::ObjectRef::New(vm);
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "create"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::Create));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuItemSelected"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetMenuItemSelected));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuItemSelected"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetMenuItemSelected));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLabelFontColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetLabelFontColor));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLabelFontColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetLabelFontColor));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentFontColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetContentFontColor));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentFontColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetContentFontColor));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setLabelFont"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetLabelFont));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetLabelFont"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetLabelFont));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectIcon"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetSelectIcon));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectIcon"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetSelectIcon));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetOnChange));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnChange"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetOnChange));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "setContentFont"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::SetContentFont));
-    menuitem->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetContentFont"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuItemBridge::ResetContentFont));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "menuitem"), menuitem);
-}
-
-void ArkUINativeModule::RegisterMenuAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto menu = panda::ObjectRef::New(vm);
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "create"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::CreateMenu));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuFontColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetMenuFontColor));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuFontColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetMenuFontColor));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFont"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetFont));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFont"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetFont));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetRadius));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetRadius));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetWidth));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetWidth));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuItemDivider"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetMenuItemDivider));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuItemDivider"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetMenuItemDivider));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setMenuItemGroupDivider"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetMenuItemGroupDivider));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetMenuItemGroupDivider"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetMenuItemGroupDivider));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSubMenuExpandingMode"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetSubMenuExpandingMode));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSubMenuExpandingMode"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetSubMenuExpandingMode));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSubMenuExpandSymbol"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetSubMenuExpandSymbol));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSubMenuExpandSymbol"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetSubMenuExpandSymbol));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFontSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::SetFontSize));
-    menu->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFontSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), MenuBridge::ResetFontSize));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "menu"), menu);
 }
 
 void ArkUINativeModule::RegisterTabAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
