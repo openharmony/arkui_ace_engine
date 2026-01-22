@@ -21440,7 +21440,7 @@ typedef struct Opt_SweepGradientOptions {
 typedef struct Ark_SwipeActionItem {
     /* kind: Interface */
     Opt_CustomNodeBuilder builder;
-    Opt_ComponentContent builderComponent;
+    Opt_ComponentContentBase builderComponent;
     Opt_Length actionAreaDistance;
     Opt_Callback_Void onAction;
     Opt_Callback_Void onEnterActionArea;
