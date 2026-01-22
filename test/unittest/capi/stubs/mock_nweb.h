@@ -466,7 +466,7 @@ public:
 
     virtual void SendAccessibilityHoverEvent(int32_t x, int32_t y) {}
 
-    virtual void RegisterArkJSfunctionV2(const std::string& object_name, const std::vector<std::string>& method_list,
+    virtual void RegisterArkJSfunction(const std::string& object_name, const std::vector<std::string>& method_list,
         const std::vector<std::string>& async_method_list, const int32_t object_id, const std::string& permission) {}
 
     virtual void ResizeVisibleViewport(uint32_t width, uint32_t height, bool isKeyboard) {}
