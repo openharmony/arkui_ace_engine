@@ -258,6 +258,8 @@ export enum CallbackKind {
     Kind_OnFirstScreenPaintCallback = -203561522,
     Kind_OnFoldStatusChangeCallback = 2050387049,
     Kind_OnFullScreenEnterCallback = 81230317,
+    Kind_OnGetStartIndexByIndexCallback = -115606345,
+    Kind_OnGetStartIndexByOffsetCallback = -141251740,
     Kind_OnGridScrollIndexCallback = 2064022865,
     Kind_OnHoverCallback = -2025767812,
     Kind_OnHoverStatusChangeCallback = 9040430,

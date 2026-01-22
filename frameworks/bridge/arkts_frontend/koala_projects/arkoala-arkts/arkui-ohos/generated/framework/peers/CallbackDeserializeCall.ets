@@ -21,7 +21,7 @@ import { image_PixelMap_serializer } from "./../ohos.multimedia.image"
 import { ButtonConfiguration_serializer, ButtonConfiguration, ButtonTriggerClickCallback } from "./../../component/button"
 import { Area_serializer, ConstraintSizeOptions_serializer, SizeOptions_serializer, Area, ConstraintSizeOptions, Length, ResourceStr, SizeOptions, VoidCallback } from "./../../component/units"
 import { TextMenuItem_serializer, DeleteValue_serializer, EditableTextChangeValue_serializer, InsertValue_serializer, StyledStringChangeValue_serializer, TextRange_serializer, PreviewText_serializer, TextChangeOptions_serializer, TextMenuItem, DeleteValue, EditableTextChangeValue, InsertValue, StyledStringChangeValue, TextRange, EditableTextOnChangeCallback, PreviewText, TextChangeOptions, OnCreateMenuCallback, OnDidChangeCallback, OnMenuItemClickCallback, OnPrepareMenuCallback } from "./../../component/textCommon"
-import { ComputedBarAttribute_serializer, ComputedBarAttribute, OnGridScrollIndexCallback } from "./../../component/grid"
+import { ComputedBarAttribute_serializer, StartLineInfo_serializer, ComputedBarAttribute, StartLineInfo, OnGridScrollIndexCallback, OnGetStartIndexByIndexCallback, OnGetStartIndexByOffsetCallback } from "./../../component/grid"
 import { CopyEvent_serializer, CutEvent_serializer, RichEditorChangeValue_serializer, RichEditorDeleteValue_serializer, RichEditorInsertValue_serializer, RichEditorRange_serializer, RichEditorSelection_serializer, RichEditorTextSpanResult_serializer, PasteEvent_serializer, CopyEvent, CutEvent, RichEditorChangeValue, RichEditorDeleteValue, RichEditorInsertValue, RichEditorRange, RichEditorSelection, RichEditorTextSpanResult, PasteEvent, MenuCallback, MenuOnAppearCallback, OnHoverCallback, PasteEventCallback, SubmitCallback } from "./../../component/richEditor"
 import { CustomSpanMeasureInfo_serializer, CustomSpanMetrics_serializer, CustomSpanDrawInfo_serializer, LeadingMarginSpanDrawInfo_serializer, StyledString_serializer, CustomSpanMeasureInfo, CustomSpanMetrics, CustomSpanDrawInfo, LeadingMarginSpanDrawInfo, StyledString, UserDataSpan, StyledStringMarshallCallback, StyledStringUnmarshallCallback } from "./../../component/styledString"
 import { DismissDialogAction_serializer, DismissDialogAction } from "./../../component/actionSheet"
@@ -2609,6 +2609,46 @@ export function deserializeAndCallOnContextMenuHideCallback(thisDeserializer: De
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnContextMenuHideCallback)
     _call()
 }
+export function deserializeAndCallOnGetStartIndexByIndexCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnGetStartIndexByIndexCallback)
+    let targetIndex : int32 = thisDeserializer.readInt32()
+    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
+    let continuationResult : ((value: StartLineInfo) => void) = (value: StartLineInfo):void => {
+        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        StartLineInfo_serializer.write(continuationBufferBufArgsSerializer, value);
+        InteropNativeModule._CallCallbackSync(10, 2051511247, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    const _callResult  = _call(targetIndex)
+    continuationResult(_callResult)
+}
+export function deserializeAndCallOnGetStartIndexByOffsetCallback(thisDeserializer: DeserializerBase): void {
+    const _resourceId : int32 = thisDeserializer.readInt32()
+    const _call  = (ResourceHolder.instance().get(_resourceId) as OnGetStartIndexByOffsetCallback)
+    let totalOffset : double = thisDeserializer.readFloat64()
+    const continuationBufferBufResource : CallbackResource = thisDeserializer.readCallbackResource()
+    const continuationBufferBufCall : KPointer = thisDeserializer.readPointer()
+    const continuationBufferBufCallSync : KPointer = thisDeserializer.readPointer()
+    let continuationResult : ((value: StartLineInfo) => void) = (value: StartLineInfo):void => {
+        const continuationBufferBufArgsSerializer : SerializerBase = SerializerBase.hold();
+        continuationBufferBufArgsSerializer.writeInt32(continuationBufferBufResource.resourceId);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCall);
+        continuationBufferBufArgsSerializer.writePointer(continuationBufferBufCallSync);
+        StartLineInfo_serializer.write(continuationBufferBufArgsSerializer, value);
+        InteropNativeModule._CallCallbackSync(10, 2051511247, continuationBufferBufArgsSerializer.asBuffer(), continuationBufferBufArgsSerializer.length());
+        continuationBufferBufArgsSerializer.release();
+        return;
+    }
+    const _callResult  = _call(totalOffset)
+    continuationResult(_callResult)
+}
 export function deserializeAndCallOnCreateMenuCallback(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as OnCreateMenuCallback)
@@ -3953,6 +3993,8 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
         case CallbackKind.Kind_Callback_FocusAxisEvent_Void: return deserializeAndCallCallback_FocusAxisEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_FormCallbackInfo_Void: return deserializeAndCallCallback_FormCallbackInfo_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_FullscreenInfo_Void: return deserializeAndCallCallback_FullscreenInfo_Void(thisDeserializer);
+        case CallbackKind.Kind_OnGetStartIndexByIndexCallback: return deserializeAndCallOnGetStartIndexByIndexCallback(thisDeserializer);
+        case CallbackKind.Kind_OnGetStartIndexByOffsetCallback: return deserializeAndCallOnGetStartIndexByOffsetCallback(thisDeserializer);
         case CallbackKind.Kind_Callback_GestureEvent_Void: return deserializeAndCallCallback_GestureEvent_Void(thisDeserializer);
         case CallbackKind.Kind_Callback_GestureInfo_BaseGestureEvent_GestureJudgeResult: return deserializeAndCallCallback_GestureInfo_BaseGestureEvent_GestureJudgeResult(thisDeserializer);
         case CallbackKind.Kind_Callback_GestureJudgeResult_Void: return deserializeAndCallCallback_GestureJudgeResult_Void(thisDeserializer);

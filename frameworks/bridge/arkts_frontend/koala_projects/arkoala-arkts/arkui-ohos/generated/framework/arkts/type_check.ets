@@ -81,7 +81,7 @@ import { FormDimension, FormRenderingMode, FormShape, FormSize, ErrorInformation
 import { FrictionMotion, ScrollMotion, SpringProp, SpringMotion } from "./../../component/animator"
 import { FullscreenInfo, PlaybackInfo, PlaybackSpeed, PreparedInfo, SeekMode, VideoController, PosterOptions, VideoOptions } from "./../../component/video"
 import { GaugeConfiguration, GaugeOptions, GaugeShadowOptions, GaugeIndicatorOptions } from "./../../component/gauge"
-import { GridDirection, GridItemAlignment, UIGridEvent, OnGridScrollIndexCallback, ComputedBarAttribute, GridLayoutOptions } from "./../../component/grid"
+import { GridDirection, GridItemAlignment, UIGridEvent, OnGridScrollIndexCallback, ComputedBarAttribute, GridLayoutOptions, OnGetStartIndexByOffsetCallback, OnGetStartIndexByIndexCallback } from "./../../component/grid"
 import { GridItemStyle, GridItemOptions } from "./../../component/gridItem"
 import { AsyncCallback, BusinessError } from "@ohos.base"
 import { default as colorSpaceManager } from "@ohos.graphics.colorSpaceManager"
