@@ -1126,10 +1126,10 @@ class ArkThemeWhiteList {
     }
 }
 ArkThemeWhiteList.whiteList = [
-    'AlphabetIndexer',
     'Badge',
     'Button',
     'DataPanel',
+    'JSAlphabetIndexer',
     'JSMenu',
     'JSMenuItem',
     'JSRadio',

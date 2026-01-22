@@ -627,7 +627,7 @@ namespace Converter {
     template<> ACE_FORCE_EXPORT Color Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_Float64& src);
     template<> Dimension Convert(const Ark_Int32& src);
-    template<> Dimension Convert(const Ark_LengthMetrics& src);
+    template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_LengthMetrics& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_Number& src);
     template<> ACE_FORCE_EXPORT Dimension Convert(const Ark_String& src);
     template<> ACE_FORCE_EXPORT DimensionOffset Convert(const Ark_Offset& src);
@@ -640,7 +640,7 @@ namespace Converter {
     template<> EventLocationInfo Convert(const Ark_EventLocationInfo& src);
     template<> EventTarget Convert(const Ark_EventTarget& src);
     template<> FingerInfo Convert(const Ark_FingerInfo& src);
-    template<> Font Convert(const Ark_Font& src);
+    template<> ACE_FORCE_EXPORT Font Convert(const Ark_Font& src);
     template<> ACE_FORCE_EXPORT FontFamilies Convert(const Ark_String& src);
     template<> FontInfo Convert(const Ark_font_FontInfo& src);
     template<> FontMetaData Convert(const Ark_Font& src);
@@ -827,7 +827,7 @@ namespace Converter {
     template<> void AssignCast(std::optional<CheckBoxStyle>& dst, const Ark_CheckBoxShape& src);
     template<> void AssignCast(std::optional<CleanNodeStyle>& dst, const Ark_CancelButtonStyle& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const Ark_Color& src);
-    template<> void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src);
+    template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src);
     template<> ACE_FORCE_EXPORT void AssignCast(std::optional<Color>& dst, const Ark_String& src);
     template<> void AssignCast(std::optional<ColorSpace>& dst, const Ark_ColorSpace& src);
     template<> void AssignCast(std::optional<ConsoleMessageSource>& dst, const Ark_ConsoleMessageSource& src);

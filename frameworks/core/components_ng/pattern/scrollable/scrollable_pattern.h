@@ -27,6 +27,7 @@
 #include "core/components_ng/base/frame_scene_status.h"
 #include "core/components_ng/event/drag_event.h"
 #include "core/components_ng/event/scrollable_event.h"
+#include "core/components_ng/manager/content_change_manager/content_change_manager.h"
 #include "core/components_ng/pattern/navigation/nav_bar_pattern.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
@@ -950,8 +951,8 @@ public:
     void ProcessScrollOverDrag(double velocity, bool isNestScroller);
 
     void SetCanOverScroll(bool val);
-    
-    void ContentChangeReport(const RefPtr<FrameNode>& keyNode);
+
+    void ContentChangeReport(const RefPtr<FrameNode>& keyNode, uint32_t type = ContentChangeManager::NONE);
 
     void ContentChangeOnScrollStart(const RefPtr<FrameNode>& keyNode);
 

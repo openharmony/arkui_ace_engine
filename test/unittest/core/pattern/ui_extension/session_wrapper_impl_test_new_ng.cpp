@@ -1371,4 +1371,15 @@ HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg040, TestSize.L
     sessionWrapper->UpdateWantPtr(wantPtr);
     EXPECT_FALSE(wantPtr->GetBoolParam(UIEXTENSION_HOST_UICONTENT_ALLOW_CROSS_PROCESS_NESTING, false));
 }
+
+/**
+ * @tc.name: SessionWrapperImplNewTestNg041
+ * @tc.desc: Test the method RefreshOccupiedAreaChangeInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SessionWrapperImplNewTestNg, SessionWrapperImplNewTestNg041, TestSize.Level1)
+{
+    auto sessionWrapper = GenerateSessionWrapperImpl();
+    EXPECT_FALSE(sessionWrapper->RefreshOccupiedAreaChangeInfo());
+}
 } // namespace OHOS::Ace::NG

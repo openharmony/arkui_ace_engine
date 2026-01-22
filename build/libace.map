@@ -152,7 +152,6 @@
       OHOS::Ace::AlertDialogModel::*;
       OHOS::Ace::StringUtils::*;
       OHOS::Ace::UtfUtils::*;
-      OHOS::Ace::IndexerModel::*;
       OHOS::Ace::BadgeModel::*;
       OHOS::Ace::BlankModel::*;
       OHOS::Ace::ButtonModel::*;
@@ -937,6 +936,51 @@
       vtable?for?OHOS::Ace::UiMaterial;
       vtable?for?OHOS::Ace::RawRecognizer;
       VTT?for?OHOS::Ace::UiMaterial;
+
+
+      #indexer
+      vtable?for?OHOS::Ace::Framework::IndexerModelImpl;
+      OHOS::Ace::NG::IndexerModelNG::*;
+      OHOS::Ace::IndexerModel::GetInstance*;
+      OHOS::Ace::ToRSCapStyle*;
+      OHOS::Ace::ToRSColor*;
+      OHOS::Ace::NG::GetMainAxisSize*;
+      OHOS::Ace::NG::GetCrossAxisSize*;
+      OHOS::Ace::NG::CheckMeasureSelfFlag*;
+      OHOS::Ace::NG::VibratorUtils::*;
+      OHOS::Ace::FontManager::GetAppCustomFont*;
+      OHOS::Ace::FontManager::IsUseAppCustomFont*;
+      OHOS::Ace::KeyEvent::ConvertCodeToString*;
+      "OHOS::Ace::NG::StackLayoutAlgorithm::StackLayoutAlgorithm()";
+      OHOS::Ace::NG::ScrollablePattern::ScrollablePattern*;
+      "OHOS::Ace::NG::CommonBridge::SetWidth(panda::JsiRuntimeCallInfo*)";
+      "OHOS::Ace::NG::CommonBridge::ResetWidth(panda::JsiRuntimeCallInfo*)";
+      "OHOS::Ace::TextStyle::operator==(OHOS::Ace::TextStyle const&) const";
+      "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::operator==(OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> const&) const";
+      "OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension>::operator==(OHOS::Ace::NG::BorderRadiusPropertyT<OHOS::Ace::Dimension> const&) const";
+      OHOS::Ace::NG::NodeAnimatableProperty*;
+      OHOS::Ace::TokenTheme::IsDarkMode*;
+      "OHOS::Ace::NG::InputEventActuator::InputEventActuator(OHOS::Ace::WeakPtr<OHOS::Ace::NG::InputEventHub> const&)";
+      "OHOS::Ace::UiSessionManager::GetInstance()";
+      vtable?for?OHOS::Ace::NG::ListPattern;
+      VTT?for?OHOS::Ace::NG::ListPattern;
+      vtable?for?OHOS::Ace::NG::ListItemPattern;
+      VTT?for?OHOS::Ace::NG::ListItemPattern;
+      OHOS::Ace::V2::ItemDivider::*;
+
+      OHOS::Ace::Framework::ViewStackProcessor::ClaimElementId*;
+      OHOS::Ace::Framework::ViewStackProcessor::Push*;
+      OHOS::Ace::Framework::ViewStackProcessor::GetFocusableComponent*;
+      OHOS::Ace::Framework::ViewStackProcessor::GetMainComponent*;
+
+      OHOS::Ace::V2::IndexerComponent::UpdateTextStyle*;
+      OHOS::Ace::TextComponent::SetTextStyle*;
+      OHOS::Ace::V2::IndexerComponent::BuildIndexerAlphabet*;
+      OHOS::Ace::V2::IndexerComponent::InitIndexerItemStyle*;
+      OHOS::Ace::V2::IndexerComponent::BuildIndexerItems*;
+      OHOS::Ace::V2::IndexerComponent::BuildPopupList*;
+      vtable?for?OHOS::Ace::V2::IndexerComponent;
+      VTT?for?OHOS::Ace::V2::IndexerComponent;
 
       "OHOS::Ace::ElementRegister::GetInstance()";
       "OHOS::Ace::ElementRegister::RemoveItemSilently(int)";

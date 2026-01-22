@@ -128,6 +128,7 @@
 #include "core/components_ng/pattern/window_scene/screen/screen_model.h"
 #endif // WINDOW_SCENE_SUPPORTED
 #include "core/interfaces/native/node/node_api.h"
+#include "core/interfaces/native/node/alphabet_indexer_modifier.h"
 #include "core/interfaces/native/node/node_checkbox_modifier.h"
 #include "core/interfaces/native/node/node_slider_modifier.h"
 #include "core/interfaces/native/node/checkboxgroup_modifier.h"
@@ -504,10 +505,14 @@ void* createDividerNode(ArkUI_Int32 nodeId)
 
 void* createAlphabetIndexerNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = IndexerModelNG::CreateFrameNode(nodeId);
+    auto* arkUIAlphabetIndexerModifier = NodeModifier::GetAlphabetIndexerModifier();
+    CHECK_NULL_RETURN(arkUIAlphabetIndexerModifier, nullptr);
+    auto arkUINodeHandle = arkUIAlphabetIndexerModifier->createFrameNode(nodeId, false);
+    CHECK_NULL_RETURN(arkUINodeHandle, nullptr);
+    auto frameNode = reinterpret_cast<FrameNode*>(arkUINodeHandle);
     CHECK_NULL_RETURN(frameNode, nullptr);
     frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    return frameNode;
 }
 
 void* createSearchNode(ArkUI_Int32 nodeId)

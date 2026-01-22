@@ -436,7 +436,7 @@ HWTEST_F(FrameNodeTestNg, GetGlobalPositionOnDisplay001, TestSize.Level1)
      * @tc.expected: expect result false.
      */
     frameNode->DumpExtensionHandlerInfo(json);
-    
+
     RefPtr<NG::DrawModifier> drawModifier = AceType::MakeRefPtr<NG::DrawModifier>();
     ASSERT_NE(drawModifier, nullptr);
     frameNode->SetDrawModifier(drawModifier);
@@ -1426,7 +1426,7 @@ HWTEST_F(FrameNodeTestNg, DumpBorderTest004, TestSize.Level1)
     auto json = JsonUtil::Create(true);
 
     frameNode->DumpBorder(border, label, json);
-    
+
     EXPECT_NE(json, nullptr);
     EXPECT_TRUE(json->Contains(label));
 

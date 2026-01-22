@@ -495,6 +495,23 @@ HWTEST_F(GridTestNg, ToJsonValue002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ToJsonValueEditModeOptions
+ * @tc.desc: Test GridPattern ToJsonValue
+ * @tc.type: FUNC
+ */
+HWTEST_F(GridTestNg, ToJsonValueEditModeOptions, TestSize.Level1)
+{
+    RefPtr<GridPattern> gridPattern = AceType::MakeRefPtr<GridPattern>();
+    auto json = JsonUtil::Create(true);
+    InspectorFilter filter;
+    gridPattern->SetEditModeOptions({.enableGatherSelectedItemsAnimation = true});
+    gridPattern->ToJsonValue(json, filter);
+    auto options = json->GetObject("editModeOptions");
+    EXPECT_NE(options, nullptr);
+    EXPECT_EQ(options->GetString("enableGatherSelectedItemsAnimation"), "true");
+}
+
+/**
  * @tc.name: OnKeyEvent001
  * @tc.desc: Test GridPattern OnKeyEvent
  * @tc.type: FUNC

@@ -100,6 +100,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "TimePickerDialog", "timepicker" },
         {"CalendarPicker", "calendarpicker"},
         {"CalendarPickerDialog", "calendarpicker"},
+        {"Indexer", "indexer"},
         { "Hyperlink", "hyperlink" },
     };
     // Load module without holding the lock (LOADLIB/LOADSYM may be slow)

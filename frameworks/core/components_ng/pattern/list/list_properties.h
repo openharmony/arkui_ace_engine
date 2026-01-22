@@ -90,7 +90,7 @@ struct EditMode {
     };
 };
 
-struct ItemDivider final {
+struct ACE_FORCE_EXPORT ItemDivider final {
     Dimension strokeWidth = 0.0_vp;
     Dimension startMargin = 0.0_vp;
     Dimension endMargin = 0.0_vp;

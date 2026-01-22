@@ -23,7 +23,7 @@
 namespace OHOS::Ace {
 struct ContentChangeConfigImpl : public Parcelable {
     ContentChangeConfigImpl() = default;
-    ContentChangeConfigImpl(int32_t minReportTime, float textContentRatio);
+    ContentChangeConfigImpl(int32_t minReportTime, float textContentRatio, std::string ignoreEventType);
     ContentChangeConfigImpl(const ContentChangeConfig& config);
     bool Marshalling(Parcel& parcel) const override;
     static ContentChangeConfigImpl* Unmarshalling(Parcel& parcel);

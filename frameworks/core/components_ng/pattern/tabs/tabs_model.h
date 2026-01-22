@@ -165,6 +165,7 @@ public:
     virtual void SetBarModifier(std::function<void(WeakPtr<NG::FrameNode>)>&& onApply) {}
     virtual void SetCachedMaxCount(std::optional<int32_t> cachedMaxCount, TabsCacheMode cacheMode) {}
     virtual void CreateWithResourceObj(TabJsResType colorType, const RefPtr<ResourceObject>& resObj) {}
+    virtual void SetNestedScroll(const NestedScrollOptions& nestedOpt) {}
 
 private:
     static std::unique_ptr<TabsModel> instance_;

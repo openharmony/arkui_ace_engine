@@ -47,7 +47,7 @@ inline constexpr ItemState ITEM_STATE_HOVERED = 1 << 2;
 
 using PendingSwipeFunc = std::function<void()>;
 
-class ACE_EXPORT ListItemPattern : public SelectableItemPattern {
+class ACE_FORCE_EXPORT ListItemPattern : public SelectableItemPattern {
     DECLARE_ACE_TYPE(ListItemPattern, SelectableItemPattern);
 
 public:

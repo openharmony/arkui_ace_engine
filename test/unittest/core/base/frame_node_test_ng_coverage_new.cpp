@@ -1867,7 +1867,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetResponseRegionList006, TestSize.Level1)
 
     auto paintRect = FRAME_NODE2->renderContext_->GetPaintRectWithoutTransform();
     frameNode->GetResponseRegionListForTouch(paintRect);
-    
+
     auto region = FRAME_NODE2->GetResponseRegionList(paintRect, 1, 0);
     EXPECT_EQ(region.size(), 1);
 

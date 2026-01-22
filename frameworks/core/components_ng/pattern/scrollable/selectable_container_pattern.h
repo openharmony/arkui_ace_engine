@@ -53,6 +53,8 @@ public:
         return editModeOptions_;
     }
 
+    void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
+
 private:
     EditModeOptions editModeOptions_;
 };

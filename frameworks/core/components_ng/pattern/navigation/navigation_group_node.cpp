@@ -1742,7 +1742,14 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
             CHECK_NULL_VOID(navigation);
             navigation->LoadCompleteManagerStopCollect();
             navigation->isOnAnimation_ = false;
-            navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+            auto curNode = weakCurNode.Upgrade();
+            if (!curNode) {
+                // NavDestination pop to navBar/HomeNavDestination
+                curNode = AceType::DynamicCast<FrameNode>(navigation->GetNavBarOrHomeDestinationNode());
+            }
+            auto id = curNode ? curNode->GetAccessibilityId() : -1;
+            navigation->OnAccessibilityEvent(
+                AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
             navigation->CleanPopAnimations();
             for (auto iter = preNavList.rbegin(); iter != preNavList.rend(); ++iter) {
@@ -1765,11 +1772,6 @@ void NavigationGroupNode::TransitionWithDialogPop(const RefPtr<FrameNode>& preNo
                 navigation->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF_AND_CHILD);
             }
             navigation->RemoveDialogDestination();
-            auto curNode = weakCurNode.Upgrade();
-            if (!curNode) {
-                // NavDestination pop to navBar/HomeNavDestination
-                curNode = AceType::DynamicCast<FrameNode>(navigation->GetNavBarOrHomeDestinationNode());
-            }
             navigation->ContentChangeReport(curNode);
             auto context = navigation->GetContextWithCheck();
             CHECK_NULL_VOID(context);
@@ -1905,11 +1907,13 @@ void NavigationGroupNode::TransitionWithDialogPush(const RefPtr<FrameNode>& preN
                 curNavDestination->SystemTransitionPushFinish(true, curNavDestination->GetAnimationId());
             }
             navigation->RemoveDialogDestination();
-            navigation->OnAccessibilityEvent(AccessibilityEventType::PAGE_CHANGE);
+            auto curNode = weakCurNode.Upgrade();
+            auto id = curNode ? curNode->GetAccessibilityId() : -1;
+            navigation->OnAccessibilityEvent(
+                AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
             UiSessionManager::GetInstance()->OnRouterChange(navigation->GetNavigationPathInfo(), "onPageChange");
             navigation->isOnAnimation_ = false;
             navigation->CleanPushAnimations();
-            auto curNode = weakCurNode.Upgrade();
             navigation->ContentChangeReport(curNode);
         };
     AnimationFinishCallback callback = [onFinishCb = std::move(onFinish), weak = WeakPtr(navigationPattern)]() {
@@ -1998,6 +2002,9 @@ void NavigationGroupNode::DialogTransitionPushAnimation(const RefPtr<FrameNode>&
         auto preNode = weakPreNode.Upgrade();
         navigation->ResetTransitionAnimationNodeState(preNode, curNode);
         navigation->ContentChangeReport(curNode);
+        auto id = curNode ? curNode->GetAccessibilityId() : -1;
+        navigation->OnAccessibilityEvent(
+            AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
     };
     auto finishWrapper = [onFinishCb = std::move(onFinish), weak = WeakPtr(navigationPattern)]() {
         auto pattern = weak.Upgrade();
@@ -2110,6 +2117,9 @@ void NavigationGroupNode::DialogTransitionPopAnimation(const RefPtr<FrameNode>& 
                 curNode = AceType::DynamicCast<FrameNode>(navigation->GetNavBarOrHomeDestinationNode());
             }
             navigation->ContentChangeReport(curNode);
+            auto id = curNode ? curNode->GetAccessibilityId() : -1;
+            navigation->OnAccessibilityEvent(
+                AccessibilityEventType::PAGE_CHANGE, id, WindowsContentChangeTypes::CONTENT_CHANGE_TYPE_INVALID);
         };
     auto finishWrapper = [onFinishCb = std::move(onFinish), weak = WeakPtr(navigationPattern)]() {
         auto pattern = weak.Upgrade();

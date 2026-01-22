@@ -824,6 +824,8 @@ void JsiDeclarativeEngineInstance::PreLoadArkuiModule(const shared_ptr<JsRuntime
         { "Gauge", "gauge" },
         { "TimePicker", "timepicker" },
         { "TimePickerDialog", "timepicker" },
+        { "WaterFlow", "waterflow" },
+        { "FlowItem", "flowitem" },
         { "CalendarPicker", "calendarpicker" },
         { "CalendarPickerDialog", "calendarpicker" },
         { "Hyperlink", "hyperlink" },

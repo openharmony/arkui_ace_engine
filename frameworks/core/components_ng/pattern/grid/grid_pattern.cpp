@@ -752,7 +752,7 @@ void GridPattern::ScrollBy(float offset)
 
 void GridPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    ScrollablePattern::ToJsonValue(json, filter);
+    SelectableContainerPattern::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         return;
@@ -878,7 +878,7 @@ void GridPattern::ScrollTo(float position)
     UpdateCurrentOffset(GetTotalOffset() - position, SCROLL_FROM_JUMP);
     SetIsOverScroll(GetCanStayOverScroll());
     // AccessibilityEventType::SCROLL_END
-    ContentChangeReport(GetHost());
+    ContentChangeReport(GetHost(), ContentChangeManager::SCROLL_TO);
 }
 
 float GridPattern::EstimateHeight() const

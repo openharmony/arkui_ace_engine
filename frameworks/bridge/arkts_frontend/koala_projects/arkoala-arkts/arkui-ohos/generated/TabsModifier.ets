@@ -21,7 +21,7 @@ import { ModifierState } from './CommonModifier'
 import { AttributeModifier, extractors } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkTabsPeer, BarPosition, AnimationMode, OnTabsAnimationStartCallback, TabsAnimationEvent, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, TabsAttribute, OnTabsContentDidScrollCallback, BarMode, ScrollableBarModeOptions, TabsCacheMode } from "./component/tabs"
+import { ArkTabsPeer, BarPosition, AnimationMode, TabsNestedScrollMode, OnTabsAnimationStartCallback, TabsAnimationEvent, OnTabsAnimationEndCallback, OnTabsGestureSwipeCallback, BarGridColumnOptions, TabsCustomContentTransitionCallback, OnTabsContentWillChangeCallback, TabsAttribute, OnTabsContentDidScrollCallback, BarMode, ScrollableBarModeOptions, TabsCacheMode } from "./component/tabs"
 import { int32 } from "@koalaui/common"
 import { CommonMethod, DividerStyle, BlurStyle, BackgroundEffectOptions, BackgroundBlurStyleOptions } from "./component/common"
 import { Length, ResourceColor } from "./component/units"
@@ -64,6 +64,8 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
     _onTabBarClick_0_0value?: ((value0: int32) => void) | undefined
     _onUnselected_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onUnselected_0_0value?: ((value0: int32) => void) | undefined
+    _nestedScroll_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _nestedScroll_0_0value?: TabsNestedScrollMode | undefined
     _onAnimationStart_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _onAnimationStart_0_0value?: OnTabsAnimationStartCallback | undefined
     _onAnimationEnd_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -323,6 +325,24 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 default: {
                     this._onUnselected_0_flag = AttributeUpdaterFlag.INITIAL;
                     peer.setOnUnselectedAttribute((undefined as ((value0: int32) => void) | undefined));
+                }
+            }
+        }
+        if (this._nestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._nestedScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setNestedScrollAttribute((this._nestedScroll_0_0value as TabsNestedScrollMode | undefined));
+                    this._nestedScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._nestedScroll_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._nestedScroll_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setNestedScrollAttribute((undefined as TabsNestedScrollMode | undefined));
                 }
             }
         }
@@ -828,6 +848,19 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
                 }
             }
         }
+        if (modifier._nestedScroll_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._nestedScroll_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.nestedScroll(modifier._nestedScroll_0_0value);
+                    break;
+                }
+                default: {
+                    this.nestedScroll((undefined as TabsNestedScrollMode | undefined));
+                }
+            }
+        }
         if (modifier._onAnimationStart_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._onAnimationStart_0_flag) {
@@ -1217,6 +1250,18 @@ export class TabsModifier extends CommonMethodModifier implements TabsAttribute,
         } else
         {
             this._onUnselected_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    nestedScroll(value: TabsNestedScrollMode | undefined): this {
+        if (((this._nestedScroll_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._nestedScroll_0_flag = AttributeUpdaterFlag.UPDATE
+            this._nestedScroll_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._nestedScroll_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

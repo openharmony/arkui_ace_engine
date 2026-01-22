@@ -215,7 +215,12 @@ bool ParseSectionOptions(EcmaVM* vm, const Local<JSValueRef>& jsValue, WaterFlow
 void ParseSections(EcmaVM* vm, const Local<panda::ArrayRef>& sectionArray, RefPtr<WaterFlowSections>& waterFlowSections)
 {
     CHECK_NULL_VOID(vm);
-    auto length = sectionArray->Length(vm);
+    uint32_t length = sectionArray->Length(vm);
+    if (sectionArray->IsProxy(vm)) {
+        length = sectionArray->Get(vm, "length")->IsNumber()
+                     ? sectionArray->Get(vm, "length")->ToNumber(vm)->Uint32Value(vm)
+                     : 0;
+    }
     std::vector<NG::WaterFlowSections::Section> newSections;
     for (size_t j = 0; j < length; ++j) {
         NG::WaterFlowSections::Section section;

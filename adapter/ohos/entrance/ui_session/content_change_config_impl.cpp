@@ -16,16 +16,19 @@
 #include "adapter/ohos/entrance/ui_session/content_change_config_impl.h"
 
 namespace OHOS::Ace {
-ContentChangeConfigImpl::ContentChangeConfigImpl(int32_t minReportTime, float textContentRatio)
+ContentChangeConfigImpl::ContentChangeConfigImpl(int32_t minReportTime, float textContentRatio,
+    std::string ignoreEventType)
 {
     config_.minReportTime = minReportTime;
     config_.textContentRatio = textContentRatio;
+    config_.ignoreEventType = ignoreEventType;
 }
 
 ContentChangeConfigImpl::ContentChangeConfigImpl(const ContentChangeConfig& config)
 {
     config_.minReportTime = config.minReportTime;
     config_.textContentRatio = config.textContentRatio;
+    config_.ignoreEventType = config.ignoreEventType;
 }
 
 bool ContentChangeConfigImpl::Marshalling(Parcel& parcel) const
@@ -34,6 +37,9 @@ bool ContentChangeConfigImpl::Marshalling(Parcel& parcel) const
         return false;
     }
     if (!parcel.WriteFloat(config_.textContentRatio)) {
+        return false;
+    }
+    if (!parcel.WriteString(config_.ignoreEventType)) {
         return false;
     }
     return true;
@@ -49,7 +55,11 @@ ContentChangeConfigImpl* ContentChangeConfigImpl::Unmarshalling(Parcel& parcel)
     if (!parcel.ReadFloat(textContentRatio)) {
         return nullptr;
     }
-    ContentChangeConfigImpl* configImpl = new ContentChangeConfigImpl(minReportTime, textContentRatio);
+    std::string ignoreEventType;
+    if (!parcel.ReadString(ignoreEventType)) {
+        return nullptr;
+    }
+    ContentChangeConfigImpl* configImpl = new ContentChangeConfigImpl(minReportTime, textContentRatio, ignoreEventType);
     return configImpl;
 }
 

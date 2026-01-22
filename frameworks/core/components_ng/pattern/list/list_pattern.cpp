@@ -57,6 +57,8 @@ constexpr const char* HAPTIC_STRENGTH1 = "watchhaptic.feedback.crown.strength3";
 #endif
 } // namespace
 
+ListPattern::~ListPattern() = default;
+
 void ListPattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
@@ -1789,7 +1791,7 @@ void ListPattern::ScrollTo(float position)
     SetIsOverScroll(GetCanStayOverScroll());
     MarkDirtyNodeSelf();
     isScrollEnd_ = true;
-    ContentChangeReport(GetHost());
+    ContentChangeReport(GetHost(), ContentChangeManager::SCROLL_TO);
 }
 
 void ListPattern::ResetScrollToIndexParams()
@@ -2932,7 +2934,7 @@ std::string static FocusWrapModeToString(FocusWrapMode mode)
 
 void ListPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
-    ScrollablePattern::ToJsonValue(json, filter);
+    SelectableContainerPattern::ToJsonValue(json, filter);
     /* no fixed attr below, just return */
     if (filter.IsFastFilter()) {
         return;

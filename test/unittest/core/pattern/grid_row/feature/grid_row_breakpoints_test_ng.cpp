@@ -364,6 +364,9 @@ HWTEST_F(GridRowBreakPointsTestNG, ProcessGridSizeType_WindowSize06, TestSize.Le
     container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
     EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
     V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    /**
+     * @tc.expected: result is V2::GridSizeType::MD.
+     */
     EXPECT_EQ(result, V2::GridSizeType::MD);
 }
 
@@ -387,6 +390,9 @@ HWTEST_F(GridRowBreakPointsTestNG, ProcessGridSizeType_WindowSize07, TestSize.Le
     container->SetApiTargetVersion((int32_t)PlatformVersion::VERSION_TWENTY);
     EXPECT_TRUE(Container::GreatOrEqualAPITargetVersion(PlatformVersion::VERSION_TWENTY));
     V2::GridSizeType result = V2::GridContainerUtils::ProcessGridSizeType(breakpoints, size, mode, pipeline);
+    /**
+     * @tc.expected: result is V2::GridSizeType::MD.
+     */
     EXPECT_EQ(result, V2::GridSizeType::MD);
 }
 

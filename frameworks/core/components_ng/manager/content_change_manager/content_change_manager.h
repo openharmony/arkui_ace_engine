@@ -33,6 +33,11 @@ class ContentChangeDumpManager;
 class ContentChangeManager final : public AceType {
     DECLARE_ACE_TYPE(ContentChangeManager, AceType);
 public:
+    enum ContentIgnoreEventType : uint32_t {
+        NONE = 0,            // no event
+        SCROLL_TO = 1 << 0,  // SCROLL: scrollTo
+    };
+
     ContentChangeManager();
     virtual ~ContentChangeManager() = default;
     void StartContentChangeReport(const ContentChangeConfig& config);
@@ -55,6 +60,11 @@ public:
     void OnVsyncStart();
     void OnVsyncEnd(const RectF& rootRect);
     bool IsTextAABBCollecting() const;
+
+    uint32_t ConvertEventStringToEnum(std::string type) const;
+    uint32_t GetIgnoreEventMask(std::string ignoreEventType) const;
+    bool IsIgnoringEventType(uint32_t type) const;
+
 #ifndef IS_RELEASE_VERSION
     std::string DumpInfo() const;
 #endif
@@ -73,6 +83,7 @@ private:
     static constexpr int32_t DEFAULT_TEXT_MIN_REPORT_TIME = 100;
     float textContentRatio_ = 0.15f; // default text content ratio is 0.15
     uint64_t textContentInterval_ = 100 * NS_PER_MS; // minimum text content change interval is 100 ms.
+    uint32_t ignoreEventMask_;
     uint64_t lastTextReportTime_ = 0;
     bool textCollecting_ = false;
     std::set<std::pair<WeakPtr<FrameNode>, bool>> changedSwiperNodes_;

@@ -371,6 +371,7 @@ export class TipsDialogV2 extends ViewV2 {
             Text.layoutWeight(1);
             Text.focusable(false);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.fallbackLineSpacing(true);
           }, Text);
           Text.pop();
         });
@@ -434,6 +435,7 @@ export class TipsDialogV2 extends ViewV2 {
             Text.maxLines(CONTENT_MAX_LINES);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
             Text.width('100%');
+            Text.fallbackLineSpacing(true);
           }, Text);
           Text.pop();
           Row.pop();
@@ -469,6 +471,7 @@ export class TipsDialogV2 extends ViewV2 {
                 resolveKeyEvent(event, this.contentScroller);
               }
             });
+            Text.fallbackLineSpacing(true);
           }, Text);
           Text.pop();
           Row.pop();
@@ -798,6 +801,7 @@ export class SelectDialogV2 extends ViewV2 {
             Text.fontWeight(FontWeight.Regular);
             Text.fontColor(this.fontColorWithTheme);
             Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+            Text.fallbackLineSpacing(true);
           }, Text);
           Text.pop();
           Row.pop();
@@ -882,6 +886,7 @@ export class SelectDialogV2 extends ViewV2 {
               Text.fontColor(this.fontColorWithTheme);
               Text.layoutWeight(1);
               Text.direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr);
+              Text.fallbackLineSpacing(true);
             }, Text);
             Text.pop();
             this.observeComponentCreation2((elmtId, isInitialRender) => {
@@ -1206,6 +1211,7 @@ export class ConfirmDialogV2 extends ViewV2 {
         }
       });
       Text.width('100%');
+      Text.fallbackLineSpacing(true);
     }, Text);
     Text.pop();
     Column.pop();
@@ -1266,6 +1272,7 @@ export class ConfirmDialogV2 extends ViewV2 {
       Text.focusable(false);
       Text.layoutWeight(1);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+      Text.fallbackLineSpacing(true);
     }, Text);
     Text.pop();
     Row.pop();
@@ -1563,6 +1570,7 @@ export class AlertDialogV2 extends ViewV2 {
           resolveKeyEvent(event, this.contentScroller);
         }
       });
+      Text.fallbackLineSpacing(true);
     }, Text);
     Text.pop();
     Scroll.pop();
@@ -2171,6 +2179,7 @@ class CustomDialogContentComponent extends ViewV2 {
       Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.width('100%');
+      Text.fallbackLineSpacing(true);
     }, Text);
     Text.pop();
     Row.pop();
@@ -2206,6 +2215,7 @@ class CustomDialogContentComponent extends ViewV2 {
       Text.heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST);
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
       Text.width('100%');
+      Text.fallbackLineSpacing(true);
     }, Text);
     Text.pop();
     Row.pop();
@@ -2904,6 +2914,7 @@ export class LoadingDialogV2 extends ViewV2 {
         strokeWidth: LengthMetrics.px(0)
       });
       Text.textOverflow({ overflow: TextOverflow.Ellipsis });
+      Text.fallbackLineSpacing(true);
     }, Text);
     Text.pop();
     this.observeComponentCreation2((elmtId, isInitialRender) => {

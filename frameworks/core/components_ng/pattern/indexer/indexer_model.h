@@ -32,6 +32,15 @@ const std::vector<NG::AlignStyle> NG_ALIGN_STYLE = { NG::AlignStyle::LEFT, NG::A
     NG::AlignStyle::END };
 }; // namespace
 
+struct IndexerTextStyle {
+    std::optional<Dimension> fontSize;
+    std::optional<FontWeight> fontWeight;
+    std::optional<std::vector<std::string>> fontFamily;
+    std::optional<Ace::FontStyle> fontStyle;
+    RefPtr<ResourceObject> fontSizeResObj;
+    RefPtr<ResourceObject> fontFamilyResObj;
+};
+
 enum class IndexerJsResourceType : int32_t {
     COLOR,
     SELECTED_COLOR,

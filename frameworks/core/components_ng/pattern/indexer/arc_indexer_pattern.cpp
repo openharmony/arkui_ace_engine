@@ -382,7 +382,7 @@ RefPtr<FrameNode> ArcIndexerPattern::BuildIcon()
     CHECK_EQUAL_RETURN(arcArrayValue_.size(), 0, nullptr);
     int32_t indexerSize = static_cast<int32_t>(arcArrayValue_.size() - 1);
     auto icon = FrameNode::CreateFrameNode(
-        V2::IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
+        IMAGE_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<ImagePattern>());
     CHECK_NULL_RETURN(icon, nullptr);
     ImageSourceInfo imageSourceInfo;
     if (arcArrayValue_[indexerSize].second == ArcIndexerBarState::COLLAPSED) {
@@ -429,7 +429,7 @@ void ArcIndexerPattern::BuildArrayValueItems()
         }
         for (int32_t index = 0; index < indexerSize; index++) {
             auto indexerChildNode = FrameNode::CreateFrameNode(
-                V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+                TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
             CHECK_NULL_VOID(indexerChildNode);
             host->AddChild(indexerChildNode);
         }
@@ -1197,7 +1197,7 @@ void ArcIndexerPattern::ShowBubble(bool isShow)
 RefPtr<FrameNode> ArcIndexerPattern::CreatePopupNode()
 {
     auto textNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
+        TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
     CHECK_NULL_RETURN(textNode, nullptr);
     return textNode;
 }
@@ -1547,7 +1547,7 @@ void ArcIndexerPattern::UpdateChildBoundary(RefPtr<FrameNode>& frameNode)
     CHECK_NULL_VOID(layoutProperty);
     CHECK_NULL_VOID(frameNode);
     auto isMeasureBoundary = layoutProperty->GetPropertyChangeFlag() ==  PROPERTY_UPDATE_NORMAL;
-    if (frameNode->GetHostTag() == V2::TEXT_ETS_TAG) {
+    if (frameNode->GetHostTag() == TEXT_ETS_TAG) {
         auto pattern = DynamicCast<TextPattern>(frameNode->GetPattern());
         CHECK_NULL_VOID(pattern);
         pattern->SetIsMeasureBoundary(isMeasureBoundary);

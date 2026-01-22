@@ -63,7 +63,7 @@ bool CheckForceParentMeasureFlag(PropertyChangeFlag propertyChangeFlag);
 
 ACE_FORCE_EXPORT bool CheckLayoutFlag(PropertyChangeFlag propertyChangeFlag);
 
-bool CheckMeasureSelfFlag(PropertyChangeFlag propertyChangeFlag);
+ACE_FORCE_EXPORT bool CheckMeasureSelfFlag(PropertyChangeFlag propertyChangeFlag);
 
 bool CheckMeasureSelfAndParentFlag(PropertyChangeFlag propertyChangeFlag);
 
