@@ -1119,6 +1119,7 @@ void SliderPattern::HandleTouchUp(const Offset& location, SourceType sourceType)
         allowDragEvents_ = true;
         if (!AtPanArea(location, sourceType)) {
             UpdateValueByLocalLocation(location);
+            UpdateBubble();
         }
         UpdateToValidValue();
         FireChangeEvent(SliderChangeMode::Click);
