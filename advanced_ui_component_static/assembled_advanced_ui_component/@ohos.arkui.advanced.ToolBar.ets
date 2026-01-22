@@ -115,7 +115,7 @@ import {
     public content: ResourceStr = '';
     public action?: () => void = undefined;
     public icon?: Resource = undefined;
-    public state?: ItemState = 1 as ItemState;
+    public state?: ItemState = ItemState.fromValue(1);
     public iconColor?: ResourceColor = $r('sys.color.icon_primary');
     public activatedIconColor?: ResourceColor = $r('sys.color.icon_emphasize');
     public textColor?: ResourceColor = $r('sys.color.font_primary');

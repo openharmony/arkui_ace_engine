@@ -158,7 +158,7 @@ export class ToolBarV2Item {
   @Trace
   public icon?: ToolBarV2ItemIconType = undefined;
   @Trace
-  public state?: ToolBarV2ItemState = 1 as ToolBarV2ItemState;
+  public state?: ToolBarV2ItemState = ToolBarV2ItemState.fromValue(1);
   @Trace
   public accessibilityText?: ResourceStr = '';
   @Trace

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -342,7 +342,7 @@ export class Application {
 
     handleMessage(ptr: KPointer, type: int32, param : string) : boolean {
         let result : boolean = false
-        switch (type as MessageType) {
+        switch (MessageType.fromValue(type)) {
             case MessageType.DELETE_DETACHED_ROOT: {
                 result = true
                 scheduleCallback(() => {
@@ -535,7 +535,7 @@ export class Application {
         const node = PeerNode.findPeerByNativeId(target)
         if (node != undefined) {
             try {
-                switch (type as EventType) {
+                switch (EventType.fromValue(type)) {
                     case EventType.Click: {
                         EventEmulator.emitClickEvent(node.peer.ptr, makeClickEvent(10, 20))
                         break

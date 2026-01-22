@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -59,7 +59,7 @@ export class RenderNodeTransfer {
     private mapNodeDynamic = new Map<int, ESValue>();
 
     private transProperty2Static(inVal: ESValue, rn: RenderNode): void {
-        rn.lengthMetricsUnit = TransferUtil.getPropNumber(inVal, "lengthMetricsUnitValue") as int as LengthMetricsUnit;
+        rn.lengthMetricsUnit = LengthMetricsUnit.fromValue((TransferUtil.getPropNumber(inVal, "lengthMetricsUnitValue")).toInt());
         let styleVal = TransferUtil.getPropBorderStyle(inVal, "borderStyleValue");
         if (styleVal) {
             rn.borderStyle = styleVal as NodeEdges<BorderStyle>;
