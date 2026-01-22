@@ -90,7 +90,7 @@ export class UIUtils {
     }
 }
 
-interface MonitorOptions {
+export interface MonitorOptions {
     isSynchronous?: boolean;
     owner?: ExtendableComponent;
     path?: string | string[];

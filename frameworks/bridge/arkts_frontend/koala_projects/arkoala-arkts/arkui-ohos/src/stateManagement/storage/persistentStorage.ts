@@ -58,7 +58,7 @@ export type ToJSONType<T> = (value: T) => jsonx.JsonElement;
  */
 export type FromJSONType<T> = (element: jsonx.JsonElement) => T;
 
-interface PersistPropsOptions<T> {
+export interface PersistPropsOptions<T> {
     key: string;
     defaultValue: T;
     toJson?: ToJSONType<T>;
@@ -150,7 +150,7 @@ function areaModeToInt(areaMode?: AreaMode): Int {
  * @syscap SystemCapability.ArkUI.ArkUI.Full
  * @since 20
  */
-class PersistentStorage {
+export class PersistentStorage {
     private static instance_: PersistentStorage | undefined = undefined;
     private readonly storage_: IAniStorage = new AniStorage();
     private map_: TypedMap = new TypedMap();
