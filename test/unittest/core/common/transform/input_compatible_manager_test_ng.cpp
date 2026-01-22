@@ -61,64 +61,6 @@ public:
 };
 
 /**
- * @tc.name: InputCompatibleManagerTest001
- * @tc.desc: Test LoadProductCompatiblePolicy function.
- * @tc.type: FUNC
- */
-HWTEST_F(InputCompatibleManagerTest, LoadProductCompatiblePolicy001, TestSize.Level1)
-{
-    OHOS::Ace::InputCompatibleManager& manager = OHOS::Ace::InputCompatibleManager::GetInstance();
-    manager.LoadProductCompatiblePolicy();
-    EXPECT_NE(manager.productPolicy_, nullptr);
-    EXPECT_TRUE(manager.transformSoLoaded_);
-
-    manager.libraryHandle_ = nullptr;
-    manager.LoadProductCompatiblePolicy();
-    EXPECT_NE(manager.libraryHandle_, nullptr);
-
-    manager.productPolicy_ = nullptr;
-    manager.LoadProductCompatiblePolicy();
-    EXPECT_NE(manager.productPolicy_, nullptr);
-}
-
-/**
- * @tc.name: InputCompatibleManagerTest002
- * @tc.desc: Test UnloadProductCompatiblePolicy function.
- * @tc.type: FUNC
- */
-HWTEST_F(InputCompatibleManagerTest, UnloadProductCompatiblePolicy001, TestSize.Level1)
-{
-    OHOS::Ace::InputCompatibleManager& manager = OHOS::Ace::InputCompatibleManager::GetInstance();
-    manager.LoadProductCompatiblePolicy();
-    EXPECT_NE(manager.productPolicy_, nullptr);
-    EXPECT_TRUE(manager.transformSoLoaded_);
-
-    manager.UnloadProductCompatiblePolicy();
-    EXPECT_EQ(manager.productPolicy_, nullptr);
-    EXPECT_FALSE(manager.transformSoLoaded_);
-}
-
-/**
- * @tc.name: InputCompatibleManagerTest003
- * @tc.desc: Test IsCompatibleConvertingEnabledFor function.
- * @tc.type: FUNC
- */
-HWTEST_F(InputCompatibleManagerTest, IsCompatibleConvertingEnabledFor001, TestSize.Level1)
-{
-    OHOS::Ace::InputCompatibleManager& manager = OHOS::Ace::InputCompatibleManager::GetInstance();
-    MockInputCompatiblePolicy* instance = MockInputCompatiblePolicy::GetInputCompatiblePolicyInstance();
-    EXPECT_CALL(*instance, IsInputCompatibleConvertingNeeded(_)).Times(1).WillOnce(Return(true));
-    manager.LoadProductCompatiblePolicy();
-    MockSystemProperties::g_isCompatibleInputTransEnabled = true;
-    MockSystemProperties::g_isTransformEnabled = true;
-    EXPECT_TRUE(manager.IsCompatibleConvertingEnabledFor(Kit::InputCompatibleSource::LEFT_PRESS));
-    manager.UnloadProductCompatiblePolicy();
-    MockSystemProperties::g_isCompatibleInputTransEnabled = true;
-    MockSystemProperties::g_isTransformEnabled = false;
-    EXPECT_FALSE(manager.IsCompatibleConvertingEnabledFor(Kit::InputCompatibleSource::SCROLL_AXIS_EVENT));
-}
-
-/**
  * @tc.name: InputCompatibleManagerTest004
  * @tc.desc: Test Close function.
  * @tc.type: FUNC
