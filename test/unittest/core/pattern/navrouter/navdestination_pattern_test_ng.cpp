@@ -379,7 +379,7 @@ HWTEST_F(NavDestinationPatternTestNg, SetSystemBarStyle004, TestSize.Level1)
     });
 
     navDestinationPattern->SetSystemBarStyle(nullptr);
-    EXPECT_EQ(systemBarStyle, mockSystemBarStyle);
+    EXPECT_EQ(systemBarStyle, nullptr);
 }
 
 /**
