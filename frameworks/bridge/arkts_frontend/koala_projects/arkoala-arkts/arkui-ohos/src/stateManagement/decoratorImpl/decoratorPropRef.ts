@@ -67,17 +67,18 @@ export class PropRefDecoratedVariable<T> extends DecoratedV1VariableBase<T> impl
             return;
         }
         this.checkValueIsNotFunction(newValue);
+        let value: T;
         if (isDynamicObject(newValue)) {
-            const value = getObservedObject(newValue);
+            value = getObservedObject(newValue);
             this.localValue.setNoCheck(value);
         } else {
-            const value = uiUtils.makeV1Observed(newValue);
+            value = uiUtils.makeV1Observed(newValue);
             this.localValue.setNoCheck(value);
         }
         this.unregisterWatchFromObservedObjectChanges(oldValue);
         this.registerWatchForObservedObjectChanges(this.localValue.get(false));
         if (this.setProxyValue) {
-            this.setProxyValue!(newValue);
+            this.setProxyValue!(value);
         }
         this.execWatchFuncs();
     }
