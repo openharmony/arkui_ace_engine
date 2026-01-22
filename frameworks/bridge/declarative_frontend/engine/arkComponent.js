@@ -36904,15 +36904,10 @@ if (globalThis.CalendarPickerDialog === undefined) {
 if (globalThis.Gauge === undefined) {
   globalThis.Gauge = {
     create: function(params) {
-      console.log('first create gauge nativeModule');
       getUINativeModule().loadNativeModule('Gauge');
       let module = globalThis.requireNapi('arkui.components.arkgauge');
       module.exportView();
-      if (params !== undefined) {
-        getUINativeModule().gauge.create(params.value ?? 0, params.min ?? 0, params.max ?? 100);
-      } else {
-        getUINativeModule().gauge.create(0, 0, 100);
-      }
+      getUINativeModule().gauge.create(params);
     }
   }
 }

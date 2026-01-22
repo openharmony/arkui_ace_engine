@@ -1556,10 +1556,10 @@ bool ArkTSUtils::ParseJsLengthMetrics(const EcmaVM* vm, const Local<JSValueRef>&
     return true;
 }
 
-bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result)
+bool ArkTSUtils::ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result, bool isJsView)
 {
     RefPtr<ResourceObject> resourceObject;
-    return ParseJsMedia(vm, jsValue, result, resourceObject);
+    return ParseJsMedia(vm, jsValue, result, resourceObject, isJsView);
 }
 
 bool ArkTSUtils::ParseJsMedia(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
@@ -1626,6 +1626,9 @@ bool ArkTSUtils::ParseJsMediaFromResource(const EcmaVM* vm, const Local<JSValueR
             auto param = panda::ArrayRef::GetValueAt(vm, params, 0);
             if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::MEDIA)) {
                 result = resourceWrapper->GetMediaPathByName(param->ToString(vm)->ToString(vm));
+                return true;
+            } else if (resourceObject->GetType() == static_cast<int32_t>(ResourceType::STRING) && isJsView) {
+                result = resourceWrapper->GetString(resId->Uint32Value(vm));
                 return true;
             }
             return false;

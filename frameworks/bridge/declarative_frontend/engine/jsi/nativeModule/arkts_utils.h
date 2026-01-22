@@ -211,7 +211,8 @@ public:
         bool isSupportPercent = true);
     static bool ParseJsDimensionVpNG(const EcmaVM *vm, const Local<JSValueRef> &jsValue, CalcDimension &result,
         RefPtr<ResourceObject>& resourceObject, bool isSupportPercent = true);
-    static bool ParseJsMedia(const EcmaVM *vm, const Local<JSValueRef> &jsValue, std::string& result);
+    static bool ParseJsMedia(
+        const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result, bool isJsView = false);
     static bool ParseJsMedia(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
         RefPtr<ResourceObject>& resourceObject, bool isJsView = false);
     static bool ParseJsMediaFromResource(const EcmaVM* vm, const Local<JSValueRef>& jsValue, std::string& result,
