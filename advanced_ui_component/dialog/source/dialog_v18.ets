@@ -242,6 +242,7 @@ export struct TipsDialog {
           .layoutWeight(1)
           .focusable(false)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .fallbackLineSpacing(true)
       }
     }
     .accessibilityGroup(true)
@@ -308,6 +309,7 @@ export struct TipsDialog {
               .maxLines(CONTENT_MAX_LINES)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
               .width('100%')
+              .fallbackLineSpacing(true)
           }
           .padding({ bottom: $r('sys.float.padding_level8') })
         }
@@ -329,6 +331,7 @@ export struct TipsDialog {
                   resolveKeyEvent(event, this.contentScroller);
                 }
               })
+              .fallbackLineSpacing(true)
           }
         }
       }
@@ -504,6 +507,7 @@ export struct SelectDialog {
               .fontWeight(FontWeight.Regular)
               .fontColor(this.fontColorWithTheme)
               .textOverflow({ overflow: TextOverflow.Ellipsis })
+              .fallbackLineSpacing(true)
           }.paddingContentStyle().width('100%')
         }
         List() {
@@ -518,6 +522,7 @@ export struct SelectDialog {
                       .fontColor(this.fontColorWithTheme)
                       .layoutWeight(1)
                       .direction(i18n.isRTL(i18n.System.getSystemLanguage()) ? Direction.Rtl : Direction.Ltr)
+                      .fallbackLineSpacing(true)
                     Radio({ value: 'item.title', group: 'radioGroup' })
                       .size({ width: CHECKBOX_CONTAINER_LENGTH, height: CHECKBOX_CONTAINER_LENGTH })
                       .checked(this.selectedIndex === index)
@@ -758,6 +763,7 @@ export struct ConfirmDialog {
               }
             })
             .width('100%')
+            .fallbackLineSpacing(true)
         }
         .margin({ end: LengthMetrics.vp(SCROLL_BAR_OFFSET) })
         .width(`calc(100% - ${SCROLL_BAR_OFFSET}vp)`)
@@ -790,6 +796,7 @@ export struct ConfirmDialog {
         .focusable(false)
         .layoutWeight(1)
         .textOverflow({ overflow: TextOverflow.Ellipsis })
+        .fallbackLineSpacing(true)
     }
     .accessibilityGroup(true)
     .accessibilityText(getCheckTipsAccessibilityText(this.getUIContext(), this.checkTips, this.isChecked))
@@ -934,6 +941,7 @@ export struct AlertDialog {
               resolveKeyEvent(event, this.contentScroller);
             }
           })
+          .fallbackLineSpacing(true)
       }
       .fadingEdge(IS_FADEOUT_ENABLE(), { fadingEdgeLength: LengthMetrics.vp(FADEOUT_GRADIENT_WIDTH) })
       .nestedScroll({ scrollForward: NestedScrollMode.PARALLEL, scrollBackward: NestedScrollMode.PARALLEL })
@@ -1321,6 +1329,7 @@ struct CustomDialogContentComponent {
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
+          .fallbackLineSpacing(true)
       }
       .width('100%')
 
@@ -1340,6 +1349,7 @@ struct CustomDialogContentComponent {
           .heightAdaptivePolicy(TextHeightAdaptivePolicy.MAX_LINES_FIRST)
           .textOverflow({ overflow: TextOverflow.Ellipsis })
           .width('100%')
+          .fallbackLineSpacing(true)
       }
       .width('100%')
     }
@@ -1946,6 +1956,7 @@ export struct LoadingDialog {
             strokeWidth: LengthMetrics.px(0)
           })
           .textOverflow({ overflow: TextOverflow.Ellipsis })
+          .fallbackLineSpacing(true)
         LoadingProgress()
           .color(this.loadingProgressIconColorWithTheme)
           .width(LOADING_PROGRESS_WIDTH)
