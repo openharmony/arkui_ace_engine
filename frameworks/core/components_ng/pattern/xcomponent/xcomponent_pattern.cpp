@@ -18,9 +18,11 @@
 #include <cmath>
 #include <cstdlib>
 
+#include "interfaces/inner_api/ace/ui_content.h"
 #include "interfaces/native/event/ui_input_event_impl.h"
 #include "interfaces/native/ui_input_event.h"
 
+#include "base/display_manager/display_manager.h"
 #include "base/geometry/ng/point_t.h"
 #include "base/geometry/ng/size_t.h"
 #include "base/log/dump_log.h"
@@ -48,6 +50,7 @@
 #ifdef ENABLE_ROSEN_BACKEND
 #include "core/components_ng/render/adapter/rosen_render_context.h"
 #include "feature/anco_manager/rs_ext_node_operation.h"
+#include "screen_manager/screen_types.h"
 #include "transaction/rs_transaction.h"
 #include "transaction/rs_transaction_handler.h"
 #include "ui/rs_ui_context.h"
@@ -74,6 +77,18 @@ namespace OHOS::Ace::NG {
 namespace {
 
 const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
+#ifdef ENABLE_ROSEN_BACKEND
+constexpr char X_COMPONENT_COMPENSATION_ANGLE[] = "xcomponentCompensationAngle";
+const int32_t ROTATION_0 = 0;
+const int32_t ROTATION_90 = 90;
+const int32_t ROTATION_180 = 180;
+const int32_t ROTATION_270 = 270;
+constexpr char UNKNOWN[] = "0";
+constexpr char FULL[] = "1";
+constexpr char MAIN[] = "2";
+constexpr char SUB[] = "3";
+constexpr char COORDINATION[] = "4";
+#endif
 
 #if defined(RENDER_EXTRACT_SUPPORTED) && defined(IOS_PLATFORM)
 const int TEXTURETYPE_XCOMPONENT = 1;
@@ -317,6 +332,78 @@ void XComponentPattern::OnDetachFromMainTree()
     host->UnregisterNodeChangeListener();
 }
 
+#ifdef ENABLE_ROSEN_BACKEND
+std::string FoldDisplayModeToString(FoldDisplayMode foldDisplayMode)
+{
+    switch (foldDisplayMode) {
+        case FoldDisplayMode::UNKNOWN: return UNKNOWN;
+        case FoldDisplayMode::FULL: return FULL;
+        case FoldDisplayMode::MAIN: return MAIN;
+        case FoldDisplayMode::SUB: return SUB;
+        case FoldDisplayMode::COORDINATION: return COORDINATION;
+        default: return "0";
+    }
+}
+ 
+Rosen::ScreenRotation RotationIntToScreenRotation(int32_t rotation)
+{
+    switch (rotation) {
+        case ROTATION_0: return Rosen::ScreenRotation::ROTATION_0;
+        case ROTATION_90: return Rosen::ScreenRotation::ROTATION_90;
+        case ROTATION_180: return Rosen::ScreenRotation::ROTATION_180;
+        case ROTATION_270: return Rosen::ScreenRotation::ROTATION_270;
+        default: return Rosen::ScreenRotation::INVALID_SCREEN_ROTATION;
+    }
+}
+ 
+std::unique_ptr<JsonValue> GetXComponentCompensationAngle(const std::string& angleConfigJson)
+{
+    if (angleConfigJson == "") {
+        LOGE("UIContent set compensation angle empty");
+        return nullptr;
+    }
+    auto jsonConfig = JsonUtil::ParseJsonString(angleConfigJson);
+    if (jsonConfig == nullptr) {
+        LOGE("UIContent set compensasion angle %{public}s is invalid", angleConfigJson.c_str());
+        return nullptr;
+    }
+    auto angleConfig = jsonConfig->GetObject(X_COMPONENT_COMPENSATION_ANGLE);
+    if (angleConfig == nullptr) {
+        LOGE("UIContent can not get angle info from %{public}s", angleConfigJson.c_str());
+        return nullptr;
+    }
+    auto result = angleConfig->ToString();
+    LOGI("get angle info: %{public}s", result.c_str());
+    return JsonUtil::ParseJsonString(result);
+}
+ 
+void SetCompensationAngleToRS(const RefPtr<RenderContext>& renderContext, FoldDisplayMode foldDisplayMode,
+    const std::string& xcomponentId)
+{
+    auto context = AceType::DynamicCast<NG::RosenRenderContext>(renderContext);
+    CHECK_NULL_VOID(context);
+    std::shared_ptr<Rosen::RSNode> rsNode = context->GetRSNode();
+    CHECK_NULL_VOID(rsNode);
+    std::shared_ptr<Rosen::RSSurfaceNode> rsSurfaceNode = std::static_pointer_cast<Rosen::RSSurfaceNode>(rsNode);
+    CHECK_NULL_VOID(rsSurfaceNode);
+    auto& angleConfigJsonStr = UIContent::GetXComponentCompensationAngle();
+    auto angleConfigJson = GetXComponentCompensationAngle(angleConfigJsonStr);
+    CHECK_NULL_VOID(angleConfigJson);
+    auto displyMode = FoldDisplayModeToString(foldDisplayMode);
+    int32_t rotationInt = angleConfigJson->GetInt(displyMode, -1);
+    auto rotation = RotationIntToScreenRotation(rotationInt);
+    if (rotation == Rosen::ScreenRotation::INVALID_SCREEN_ROTATION) {
+        TAG_LOGW(AceLogTag::ACE_XCOMPONENT,
+            "XComponent[%{public}s]'s can not get rotation FoldDisplayMode %{public}s angleConfig %{public}s",
+            xcomponentId.c_str(), displyMode.c_str(), angleConfigJson->ToString().c_str());
+        return;
+    }
+    TAG_LOGW(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s set rotation %{public}d",
+        xcomponentId.c_str(), rotationInt);
+    rsSurfaceNode->SetAppRotationCorrection(rotation);
+}
+#endif
+
 void XComponentPattern::InitializeRenderContext(bool isThreadSafeNode)
 {
     ACE_UINODE_TRACE(GetHost());
@@ -337,6 +424,9 @@ void XComponentPattern::InitializeRenderContext(bool isThreadSafeNode)
     renderContextForSurface_->InitContext(false, param);
 
     renderContextForSurface_->UpdateBackgroundColor(Color::BLACK);
+#ifdef ENABLE_ROSEN_BACKEND
+    SetCompensationAngleToRS(renderContextForSurface_, DisplayManager::GetInstance().GetFoldDisplayMode(), GetId());
+#endif
 }
 
 #ifdef RENDER_EXTRACT_SUPPORTED
@@ -659,6 +749,17 @@ void XComponentPattern::OnAttachContext(PipelineContext* context)
     if (!isTypedNode_) {
         InitializeAccessibility();
     }
+#ifdef ENABLE_ROSEN_BACKEND
+    foldDisplayCallbackId_ = context->RegisterFoldDisplayModeChangedCallback(
+        [weak = WeakClaim(this)](FoldDisplayMode foldDisplayMode) {
+            auto pattern = weak.Upgrade();
+            CHECK_NULL_VOID(pattern);
+            auto displyMode = FoldDisplayModeToString(foldDisplayMode);
+            TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s]'s FoldDisplayMode change to %{public}s",
+                pattern->GetId().c_str(), displyMode.c_str());
+            SetCompensationAngleToRS(pattern->renderContextForSurface_, foldDisplayMode, pattern->GetId());
+        });
+#endif
 }
 
 void XComponentPattern::OnDetachContext(PipelineContext* context)
@@ -668,6 +769,7 @@ void XComponentPattern::OnDetachContext(PipelineContext* context)
     CHECK_NULL_VOID(host);
     UninitializeAccessibility(host.GetRawPtr());
     context->RemoveWindowStateChangedCallback(host->GetId());
+    context->UnRegisterFoldDisplayModeChangedCallback(foldDisplayCallbackId_);
 }
 
 void XComponentPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
