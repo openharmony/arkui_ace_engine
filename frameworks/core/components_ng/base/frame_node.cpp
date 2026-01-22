@@ -5540,9 +5540,10 @@ void FrameNode::Measure(const std::optional<LayoutConstraintF>& parentConstraint
     if (PreMeasure(parentConstraint)) {
         return;
     }
-
-    auto parent = GetAncestorNodeOfFrame(true);
-    isAncestorScrollable_ = (parent ? parent->IsAncestorScrollable() : false) || IsVerticalScrollable();
+    if (FeatureParam::IsPageOverflowEnabled() || FeatureParam::IsRnOverflowEnable()) {
+        auto parent = GetAncestorNodeOfFrame(true);
+        isAncestorScrollable_ = (parent ? parent->IsAncestorScrollable() : false) || IsVerticalScrollable();
+    }
     layoutProperty_->UpdateContentConstraint();
     geometryNode_->UpdateMargin(layoutProperty_->CreateMargin());
     geometryNode_->UpdatePaddingWithBorder(layoutProperty_->CreatePaddingAndBorder());
@@ -5670,6 +5671,7 @@ void FrameNode::Layout()
                 [this](int32_t, int32_t, int32_t, int32_t) { GetLayoutAlgorithm()->Layout(this); });
             const auto& rect = geometryNode_->GetFrameRect();
             extensionHandler_->Layout(rect.Width(), rect.Height(), rect.GetX(), rect.GetY());
+            GetLayoutAlgorithm()->HandleStackContentOverflow(this);
         } else {
             GetLayoutAlgorithm()->Layout(this);
         }

@@ -44,6 +44,11 @@ bool FeatureParam::IsPageOverflowEnabled()
     return FeatureParamManager::GetInstance().IsPageOverflowEnabled();
 }
 
+bool FeatureParam::IsRnOverflowEnable()
+{
+    return FeatureParamManager::GetInstance().IsRnOverflowEnable();
+}
+
 bool FeatureParam::IsDialogCorrectionEnabled()
 {
     return FeatureParamManager::GetInstance().IsDialogCorrectionEnabled();

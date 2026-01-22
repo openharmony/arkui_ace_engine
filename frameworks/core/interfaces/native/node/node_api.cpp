@@ -478,6 +478,8 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnSizeChange,
     NodeModifier::SetOnCoastingAxisEvent,
     NodeModifier::SetOnChildTouchTest,
+    NodeModifier::SetOnCustomOverflowScroll,
+    NodeModifier::SetOnStackOverflowScroll,
 };
 
 const ComponentAsyncEventHandler scrollNodeAsyncEventHandlers[] = {
@@ -724,6 +726,8 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnSizeChange,
     NodeModifier::ResetOnCoastingAxisEvent,
     NodeModifier::ResetOnChildTouchTest,
+    NodeModifier::ResetOnCustomOverflowScroll,
+    NodeModifier::ResetOnStackOverflowScroll
 };
 
 const ResetComponentAsyncEventHandler SCROLL_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

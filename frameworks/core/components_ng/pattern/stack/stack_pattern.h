@@ -22,7 +22,9 @@
 
 namespace OHOS::Ace::NG {
 
-class ACE_EXPORT StackPattern : public Pattern {
+class VerticalOverflowHandler;
+
+class ACE_FORCE_EXPORT StackPattern : public Pattern {
     DECLARE_ACE_TYPE(StackPattern, Pattern);
 
 public:
@@ -68,6 +70,20 @@ public:
     {
         return true;
     }
+
+    RefPtr<EventHub> CreateEventHub() override;
+
+    RefPtr<VerticalOverflowHandler> GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host) override;
+
+    void DumpInfo() override;
+
+    bool GetIsVertical() const override
+    {
+        return true;
+    }
+
+private:
+    RefPtr<VerticalOverflowHandler> vOverflowHandler_;
 };
 } // namespace OHOS::Ace::NG
 

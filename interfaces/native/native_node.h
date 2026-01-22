@@ -8772,6 +8772,32 @@ typedef enum {
     NODE_ON_CHILD_TOUCH_TEST = 32,
 
     /**
+ 	 * @brief Defines the event is triggered when the <b>ARKUI_NODE_CUSTOM</b> content is scrolled.
+ 	 * 
+ 	 * The event is triggered when the component's content is scrolled. \n
+ 	 * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
+ 	 * {@link ArkUI_NodeComponentEvent}. \n
+ 	 * {@link ArkUI_NodeComponentEvent} contains one parameters:\n
+ 	 * ArkUI_NodeComponentEvent.data[0].i32: id of scrolling child component. \n
+ 	 * ArkUI_NodeComponentEvent.data[1].f32: offset of the frame scrolling, measured in px. \n
+ 	 * @since 24
+ 	*/
+    NODE_ON_CUSTOM_OVERFLOW_SCROLL = 34,
+
+	/**
+ 	 * @brief Defines the event is triggered when the <b>ARKUI_NODE_STACK</b> content is scrolled.
+ 	 * 
+ 	 * The event is triggered when the component's content is scrolled. \n
+ 	 * When the event callback occurs, the {@link ArkUI_NodeEvent} object can be obtained from the
+ 	 * {@link ArkUI_NodeComponentEvent}. \n
+ 	 * {@link ArkUI_NodeComponentEvent} contains one parameters:\n
+ 	 * ArkUI_NodeComponentEvent.data[0].i32: id of scrolling child component. \n
+ 	 * ArkUI_NodeComponentEvent.data[1].f32: offset of the frame scrolling, measured in px. \n
+ 	 * @since 24
+ 	*/
+    NODE_ON_STACK_OVERFLOW_SCROLL = 35,
+
+    /**
      * @brief Triggers onDetectResultUpdate callback
      * when the text is set to TextDataDetectorConfig and recognized successfully.
      *

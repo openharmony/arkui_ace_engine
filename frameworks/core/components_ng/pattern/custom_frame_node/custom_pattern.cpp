@@ -198,4 +198,24 @@ void CustomPattern::HandleRegisterAccessibilityEvent(bool isRegister)
             pipeline->GetWindowId(), accessibilityManager->GetTreeId());
     }
 }
+
+RefPtr<EventHub> CustomPattern::CreateEventHub()
+{
+    return MakeRefPtr<OverflowScrollEventHub>();
+}
+
+RefPtr<VerticalOverflowHandler> CustomPattern::GetOrCreateVerticalOverflowHandler(const WeakPtr<FrameNode>& host)
+{
+    if (!vOverflowHandler_) {
+        vOverflowHandler_ = MakeRefPtr<VerticalOverflowHandler>(host);
+    }
+    return vOverflowHandler_;
+}
+
+void CustomPattern::DumpInfo()
+{
+    if (vOverflowHandler_) {
+        DumpLog::GetInstance().AddDesc(std::string("OverflowInfo: ").append(vOverflowHandler_->ToString().c_str()));
+    }
+}
 } // namespace OHOS::Ace::NG

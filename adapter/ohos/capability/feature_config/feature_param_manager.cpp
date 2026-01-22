@@ -123,10 +123,20 @@ bool FeatureParamManager::IsDialogCorrectionEnabled() const
     return dialogCorrectionEnabled_;
 }
 
+bool FeatureParamManager::IsRnOverflowEnable() const
+{
+    return rnOverflowEnabled_;
+}
+
 void FeatureParamManager::SetUiCorrectionEnableParam(bool pageOverflowEnabled, bool dialogCorrectionEnabled)
 {
     pageOverflowEnabled_ = pageOverflowEnabled;
     dialogCorrectionEnabled_ = dialogCorrectionEnabled;
+}
+
+void FeatureParamManager::SetUiCorrectionRnEnableParam(bool rnOverflowEnabled)
+{
+    rnOverflowEnabled_ = rnOverflowEnabled;
 }
 
 uint32_t FeatureParamManager::GetSyncloadResponseDeadline() const

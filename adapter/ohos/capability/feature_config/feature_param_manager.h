@@ -45,7 +45,9 @@ public:
 
     bool IsPageOverflowEnabled() const;
     bool IsDialogCorrectionEnabled() const;
+    bool IsRnOverflowEnable() const;
     void SetUiCorrectionEnableParam(bool pageOverflowEnabled, bool dialogCorrectionEnabled);
+    void SetUiCorrectionRnEnableParam(bool rnOverflowEnabled);
 private:
     void MetaDataParseEntry(std::vector<OHOS::AppExecFwk::Metadata>& metaData);
     void FeatureParamParseEntry(const std::string& bundleName);
@@ -66,6 +68,7 @@ private:
     bool uiNodeGcEnabled_ = false;
     bool pageOverflowEnabled_ = false;
     bool dialogCorrectionEnabled_ = false;
+    bool rnOverflowEnabled_ = false;
 
     friend class ConfigParserBase;
     friend class SyncLoadParser;

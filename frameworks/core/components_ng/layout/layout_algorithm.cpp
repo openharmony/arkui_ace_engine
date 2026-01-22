@@ -26,7 +26,9 @@ namespace OHOS::Ace::NG {
 namespace {
 const std::unordered_set<std::string> OVERFLOW_ENABLED_COMPONENTS = {
     OHOS::Ace::V2::COLUMN_ETS_TAG,
-    OHOS::Ace::V2::FLEX_ETS_TAG
+    OHOS::Ace::V2::FLEX_ETS_TAG,
+    OHOS::Ace::V2::STACK_ETS_TAG,
+    "Custom"
 };
 }
 
@@ -216,6 +218,55 @@ void LayoutAlgorithm::HandleContentOverflow(LayoutWrapper* layoutWrapper)
     
     vOverflowHandler->SetOverflowDisabledFlag(
         vOverflowHandler->IsOverflowDisabled() || hostNode->IsAncestorScrollable());
+    vOverflowHandler->HandleContentOverflow();
+}
+
+void LayoutAlgorithm::HandleStackContentOverflow(LayoutWrapper* layoutWrapper)
+{
+    if (!FeatureParam::IsRnOverflowEnable()) {
+        return;
+    }
+    CHECK_NULL_VOID(layoutWrapper);
+    auto hostNode = layoutWrapper->GetHostNode();
+    CHECK_NULL_VOID(hostNode);
+    if (OVERFLOW_ENABLED_COMPONENTS.find(hostNode->GetTag()) == OVERFLOW_ENABLED_COMPONENTS.end()) {
+        return;
+    }
+    std::optional<RectF> totalChildFrameRect;
+    bool overflowDisabled = false;
+    int32_t childCount = hostNode->GetTotalChildCount();
+    for (int32_t i = 0; i < childCount; i++) {
+        auto child = AceType::DynamicCast<FrameNode>(hostNode->GetChildByIndex(i));
+        CHECK_NULL_CONTINUE(child);
+        if (child->IsOutOfLayout() || !child->IsActive()) {
+            continue;
+        }
+        auto childLayoutProperty = child->GetLayoutProperty();
+        CHECK_NULL_CONTINUE(childLayoutProperty);
+        if (childLayoutProperty->GetVisibilityValue(VisibleType::VISIBLE) == VisibleType::GONE) {
+            continue;
+        }
+        bool hasSafeAreaProp = childLayoutProperty->IsIgnoreOptsValid() || child->SelfExpansive();
+        overflowDisabled |= hasSafeAreaProp;
+        if (overflowDisabled) {
+            break;
+        }
+        auto geometryNode = child->GetGeometryNode();
+        CHECK_NULL_CONTINUE(geometryNode);
+        if (totalChildFrameRect.has_value()) {
+            totalChildFrameRect->CombineRectTInner(geometryNode->GetMarginFrameRect());
+        } else {
+            totalChildFrameRect = geometryNode->GetMarginFrameRect();
+        }
+    }
+    auto pattern = hostNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    const auto& vOverflowHandler =
+        pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(hostNode)));
+    CHECK_NULL_VOID(vOverflowHandler);
+    vOverflowHandler->SetOverflowDisabledFlag(overflowDisabled || hostNode->IsAncestorScrollable());
+    vOverflowHandler->SetTotalChildFrameRect(totalChildFrameRect.value_or(RectF()));
+    vOverflowHandler->CreateContentRect();
     vOverflowHandler->HandleContentOverflow();
 }
 } // namespace OHOS::Ace::NG
