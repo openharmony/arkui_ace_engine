@@ -1767,6 +1767,7 @@ void AssignCast(std::optional<TextSpanType>& dst, const Ark_RichEditorSpanType& 
         case ARK_RICH_EDITOR_SPAN_TYPE_IMAGE: dst = TextSpanType::IMAGE; break;
         case ARK_RICH_EDITOR_SPAN_TYPE_MIXED: dst = TextSpanType::MIXED; break;
         case ARK_RICH_EDITOR_SPAN_TYPE_BUILDER: dst = TextSpanType::BUILDER; break;
+        case ARK_RICH_EDITOR_SPAN_TYPE_DEFAULT: dst = TextSpanType::NONE; break;
         default: LOGE("Unexpected enum value in Ark_RichEditorSpanType: %{public}d", src);
     }
 }
@@ -1788,6 +1789,7 @@ void AssignCast(std::optional<TextResponseType>& dst, const Ark_RichEditorRespon
         case ARK_RICH_EDITOR_RESPONSE_TYPE_RIGHT_CLICK: dst = TextResponseType::RIGHT_CLICK; break;
         case ARK_RICH_EDITOR_RESPONSE_TYPE_LONG_PRESS: dst = TextResponseType::LONG_PRESS; break;
         case ARK_RICH_EDITOR_RESPONSE_TYPE_SELECT: dst = TextResponseType::SELECTED_BY_MOUSE; break;
+        case ARK_RICH_EDITOR_RESPONSE_TYPE_DEFAULT: dst = TextResponseType::NONE; break;
         default: LOGE("Unexpected enum value in Ark_RichEditorResponseType: %{public}d", src);
     }
 }
