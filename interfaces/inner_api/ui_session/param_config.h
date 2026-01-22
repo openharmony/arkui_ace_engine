@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_INTERFACE_PARAM_CONFIG_H
 
 #include <cstdint>
+#include <string>
 
 namespace OHOS::Ace {
 struct ParamConfig {
@@ -44,6 +45,7 @@ enum class ChangeType {
 struct ContentChangeConfig {
     int32_t minReportTime = 100; // minimum report interval: 100 ms
     float textContentRatio = 0.15f; // ratio of a single text change bounding box area to window area: 0.15
+    std::string ignoreEventType; // event type which need to be ignored when reporting, in json format
 };
 
 enum ComponentEventType : uint32_t {

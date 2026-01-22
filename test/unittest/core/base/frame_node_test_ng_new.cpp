@@ -1921,7 +1921,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCapiCustomProperty, TestSize.Level1)
      */
     auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     std::string value;
-    
+
     /**
      * @tc.steps: step2. GetCapiCustomProperty
      * @tc.expected: expect result value false.
@@ -1973,7 +1973,7 @@ HWTEST_F(FrameNodeTestNg, FrameDumpOnSizeChangeInfo, TestSize.Level1)
      */
     auto frameNode = FrameNode::CreateFrameNode("main", 1, AceType::MakeRefPtr<Pattern>(), true);
     EXPECT_NE(frameNode, nullptr);
- 
+
     /**
      * @tc.steps: step2. onSizeChangeDumpInfos push_back.
      * @tc.expected: expect is not nullptr.
@@ -1982,7 +1982,7 @@ HWTEST_F(FrameNodeTestNg, FrameDumpOnSizeChangeInfo, TestSize.Level1)
     frameNode->onSizeChangeDumpInfos.push_back({1625491200, RectF{}, RectF{}});
     frameNode->onSizeChangeDumpInfos.push_back({1625494800, RectF{}, RectF{}});
     EXPECT_EQ(frameNode->onSizeChangeDumpInfos.size(), 2);
-    
+
     /**
      * @tc.steps: step3. create json.
      * @tc.expected: expect is not nullptr.

@@ -213,12 +213,12 @@ private:
     }
 
     std::unordered_map<OHOS::Ace::ChangeType, const char *> typeDict_ = {
-        {OHOS::Ace::ChangeType::PAGE, "PAGE"},
-        {OHOS::Ace::ChangeType::SCROLL, "SCROLL"},
-        {OHOS::Ace::ChangeType::SWIPER, "SWIPER"},
-        {OHOS::Ace::ChangeType::TABS, "TABS"},
-        {OHOS::Ace::ChangeType::TEXT, "TEXT"},
-        {OHOS::Ace::ChangeType::DIALOG, "DIALOG"}
+        { OHOS::Ace::ChangeType::PAGE, "PAGE" },
+        { OHOS::Ace::ChangeType::SCROLL, "SCROLL" },
+        { OHOS::Ace::ChangeType::SWIPER, "SWIPER" },
+        { OHOS::Ace::ChangeType::TABS, "TABS" },
+        { OHOS::Ace::ChangeType::TEXT, "TEXT" },
+        { OHOS::Ace::ChangeType::DIALOG, "DIALOG" }
     };
 
     int64_t timestamp_ = 0;
@@ -244,12 +244,14 @@ void ContentChangeManager::StartContentChangeReport(const ContentChangeConfig& c
     if (config.minReportTime < 0) {
         currentContentChangeConfig_->minReportTime = DEFAULT_TEXT_MIN_REPORT_TIME;
     }
+    currentContentChangeConfig_->ignoreEventType = config.ignoreEventType;
     ACE_SCOPED_TRACE("[ContentChangeManager] StartContentChangeReport: ratio:%f, minReportTime:%d",
         currentContentChangeConfig_->textContentRatio, currentContentChangeConfig_->minReportTime);
     LOGI("[ContentChangeManager] StartContentChangeReport: ratio:%{public}f, minReportTime:%{public}d",
         currentContentChangeConfig_->textContentRatio, currentContentChangeConfig_->minReportTime);
     textContentRatio_ = currentContentChangeConfig_->textContentRatio;
     textContentInterval_ = static_cast<uint64_t>(currentContentChangeConfig_->minReportTime) * NS_PER_MS;
+    ignoreEventMask_ = GetIgnoreEventMask(currentContentChangeConfig_->ignoreEventType);
     for (auto& weak : onContentChangeNodes_) {
         auto node = weak.Upgrade();
         if (!node) {
@@ -530,5 +532,41 @@ void ContentChangeManager::OnScrollRemoved(int32_t nodeId)
 bool ContentChangeManager::IsScrolling() const
 {
     return !scrollingNodes_.empty();
+}
+
+uint32_t ContentChangeManager::ConvertEventStringToEnum(std::string type) const
+{
+    std::map<std::string, uint32_t> eventMap = {
+        { "scrollTo", SCROLL_TO },
+    };
+    auto it = eventMap.find(type);
+    return it == eventMap.end() ? NONE : it->second;
+}
+
+uint32_t ContentChangeManager::GetIgnoreEventMask(std::string ignoreEventType) const
+{
+    uint32_t mask = 0;
+    auto json = JsonUtil::ParseJsonString(ignoreEventType);
+    if (!json || !json->IsValid() || !json->IsObject()) {
+        return mask;
+    }
+    auto scrollValue = json->GetValue("SCROLL");
+    if (!scrollValue || !scrollValue->IsArray()) {
+        return mask;
+    }
+    int32_t arraySize = scrollValue->GetArraySize();
+    for (int32_t i = 0; i < arraySize; i++) {
+        auto item = scrollValue->GetArrayItem(i);
+        if (item && item->IsString()) {
+            uint32_t eventType = ConvertEventStringToEnum(item->GetString());
+            mask |= eventType;
+        }
+    }
+    return mask;
+}
+
+bool ContentChangeManager::IsIgnoringEventType(uint32_t type) const
+{
+    return (ignoreEventMask_ & type) != 0;
 }
 } // namespace OHOS::Ace::NG
