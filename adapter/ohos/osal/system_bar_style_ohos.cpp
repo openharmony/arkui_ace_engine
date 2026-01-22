@@ -93,11 +93,20 @@ RefPtr<SystemBarStyleOhos> SystemBarStyleOhos::GetCurrentSystemBarStyle(const sp
 void SystemBarStyleOhos::SetSystemBarStyle(const sptr<Rosen::Window>& window, const RefPtr<SystemBarStyle>& style)
 {
     CHECK_NULL_VOID(window);
+    std::optional<uint32_t> color;
+    if (!style) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "reset statusBarColor.");
+        window->SetStatusBarColorForNavigation(color);
+        return;
+    }
     auto tempStyle = AceType::DynamicCast<SystemBarStyleOhos>(style);
     CHECK_NULL_VOID(tempStyle);
-    window->SetSystemBarProperties(tempStyle->properties_, tempStyle->propertyFlags_);
-    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "set system bar style, color: %{public}s, flag: %{public}s",
-        GetStatusBarContentColor(tempStyle->properties_).c_str(),
-        GetStatusBarContentColorFlag(tempStyle->propertyFlags_).c_str());
+    auto it = tempStyle->properties_.find(OHOS::Rosen::WindowType::WINDOW_TYPE_STATUS_BAR);
+    if (it != tempStyle->properties_.end()) {
+        color = it->second.contentColor_;
+    }
+    window->SetStatusBarColorForNavigation(color);
+    TAG_LOGI(AceLogTag::ACE_NAVIGATION, "set system bar style, color: %{public}s",
+        GetStatusBarContentColor(tempStyle->properties_).c_str());
 }
 } // namespace OHOS::Ace

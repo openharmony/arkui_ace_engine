@@ -858,7 +858,8 @@ void NavigationPattern::UpdateSystemBarStyleWithTopNavPath(const RefPtr<WindowMa
 void NavigationPattern::TryRestoreSystemBarStyle(const RefPtr<WindowManager>& windowManager)
 {
     if (backupStyle_.has_value()) {
-        windowManager->SetSystemBarStyle(backupStyle_.value());
+        RefPtr<SystemBarStyle> style;
+        windowManager->SetSystemBarStyle(style);
     }
 }
 
