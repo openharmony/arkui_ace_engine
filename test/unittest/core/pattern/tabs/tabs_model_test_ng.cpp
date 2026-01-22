@@ -17,6 +17,7 @@
 #include "tabs_test_ng.h"
 #include "ui/base/ace_type.h"
 
+#include "core/components_ng/pattern/swiper_indicator/dot_indicator/overlength_dot_indicator_paint_method.h"
 #include "core/components_ng/pattern/tabs/tabs_model_ng.h"
 #include "core/components_ng/pattern/tabs/tabs_pattern.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
@@ -151,6 +152,23 @@ HWTEST_F(TabsModelTestNg, SetTabBarIndex005, TestSize.Level1)
     tabsPattern->frameNode_ = tabsNode;
     model.SetTabBarIndex(frameNode, 4);
     EXPECT_EQ(tabsLayoutProperty->propIndexSetByUser_.value(), 4);
+}
+
+/**
+ * @tc.name: SetNestedScrollTest001
+ * @tc.desc: Verify TabsModelNG::SetNestedScroll
+ * @tc.type: FUNC
+ */
+HWTEST_F(TabsModelTestNg, SetNestedScroll001, TestSize.Level1)
+{
+    TabsModelNG model = CreateTabs();
+    CreateTabContents();
+    CreateTabsDone(model);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+
+    model.SetNestedScroll(frameNode, NUMBER_ONE);
+    EXPECT_FALSE(swiperPattern_->isNestedInterrupt_);
 }
 
 /**

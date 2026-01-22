@@ -7045,6 +7045,14 @@ typedef struct Opt_TabsCacheMode {
     Ark_Tag tag;
     Ark_TabsCacheMode value;
 } Opt_TabsCacheMode;
+typedef enum Ark_TabsNestedScrollMode {
+    ARK_TABS_NESTED_SCROLL_MODE_SELF_ONLY = 0,
+    ARK_TABS_NESTED_SCROLL_MODE_SELF_FIRST = 1,
+} Ark_TabsNestedScrollMode;
+typedef struct Opt_TabsNestedScrollMode {
+    Ark_Tag tag;
+    Ark_TabsNestedScrollMode value;
+} Opt_TabsNestedScrollMode;
 typedef enum Ark_text_Affinity {
     ARK_TEXT_AFFINITY_UPSTREAM = 0,
     ARK_TEXT_AFFINITY_DOWNSTREAM = 1,
@@ -26638,6 +26646,8 @@ typedef struct GENERATED_ArkUITabsModifier {
                              const Opt_Callback_I32_Void* value);
     void (*setOnUnselected)(Ark_NativePointer node,
                             const Opt_Callback_I32_Void* value);
+    void (*setNestedScroll)(Ark_NativePointer node,
+                            const Opt_TabsNestedScrollMode* value);
     void (*setOnAnimationStart)(Ark_NativePointer node,
                                 const Opt_OnTabsAnimationStartCallback* value);
     void (*setOnAnimationEnd)(Ark_NativePointer node,
