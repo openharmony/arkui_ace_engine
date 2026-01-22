@@ -130,7 +130,7 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsync(const TouchEvent& touchEvent)
     isFristFrameAfterTpFlushFrameDisplayPeriod_ = false;
     bool result = NeedTpFlushVsyncInner(touchEvent);
     if (isTpFlushFrameDisplayPeriod_ && !result) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush end");
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush end");
         ACE_SCOPED_TRACE("TpFlush end");
         isFristFrameAfterTpFlushFrameDisplayPeriod_ = true;
     }
@@ -157,21 +157,21 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsyncInner(const TouchEvent& touchEvent)
     }
     // If slide is not accepted, trigger TP flush for the first frame
     if (!slideAccepted_) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush first frame");
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush first frame");
         ACE_SCOPED_TRACE("TpFlush first frame");
         return true;
     }
     // If last frame was TP triggered and current Vsync count differs,
     // trigger TP flush to avoid frame drop
     if (lastTpFlush_ && vsyncFlushed_) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush continue");
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush continue");
         ACE_SCOPED_TRACE("TpFlush continue");
         return true;
     }
     // If current direction is reversed and last frame wasn't TP triggered,
     // trigger TP flush to avoid frame drop
     if (!lastTpFlush_ && (RVSDirectionStateCheck(touchEvent.xReverse) || RVSDirectionStateCheck(touchEvent.yReverse))) {
-        TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush reversed");
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush reversed");
         ACE_SCOPED_TRACE("TpFlush reversed");
         return true;
     }
@@ -767,7 +767,7 @@ TouchEvent ResSchedTouchOptimizer::SetPointReverseSignal(const TouchEvent& point
 
 void ResSchedTouchOptimizer::EndTpFlushVsyncPeriod()
 {
-    TAG_LOGD(AceLogTag::ACE_UIEVENT, "TpFlush end by up event");
+    TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush end by up event");
     ACE_SCOPED_TRACE("TpFlush end by up event");
     lastTpFlush_ = false;
     vsyncPeriod_ = 0;
