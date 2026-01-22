@@ -4010,7 +4010,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         reason == OHOS::Rosen::WindowSizeChangeReason::UPDATE_DPI_SYNC ||
         reason == OHOS::Rosen::WindowSizeChangeReason::SCENE_WITH_ANIMATION);
     if (container->IsUseStageModel() && isReasonRotationOrDPI) {
-        if (container->IsUIExtensionWindow()) {
+        if (pipelineContext && container->IsUIExtensionWindow()) {
             pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
         }
         viewportConfigMgr_->UpdateConfigSync(aceViewportConfig, std::move(task));
@@ -4025,7 +4025,7 @@ void UIContentImpl::UpdateViewportConfigWithAnimation(const ViewportConfig& conf
         viewportConfigMgr_->UpdatePromiseConfig(aceViewportConfig, std::move(task), container, taskId,
             "ArkUIPromiseViewportConfig");
     } else {
-        if (container->IsUIExtensionWindow()) {
+        if (pipelineContext && container->IsUIExtensionWindow()) {
             pipelineContext->AddUIExtensionCallbackEvent(NG::UIExtCallbackEventId::ON_AREA_CHANGED);
         }
         viewportConfigMgr_->UpdateConfig(aceViewportConfig, std::move(task), container, "ArkUIUpdateViewportConfig");
