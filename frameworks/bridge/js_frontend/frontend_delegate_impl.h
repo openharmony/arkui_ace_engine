@@ -76,6 +76,7 @@ using OnRemoteTerminatedCallBack = std::function<void(void)>;
 using OnSaveDataCallBack = std::function<void(std::string& data)>;
 using OnRestoreDataCallBack = std::function<bool(const std::string& data)>;
 using CallNativeHandlerCallback = std::function<void(const std::string& event, const std::string& params)>;
+using OnDigitalCrownCallback = std::function<bool(const std::string& callbackId, const std::string& args)>;
 
 struct PageInfo {
     int32_t pageId = -1;
@@ -114,6 +115,7 @@ struct FrontendDelegateImplBuilder {
     OnInactiveCallBack onInactiveCallBack;
     OnMemoryLevelCallBack onMemoryLevelCallBack;
     CallNativeHandlerCallback callNativeHandler;
+    OnDigitalCrownCallback onCrownEventCallback;
     void* ability;
 };
 
@@ -330,6 +332,10 @@ public:
 
     void CancelAnimationFrame(const std::string& callbackId) override;
 
+    void SetMonitorForCrownEvents(const std::string& callbackId) override;
+
+    void ClearMonitorForCrownEvents() override;
+
     SingleTaskExecutor GetAnimationJsTask() override;
 
     SingleTaskExecutor GetUiTask() override;
@@ -469,6 +475,7 @@ private:
 
     RefPtr<TaskExecutor> taskExecutor_;
     CallNativeHandlerCallback callNativeHandler_;
+    OnDigitalCrownCallback onCrownEventCallback_;
 
     PipelineContextHolder pipelineContextHolder_;
 
