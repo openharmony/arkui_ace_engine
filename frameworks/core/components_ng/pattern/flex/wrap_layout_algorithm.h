@@ -59,7 +59,7 @@ struct ContentInfo {
     }
 };
 
-class ACE_EXPORT WrapLayoutAlgorithm : public LayoutAlgorithm {
+class ACE_FORCE_EXPORT WrapLayoutAlgorithm : public LayoutAlgorithm {
     DECLARE_ACE_TYPE(WrapLayoutAlgorithm, LayoutAlgorithm);
 
 public:

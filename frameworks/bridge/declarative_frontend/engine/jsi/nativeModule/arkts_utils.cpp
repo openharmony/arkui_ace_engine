@@ -2331,6 +2331,35 @@ bool ArkTSUtils::IsJsView(const Local<JSValueRef>& firstArg, const EcmaVM* vm)
     return firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
 }
 
+void ArkTSUtils::SetSymbolOptionApply(
+    EcmaVM* vm, std::function<void(WeakPtr<NG::FrameNode>)>& symbolApply, const Local<JSValueRef> modifierObj)
+{
+    auto globalObj = panda::JSNApi::GetGlobalObject(vm);
+    auto globalFunc = globalObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "applySymbolGlyphModifierToNode"));
+    if (globalFunc->IsFunction(vm)) {
+        panda::Local<panda::FunctionRef> func = globalFunc->ToObject(vm);
+        if (!modifierObj->IsObject(vm)) {
+            symbolApply = nullptr;
+        } else {
+            auto onApply = [vm, func = panda::CopyableGlobal(vm, func),
+                               modifierParam = panda::CopyableGlobal(vm, modifierObj)](
+                               WeakPtr<NG::FrameNode> frameNode) {
+                panda::LocalScope pandaScope(vm);
+                panda::TryCatch trycatch(vm);
+                auto node = frameNode.Upgrade();
+                CHECK_NULL_VOID(node);
+                Local<JSValueRef> params[NUM_2];
+                params[NUM_0] = modifierParam.ToLocal();
+                params[NUM_1] = panda::NativePointerRef::New(vm, AceType::RawPtr(node));
+                PipelineContext::SetCallBackNode(node);
+                auto result = func->Call(vm, func.ToLocal(), params, 2);
+                ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
+            };
+            symbolApply = onApply;
+        }
+    }
+}
+
 uint32_t ArkTSUtils::parseShadowColor(const EcmaVM* vm, const Local<JSValueRef>& jsValue)
 {
     RefPtr<ResourceObject> resObj;

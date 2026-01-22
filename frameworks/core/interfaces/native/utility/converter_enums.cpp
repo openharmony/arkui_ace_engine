@@ -1184,7 +1184,7 @@ void AssignCast(std::optional<std::string>& dst, const Ark_FunctionKey& src)
 }
 
 template<>
-void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<SubMenuExpandingMode>& dst, const Ark_SubMenuExpandingMode& src)
 {
     switch (src) {
         case ARK_SUB_MENU_EXPANDING_MODE_SIDE_EXPAND: dst = SubMenuExpandingMode::SIDE; break;
@@ -2634,7 +2634,7 @@ void AssignCast(std::optional<HapticFeedbackMode>& dst, const Ark_HapticFeedback
 }
 
 template<>
-void AssignCast(std::optional<DividerMode>& dst, const Ark_DividerMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DividerMode>& dst, const Ark_DividerMode& src)
 {
     switch (src) {
         case ARK_DIVIDER_MODE_FLOATING_ABOVE_MENU: dst = DividerMode::FLOATING_ABOVE_MENU; break;

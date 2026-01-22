@@ -23,6 +23,8 @@
 #include "base/utils/multi_thread.h"
 #include "core/components_ng/pattern/image/image_layout_property.h"
 #include "core/components_ng/pattern/image/image_pattern.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_view_inner_modifier.h"
+#include "core/components_ng/pattern/menu/bridge/inner_modifier/menu_inner_modifier.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
 #include "core/components_ng/pattern/navigation/navigation_pattern.h"
@@ -30,6 +32,7 @@
 #include "core/components_ng/pattern/navigation/navigation_toolbar_util.h"
 #include "core/components_ng/pattern/navigation/title_bar_pattern.h"
 #include "core/components_ng/pattern/navigation/tool_bar_node.h"
+#include "core/interfaces/native/node/menu_modifier.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -63,8 +66,8 @@ void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<B
         auto menuNode = AceType::DynamicCast<FrameNode>(menu->GetChildAtIndex(0));
         CHECK_NULL_VOID(menuNode);
 
-        auto menuPattern = menuNode->GetPattern<MenuPattern>();
-        CHECK_NULL_VOID(menuPattern);
+        const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+        CHECK_NULL_VOID(menuModifier);
 
         auto navBarNode = weakNavBarNode.Upgrade();
         CHECK_NULL_VOID(navBarNode);
@@ -73,7 +76,7 @@ void BuildMoreItemNodeAction(const RefPtr<FrameNode>& buttonNode, const RefPtr<B
         CHECK_NULL_VOID(navBarPattern);
 
         // navigation menu show like select.
-        menuPattern->SetIsSelectMenu(true);
+        menuModifier->setIsSelectMenu(menuNode, true);
         OffsetF offset(0.0f, 0.0f);
         if (AceApplicationInfo::GetInstance().GreatOrEqualTargetAPIVersion(PlatformVersion::VERSION_TWELVE)) {
             auto symbol = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
@@ -215,8 +218,9 @@ RefPtr<FrameNode> CreateMenuItems(const int32_t menuNodeId, const std::vector<NG
         if (menuOptions.mbOptions.bgOptions.effectOption.has_value()) {
             menuParam.backgroundEffectOption = menuOptions.mbOptions.bgOptions.effectOption.value();
         }
-        auto barMenuNode = MenuView::Create(
-            std::move(params), targetId, targetTag, MenuType::NAVIGATION_MENU, menuParam);
+        const auto* menuViewModifier = NG::NodeModifier::GetMenuViewInnerModifier();
+        auto barMenuNode = menuViewModifier ? menuViewModifier->createWithOptionParams(
+            std::move(params), targetId, targetTag, MenuType::NAVIGATION_MENU, menuParam) : nullptr;
         BuildMoreItemNodeAction(menuItemNode, barItemNode, barMenuNode, navBarNode, menuParam);
         auto iconNode = AceType::DynamicCast<FrameNode>(barItemNode->GetChildren().front());
         NavigationTitleUtil::InitTitleBarButtonEvent(menuItemNode, iconNode, true);
@@ -361,9 +365,9 @@ OffsetF NavBarPattern::GetShowMenuOffset(const RefPtr<BarItemNode>& barItemNode,
     auto imgOffset = imageFrameNode->GetOffsetRelativeToWindow();
     auto imageSize = imageFrameNode->GetGeometryNode()->GetFrameSize();
 
-    auto menuLayoutProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();
-    CHECK_NULL_RETURN(menuLayoutProperty, OffsetF(0.0f, 0.0f));
-    menuLayoutProperty->UpdateTargetSize(imageSize);
+    const auto* menuModifier = NG::NodeModifier::GetMenuInnerModifier();
+    CHECK_NULL_RETURN(menuModifier, OffsetF(0.0f, 0.0f));
+    menuModifier->updateTargetSize(menuNode, imageSize);
 
     bool isRightToLeft = AceApplicationInfo::GetInstance().IsRightToLeft();
     if (isRightToLeft) {

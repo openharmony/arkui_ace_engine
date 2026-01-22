@@ -19,9 +19,9 @@
 #include "core/components_ng/pattern/security_component/security_component_layout_property.h"
 #include "core/components_ng/pattern/text/text_pattern.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 
 namespace OHOS::Ace::NG {
-
 namespace {
 bool IsSelectOverlayExtensionMenu(const RefPtr<FrameNode>& itemNode)
 {
@@ -551,7 +551,7 @@ void MenuItemLayoutAlgorithm::UpdateIconMargin(LayoutWrapper* layoutWrapper)
     Alignment align = isRtl ? Alignment::CENTER_RIGHT : Alignment::CENTER_LEFT;
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     for (auto iconChild : child->GetAllChildrenWithBuild()) {
-        if ((iconChild->GetHostTag() == V2::IMAGE_ETS_TAG) || (iconChild->GetHostTag() == V2::SYMBOL_ETS_TAG)) {
+        if ((iconChild->GetHostTag() == IMAGE_ETS_TAG) || (iconChild->GetHostTag() == SYMBOL_ETS_TAG)) {
             auto iconProps = iconChild->GetLayoutProperty();
             iconProps->UpdateAlignment(align);
             iconProps->UpdateMargin(margin);
@@ -671,7 +671,7 @@ void MenuItemLayoutAlgorithm::MeasureOption(LayoutWrapper* layoutWrapper, const 
 
     auto textAlign = static_cast<TextAlign>(selectTheme->GetOptionContentNormalAlign());
     auto rowChild = child->GetOrCreateChildByIndex(0);
-    if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG) && textAlign != TextAlign::CENTER) {
+    if (rowChild && (rowChild->GetHostTag() == PASTE_BUTTON_ETS_TAG) && textAlign != TextAlign::CENTER) {
         auto securityLayoutProperty = DynamicCast<SecurityComponentLayoutProperty>(rowChild->GetLayoutProperty());
         CHECK_NULL_VOID(securityLayoutProperty);
         securityLayoutProperty->UpdateBackgroundLeftPadding(Dimension(horInterval_));
@@ -695,7 +695,7 @@ void MenuItemLayoutAlgorithm::MeasureOption(LayoutWrapper* layoutWrapper, const 
     if (optionPattern->IsSelectOption() && optionPattern->GetHasOptionWidth()) {
         idealSize.SetWidth(optionPattern->GetSelectOptionWidth());
     }
-    if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
+    if (rowChild && (rowChild->GetHostTag() == PASTE_BUTTON_ETS_TAG)) {
         float dividerWidth = static_cast<float>(selectTheme->GetDefaultDividerWidth().ConvertToPx());
         SizeF idealSizePaste(idealSize.Width() - dividerWidth, idealSize.Height() - dividerWidth);
         childConstraint.selfIdealSize.SetSize(idealSizePaste);
@@ -770,7 +770,7 @@ void MenuItemLayoutAlgorithm::LayoutOption(LayoutWrapper* layoutWrapper, const R
     auto child = layoutWrapper->GetOrCreateChildByIndex(0);
     child->GetLayoutProperty()->UpdatePropertyChangeFlag(PROPERTY_UPDATE_LAYOUT);
     auto rowChild = child->GetOrCreateChildByIndex(0);
-    if (rowChild && (rowChild->GetHostTag() == V2::PASTE_BUTTON_ETS_TAG)) {
+    if (rowChild && (rowChild->GetHostTag() == PASTE_BUTTON_ETS_TAG)) {
         float horInterval = 0.0f;
         if (props->GetNonAutoLayoutDirection() == TextDirection::RTL) {
             SizeF childSize = child->GetGeometryNode()->GetMarginFrameSize();
@@ -813,7 +813,7 @@ void MenuItemLayoutAlgorithm::ExtendTextAndRowNode(const RefPtr<LayoutWrapper>& 
         if (!geometryNode) {
             continue;
         }
-        if (textChild->GetHostTag() != V2::TEXT_ETS_TAG) {
+        if (textChild->GetHostTag() != TEXT_ETS_TAG) {
             imageNodeWidth += geometryNode->GetMarginFrameSize().Width();
             continue;
         }

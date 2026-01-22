@@ -75,7 +75,7 @@ namespace OHOS::Ace::NG {
 struct AttractionEffect;
 using TransitionFinishCallback = std::function<void(bool)>;
 
-struct OptionParam {
+struct ACE_FORCE_EXPORT OptionParam {
     std::string value;
     std::string icon;
     std::string labelInfo;

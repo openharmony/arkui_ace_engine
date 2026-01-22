@@ -74,7 +74,7 @@ void FfiOHOSAceFrameworkProgressResetColor(int32_t type)
     Color colorVal;
     NG::Gradient gradient;
     bool gradientColorByUser = true;
-    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+    RefPtr<ProgressTheme> theme = OHOS::Ace::Framework::GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
     Color endColor;
     Color beginColor;
@@ -108,7 +108,7 @@ void FfiOHOSAceFrameworkProgressResetBackgroundColor(int32_t type)
         return;
     }
     Color colorVal;
-    RefPtr<ProgressTheme> theme = GetTheme<ProgressTheme>();
+    RefPtr<ProgressTheme> theme = OHOS::Ace::Framework::GetTheme<ProgressTheme>();
     CHECK_NULL_VOID(theme);
     colorVal = (PROGRESS_TYPES[type] == ProgressType::CAPSULE) ? theme->GetCapsuleBgColor()
                : (PROGRESS_TYPES[type] == ProgressType::RING)  ? theme->GetRingProgressBgColor()

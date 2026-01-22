@@ -46,14 +46,14 @@ public:
     static void PlayGatherAnimation(const RefPtr<FrameNode>& frameNode, const RefPtr<OverlayManager>& overlayManager);
     static void ShowBadgeAnimation(const RefPtr<FrameNode>& textNode);
     static void ShowMenuHideAnimation(const PreparedInfoForDrag& data);
-    static void CalcBadgeTextPosition(const RefPtr<MenuPattern>& menuPattern,
-        const RefPtr<OverlayManager>& manager, const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode);
-    static OffsetF CalcBadgeTextOffset(const RefPtr<MenuPattern>& menuPattern, const RefPtr<FrameNode>& imageNode,
+    static void CalcBadgeTextPosition(const RefPtr<FrameNode>& node, const RefPtr<OverlayManager>& manager,
+        const RefPtr<FrameNode>& imageNode, const RefPtr<FrameNode>& textNode);
+    static OffsetF CalcBadgeTextOffset(const RefPtr<FrameNode>& node, const RefPtr<FrameNode>& imageNode,
         const RefPtr<PipelineBase>& context, int32_t badgeLength);
     static void UpdateBadgeLayoutAndRenderContext(
         const RefPtr<FrameNode>& textNode, int32_t badgeLength, int32_t childSize);
-    static void UpdateGatherNodeToTop();
-    static void ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& menuWrapperNode);
+    ACE_FORCE_EXPORT static void UpdateGatherNodeToTop();
+    ACE_FORCE_EXPORT static void ShowGatherAnimationWithMenu(const RefPtr<FrameNode>& menuWrapperNode);
     static void DoGrayedAnimation(const RefPtr<FrameNode>& frameNode, float opacity, RefPtr<InterpolatingSpring> cure);
     static void SetPreOpacity(const RefPtr<FrameNode>& preNode);
     static void DoDragStartGrayedAnimation(const RefPtr<FrameNode>& frameNode);

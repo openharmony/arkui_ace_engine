@@ -89,6 +89,9 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "TimePicker", "timepicker" },
         { "TimePickerDialog", "timepicker" },
         { "WaterFlow", "waterflow" },
+        { "Menu", "menu" },
+        { "MenuItem", "menu" },
+        { "MenuItemGroup", "menu" },
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {

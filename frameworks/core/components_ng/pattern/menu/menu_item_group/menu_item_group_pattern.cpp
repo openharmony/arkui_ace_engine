@@ -17,6 +17,7 @@
 
 #include "core/components_ng/pattern/menu/menu_divider/menu_divider_pattern.h"
 #include "core/components_ng/pattern/menu/menu_item/menu_item_pattern.h"
+#include "core/components_ng/pattern/menu/menu_tag_constants.h"
 
 namespace OHOS::Ace::NG {
 void MenuItemGroupPattern::CreateBottomDivider()
@@ -26,7 +27,7 @@ void MenuItemGroupPattern::CreateBottomDivider()
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    bottomDivider_ = FrameNode::GetOrCreateFrameNode(V2::MENU_DIVIDER_TAG,
+    bottomDivider_ = FrameNode::GetOrCreateFrameNode(MENU_DIVIDER_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<MenuDividerPattern>(); });
     auto dividerPattern = bottomDivider_->GetPattern<MenuDividerPattern>();
     dividerPattern->BindMenuItem(host);
@@ -64,7 +65,7 @@ void MenuItemGroupPattern::OnMountToParentDone()
     bool needDivider = false;
     const auto& children = host->GetChildren();
     for (const auto& child : children) {
-        if (child && child->GetTag() == V2::MENU_ITEM_ETS_TAG) {
+        if (child && child->GetTag() == MENU_ITEM_ETS_TAG) {
             auto itemNode = AceType::DynamicCast<FrameNode>(child);
             CHECK_NULL_VOID(itemNode);
             auto itemPattern = itemNode->GetPattern<MenuItemPattern>();
@@ -162,7 +163,7 @@ RefPtr<FrameNode> MenuItemGroupPattern::GetMenu()
     CHECK_NULL_RETURN(host, nullptr);
     auto parent = host->GetParent();
     while (parent) {
-        if (parent->GetTag() == V2::MENU_ETS_TAG) {
+        if (parent->GetTag() == MENU_ETS_TAG) {
             return DynamicCast<FrameNode>(parent);
         }
         parent = parent->GetParent();
@@ -246,7 +247,7 @@ void MenuItemGroupPattern::OnIntItemPressed(int32_t index, bool press)
     if (index == itemStartIndex_ && headerContent_ == nullptr) {
         OnExtItemPressed(press, true); // beforeGroup=true just to hide header divider
         auto prevNode = parent->GetChildAtIndex(currentIndex - 1);
-        if (prevNode != nullptr && prevNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+        if (prevNode != nullptr && prevNode->GetTag() == MENU_ITEM_GROUP_ETS_TAG) {
             auto prevFrameNode = DynamicCast<FrameNode>(prevNode);
             CHECK_NULL_VOID(prevFrameNode);
             auto pattern = prevFrameNode->GetPattern<MenuItemGroupPattern>();
@@ -257,7 +258,7 @@ void MenuItemGroupPattern::OnIntItemPressed(int32_t index, bool press)
     if (size > 0 && index == static_cast<int32_t>(size - 1) && footerContent_ == nullptr) {
         OnExtItemPressed(press, false); // beforeGroup=false just to hide footer divider
         auto nextNode = parent->GetChildAtIndex(currentIndex + 1);
-        if (nextNode != nullptr && nextNode->GetTag() == V2::MENU_ITEM_GROUP_ETS_TAG) {
+        if (nextNode != nullptr && nextNode->GetTag() == MENU_ITEM_GROUP_ETS_TAG) {
             auto nextFrameNode = DynamicCast<FrameNode>(nextNode);
             CHECK_NULL_VOID(nextFrameNode);
             auto pattern = nextFrameNode->GetPattern<MenuItemGroupPattern>();

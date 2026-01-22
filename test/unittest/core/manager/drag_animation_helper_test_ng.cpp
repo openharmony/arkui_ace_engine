@@ -311,7 +311,9 @@ HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition001, TestSize.Level1)
     auto overlayManager = pipelineContext->GetOverlayManager();
     ASSERT_TRUE(overlayManager != nullptr);
     overlayManager->MountGatherNodeToRootNode(textNode, gatherNodeInfos);
-    DragAnimationHelper::CalcBadgeTextPosition(menuPattern, overlayManager, imageNode, textNode);
+    auto host = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), menuPattern);
+    ASSERT_TRUE(host != nullptr);
+    DragAnimationHelper::CalcBadgeTextPosition(host, overlayManager, imageNode, textNode);
 
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_TRUE(textLayoutProperty != nullptr);
@@ -352,7 +354,9 @@ HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition002, TestSize.Level1)
     auto overlayManager = pipelineContext->GetOverlayManager();
     ASSERT_NE(overlayManager, nullptr);
     overlayManager->MountGatherNodeToRootNode(textNode, gatherNodeInfos);
-    DragAnimationHelper::CalcBadgeTextPosition(menuPattern, overlayManager, imageNode, textNode);
+    auto host = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), menuPattern);
+    ASSERT_TRUE(host != nullptr);
+    DragAnimationHelper::CalcBadgeTextPosition(host, overlayManager, imageNode, textNode);
 
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
@@ -384,7 +388,9 @@ HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition003, TestSize.Level1)
     ASSERT_NE(overlayManager, nullptr);
 
     overlayManager->MountGatherNodeToRootNode(textNode, {});
-    DragAnimationHelper::CalcBadgeTextPosition(menuPattern, overlayManager, imageNode, textNode);
+    auto host = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), menuPattern);
+    ASSERT_TRUE(host != nullptr);
+    DragAnimationHelper::CalcBadgeTextPosition(host, overlayManager, imageNode, textNode);
     auto layoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(layoutProperty, nullptr);
     auto content = layoutProperty->GetContentValue();
@@ -437,7 +443,9 @@ HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextPosition004, TestSize.Level1)
      * @tc.steps: step4. Call the target function.
      * @tc.expected: The text content of textNode should be childrenCount + 1, i.e., "2".
      */
-    DragAnimationHelper::CalcBadgeTextPosition(menuPattern, overlayManager, imageNode, textNode);
+    auto host = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), menuPattern);
+    ASSERT_TRUE(host != nullptr);
+    DragAnimationHelper::CalcBadgeTextPosition(host, overlayManager, imageNode, textNode);
     auto textLayoutProperty = textNode->GetLayoutProperty<TextLayoutProperty>();
     ASSERT_NE(textLayoutProperty, nullptr);
     auto content = textLayoutProperty->GetContentValue();
@@ -909,7 +917,9 @@ HWTEST_F(DragAnimationHelperTestNg, CalcBadgeTextOffset001, TestSize.Level1)
     ASSERT_NE(pipelineContext, nullptr);
     const int32_t badgeLength = 2;
     AceApplicationInfo::GetInstance().isRightToLeft_ = true;
-    auto offset = DragAnimationHelper::CalcBadgeTextOffset(menuPattern, imageNode, pipelineContext, badgeLength);
+    auto host = FrameNode::CreateFrameNode(V2::COLUMN_ETS_TAG, GetElmtId(), menuPattern);
+    ASSERT_TRUE(host != nullptr);
+    auto offset = DragAnimationHelper::CalcBadgeTextOffset(host, imageNode, pipelineContext, badgeLength);
     AceApplicationInfo::GetInstance().isRightToLeft_ = false;
     float expectX = -BADGE_RELATIVE_OFFSET.ConvertToPx();
     float expectY = -BADGE_RELATIVE_OFFSET.ConvertToPx();

@@ -140,6 +140,9 @@
 #include "core/interfaces/native/node/water_flow_modifier.h"
 #include "core/interfaces/native/node/qrcode_modifier.h"
 #include "core/interfaces/native/node/node_timepicker_modifier.h"
+#include "core/interfaces/native/node/menu_modifier.h"
+#include "core/interfaces/native/node/menu_item_modifier.h"
+#include "core/interfaces/native/node/menu_item_group_modifier.h"
 #include "core/pipeline/base/element_register.h"
 #ifdef PLUGIN_COMPONENT_SUPPORTED
 #include "core/components_ng/pattern/plugin/plugin_model_static.h"
@@ -812,26 +815,23 @@ void* createMediaCachedImageNode(ArkUI_Int32 nodeId)
 
 void* createMenuNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = MenuModelStatic::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NodeModifier::GetMenuModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createMenuFrameNode(nodeId);
 }
 
 void* createMenuItemNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = MenuItemModelStatic::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NodeModifier::GetMenuItemModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createMenuItemFrameNode(nodeId);
 }
 
 void* createMenuItemGroupNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = MenuItemGroupViewStatic::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto modifier = NodeModifier::GetMenuItemGroupModifier();
+    CHECK_NULL_RETURN(modifier, nullptr);
+    return modifier->createMenuItemGroupFrameNode(nodeId);
 }
 
 void* createNavDestinationNode(ArkUI_Int32 nodeId)

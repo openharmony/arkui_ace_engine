@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 
-#ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_MENU_ITEM_BRIDGE_H
-#define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_MENU_ITEM_BRIDGE_H
+#ifndef FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_BRIDGE_MENU_ITEM_ARKTS_NATIVE_MENU_ITEM_BRIDGE_H
+#define FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_BRIDGE_MENU_ITEM_ARKTS_NATIVE_MENU_ITEM_BRIDGE_H
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_api_bridge.h"
 
@@ -36,7 +36,8 @@ public:
     static ArkUINativeModuleValue SetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetOnChange(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue Create(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static void RegisterMenuItemAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
 };
 } // namespace OHOS::Ace::NG
 
-#endif // FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_NATIVE_MENU_ITEM_BRIDGE_H
+#endif // FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_MENU_BRIDGE_MENU_ITEM_ARKTS_NATIVE_MENU_ITEM_BRIDGE_H

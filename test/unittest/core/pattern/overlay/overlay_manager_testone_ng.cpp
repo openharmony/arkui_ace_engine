@@ -57,6 +57,7 @@
 #include "core/components_ng/pattern/dialog/dialog_event_hub.h"
 #include "core/components_ng/pattern/dialog/dialog_pattern.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_pattern.h"
+#include "core/components_ng/pattern/menu/menu_manager.h"
 #include "core/components_ng/pattern/menu/menu_pattern.h"
 #include "core/components_ng/pattern/menu/menu_theme.h"
 #include "core/components_ng/pattern/menu/menu_view.h"
@@ -1598,8 +1599,10 @@ HWTEST_F(OverlayManagerTestOneNG, GetMenuNode001, TestSize.Level1)
     auto overlayNode = FrameNode::CreateFrameNode(V2::ROOT_ETS_TAG, 1, AceType::MakeRefPtr<RootPattern>());
     auto overlayManager = AceType::MakeRefPtr<OverlayManager>(overlayNode);
     overlayManager->HideMenu(overlayNode, 10, true);
-    overlayManager->menuMap_.insert({ 1, overlayNode });
-    overlayManager->menuMap_.insert({ 2, overlayNode });
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    menuManager->menuMap_.insert({ 1, overlayNode });
+    menuManager->menuMap_.insert({ 2, overlayNode });
     EXPECT_TRUE(overlayManager->GetMenuNode(2));
     EXPECT_FALSE(overlayManager->GetMenuNode(3));
 }
@@ -1754,9 +1757,11 @@ HWTEST_F(OverlayManagerTestOneNG, ShowMenu001, TestSize.Level1)
         V2::MENU_ETS_TAG, targetId, AceType::MakeRefPtr<MenuPattern>(targetId, TEXT_TAG, MenuType::MENU));
     menuNode->MountToParent(wrapperNode);
     overlayManager->ShowMenu(targetId, OffsetF(), menuNode);
-    EXPECT_TRUE(overlayManager->menuMap_.find(menuNode) != overlayManager->menuMap_.end());
+    auto menuManager = AceType::DynamicCast<MenuManager>(overlayManager->menuManager_);
+    ASSERT_NE(menuManager, nullptr);
+    EXPECT_TRUE(menuManager->menuMap_.find(menuNode) != menuManager->menuMap_.end());
 
-    overlayManager->menuMap_.clear();
+    menuManager->menuMap_.clear();
     targetId = 2;
     auto wrapperNode1 =
         FrameNode::CreateFrameNode(V2::MENU_WRAPPER_ETS_TAG, targetId, AceType::MakeRefPtr<MenuWrapperPattern>(-1));
@@ -1769,7 +1774,7 @@ HWTEST_F(OverlayManagerTestOneNG, ShowMenu001, TestSize.Level1)
     menuNode1->MountToParent(wrapperNode1);
     menuNode2->MountToParent(menuNode1);
     overlayManager->ShowMenu(targetId, OffsetF(), menuNode1);
-    EXPECT_FALSE(overlayManager->menuMap_.find(menuNode1) != overlayManager->menuMap_.end());
+    EXPECT_FALSE(menuManager->menuMap_.find(menuNode1) != menuManager->menuMap_.end());
 }
 
 /**
