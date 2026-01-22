@@ -196,11 +196,11 @@ HWTEST_F(WaterFlowTestNg, LargeOffset003, TestSize.Level1)
     EXPECT_EQ(info->endIndex_, 44);
 
     UpdateCurrentOffset(1500.0f); // no jump
-    EXPECT_EQ(info->startIndex_, 8);
+    EXPECT_EQ(info->startIndex_, 5);
     EXPECT_EQ(info->endIndex_, 17);
 
     UpdateCurrentOffset(-3000.0f);
-    EXPECT_EQ(info->startIndex_, 29);
+    EXPECT_EQ(info->startIndex_, 31);
     EXPECT_EQ(info->endIndex_, 44);
 
     UpdateCurrentOffset(5000.0f);

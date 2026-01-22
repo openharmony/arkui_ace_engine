@@ -588,27 +588,27 @@ HWTEST_F(WaterFlowSWTest, Misaligned002, TestSize.Level1)
     EXPECT_FALSE(info_->IsMisaligned());
     ScrollToEdge(ScrollEdgeType::SCROLL_BOTTOM, false);
     ScrollToIndex(15, true, ScrollAlign::START);
-    EXPECT_EQ(pattern_->GetFinalPosition() - pattern_->GetTotalOffset(), -575.0f);
+    EXPECT_EQ(pattern_->GetFinalPosition() - pattern_->GetTotalOffset(), -1291.10009765625f);
     UpdateCurrentOffset(550.0f);
 
     EXPECT_EQ(GetChildY(frameNode_, 15), -25.0f);
     EXPECT_EQ(GetChildX(frameNode_, 15), 0.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 16), -62.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 16), 320.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 17), -96.0f);
-    EXPECT_EQ(GetChildX(frameNode_, 17), 160.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 16), -25.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 16), 160.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 17), -25.0f);
+    EXPECT_EQ(GetChildX(frameNode_, 17), 320.0f);
     EXPECT_EQ(info_->startIndex_, 15);
-    EXPECT_TRUE(info_->IsMisaligned());
+    EXPECT_FALSE(info_->IsMisaligned());
 
     UpdateCurrentOffset(100.0f);
     EXPECT_EQ(info_->startIndex_, 13);
-    EXPECT_TRUE(info_->IsMisaligned());
+    EXPECT_FALSE(info_->IsMisaligned());
 
     pattern_->OnScrollEndCallback(); // check misalignment onScrollEnd
     FlushUITasks();
-    EXPECT_EQ(GetChildY(frameNode_, 15), 4.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 15), 75.0f);
     EXPECT_EQ(GetChildX(frameNode_, 15), 0.0f);
-    EXPECT_EQ(GetChildY(frameNode_, 16), 4.0f);
+    EXPECT_EQ(GetChildY(frameNode_, 16), 75.0f);
     EXPECT_EQ(GetChildX(frameNode_, 16), 160.0f);
     EXPECT_FALSE(info_->IsMisaligned());
 }

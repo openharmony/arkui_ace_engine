@@ -388,7 +388,8 @@ bool WaterFlowPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dir
         isInitialized_ = true;
     }
 
-    if (layoutInfo_->startIndex_ == 0 && CheckMisalignment(layoutInfo_)) {
+	// Check if we need to mark node dirty when at section boundary with misalignment
+    if (IsAtSectionBoundary() && CheckMisalignment(layoutInfo_)) {
         MarkDirtyNodeSelf();
     }
 
@@ -994,5 +995,22 @@ void WaterFlowPattern::ScrollToFocusItem(int32_t itemIdx)
     if (context) {
         context->FlushUITaskWithSingleDirtyNode(host);
     }
+}
+
+bool WaterFlowPattern::IsAtSectionBoundary() const
+{
+    if (layoutInfo_->segmentTails_.empty()) {
+        return layoutInfo_->startIndex_ == 0;
+    }
+
+    int32_t startIdx = layoutInfo_->startIndex_;
+    int32_t segmentIdx = layoutInfo_->GetSegment(startIdx);
+    if (segmentIdx == 0) {
+        return startIdx == 0;
+    }
+
+    // Calculate section start index and check if we're at boundary
+    int32_t sectionStart = layoutInfo_->segmentTails_[segmentIdx - 1] + 1;
+    return startIdx == sectionStart;
 }
 } // namespace OHOS::Ace::NG
