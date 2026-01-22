@@ -1301,7 +1301,8 @@ void FormManagerDelegate::OnCallActionEvent(const std::string& action, bool isMa
         auto context = context_.Upgrade();
         CHECK_NULL_VOID(context);
         auto instantId = context->GetInstanceId();
-        formUtils_->BackgroundEvent(runningCardId_, action, instantId, wantCache_.GetElement().GetBundleName(), isManuallyClick);
+        formUtils_->BackgroundEvent(runningCardId_, action, instantId,
+            wantCache_.GetElement().GetBundleName(), isManuallyClick);
     }
 }
 
