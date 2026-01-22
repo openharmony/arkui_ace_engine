@@ -24,7 +24,7 @@ import { Matrix2D_serializer, Matrix2D, Matrix2DInternal } from "./matrix2d"
 import { ColorMetrics_serializer, Size_serializer, LengthMetrics_serializer } from "./../Graphics"
 import { drawing_Canvas_serializer } from "./../framework/ohos.graphics.drawing"
 import { ColorMetrics, Size, LengthMetricsUnit, LengthMetrics } from "arkui.Graphics"
-import { extractors, AttributeModifier, hookCanvasAttributeModifier, AttributeUpdater, hookSetCanvasOptions, hookCanvasStartImageAnalyzer, hookCreateImageData, hookGetImageData, hookPutImageData, hookGetContext, registerAttach, unregisterAttach, registerDetach, unregisterDetach } from "#handwritten"
+import { extractors, AttributeModifier, hookCanvasAttributeModifier, AttributeUpdater, hookSetCanvasOptions, hookCanvasStartImageAnalyzer, hookCreateImageData, hookGetImageData, hookPutImageData, hookGetContext, registerAttach, unregisterAttach, registerDetach, unregisterDetach, hookGetCanvas } from "#handwritten"
 import { ModifierStateManager } from '../CommonModifier';
 import { default as drawing } from "@ohos.graphics.drawing"
 import { image_PixelMap_serializer } from "./../framework/ohos.multimedia.image"
@@ -2359,7 +2359,7 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
         return
     }
     private getCanvas(): FrameNode {
-        return this.getCanvas_serialize()
+        return hookGetCanvas(this)
     }
     private setCanvas(canvas: FrameNode): void {
         const canvas_casted = canvas as (FrameNode)
@@ -2446,11 +2446,6 @@ export class CanvasRenderingContext2D extends CanvasRenderer implements Material
     }
     private setWidth_serialize(width: double): void {
         ArkUIGeneratedNativeModule._CanvasRenderingContext2D_setWidth(this.peer!.ptr, width)
-    }
-    private getCanvas_serialize(): FrameNode {
-        const retval  = ArkUIGeneratedNativeModule._CanvasRenderingContext2D_getCanvas(this.peer!.ptr)
-        const obj : FrameNode = extractors.fromFrameNodePtr(retval)
-        return obj
     }
     private setCanvas_serialize(canvas: FrameNode): void {
         ArkUIGeneratedNativeModule._CanvasRenderingContext2D_setCanvas(this.peer!.ptr, extractors.toFrameNodePtr(canvas))

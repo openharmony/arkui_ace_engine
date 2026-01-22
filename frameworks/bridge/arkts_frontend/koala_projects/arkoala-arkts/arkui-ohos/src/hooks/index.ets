@@ -13,6 +13,8 @@ import { Configuration } from "@ohos.app.ability.Configuration";
 import { default as window } from "@ohos.window";
 import { default as uiObserver } from "@ohos.arkui.observer";
 import { UIContext } from "@ohos.arkui.UIContext";
+import { UIContextImpl } from 'arkui/base/UIContextImpl';
+import { UIContextUtil } from 'arkui/base/UIContextUtil';
 import { AbilityInfo, WindowSize } from "bundleManager.AbilityInfo";
 import { ArkBaseNode } from '../typedNode/ArkBaseNode';
 import {
@@ -514,6 +516,11 @@ export function hookGetConfigInRouteMap(info: NavDestinationContextInternal): Ro
 const DIFF: number = 1e-10
 const int_MAX: number = 2147483647
 const PIXEL_SIZE: int = 4
+export function hookGetCanvas(peerPtr: CanvasRenderingContext2D): FrameNode {
+    const context: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl
+    const nodeId: number = ArkUIAniModule._CanvasRenderingContext_GetCanvasId(peerPtr.peer!.ptr) as number
+    return context.getFrameNodeByNodeId(nodeId) as FrameNode
+}
 export function getCanvasDensity(peerPtr: CanvasRenderer): number {
     return ArkUIAniModule._CanvasRenderer_GetCanvasDensity(peerPtr.peer!.ptr)
 }

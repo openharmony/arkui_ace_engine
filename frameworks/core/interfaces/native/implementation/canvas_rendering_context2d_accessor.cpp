@@ -97,6 +97,8 @@ void OffAttachImpl(Ark_CanvasRenderingContext2D peer,
             arkCallback.Invoke();
         };
         peer->Off(std::move(func), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
+    } else {
+        peer->Off(nullptr, CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_ATTACH);
     }
 }
 void OnDetachImpl(Ark_CanvasRenderingContext2D peer,
@@ -119,6 +121,8 @@ void OffDetachImpl(Ark_CanvasRenderingContext2D peer,
             arkCallback.Invoke();
         };
         peer->Off(std::move(func), CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
+    } else {
+        peer->Off(nullptr, CanvasRenderingContext2DPeerImpl::CanvasCallbackType::ON_DETACH);
     }
 }
 Ark_CanvasRenderingContext2D GetContext2DFromDrawingContextImpl(
