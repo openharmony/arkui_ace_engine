@@ -386,6 +386,36 @@ HWTEST_F(RichEditorAITestOneNg, GetAIWriteInfo001, TestSize.Level2)
 }
 
 /**
+ * @tc.name: GetAIWriteInfo002
+ * @tc.desc: test GetAIWriteInfo
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorAITestOneNg, GetAIWriteInfo002, TestSize.Level2)
+{
+    /**
+     * @tc.steps: step1. get richEditor controller
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto richEditorController = richEditorPattern->GetRichEditorController();
+    ASSERT_NE(richEditorController, nullptr);
+
+    /**
+     * @tc.steps: step2. add span
+     */
+    TextSpanOptions options;
+    options.value = INIT_VALUE_3;
+    richEditorController->AddTextSpan(options);
+    richEditorPattern->textSelector_.Update(5, 5);
+    richEditorPattern->textForDisplay_ = u"testtesttest";
+    AIWriteInfo info;
+    richEditorPattern->GetAIWriteInfo(info);
+    EXPECT_EQ(info.selectStart, 5);
+    EXPECT_EQ(info.selectEnd, 5);
+}
+
+/**
  * @tc.name: CanStartAITask001
  * @tc.desc: test CanStartAITask
  * @tc.type: FUNC
