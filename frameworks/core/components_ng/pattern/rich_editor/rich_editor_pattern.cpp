@@ -13337,11 +13337,11 @@ void RichEditorPattern::GetAIWriteInfo(AIWriteInfo& info)
 {
     auto aiWriteAdapter = GetAIWriteAdapter();
     CHECK_NULL_VOID(aiWriteAdapter);
+    info.selectStart = textSelector_.GetTextStart();
+    info.selectEnd = textSelector_.GetTextEnd();
     CHECK_NULL_VOID(!textSelector_.SelectNothing());
     info.firstHandle = textSelector_.firstHandle.ToString();
     info.secondHandle = textSelector_.secondHandle.ToString();
-    info.selectStart = textSelector_.GetTextStart();
-    info.selectEnd = textSelector_.GetTextEnd();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
     info.componentType = host->GetTag();
