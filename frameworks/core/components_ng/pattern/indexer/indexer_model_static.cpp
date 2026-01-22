@@ -22,7 +22,7 @@ namespace OHOS::Ace::NG {
 
 RefPtr<FrameNode> IndexerModelStatic::CreateFrameNode(int32_t nodeId, bool isArc)
 {
-    const char* tag = isArc ? V2::ARC_INDEXER_ETS_TAG : V2::INDEXER_ETS_TAG;
+    const char* tag = isArc ? ARC_INDEXER_ETS_TAG : INDEXER_ETS_TAG;
     ACE_LAYOUT_SCOPED_TRACE("Create[%s][self:%d]", tag, nodeId);
     return isArc ? FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<ArcIndexerPattern>())
                  : FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<IndexerPattern>());

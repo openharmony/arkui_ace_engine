@@ -71,7 +71,7 @@ enum class AlignStyle {
     END,
 };
 
-class ACE_EXPORT IndexerComponent : public ComponentGroup {
+class ACE_FORCE_EXPORT IndexerComponent : public ComponentGroup {
     DECLARE_ACE_TYPE(IndexerComponent, ComponentGroup);
 
 public:

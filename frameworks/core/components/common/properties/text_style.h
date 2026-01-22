@@ -887,7 +887,7 @@ public:
     TextStyle(const Color& textColor) : propTextColor_(textColor) {}
     ~TextStyle() = default;
 
-    bool operator==(const TextStyle& rhs) const;
+    ACE_FORCE_EXPORT bool operator==(const TextStyle& rhs) const;
     ACE_FORCE_EXPORT bool operator!=(const TextStyle& rhs) const;
 
     static void ToJsonValue(std::unique_ptr<JsonValue>& json, const std::optional<TextStyle>& style,

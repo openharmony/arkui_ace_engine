@@ -25,7 +25,7 @@
 
 namespace OHOS::Ace {
 ACE_FORCE_EXPORT RSPoint ToRSPoint(const NG::PointF& point);
-RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
+ACE_FORCE_EXPORT RSPen::CapStyle ToRSCapStyle(const LineCap& lineCap);
 ACE_FORCE_EXPORT RSColor ToRSColor(const Color& color);
 ACE_FORCE_EXPORT RSColor ToRSColor(const LinearColor& color);
 ACE_FORCE_EXPORT RSRect ToRSRect(const NG::RectF& rect);

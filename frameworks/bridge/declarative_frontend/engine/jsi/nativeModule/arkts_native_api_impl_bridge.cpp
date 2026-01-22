@@ -84,7 +84,6 @@
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_path_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polygon_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_polyline_bridge.h"
-#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_alphabet_indexer_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_data_panel_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scroll_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_scrollable_bridge.h"
@@ -487,6 +486,7 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         {"Counter"},
         {"Gauge" },
         {"Sidebar"},
+        {"Indexer"},
         {"Checkbox"},
         {"CheckboxGroup"},
         {"QRCode"},
@@ -2032,7 +2032,6 @@ ArkUINativeModuleValue ArkUINativeModule::GetArkUINativeModule(ArkUIRuntimeCallI
     RegisterMenuItemAttributes(object, vm);
     RegisterMenuAttributes(object, vm);
     RegisterDatePickerAttributes(object, vm);
-    RegisterAlphabetIndexerAttributes(object, vm);
     RegisterSwiperAttributes(object, vm);
     RegisterSelectAttributes(object, vm);
     RegisterTextpickerAttributes(object, vm);
@@ -3717,124 +3716,6 @@ void ArkUINativeModule::RegisterDatePickerAttributes(Local<panda::ObjectRef> obj
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::SetCanLoop));
     datePicker->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetCanLoop"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), DatePickerBridge::ResetCanLoop));
-}
-
-void ArkUINativeModule::RegisterAlphabetIndexerAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
-{
-    auto alphabetIndexer = panda::ObjectRef::New(vm);
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupItemFont"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupItemFont));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupItemFont"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupItemFont));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedFont"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetSelectedFont));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedFont"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetSelectedFont));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupFont"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupFont));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupFont"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupFont));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setFont"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetFont));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetFont"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetFont));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupItemBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupItemBackgroundColor));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupItemBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupItemBackgroundColor));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetColor));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetColor));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupColor));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupColor));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetSelectedColor));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetSelectedColor));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupBackground"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupBackground));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupBackground"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupBackground));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelectedBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetSelectedBackgroundColor));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelectedBackgroundColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetSelectedBackgroundColor));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupUnselectedColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupUnselectedColor));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupUnselectedColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupUnselectedColor));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupSelectedColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupSelectedColor));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupSelectedColor"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupSelectedColor));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAlignStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetAlignStyle));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAlignStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetAlignStyle));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setUsingPopup"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetUsingPopup));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetUsingPopup"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetUsingPopup));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setSelected"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetSelected));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetSelected"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetSelected));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setItemSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetItemSize));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetItemSize"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetItemSize));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupPosition"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupPosition));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupPosition"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupPosition));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupItemBorderRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupItemBorderRadius));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupItemBorderRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupItemBorderRadius));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setItemBorderRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetItemBorderRadius));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetItemBorderRadius"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetItemBorderRadius));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupBackgroundBlurStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupBackgroundBlurStyle));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupBackgroundBlurStyle"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupBackgroundBlurStyle));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setPopupTitleBackground"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetPopupTitleBackground));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetPopupTitleBackground"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetPopupTitleBackground));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAdaptiveWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetAdaptiveWidth));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAdaptiveWidth"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetAdaptiveWidth));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setAutoCollapse"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetAutoCollapse));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetAutoCollapse"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetAutoCollapse));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setEnableHapticFeedback"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetEnableHapticFeedback));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetEnableHapticFeedback"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetEnableHapticFeedback));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSelected"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetOnSelected));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSelected"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetOnSelected));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnSelect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetOnSelect));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnSelect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetOnSelect));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnRequestPopupData"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetOnRequestPopupData));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnRequestPopupData"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetOnRequestPopupData));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "setOnPopupSelect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::SetOnPopupSelect));
-    alphabetIndexer->Set(vm, panda::StringRef::NewFromUtf8(vm, "resetOnPopupSelect"),
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), AlphabetIndexerBridge::ResetOnPopupSelect));
-    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "alphabetIndexer"), alphabetIndexer);
 }
 
 void ArkUINativeModule::RegisterDataPanelAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)

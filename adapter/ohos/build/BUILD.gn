@@ -29,6 +29,7 @@ component_modules = [
   "slider",
   "time_picker",
   "calendar_picker",
+  "indexer",
 ]
 
 if (!ace_engine_feature_wearable) { 

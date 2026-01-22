@@ -63,6 +63,7 @@ ohos_shared_library("arcalphabetindexer") {
   deps = [
     ":gen_obj_src_arkui_arcalphabetindexer_abc",
     "$ace_root/build:libace_compatible",
+    "$ace_root/adapter/ohos/build:arkui_indexer"
   ]
 
   if (!(use_mingw_win || use_mac || use_linux)) {

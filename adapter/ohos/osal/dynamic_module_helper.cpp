@@ -78,7 +78,8 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         {"TimePicker", "timepicker"},
         {"TimePickerDialog", "timepicker"},
         {"CalendarPicker", "calendarpicker"},
-        {"CalendarPickerDialog", "calendarpicker"}
+        {"CalendarPickerDialog", "calendarpicker"},
+        {"Indexer", "indexer"},
     };
     auto it = soMap.find(name);
     if (it == soMap.end()) {
