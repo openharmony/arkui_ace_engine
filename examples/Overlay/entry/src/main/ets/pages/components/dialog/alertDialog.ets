@@ -13,104 +13,38 @@
  * limitations under the License.
  */
 
+import router from '@ohos.router';
+import {TestListOption} from '../../../common/DataModel'
 @Builder
 export function AlertDialogBuilder(name: string, param: Object) {
   AlertDialogExample()
 }
 
+const testList: TestListOption[] = [
+  { title: '警告弹窗_1个button', url: 'pages/components/dialog/page/AlertDialogTestLevel0_0' },
+  { title: '警告弹窗_2个button', url: 'pages/components/dialog/page/AlertDialogTestLevel0_1' },
+  { title: '警告弹窗_多个button', url: 'pages/components/dialog/page/AlertDialogTestLevel0_2' },
+  { title: '警告弹窗_基本功能_3', url: 'pages/components/dialog/page/AlertDialogTestLevel0_3' },
+]
+
 @Entry
 @Component
 struct AlertDialogExample {
   pathStack: NavPathStack = new NavPathStack()
-
   build() {
     NavDestination() {
-      Column({ space: 5 }) {
-        Text('AlertDialog.show')
-          .fontColor(Color.Gray)
-          .width('100%')
-          .padding(10)
-
-        Button('three button dialog')
-          .margin(10)
-          .onClick(() => {
-            AlertDialog.show({
-              title: 'title',
-              subtitle: 'subtitle',
-              message: 'text',
-              buttonDirection: DialogButtonDirection.HORIZONTAL,
-              buttons: [
-                {
-                  value: '按钮',
-                  action: () => {
-                    console.info('Callback when button1 is clicked')
-                  }
-                },
-                {
-                  value: '按钮',
-                  action: () => {
-                    console.info('Callback when button2 is clicked')
-                  }
-                },
-                {
-                  value: '按钮',
-                  enabled: true,
-                  defaultFocus: true,
-                  style: DialogButtonStyle.HIGHLIGHT,
-                  action: () => {
-                    console.info('Callback when button3 is clicked')
-                  }
-                },
-              ],
-              cancel: () => {
-                console.info('Closed callbacks')
-              }
-            })
-          })
-
-        Text('UIContext.showAlertDialog')
-          .fontColor(Color.Gray)
-          .width('100%')
-          .padding(10)
-
-        Button('three button dialog')
-          .margin(10)
-          .onClick(() => {
-            this.getUIContext().showAlertDialog({
-              title: 'title',
-              subtitle: 'subtitle',
-              message: 'text',
-              buttonDirection: DialogButtonDirection.HORIZONTAL,
-              buttons: [
-                {
-                  value: '按钮',
-                  action: () => {
-                    console.info('Callback when button1 is clicked')
-                  }
-                },
-                {
-                  value: '按钮',
-                  action: () => {
-                    console.info('Callback when button2 is clicked')
-                  }
-                },
-                {
-                  value: '按钮',
-                  enabled: true,
-                  defaultFocus: true,
-                  style: DialogButtonStyle.HIGHLIGHT,
-                  action: () => {
-                    console.info('Callback when button3 is clicked')
-                  }
-                },
-              ],
-              cancel: () => {
-                console.info('Closed callbacks')
-              }
-            })
-          })
-      }
-      .width('100%')
+      List({ space: 8 }) {
+        ForEach(testList, (item: TestListOption) => {
+          ListItem() {
+            Text(item.title).width('100%').backgroundColor(Color.Pink).fontSize(20)
+              .onClick(() => {
+                router.pushUrl({
+                  url: item.url
+                }, router.RouterMode.Single)
+              })
+          }
+        }, (item: TestListOption) => item.title)
+      }.borderWidth(2).padding(5)
     }
     .title('AlertDialog')
     .onBackPressed(() => {
