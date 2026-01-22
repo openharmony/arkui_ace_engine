@@ -43,7 +43,7 @@ constexpr int32_t HOME_PAGE_CHILD_NODE_COUNT_THRESHOLD = 100;
 constexpr char NAV_BAR_HOME_PAGE_NAME[] = "navBar";
 constexpr char HOME_PAGE_KEY[] = "homePage";
 constexpr char RELATED_PAGE_KEY[] = "relatedPage";
-constexpr char ENABLE_ARKUI_HOOK_KEY[] = "enableArkUIHook";
+constexpr char ENABLE_REDUCED_CONTAINER_SIZE_KEY[] = "enableReducedContainerSize";
 constexpr char HOME_NAVIGATION_ID_KEY[] = "homeNavigationId";
 constexpr char ENABLE_HOOK_KEY[] = "enableHook";
 constexpr char NAVIGATION_OPTIONS_KEY[] = "navigationOptions";
@@ -410,7 +410,7 @@ bool ForceSplitUtils::ParseAppForceSplitConfig(
             isRouter ? "routerSplitOptions" : "navigationSplitOptions");
         return false;
     }
-    config.isArkUIHookEnabled = configJson->GetBool(ENABLE_ARKUI_HOOK_KEY, false);
+    config.isArkUIHookEnabled = configJson->GetBool(ENABLE_REDUCED_CONTAINER_SIZE_KEY, false);
     if (configJson->Contains(HOME_PAGE_KEY)) {
         auto homePageJson = configJson->GetValue(HOME_PAGE_KEY);
         if (!homePageJson->IsString()) {
