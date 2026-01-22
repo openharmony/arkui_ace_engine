@@ -48,16 +48,19 @@ bool TransparentNodeDetector::CheckWindowTransparent(const RefPtr<FrameNode>& ro
     }
 
     if (isNavigation) {
-        RefPtr<NG::FrameNode> topNavDesNode;
-        root->FindTopNavDestination(topNavDesNode);
-        CHECK_NULL_RETURN(topNavDesNode, false);
-        auto navDestinationNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(topNavDesNode);
-        CHECK_NULL_RETURN(navDestinationNodeBase, false);
-        auto navDestContentFrameNode = AceType::DynamicCast<FrameNode>(navDestinationNodeBase->GetContentNode());
-        CHECK_NULL_RETURN(navDestContentFrameNode, false);
-        auto rootNode = navDestContentFrameNode->GetChildren().front();
-        if (rootNode && !rootNode->IsContextTransparent()) {
-            return false;
+        std::list<RefPtr<NG::FrameNode>> navDesNodes;
+        root->FindTopNavDestination(navDesNodes);
+        CHECK_NULL_RETURN(!navDesNodes.empty(), false);
+        for (auto& navDesNode : navDesNodes) {
+            CHECK_NULL_RETURN(navDesNode, false);
+            auto navDestinationNodeBase = AceType::DynamicCast<NavDestinationNodeBase>(navDesNode);
+            CHECK_NULL_RETURN(navDestinationNodeBase, false);
+            auto navDestContentFrameNode = AceType::DynamicCast<FrameNode>(navDestinationNodeBase->GetContentNode());
+            CHECK_NULL_RETURN(navDestContentFrameNode, false);
+            auto rootNode = navDestContentFrameNode->GetChildren().front();
+            if (rootNode && !rootNode->IsContextTransparent()) {
+                return false;
+            }
         }
     } else {
         auto stageNode = root->GetChildren().front();

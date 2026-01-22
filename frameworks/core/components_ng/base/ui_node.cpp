@@ -26,6 +26,7 @@
 #include "core/components_ng/layout/layout_wrapper_node.h"
 #include "core/components_ng/pattern/text/text_layout_property.h"
 #include "core/components_ng/pattern/navigation/navigation_group_node.h"
+#include "core/components_ng/pattern/navigation/navigation_pattern.h"
 #include "core/components_ng/token_theme/token_theme_storage.h"
 #include "frameworks/core/pipeline/base/element_register_multi_thread.h"
 
@@ -2663,7 +2664,7 @@ void UINode::SetAncestor(const WeakPtr<UINode>& parent)
     ancestor_ = parent;
 }
 
-void UINode::FindTopNavDestination(RefPtr<FrameNode>& result)
+void UINode::FindTopNavDestination(std::list<RefPtr<FrameNode>>& result)
 {
     auto currentNode = AceType::DynamicCast<FrameNode>(this);
     if (currentNode) {
@@ -2672,14 +2673,24 @@ void UINode::FindTopNavDestination(RefPtr<FrameNode>& result)
         } else if (currentNode->GetTag() == V2::NAVIGATION_VIEW_ETS_TAG) {
             auto navigationGroupNode = AceType::DynamicCast<NG::NavigationGroupNode>(currentNode);
             CHECK_NULL_VOID(navigationGroupNode);
-            result = navigationGroupNode->GetTopDestination();
+            auto navigationPattern = navigationGroupNode->GetPattern<NavigationPattern>();
+            CHECK_NULL_VOID(navigationPattern);
+            auto navigationStack = navigationPattern->GetNavigationStack();
+            CHECK_NULL_VOID(navigationStack);
+            auto lastStandardIndex = navigationGroupNode->GetLastStandardIndex();
+            int32_t startIndex = lastStandardIndex >= 0 ? lastStandardIndex : 0;
+            int32_t endIndex = navigationStack->Size();
+            for (int32_t i = startIndex; i < endIndex; ++i) {
+                result.emplace_back(AceType::DynamicCast<FrameNode>(
+                    NavigationGroupNode::GetNavDestinationNode(navigationStack->Get(i))));
+            }
             return;
         }
     }
     
     for (const auto& item : GetChildren()) {
         item->FindTopNavDestination(result);
-        if (result) {
+        if (!result.empty()) {
             return;
         }
     }
