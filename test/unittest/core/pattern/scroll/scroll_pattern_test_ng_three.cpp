@@ -856,4 +856,25 @@ HWTEST_F(ScrollPatternThreeTestNg, GetScrollSnap002, TestSize.Level1)
     EXPECT_EQ(snapOptions.paginationParams[0].ToString(), snapPaginations[0].ToString());
     EXPECT_EQ(snapOptions.paginationParams[1].ToString(), snapPaginations[1].ToString());
 }
+
+/**
+ * @tc.name: CalcPredictSnapOffsetWithContentOffset
+ * @tc.desc: Test Snap with contentOffset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollPatternThreeTestNg, CalcPredictSnapOffsetWithContentOffset, TestSize.Level1)
+{
+    Dimension intervalSize(100.0);
+    std::vector<Dimension> snapPaginations = {};
+    std::pair<bool, bool> enableSnapToSide = std::make_pair(true, true);
+
+    ScrollModelNG model = CreateScroll();
+    ScrollableModelNG::SetContentStartOffset(CONTENT_START_OFFSET);
+    ScrollableModelNG::SetContentEndOffset(CONTENT_END_OFFSET);
+    model.SetScrollSnap(ScrollSnapAlign::START, intervalSize, snapPaginations, enableSnapToSide);
+    CreateContent();
+    CreateScrollDone();
+    auto offset = pattern_->CalcPredictSnapOffset(0, 0, 0, SnapDirection::NONE);
+    EXPECT_EQ(offset, 0);
+}
 } // namespace OHOS::Ace::NG
