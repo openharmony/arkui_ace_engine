@@ -8560,7 +8560,7 @@ void GetFocusPriority(ArkUINodeHandle node, ArkUI_Int32 (*values)[1], ArkUI_Char
     CHECK_NULL_VOID(frameNode);
     auto scopePriority = ViewAbstract::GetFocusScopePriority(frameNode);
     g_strValue = ViewAbstract::GetFocusScopeId(frameNode);
-    (*values)[NUM_0] = scopePriority;
+    (*values)[NUM_0] = static_cast<int>(scopePriority);
     *id = g_strValue.c_str();
 }
 
