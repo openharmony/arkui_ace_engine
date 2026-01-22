@@ -82,6 +82,7 @@ std::list<int32_t> WaterFlowLayoutBase::GeneratePreloadList(
 
 void WaterFlowLayoutBase::PostIdleTask(const RefPtr<FrameNode>& frameNode)
 {
+    ACE_UINODE_TRACE(frameNode);
     auto* context = frameNode->GetContext();
     CHECK_NULL_VOID(context);
     context->AddPredictTask([weak = WeakPtr(frameNode)](int64_t deadline, bool canUseLongPredictTask) {
