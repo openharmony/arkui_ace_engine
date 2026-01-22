@@ -7201,7 +7201,7 @@ export interface BackgroundBlurStyleOptions extends BlurStyleOptions {
 export interface ForegroundBlurStyleOptions extends BlurStyleOptions {
 }
 export interface BlurOptions {
-    grayscale: [ double, double ];
+    grayscale: [ double, double ] | undefined;
 }
 export interface SystemAdaptiveOptions {
     disableSystemAdaptation?: boolean;
@@ -7213,7 +7213,7 @@ export interface BlurStyleOptions {
     blurOptions?: BlurOptions;
 }
 export interface BackgroundEffectOptions {
-    radius: double;
+    radius: double | undefined;
     saturation?: double;
     brightness?: double;
     color?: ResourceColor;
@@ -7223,7 +7223,7 @@ export interface BackgroundEffectOptions {
     inactiveColor?: ResourceColor;
 }
 export interface ForegroundEffectOptions {
-    radius: double;
+    radius: double | undefined;
 }
 export interface PickerTextStyle {
     color?: ResourceColor;
@@ -7247,7 +7247,7 @@ export enum ShadowType {
     BLUR = 1
 }
 export interface ShadowOptions {
-    radius: double | Resource;
+    radius: double | Resource | undefined;
     type?: ShadowType;
     color?: Color | string | Resource | ColoringStrategy;
     offsetX?: double | Resource;
@@ -9468,16 +9468,16 @@ export interface PixelRoundPolicy {
     bottom?: PixelRoundCalcPolicy;
 }
 export interface LinearGradientBlurOptions {
-    fractionStops: Array<FractionStop>;
-    direction: GradientDirection;
+    fractionStops: Array<FractionStop> | undefined;
+    direction: GradientDirection | undefined;
 }
 export interface MotionBlurAnchor {
-    x: double;
-    y: double;
+    x: double | undefined;
+    y: double | undefined;
 }
 export interface MotionBlurOptions {
-    radius: double;
-    anchor: MotionBlurAnchor;
+    radius: double | undefined;
+    anchor: MotionBlurAnchor | undefined;
 }
 export interface GeometryInfo extends SizeResult {
     borderWidth: EdgeWidths;
@@ -11995,19 +11995,6 @@ export class ContentTransitionEffect_serializer {
         return ContentTransitionEffectInternal.fromPtr(ptr)
     }
 }
-export class ForegroundEffectOptions_serializer {
-    public static write(buffer: SerializerBase, value: ForegroundEffectOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForRadius  = value.radius
-        valueSerializer.writeFloat64(valueHolderForRadius)
-    }
-    public static read(buffer: DeserializerBase): ForegroundEffectOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpResult : double = valueDeserializer.readFloat64()
-        let value : ForegroundEffectOptions = ({radius: radiusTmpResult} as ForegroundEffectOptions)
-        return value
-    }
-}
 export class InvertOptions_serializer {
     public static write(buffer: SerializerBase, value: InvertOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -12039,22 +12026,6 @@ export class LayoutPolicy_serializer {
         let valueDeserializer : DeserializerBase = buffer
         let ptr : KPointer = valueDeserializer.readPointer()
         return LayoutPolicyInternal.fromPtr(ptr)
-    }
-}
-export class MotionBlurAnchor_serializer {
-    public static write(buffer: SerializerBase, value: MotionBlurAnchor): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForX  = value.x
-        valueSerializer.writeFloat64(valueHolderForX)
-        const valueHolderForY  = value.y
-        valueSerializer.writeFloat64(valueHolderForY)
-    }
-    public static read(buffer: DeserializerBase): MotionBlurAnchor {
-        let valueDeserializer : DeserializerBase = buffer
-        const xTmpResult : double = valueDeserializer.readFloat64()
-        const yTmpResult : double = valueDeserializer.readFloat64()
-        let value : MotionBlurAnchor = ({x: xTmpResult, y: yTmpResult} as MotionBlurAnchor)
-        return value
     }
 }
 export class NestedScrollOptions_serializer {
@@ -12647,16 +12618,27 @@ export class BlurOptions_serializer {
     public static write(buffer: SerializerBase, value: BlurOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForGrayscale  = value.grayscale
-        const valueHolderForGrayscale_0  = valueHolderForGrayscale[0]
-        valueSerializer.writeFloat64(valueHolderForGrayscale_0)
-        const valueHolderForGrayscale_1  = valueHolderForGrayscale[1]
-        valueSerializer.writeFloat64(valueHolderForGrayscale_1)
+        if (valueHolderForGrayscale !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForGrayscaleTmpValue  = valueHolderForGrayscale!
+            const valueHolderForGrayscaleTmpValue_0  = valueHolderForGrayscaleTmpValue[0]
+            valueSerializer.writeFloat64(valueHolderForGrayscaleTmpValue_0)
+            const valueHolderForGrayscaleTmpValue_1  = valueHolderForGrayscaleTmpValue[1]
+            valueSerializer.writeFloat64(valueHolderForGrayscaleTmpValue_1)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): BlurOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const grayscaleTmpBufValue0 : double = valueDeserializer.readFloat64()
-        const grayscaleTmpBufValue1 : double = valueDeserializer.readFloat64()
-        const grayscaleTmpResult : [ double, double ] = ([grayscaleTmpBufValue0, grayscaleTmpBufValue1] as [ double, double ])
+        const grayscaleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let grayscaleTmpBuf : [ double, double ] | undefined = undefined
+        if ((grayscaleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const grayscaleTmpBuf_Value0 : double = valueDeserializer.readFloat64()
+            const grayscaleTmpBuf_Value1 : double = valueDeserializer.readFloat64()
+            grayscaleTmpBuf = ([grayscaleTmpBuf_Value0, grayscaleTmpBuf_Value1] as [ double, double ])
+        }
+        const grayscaleTmpResult : [ double, double ] | undefined = grayscaleTmpBuf
         let value : BlurOptions = ({grayscale: grayscaleTmpResult} as BlurOptions)
         return value
     }
@@ -13229,6 +13211,30 @@ export class FocusMovement_serializer {
         return value
     }
 }
+export class ForegroundEffectOptions_serializer {
+    public static write(buffer: SerializerBase, value: ForegroundEffectOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForRadius  = value.radius
+        if (valueHolderForRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRadiusTmpValue  = valueHolderForRadius!
+            valueSerializer.writeFloat64(valueHolderForRadiusTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): ForegroundEffectOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radiusTmpBuf : double | undefined = undefined
+        if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            radiusTmpBuf = valueDeserializer.readFloat64()
+        }
+        const radiusTmpResult : double | undefined = radiusTmpBuf
+        let value : ForegroundEffectOptions = ({radius: radiusTmpResult} as ForegroundEffectOptions)
+        return value
+    }
+}
 export class GeometryTransitionOptions_serializer {
     public static write(buffer: SerializerBase, value: GeometryTransitionOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -13559,28 +13565,50 @@ export class LinearGradientBlurOptions_serializer {
     public static write(buffer: SerializerBase, value: LinearGradientBlurOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForFractionStops  = value.fractionStops
-        valueSerializer.writeInt32((valueHolderForFractionStops.length).toInt())
-        for (let valueHolderForFractionStopsCounterI = 0; valueHolderForFractionStopsCounterI < valueHolderForFractionStops.length; valueHolderForFractionStopsCounterI++) {
-            const valueHolderForFractionStopsTmpElement : FractionStop = valueHolderForFractionStops[valueHolderForFractionStopsCounterI]
-            const valueHolderForFractionStopsTmpElement_0  = valueHolderForFractionStopsTmpElement[0]
-            valueSerializer.writeFloat64(valueHolderForFractionStopsTmpElement_0)
-            const valueHolderForFractionStopsTmpElement_1  = valueHolderForFractionStopsTmpElement[1]
-            valueSerializer.writeFloat64(valueHolderForFractionStopsTmpElement_1)
+        if (valueHolderForFractionStops !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForFractionStopsTmpValue  = valueHolderForFractionStops!
+            valueSerializer.writeInt32((valueHolderForFractionStopsTmpValue.length).toInt())
+            for (let valueHolderForFractionStopsTmpValueCounterI = 0; valueHolderForFractionStopsTmpValueCounterI < valueHolderForFractionStopsTmpValue.length; valueHolderForFractionStopsTmpValueCounterI++) {
+                const valueHolderForFractionStopsTmpValueTmpElement : FractionStop = valueHolderForFractionStopsTmpValue[valueHolderForFractionStopsTmpValueCounterI]
+                const valueHolderForFractionStopsTmpValueTmpElement_0  = valueHolderForFractionStopsTmpValueTmpElement[0]
+                valueSerializer.writeFloat64(valueHolderForFractionStopsTmpValueTmpElement_0)
+                const valueHolderForFractionStopsTmpValueTmpElement_1  = valueHolderForFractionStopsTmpValueTmpElement[1]
+                valueSerializer.writeFloat64(valueHolderForFractionStopsTmpValueTmpElement_1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForDirection  = value.direction
-        valueSerializer.writeInt32(valueHolderForDirection.valueOf())
+        if (valueHolderForDirection !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForDirectionTmpValue  = (valueHolderForDirection as GradientDirection)
+            valueSerializer.writeInt32(valueHolderForDirectionTmpValue.valueOf())
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): LinearGradientBlurOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const fractionStopsTmpBufLength : int32 = valueDeserializer.readInt32()
-        let fractionStopsTmpBuf : Array<FractionStop> = new Array<FractionStop>(fractionStopsTmpBufLength)
-        for (let fractionStopsTmpBufBufCounterI = 0; fractionStopsTmpBufBufCounterI < fractionStopsTmpBufLength; fractionStopsTmpBufBufCounterI++) {
-            const fractionStopsTmpBufTempBufValue0 : double = valueDeserializer.readFloat64()
-            const fractionStopsTmpBufTempBufValue1 : double = valueDeserializer.readFloat64()
-            fractionStopsTmpBuf[fractionStopsTmpBufBufCounterI] = ([fractionStopsTmpBufTempBufValue0, fractionStopsTmpBufTempBufValue1] as FractionStop)
+        const fractionStopsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let fractionStopsTmpBuf : Array<FractionStop> | undefined = undefined
+        if ((fractionStopsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const fractionStopsTmpBuf_Length : int32 = valueDeserializer.readInt32()
+            let fractionStopsTmpBuf_ : Array<FractionStop> = new Array<FractionStop>(fractionStopsTmpBuf_Length)
+            for (let fractionStopsTmpBuf_BufCounterI = 0; fractionStopsTmpBuf_BufCounterI < fractionStopsTmpBuf_Length; fractionStopsTmpBuf_BufCounterI++) {
+                const fractionStopsTmpBuf_TempBufValue0 : double = valueDeserializer.readFloat64()
+                const fractionStopsTmpBuf_TempBufValue1 : double = valueDeserializer.readFloat64()
+                fractionStopsTmpBuf_[fractionStopsTmpBuf_BufCounterI] = ([fractionStopsTmpBuf_TempBufValue0, fractionStopsTmpBuf_TempBufValue1] as FractionStop)
+            }
+            fractionStopsTmpBuf = fractionStopsTmpBuf_
         }
-        const fractionStopsTmpResult : Array<FractionStop> = fractionStopsTmpBuf
-        const directionTmpResult : GradientDirection = GradientDirection.fromValue(valueDeserializer.readInt32())
+        const fractionStopsTmpResult : Array<FractionStop> | undefined = fractionStopsTmpBuf
+        const directionTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let directionTmpBuf : GradientDirection | undefined = undefined
+        if ((directionTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            directionTmpBuf = GradientDirection.fromValue(valueDeserializer.readInt32())
+        }
+        const directionTmpResult : GradientDirection | undefined = directionTmpBuf
         let value : LinearGradientBlurOptions = ({fractionStops: fractionStopsTmpResult, direction: directionTmpResult} as LinearGradientBlurOptions)
         return value
     }
@@ -13743,6 +13771,44 @@ export class Measurable_serializer {
         return MeasurableInternal.fromPtr(ptr)
     }
 }
+export class MotionBlurAnchor_serializer {
+    public static write(buffer: SerializerBase, value: MotionBlurAnchor): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForX  = value.x
+        if (valueHolderForX !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForXTmpValue  = valueHolderForX!
+            valueSerializer.writeFloat64(valueHolderForXTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForY  = value.y
+        if (valueHolderForY !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForYTmpValue  = valueHolderForY!
+            valueSerializer.writeFloat64(valueHolderForYTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): MotionBlurAnchor {
+        let valueDeserializer : DeserializerBase = buffer
+        const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let xTmpBuf : double | undefined = undefined
+        if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            xTmpBuf = valueDeserializer.readFloat64()
+        }
+        const xTmpResult : double | undefined = xTmpBuf
+        const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let yTmpBuf : double | undefined = undefined
+        if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            yTmpBuf = valueDeserializer.readFloat64()
+        }
+        const yTmpResult : double | undefined = yTmpBuf
+        let value : MotionBlurAnchor = ({x: xTmpResult, y: yTmpResult} as MotionBlurAnchor)
+        return value
+    }
+}
 export class MeasureResult_serializer {
     public static write(buffer: SerializerBase, value: MeasureResult): void {
         let valueSerializer : SerializerBase = buffer
@@ -13756,22 +13822,6 @@ export class MeasureResult_serializer {
         const widthTmpResult : number = (valueDeserializer.readNumber() as number)
         const heightTmpResult : number = (valueDeserializer.readNumber() as number)
         let value : MeasureResult = ({width: widthTmpResult, height: heightTmpResult} as MeasureResult)
-        return value
-    }
-}
-export class MotionBlurOptions_serializer {
-    public static write(buffer: SerializerBase, value: MotionBlurOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForRadius  = value.radius
-        valueSerializer.writeFloat64(valueHolderForRadius)
-        const valueHolderForAnchor  = value.anchor
-        MotionBlurAnchor_serializer.write(valueSerializer, valueHolderForAnchor)
-    }
-    public static read(buffer: DeserializerBase): MotionBlurOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpResult : double = (valueDeserializer.readNumber() as double)
-        const anchorTmpResult : MotionBlurAnchor = MotionBlurAnchor_serializer.read(valueDeserializer)
-        let value : MotionBlurOptions = ({radius: radiusTmpResult, anchor: anchorTmpResult} as MotionBlurOptions)
         return value
     }
 }
@@ -15359,7 +15409,13 @@ export class BackgroundEffectOptions_serializer {
     public static write(buffer: SerializerBase, value: BackgroundEffectOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRadius  = value.radius
-        valueSerializer.writeFloat64(valueHolderForRadius)
+        if (valueHolderForRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRadiusTmpValue  = valueHolderForRadius!
+            valueSerializer.writeFloat64(valueHolderForRadiusTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForSaturation  = value.saturation
         if (valueHolderForSaturation !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -15451,7 +15507,12 @@ export class BackgroundEffectOptions_serializer {
     }
     public static read(buffer: DeserializerBase): BackgroundEffectOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpResult : double = valueDeserializer.readFloat64()
+        const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radiusTmpBuf : double | undefined = undefined
+        if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            radiusTmpBuf = valueDeserializer.readFloat64()
+        }
+        const radiusTmpResult : double | undefined = radiusTmpBuf
         const saturationTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let saturationTmpBuf : double | undefined = undefined
         if ((saturationTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -16597,6 +16658,44 @@ export class MenuMaskType_serializer {
         return value
     }
 }
+export class MotionBlurOptions_serializer {
+    public static write(buffer: SerializerBase, value: MotionBlurOptions): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForRadius  = value.radius
+        if (valueHolderForRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRadiusTmpValue  = valueHolderForRadius!
+            valueSerializer.writeFloat64(valueHolderForRadiusTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        const valueHolderForAnchor  = value.anchor
+        if (valueHolderForAnchor !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForAnchorTmpValue  = valueHolderForAnchor!
+            MotionBlurAnchor_serializer.write(valueSerializer, valueHolderForAnchorTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+    }
+    public static read(buffer: DeserializerBase): MotionBlurOptions {
+        let valueDeserializer : DeserializerBase = buffer
+        const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radiusTmpBuf : double | undefined = undefined
+        if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            radiusTmpBuf = valueDeserializer.readFloat64()
+        }
+        const radiusTmpResult : double | undefined = radiusTmpBuf
+        const anchorTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let anchorTmpBuf : MotionBlurAnchor | undefined = undefined
+        if ((anchorTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            anchorTmpBuf = MotionBlurAnchor_serializer.read(valueDeserializer)
+        }
+        const anchorTmpResult : MotionBlurAnchor | undefined = anchorTmpBuf
+        let value : MotionBlurOptions = ({radius: radiusTmpResult, anchor: anchorTmpResult} as MotionBlurOptions)
+        return value
+    }
+}
 export class OverlayOptions_serializer {
     public static write(buffer: SerializerBase, value: OverlayOptions): void {
         let valueSerializer : SerializerBase = buffer
@@ -16835,14 +16934,20 @@ export class ShadowOptions_serializer {
     public static write(buffer: SerializerBase, value: ShadowOptions): void {
         let valueSerializer : SerializerBase = buffer
         const valueHolderForRadius  = value.radius
-        if (valueHolderForRadius instanceof double) {
+        if (valueHolderForRadius !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForRadiusTmpValue  = valueHolderForRadius!
+            if (valueHolderForRadiusTmpValue instanceof double) {
             valueSerializer.writeInt8((0).toByte())
-            const valueHolderForRadiusForIdx0  = valueHolderForRadius as double
-            valueSerializer.writeFloat64(valueHolderForRadiusForIdx0)
-        } else if (valueHolderForRadius instanceof Resource) {
+            const valueHolderForRadiusTmpValueForIdx0  = valueHolderForRadiusTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForRadiusTmpValueForIdx0)
+            } else if (valueHolderForRadiusTmpValue instanceof Resource) {
             valueSerializer.writeInt8((1).toByte())
-            const valueHolderForRadiusForIdx1  = valueHolderForRadius as Resource
-            Resource_serializer.write(valueSerializer, valueHolderForRadiusForIdx1)
+            const valueHolderForRadiusTmpValueForIdx1  = valueHolderForRadiusTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForRadiusTmpValueForIdx1)
+            }
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
         const valueHolderForType  = value.type
         if (valueHolderForType !== undefined) {
@@ -16919,16 +17024,21 @@ export class ShadowOptions_serializer {
     }
     public static read(buffer: DeserializerBase): ShadowOptions {
         let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpBufUnionSelector : int32 = valueDeserializer.readInt8()
-        let radiusTmpBuf : double | Resource | undefined
-        if (radiusTmpBufUnionSelector == (0).toChar()) {
-            radiusTmpBuf = valueDeserializer.readFloat64()
-        } else if (radiusTmpBufUnionSelector == (1).toChar()) {
-            radiusTmpBuf = Resource_serializer.read(valueDeserializer)
-        } else {
-            throw new Error("One of the branches for radiusTmpBuf has to be chosen through deserialisation.")
+        const radiusTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let radiusTmpBuf : double | Resource | undefined = undefined
+        if ((radiusTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            const radiusTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let radiusTmpBuf_ : double | Resource | undefined
+            if (radiusTmpBuf_UnionSelector == (0).toByte()) {
+                radiusTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (radiusTmpBuf_UnionSelector == (1).toByte()) {
+                radiusTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for radiusTmpBuf_ has to be chosen through deserialisation.")
+            }
+            radiusTmpBuf = (radiusTmpBuf_ as double | Resource)
         }
-        const radiusTmpResult : double | Resource = (radiusTmpBuf as double | Resource)
+        const radiusTmpResult : double | Resource | undefined = radiusTmpBuf
         const typeTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let typeTmpBuf : ShadowType | undefined = undefined
         if ((typeTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {

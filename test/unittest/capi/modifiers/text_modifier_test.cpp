@@ -560,7 +560,7 @@ HWTEST_F(TextModifierTest, setCopyOption, TestSize.Level1)
 HWTEST_F(TextModifierTest, setTextShadow, TestSize.Level1)
 {
     Ark_ShadowOptions shadow = {
-        .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(1.5),
+        .radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(1.5),
         .type = Converter::ArkValue<Opt_ShadowType>(ARK_SHADOW_TYPE_COLOR),
         .color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_Color>(ARK_COLOR_GREEN),
         .offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(2.5),
@@ -947,14 +947,14 @@ HWTEST_F(TextModifierTest, setTextShadowTestArrayValues, TestSize.Level1)
         .color = ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>("#FFAABB01"),
         .offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(50.),
         .offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(55.),
-        .radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(12.),
+        .radius = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(12.),
         .type = Converter::ArkValue<Opt_ShadowType>(ARK_SHADOW_TYPE_COLOR),
     };
     Ark_ShadowOptions shadow2 = {
         .color = ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>("#FFAABB22"),
         .offsetX = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(70.),
         .offsetY = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(75.),
-        .radius = ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(20.),
+        .radius = ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(20.),
         .type = Converter::ArkValue<Opt_ShadowType>(ARK_SHADOW_TYPE_BLUR),
     };
     std::vector<Ark_ShadowOptions> vec = { shadow1, shadow2 };

@@ -1239,7 +1239,7 @@ uint16_t Convert(const Ark_PixelRoundPolicy& src)
 template<>
 float Convert(const Ark_ForegroundEffectOptions& src)
 {
-    return Convert<float>(src.radius);
+    return OptConvert<float>(src.radius).value_or(0.0f);
 }
 
 template<>
@@ -1582,18 +1582,19 @@ MotionBlurOption Convert(const Ark_MotionBlurOptions& src)
     MotionBlurOption options;
     const float minValue = 0.0;
     const float maxValue = 1.0;
-    options.radius = Convert<float>(src.radius);
+    options.radius = OptConvert<float>(src.radius).value_or(0.0f);
     if (LessNotEqual(options.radius, minValue)) {
         options.radius = minValue;
     }
-    options.anchor.x = Convert<float>(src.anchor.x);
+    auto arkMotionBlurAnchor = GetOpt(src.anchor);
+    options.anchor.x = OPT_CONVERT_FIELD(float, arkMotionBlurAnchor, x).value_or(0.0f);
     if (LessNotEqual(options.anchor.x, minValue)) {
         options.anchor.x = minValue;
     }
     if (GreatNotEqual(options.anchor.x, maxValue)) {
         options.anchor.x = maxValue;
     }
-    options.anchor.y = Convert<float>(src.anchor.y);
+    options.anchor.y = OPT_CONVERT_FIELD(float, arkMotionBlurAnchor, y).value_or(0.0f);
     if (LessNotEqual(options.anchor.y, minValue)) {
         options.anchor.y = minValue;
     }
@@ -1815,12 +1816,13 @@ NG::LinearGradientBlurPara Convert(const Ark_LinearGradientBlurOptions& value)
     auto blurRadius = Dimension(0);
     std::pair<float, float> pair;
     std::vector<std::pair<float, float>> fractionStops;
-    auto fractionStopsVec = Convert<std::vector<Ark_FractionStop>>(value.fractionStops);
+    auto fractionStopsVec =
+        OptConvert<std::vector<Ark_FractionStop>>(value.fractionStops).value_or(std::vector<Ark_FractionStop> {});
     for (auto& arkPair : fractionStopsVec) {
         pair = Convert<std::pair<float, float>>(arkPair);
         fractionStops.push_back(pair);
     }
-    auto direction = Convert<GradientDirection>(value.direction);
+    auto direction = OptConvert<GradientDirection>(value.direction).value_or(GradientDirection::BOTTOM);
     return NG::LinearGradientBlurPara(blurRadius, fractionStops, direction);
 }
 template<>

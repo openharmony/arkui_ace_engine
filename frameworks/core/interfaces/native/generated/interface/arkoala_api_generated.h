@@ -414,8 +414,6 @@ typedef struct FileSelectorResultPeer* Ark_FileSelectorResult;
 typedef struct Opt_FileSelectorResult Opt_FileSelectorResult;
 typedef struct Opt_Float32 Opt_Float32;
 typedef struct Opt_Float64 Opt_Float64;
-typedef struct Ark_ForegroundEffectOptions Ark_ForegroundEffectOptions;
-typedef struct Opt_ForegroundEffectOptions Opt_ForegroundEffectOptions;
 typedef struct Ark_FormSize Ark_FormSize;
 typedef struct Opt_FormSize Opt_FormSize;
 typedef struct Ark_FractionStop Ark_FractionStop;
@@ -519,8 +517,6 @@ typedef struct matrix4_Matrix4TransitPeer* Ark_matrix4_Matrix4Transit;
 typedef struct Opt_matrix4_Matrix4Transit Opt_matrix4_Matrix4Transit;
 typedef struct Ark_MicrophoneCaptureStateChangeInfo Ark_MicrophoneCaptureStateChangeInfo;
 typedef struct Opt_MicrophoneCaptureStateChangeInfo Opt_MicrophoneCaptureStateChangeInfo;
-typedef struct Ark_MotionBlurAnchor Ark_MotionBlurAnchor;
-typedef struct Opt_MotionBlurAnchor Opt_MotionBlurAnchor;
 typedef struct MultiAppModePeer MultiAppModePeer;
 typedef struct MultiAppModePeer* Ark_MultiAppMode;
 typedef struct Opt_MultiAppMode Opt_MultiAppMode;
@@ -2194,6 +2190,8 @@ typedef struct Ark_font_UIFontGenericInfo Ark_font_UIFontGenericInfo;
 typedef struct Opt_font_UIFontGenericInfo Opt_font_UIFontGenericInfo;
 typedef struct Ark_FontSettingOptions Ark_FontSettingOptions;
 typedef struct Opt_FontSettingOptions Opt_FontSettingOptions;
+typedef struct Ark_ForegroundEffectOptions Ark_ForegroundEffectOptions;
+typedef struct Opt_ForegroundEffectOptions Opt_ForegroundEffectOptions;
 typedef struct Ark_FormCallbackInfo Ark_FormCallbackInfo;
 typedef struct Opt_FormCallbackInfo Opt_FormCallbackInfo;
 typedef struct Ark_FormLinkOptions Ark_FormLinkOptions;
@@ -2331,8 +2329,8 @@ typedef struct Opt_Metadata Opt_Metadata;
 typedef struct ModuleMetadataPeer ModuleMetadataPeer;
 typedef struct ModuleMetadataPeer* Ark_ModuleMetadata;
 typedef struct Opt_ModuleMetadata Opt_ModuleMetadata;
-typedef struct Ark_MotionBlurOptions Ark_MotionBlurOptions;
-typedef struct Opt_MotionBlurOptions Opt_MotionBlurOptions;
+typedef struct Ark_MotionBlurAnchor Ark_MotionBlurAnchor;
+typedef struct Opt_MotionBlurAnchor Opt_MotionBlurAnchor;
 typedef struct Ark_MotionPathOptions Ark_MotionPathOptions;
 typedef struct Opt_MotionPathOptions Opt_MotionPathOptions;
 typedef struct Ark_NativeEmbedParamDataInfo Ark_NativeEmbedParamDataInfo;
@@ -2994,6 +2992,8 @@ typedef struct Ark_MenuItemOptions Ark_MenuItemOptions;
 typedef struct Opt_MenuItemOptions Opt_MenuItemOptions;
 typedef struct Ark_MenuMaskType Ark_MenuMaskType;
 typedef struct Opt_MenuMaskType Opt_MenuMaskType;
+typedef struct Ark_MotionBlurOptions Ark_MotionBlurOptions;
+typedef struct Opt_MotionBlurOptions Opt_MotionBlurOptions;
 typedef struct Ark_NativeXComponentParameters Ark_NativeXComponentParameters;
 typedef struct Opt_NativeXComponentParameters Opt_NativeXComponentParameters;
 typedef struct Ark_NavDestinationCommonTitle Ark_NavDestinationCommonTitle;
@@ -8162,14 +8162,6 @@ typedef struct Opt_Float64 {
     Ark_Tag tag;
     Ark_Float64 value;
 } Opt_Float64;
-typedef struct Ark_ForegroundEffectOptions {
-    /* kind: Interface */
-    Ark_Float64 radius;
-} Ark_ForegroundEffectOptions;
-typedef struct Opt_ForegroundEffectOptions {
-    Ark_Tag tag;
-    Ark_ForegroundEffectOptions value;
-} Opt_ForegroundEffectOptions;
 typedef struct Ark_FormSize {
     /* kind: Interface */
     Ark_Float64 width;
@@ -8416,24 +8408,6 @@ typedef struct Opt_MicrophoneCaptureStateChangeInfo {
     Ark_Tag tag;
     Ark_MicrophoneCaptureStateChangeInfo value;
 } Opt_MicrophoneCaptureStateChangeInfo;
-typedef struct Ark_MotionBlurAnchor {
-    /* kind: Interface */
-    Ark_Float64 x;
-    Ark_Float64 y;
-} Ark_MotionBlurAnchor;
-typedef struct Opt_MotionBlurAnchor {
-    Ark_Tag tag;
-    Ark_MotionBlurAnchor value;
-} Opt_MotionBlurAnchor;
-typedef struct Ark_MotionBlurOptions {
-    /* kind: Interface */
-    Ark_Float64 radius;
-    Ark_MotionBlurAnchor anchor;
-} Ark_MotionBlurOptions;
-typedef struct Opt_MotionBlurOptions {
-    Ark_Tag tag;
-    Ark_MotionBlurOptions value;
-} Opt_MotionBlurOptions;
 typedef struct Opt_MultiAppMode {
     Ark_Tag tag;
     Ark_MultiAppMode value;
@@ -14752,7 +14726,7 @@ typedef struct Opt_BlankScreenDetectionConfig {
 } Opt_BlankScreenDetectionConfig;
 typedef struct Ark_BlurOptions {
     /* kind: Interface */
-    Ark_Tuple_F64_F64 grayscale;
+    Opt_Tuple_F64_F64 grayscale;
 } Ark_BlurOptions;
 typedef struct Opt_BlurOptions {
     Ark_Tag tag;
@@ -15627,6 +15601,14 @@ typedef struct Opt_FontSettingOptions {
     Ark_Tag tag;
     Ark_FontSettingOptions value;
 } Opt_FontSettingOptions;
+typedef struct Ark_ForegroundEffectOptions {
+    /* kind: Interface */
+    Opt_Float64 radius;
+} Ark_ForegroundEffectOptions;
+typedef struct Opt_ForegroundEffectOptions {
+    Ark_Tag tag;
+    Ark_ForegroundEffectOptions value;
+} Opt_ForegroundEffectOptions;
 typedef struct Ark_FormCallbackInfo {
     /* kind: Interface */
     Ark_Int64 id;
@@ -16010,8 +15992,8 @@ typedef struct Opt_LengthMetricsCustom {
 } Opt_LengthMetricsCustom;
 typedef struct Ark_LinearGradientBlurOptions {
     /* kind: Interface */
-    Array_FractionStop fractionStops;
-    Ark_GradientDirection direction;
+    Opt_Array_FractionStop fractionStops;
+    Opt_GradientDirection direction;
 } Ark_LinearGradientBlurOptions;
 typedef struct Opt_LinearGradientBlurOptions {
     Ark_Tag tag;
@@ -16207,6 +16189,15 @@ typedef struct Opt_ModuleMetadata {
     Ark_Tag tag;
     Ark_ModuleMetadata value;
 } Opt_ModuleMetadata;
+typedef struct Ark_MotionBlurAnchor {
+    /* kind: Interface */
+    Opt_Float64 x;
+    Opt_Float64 y;
+} Ark_MotionBlurAnchor;
+typedef struct Opt_MotionBlurAnchor {
+    Ark_Tag tag;
+    Ark_MotionBlurAnchor value;
+} Opt_MotionBlurAnchor;
 typedef struct Ark_MotionPathOptions {
     /* kind: Interface */
     Ark_String path;
@@ -19011,7 +19002,7 @@ typedef struct Opt_BackgroundBlurStyleOptions {
 } Opt_BackgroundBlurStyleOptions;
 typedef struct Ark_BackgroundEffectOptions {
     /* kind: Interface */
-    Ark_Float64 radius;
+    Opt_Float64 radius;
     Opt_Float64 saturation;
     Opt_Float64 brightness;
     Opt_ResourceColor color;
@@ -19598,6 +19589,15 @@ typedef struct Opt_MenuMaskType {
     Ark_Tag tag;
     Ark_MenuMaskType value;
 } Opt_MenuMaskType;
+typedef struct Ark_MotionBlurOptions {
+    /* kind: Interface */
+    Opt_Float64 radius;
+    Opt_MotionBlurAnchor anchor;
+} Ark_MotionBlurOptions;
+typedef struct Opt_MotionBlurOptions {
+    Ark_Tag tag;
+    Ark_MotionBlurOptions value;
+} Opt_MotionBlurOptions;
 typedef struct Ark_NativeXComponentParameters {
     /* kind: Interface */
     Ark_XComponentType type;
@@ -19997,7 +19997,7 @@ typedef struct Opt_SelectOption {
 } Opt_SelectOption;
 typedef struct Ark_ShadowOptions {
     /* kind: Interface */
-    Ark_Union_F64_Resource radius;
+    Opt_Union_F64_Resource radius;
     Opt_ShadowType type;
     Opt_Union_Color_String_Resource_ColoringStrategy color;
     Opt_Union_F64_Resource offsetX;

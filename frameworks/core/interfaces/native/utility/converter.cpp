@@ -2938,14 +2938,15 @@ AnimationOption Convert(const Ark_AnimateParam& src)
 template<>
 BlurOption Convert(const Ark_BlurOptions& src)
 {
-    auto value0 = Converter::Convert<int32_t>(src.grayscale.value0);
-    auto value1 = Converter::Convert<int32_t>(src.grayscale.value1);
+    auto value = GetOpt(src.grayscale);
+    auto grayscaleValue0 = OPT_CONVERT_FIELD(int32_t, value, value0).value_or(0);
+    auto grayscaleValue1 = OPT_CONVERT_FIELD(int32_t, value, value1).value_or(0);
     constexpr int32_t GRAYSCALE_MAX = 127;
     constexpr int32_t GRAYSCALE_MIN = 0;
-    value0 = (value0 < GRAYSCALE_MIN || value0 > GRAYSCALE_MAX) ? 0 : value0;
-    value1 = (value1 < GRAYSCALE_MIN || value1 > GRAYSCALE_MAX) ? 0 : value1;
+    grayscaleValue0 = (grayscaleValue0 < GRAYSCALE_MIN || grayscaleValue0 > GRAYSCALE_MAX) ? 0 : grayscaleValue0;
+    grayscaleValue1 = (grayscaleValue1 < GRAYSCALE_MIN || grayscaleValue1 > GRAYSCALE_MAX) ? 0 : grayscaleValue1;
     return BlurOption {
-        .grayscale = { value0, value1 }
+        .grayscale = { grayscaleValue0, grayscaleValue1 }
     };
 }
 

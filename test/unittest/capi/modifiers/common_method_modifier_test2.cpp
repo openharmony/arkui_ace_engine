@@ -116,8 +116,9 @@ namespace Converter {
     Ark_BlurOptions ArkCreate(double v0, double v1)
     {
         Ark_BlurOptions result;
-        result.grayscale.value0 = ArkValue<Ark_Float64>(v0);
-        result.grayscale.value1 = ArkValue<Ark_Float64>(v1);
+        auto value0 = Converter::ArkValue<Ark_Float64>(v0);
+        auto value1 = Converter::ArkValue<Ark_Float64>(v1);
+        result.grayscale = Converter::ArkValue<Opt_Tuple_F64_F64>(Ark_Tuple_F64_F64{value0, value1});
         return result;
     }
 }
@@ -541,7 +542,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setBackgroundEffectTestValidValues,
     ASSERT_NE(renderMock, nullptr);
 
     Ark_BackgroundEffectOptions arkInputValValid = {
-        .radius = ArkValue<Ark_Float64>(123.45f),
+        .radius = ArkValue<Opt_Float64>(123.45f),
         .saturation = ArkValue<Opt_Float64>(0.123f),
         .brightness = ArkValue<Opt_Float64>(100),
         .color = ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123123),
@@ -577,7 +578,7 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundEffectTest, TestSize.Level1)
     ASSERT_NE(renderMock, nullptr);
 
     Ark_ForegroundEffectOptions arkInputValValid = {
-        .radius = ArkValue<Ark_Float64>(VALID_VAL),
+        .radius = ArkValue<Opt_Float64>(VALID_VAL),
     };
     auto inputValValid = Converter::ArkValue<Opt_ForegroundEffectOptions>(arkInputValValid);
     modifier_->setForegroundEffect(node_, &inputValValid);
@@ -585,7 +586,7 @@ HWTEST_F(CommonMethodModifierTest2, setForegroundEffectTest, TestSize.Level1)
     EXPECT_EQ(renderMock->GetForegroundEffect().value(), VALID_VAL);
 
     Ark_ForegroundEffectOptions arkInputValInvalid = {
-        .radius = ArkValue<Ark_Float64>(INT_MIN),
+        .radius = ArkValue<Opt_Float64>(INT_MIN),
     };
     auto inputValInvalid = Converter::ArkValue<Opt_ForegroundEffectOptions>(arkInputValInvalid);
     modifier_->setForegroundEffect(node_, &inputValInvalid);
@@ -1194,7 +1195,7 @@ HWTEST_F(CommonMethodModifierTest2, DISABLED_setShadow, TestSize.Level1)
         .type = Converter::ArkValue<Opt_ShadowType>(Ark_ShadowType::ARK_SHADOW_TYPE_BLUR),
         .offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(6),
         .offsetY = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(10),
-        .radius = Converter::ArkUnion<Ark_Union_F64_Resource, Ark_Float64>(14),
+        .radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(14),
     };
     auto inputValue = Converter::ArkUnion<Opt_Union_ShadowOptions_ShadowStyle, Ark_ShadowOptions>(arkShadowOptions);
     modifier_->setShadow(node_, &inputValue);
