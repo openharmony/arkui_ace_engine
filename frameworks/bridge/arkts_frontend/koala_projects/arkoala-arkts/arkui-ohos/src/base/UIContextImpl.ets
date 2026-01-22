@@ -65,7 +65,7 @@ import { dragController } from '@ohos/arkui/dragController';
 import { UIContextAtomicServiceBar, UIContextGetInfo } from 'arkui/component/idlize';
 import { SheetOptions } from '#generated';
 import { GlobalScope } from './../framework/GlobalScope';
-import { default as mediaquery } from '@ohos.mediaquery';
+import { default as mediaquery } from '@ohos/mediaquery';
 import { CustomBuilder, CustomBuilderT, ArkComponentRootPeer, DragItemInfo, Callback } from 'arkui/framework';
 import { AsyncCallback } from '#external';
 import { createUiDetachedRoot, createUiDetachedRootT, destroyUiDetachedRoot } from 'arkui/ArkUIEntry';
