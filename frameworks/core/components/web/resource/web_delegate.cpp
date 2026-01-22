@@ -1695,7 +1695,7 @@ void WebDelegate::AddJavascriptInterface(const std::string& objectName, const st
                 std::string permission;
                 // webcontroller not support object, so the object_id param
                 // assign error code
-                delegate->nweb_->RegisterArkJSfunctionV2(
+                delegate->nweb_->RegisterArkJSfunction(
                     objectName, methodList, asyncMethodList,
                     static_cast<int32_t>(JavaScriptObjIdErrorCode::WEBCONTROLLERERROR),
                     permission);
