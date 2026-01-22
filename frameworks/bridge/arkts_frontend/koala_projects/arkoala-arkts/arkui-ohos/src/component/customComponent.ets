@@ -179,7 +179,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
             const layout = this.instance as LayoutCallbacks;
             const onPlaceChildren = Class.of(layout).getInstanceMethod('onPlaceChildren');
             const result = onPlaceChildren!.getOwner() === Class.from<LayoutCallbacks>();
-            return result ;
+            return result;
         }
         return false;    
     }
