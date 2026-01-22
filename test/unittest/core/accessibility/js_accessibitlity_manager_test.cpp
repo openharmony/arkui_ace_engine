@@ -2380,6 +2380,27 @@ HWTEST_F(JsAccessibilityManagerTest, GetComponentTypeAndPageIdByNodeIdTest001, T
 }
 
 /**
+* @tc.name: GetNextFocusableNodeTest001
+* @tc.desc: test GetNextFocusableNodeTest
+* @tc.type: FUNC
+*/
+HWTEST_F(JsAccessibilityManagerTest, GetNextFocusableNodeTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. construct jsAccessibilityManager.
+     */
+    auto jsAccessibilityManager = AceType::MakeRefPtr<MockJsAccessibilityManager>();
+    ASSERT_NE(jsAccessibilityManager, nullptr);
+
+    /**
+     * @tc.steps: step2. test GetNextFocusableNodeTest.
+     */
+    std::list<RefPtr<AccessibilityNode>> nodeList;
+    auto focusableNode = jsAccessibilityManager->GetNextFocusableNode(nodeList, frameNode);
+    EXPECT_EQ(focusableNode, nullptr);
+}
+
+/**
 * @tc.name: IsSendAccessibilityEventTest001
 * @tc.desc: IsSendAccessibilityEvent in UIExtensionWindow
 * @tc.type: FUNC
