@@ -87,6 +87,9 @@ int32_t RichEditorEditTestNg::CheckMaxLines(int32_t maxLines)
  */
 HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. get richEditor pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
@@ -94,6 +97,10 @@ HWTEST_F(RichEditorEditTestNg, RichEditorInsertValue001, TestSize.Level0)
     richEditorPattern->CalcInsertValueObj(info);
     EXPECT_EQ(info.GetSpanIndex(), 0);
     EXPECT_EQ(info.GetOffsetInSpan(), 0);
+
+    /**
+     * @tc.steps: step2. add text span
+     */
     AddSpan(INIT_VALUE_1);
     richEditorPattern->caretPosition_ = richEditorPattern->GetTextContentLength();
     richEditorPattern->CalcInsertValueObj(info);

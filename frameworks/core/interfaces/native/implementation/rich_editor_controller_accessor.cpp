@@ -828,10 +828,17 @@ void UpdateSpanStyleImpl(Ark_RichEditorController peer,
     CHECK_NULL_VOID(value);
     auto options = Converter::OptConvert<Converter::TextSpanOptionsForUpdate>(*value);
     auto updateSpanStyle = Converter::OptConvert<UpdateSpanStyle>(*value);
-    if (options && updateSpanStyle) {
-        peerImpl->SetUpdateSpanStyle(updateSpanStyle.value());
-        peerImpl->UpdateSpanStyleImpl(options.value());
+    CHECK_NULL_VOID(options && updateSpanStyle);
+    auto& textStyle = options->textStyle;
+    bool isUseFontColor = textStyle.has_value() && !updateSpanStyle->updateTextDecorationColor.has_value()
+        && updateSpanStyle->updateTextColor.has_value();
+    if (isUseFontColor) {
+        auto textColor = textStyle->GetTextColor();
+        updateSpanStyle->updateTextDecorationColor = textColor;
+        textStyle->SetTextDecorationColor(textColor);
     }
+    peerImpl->SetUpdateSpanStyle(updateSpanStyle.value());
+    peerImpl->UpdateSpanStyleImpl(options.value());
 }
 void UpdateParagraphStyleImpl(Ark_RichEditorController peer,
                               const Ark_RichEditorParagraphStyleOptions* value)
