@@ -41,7 +41,7 @@ struct AppInfo {
 const AppInfo KOALA_APP_INFO = {
     "arkui.ArkUIEntry.Application",
     "createApplication",
-    "C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}"
+    "C{std.core.String}C{std.core.String}C{std.core.String}zC{std.core.String}C{arkui.UserView.UserView}"
     "C{arkui.component.customComponent.EntryPoint}:C{arkui.ArkUIEntry.Application}",
     "start",
     "z:l",
@@ -155,7 +155,8 @@ UIContentErrorCode ArktsPluginFrontend::RunPage(const std::string& url, const st
     env->String_NewUTF8(pluginModuleName_.c_str(), pluginModuleName_.size(), &module);
 
     ani_ref appLocal{};
-    ANI_CALL(env, Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, false, module,
+    ani_string startName{};
+    ANI_CALL(env, Class_CallStaticMethod_Ref(appClass, create, &appLocal, aniUrl, aniParams, startName, false, module,
         legacyEntryPointObj, entryPointObj), return UIContentErrorCode::INVALID_URL);
 
     env->GlobalReference_Create(appLocal, &app_);
