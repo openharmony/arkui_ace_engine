@@ -2396,7 +2396,7 @@ HWTEST_F(JsAccessibilityManagerTest, GetNextFocusableNodeTest001, TestSize.Level
      * @tc.steps: step2. test GetNextFocusableNodeTest.
      */
     std::list<RefPtr<AccessibilityNode>> nodeList;
-    auto focusableNode = jsAccessibilityManager->GetNextFocusableNode(nodeList, frameNode);
+    auto focusableNode = jsAccessibilityManager->GetNextFocusableNode(nodeList, nullptr);
     EXPECT_EQ(focusableNode, nullptr);
 }
 
