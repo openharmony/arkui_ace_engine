@@ -844,7 +844,7 @@ struct ImageMenuItem {
       return '' as string;
     } else {
       let accessibilityText: string = '';
-      let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+      let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
       if (uiContent) {
         accessibilityText = (uiContent as common.UIAbilityContext).resourceManager
           .getStringSync((this.item.accessibilityText as Resource).id as Long)
@@ -869,7 +869,7 @@ struct ImageMenuItem {
         return '' as string;
       } else {
         let accessibilityText: string = '';
-        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
         if (uiContent) {
           accessibilityText = (uiContent as common.UIAbilityContext).resourceManager
             .getStringSync((this.item.accessibilityText as Resource).id as Long)
@@ -883,7 +883,7 @@ struct ImageMenuItem {
         return '' as string;
       } else {
         let label: string = '';
-        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
         if (uiContent) {
           label = (uiContent as common.UIAbilityContext).resourceManager
             .getStringSync((this.item.label as Resource).id as Long)
@@ -902,7 +902,7 @@ struct ImageMenuItem {
         return ' ' as string;
       } else {
         let accessibilityDescription: string = ' ';
-        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
         if (uiContent) {
           accessibilityDescription = (uiContent as common.UIAbilityContext).resourceManager
             .getStringSync((this.item.accessibilityDescription as Resource).id as Long)

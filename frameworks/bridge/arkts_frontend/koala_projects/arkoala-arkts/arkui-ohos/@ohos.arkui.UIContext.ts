@@ -560,13 +560,6 @@ export class UIContext {
         let instance = UIContextUtil.resolveUIContext();
         return new ResolvedUIContext(instance[0] as int32, instance[1] as ResolveStrategy);
     }
-    static getFocusedUIContext(): UIContext | undefined {
-        const instanceId = ArkUIAniModule._Common_GetFocused_InstanceId();
-        if (instanceId === -1) {
-            return undefined;
-        }
-        return UIContextUtil.getOrCreateUIContextById(instanceId);
-    }
     public isAvailable() : boolean {
         throw Error("isAvailable not implemented in UIContext!")
     }

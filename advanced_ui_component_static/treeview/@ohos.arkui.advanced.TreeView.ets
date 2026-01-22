@@ -2072,7 +2072,7 @@ export class TreeController {
         if (typeof nodeParam.primaryTitle === 'string') {
           primaryTitle = nodeParam.primaryTitle as string;
         } else {
-          let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+          let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
           if (uiContent) {
             primaryTitle =
               (uiContent as common.UIAbilityContext).resourceManager.getStringSync((nodeParam.primaryTitle as Resource).id as Long)
@@ -3189,7 +3189,7 @@ export class ListNodeDataSource extends BasicDataSource {
   }
 
   public sendAccessibility(textAnnouncedForAccessibility: string): void {
-    let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+    let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
     let bundleName: string = 'defaultBundle';
     if (uiContent) {
       bundleName = (uiContent as common.UIAbilityContext)?.abilityInfo?.bundleName as string;
@@ -3209,7 +3209,7 @@ export class ListNodeDataSource extends BasicDataSource {
       if (typeof resource === 'string') {
         resourceString = resource as string;
       } else {
-        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
         if (uiContent) {
           resourceString =
             (uiContent as common.UIAbilityContext).resourceManager.getStringSync((resource as Resource).id as Long)
@@ -3425,7 +3425,7 @@ export class ListNodeDataSource extends BasicDataSource {
           if (typeof this.nodeIdAndSubtitleMap.get(currentNodeId) === 'string') {
             return this.nodeIdAndSubtitleMap.get(currentNodeId) as string;
           } else {
-            let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+            let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
             if (uiContent) {
               title =
                 (uiContent as common.UIAbilityContext).resourceManager
@@ -3675,7 +3675,7 @@ export class ListNodeDataSource extends BasicDataSource {
                   if (typeof tmp[i].getNodeItem().mainTitleNode?.title === 'string') {
                     nodeInfo.getNodeItem().mainTitleNode.title = tmp[i].getNodeItem().mainTitleNode?.title as string;
                   } else {
-                    let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+                    let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
                     if (uiContent) {
                       nodeInfo.getNodeItem().mainTitleNode.title =
                         (uiContent as common.UIAbilityContext).resourceManager.getStringSync((tmp[i].getNodeItem().mainTitleNode?.title as Resource).id as Long)
