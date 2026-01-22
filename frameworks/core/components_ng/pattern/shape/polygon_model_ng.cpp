@@ -93,6 +93,7 @@ void PolygonModelNG::SetPoints(FrameNode* frameNode, const ShapePoints& points,
             frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
         }
     };
+    ACE_UINODE_TRACE(frameNode);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     pattern->AddResObj("PolygonPoints", resObj, std::move(updateFunc));
 }
