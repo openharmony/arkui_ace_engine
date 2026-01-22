@@ -359,7 +359,7 @@ export function registerCompatibleStaticComponentCallback(): void {
 export function registerMakeBuilderParameterStaticProxy(): void {
     const global = ESValue.getGlobal();
     const registerCallback = global.getProperty('registerMakeBuilderParameterStaticProxy');
-    registerCallback.invoke(makeBuilderParameterStaticProxy<Object>);
+    registerCallback.invoke(makeBuilderParameterStaticProxy);
 }
 
 export function registerTransferCompatibleBuilderCallback(): void {
@@ -549,12 +549,11 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
         if (isDynamicObject(args)) {
             state = updateDynamicObjectForInterop(args);
         } else {
-            const objType = Class.of(args);
-            let handler = objType.getName().endsWith('@Proxy')
-            ? (proxy.Proxy.tryGetHandler(args) as InteropBuilderLiteralProxyHandler<T>) // a very slow call so need to judge proxy first
-            : undefined;
-            if (handler) {
-                state = handler!.state;
+            if (args instanceof reflect.Proxy) {
+                const handler = args.getHandler();
+                if (handler instanceof InteropBuilderLiteralProxyHandler) {
+                    state = handler!.state;
+                }
             }
         }
         const uiContext = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
@@ -580,9 +579,13 @@ export function transferCompatibleUpdatableBuilder<T extends Object>(
  * Creates a proxy for static object literal in the ArkTS 1.1 context
  * to intercept property getter operations.
  */
-function makeBuilderParameterStaticProxy<T extends Object>(name: string, value: T, sourceGetter: Any): T {
-    const result = proxy.Proxy.create(value, new InteropBuilderLiteralProxyHandler<T>(sourceGetter));
-    return result;
+function makeBuilderParameterStaticProxy(name: string, value: Object, sourceGetter: Any): Object {
+    const cls = Class.of(value);
+    const ifaces = cls.getInterfaces();
+    if (ifaces.length == 0) {
+        return value;
+    }
+    return reflect.Proxy.create(cls.getLinker(), ifaces, new InteropBuilderLiteralProxyHandler(value, sourceGetter));
 }
 
 /**
@@ -599,21 +602,36 @@ function updateDynamicObjectForInterop(args: Any): MutableState<int32> | undefin
     return state;
 }
 
-class InteropBuilderLiteralProxyHandler<T extends Object> extends proxy.DefaultProxyHandler<T> {
+class InteropBuilderLiteralProxyHandler implements reflect.InvocationHandler {
+    private static readonly GETTER_PREFIX = "%%get-"
+
     source: ESValue;
+    target: Object;
     state: MutableState<int32>;
-    constructor(source: Any) {
+
+    constructor(target: Object, source: Any) {
         this.source = ESValue.wrap(source)
+        this.target = target
         this.state = GlobalStateManager.instance.mutableState<int32>(0, true);
     }
 
-    override get(target: T, name: string): Any {
-        const propertyGetter: ESValue = this.source.getPropertySafe(name);
-        if (propertyGetter === ESValue.Undefined) {
-            return super.get(target, name);
+    override get(proxy: reflect.Proxy, method: reflect.InstanceMethod): Any {
+        const getterPrefixLength = InteropBuilderLiteralProxyHandler.GETTER_PREFIX.length
+        const propName = method.getName().substring(getterPrefixLength)
+        const propGetter: ESValue = this.source.getPropertySafe(propName);
+        if (propGetter.isUndefined()) {
+            return method.invoke(this.target);
         }
         this.state.value;
-        return propertyGetter.invoke().unwrap();
+        return propGetter.isFunction() ? propGetter.invoke().unwrap() : propGetter.unwrap()
+    }
+
+    override set(proxy: reflect.Proxy, method: reflect.InstanceMethod, value: Any): void {
+        method.invoke(this.target, [value])
+    }
+
+    override invoke(proxy: reflect.Proxy, method: reflect.InstanceMethod, args: FixedArray<Any>): void {
+        method.invoke(this.target, args)
     }
 }
 
