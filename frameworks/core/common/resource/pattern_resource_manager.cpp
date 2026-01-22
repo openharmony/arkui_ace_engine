@@ -29,6 +29,7 @@ void PatternResourceManager::AddResource(
         return;
     }
     if (resMap_.count(key) > 0) {
+        LOGD("PatternResourceManager::AddResource resMap_ key: %{public}s", key.c_str());
         resCacheMap_.clear();
         resKeyArray_.erase(std::remove(resKeyArray_.begin(), resKeyArray_.end(), key), resKeyArray_.end());
     }
