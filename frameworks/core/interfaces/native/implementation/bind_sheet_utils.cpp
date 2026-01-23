@@ -41,25 +41,25 @@ std::pair<std::optional<OHOS::Ace::Dimension>, std::optional<OHOS::Ace::Dimensio
 
 void BindSheetUtil::ParseLifecycleCallbacks(SheetCallbacks& callbacks, const Ark_SheetOptions& sheetOptions)
 {
-    auto onAppear = Converter::OptConvert<Callback_Void>(sheetOptions.onAppear);
+    auto onAppear = Converter::OptConvert<VoidCallback>(sheetOptions.onAppear);
     if (onAppear) {
         callbacks.onAppear = [arkCallback = CallbackHelper(onAppear.value())]() {
             arkCallback.InvokeSync();
         };
     }
-    auto onDisappear = Converter::OptConvert<Callback_Void>(sheetOptions.onDisappear);
+    auto onDisappear = Converter::OptConvert<VoidCallback>(sheetOptions.onDisappear);
     if (onDisappear) {
         callbacks.onDisappear = [arkCallback = CallbackHelper(onDisappear.value())]() {
             arkCallback.InvokeSync();
         };
     }
-    auto onWillAppear = Converter::OptConvert<Callback_Void>(sheetOptions.onWillAppear);
+    auto onWillAppear = Converter::OptConvert<VoidCallback>(sheetOptions.onWillAppear);
     if (onWillAppear) {
         callbacks.onWillAppear = [arkCallback = CallbackHelper(onWillAppear.value())]() {
             arkCallback.InvokeSync();
         };
     }
-    auto onWillDisappear = Converter::OptConvert<Callback_Void>(sheetOptions.onWillDisappear);
+    auto onWillDisappear = Converter::OptConvert<VoidCallback>(sheetOptions.onWillDisappear);
     if (onWillDisappear) {
         callbacks.onWillDisappear = [arkCallback = CallbackHelper(onWillDisappear.value())]() {
             arkCallback.InvokeSync();
@@ -250,28 +250,28 @@ void BindSheetUtil::ParseContentCoverCallbacks(WeakPtr<FrameNode> weakNode, cons
     std::function<void()>& onWillShowCallback, std::function<void()>& onWillDismissCallback,
     std::function<void(const int32_t& info)>& onWillDismissFunc)
 {
-    auto onAppearValue = OptConvert<Callback_Void>(options.onAppear);
+    auto onAppearValue = OptConvert<VoidCallback>(options.onAppear);
     if (onAppearValue) {
         onShowCallback = [arkCallback = CallbackHelper(onAppearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
             arkCallback.InvokeSync();
         };
     }
-    auto onDisappearValue = OptConvert<Callback_Void>(options.onDisappear);
+    auto onDisappearValue = OptConvert<VoidCallback>(options.onDisappear);
     if (onDisappearValue) {
         onDismissCallback = [arkCallback = CallbackHelper(onDisappearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
             arkCallback.InvokeSync();
         };
     }
-    auto onWillAppearValue = OptConvert<Callback_Void>(options.onWillAppear);
+    auto onWillAppearValue = OptConvert<VoidCallback>(options.onWillAppear);
     if (onWillAppearValue) {
         onWillShowCallback = [arkCallback = CallbackHelper(onWillAppearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);
             arkCallback.InvokeSync();
         };
     }
-    auto onWillDisappearValue = OptConvert<Callback_Void>(options.onWillDisappear);
+    auto onWillDisappearValue = OptConvert<VoidCallback>(options.onWillDisappear);
     if (onWillDisappearValue) {
         onWillDismissCallback = [arkCallback = CallbackHelper(onWillDisappearValue.value()), weakNode]() {
             PipelineContext::SetCallBackNode(weakNode);

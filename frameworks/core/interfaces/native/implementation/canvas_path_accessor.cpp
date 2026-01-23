@@ -204,7 +204,7 @@ void RoundRectImpl(Ark_CanvasPath peer,
             auto radiiVal = Converter::Convert<double>(value);
             peer->Path2DRoundRect(x, y, width, height, radiiVal);
         },
-        [x = px, y = py, width = pw, height = ph, weak = AceType::WeakClaim(peerImpl)](const Array_Float64& value) {
+        [x = px, y = py, width = pw, height = ph, weak = AceType::WeakClaim(peerImpl)](const Array_F64& value) {
             auto peer = weak.Upgrade();
             CHECK_NULL_VOID(peer);
             auto radiiVal = Converter::Convert<std::vector<double>>(value);

@@ -352,7 +352,7 @@ void Unmarshalling0Impl(Ark_VMContext vmContext,
             Ark_Buffer arkBuffer = BufferKeeper::Allocate(buff.size());
             std::copy(buff.begin(), buff.end(), reinterpret_cast<uint8_t*>(arkBuffer.data));
             RefPtr<ExtSpan> result;
-            auto continuation = CallbackKeeper::Claim<Callback_StyledStringMarshallingValue_Void>(
+            auto continuation = CallbackKeeper::Claim<Callback_UserDataSpan_Void>(
                 [&result, spanStart, spanLength](Ark_UserDataSpan arkUserDataSpan) {
                 result = AceType::MakeRefPtr<UserDataSpanHolder>(arkUserDataSpan, spanStart, spanStart + spanLength);
             });

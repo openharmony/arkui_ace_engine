@@ -143,7 +143,7 @@ void AssignArkValue(Ark_DragEvent& dragEvent, const RefPtr<OHOS::Ace::DragEvent>
 void AssignArkValue(
     Ark_dragController_SpringLoadingContext& dst, const RefPtr<OHOS::Ace::DragSpringLoadingContext>& src)
 {
-    const auto peer = PeerUtils::CreatePeer<DragController_SpringLoadingContextPeer>();
+    const auto peer = PeerUtils::CreatePeer<dragController_SpringLoadingContextPeer>();
     peer->context = src;
     dst = peer;
 }
@@ -312,8 +312,9 @@ ACE_FORCE_EXPORT void AssignArkValue(Ark_ShadowOptions& dst, const Shadow& src, 
 {
     dst.radius = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(src.GetBlurRadius());
     dst.type = Converter::ArkValue<Opt_ShadowType>(src.GetShadowType());
-    dst.color = Converter::ArkUnion<Opt_Union_Color_String_Resource_ColoringStrategy, Ark_String>(
-        src.GetColor().ColorToString(), ctx);
+    dst.color = Converter::ArkUnion<
+        Opt_Union_arkui_component_enums_Color_String_Resource_ColoringStrategy, Ark_String>(
+            src.GetColor().ColorToString(), ctx);
     auto offset = src.GetOffset();
     dst.offsetX = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(offset.GetX());
     dst.offsetY = Converter::ArkUnion<Opt_Union_F64_Resource, Ark_Float64>(offset.GetY());
@@ -755,7 +756,7 @@ void AssignArkValue(Ark_ImageError& dst, const LoadImageFailEvent& src)
     dst.componentWidth = Converter::ArkValue<Ark_Int32>(src.GetComponentWidth());
     dst.componentHeight = Converter::ArkValue<Ark_Int32>(src.GetComponentHeight());
     dst.message = Converter::ArkValue<Ark_String>(src.GetErrorMessage());
-    dst.error = ArkValue<Opt_BusinessError>(std::nullopt);
+    dst.error = ArkValue<Opt_BusinessErrorInterface_Void>(std::nullopt);
 }
 
 void AssignArkValue(Ark_ImageLoadResult& dst, const LoadImageSuccessEvent& src)
@@ -959,10 +960,10 @@ std::optional<OHOS::Ace::NG::BorderRadiusProperty> ParseBorderRadiusString(const
 
 ACE_FORCE_EXPORT void AssignArkValue(Ark_RichEditorLayoutStyle& dst, const ImageStyleResult& src)
 {
-    dst.margin = ArkUnion<Opt_Union_Dimension_Margin>(Ark_Empty());
+    dst.margin = ArkUnion<Opt_Union_Dimension_Padding>(Ark_Empty());
     if (auto marginProp = ParseMarginString(src.margin)) {
         auto arkMargin = ArkValue<Ark_Padding>(marginProp.value(), Converter::FC);
-        dst.margin = ArkUnion<Opt_Union_Dimension_Margin, Ark_Padding>(arkMargin, Converter::FC);
+        dst.margin = ArkUnion<Opt_Union_Dimension_Padding, Ark_Padding>(arkMargin, Converter::FC);
     }
     dst.borderRadius = ArkUnion<Opt_Union_Dimension_BorderRadiuses>(Ark_Empty());
     auto borderRadius = ParseBorderRadiusString(src.borderRadius);

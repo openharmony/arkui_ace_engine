@@ -29,7 +29,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 
-std::optional<bool> ProcessBindableChecked(FrameNode* frameNode, const Opt_Union_Boolean_Bindable* value)
+std::optional<bool> ProcessBindableChecked(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean* value)
 {
     std::optional<bool> result;
     Converter::VisitUnionPtr(
@@ -158,7 +158,8 @@ void ContentModifierRadioImpl(Ark_NativePointer node,
         arkConfig.enabled = Converter::ArkValue<Ark_Boolean>(config.enabled_);
         arkConfig.value = Converter::ArkValue<Ark_String>(config.value_, Converter::FC);
         arkConfig.checked = Converter::ArkValue<Ark_Boolean>(config.checked_);
-        auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>([frameNode](bool change) {
+        auto triggerCallback = CallbackKeeper::Claim<arkui_component_common_Callback_Boolean_Void>(
+            [frameNode](bool change) {
             RadioModelNG::SetChangeValue(frameNode, change);
         });
         arkConfig.triggerChange = triggerCallback.ArkValue();

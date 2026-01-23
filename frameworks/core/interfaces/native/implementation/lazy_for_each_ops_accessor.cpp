@@ -76,7 +76,7 @@ void NotifyChangeImpl(Ark_VMContext vmContext,
     CHECK_NULL_VOID(uiNode);
     auto lazyNode = AceType::DynamicCast<ArkoalaLazyNode>(uiNode);
     CHECK_NULL_VOID(lazyNode);
-    lazyNode->OnDataChange(startIdx, changeCnt, UINode::NotificationType::START_CHANGE_POSITION);
+    lazyNode->OnDataChange(startIndex, count, UINode::NotificationType::START_CHANGE_POSITION);
 }
 void SyncImpl(Ark_NativePointer node,
               Ark_Int32 totalCount,

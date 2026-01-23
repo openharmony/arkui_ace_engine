@@ -34,7 +34,7 @@ inline void AssignCast(std::optional<GridItemSize>& dst, const Ark_GridLayoutOpt
 }
 
 template<>
-inline void AssignCast(std::optional<std::set<int32_t>>& dst, const Array_Int32& src)
+inline void AssignCast(std::optional<std::set<int32_t>>& dst, const Array_I32& src)
 {
     auto length = static_cast<int32_t>(src.length);
     std::set<int32_t> indexesSet;
@@ -403,7 +403,7 @@ void SetOnItemDragStartImpl(Ark_NativePointer node,
         auto arkDragInfo = Converter::ArkValue<Ark_ItemDragInfo>(dragInfo);
         auto arkItemIndex = Converter::ArkValue<Ark_Int32>(itemIndex);
         auto builderOpt = callback.InvokeWithOptConvertResult<CustomNodeBuilder, Opt_CustomNodeBuilder,
-            Callback_Opt_CustomBuilder_Void>(arkDragInfo, arkItemIndex);
+            Callback_Opt_CustomNodeBuilder_Void>(arkDragInfo, arkItemIndex);
         if (builderOpt.has_value()) {
             auto uiNode = CallbackHelper(builderOpt.value()).BuildSync(node);
             ViewStackProcessor::GetInstance()->Push(uiNode);
@@ -538,13 +538,12 @@ void SetEditModeOptionsImpl(Ark_NativePointer node,
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
     EditModeOptions options;
-    auto convValue = Converter::GetOptPtr(value);
-    if (convValue) {
+    if (value) {
         auto enableGatherSelectedItemsAnimation =
-            Converter::OptConvert<bool>(convValue->enableGatherSelectedItemsAnimation);
+            Converter::OptConvert<bool>(value->enableGatherSelectedItemsAnimation);
         options.enableGatherSelectedItemsAnimation = enableGatherSelectedItemsAnimation.value_or(false);
 
-        auto onGetPreviewBadge = Converter::OptConvert<::Callback_Union_Boolean_I32>(convValue->onGetPreviewBadge);
+        auto onGetPreviewBadge = Converter::OptConvert<::OnGetPreviewBadgeCallback>(value->onGetPreviewBadge);
         if (onGetPreviewBadge) {
             auto modelCallback = [callback = CallbackHelper(*onGetPreviewBadge)]() -> PreviewBadge {
                 auto resultOpt = callback.InvokeWithOptConvertResult<PreviewBadge, Ark_Union_Boolean_I32,

@@ -26,7 +26,7 @@ void DestroyPeerImpl(Ark_arkui_component_idlize_Magnifier peer)
 }
 Ark_arkui_component_idlize_Magnifier ConstructImpl()
 {
-    auto peer = OHOS::Ace::NG::PeerUtils::CreatePeer<MagnifierPeer>();
+    auto peer = OHOS::Ace::NG::PeerUtils::CreatePeer<arkui_component_idlize_MagnifierPeer>();
     CHECK_NULL_RETURN(peer, {});
     return peer;
 }

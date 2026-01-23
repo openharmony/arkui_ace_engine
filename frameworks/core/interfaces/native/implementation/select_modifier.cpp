@@ -220,7 +220,7 @@ MenuParam Convert(const Ark_MenuOutlineOptions& src)
 } // namespace Converter
 namespace {
 std::optional<std::string> ProcessBindableValue(FrameNode* frameNode,
-    const Opt_Union_ResourceStr_Bindable_Bindable* value)
+    const Opt_Union_ResourceStr_Bindable_String_Bindable_Resource* value)
 {
     std::optional<std::string> result;
     Converter::VisitUnionPtr(value,
@@ -236,14 +236,14 @@ std::optional<std::string> ProcessBindableValue(FrameNode* frameNode,
             };
             SelectModelStatic::SetValueChangeEvent(frameNode, std::move(onEvent));
         },
-        [](const Ark_Bindable_Global_Resource_Resource& src) {
+        [](const Ark_Bindable_Resource& src) {
             // Invalid case, should be deleted from SDK
         },
         [] {});
     return result;
 }
 std::optional<int32_t> ProcessBindableSelected(FrameNode* frameNode,
-    const Opt_Union_I32_Resource_Bindable_Bindable* value)
+    const Opt_Union_I32_Resource_Bindable_I32_Bindable_Resource* value)
 {
     std::optional<int32_t> result;
     Converter::VisitUnionPtr(value,
@@ -262,7 +262,7 @@ std::optional<int32_t> ProcessBindableSelected(FrameNode* frameNode,
             };
             SelectModelStatic::SetSelectChangeEvent(frameNode, std::move(onEvent));
         },
-        [](const Ark_Bindable_Global_Resource_Resource& src) {
+        [](const Ark_Bindable_Resource& src) {
             // Invalid case, should be deleted from SDK
         },
         [] {});
@@ -274,9 +274,9 @@ std::optional<int32_t> ProcessBindableSelected(FrameNode* frameNode,
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace SelectAttributeModifier {
     void Selected1Impl(Ark_NativePointer node, const Opt_Union_I32_Resource* value);
-    void Font1Impl(Ark_NativePointer node, const Opt_Font* value);
-    void SelectedOptionFont1Impl(Ark_NativePointer node, const Opt_Font* value);
-    void OptionFont1Impl(Ark_NativePointer node, const Opt_Font* value);
+    void Font1Impl(Ark_NativePointer node, const Opt_arkui_component_units_Font* value);
+    void SelectedOptionFont1Impl(Ark_NativePointer node, const Opt_arkui_component_units_Font* value);
+    void OptionFont1Impl(Ark_NativePointer node, const Opt_arkui_component_units_Font* value);
     void Space1Impl(Ark_NativePointer node, const Opt_Length* value);
     void OptionWidth1Impl(Ark_NativePointer node,
         const Opt_Union_Dimension_OptionWidthMode* value);

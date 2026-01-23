@@ -50,14 +50,14 @@ void StopEditingImpl(Ark_TextEditControllerEx peer)
 Opt_Boolean SetCaretOffsetImpl(Ark_TextEditControllerEx peer,
                                Ark_Int32 offset)
 {
-    CHECK_NULL_RETURN(peer && offset, Converter::ArkValue<Opt_Boolean>(Ark_Empty()));
-    auto offsetConv = Converter::Convert<int32_t>(*offset);
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Boolean>(Ark_Empty()));
+    auto offsetConv = Converter::Convert<int32_t>(offset);
     return Converter::ArkValue<Opt_Boolean>(peer->SetCaretOffset(offsetConv));
 }
 Opt_Int32 GetCaretOffsetImpl(Ark_TextEditControllerEx peer)
 {
-    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Number>(Ark_Empty()));
-    return Converter::ArkValue<Opt_Number>(peer->GetCaretOffset());
+    CHECK_NULL_RETURN(peer, Converter::ArkValue<Opt_Int32>(Ark_Empty()));
+    return Converter::ArkValue<Opt_Int32>(peer->GetCaretOffset());
 }
 Opt_PreviewText GetPreviewTextImpl(Ark_TextEditControllerEx peer)
 {

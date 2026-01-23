@@ -69,7 +69,7 @@ Opt_Array_FingerInfo GetFingerInfosImpl(Ark_BaseGestureEvent peer)
     }
     fingerInfos.splice(fingerInfos.end(), touchFingers);
     fingerInfos.splice(fingerInfos.end(), otherFingers);
-    return Converter::ArkValue<Array_FingerInfo>(fingerInfos, Converter::FC);
+    return Converter::ArkValue<Opt_Array_FingerInfo>(fingerInfos, Converter::FC);
 }
 void SetFingerInfosImpl(Ark_BaseGestureEvent peer,
                         const Opt_Array_FingerInfo* fingerInfos)

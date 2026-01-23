@@ -58,7 +58,7 @@ void XComponentControllerPeerImpl::TriggerStartImageAnalyzer(Ark_VMContext vmCon
     });
     wrapAnalyzerConfigImpl = nullptr;
 }
-void XComponentControllerPeerImpl::SetOnSurfaceCreatedEvent(const Callback_String_Void& callback)
+void XComponentControllerPeerImpl::SetOnSurfaceCreatedEvent(const synthetic_Callback_String_Void& callback)
 {
     arkOnSurfaceCreated = callback;
     onSurfaceCreatedEvent = [arkCallback = CallbackHelper(callback)]
@@ -81,7 +81,7 @@ void XComponentControllerPeerImpl::SetOnSurfaceChangedEvent(const Callback_Strin
         arkCallback.InvokeSync(arkSurfaceId, arkSurfaceRect);
     };
 }
-void XComponentControllerPeerImpl::SetOnSurfaceDestroyedEvent(const Callback_String_Void& callback)
+void XComponentControllerPeerImpl::SetOnSurfaceDestroyedEvent(const synthetic_Callback_String_Void& callback)
 {
     arkOnSurfaceDestroyed = callback;
     onSurfaceDestroyedEvent = [arkCallback = CallbackHelper(callback)]

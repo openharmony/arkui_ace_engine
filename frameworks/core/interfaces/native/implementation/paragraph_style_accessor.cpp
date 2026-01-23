@@ -164,20 +164,20 @@ Opt_Float64 GetParagraphSpacingImpl(Ark_ParagraphStyle peer)
 }
 Opt_TextDirection GetTextDirectionImpl(Ark_ParagraphStyle peer)
 {
+    auto invalid = Converter::ArkValue<Opt_TextDirection>();
+    CHECK_NULL_RETURN(peer, invalid);
+    CHECK_NULL_RETURN(peer->span, invalid);
+    auto style = peer->span->GetParagraphStyle();
+    return Converter::ArkValue<Opt_TextDirection>(style.textDirection);
+}
+Opt_LeadingMarginSpan GetLeadingMarginSpanImpl(Ark_ParagraphStyle peer)
+{
     auto invalid = Converter::ArkValue<Opt_LeadingMarginSpan>();
     CHECK_NULL_RETURN(peer, invalid);
     CHECK_NULL_RETURN(peer->span, invalid);
     auto style = peer->span->GetParagraphStyle();
     auto result = Converter::ArkValue<Opt_LeadingMarginSpan>(style.drawableLeadingMargin);
     return result;
-}
-Opt_LeadingMarginSpan GetLeadingMarginSpanImpl(Ark_ParagraphStyle peer)
-{
-    auto invalid = Converter::ArkValue<Opt_TextDirection>();
-    CHECK_NULL_RETURN(peer, invalid);
-    CHECK_NULL_RETURN(peer->span, invalid);
-    auto style = peer->span->GetParagraphStyle();
-    return Converter::ArkValue<Opt_TextDirection>(style.textDirection);
 }
 } // ParagraphStyleAccessor
 const GENERATED_ArkUIParagraphStyleAccessor* GetParagraphStyleAccessor()

@@ -317,7 +317,7 @@ void HandleUnbindTabsFromScrollable(Ark_TabsController arkTabsController, Ark_Sc
     }
 }
 
-std::optional<std::string> ConvertString(const Ark_Union_Number_String& src)
+std::optional<std::string> ConvertString(const Ark_Union_I32_String& src)
 {
     std::optional<std::string> value;
     auto selector = src.selector;
@@ -326,7 +326,7 @@ std::optional<std::string> ConvertString(const Ark_Union_Number_String& src)
     }
     return value;
 }
-std::optional<int32_t> ConvertNumber(const Ark_Union_Number_String& src)
+std::optional<int32_t> ConvertNumber(const Ark_Union_I32_String& src)
 {
     std::optional<int32_t> value;
     auto selector = src.selector;

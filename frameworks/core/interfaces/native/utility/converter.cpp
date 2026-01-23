@@ -1310,13 +1310,13 @@ DimensionOffset Convert(const Ark_Position& src)
 }
 
 template<>
-FontMetaData Convert(const Ark_Font& src)
+FontMetaData Convert(const Ark_arkui_component_units_Font& src)
 {
     return { OptConvert<Dimension>(src.size), OptConvert<FontWeight>(src.weight) };
 }
 
 template<>
-ShadowColorStrategy Convert(const Ark_Color& src)
+ShadowColorStrategy Convert(const Ark_arkui_component_enums_Color& src)
 {
     return ShadowColorStrategy::NONE;
 }
@@ -1343,7 +1343,7 @@ FontFamilies Convert(const Ark_String& src)
 }
 
 template<>
-Font Convert(const Ark_Font& src)
+Font Convert(const Ark_arkui_component_units_Font& src)
 {
     Font font;
     if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(src.family); fontfamiliesOpt) {
@@ -2573,7 +2573,7 @@ std::optional<Dimension> OptConvertFromF64ResourceStr(const Opt_Union_F64_Resour
     return dimension;
 }
 
-Font OptConvertFromFont(const Opt_Font& src, bool isSubTabStyle)
+Font OptConvertFromFont(const Opt_arkui_component_units_Font& src, bool isSubTabStyle)
 {
     Font font;
     if (auto fontfamiliesOpt = Converter::OptConvert<Converter::FontFamilies>(src.value.family); fontfamiliesOpt) {
@@ -3456,6 +3456,12 @@ PickerValueType Convert(const Array_ResourceStr& src)
 }
 
 template<>
+PickerValueType Convert(const Array_String& src)
+{
+    return Converter::Convert<std::vector<std::string>>(src);
+}
+
+template<>
 PickerSelectedType Convert(const Ark_Int32& src)
 {
     auto selected = Converter::Convert<int32_t>(src);
@@ -3466,7 +3472,7 @@ PickerSelectedType Convert(const Ark_Int32& src)
 }
 
 template<>
-PickerSelectedType Convert(const Array_Int32& src)
+PickerSelectedType Convert(const Array_I32& src)
 {
     std::vector<uint32_t> dst;
     std::vector<int32_t> tmp = Converter::Convert<std::vector<int32_t>>(src);
@@ -3867,17 +3873,6 @@ OverflowMode Convert(const Ark_MaxLinesOptions& src)
 }
 
 template<>
-KeyboardAppearanceConfig Convert(const Ark_KeyboardAppearanceConfig& src)
-{
-    KeyboardAppearanceConfig dst;
-    dst.fluidLightMode = Converter::OptConvert<KeyboardFluidLightMode>(src.fluidLightMode).value_or(
-        KeyboardFluidLightMode::NONE);
-    dst.gradientMode = Converter::OptConvert<KeyboardGradientMode>(src.gradientMode).value_or(
-        KeyboardGradientMode::NONE);
-    return dst;
-}
-
-template<>
 ACE_FORCE_EXPORT SymbolShadow Convert(const Ark_ShadowOptions& src)
 {
     SymbolShadow dst;
@@ -4204,14 +4199,14 @@ void AssignCast(std::optional<double>& dst, const Ark_LevelOrderExtender& src)
 }
 
 template<>
-void AssignCast(std::optional<Color>& dst, const Ark_ColorMetrics& src)
+void AssignCast(std::optional<Color>& dst, const Ark_ColorMetricsExt& src)
 {
-    uint8_t red = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.red_));
-    uint8_t green = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.green_));
-    uint8_t blue = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.blue_));
-    uint8_t alpha = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.alpha_));
+    uint8_t red = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.red));
+    uint8_t green = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.green));
+    uint8_t blue = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.blue));
+    uint8_t alpha = static_cast<uint8_t>(Converter::Convert<uint32_t>(src.alpha));
     dst = Color::FromARGB(alpha, red, green, blue);
-    dst->SetColorSpace(static_cast<ColorSpace>(src.colorSpace_));
+    dst->SetColorSpace(static_cast<ColorSpace>(src.colorSpace));
 }
 
 template<>
@@ -4312,33 +4307,6 @@ void ConvertAngleWithDefault(const Opt_Union_F64_String& src, std::optional<floa
 
 void ConvertAngleWithDefault(const Ark_Union_F64_String& src, std::optional<float>& angle,
     float defaultValue)
-{
-    if (src.selector == 0) {
-        angle = Converter::Convert<float>(src.value0);
-    } else if (src.selector == 1) {
-        auto str = Converter::Convert<std::string>(src.value1);
-        double temp = static_cast<double>(defaultValue);
-        if (StringUtils::StringToDegree(str, temp)) {
-            angle = static_cast<float>(temp);
-        } else {
-            angle = defaultValue;
-        }
-    } else {
-        LOGW("unknown branch in %{public}s, %{public}d", __func__, src.selector);
-    }
-}
-
-// Note: These two overloads can be removed if Ark_LinearGradientOptions::angle type changes from
-// Opt_Union_Number_String to Opt_Union_F64_String
-void ConvertAngleWithDefault(const Opt_Union_Number_String& src, std::optional<float>& angle, float defaultValue)
-{
-    if (src.tag == INTEROP_TAG_UNDEFINED) {
-        return;
-    }
-    ConvertAngleWithDefault(src.value, angle, defaultValue);
-}
-
-void ConvertAngleWithDefault(const Ark_Union_Number_String& src, std::optional<float>& angle, float defaultValue)
 {
     if (src.selector == 0) {
         angle = Converter::Convert<float>(src.value0);

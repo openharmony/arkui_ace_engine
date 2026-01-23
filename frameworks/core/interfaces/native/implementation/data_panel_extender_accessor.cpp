@@ -20,13 +20,14 @@
 #include "frameworks/base/log/log_wrapper.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
-const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier()
+const GENERATED_ArkUIDataPanelExtenderAccessor* GetDataPanelExtenderAccessor()
 {
-    static const GENERATED_ArkUIDataPanelModifier* cachedModifier = nullptr;
+    static const GENERATED_ArkUIDataPanelExtenderAccessor* cachedModifier = nullptr;
     if (cachedModifier == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("DataPanel");
         CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const GENERATED_ArkUIDataPanelModifier*>(module->GetStaticModifier());
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIDataPanelExtenderAccessor*>(
+            module->GetCustomModifier("dataPanelExtenderAccessor"));
     }
     return cachedModifier;
 }

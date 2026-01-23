@@ -73,7 +73,7 @@ Map_AxisModel_F64 GetAxisMapImpl(Ark_FocusAxisEvent peer)
 {
     CHECK_NULL_RETURN(peer && peer->GetEventInfo(), {});
     auto eventInfo = peer->GetEventInfo();
-    return Converter::ArkValue<Map_AxisModel_Float64>(getAxisMapFromInfo(*eventInfo), Converter::FC);
+    return Converter::ArkValue<Map_AxisModel_F64>(getAxisMapFromInfo(*eventInfo), Converter::FC);
 }
 void SetAxisMapImpl(Ark_FocusAxisEvent peer,
                     const Map_AxisModel_F64* axisMap)

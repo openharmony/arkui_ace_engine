@@ -41,7 +41,7 @@ struct SearchButtonOptions {
     std::optional<bool> autoDisable;
 };
 
-std::optional<std::string> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_String_Bindable& value)
+std::optional<std::string> ProcessBindableValue(FrameNode* frameNode, const Opt_Union_String_Bindable_String& value)
 {
     std::optional<std::string> result;
     Converter::VisitUnion(
@@ -513,7 +513,7 @@ void SetOnWillInsertImpl(Ark_NativePointer node, const Opt_Callback_InsertValue_
         Converter::ConvContext ctx;
         Ark_InsertValue insertValue = { .insertOffset = Converter::ArkValue<Ark_Int32>(value.insertOffset),
             .insertValue = Converter::ArkValue<Ark_String>(value.insertValue, &ctx) };
-        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(insertValue)
+        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(insertValue)
             .value_or(true);
     };
     SearchModelNG::SetOnWillInsertValueEvent(frameNode, std::move(onWillInsert));
@@ -549,7 +549,7 @@ void SetOnWillDeleteImpl(Ark_NativePointer node, const Opt_Callback_DeleteValue_
         Ark_DeleteValue deleteValue = { .deleteOffset = Converter::ArkValue<Ark_Int32>(value.deleteOffset),
             .direction = Converter::ArkValue<Ark_TextDeleteDirection>(value.direction),
             .deleteValue = Converter::ArkValue<Ark_String>(value.deleteValue, &ctx) };
-        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(deleteValue)
+        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(deleteValue)
             .value_or(true);
     };
     SearchModelNG::SetOnWillDeleteEvent(frameNode, std::move(onWillDelete));
@@ -605,7 +605,7 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node, const Opt_EditMenuOptions* v
             auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
             auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
             auto arkResult =
-                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
     }
@@ -674,7 +674,7 @@ void SetOnWillChangeImpl(Ark_NativePointer node, const Opt_Callback_EditableText
             .previewText = Converter::ArkValue<Opt_PreviewText>(value.previewText, &ctx),
             .options = Converter::ArkValue<Opt_TextChangeOptions>(value, &ctx),
         };
-        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>(changeValue)
+        return callback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>(changeValue)
             .value_or(true);
     };
     SearchModelNG::SetOnWillChangeEvent(frameNode, std::move(onWillChange));

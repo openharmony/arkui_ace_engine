@@ -339,7 +339,7 @@ Array_F64 GetLineDashImpl(Ark_CanvasRenderer peer)
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
     CHECK_NULL_RETURN(peerImpl, {});
     auto lineDash = peerImpl->GetLineDash();
-    return Converter::ArkValue<Array_Float64>(lineDash, Converter::FC);
+    return Converter::ArkValue<Array_F64>(lineDash, Converter::FC);
 }
 void SetLineDashImpl(Ark_CanvasRenderer peer,
                      const Array_F64* segments)
@@ -665,7 +665,7 @@ void SetGlobalCompositeOperationImpl(Ark_CanvasRenderer peer,
 }
 Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern GetFillStyleImpl(Ark_CanvasRenderer peer)
 {
-    auto defaultValue = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
+    auto defaultValue = Converter::ArkUnion<Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
         Converter::ArkValue<Ark_String>("#000000"));
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -675,13 +675,13 @@ Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern Ge
         case ParamType::STRING:
         case ParamType::COLOR:
         case ParamType::INT32:
-            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
+            return Converter::ArkUnion<Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
                 Converter::ArkValue<Ark_String>(peerImpl->GetFillStyleString()));
         case ParamType::CANVAS_GRADIENT:
-            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(
+            return Converter::ArkUnion<Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(
                 peerImpl->GetFillStyleGradient());
         case ParamType::CANVAS_PATTERN:
-            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
+            return Converter::ArkUnion<Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
                 peerImpl->GetFillStylePattern());
         default:
             return defaultValue;
@@ -700,7 +700,7 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
             auto colorStr = Converter::Convert<std::string>(style);
             peerImpl->SetFillStyle(colorStr);
         },
-        [peerImpl](const Ark_Color& style) {
+        [peerImpl](const Ark_arkui_component_enums_Color& style) {
             auto color = Converter::OptConvert<Color>(style);
             peerImpl->SetFillStyle(color);
         },
@@ -718,9 +718,11 @@ void SetFillStyleImpl(Ark_CanvasRenderer peer,
         },
         []() {});
 }
-Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(Ark_CanvasRenderer peer)
+Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern GetStrokeStyleImpl(
+    Ark_CanvasRenderer peer)
 {
-    auto defaultValue = Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
+    auto defaultValue = Converter::ArkUnion<
+        Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
         Converter::ArkValue<Ark_String>("#000000"));
     CHECK_NULL_RETURN(peer, defaultValue);
     auto peerImpl = reinterpret_cast<CanvasRendererPeerImpl*>(peer);
@@ -730,13 +732,14 @@ Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern Ge
         case ParamType::STRING:
         case ParamType::COLOR:
         case ParamType::INT32:
-            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
+            return Converter::ArkUnion<
+                Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern, Ark_String>(
                 Converter::ArkValue<Ark_String>(peerImpl->GetStrokeStyleString()));
         case ParamType::CANVAS_GRADIENT:
-            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(
+            return Converter::ArkUnion<Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasGradient>(
                 peerImpl->GetStrokeStyleGradient());
         case ParamType::CANVAS_PATTERN:
-            return Converter::ArkUnion<Ark_Union_String_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
+            return Converter::ArkUnion<Ark_Union_String_arkui_component_enums_Color_I32_CanvasGradient_CanvasPattern, Ark_CanvasPattern>(
                 peerImpl->GetStrokeStylePattern());
         default:
             return defaultValue;
@@ -755,7 +758,7 @@ void SetStrokeStyleImpl(Ark_CanvasRenderer peer,
             auto colorStr = Converter::Convert<std::string>(style);
             peerImpl->SetStrokeStyle(colorStr);
         },
-        [peerImpl](const Ark_Color& style) {
+        [peerImpl](const Ark_arkui_component_enums_Color& style) {
             auto color = Converter::OptConvert<Color>(style);
             peerImpl->SetStrokeStyle(color);
         },

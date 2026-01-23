@@ -23,7 +23,7 @@
 namespace OHOS::Ace::NG {
 namespace {
 using SelectIconType = std::variant<bool, std::optional<std::string>, std::optional<SymbolGlyphModifierPeer *>>;
-std::optional<bool> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
+std::optional<bool> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean *value)
 {
     std::optional<bool> result;
     Converter::VisitUnionPtr(value,

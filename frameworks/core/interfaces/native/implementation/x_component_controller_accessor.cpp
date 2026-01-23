@@ -146,18 +146,6 @@ void StopImageAnalyzerImpl(Ark_XComponentController peer)
     peerImpl->controller->StopImageAnalyzer();
 #endif //XCOMPONENT_SUPPORTED
 }
-Opt_drawing_Canvas LockCanvasImpl(Ark_XComponentController peer)
-{
-    return {};
-}
-void UnlockCanvasAndPostImpl(Ark_XComponentController peer,
-                             Ark_drawing_Canvas canvas)
-{
-}
-void SetXComponentSurfaceConfigImpl(Ark_XComponentController peer,
-                                    const Ark_SurfaceConfig* config)
-{
-}
 synthetic_Callback_String_Void GetOnSurfaceCreatedImpl(Ark_XComponentController peer)
 {
 #ifdef XCOMPONENT_SUPPORTED

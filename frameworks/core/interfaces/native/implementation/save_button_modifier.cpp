@@ -117,7 +117,7 @@ void SetOnClickImpl(Ark_NativePointer node,
 #endif
         const auto event = Converter::SyncEvent<Ark_ClickEvent>(info);
         Ark_SaveButtonOnClickResult arkResult = Converter::ArkValue<Ark_SaveButtonOnClickResult>(res);
-        auto error = Converter::ArkValue<Opt_BusinessError>();
+        auto error = Converter::ArkValue<Opt_BusinessErrorInterface_Void>();
         arkCallback.InvokeSync(event.ArkValue(), arkResult, error);
     };
 

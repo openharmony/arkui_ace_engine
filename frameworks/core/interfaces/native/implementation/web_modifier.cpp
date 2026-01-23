@@ -1282,8 +1282,6 @@ void SetOnVerifyPinImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //WebModelNG::SetOnVerifyPin(frameNode, convValue);
 }
 void SetOnWindowNewImpl(Ark_NativePointer node,
                         const Opt_Callback_OnWindowNewEvent_Void* value)
@@ -2253,7 +2251,7 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
             auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
             auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
             auto arkResult =
-                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
     }

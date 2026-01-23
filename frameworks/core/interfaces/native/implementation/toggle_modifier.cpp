@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<bool> ProcessBindableIsOn(FrameNode* frameNode, const Opt_Union_Boolean_Bindable& value)
+std::optional<bool> ProcessBindableIsOn(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean& value)
 {
     std::optional<bool> result;
     Converter::VisitUnion(value,

@@ -135,6 +135,18 @@ bool CheckParentCanAdopt(RefPtr<FrameNode>& node)
     CHECK_NULL_RETURN(node, false);
     return node->IsCNode() || node->IsArkTsFrameNode();
 }
+void ParseArrayFailNumber(std::vector<float>& indexes)
+{
+    indexes.clear();
+    indexes.emplace_back(0);
+}
+void ParseArrayResultNumber(std::vector<float>& indexes, NG::OffsetF offset)
+{
+    indexes.clear();
+    indexes.emplace_back(1);
+    indexes.emplace_back(offset.GetX());
+    indexes.emplace_back(offset.GetY());
+}
 } // namespace
 namespace FrameNodeExtenderAccessor {
 void DestroyPeerImpl(Ark_FrameNode peer)
@@ -1139,7 +1151,7 @@ Array_F64 GetNodePropertyValueImpl(Ark_FrameNode peer,
     CHECK_NULL_RETURN(frameNode, {});
     auto resultVector = ViewAbstractModelStatic::GetRenderNodePropertyValue(
         frameNode.GetRawPtr(), static_cast<AnimationPropertyType>(property));
-    return Converter::ArkValue<Array_Float64>(resultVector, Converter::FC);
+    return Converter::ArkValue<Array_F64>(resultVector, Converter::FC);
 }
 Ark_NativePointer GetFrameNodePtrImpl(Ark_FrameNode node)
 {
@@ -1251,47 +1263,33 @@ Ark_NativePointer GetRenderNodeImpl(Ark_NativePointer peer)
     auto nodePeer = reinterpret_cast<FrameNodePeer*>(peer);
     return nodePeer->GetRenderNodePeer();
 }
-void ParseArrayFailNumber(std::vector<float>& indexes)
-{
-    indexes.clear();
-    indexes.emplace_back(0);
-}
-
-void ParseArrayResultNumber(std::vector<float>& indexes, NG::OffsetF offset)
-{
-    indexes.clear();
-    indexes.emplace_back(1);
-    indexes.emplace_back(offset.GetX());
-    indexes.emplace_back(offset.GetY());
-}
-
-Array_Float64 ConvertPositionWithWindow(Ark_FrameNode peer, const Ark_Vector2* position, bool fromWindow)
+Array_F64 ConvertPositionWithWindow(Ark_FrameNode peer, const Ark_Vector2* position, bool fromWindow)
 {
     std::vector<float> indexes;
     ParseArrayFailNumber(indexes);
-    auto errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    auto errValue = Converter::ArkValue<Array_F64>(indexes, Converter::FC);
     CHECK_NULL_RETURN(position, errValue);
     auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(currentNode, errValue);
     auto isOnMainTree = currentNode->IsOnMainTree();
     if (!isOnMainTree) {
         indexes[0] = 2; // 2 means not on main tree and will pass to js
-        return Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+        return Converter::ArkValue<Array_F64>(indexes, Converter::FC);
     }
     auto xFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(position->x));
     auto yFloat = PipelineBase::Vp2PxWithCurrentDensity(Converter::Convert<float>(position->y));
     auto offset = currentNode->ConvertPositionToWindow({ xFloat, yFloat }, fromWindow);
     ParseArrayResultNumber(indexes,
         { PipelineBase::Px2VpWithCurrentDensity(offset.GetX()), PipelineBase::Px2VpWithCurrentDensity(offset.GetY()) });
-    auto resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    auto resultValue = Converter::ArkValue<Array_F64>(indexes, Converter::FC);
     return resultValue;
 }
 
-Array_Float64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark_Vector2* vector2)
+Array_F64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark_Vector2* vector2)
 {
     std::vector<float> indexes;
     ParseArrayFailNumber(indexes);
-    Array_Float64 errValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    Array_F64 errValue = Converter::ArkValue<Array_F64>(indexes, Converter::FC);
     CHECK_NULL_RETURN(vector2, errValue);
     auto currentNode = FrameNodePeer::GetFrameNodeByPeer(peer);
     CHECK_NULL_RETURN(currentNode, errValue);
@@ -1307,17 +1305,17 @@ Array_Float64 ConvertPointImpl(Ark_FrameNode peer, Ark_FrameNode node, const Ark
     auto offset =
         currentNode->ConvertPoint(NG::OffsetF(xFloat, yFloat), targetNode);
     ParseArrayResultNumber(indexes, offset);
-    Array_Float64 resultValue = Converter::ArkValue<Array_Float64>(indexes, Converter::FC);
+    Array_F64 resultValue = Converter::ArkValue<Array_F64>(indexes, Converter::FC);
     return resultValue;
 }
 
-Array_Float64 ConvertPositionToWindowImpl(Ark_FrameNode peer, const Ark_Vector2* positionByLocal)
+Array_F64 ConvertPositionToWindowImpl(Ark_FrameNode peer, const Ark_Vector2* positionByLocal)
 {
     CHECK_ON_UI_THREAD();
     return ConvertPositionWithWindow(peer, positionByLocal, false);
 }
 
-Array_Float64 ConvertPositionFromWindowImpl(Ark_FrameNode peer, const Ark_Vector2* positionByWindow)
+Array_F64 ConvertPositionFromWindowImpl(Ark_FrameNode peer, const Ark_Vector2* positionByWindow)
 {
     CHECK_ON_UI_THREAD();
     return ConvertPositionWithWindow(peer, positionByWindow, true);

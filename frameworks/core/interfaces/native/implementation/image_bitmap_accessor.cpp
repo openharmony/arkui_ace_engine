@@ -20,7 +20,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ImageBitmapAccessor {
-const auto ARK_ERROR_VALUE = Converter::ArkValue<Ark_Number>(0);
+const auto ARK_ERROR_VALUE = Converter::ArkValue<Ark_Float64>(0);
 void DestroyPeerImpl(Ark_ImageBitmap peer)
 {
     PeerUtils::DestroyPeer(peer);
@@ -57,13 +57,13 @@ Ark_Float64 GetHeightImpl(Ark_ImageBitmap peer)
 {
     CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
     auto height = peer->OnGetHeight();
-    return NG::Converter::ArkValue<Ark_Number>(static_cast<int32_t>(height));
+    return NG::Converter::ArkValue<Ark_Float64>(height);
 }
 Ark_Float64 GetWidthImpl(Ark_ImageBitmap peer)
 {
     CHECK_NULL_RETURN(peer, ARK_ERROR_VALUE);
     double width = peer->OnGetWidth();
-    return NG::Converter::ArkValue<Ark_Number>(static_cast<int32_t>(width));
+    return NG::Converter::ArkValue<Ark_Float64>(width);
 }
 } // ImageBitmapAccessor
 const GENERATED_ArkUIImageBitmapAccessor* GetImageBitmapAccessor()

@@ -63,7 +63,7 @@ Ark_Float64 GetDistanceImpl(Ark_PanRecognizer peer)
 }
 Map_SourceTool_F64 GetDistanceMapImpl(Ark_PanRecognizer peer)
 {
-    Map_SourceTool_Float64 result = {0, nullptr, nullptr};
+    Map_SourceTool_F64 result = {0, nullptr, nullptr};
     CHECK_NULL_RETURN(peer, result);
 
     auto recognizer = peer->GetRecognizer().Upgrade();

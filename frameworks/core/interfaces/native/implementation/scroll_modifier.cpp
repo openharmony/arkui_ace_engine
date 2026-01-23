@@ -67,7 +67,7 @@ std::vector<Dimension> ValidateDimensionArray(std::optional<std::vector<std::opt
     return out;
 }
 
-std::optional<float> ProcessBindableZoomScale(FrameNode* frameNode, const Opt_Union_F64_Bindable *value)
+std::optional<float> ProcessBindableZoomScale(FrameNode* frameNode, const Opt_Union_F64_Bindable_F64 *value)
 {
     std::optional<float> result;
     Converter::VisitUnionPtr(value,

@@ -156,7 +156,7 @@ Ark_FrameNode GetCanvasImpl(Ark_CanvasRenderingContext2D peer)
 {
     return FrameNodePeer::Create(static_cast<Ark_UIContext>(nullptr));
 }
-#endif WRONG_GEN_v140
+#endif // WRONG_GEN_v140
 } // CanvasRenderingContext2DAccessor
 const GENERATED_ArkUICanvasRenderingContext2DAccessor* GetCanvasRenderingContext2DAccessor()
 {

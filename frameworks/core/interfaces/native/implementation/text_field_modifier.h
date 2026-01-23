@@ -22,13 +22,13 @@ namespace TextFieldModifier {
 void SetWidthImpl(Ark_NativePointer node, const Opt_Union_Length_LayoutPolicy* value);
 void SetHeightImpl(Ark_NativePointer node, const Opt_Union_Length_LayoutPolicy* value);
 void SetPaddingImpl(Ark_NativePointer node, const Opt_Union_Padding_Length_LocalizedPadding* value);
-void SetMarginImpl(Ark_NativePointer node, const Opt_Union_Margin_Length_LocalizedMargin* value);
+void SetMarginImpl(Ark_NativePointer node, const Opt_Union_Padding_Length_LocalizedPadding* value);
 void SetBorderImpl(Ark_NativePointer node, const Opt_BorderOptions* value);
 void SetBorderWidthImpl(Ark_NativePointer node, const Opt_Union_Length_EdgeWidths_LocalizedEdgeWidths* value);
 void SetBorderColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColor_EdgeColors_LocalizedEdgeColors* value);
 void SetBorderStyleImpl(Ark_NativePointer node, const Opt_Union_BorderStyle_EdgeStyles* value);
 void SetBorderRadiusImpl(Ark_NativePointer node, const Opt_Union_Length_BorderRadiuses_LocalizedBorderRadiuses* value);
-void SetBackgroundColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColor_ColorMetrics* value);
+void SetBackgroundColorImpl(Ark_NativePointer node, const Opt_Union_ResourceColor_ColorMetricsExt* value);
 } // namespace TextFieldModifier
 } // namespace OHOS::Ace::NG::GeneratedModifier
 

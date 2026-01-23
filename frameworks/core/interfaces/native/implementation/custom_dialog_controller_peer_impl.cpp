@@ -24,11 +24,11 @@
 
 namespace OHOS::Ace::NG::Converter {
 template<>
-inline void AssignCast(std::optional<KeyboardAvoidMode>& dst, const Ark_KeyboardAvoidMode& src)
+inline void AssignCast(std::optional<KeyboardAvoidMode>& dst, const Ark_arkui_component_common_KeyboardAvoidMode& src)
 {
     switch (src) {
-        case ARK_KEYBOARD_AVOID_MODE_DEFAULT: dst = KeyboardAvoidMode::DEFAULT; break;
-        case ARK_KEYBOARD_AVOID_MODE_NONE: dst = KeyboardAvoidMode::NONE; break;
+        case ARK_ARKUI_COMPONENT_COMMON_KEYBOARD_AVOID_MODE_DEFAULT: dst = KeyboardAvoidMode::DEFAULT; break;
+        case ARK_ARKUI_COMPONENT_COMMON_KEYBOARD_AVOID_MODE_NONE: dst = KeyboardAvoidMode::NONE; break;
         default: LOGE("Unexpected enum value in Ark_KeyboardAvoidMode: %{public}d", src);
     }
 }
@@ -394,6 +394,11 @@ void CustomDialogControllerPeerImpl::SetDismiss(Opt_Callback_DismissDialogAction
     AddOnWillDismiss(dialogProperties_, onWillDismiss);
 }
 
+void CustomDialogControllerPeerImpl::SetDismiss(Opt_synthetic_Callback_DismissDialogAction_Void onWillDismiss)
+{
+    AddOnWillDismiss(dialogProperties_, onWillDismiss);
+}
+
 void CustomDialogControllerPeerImpl::SetWidth(Opt_Dimension width)
 {
     auto optWidth = OptConvertFromOptNumStrRes(width);
@@ -439,7 +444,7 @@ void CustomDialogControllerPeerImpl::SetBlurStyle(Opt_BlurStyle backgroundBlurSt
         std::optional<int32_t>(static_cast<int32_t>(result.value())) : std::nullopt;
 }
 
-void CustomDialogControllerPeerImpl::SetKeyboardAvoidMode(Opt_KeyboardAvoidMode keyboardAvoidMode)
+void CustomDialogControllerPeerImpl::SetKeyboardAvoidMode(Opt_arkui_component_common_KeyboardAvoidMode keyboardAvoidMode)
 {
     auto result = Converter::OptConvert<KeyboardAvoidMode>(keyboardAvoidMode);
     if (result) {

@@ -105,11 +105,14 @@ void SyncStackImpl(Ark_NavPathStack peer)
 void SetNavDestinationIdImpl(Ark_NativePointer ptr,
                              const Opt_String* id)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(ptr);
-    //auto convValue = Converter::OptConvert<type>(ptr); // for enums
-    //undefinedModelNG::SetNavDestinationId(frameNode, convValue);
+    auto peer = reinterpret_cast<Ark_NavPathInfo>(ptr);
+    CHECK_NULL_VOID(peer);
+    CHECK_NULL_VOID(id);
+    if (id->tag == InteropTag::INTEROP_TAG_UNDEFINED) {
+        peer->data.navDestinationId_ = "";
+        return;
+    }
+    peer->data.navDestinationId_ = Converter::Convert<std::string>(id->value);
 }
 void PushPathImpl(Ark_NavPathStack pathStack,
                   Ark_NavPathInfo info,

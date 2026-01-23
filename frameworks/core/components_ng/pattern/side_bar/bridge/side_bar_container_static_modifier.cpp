@@ -81,7 +81,7 @@ std::optional<Dimension> ProcessBindableSideBarWidth(FrameNode* frameNode, const
         [&result](const Ark_Length& src) {
             result = Converter::OptConvert<Dimension>(src);
         },
-        [&result, frameNode](const Ark_Bindable_Arkui_Component_Units_Length& src) {
+        [&result, frameNode](const Ark_Bindable_Length& src) {
             result = Converter::OptConvert<Dimension>(src.value);
             // Need to provide callback
         },
@@ -142,7 +142,7 @@ void AssignCast(std::optional<SideBarContainerType>& dst, const Ark_SideBarConta
     }
 }
 
-ControlButtonStyleIcon GetIconStyle(const Ark_Union_String_PixelMap_Resource& src)
+ControlButtonStyleIcon GetIconStyle(const Ark_Union_String_image_PixelMap_Resource& src)
 {
     ControlButtonStyleIcon ret = {};
     Converter::VisitUnion(src,

@@ -120,14 +120,6 @@ void AssignCast(std::optional<int32_t>& dst, const Ark_FormRenderingMode& src)
     }
 }
 template<>
-LiteralDimension Convert(const Ark_FormSize& src)
-{
-    return LiteralDimension {
-        .width = Dimension(Converter::Convert<double>(src.width)),
-        .height = Dimension(Converter::Convert<double>(src.height)),
-    };
-}
-template<>
 void AssignCast(std::optional<int32_t>& dst, const Ark_FormDimension& src)
 {
     switch (src) {
@@ -248,8 +240,6 @@ void SetColorModeImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    //auto convValue = value ? Converter::OptConvert<type>(*value) : std::nullopt;
-    //FormComponentModelNG::SetColorMode(frameNode, convValue);
 }
 void SetOnAcquiredImpl(Ark_NativePointer node,
                        const Opt_Callback_FormCallbackInfo_Void* value)

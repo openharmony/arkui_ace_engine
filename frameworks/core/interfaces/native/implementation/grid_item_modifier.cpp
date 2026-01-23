@@ -40,7 +40,7 @@ inline void AssignCast(std::optional<GridItemStyle>& dst, const Ark_GridItemOpti
 } // namespace OHOS::Ace::NG::Converter
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<bool> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
+std::optional<bool> ProcessBindableSelected(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean *value)
 {
     std::optional<bool> result;
     Converter::VisitUnionPtr(value,

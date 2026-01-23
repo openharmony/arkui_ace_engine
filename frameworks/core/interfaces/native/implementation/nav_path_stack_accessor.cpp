@@ -571,7 +571,7 @@ Array_I32 GetIndexByNameImpl(Ark_NavPathStack peer,
     std::vector<size_t> allIndexes = pathStack->NavigationContext::PathStack::GetIndexByName(pathName);
     std::vector<uint32_t> indexes;
     indexes.assign(allIndexes.begin(), allIndexes.end());
-    Array_Int32 result = Converter::ArkValue<Array_Int32>(indexes, Converter::FC);
+    Array_I32 result = Converter::ArkValue<Array_I32>(indexes, Converter::FC);
     return result;
 }
 Opt_NavPathStack GetParentImpl(Ark_NavPathStack peer)
@@ -625,19 +625,19 @@ void SetInterceptionImpl(Ark_NavPathStack peer,
                                const RefPtr<NG::NavDestinationContext>& from,
                                const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation,
                                bool isAnimated) {
-            Ark_Union_NavDestinationContext_NavBar tempfrom;
-            Ark_Union_NavDestinationContext_NavBar tempto;
+            Ark_Union_NavDestinationContext_String tempfrom;
+            Ark_Union_NavDestinationContext_String tempto;
             auto preDestination = AceType::DynamicCast<NG::NavDestinationContext>(from);
             if (!preDestination) {
-                tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_String>("navbar");
+                tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_String, Ark_String>("navbar");
             } else {
-                tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(from);
+                tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_String, Ark_NavDestinationContext>(from);
             }
             auto topDestination = AceType::DynamicCast<NG::NavDestinationContext>(to);
             if (!topDestination) {
-                tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_String>("navbar");
+                tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_String, Ark_String>("navbar");
             } else {
-                tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(to);
+                tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_String, Ark_NavDestinationContext>(to);
             }
             callback.InvokeSync(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation),
                 Converter::ArkValue<Ark_Boolean>(isAnimated));
@@ -648,19 +648,19 @@ void SetInterceptionImpl(Ark_NavPathStack peer,
                               const RefPtr<NG::NavDestinationContext>& from,
                               const RefPtr<NG::NavDestinationContext>& to, NG::NavigationOperation operation,
                               bool isAnimated) {
-            Ark_Union_NavDestinationContext_NavBar tempfrom;
-            Ark_Union_NavDestinationContext_NavBar tempto;
+            Ark_Union_NavDestinationContext_String tempfrom;
+            Ark_Union_NavDestinationContext_String tempto;
             auto preDestination = AceType::DynamicCast<NG::NavDestinationContext>(from);
             if (!preDestination) {
-                tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_String>("navbar");
+                tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_String, Ark_String>("navbar");
             } else {
-                tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(from);
+                tempfrom = Converter::ArkUnion<Ark_Union_NavDestinationContext_String, Ark_NavDestinationContext>(from);
             }
             auto topDestination = AceType::DynamicCast<NG::NavDestinationContext>(to);
             if (!topDestination) {
-                tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_String>("navbar");
+                tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_String, Ark_String>("navbar");
             } else {
-                tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_NavBar, Ark_NavDestinationContext>(to);
+                tempto = Converter::ArkUnion<Ark_Union_NavDestinationContext_String, Ark_NavDestinationContext>(to);
             }
             callback.InvokeSync(tempfrom, tempto, Converter::ArkValue<Ark_NavigationOperation>(operation),
                 Converter::ArkValue<Ark_Boolean>(isAnimated));
@@ -672,12 +672,12 @@ void SetInterceptionImpl(Ark_NavPathStack peer,
                                    const RefPtr<NG::NavigationStack> &stack,
                                    const RefPtr<NG::NavDestinationContext> &from, const int32_t index,
                                    bool isAnimated) {
-            Ark_Union_NavPathInfo_NavBar tempfrom;
+            Ark_Union_NavPathInfo_String tempfrom;
             auto preDestination = AceType::DynamicCast<NG::NavDestinationContext>(from);
             if (!preDestination) {
-                tempfrom = Converter::ArkUnion<Ark_Union_NavPathInfo_NavBar, Ark_String>("navbar");
+                tempfrom = Converter::ArkUnion<Ark_Union_NavPathInfo_String, Ark_String>("navbar");
             } else {
-                tempfrom = Converter::ArkUnion<Ark_Union_NavPathInfo_NavBar, Ark_NavPathInfo>(
+                tempfrom = Converter::ArkUnion<Ark_Union_NavPathInfo_String, Ark_NavPathInfo>(
                     AceType::DynamicCast<NavigationContext::JSNavPathInfoStatic>(from->GetNavPathInfo()));
             }
 
@@ -688,12 +688,12 @@ void SetInterceptionImpl(Ark_NavPathStack peer,
             auto curPathStack = curStack.Upgrade();
             CHECK_NULL_VOID(curPathStack);
 
-            Ark_Union_NavPathInfo_NavBar tempto;
+            Ark_Union_NavPathInfo_String tempto;
             auto pathInfo = curPathStack->PathStack::GetPathInfo(index);
             if (!pathInfo) {
-                tempto = Converter::ArkUnion<Ark_Union_NavPathInfo_NavBar, Ark_String>("navbar");
+                tempto = Converter::ArkUnion<Ark_Union_NavPathInfo_String, Ark_String>("navbar");
             } else {
-                tempto = Converter::ArkUnion<Ark_Union_NavPathInfo_NavBar, Ark_NavPathInfo>(*pathInfo);
+                tempto = Converter::ArkUnion<Ark_Union_NavPathInfo_String, Ark_NavPathInfo>(*pathInfo);
             }
             NG::NavigationOperation operation;
             auto replaceValue = curPathStack->PathStack::GetIsReplace();

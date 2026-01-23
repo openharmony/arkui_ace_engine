@@ -355,7 +355,7 @@ void SetAboutToIMEInputImpl(Ark_NativePointer node,
         frameNode](const RichEditorInsertValue& param) -> bool {
         Converter::ConvContext ctx;
         Ark_RichEditorInsertValue data = Converter::ArkValue<Ark_RichEditorInsertValue>(param, &ctx);
-        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(data);
         return Converter::Convert<bool>(result);
     };
     RichEditorModelNG::SetAboutToIMEInput(frameNode, std::move(onCallback));
@@ -409,7 +409,7 @@ void SetAboutToDeleteImpl(Ark_NativePointer node,
     auto onCallback = [arkCallback = CallbackHelper(*optValue), frameNode](const RichEditorDeleteValue& param) -> bool {
         Converter::ConvContext ctx;
         auto data = Converter::ArkValue<Ark_RichEditorDeleteValue>(param, &ctx);
-        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(data);
         return Converter::Convert<bool>(result);
     };
     RichEditorModelStatic::SetAboutToDelete(frameNode, std::move(onCallback));
@@ -592,7 +592,7 @@ void SetOnWillChangeImpl(Ark_NativePointer node,
         frameNode](const RichEditorChangeValue& param) -> bool {
         Converter::ConvContext ctx;
         auto data = Converter::ArkValue<Ark_RichEditorChangeValue>(param, &ctx);
-        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(data);
+        auto result = arkCallback.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(data);
         return Converter::Convert<bool>(result);
     };
     RichEditorModelNG::SetOnWillChange(frameNode, std::move(onCallback));
@@ -707,7 +707,7 @@ void SetEditMenuOptionsImpl(Ark_NativePointer node,
             auto menuItem = Converter::ArkValue<Ark_TextMenuItem>(menuOptionsParam);
             auto arkRange = Converter::ArkValue<Ark_TextRange>(range);
             auto arkResult =
-                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, Callback_Boolean_Void>(menuItem, arkRange);
+                arkMenuItemClick.InvokeWithObtainResult<Ark_Boolean, synthetic_Callback_Boolean_Void>(menuItem, arkRange);
             return Converter::Convert<bool>(arkResult);
         };
     }

@@ -55,7 +55,7 @@ void AssignCast(std::optional<AlignStyle>& dst, const Ark_IndexerAlign& src)
 
 } // namespace Converter
 namespace {
-int32_t ProcessBindableSelected(FrameNode* frameNode, const Ark_Union_I32_Bindable& value)
+int32_t ProcessBindableSelected(FrameNode* frameNode, const Ark_Union_I32_Bindable_I32& value)
 {
     int32_t result = 0;
     Converter::VisitUnion(value,
@@ -258,7 +258,7 @@ void SetOnRequestPopupDataImpl(Ark_NativePointer node,
     auto onEvent = [callback = CallbackHelper(*optValue)](const int32_t selected) -> std::vector<std::string> {
         auto arkValue = Converter::ArkValue<Ark_Int32>(selected);
         return callback.InvokeWithConvertResult<std::vector<std::string>, Array_String,
-            Callback_Array_String_Void>(arkValue);
+            synthetic_Callback_Array_String_Void>(arkValue);
     };
     IndexerModelStatic::SetOnRequestPopupData(frameNode, std::move(onEvent));
 }

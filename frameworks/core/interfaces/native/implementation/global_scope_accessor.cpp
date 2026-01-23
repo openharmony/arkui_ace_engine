@@ -35,7 +35,7 @@ Ark_Resource $rawfileImpl(const Ark_String* value)
 void AnimateToImmediatelyImpl(const Ark_AnimateParam* value,
                               const VoidCallback* processor)
 {
-    AnimateToInner(value, event, true);
+    AnimateToInner(value, processor, true);
 }
 void CursorControl_restoreDefaultImpl()
 {

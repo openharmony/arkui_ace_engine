@@ -18,4 +18,5 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
     void AddOnWillDismiss(DialogProperties& properties, Opt_Callback_DismissDialogAction_Void onWillDismiss);
+    void AddOnWillDismiss(DialogProperties& properties, Opt_synthetic_Callback_DismissDialogAction_Void onWillDismiss);
 }

@@ -30,7 +30,7 @@
 
 namespace OHOS::Ace::NG {
 namespace {
-std::optional<bool> ProcessBindableSelect(FrameNode* frameNode, const Opt_Union_Boolean_Bindable *value)
+std::optional<bool> ProcessBindableSelect(FrameNode* frameNode, const Opt_Union_Boolean_Bindable_Boolean *value)
 {
     std::optional<bool> result;
     Converter::VisitUnionPtr(value,
@@ -224,7 +224,7 @@ void ContentModifierCheckboxImpl(
         auto handler = [frameNode](Ark_Boolean retValue) {
             CheckBoxModelStatic::TriggerChange(frameNode, Converter::Convert<bool>(retValue));
         };
-        auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>(handler);
+        auto triggerCallback = CallbackKeeper::Claim<arkui_component_common_Callback_Boolean_Void>(handler);
         arkConfig.triggerChange = triggerCallback.ArkValue();
         auto boxNode = GeneratedApiImpl::GetContentNode(node);
         if (boxNode == nullptr) {

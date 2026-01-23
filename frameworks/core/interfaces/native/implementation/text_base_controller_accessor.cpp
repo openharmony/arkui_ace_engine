@@ -42,8 +42,8 @@ void SetSelectionImpl(Ark_TextBaseController peer,
                       const Opt_SelectionOptions* options)
 {
     CHECK_NULL_VOID(peer && selectionStart && selectionEnd);
-    auto selectionStartConv = Converter::Convert<int32_t>(*selectionStart);
-    auto selectionEndConv = Converter::Convert<int32_t>(*selectionEnd);
+    auto selectionStartConv = Converter::Convert<int32_t>(selectionStart);
+    auto selectionEndConv = Converter::Convert<int32_t>(selectionEnd);
     auto optionsConv = Converter::OptConvertPtr<SelectionOptions>(options);
     peer->SetSelection(selectionStartConv, selectionEndConv, optionsConv);
 }

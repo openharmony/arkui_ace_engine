@@ -116,7 +116,7 @@ void SetOnBackPressedImpl(Ark_NativePointer node,
         return;
     }
     auto onBackPressedEvent = [arkCallback = CallbackHelper(*optValue)]() -> bool {
-        return arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, Callback_Boolean_Void>().value_or(false);
+        return arkCallback.InvokeWithOptConvertResult<bool, Ark_Boolean, synthetic_Callback_Boolean_Void>().value_or(false);
     };
     NavDestinationModelStatic::SetOnBackPressed(frameNode, std::move(onBackPressedEvent));
 }

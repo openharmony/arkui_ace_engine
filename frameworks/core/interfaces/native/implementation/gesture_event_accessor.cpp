@@ -89,7 +89,7 @@ Opt_Array_FingerInfo GetFingerInfosImpl(Ark_GestureEvent peer)
     }
     fingerInfos.splice(fingerInfos.end(), touchFingers);
     fingerInfos.splice(fingerInfos.end(), otherFingers);
-    return Converter::ArkValue<Array_FingerInfo>(fingerInfos, Converter::FC);
+    return Converter::ArkValue<Opt_Array_FingerInfo>(fingerInfos, Converter::FC);
 }
 void SetFingerInfosImpl(Ark_GestureEvent peer,
                         const Opt_Array_FingerInfo* fingerInfos)
@@ -315,7 +315,7 @@ Opt_EventLocationInfo GetTapLocationImpl(Ark_GestureEvent peer)
             };
         }
     }
-    return Converter::ArkValue<Ark_EventLocationInfo>(tapLocation, Converter::FC);
+    return Converter::ArkValue<Opt_EventLocationInfo>(tapLocation, Converter::FC);
 }
 void SetTapLocationImpl(Ark_GestureEvent peer,
                         const Opt_EventLocationInfo* tapLocation)

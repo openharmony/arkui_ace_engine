@@ -49,7 +49,7 @@ Opt_EventLocationInfo GetTapLocationImpl(Ark_TapGestureEvent peer)
         };
     }
 
-    return Converter::ArkValue<Ark_EventLocationInfo>(tapLocation);
+    return Converter::ArkValue<Opt_EventLocationInfo>(tapLocation);
 }
 void SetTapLocationImpl(Ark_TapGestureEvent peer,
                         const Opt_EventLocationInfo* tapLocation)

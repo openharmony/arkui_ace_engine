@@ -17,6 +17,8 @@
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/tabs/tab_content_model_static.h"
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
+#include "core/interfaces/native/implementation/bottom_tab_bar_style_peer.h"
+#include "core/interfaces/native/implementation/sub_tab_bar_style_peer.h"
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
@@ -65,252 +67,36 @@ void SetTabBarCustomBuilder(FrameNode* frameNode, const CustomNodeBuilder& arkBu
 }
 } // namespace
 
-ImageType ConvertToImageType(DrawableType type)
-{
-    switch (type) {
-        case DrawableType::BASE:
-            return ImageType::DRAWABLE;
-        case DrawableType::LAYERED:
-            return ImageType::LAYERED_DRAWABLE;
-        case DrawableType::ANIMATED:
-            return ImageType::ANIMATED_DRAWABLE;
-        case DrawableType::PIXELMAP:
-            return ImageType::PIXELMAP_DRAWABLE;
-        default:
-            return ImageType::BASE;
-    }
-}
-
-bool ParseImageInfoConfig(const Ark_DrawableTabBarIndicator& src, ImageInfoConfig& config)
-{
-    if (src.drawable.tag == INTEROP_TAG_UNDEFINED) {
-        return false;
-    }
-    auto desc = Converter::Convert<DrawableDescriptor*>(src.drawable.value);
-    auto drawableType = desc->GetDrawableType();
-    config.type = ConvertToImageType(drawableType);
-    if (config.type == ImageType::ANIMATED_DRAWABLE) {
-        config.drawable = Referenced::Claim<DrawableDescriptor>(desc);
-        return true;
-    } else if (config.type == ImageType::PIXELMAP_DRAWABLE || config.type == ImageType::DRAWABLE ||
-               config.type == ImageType::LAYERED_DRAWABLE) {
-        config.pixelMap = desc->GetPixelMap();
-        return true;
-    }
-    return false;
-}
-
-void ParseIndicatorStyle(const Ark_DrawableTabBarIndicator& src, IndicatorStyle& indicatorStyle)
-{
-    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_VOID(pipeline);
-    auto tabTheme = pipeline->GetTheme<TabTheme>();
-    if (tabTheme) {
-        indicatorStyle.color = tabTheme->GetActiveIndicatorColor();
-        indicatorStyle.height = tabTheme->GetActiveIndicatorWidth();
-        indicatorStyle.marginTop = tabTheme->GetSubTabIndicatorGap();
-    }
-    std::optional<Dimension> height = Converter::OptConvert<Dimension>(src.height);
-    Validator::ValidateNonNegative(height);
-    Validator::ValidateNonPercent(height);
-    if (height) {
-        indicatorStyle.height = height.value();
-    }
-    std::optional<Dimension> width = Converter::OptConvert<Dimension>(src.width);
-    Validator::ValidateNonNegative(width);
-    Validator::ValidateNonPercent(width);
-    if (width) {
-        indicatorStyle.width = width.value();
-    }
-    std::optional<Dimension> borderRadius = Converter::OptConvert<Dimension>(src.borderRadius);
-    Validator::ValidateNonNegative(borderRadius);
-    Validator::ValidateNonPercent(borderRadius);
-    if (borderRadius) {
-        indicatorStyle.borderRadius = borderRadius.value();
-    }
-    std::optional<Dimension> marginTop = Converter::OptConvert<Dimension>(src.marginTop);
-    Validator::ValidateNonNegative(marginTop);
-    Validator::ValidateNonPercent(marginTop);
-    if (marginTop) {
-        indicatorStyle.marginTop = marginTop.value();
-    }
-}
-
-namespace Validator {
-void ValidatePaddingProperty(std::optional<PaddingProperty>& opt)
-{
-    if (!opt.has_value()) {
-        return;
-    }
-    Validator::ValidateNonNegative(opt->left);
-    Validator::ValidateNonPercent(opt->left);
-    if (opt->left && !opt->left.value().IsValid()) {
-        opt->left.reset();
-    }
-    Validator::ValidateNonNegative(opt->top);
-    Validator::ValidateNonPercent(opt->top);
-    if (opt->top && !opt->top.value().IsValid()) {
-        opt->top.reset();
-    }
-    Validator::ValidateNonNegative(opt->right);
-    Validator::ValidateNonPercent(opt->right);
-    if (opt->right && !opt->right.value().IsValid()) {
-        opt->right.reset();
-    }
-    Validator::ValidateNonNegative(opt->bottom);
-    Validator::ValidateNonPercent(opt->bottom);
-    if (opt->bottom && !opt->bottom.value().IsValid()) {
-        opt->bottom.reset();
-    }
-    Validator::ValidateNonNegative(opt->start);
-    Validator::ValidateNonPercent(opt->start);
-    if (opt->start && !opt->start.value().IsValid()) {
-        opt->start.reset();
-    }
-    Validator::ValidateNonNegative(opt->end);
-    Validator::ValidateNonPercent(opt->end);
-    if (opt->end && !opt->end.value().IsValid()) {
-        opt->end.reset();
-    }
-}
-} // namespace Validator
-
 auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& style) {
-    // content
-    std::optional<std::string> content = std::nullopt;
-    Converter::VisitUnion(style._content,
-        [&content](const Ark_String& arkContent) {
-            content = Converter::OptConvert<std::string>(arkContent);
-        },
-        [&content](const Ark_Resource& arkContent) {
-            content = Converter::OptConvert<std::string>(arkContent);
-        },
-        [frameNode](const Ark_ComponentContentBase& arkContent) {
-            auto contentPeer = reinterpret_cast<FrameNodePeer*>(arkContent);
-            CHECK_NULL_VOID(contentPeer);
-            if (auto customNode = FrameNodePeer::GetFrameNodeByPeer(contentPeer)) {
-                TabContentModelStatic::SetCustomStyleNode(frameNode, customNode);
-            }
-        },
-        []() {}
-    );
-    bool isDrawableIndicator = false;
-    if (style._indicator.value.selector == 0) {
-        // indicator
-        TabContentModelStatic::SetIndicator(
-            frameNode, Converter::OptConvert<IndicatorStyle>(style._indicator.value.value0));
-    } else {
-        ImageInfoConfig config;
-        IndicatorStyle indicatorStyle;
-        isDrawableIndicator = ParseImageInfoConfig(style._indicator.value.value1, config);
-        ParseIndicatorStyle(style._indicator.value.value1, indicatorStyle);
-        if (isDrawableIndicator) {
-            TabContentModelStatic::SetDrawableIndicatorConfig(frameNode, config);
+    if (!style->indicatorColorByUser) {
+        if (style->imageInfoConfig.has_value()) {
+            TabContentModelStatic::SetDrawableIndicatorConfig(frameNode, style->imageInfoConfig.value());
         }
         TabContentModelStatic::SetIndicatorColorByUser(frameNode, false);
-        TabContentModelStatic::SetIndicator(frameNode, indicatorStyle);
     }
-    TabContentModelStatic::SetDrawableIndicatorFlag(frameNode, isDrawableIndicator);
-    // selectedMode
-    TabContentModelStatic::SetSelectedMode(frameNode, Converter::OptConvert<SelectedMode>(style._selectedMode));
-    // board
-    TabContentModelStatic::SetBoard(frameNode, Converter::OptConvert<BoardStyle>(style._board));
-    // labelStyle
-    auto optLabelStyle = Converter::OptConvert<LabelStyle>(style._labelStyle);
-    if (optLabelStyle) {
-        auto labelFont = Converter::OptConvertFromFont(style._labelStyle.value.font, true);
-        optLabelStyle->fontSize = labelFont.fontSize;
-        optLabelStyle->fontStyle = labelFont.fontStyle;
-        optLabelStyle->fontWeight = labelFont.fontWeight;
-        if (labelFont.fontFamilies.size() > 0) {
-            optLabelStyle->fontFamily = labelFont.fontFamilies;
-        }
-    }
-    TabContentModelStatic::SetLabelStyle(frameNode, optLabelStyle, true);
-    // padding
-    std::optional<PaddingProperty> optPadding;
-    bool useLocalizedPadding = false;
-    Converter::VisitUnion(style._padding,
-        [&optPadding](const Ark_Union_Padding_Dimension& arkPadding) {
-            optPadding = Converter::OptConvert<PaddingProperty>(arkPadding);
-        },
-        [&optPadding, &useLocalizedPadding](const Ark_LocalizedPadding& arkLocalizedPadding) {
-            optPadding = Converter::OptConvert<PaddingProperty>(arkLocalizedPadding);
-            useLocalizedPadding = true;
-        },
-        []() {}
-    );
-    Validator::ValidatePaddingProperty(optPadding);
-    TabContentModelStatic::SetPadding(frameNode, optPadding, true);
-    TabContentModelStatic::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
-    // id
-    auto id = Converter::OptConvert<std::string>(style._id);
-    TabContentModelStatic::SetId(frameNode, id);
-
+    TabContentModelStatic::SetIndicator(frameNode, style->indicator);
+    TabContentModelStatic::SetSelectedMode(frameNode, style->selectedMode);
+    TabContentModelStatic::SetBoard(frameNode, style->board);
+    TabContentModelStatic::SetLabelStyle(frameNode, style->labelStyle, true);
+    TabContentModelStatic::SetPadding(frameNode, style->padding, true);
+    TabContentModelStatic::SetUseLocalizedPadding(frameNode, style->useLocalizedPadding);
+    TabContentModelStatic::SetId(frameNode, style->id);
     TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::SUBTABBATSTYLE);
-    TabContentModelStatic::SetTabBar(frameNode, content, std::nullopt, nullptr);
+    TabContentModelStatic::SetTabBar(frameNode, style->content, std::nullopt, nullptr);
     TabbarAddTabBarItem(AceType::WeakClaim(frameNode));
 };
 
 auto g_setBottomTabBarStyle = [](FrameNode* frameNode, const Ark_BottomTabBarStyle& style) {
-    // text
-    std::optional<std::string> text = Converter::OptConvert<std::string>(style._text);
-    // icon
-    std::optional<std::string> icon = std::nullopt;
-    Converter::VisitUnion(style._icon,
-        [&icon](const Ark_ResourceStr& arkIcon) {
-            icon = Converter::OptConvert<std::string>(arkIcon);
-        },
-        [](const Ark_TabBarSymbol& arkTabBarSymbol) {
-            LOGE("TabContentAttributeModifier.TabBar1Impl tabBarSymbol is not supported yet.");
-        },
-        []() {}
-    );
-    // layoutMode
-    TabContentModelStatic::SetLayoutMode(frameNode, Converter::OptConvert<LayoutMode>(style._layoutMode));
-    // padding
-    std::optional<PaddingProperty> optPadding;
-    bool useLocalizedPadding = false;
-    Converter::VisitUnion(style._padding,
-        [&optPadding](const Ark_Padding& arkPadding) {
-            optPadding = Converter::OptConvert<PaddingProperty>(arkPadding);
-        },
-        [&optPadding](const Ark_Dimension& arkLength) {
-            optPadding = Converter::OptConvert<PaddingProperty>(arkLength);
-        },
-        [&optPadding, &useLocalizedPadding](const Ark_LocalizedPadding& arkLocalizedPadding) {
-            optPadding = Converter::OptConvert<PaddingProperty>(arkLocalizedPadding);
-            useLocalizedPadding = true;
-        },
-        []() {}
-    );
-    Validator::ValidatePaddingProperty(optPadding);
-    TabContentModelStatic::SetPadding(frameNode, optPadding, false);
-    TabContentModelStatic::SetUseLocalizedPadding(frameNode, useLocalizedPadding);
-    // verticalAlign
-    TabContentModelStatic::SetVerticalAlign(frameNode, Converter::OptConvert<FlexAlign>(style._verticalAlign));
-    // symmetricExtensible
-    TabContentModelStatic::SetSymmetricExtensible(frameNode, Converter::OptConvert<bool>(style._symmetricExtensible));
-    // labelStyle
-    auto optLabelStyle = Converter::OptConvert<LabelStyle>(style._labelStyle);
-    if (optLabelStyle) {
-        auto labelFont = Converter::OptConvertFromFont(style._labelStyle.value.font, false);
-        optLabelStyle->fontSize = labelFont.fontSize;
-        optLabelStyle->fontStyle = labelFont.fontStyle;
-        optLabelStyle->fontWeight = labelFont.fontWeight;
-        if (labelFont.fontFamilies.size() > 0) {
-            optLabelStyle->fontFamily = labelFont.fontFamilies;
-        }
-    }
-    TabContentModelStatic::SetLabelStyle(frameNode, optLabelStyle, false);
-    // iconStyle
-    TabContentModelStatic::SetIconStyle(frameNode, Converter::OptConvert<IconStyle>(style._iconStyle));
-    // id
-    auto id = Converter::OptConvert<std::string>(style._id);
-    TabContentModelStatic::SetId(frameNode, id);
-
+    TabContentModelStatic::SetLayoutMode(frameNode, style->layoutMode);
+    TabContentModelStatic::SetPadding(frameNode, style->padding, false);
+    TabContentModelStatic::SetUseLocalizedPadding(frameNode, style->useLocalizedPadding);
+    TabContentModelStatic::SetVerticalAlign(frameNode, style->verticalAlign);
+    TabContentModelStatic::SetSymmetricExtensible(frameNode, style->symmetricExtensible);
+    TabContentModelStatic::SetLabelStyle(frameNode, style->labelStyle, false);
+    TabContentModelStatic::SetIconStyle(frameNode, style->iconStyle);
+    TabContentModelStatic::SetId(frameNode, style->id);
     TabContentModelStatic::SetTabBarStyle(frameNode, TabBarStyle::BOTTOMTABBATSTYLE);
-    TabContentModelStatic::SetTabBar(frameNode, text, icon, nullptr);
+    TabContentModelStatic::SetTabBar(frameNode, style->text, style->icon, nullptr);
     TabbarAddTabBarItem(AceType::WeakClaim(frameNode));
 };
 

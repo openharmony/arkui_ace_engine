@@ -54,7 +54,7 @@ void AddColorStopImpl(Ark_CanvasGradient peer,
                 peer->AddColorStop(value, colorValue.value());
             }
         },
-        [value, peer](const Ark_ColorMetrics& opt) {
+        [value, peer](const Ark_ColorMetricsExt& opt) {
         },
         []() {});
 }

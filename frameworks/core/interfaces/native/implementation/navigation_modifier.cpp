@@ -36,14 +36,15 @@ constexpr uint32_t SAFE_AREA_EDGE_BOTTOM = 1;
 constexpr uint32_t INVALID_VALUE = 0;
 constexpr uint32_t DEFAULT_NAV_BAR_WIDTH = 240;
 
-std::optional<Dimension> ProcessBindableNavBarWidth(FrameNode* frameNode, const Opt_Union_Length_Bindable* value)
+std::optional<Dimension> ProcessBindableNavBarWidth(
+    FrameNode* frameNode, const Opt_Union_Length_Bindable_Length* value)
 {
     std::optional<Dimension> result;
     Converter::VisitUnionPtr(value,
         [&result](const Ark_Length& src) {
             result = Converter::OptConvert<Dimension>(src);
         },
-        [&result, frameNode](const Ark_Bindable_Arkui_Component_Units_Length& src) {
+        [&result, frameNode](const Ark_Bindable_Length& src) {
             result = Converter::OptConvert<Dimension>(src.value);
             // Need to provide callback
         },
@@ -110,17 +111,6 @@ void SetNavigationOptions1Impl(Ark_NativePointer node,
     navigationStack->RegisterOnResultCallback();
     // update path stack need to sync stack immediately
     navigationStack->InvokeOnStateChanged();
-}
-void SetNavigationOptions1Impl(Ark_NativePointer node,
-                               const Opt_NavPathStack* pathInfos,
-                               const Opt_HomePathInfo* homeDestination,
-                               const Opt_NavigationModuleInfo* moduleInfo)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(pathInfos);
-    //auto convValue = Converter::OptConvert<type>(pathInfos); // for enums
-    //NavigationModelNG::SetNavigationOptions1(frameNode, convValue);
 }
 } // namespace NavigationInterfaceModifier
 
@@ -330,10 +320,6 @@ void SetOnNavigationModeChangeImpl(Ark_NativePointer node,
     auto eventHub = frameNode->GetEventHub<NavigationEventHub>();
     CHECK_NULL_VOID(eventHub);
     eventHub->SetOnNavigationModeChange(modeCallback);
-}
-void SetNavDestinationImpl(Ark_NativePointer node,
-                           const Opt_PageMapBuilder* value)
-{
 }
 void SetCustomNavContentTransitionImpl(Ark_NativePointer node,
                                        const Opt_Type_NavigationAttribute_customNavContentTransition* value)

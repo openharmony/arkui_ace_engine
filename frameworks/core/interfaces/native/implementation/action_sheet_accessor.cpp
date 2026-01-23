@@ -222,19 +222,19 @@ void ShowImpl(const Ark_ActionSheetOptions* value)
     dialogProps.height = Converter::OptConvert<CalcDimension>(value->height);
 
     AddOnWillDismiss(dialogProps, value->onWillDismiss);
-    auto onDidAppear = Converter::OptConvert<Callback_Void>(value->onDidAppear);
+    auto onDidAppear = Converter::OptConvert<VoidCallback>(value->onDidAppear);
     if (onDidAppear) {
         dialogProps.onDidAppear = [arkCallback = CallbackHelper(onDidAppear.value())]() { arkCallback.InvokeSync(); };
     }
-    auto onDidDisappear = Converter::OptConvert<Callback_Void>(value->onDidDisappear);
+    auto onDidDisappear = Converter::OptConvert<VoidCallback>(value->onDidDisappear);
     if (onDidDisappear) {
         dialogProps.onDidDisappear = [arkCallback = CallbackHelper(onDidDisappear.value())]() { arkCallback.Invoke(); };
     }
-    auto onWillAppear = Converter::OptConvert<Callback_Void>(value->onWillAppear);
+    auto onWillAppear = Converter::OptConvert<VoidCallback>(value->onWillAppear);
     if (onWillAppear) {
         dialogProps.onWillAppear = [arkCallback = CallbackHelper(onWillAppear.value())]() { arkCallback.Invoke(); };
     }
-    auto onWillDisappear = Converter::OptConvert<Callback_Void>(value->onWillDisappear);
+    auto onWillDisappear = Converter::OptConvert<VoidCallback>(value->onWillDisappear);
     if (onWillDisappear) {
         dialogProps.onWillDisappear = [arkCallback = CallbackHelper(onWillDisappear.value())]() {
             arkCallback.Invoke();

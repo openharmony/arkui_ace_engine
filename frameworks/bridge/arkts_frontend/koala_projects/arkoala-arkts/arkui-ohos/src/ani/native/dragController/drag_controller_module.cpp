@@ -1016,8 +1016,8 @@ void ANICleanSpringLoadingContext([[maybe_unused]] ani_env* env, [[maybe_unused]
     if (springLoadingContextPtr == 0) {
         return;
     }
-    DragController_SpringLoadingContextPeer* ptr =
-        reinterpret_cast<DragController_SpringLoadingContextPeer *>(springLoadingContextPtr);
+    dragController_SpringLoadingContextPeer* ptr =
+        reinterpret_cast<dragController_SpringLoadingContextPeer *>(springLoadingContextPtr);
     delete ptr;
     ptr = nullptr;
 }

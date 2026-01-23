@@ -467,7 +467,7 @@ void AnimationTranslateImpl(Ark_NativePointer node,
 void AnimateToImmediatelyImplImpl(Ark_VMContext vmContext,
                                   const Ark_AnimateParam* param,
                                   const synthetic_Callback_Void* event,
-                                  Ark_Boolean immediately)
+                                  Ark_Boolean arkImmediately)
 {
     bool immediately = Converter::Convert<bool>(arkImmediately);
     std::function<void()> onEventFinish;
@@ -507,7 +507,7 @@ void AnimateToImmediatelyImplImpl(Ark_VMContext vmContext,
 }
 void KeyframeAnimationImplImpl(Ark_VMContext vmContext,
                                const Ark_KeyframeAnimateParam* param,
-                               const Array_KeyframeState* keyfames)
+                               const Array_KeyframeState* keyframes)
 {
     auto scopedDelegate = Container::CurrentIdSafelyWithCheck();
     if (!scopedDelegate) {

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
+ * Copyright (c) 2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,18 +13,24 @@
  * limitations under the License.
  */
 
-#include "core/components_ng/base/frame_node.h"
 #include "core/interfaces/native/utility/converter.h"
-#include "arkoala_api_generated.h"
+#include "core/interfaces/native/utility/callback_helper.h"
+#include "core/interfaces/native/implementation/arc_swiper_controller_peer.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace ArcSwiperControllerHelperAccessor {
 void DestroyPeerImpl(Ark_ArcSwiperControllerHelper peer)
 {
+    auto peerImpl = reinterpret_cast<ArcSwiperControllerHelperPeerImpl *>(peer);
+    if (peerImpl) {
+        peerImpl->DecRefCount();
+    }
 }
 Ark_ArcSwiperControllerHelper ConstructImpl()
 {
-    return {};
+    auto peerImpl = Referenced::MakeRefPtr<ArcSwiperControllerHelperPeerImpl>();
+    peerImpl->IncRefCount();
+    return reinterpret_cast<ArcSwiperControllerHelperPeer *>(Referenced::RawPtr(peerImpl));
 }
 Ark_NativePointer GetFinalizerImpl()
 {
@@ -32,28 +38,29 @@ Ark_NativePointer GetFinalizerImpl()
 }
 void ShowNextImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::ShowNext(frameNode, convValue);
+    auto peerImpl = reinterpret_cast<ArcSwiperControllerHelperPeerImpl *>(node);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerShowNext();
 }
 void ShowPreviousImpl(Ark_NativePointer node)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::ShowPrevious(frameNode, convValue);
+    auto peerImpl = reinterpret_cast<ArcSwiperControllerHelperPeerImpl *>(node);
+    CHECK_NULL_VOID(peerImpl);
+    peerImpl->TriggerShowPrevious();
 }
 void FinishAnimationImpl(Ark_NativePointer node,
                          const Opt_VoidCallback* callback_)
 {
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    //auto convValue = Converter::Convert<type>(node);
-    //auto convValue = Converter::OptConvert<type>(node); // for enums
-    //undefinedModelNG::FinishAnimation(frameNode, convValue);
+    auto peerImpl = reinterpret_cast<ArcSwiperControllerHelperPeerImpl *>(node);
+    CHECK_NULL_VOID(peerImpl);
+    auto arkCallbackOpt = callback_ ? Converter::OptConvert<VoidCallback>(*callback_) : std::nullopt;
+    if (arkCallbackOpt) {
+        auto onFinish = [arkCallback = CallbackHelper(*arkCallbackOpt)]() -> void {
+            arkCallback.InvokeSync();
+        };
+        peerImpl->SetFinishCallback(onFinish);
+    }
+    peerImpl->TriggerFinishAnimation();
 }
 } // ArcSwiperControllerHelperAccessor
 const GENERATED_ArkUIArcSwiperControllerHelperAccessor* GetArcSwiperControllerHelperAccessor()

@@ -212,7 +212,7 @@ void Back0Impl(Ark_VMContext vmContext,
 }
 void Back1Impl(Ark_VMContext vmContext,
                Ark_Int32 index,
-               const Opt_String* params)
+               const Opt_String* optParams)
 {
     auto container = Container::Current();
     CHECK_NULL_VOID(container);

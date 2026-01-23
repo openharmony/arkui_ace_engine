@@ -147,8 +147,8 @@ inline ScrollOptions Convert(const Ark_ScrollOptions& src)
 
 void AssignArkValue(Ark_SizeResult& dst, const SizeF& src)
 {
-    dst.width = Converter::ArkValue<Ark_Number>(src.Width());
-    dst.height = Converter::ArkValue<Ark_Number>(src.Height());
+    dst.width = Converter::ArkValue<Ark_Float64>(src.Width());
+    dst.height = Converter::ArkValue<Ark_Float64>(src.Height());
 }
 } // namespace OHOS::Ace::NG::Converter
 

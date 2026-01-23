@@ -49,7 +49,7 @@ void AssignArkValue(Ark_RefreshStatus& dst, const RefreshStatus& src, ConvContex
 }
 } // namespace Converter
 namespace {
-std::optional<bool> ProcessBindableRefreshing(FrameNode* frameNode, const Ark_Union_Boolean_Bindable& value)
+std::optional<bool> ProcessBindableRefreshing(FrameNode* frameNode, const Ark_Union_Boolean_Bindable_Boolean& value)
 {
     std::optional<bool> result;
     Converter::VisitUnion(value,

@@ -157,7 +157,7 @@ void SetOnPatternCompleteImpl(Ark_NativePointer node,
     auto call = [arkCallback = CallbackHelper(*optValue)](const BaseEventInfo* info) {
         const auto* eventInfo = TypeInfoHelper::DynamicCast<V2::PatternCompleteEvent>(info);
         CHECK_NULL_VOID(eventInfo);
-        Converter::ArkArrayHolder<Array_Int32> arrayHolder(eventInfo->GetInput());
+        Converter::ArkArrayHolder<Array_I32> arrayHolder(eventInfo->GetInput());
         arkCallback.Invoke(arrayHolder.ArkValue());
     };
     PatternLockModelNG::SetPatternComplete(frameNode, std::move(call));
