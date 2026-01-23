@@ -63,15 +63,14 @@ bool ClickSoundEffectManager::LoadProductPolicy()
     }
     productPolicy_ = reinterpret_cast<Kit::ClickSoundEffectPolicy*>(getClickSoundEffectPolicyInstance());
     defaultClickSoundEffectSoLoaded_ = true;
-    Close();
     return true;
 }
 
 void ClickSoundEffectManager::UnloadProductPolicy()
 {
+    productPolicy_ = nullptr;
     Close();
     libraryHandle_ = nullptr;
-    productPolicy_ = nullptr;
     defaultClickSoundEffectSoLoaded_ = false;
 }
 
