@@ -2515,8 +2515,9 @@ void FormPattern::DoSkeletonAnimation()
     RefPtr<OHOS::Ace::NG::RenderContext> childRenderContext = lastFrameChild->GetRenderContext();
     CHECK_NULL_VOID(childRenderContext);
 
+    std::unique_ptr<FormScopedRSTransaction> formScopedRSTransaction = nullptr;
     if (SystemProperties::IsFormSkeletonRSTransactionEnabled()) {
-        FormScopedRSTransaction formScopedRSTransaction(scopeId_);
+        formScopedRSTransaction = std::make_unique<FormScopedRSTransaction>(scopeId_);
     }
     // Switch off render group of the form node before doing animation
     SwitchRenderGroup(false);
