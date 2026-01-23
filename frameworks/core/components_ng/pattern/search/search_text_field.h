@@ -41,6 +41,8 @@ public:
     float FontSizeConvertToPx(const Dimension& fontSize) override;
     std::string GetPlaceholderFont() const override;
     IMEClient GetIMEClientInfo() override;
+    void UpdateHoverStyleForTV(bool isHover) override {}
+    void UpdatePressStyleForTV(bool isPressed) override {}
 
 private:
     bool searchRequestStopTwinkling_ = false;

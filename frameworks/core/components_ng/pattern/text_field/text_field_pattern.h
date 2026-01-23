@@ -1858,6 +1858,8 @@ public:
     }
 
     bool IsPreviewTextInputting() const;
+    virtual void UpdateHoverStyleForTV(bool isHover);
+    virtual void UpdatePressStyleForTV(bool isPressed);
 
 protected:
     virtual void InitDragEvent();
@@ -2211,8 +2213,6 @@ private:
 #endif
     void SetFocusStyleForTV();
     void ClearFocusStyleForTV();
-    void UpdateHoverStyleForTV(bool isHover);
-    void UpdatePressStyleForTV(bool isPressed);
     void SetShowErrorForTV();
     void SetThemeAttrForTV();
     void InitDisableColorForTV();
