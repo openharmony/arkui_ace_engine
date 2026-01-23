@@ -891,7 +891,7 @@ void ScrollBar::ProcessFrictionMotionStop()
     if (scrollBarOnDidStopFlingCallback_) {
         scrollBarOnDidStopFlingCallback_();
     }
-    if (scrollEndCallback_ && !(canOverScrollWithDelta_ && canOverScrollWithDelta_(.0f))) {
+    if (scrollEndCallback_ && !(isTouchScreen_ && canOverScrollWithDelta_ && canOverScrollWithDelta_(.0f))) {
         scrollEndCallback_();
     }
     isDriving_ = false;

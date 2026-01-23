@@ -830,6 +830,39 @@ HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar014, TestSize.Level1)
 }
 
 /**
+ * @tc.name: HandleDragScrollBar015
+ * @tc.desc: Test overDrag by scrollbar with mouse trigger scroll event.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollInnerEventTestNg, HandleDragScrollBar015, TestSize.Level1)
+{
+    bool isStart = false;
+    bool isStop = false;
+    OnScrollStartEvent startEvent = [&isStart]() { isStart = true; };
+    OnScrollStopEvent stopEvent = [&isStop]() { isStop = true; };
+    ScrollModelNG model = CreateScroll();
+    model.SetOnScrollStart(std::move(startEvent));
+    model.SetOnScrollStop(std::move(stopEvent));
+    CreateContent();
+    CreateScrollDone();
+
+    float dragDelta = 100;
+    GestureEvent info;
+    info.SetInputEventType(InputEventType::MOUSE_BUTTON);
+    scrollBar_->HandleDragStart(info);
+
+    info.SetMainDelta(-dragDelta);
+    scrollBar_->HandleDragUpdate(info);
+    FlushUITasks();
+    EXPECT_TRUE(Position(0));
+    scrollBar_->HandleDragEnd(info);
+    FlushUITasks();
+
+    EXPECT_TRUE(isStart);
+    EXPECT_TRUE(isStop);
+}
+
+/**
  * @tc.name: HandleDragEndScrollBar001
  * @tc.desc: Test handleDragEnd in Horizontal and RTL layout
  * @tc.type: FUNC
