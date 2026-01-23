@@ -15,12 +15,9 @@
 
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
 
-#include "ark_native_engine.h"
 #include "arkts_utils.h"
 #include "ecmascript/napi/include/jsnapi.h"
 #include "jsnapi_expo.h"
-#include "native_engine.h"
-#include "ui/base/utils/utils.h"
 
 #include "base/utils/utils.h"
 #include "base/i18n/localization.h"

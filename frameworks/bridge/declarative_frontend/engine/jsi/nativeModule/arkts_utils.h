@@ -16,12 +16,8 @@
 #ifndef FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H
 #define FRAMEWORKS_BRIDGE_DECLARATIVE_FRONTEND_ENGINE_JSI_NATIVEMODULE_ARKTS_UTILS_H
 
-#include "ark_native_engine.h"
-#include "ecmascript/cross_vm/jsnapi_expo_hybrid.h"
-#include "jsnapi_expo.h"
 #include "bridge/declarative_frontend/declarative_frontend.h"
 #include "bridge/declarative_frontend/engine/js_object_template.h"
-#include "bridge/declarative_frontend/engine/jsi/jsi_value_conversions.h"
 #include "bridge/declarative_frontend/frontend_delegate_declarative.h"
 #include "core/components/common/properties/text_style.h"
 #include "core/components_ng/pattern/text_field/text_field_model.h"
