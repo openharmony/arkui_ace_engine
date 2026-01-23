@@ -1095,6 +1095,7 @@ public:
     void HandleTouchpadFlingEvent(const double& x, const double& y, const double& vx, const double& vy);
     void WebHandleTouchpadFlingEvent(const double& x, const double& y,
         const double& vx, const double& vy, const std::vector<int32_t>& pressedCodes);
+    void WebHandleCancelFlingEvent();
     void HandleAxisEvent(const double& x, const double& y, const double& deltaX, const double& deltaY);
     void WebHandleAxisEvent(const double& x, const double& y,
         const double& deltaX, const double& deltaY, const std::vector<int32_t>& pressedCodes, const int32_t source);

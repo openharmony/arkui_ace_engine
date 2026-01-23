@@ -1087,6 +1087,83 @@ HWTEST_F(WebPatternPartOneTest, InitPinchEvent_002, TestSize.Level1)
 }
 
 /**
+ * @tc.name: InitLightTouchEvent_001
+ * @tc.desc: InitLightTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, InitLightTouchEvent_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    EXPECT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    EXPECT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    WeakPtr<EventHub> eventHub = nullptr;
+    RefPtr<InputEventHub> gestureHub = AceType::MakeRefPtr<InputEventHub>(eventHub);
+
+    webPattern->InitLightTouchEvent(gestureHub);
+    EXPECT_NE(webPattern, nullptr);
+#endif
+}
+
+/**
+ * @tc.name: InitLightTouchEvent_002
+ * @tc.desc: InitLightTouchEvent.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, InitLightTouchEvent_002, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+    WeakPtr<EventHub> eventHub = nullptr;
+    RefPtr<InputEventHub> gestureHub = AceType::MakeRefPtr<InputEventHub>(eventHub);
+
+    webPattern->InitLightTouchEvent(gestureHub);
+#endif
+}
+
+/**
+ * @tc.name: HandleCancelFling_001
+ * @tc.desc: HandleCancelFling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(WebPatternPartOneTest, HandleCancelFling_001, TestSize.Level1)
+{
+#ifdef OHOS_STANDARD_SYSTEM
+    auto* stack = ViewStackProcessor::GetInstance();
+    ASSERT_NE(stack, nullptr);
+    auto nodeId = stack->ClaimNodeId();
+    auto frameNode =
+        FrameNode::GetOrCreateFrameNode(V2::WEB_ETS_TAG, nodeId, []() { return AceType::MakeRefPtr<WebPattern>(); });
+    ASSERT_NE(frameNode, nullptr);
+    stack->Push(frameNode);
+    auto webPattern = frameNode->GetPattern<WebPattern>();
+    ASSERT_NE(webPattern, nullptr);
+    webPattern->OnModifyDone();
+    ASSERT_NE(webPattern->delegate_, nullptr);
+
+    webPattern->HandleCancelFling();
+#endif
+}
+
+/**
  * @tc.name: CheckZoomStatus_001
  * @tc.desc: CheckZoomStatus.
  * @tc.type: FUNC

@@ -1218,6 +1218,7 @@ private:
     void InitWebEventHubDragMove(const RefPtr<WebEventHub>& eventHub);
     void InitPanEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleFlingMove(const GestureEvent& event);
+    void HandleCancelFling();
     void HandleDragMove(const GestureEvent& event);
     void InitDragEvent(const RefPtr<GestureEventHub>& gestureHub);
     void HandleDragStart(int32_t x, int32_t y);
@@ -1251,6 +1252,7 @@ private:
     void HandleScaleGestureEnd(const GestureEvent& event);
     void HandleScaleGestureCancel(const GestureEvent& event);
     double getZoomOffset(double& scale) const;
+    void InitLightTouchEvent(const RefPtr<InputEventHub>& inputHub);
 
     NG::DragDropInfo HandleOnDragStart(const RefPtr<OHOS::Ace::DragEvent>& info);
     void HandleOnDragEnter(const RefPtr<OHOS::Ace::DragEvent>& info);

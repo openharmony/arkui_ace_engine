@@ -1501,6 +1501,7 @@ void WebPattern::InitEvent()
     CHECK_NULL_VOID(inputHub);
     InitMouseEvent(inputHub);
     InitHoverEvent(inputHub);
+    InitLightTouchEvent(inputHub);
 
     auto focusHub = eventHub->GetOrCreateFocusHub();
     CHECK_NULL_VOID(focusHub);
@@ -1523,6 +1524,22 @@ void WebPattern::InitFeatureParam()
     isVisibleActiveEnable_ = system::GetBoolParameter(VISIBLE_ACTIVE_ENABLE, true);
     isMemoryLevelEnable_ = system::GetBoolParameter(MEMORY_LEVEL_ENABEL, true);
     isOfflineWebEvictFrameBuffersEnable_ = system::GetBoolParameter(OFFLINE_WEB_EVICT_FRAME_BUFFERS_ENABLE, true);
+}
+
+void WebPattern::HandleCancelFling()
+{
+    CHECK_NULL_VOID(delegate_);
+    delegate_->WebHandleCancelFlingEvent();
+}
+
+void WebPattern::InitLightTouchEvent(const RefPtr<InputEventHub>& inputHub)
+{
+    auto lightTouchCallback = [weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->HandleCancelFling();
+    };
+    inputHub->AddTouchpadInteractionListenerInner(lightTouchCallback);
 }
 
 void WebPattern::InitPanEvent(const RefPtr<GestureEventHub>& gestureHub)
