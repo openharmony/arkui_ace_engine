@@ -142,6 +142,11 @@ public:
 
     virtual void SetKeyBoardAvoidRect(RectF keyBoardAvoidRect) {}
 
+#ifdef RENDER_EXTRACT_SUPPORTED
+    virtual void GetTextureIsVideo(int32_t& type) {}
+
+    virtual void SetPatternType(int type) {}
+#endif
 protected:
     ACE_DISALLOW_COPY_AND_MOVE(RenderSurface);
 };

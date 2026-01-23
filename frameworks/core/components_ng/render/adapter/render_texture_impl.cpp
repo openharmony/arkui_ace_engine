@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -20,6 +20,10 @@
 #include "base/utils/system_properties.h"
 #include "base/utils/utils.h"
 #include "core/common/container.h"
+#ifdef RENDER_EXTRACT_SUPPORTED
+#include "core/common/ace_view.h"
+#include "cross_platform/surface_utils.h"
+#endif
 
 namespace OHOS::Ace::NG {
 RenderTextureImpl::~RenderTextureImpl()
@@ -27,6 +31,9 @@ RenderTextureImpl::~RenderTextureImpl()
     if (extTexture_) {
         extTexture_->Release();
     }
+#ifdef RENDER_EXTRACT_SUPPORTED
+    SurfaceUtils::GetInstance().RemoveNativeWindow(textureId_);
+#endif
 }
 
 void RenderTextureImpl::InitSurface()
@@ -39,6 +46,9 @@ void RenderTextureImpl::InitSurface()
             uiTaskExecutor.PostTask([weak, errorId, param] {}, "ArkUIInitSurfaceTextureError");
         };
     extTexture_ = AceType::MakeRefPtr<ExtTexture>(container->GetPipelineContext(), errorCallback);
+#ifdef RENDER_EXTRACT_SUPPORTED
+    extTexture_->SetPatternType(patternType_);
+#endif
 
     extTexture_->Create([weak = WeakClaim(this), errorCallback](int64_t id) mutable {
         LOGI("Surface create success id %{public}d", static_cast<int32_t>(id));
@@ -73,7 +83,11 @@ void RenderTextureImpl::UpdateSurfaceConfig() {}
 
 void* RenderTextureImpl::GetNativeWindow()
 {
+#ifdef RENDER_EXTRACT_SUPPORTED
+    return nativeWindow_;
+#else
     return nullptr;
+#endif
 }
 
 void RenderTextureImpl::SetRenderContext(const RefPtr<RenderContext>& renderContext)
@@ -88,7 +102,17 @@ bool RenderTextureImpl::IsSurfaceValid() const
     return extTexture_ != nullptr;
 }
 
-void RenderTextureImpl::CreateNativeWindow() {}
+void RenderTextureImpl::CreateNativeWindow()
+{
+#ifdef RENDER_EXTRACT_SUPPORTED
+    if (extTexture_) {
+        nativeWindow_ = extTexture_->AttachNativeWindow();
+        if (nativeWindow_) {
+            SurfaceUtils::GetInstance().AddNativeWindow(textureId_, nativeWindow_);
+        }
+    }
+#endif
+}
 
 void RenderTextureImpl::AdjustNativeWindowSize(uint32_t width, uint32_t height) {}
 
@@ -109,9 +133,13 @@ void RenderTextureImpl::SetExtSurfaceBounds(int32_t left, int32_t top, int32_t w
     auto taskExecutor = Container::CurrentTaskExecutor();
     CHECK_NULL_VOID(taskExecutor);
     taskExecutor->PostTask(
-        [surface = extTexture_, id = textureId_, left, top, width, height]() {
-            if (surface) {
-                surface->SetSize(id, width, height);
+        [surface = extTexture_, weak = WeakClaim(this), left, top, width, height]() {
+            auto refThis = weak.Upgrade();
+            if (surface && refThis) {
+                surface->SetSize(refThis->textureId_, width, height);
+#if defined(IOS_PLATFORM)
+                surface->SetBounds(refThis->textureId_, left, top, width, height);
+#endif
             }
         },
         TaskExecutor::TaskType::PLATFORM, "ArkUISetExtTextureSize");
@@ -135,4 +163,12 @@ void RenderTextureImpl::UpdateTextureImage(std::vector<float>& matrix)
         extTexture_->UpdateTextureImage(matrix);
     }
 }
+
+#ifdef RENDER_EXTRACT_SUPPORTED
+void RenderTextureImpl::GetTextureIsVideo(int32_t& type)
+{
+    CHECK_NULL_VOID(extTexture_);
+    extTexture_->GetTextureIsVideo(type);
+}
+#endif
 } // namespace OHOS::Ace::NG
