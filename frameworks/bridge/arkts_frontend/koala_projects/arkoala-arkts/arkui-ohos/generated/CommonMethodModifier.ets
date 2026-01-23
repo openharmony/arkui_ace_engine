@@ -19,7 +19,7 @@
 import { AttributeModifier, TouchTestInfo, TouchResult, extractors, hookAllowDrop, hookDragPreviewOptions, hookCommonMethodModifierCustomProperty, hookCustomPropertyImpl, hookKeyboardShortcut, hookMergeKeyboardShortcuts, KeyboardShortcut } from "#handwritten"
 import { AttributeUpdaterFlag } from "./AttributeUpdaterFlag"
 import { PeerNode } from "./PeerNode"
-import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, TouchEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, CustomProperty, SafeAreaType, SafeAreaEdge, LayoutSafeAreaType, LayoutSafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
+import { ArkCommonMethodPeer, LayoutPolicy, Rectangle, ResponseRegion, PixelRoundPolicy, BackgroundEffectOptions, ForegroundEffectOptions, BorderImageOption, OutlineStyle, ClickEvent, HoverEvent, AccessibilityCallback, AccessibilityHoverEvent, AccessibilityTransparentCallback, TouchEvent, MouseEvent, KeyEvent, CrownEvent, FocusAxisEvent, AxisEvent, FocusMovement, AnimateParam, TransitionEffect, MotionBlurOptions, InvertOptions, TranslateOptions, ScaleOptions, RotateOptions, RotateAngleOptions, AlignRuleOption, LocalizedAlignRuleOptions, ClickEffect, DragEvent, DragItemInfo, PreDragStatus, LinearGradientOptions, SweepGradientOptions, RadialGradientOptions, MotionPathOptions, ShadowOptions, ShadowStyle, ProgressMask, PixelStretchEffectOptions, AccessibilitySamePageMode, AccessibilityRoleType, AccessibilityFocusCallback, AccessibilityActionInterceptCallback, AccessibilityAction, ReuseOptions, BackgroundBrightnessOptions, GestureRecognizerJudgeBeginCallback, ShouldBuiltInRecognizerParallelWithCallback, SizeChangeCallback, TouchTestDoneCallback, CustomProperty, SafeAreaType, SafeAreaEdge, LayoutSafeAreaType, LayoutSafeAreaEdge, BackgroundOptions, BackgroundImageOptions, BlurStyle, BackgroundBlurStyleOptions, SystemAdaptiveOptions, ForegroundBlurStyleOptions, TransitionFinishCallback, BlurOptions, LinearGradientBlurOptions, EffectType, sharedTransitionOptions, ChainStyle, OnDragEventCallback, DropOptions, PreviewConfiguration, DragPreviewOptions, DragInteractionOptions, OverlayOptions, BlendMode, BlendApplyType, GeometryTransitionOptions, TipsMessageType, TipsOptions, PopupOptions, CustomPopupOptions, MenuElement, MenuOptions, ContextMenuOptions, Bindable, ModalTransition, ContentCoverOptions, SheetOptions, VisibleAreaChangeCallback, VisibleAreaEventOptions, CommonMethod } from "./component/common"
 import { int32 } from "@koalaui/common"
 import { ModifierState } from "./CommonModifier"
 import { Length, SizeOptions, ConstraintSizeOptions, ChainWeightOptions, Padding, LocalizedPadding, ResourceColor, ResourceStr, Position, BorderOptions, EdgeStyles, EdgeWidths, LocalizedEdgeWidths, EdgeColors, LocalizedEdgeColors, BorderRadiuses, LocalizedBorderRadiuses, OutlineOptions, EdgeOutlineStyles, Dimension, EdgeOutlineWidths, OutlineRadiuses, VoidCallback, Area, Edges, LocalizedEdges, LocalizedPosition, AccessibilityActionOptions, AccessibilityOptions } from "./component/units"
@@ -214,6 +214,7 @@ export class CommonMethodModifier implements CommonMethod {
     _onTouchIntercept_0_0value?: ((value0: TouchEvent) => HitTestMode) | undefined
     _onSizeChange_0_0value?: SizeChangeCallback | undefined
     _accessibilityFocusDrawLevel_0_0value?: FocusDrawLevel | undefined
+    _onTouchTestDone_0_0value?: TouchTestDoneCallback | undefined
     _systemMaterial_0_0value?: uiMaterial.Material | undefined
     _accessibilityStateDescription_0_0value?: string | Resource | undefined
     _accessibilityActionOptions_0_0value?: AccessibilityActionOptions | undefined
@@ -3588,6 +3589,24 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[211] != 0)
+        {
+            switch (flagArray[211]) {
+                case 1: {
+                    peer.setOnTouchTestDoneAttribute((this._onTouchTestDone_0_0value as TouchTestDoneCallback | undefined));
+                    flagArray[211] = 2;
+                    break;
+                }
+                case 3: {
+                    flagArray[211] = 2;
+                    break;
+                }
+                default: {
+                    flagArray[211] = 0;
+                    peer.setOnTouchTestDoneAttribute((undefined as TouchTestDoneCallback | undefined));
+                }
+            }
+        }
     }
     applyModifierPatch9(peer: ArkCommonMethodPeer, flagArray: Uint8Array): void {
         if (flagArray[180] != 0)
@@ -6519,6 +6538,19 @@ export class CommonMethodModifier implements CommonMethod {
                 }
             }
         }
+        if (flagArray[211] != 0)
+        {
+            switch (flagArray[211]) {
+                case 1:
+                case 3: {
+                    this.onTouchTestDone(modifier._onTouchTestDone_0_0value);
+                    break;
+                }
+                default: {
+                    this.onTouchTestDone((undefined as TouchTestDoneCallback | undefined));
+                }
+            }
+        }
     }
     mergeModifier9(modifier: CommonMethodModifier, flagArray: Uint8Array): void {
         if (flagArray[180] != 0)
@@ -9165,6 +9197,18 @@ export class CommonMethodModifier implements CommonMethod {
         } else
         {
             this._flagArray[179] = 3
+        }
+        return this
+    }
+    onTouchTestDone(value: TouchTestDoneCallback | undefined): this {
+        if (((this._flagArray[211]) == (0)) || (true))
+        {
+            this._flagArray[211] = 1
+            this._onTouchTestDone_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+            this._flagArray[211] = 3
         }
         return this
     }
