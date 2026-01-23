@@ -132,7 +132,7 @@ bool MagnifierController::UpdateMagnifierOffsetY(OffsetF& magnifierPaintOffset, 
     float preScaledTextHeight = static_cast<float>(magnifierNodeHeight_.ConvertToPx() / MAGNIFIER_FACTOR);
     float magnifierInnerPaddingY =
         static_cast<float>((MAGNIFIER_SHADOWOFFSETY + MAGNIFIER_SHADOWSIZE * 1.5).ConvertToPx());
-    float maxZoomOffsetY = halfMenuHeight - preScaledTextHeight / 2 + magnifierInnerPaddingY;
+    float maxZoomOffsetY = halfMenuHeight - preScaledTextHeight / 2 + magnifierInnerPaddingY + ZOOM_OFFSET_Y;
     zoomOffset.y = std::clamp(zoomOffset.y, -maxZoomOffsetY, maxZoomOffsetY);
     return true;
 }

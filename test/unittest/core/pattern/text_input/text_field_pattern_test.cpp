@@ -1984,6 +1984,36 @@ HWTEST_F(TextFieldPatternTest, TextPattern082, TestSize.Level0)
 }
 
 /**
+ * @tc.name: UpdateShowMagnifierTest001
+ * @tc.desc: test UpdateShowMagnifier
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTest, UpdateShowMagnifierTest001, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. create target node.
+     */
+    CreateTextField(DEFAULT_TEXT);
+    GetFocus();
+
+    /**
+     * @tc.steps: step2. call CreateNodePaintMethod
+     * tc.expected: step2. Check if the value is created.
+     */
+    auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
+    ASSERT_NE(textFieldNode, nullptr);
+    RefPtr<TextFieldPattern> pattern = textFieldNode->GetPattern<TextFieldPattern>();
+    ASSERT_NE(pattern, nullptr);
+
+    RefPtr<MagnifierController> controller = pattern->GetMagnifierController();
+    ASSERT_NE(controller, nullptr);
+    controller->isShowMagnifier_ = true;
+    auto result = controller->GetShowMagnifier();
+    EXPECT_EQ(result, true);
+}
+
+/**
  * @tc.name: TextPattern083
  * @tc.desc: test testInput text HandleTouchEvent
  * @tc.type: FUNC
