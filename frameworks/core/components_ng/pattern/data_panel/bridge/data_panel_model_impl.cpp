@@ -13,10 +13,12 @@
  * limitations under the License.
  */
 
-#include "frameworks/bridge/declarative_frontend/jsview/models/data_panel_model_impl.h"
+#include "frameworks/core/components_ng/pattern/data_panel/bridge/data_panel_model_impl.h"
 
 #include "bridge/declarative_frontend/view_stack_processor.h"
 #include "core/components/data_panel/data_panel_component.h"
+
+#include "base/log/ace_scoring_log.h"
 
 namespace OHOS::Ace::Framework {
 

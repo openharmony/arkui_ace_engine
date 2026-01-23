@@ -2524,15 +2524,17 @@ bool ArkTSUtils::ParseJsSymbolId(const EcmaVM *vm, const Local<JSValueRef> &jsVa
     return true;
 }
 
-double ArkTSUtils::GetArrayLength(const EcmaVM* vm, Local<panda::ArrayRef> array)
+size_t ArkTSUtils::GetArrayLength(const EcmaVM* vm, Local<panda::ArrayRef> array)
 {
-    auto arrayLength = 0;
     if (array->IsProxy(vm)) {
-        arrayLength = array->Get(vm, "length")->IsNumber() ? array->Get(vm, "length")->ToNumber(vm)->Value() : 0;
-    } else {
-        arrayLength = array->Length(vm);
+        auto lengthValue = array->Get(vm, "length");
+        if (lengthValue->IsNumber()) {
+            double numValue = lengthValue->ToNumber(vm)->Value();
+            return static_cast<size_t>(std::max(numValue, 0.0));
+        }
+        return 0;
     }
-    return arrayLength;
+    return array->Length(vm);
 }
 
 BorderStyle ArkTSUtils::ConvertBorderStyle(int32_t value)

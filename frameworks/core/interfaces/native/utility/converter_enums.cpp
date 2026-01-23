@@ -1226,7 +1226,7 @@ void AssignCast(std::optional<LayoutStyle>& dst, const Ark_LayoutStyle& src)
 }
 
 template<>
-void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<DataPanelType>& dst, const Ark_DataPanelType& src)
 {
     switch (src) {
         case ARK_DATA_PANEL_TYPE_LINE: dst = DataPanelType::LINE; break;

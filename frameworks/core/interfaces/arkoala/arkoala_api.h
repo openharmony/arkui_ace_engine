@@ -7836,6 +7836,7 @@ struct ArkUILinearIndicatorModifier {
 };
 
 struct ArkUIDataPanelModifier {
+    void (*createModel)(const std::vector<double>& values, double max, int32_t dataPanelType);
     void (*setCloseEffect)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetCloseEffect)(ArkUINodeHandle node);
     void (*setDataPanelTrackBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 value);
@@ -7854,6 +7855,7 @@ struct ArkUIDataPanelModifier {
         const struct ArkUIDatePanelTrackShadow* trackShadow, const struct ArkUIShadowOptionsResource* shadowRes);
     void (*setNullTrackShadow)(ArkUINodeHandle node);
     void (*resetTrackShadow)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 
 struct ArkUIQRCodeModifier {
