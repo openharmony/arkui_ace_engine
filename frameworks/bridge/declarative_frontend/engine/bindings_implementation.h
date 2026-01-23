@@ -40,10 +40,11 @@ enum MethodOptions : uint8_t {
 
 class IFunctionBinding {
 public:
-    thread_local static std::vector<std::unique_ptr<IFunctionBinding>> functions;
+    thread_local static std::unordered_map<void*, std::vector<std::unique_ptr<IFunctionBinding>>> functions;
+    thread_local static void* runtime;
     IFunctionBinding(const char* name, MethodOptions options) : name_(name), options_(options)
     {
-        functions.emplace_back(this);
+        functions[runtime].emplace_back(this);
     }
     virtual ~IFunctionBinding() {}
 

@@ -59,6 +59,7 @@
 #include "frameworks/bridge/card_frontend/card_frontend_declarative.h"
 #include "frameworks/bridge/card_frontend/form_frontend_declarative.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
+#include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_converter.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "frameworks/bridge/declarative_frontend/engine/js_types.h"
@@ -936,6 +937,7 @@ void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtim
 void JsiDeclarativeEngineInstance::RemoveInvalidEnv(void* env)
 {
     validCustomRuntime_.erase(env);
+    IFunctionBinding::functions.erase(env);
 }
 
 void JsiDeclarativeEngineInstance::InitConsoleModule()
