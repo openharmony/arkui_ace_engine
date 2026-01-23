@@ -28,7 +28,6 @@
 #include "core/components/web/web_property.h" // Unscoped enum types
 #include "core/components_ng/pattern/list/list_item_group_pattern.h" // Unscoped enum types
 #include "core/components_ng/pattern/slider/slider_model.h" // Inner types
-#include "core/components_ng/pattern/text_field/text_keyboard_common_type.h"
 #include "core/components_ng/property/accessibility_property.h"
 #include "core/interfaces/native/utility/ace_engine_types.h"
 
@@ -68,6 +67,8 @@ namespace NG {
 enum class BindSheetDismissReason;
 enum class ContentClipMode;
 enum class DataPanelType;
+enum class KeyboardFluidLightMode;
+enum class KeyboardGradientMode;
 enum class LaunchMode;
 enum class NavDestinationMode;
 enum class NavToolbarItemStatus;

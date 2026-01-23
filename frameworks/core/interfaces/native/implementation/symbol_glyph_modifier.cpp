@@ -306,6 +306,7 @@ SymbolGradient ProcessShaderStyleForSymbol(ShaderStylePeer* shaderPeer, FrameNod
     switch (shaderPeer->type) {
         case ShaderStyleType::LINEAR_GRADIENT:
             {
+                gradient.type = SymbolGradientType::LINEAR_GRADIENT;
                 auto linearGradientValue = gradientValue.GetLinearGradient();
                 if (!linearGradientValue) {
                     break;
@@ -325,6 +326,7 @@ SymbolGradient ProcessShaderStyleForSymbol(ShaderStylePeer* shaderPeer, FrameNod
             }
         case ShaderStyleType::RADIAL_GRADIENT:
             {
+                gradient.type = SymbolGradientType::RADIAL_GRADIENT;
                 auto radialGradientValue = gradientValue.GetRadialGradient();
                 if (!radialGradientValue) {
                     break;
@@ -341,6 +343,7 @@ SymbolGradient ProcessShaderStyleForSymbol(ShaderStylePeer* shaderPeer, FrameNod
             }
         case ShaderStyleType::SOLID_COLOR:
             {
+                gradient.type = SymbolGradientType::COLOR_SHADER;
                 if (shaderPeer->colorValue.has_value()) {
                     gradient.symbolColor.push_back(shaderPeer->colorValue.value());
                 }
@@ -382,6 +385,7 @@ void SetShaderStyleImpl(Ark_NativePointer node,
     } else if (valueSelector == 1) {
         auto shaderPeer = reinterpret_cast<ShaderStylePeer*>(optUnionArrayShaderStyle.value().value1);
         SymbolGradient gradient = ProcessShaderStyleForSymbol(shaderPeer, frameNode);
+        gradient.gradientType = GradientDefinedStatus::GRADIENT_TYPE;
         gradients.emplace_back(std::move(gradient));
         SymbolModelNG::SetShaderStyle(frameNode, gradients);
     } else {

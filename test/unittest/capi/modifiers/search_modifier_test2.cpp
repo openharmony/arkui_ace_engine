@@ -104,12 +104,9 @@ HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.Leve
 
     int callsCount = 0;
     CustomNodeBuilderTestHelper<SearchModifierTest2> builderHelper(this, frameNode);
-    const auto customNodeBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
-    Opt_Union_CustomBuilder_ComponentContentBase builder; 
-    Ark_Union_CustomBuilder_ComponentContentBase unionData;
-    unionData.selector = 0;
-    unionData.value0 = customNodeBuilder.value;
-    builder.value = unionData;
+
+    const auto builder = Converter::ArkUnion<Opt_Union_CustomBuilder_ComponentContentBase, CustomNodeBuilder>(
+        Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder()).value);
     modifier_->setCustomKeyboard(frameNode, &builder, nullptr);
 
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
@@ -137,12 +134,8 @@ HWTEST_F(SearchModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOption
 
     int callsCount = 0;
     CustomNodeBuilderTestHelper<SearchModifierTest2> builderHelper(this, frameNode);
-    const auto customNodeBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
-    Opt_Union_CustomBuilder_ComponentContentBase builder; 
-    Ark_Union_CustomBuilder_ComponentContentBase unionData;
-    unionData.selector = 0;
-    unionData.value0 = customNodeBuilder.value;
-    builder.value = unionData;
+    const auto builder = Converter::ArkUnion<Opt_Union_CustomBuilder_ComponentContentBase, CustomNodeBuilder>(
+        Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder()).value);
     modifier_->setCustomKeyboard(node_, &builder, &optKeyboardOptions);
 
     auto textFieldChild = AceType::DynamicCast<FrameNode>(frameNode->GetChildren().front());
