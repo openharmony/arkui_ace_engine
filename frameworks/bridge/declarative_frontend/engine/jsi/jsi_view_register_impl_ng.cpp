@@ -67,6 +67,7 @@
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_container.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_item.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_grid_row.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_hyperlink.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_if_else.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image.h"
 #include "frameworks/bridge/declarative_frontend/jsview/js_image_animator.h"
@@ -470,6 +471,7 @@ void JsBindViews(BindingTarget globalObj, void* nativeEngine, bool isCustomEnvSu
     JSDatePickerDialog::JSBind(globalObj);
 #endif
     JSIndexer::JSBind(globalObj);
+    JSHyperlink::JSBind(globalObj);
     JSActionSheet::JSBind(globalObj);
     JSAlertDialog::JSBind(globalObj);
     JSTextArea::JSBind(globalObj);

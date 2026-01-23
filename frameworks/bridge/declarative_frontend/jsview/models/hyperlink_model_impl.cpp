@@ -13,13 +13,13 @@
 * limitations under the License.
 */
 
-#include "core/components_ng/pattern/hyperlink/bridge/hyperlink_model_impl.h"
+#include "bridge/declarative_frontend/jsview/models/hyperlink_model_impl.h"
 
+#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "core/components/hyperlink/hyperlink_component.h"
 #include "core/components/text/text_component.h"
 #include "frameworks/bridge/declarative_frontend/view_stack_processor.h"
-#include "core/components_ng/base/view_abstract_model.h"
-#include "core/components_ng/base/view_stack_model.h"
+#include "frameworks/bridge/declarative_frontend/jsview/js_container_base.h"
 
 namespace OHOS::Ace::Framework {
 void HyperlinkModelImpl::Create(const std::string& address, const std::string& summary)
@@ -32,24 +32,15 @@ void HyperlinkModelImpl::Create(const std::string& address, const std::string& s
     }
 
     ViewStackProcessor::GetInstance()->Push(component);
-    ViewAbstractModel::GetInstance()->SetFocusable(false);
-    ViewAbstractModel::GetInstance()->SetFocusNode(true);
-}
-
-void HyperlinkModelImpl::PopNew()
-{
-    if (ViewStackModel::GetInstance()->IsPrebuilding()) {
-        return ViewStackModel::GetInstance()->PushPrebuildCompCmd(
-            "[HyperlinkModelImpl][popNew]", &HyperlinkModelImpl::PopNew);
-    }
-    ViewStackModel::GetInstance()->PopContainer();
+    JSInteractableView::SetFocusable(false);
+    JSInteractableView::SetFocusNode(true);
 }
 
 void HyperlinkModelImpl::Pop()
 {
     auto hyperlink =
         AceType::DynamicCast<OHOS::Ace::HyperlinkComponent>(ViewStackProcessor::GetInstance()->GetMainComponent());
-    PopNew();
+    JSContainerBase::Pop();
     if (hyperlink) {
         std::string summary = hyperlink->GetSummary();
         std::list<RefPtr<Component>> children = hyperlink->GetChildren();

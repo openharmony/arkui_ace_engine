@@ -17,7 +17,6 @@ import("//foundation/arkui/ace_engine/ace_config.gni")
 component_modules = [
   "counter",
   "gauge",
-  "hyperlink",
   "checkbox",
   "rating",
   "waterflow",
