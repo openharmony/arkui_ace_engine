@@ -26,6 +26,7 @@
 #include "core/components_ng/pattern/overlay/modal_style.h"
 #include "core/components_ng/pattern/overlay/sheet_theme.h"
 #include "core/common/resource/resource_object.h"
+#include "ui/properties/ui_material.h"
 
 #define ACE_SHEET_CREATE_RESOURCE_FUNCTIONS(name)                                   \
 public:                                                                             \
@@ -209,6 +210,7 @@ struct SheetStyle {
     std::optional<bool> showInSubWindow;
     std::optional<ModalTransition> modalTransition;
     std::optional<RenderStrategy> radiusRenderStrategy;
+    RefPtr<UiMaterial> systemMaterial;
 
     SheetStyle() = default;
     // constructor for image generator dialog
@@ -236,7 +238,7 @@ struct SheetStyle {
                 detentSelection == sheetStyle.detentSelection && sheetEffectEdge == sheetStyle.sheetEffectEdge &&
                 placement == sheetStyle.placement && placementOnTarget == sheetStyle.placementOnTarget &&
                 showInSubWindow == sheetStyle.showInSubWindow && modalTransition == sheetStyle.modalTransition &&
-                radiusRenderStrategy == sheetStyle.radiusRenderStrategy);
+                radiusRenderStrategy == sheetStyle.radiusRenderStrategy && systemMaterial == sheetStyle.systemMaterial);
     }
 
     void PartialUpdate(const SheetStyle& sheetStyle)
@@ -285,6 +287,7 @@ struct SheetStyle {
         modalTransition = sheetStyle.modalTransition.has_value() ? sheetStyle.modalTransition : modalTransition;
         radiusRenderStrategy =
             sheetStyle.radiusRenderStrategy.has_value() ? sheetStyle.radiusRenderStrategy : radiusRenderStrategy;
+        systemMaterial = sheetStyle.systemMaterial ? sheetStyle.systemMaterial : systemMaterial;
     }
 
     // Register the set/get method of the resource.

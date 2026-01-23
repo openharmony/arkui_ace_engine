@@ -1075,6 +1075,7 @@ public:
 
     // Create Dark Light Resource Method.
     void UpdateSheetParamResource(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle);
+    void RemoveSheetResourceByMaterial(const RefPtr<FrameNode>& sheetNode, NG::SheetStyle& sheetStyle);
     void RegisterWidthRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& resObj);
     void RegisterHeightRes(const RefPtr<FrameNode>& sheetNode, RefPtr<ResourceObject>& sheetHeightResObj);
     void UpdateSheetDetents(const RefPtr<ResourceObject>& resObj,

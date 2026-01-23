@@ -53,6 +53,7 @@
 #include "core/components/common/properties/color.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
+#include "core/components/theme/ui_material_theme.h"
 #include "core/components/toast/toast_theme.h"
 #include "core/components_ng/animation/geometry_transition.h"
 #include "core/components_ng/base/frame_node.h"
@@ -5992,6 +5993,18 @@ void OverlayManager::UpdateSheetRender(
         sheetRenderContext->UpdateBackShadow(shadow);
     }
     sheetNodePattern->UpdateMaskBackgroundColor();
+
+    if (sheetStyle.systemMaterial) {
+        sheetRenderContext->SetSystemMaterial(sheetStyle.systemMaterial->Copy());
+        if (!MaterialUtils::CallSetMaterial(
+            AceType::RawPtr(sheetPageNode), AceType::RawPtr(sheetStyle.systemMaterial))) {
+            ViewAbstract::SetSystemMaterialImmediate(
+                AceType::RawPtr(sheetPageNode), AceType::RawPtr(sheetStyle.systemMaterial));
+        }
+    } else {
+        sheetRenderContext->SetSystemMaterial(nullptr);
+        sheetNodePattern->RemoveResObj("sheet.uiMaterial");
+    }
 }
 void OverlayManager::UpdateSheetRenderProperty(const RefPtr<FrameNode>& sheetNode,
     const NG::SheetStyle& currentStyle, bool isPartialUpdate)
@@ -6047,6 +6060,10 @@ void OverlayManager::UpdateSheetPage(const RefPtr<FrameNode>& sheetNode, const N
         sheetNodePattern->UpdateSheetType();
         sheetNodePattern->UpdateSheetObject(sheetNodePattern->GetSheetTypeNoProcess());
         UpdateSheetRenderProperty(sheetNode, sheetStyle, isPartialUpdate);
+    }
+    if (SystemProperties::ConfigChangePerform()) {
+        // Register the resource update function when sheet node update resource.
+        sheetNodePattern->UpdateSheetParamResource(sheetNode, currentStyle);
     }
     sheetNodePattern->SetBottomOffset(sheetStyle);
     // MarkModifyDone must be called after UpdateSheetObject. InitSheetMode depends on SheetObject.
