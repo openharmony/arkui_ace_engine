@@ -361,6 +361,22 @@ int32_t DragDropFuncWrapper::NotifyDragResult(int32_t requestId, int32_t result)
     return DragDropGlobalController::GetInstance().NotifyDragResult(requestId, result);
 }
 
+int32_t DragDropFuncWrapper::NotifySuggestedDropOperation(int32_t requestId, int32_t operation)
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    return DragDropGlobalController::GetInstance().NotifySuggestedDropOperation(requestId, operation);
+}
+
+int32_t DragDropFuncWrapper::NotifyDisableDropAnimation(int32_t requestId, bool disable)
+{
+    if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
+        return -1;
+    }
+    return DragDropGlobalController::GetInstance().NotifyDisableDropAnimation(requestId, disable);
+}
+
 int32_t DragDropFuncWrapper::NotifyDragEndPendingDone(int32_t requestId)
 {
     if (!DragDropGlobalController::GetInstance().IsOnOnDropPhase()) {
