@@ -524,6 +524,11 @@ int32_t SystemProperties::getFormSharedImageCacheThreshold()
     return formSharedImageCacheThreshold_;
 }
 
+bool SystemProperties::IsFormSkeletonRSTransactionEnabled()
+{
+    return true;
+}
+
 void SystemProperties::SetMultiInstanceEnabled(bool enabled)
 {
 }
