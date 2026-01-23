@@ -40,6 +40,7 @@ constexpr int32_t SEND_COMMAND_WITHOUT_NODEID = 2;
 constexpr int32_t CONTENT_CHANGE_EVENT_WITH_CONFIG = 3;
 constexpr int32_t CONTENT_CHANGE_EVENT_WITH_CONFIG_IGNORE = 4;
 constexpr int32_t GET_WEB_INFO_BY_REQUEST_PARAMS = 3;
+constexpr int32_t EXE_APP_AI_FUNCTION_PARAMS = 3;
 
 std::string GetCurrentTimestampStr()
 {
@@ -95,6 +96,7 @@ const std::map<std::string, UiSaService::DumpHandler> UiSaService::DUMP_MAP = {
     { "GetWebInfoByRequest", &UiSaService::HandleGetWebInfoByRequest },
     { "RegisterComponentChangeEventCallback", &UiSaService::HandleRegisterComponentChangeEventCallback },
     { "UnregisterComponentChangeEventCallback", &UiSaService::HandleUnregisterComponentChangeEventCallback },
+    { "ExeAppAIFunction", &UiSaService::HandleExeAppAIFunction },
 };
 
 UiSaService::UiSaService() : SystemAbility(UI_SA_ID, true) {}
@@ -347,16 +349,12 @@ void UiSaService::HandleGetWebInfoByRequest(sptr<IUiContentService> service, std
     if (params.size() >= GET_WEB_INFO_BY_REQUEST_PARAMS) {
         int32_t webId = std::atoi(params[1].c_str());
         std::string request = params[2];
-        if (params.back() == "-large") {
-            int32_t length = std::atoi(params[2].c_str());
-            request = std::string(length, 'A');
-        }
         auto finishCallback = [](int32_t winId, int32_t webId, const std::string& request, const std::string& result,
             WebRequestErrorCode code) {
             LOGI("[GetWebInfoByRequest] finishCallback winId=%{public}d, webId=%{public}d", winId, webId);
-            LOGI("[GetWebInfoByRequest] finishCallback request=%{public}s", request.substr(0, 200).c_str());
-            LOGI("[GetWebInfoByRequest] finishCallback request.length=%{public}zu", request.length());
-            LOGI("[GetWebInfoByRequest] finishCallback result=%{public}s", result.c_str());
+            LOGI("[GetWebInfoByRequest] finishCallback request=%{public}s", request.c_str());
+            LOGI("[GetWebInfoByRequest] finishCallback result=%{public}s", result.substr(0, 200).c_str());
+            LOGI("[GetWebInfoByRequest] finishCallback result.length=%{public}zu", result.length());
             LOGI("[GetWebInfoByRequest] finishCallback code=%{public}d", code);
         };
         service->GetWebInfoByRequest(webId, request, finishCallback);
@@ -381,5 +379,27 @@ void UiSaService::HandleUnregisterComponentChangeEventCallback(
 {
     service->UnregisterComponentChangeEventCallback();
     LOGI("[ComponentChangeEvent] call UnregisterComponentChangeEventCallback");
+}
+
+void UiSaService::HandleExeAppAIFunction(sptr<IUiContentService> service, std::vector<std::string> params)
+{
+    if (params.size() >= EXE_APP_AI_FUNCTION_PARAMS) {
+        std::string funcName = params[1];
+        std::string paramsJson = params[2];
+        auto finishCallback = [](uint32_t result) {
+            std::map<uint32_t, std::string> resultMap = {
+                { 0, "AI_CALL_SUCCESS" },
+                { 1, "AI_CALLER_INVALID" },
+                { 2, "AI_CALL_FUNCNAME_INVALID" },
+                { 3, "AI_CALL_NODE_INVALID" },
+                { 4, "AI_CALL_ENV_INVALID" },
+            };
+            LOGI("[ExeAppAIFunction] finishCallback result=%{public}d(%{public}s)", result,
+                (resultMap.count(result) ? resultMap[result] : "").c_str());
+        };
+        service->ExeAppAIFunction(funcName, paramsJson, finishCallback);
+        LOGI("[ExeAppAIFunction] call ExeAppAIFunction funcName=%{public}s, params=%{public}s", funcName.c_str(),
+            paramsJson.c_str());
+    }
 }
 } // namespace OHOS::Ace

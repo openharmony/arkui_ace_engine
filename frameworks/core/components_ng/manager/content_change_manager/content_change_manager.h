@@ -56,13 +56,13 @@ public:
     void OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, bool isShow);
     void OnScrollRemoved(int32_t nodeId);
     bool IsScrolling() const;
-    void OnTextChangeEnd(const RectF& rect);
+    void OnTextChangeEnd(const RectF& rect, const RectF& rootRect);
     void OnVsyncStart();
     void OnVsyncEnd(const RectF& rootRect);
     bool IsTextAABBCollecting() const;
 
-    uint32_t ConvertEventStringToEnum(std::string type) const;
-    uint32_t GetIgnoreEventMask(std::string ignoreEventType) const;
+    uint32_t ConvertEventStringToEnum(const std::string& type) const;
+    uint32_t GetIgnoreEventMask(const std::string& ignoreEventType) const;
     bool IsIgnoringEventType(uint32_t type) const;
 
 #ifndef IS_RELEASE_VERSION

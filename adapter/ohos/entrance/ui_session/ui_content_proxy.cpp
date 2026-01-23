@@ -19,7 +19,6 @@
 
 #include "adapter/ohos/entrance/ui_session/content_change_config_impl.h"
 #include "adapter/ohos/entrance/ui_session/get_inspector_tree_config_impl.h"
-#include "adapter/ohos/entrance/ui_session/include/large_string_ashmem.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 
 namespace OHOS::Ace {
@@ -1134,17 +1133,8 @@ int32_t UIContentServiceProxy::GetWebInfoByRequest(
         LOGW("GetWebInfoByRequest write interface token failed");
         return FAILED;
     }
-    sptr<LargeStringAshmem> largeStringAshmem = new (std::nothrow) LargeStringAshmem();
-    if (largeStringAshmem == nullptr) {
-        LOGW("GetWebInfoByRequest alloc shmem failed");
-        return FAILED;
-    }
-    if (!largeStringAshmem->WriteToAshmem(std::to_string(GET_WEBINFO_BY_REQUEST), request, request.length())) {
-        LOGW("GetWebInfoByRequest write to shmem failed");
-        return FAILED;
-    }
-    if (!data.WriteParcelable(largeStringAshmem)) {
-        LOGW("GetWebInfoByRequest write request failed");
+    if (!data.WriteString(request)) {
+        LOGW("GetWebInfoByRequest write componentName failed");
         return FAILED;
     }
     int32_t sendRequestErrorCode = Remote()->SendRequest(GET_WEBINFO_BY_REQUEST, data, reply, option);
