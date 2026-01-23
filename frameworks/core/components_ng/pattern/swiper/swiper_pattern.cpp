@@ -7255,6 +7255,9 @@ std::optional<RefPtr<UINode>> SwiperPattern::FindLazyForEachNode(RefPtr<UINode> 
     if (AceType::DynamicCast<RepeatVirtualScroll2Node>(baseNode)) {
         return baseNode;
     }
+    if (AceType::DynamicCast<ArkoalaLazyNode>(baseNode)) {
+        return baseNode;
+    }
     if (!isSelfNode && AceType::DynamicCast<FrameNode>(baseNode)) {
         return std::nullopt;
     }

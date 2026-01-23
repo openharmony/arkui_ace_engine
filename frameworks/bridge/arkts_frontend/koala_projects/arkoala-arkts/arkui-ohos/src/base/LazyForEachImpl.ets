@@ -376,7 +376,7 @@ class LazyItemPool implements Disposable {
                 }
             } else {
                 // normal case: check if cache region covers entire list
-                if (cacheStartBound - cacheEndBound + 1 >= total) {
+                if (cacheEndBound - cacheStartBound + 1 >= total) {
                     return true;
                 }
             }
@@ -389,7 +389,7 @@ class LazyItemPool implements Disposable {
                 return normIndex >= normCacheStart && normIndex <= normCacheEnd;
             } else {
                 // two regions: [0, normCacheEnd] + [normCacheStart, totalCount-1]
-                return normIndex >= normCacheStart || normIndex <= normCacheEnd;
+                return normIndex <= normCacheEnd || normIndex >= normCacheStart;
             }
         }
     }

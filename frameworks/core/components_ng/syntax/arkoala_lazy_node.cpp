@@ -550,7 +550,7 @@ bool ArkoalaLazyNode::IsInCacheRange(int32_t index, const ActiveRangeParam& para
             }
         } else {
             // normal case: check if cache region covers entire list
-            if (cacheStartBound - cacheEndBound + 1 >= total) {
+            if (cacheEndBound - cacheStartBound + 1 >= total) {
                 return true;
             }
         }
@@ -563,7 +563,7 @@ bool ArkoalaLazyNode::IsInCacheRange(int32_t index, const ActiveRangeParam& para
             return normIndex >= normCacheStart && normIndex <= normCacheEnd;
         } else {
             // two regions: [0, normCacheEnd] + [normCacheStart, totalCount-1]
-            return normIndex >= normCacheStart || normIndex <= normCacheEnd;
+            return normIndex <= normCacheEnd || normIndex >= normCacheStart;
         }
     }
 }
