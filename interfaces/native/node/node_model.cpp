@@ -671,6 +671,9 @@ int32_t GetNativeNodeEventType(ArkUINodeEvent* innerEvent, bool isCommonEvent)
         case CHILD_TOUCH_TEST_EVENT:
             subKind = static_cast<ArkUIEventSubKind>(innerEvent->touchTestInfo.subKind);
             break;
+        case PREVENTABLE_EVENT:
+            subKind = static_cast<ArkUIEventSubKind>(innerEvent->preventableEvent.subKind);
+            break;
         default:
             break; /* Empty */
     }

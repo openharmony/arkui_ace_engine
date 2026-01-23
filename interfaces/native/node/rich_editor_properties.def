@@ -7,5 +7,10 @@ X(1, 1, 1, RichEditorScrollBarColor)
 X(1, 1, 1, RichEditorBarState)
 X(1, 1, 1, RichEditorEnableDataDetector)
 X(1, 0, 1, RichEditorDataDetectorConfig)
+X(1, 0, 1, EditMenuOption)
+X(1, 0, 1, RichEditorPlaceholder)
+X(1, 0, 0, RichEditorStyledStringController)
+X(1, 1, 1, RichEditorSupportPreviewText)
+X(0, 1, 0, TextLayoutManager)
 #undef IF_1
 #undef IF_0

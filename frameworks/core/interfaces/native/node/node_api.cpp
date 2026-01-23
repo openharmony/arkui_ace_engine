@@ -543,6 +543,12 @@ const ComponentAsyncEventHandler textAreaNodeAsyncEventHandlers[] = {
 
 const ComponentAsyncEventHandler richEditorNodeAsyncEventHandlers[] = {
     OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnSelectionChange,
+    OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnReady,
+    OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnPaste,
+    OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnEditingChange,
+    OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnSubmit,
+    OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnCut,
+    OHOS::Ace::NG::NodeModifier::SetRichEditorNapiOnCopy,
 };
 
 const ComponentAsyncEventHandler refreshNodeAsyncEventHandlers[] = {
@@ -781,6 +787,12 @@ const ResetComponentAsyncEventHandler TEXT_AREA_NODE_RESET_ASYNC_EVENT_HANDLERS[
 
 const ResetComponentAsyncEventHandler RICH_EDITOR_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {
     OHOS::Ace::NG::NodeModifier::ResetRichEditorOnSelectionChange,
+    OHOS::Ace::NG::NodeModifier::ResetRichEditorOnReady,
+    OHOS::Ace::NG::NodeModifier::ResetRichEditorOnPaste,
+    OHOS::Ace::NG::NodeModifier::ResetRichEditorOnEditingChange,
+    OHOS::Ace::NG::NodeModifier::ResetRichEditorOnSubmit,
+    OHOS::Ace::NG::NodeModifier::ResetRichEditorOnCut,
+    OHOS::Ace::NG::NodeModifier::ResetRichEditorOnCopy,
 };
 
 const ResetComponentAsyncEventHandler REFRESH_NODE_RESET_ASYNC_EVENT_HANDLERS[] = {

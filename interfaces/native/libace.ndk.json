@@ -5068,6 +5068,370 @@
         "name": "OH_ArkUI_TextDataDetectorConfig_GetEnablePreviewMenu"
     },
     {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_NodeEvent_GetPreventableEvent"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_SetValue"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_GetValue"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_SetFontSize"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_GetFontSize"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_SetFontWeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_GetFontWeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_SetFontFamily"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_GetFontFamily"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_SetFontStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_GetFontStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_SetFontColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorPlaceholderOptions_GetFontColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_SetCaretOffset"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_GetCaretOffset"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_SetSelection"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_IsEditing"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_StopEditing"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_GetPreviewTextOffset"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_GetPreviewTextValue"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_GetCaretRect"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_DeleteBackward"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetTextAlign"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetTextAlign"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetLeadingMarginPixelMap"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetLeadingMarginPixelMap"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetLeadingMarginWidth"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetLeadingMarginWidth"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetLeadingMarginHeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetLeadingMarginHeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetWordBreak"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetWordBreak"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetLineBreakStrategy"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetLineBreakStrategy"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetParagraphSpacing"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetParagraphSpacing"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetTextVerticalAlign"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetTextVerticalAlign"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_SetTypingParagraphStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_SetTextDirection"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorParagraphStyle_GetTextDirection"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_SetRadius"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_GetRadius"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_SetType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_GetType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_SetColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_GetColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_SetOffsetX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_GetOffsetX"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_SetOffsetY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_GetOffsetY"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_SetFill"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_ShadowOptions_GetFill"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetFontColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetFontColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetFontSize"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetFontSize"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetFontStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetFontStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetFontWeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetFontWeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetFontFamily"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetFontFamily"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetDecoration"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetDecoration"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetTextShadows"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetTextShadows"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetLineHeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetLineHeight"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetLetterSpacing"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetLetterSpacing"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetFontFeature"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetFontFeature"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetHalfLeading"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetHalfLeading"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetTextBackgroundColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetTextBackgroundColor"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_SetTextBackgroundRadius"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorTextStyle_GetTextBackgroundRadius"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_SetTypingStyle"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorStyledStringController_GetTypingStyle"
+    },
+    {
         "first_introduced": "23",
         "name": "OH_ArkUI_NativeModule_GetNativeAccessibilityProvider"
     }

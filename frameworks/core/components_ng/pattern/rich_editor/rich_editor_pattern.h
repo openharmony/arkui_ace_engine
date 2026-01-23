@@ -405,6 +405,11 @@ public:
         isTextPreviewSupported_ = isTextPreviewSupported;
     }
 
+    bool IsSupportPreviewText()
+    {
+        return isTextPreviewSupported_;
+    }
+
     ACE_DEFINE_PROPERTY_ITEM_FUNC_WITHOUT_GROUP(TextInputAction, TextInputAction)
     TextInputAction GetDefaultTextInputAction() const;
 

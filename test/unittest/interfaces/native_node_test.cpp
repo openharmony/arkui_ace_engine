@@ -8577,19 +8577,23 @@ HWTEST_F(NativeNodeTest, NativeNodeTestRichEditor, TestSize.Level1)
     nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_SCROLL_BAR_COLOR, &item);
     value[0].i32 = true;
     nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_DATA_DETECTOR, &item);
- 
+    value[0].i32 = true;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_PREVIEW_TEXT, &item);
+
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_ENTER_KEY_TYPE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_BAR_STATE), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_CARET_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_SCROLL_BAR_COLOR), ARKUI_ERROR_CODE_NO_ERROR);
     EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_DATA_DETECTOR), ARKUI_ERROR_CODE_NO_ERROR);
-    
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_PREVIEW_TEXT), ARKUI_ERROR_CODE_NO_ERROR);
+
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_ENTER_KEY_TYPE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_BAR_STATE), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_CARET_COLOR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_SCROLL_BAR_COLOR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_DATA_DETECTOR), nullptr);
-    
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_PREVIEW_TEXT), nullptr);
+
     nodeAPI->disposeNode(rootNode);
 }
 
