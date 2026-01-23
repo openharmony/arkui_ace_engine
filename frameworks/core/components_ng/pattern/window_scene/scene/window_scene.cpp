@@ -123,7 +123,8 @@ bool WindowScene::IsMainSessionRecent()
     auto windowScene = AceType::DynamicCast<WindowScene>(pattern);
     CHECK_NULL_RETURN(windowScene, false);
     CHECK_NULL_RETURN(windowScene->session_, false);
-    
+    CHECK_NULL_RETURN(windowScene->snapshotWindow_, false);
+
     TAG_LOGI(AceLogTag::ACE_WINDOW_SCENE, "IsMainSessionRecent id:%{public}d, nodeId:%{public}d,"
         "type:%{public}d, recent:%{public}d", windowScene->session_->GetPersistentId(), host->GetId(),
         windowScene->session_->GetWindowType(), windowScene->session_->GetShowRecent());
