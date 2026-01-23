@@ -4998,25 +4998,43 @@ void TextFieldPattern::FreeMouseStyleHoldNode(const Offset location)
 
 void TextFieldPattern::UpdateTextFieldManager(const Offset& offset, float height)
 {
-    auto tmpHost = GetHost();
-    CHECK_NULL_VOID(tmpHost);
-    auto context = tmpHost->GetContextRefPtr();
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto textFieldManager = DynamicCast<TextFieldManagerNG>(context->GetTextFieldManager());
     CHECK_NULL_VOID(textFieldManager);
     auto safeAreaManager = context->GetSafeAreaManager();
     CHECK_NULL_VOID(safeAreaManager);
-    textFieldManager->UpdateScrollableParentViewPort(tmpHost);
+    textFieldManager->UpdateScrollableParentViewPort(host);
     if (!HasFocus()) {
         return;
     }
-    textFieldManager->SetClickPosition({ offset.GetX() + selectController_->GetCaretRect().GetX(),
-        offset.GetY() + selectController_->GetCaretRect().GetY() });
-    textFieldManager->SetHeight(selectController_->GetCaretRect().Height());
+    auto caretRectWithScale = GetCaretRect(false); 
+
+    textFieldManager->SetClickPosition({ offset.GetX() + caretRectWithScale.GetX(),
+        offset.GetY() + caretRectWithScale.GetY() });
+    textFieldManager->SetHeight(caretRectWithScale.Height());
     textFieldManager->SetClickPositionOffset(safeAreaManager->GetKeyboardOffset());
     textFieldManager->SetOnFocusTextField(WeakClaim(this));
     textFieldManager->SetUsingCustomKeyboardAvoid(keyboardAvoidance_);
     textFieldManager->SetIfFocusTextFieldIsInline(IsNormalInlineState());
+}
+
+RectF TextFieldPattern::GetCaretRect(bool ignoreScale) const
+{
+    if (ignoreScale) {
+        return selectController_->GetCaretRect();
+    }
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, selectController_->GetCaretRect());
+    auto scale = GetHostScale(host);
+    auto caretRect = selectController_->GetCaretRect();
+    caretRect.SetLeft(caretRect.GetX() * scale.x);
+    caretRect.SetTop(caretRect.GetY() * scale.y);
+    caretRect.SetWidth(caretRect.Width() * scale.x);
+    caretRect.SetHeight(caretRect.Height() * scale.y);
+    return caretRect;
 }
 
 TextInputAction TextFieldPattern::GetDefaultTextInputAction() const
@@ -5213,11 +5231,11 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     auto theme = GetTheme();
     CHECK_NULL_RETURN(theme, {});
     auto windowRect = pipeline->GetCurrentWindowRect();
-    double positionY = (tmpHost->GetPaintRectOffset(false, true) - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
+    double positionY = (tmpHost->GetPaintRectOffsetNG(false, true) - pipeline->GetRootRect().GetOffset()).GetY() + windowRect.Top();
     auto offset = AVOID_OFFSET.ConvertToPx();
     auto textPaintOffset = GetPaintRectGlobalOffset();
-    double height = selectController_->GetCaretRect().Bottom() + windowRect.Top() +
-             textPaintOffset.GetY() + offset - positionY;
+    auto caretRectWithScale = GetCaretRect(false);
+    double height = caretRectWithScale.Bottom() + windowRect.Top() + textPaintOffset.GetY() + offset - positionY;
     std::u16string placeholder = TruncateText(GetPlaceHolder(), MAX_PLACEHOLDER_SIZE);
     std::u16string abilityName = TruncateText(UtfUtils::Str8ToStr16(AceApplicationInfo::GetInstance()
         .GetAbilityName()), MAX_ABILITY_NAME_SIZE);
@@ -5233,11 +5251,11 @@ std::optional<MiscServices::TextConfig> TextFieldPattern::GetMiscTextConfig() co
     ContainerScope scope(GetInstanceId());
     auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
 
-    MiscServices::CursorInfo cursorInfo { .left = selectController_->GetCaretRect().Left() + windowRect.Left() +
+    MiscServices::CursorInfo cursorInfo { .left = caretRectWithScale.Left() + windowRect.Left() +
                                                   textPaintOffset.GetX(),
-        .top = selectController_->GetCaretRect().Top() + windowRect.Top() + textPaintOffset.GetY(),
+        .top = caretRectWithScale.Top() + windowRect.Top() + textPaintOffset.GetY(),
         .width = theme->GetCursorWidth().ConvertToPx(),
-        .height = selectController_->GetCaretRect().Height() };
+        .height = caretRectWithScale.Height() };
     TAG_LOGI(ACE_TEXT_FIELD, "gradientMode = %{public}d fluidLightMode = %{public}d", imeGradientMode_, imeFluidLightMode_);
     MiscServices::InputAttribute inputAttribute = { .inputPattern = (int32_t)keyboard_,
         .enterKeyType = (int32_t)GetTextInputActionValue(GetDefaultTextInputAction()),
@@ -5401,9 +5419,10 @@ bool TextFieldPattern::RequestCustomKeyboard()
     }
     isCustomKeyboardAttached_ = true;
     keyboardOverlay_ = overlayManager;
-    auto caretHeight = selectController_->GetCaretRect().Height();
-    auto safeHeight = caretHeight + selectController_->GetCaretRect().GetY();
-    if (selectController_->GetCaretRect().GetY() > caretHeight) {
+    auto caretRectWithScale = GetCaretRect(false);
+    auto caretHeight = caretRectWithScale.Height();
+    auto safeHeight = caretHeight + caretRectWithScale.GetY();
+    if (caretRectWithScale.GetY() > caretHeight) {
         safeHeight = caretHeight;
     }
     keyboardOverlay_->AvoidCustomKeyboard(frameNode->GetId(), safeHeight);

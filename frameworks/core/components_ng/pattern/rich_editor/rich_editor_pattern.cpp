@@ -10268,7 +10268,7 @@ void RichEditorPattern::UpdateSelectMenuInfo(SelectMenuInfo& menuInfo)
     menuInfo.aiMenuOptionType = TextDataDetectType::INVALID;
 }
 
-RectF RichEditorPattern::GetCaretRect() const
+RectF RichEditorPattern::GetCaretRect(bool ignoreScale) const
 {
     RectF rect;
     CHECK_NULL_RETURN(overlayMod_, rect);

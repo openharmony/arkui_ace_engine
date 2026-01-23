@@ -140,7 +140,7 @@ RectF TextFieldManagerNG::GetFocusedNodeCaretRect()
     CHECK_NULL_RETURN(frameNode, RectF());
     auto textBase = DynamicCast<TextBase>(node);
     CHECK_NULL_RETURN(textBase, RectF());
-    auto caretRect = textBase->GetCaretRect() + frameNode->GetTransformRectRelativeToWindow();
+    auto caretRect = textBase->GetCaretRect(false) + frameNode->GetTransformRectRelativeToWindow();
     return caretRect;
 }
 
@@ -154,9 +154,10 @@ void TextFieldManagerNG::TriggerCustomKeyboardAvoid()
     if (!curPattern->GetIsCustomKeyboardAttached()) {
         return;
     }
-    auto caretHeight = curPattern->GetCaretRect().Height();
-    auto safeHeight = caretHeight + curPattern->GetCaretRect().GetY();
-    if (curPattern->GetCaretRect().GetY() > caretHeight) {
+    auto caretRectWithScale = curPattern->GetCaretRect(false);
+    auto caretHeight = caretRectWithScale.Height();
+    auto safeHeight = caretHeight + caretRectWithScale.GetY();
+    if (caretRectWithScale.GetY() > caretHeight) {
         safeHeight = caretHeight;
     }
     auto keyboardOverLay = curPattern->GetKeyboardOverLay();
@@ -259,7 +260,7 @@ bool TextFieldManagerNG::ScrollToSafeAreaHelper(
         CHECK_NULL_RETURN(LessNotEqual(scrollableRect.Top(), bottomInset.start), false);
     }
 
-    auto caretRect = textBase->GetCaretRect() + frameNode->GetPositionToWindowWithTransform();
+    auto caretRect = textBase->GetCaretRect(false) + frameNode->GetPositionToWindowWithTransform();
     auto diffTop = caretRect.Top() - scrollableRect.Top();
     // caret height larger scroll's content region
     if (isShowKeyboard && LessOrEqual(diffTop, 0) && LessNotEqual(bottomInset.start,
