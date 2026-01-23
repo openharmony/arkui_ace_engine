@@ -30,6 +30,7 @@ constexpr uint32_t RES_TYPE_AXIS_EVENT      = 123;
 constexpr uint32_t RES_TYPE_PAGE_TRANSITION = 140;
 constexpr uint32_t RES_TYPE_ABILITY_OR_PAGE_SWITCH = 156;
 constexpr uint32_t RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST = 504;
+constexpr uint32_t SYNC_RES_TYPE_APP_IS_IN_CLICK_REPORT_EXT_LIST = 511;
 #ifdef FFRT_EXISTS
 constexpr uint32_t RES_TYPE_LONG_FRAME     = 71;
 #endif
@@ -57,7 +58,6 @@ constexpr int64_t TIME_INTERVAL = 300;
 constexpr int32_t ABILITY_OR_PAGE_SWITCH_START_EVENT = 0;
 constexpr int32_t ABILITY_OR_PAGE_SWITCH_END_EVENT = 1;
 constexpr int32_t MODULE_SERIALIZER_COUNT = 3;
-constexpr int32_t RSS_TAIHANG_APP_WHITE_LIST_TYPE = 2;
 constexpr int32_t RSS_VSYNC_SCENE_LIST_VAULE = 2;
 #ifdef FFRT_EXISTS
 constexpr int32_t LONG_FRAME_START_EVENT = 0;
@@ -352,7 +352,7 @@ bool ResSchedReport::AppRVSEnableCheck(const std::unordered_map<std::string, std
 bool ResSchedReport::AppClickExtEnableCheck(const std::unordered_map<std::string, std::string>& payload,
     std::unordered_map<std::string, std::string>& reply)
 {
-    ResScheSyncEventReport(RES_TYPE_CHECK_APP_IS_IN_SCHEDULE_LIST, RSS_TAIHANG_APP_WHITE_LIST_TYPE, payload, reply);
+    ResScheSyncEventReport(SYNC_RES_TYPE_APP_IS_IN_CLICK_REPORT_EXT_LIST, 0, payload, reply);
     return reply["result"] == "\"true\"";
 }
 
