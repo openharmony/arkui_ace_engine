@@ -297,9 +297,7 @@ export class ArkArcAlphabetIndexerComponent extends ArkCommonMethodComponent imp
 @memo
 export function ArcAlphabetIndexerImpl(
     @memo
-    style: ((attributes: ArcAlphabetIndexerAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
+    style: ((attributes: ArcAlphabetIndexerAttribute) => void) | undefined
 ): void {
     const receiver = remember<ArkArcAlphabetIndexerComponent>((): ArkArcAlphabetIndexerComponent => {
         return new ArkArcAlphabetIndexerComponent()
@@ -308,6 +306,5 @@ export function ArcAlphabetIndexerImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
