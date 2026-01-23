@@ -314,8 +314,8 @@ class JSCheckboxGroup extends JSViewAbstract {
     getUINativeModule().checkboxgroup.setCheckboxGroupResponseRegion(true, value);
   }
   static size(value) {
-    getUINativeModule().checkboxgroup.setCheckboxGroupSize(true, value);
-  
+    JSViewAbstract.width(value?.width);
+    JSViewAbstract.height(value?.height);
   }
   static padding(value) {
     getUINativeModule().checkboxgroup.setCheckboxGroupPadding(true, value);  
