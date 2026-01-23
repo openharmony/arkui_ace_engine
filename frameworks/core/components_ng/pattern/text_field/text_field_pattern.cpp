@@ -8079,8 +8079,12 @@ void TextFieldPattern::SetShowError()
                 borderColor.SetColor(textFieldTheme->GetPasswordErrorBorderColor());
                 renderContext->UpdateBorderColor(borderColor);
             }
-            renderContext->UpdateBackgroundColor(textFieldTheme->GetPasswordErrorInputColor());
-            layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
+            if (!paintProperty->HasBackgroundColor()) {
+                renderContext->UpdateBackgroundColor(textFieldTheme->GetPasswordErrorInputColor());
+            }
+            if (!paintProperty->HasTextColorFlagByUser()) {
+                layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
+            }
             if (!layoutProperty->HasPlaceholderTextColor()) {
                 layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetPlaceholderColor());
                 std::string info = "TextFieldPattern::SetShowError theme";
@@ -13197,8 +13201,12 @@ void TextFieldPattern::SetShowErrorForTV()
                 borderColor.SetColor(textFieldTheme->GetPasswordErrorBorderColor());
                 renderContext->UpdateBorderColor(borderColor);
             }
-            renderContext->UpdateBackgroundColor(textFieldTheme->GetPasswordErrorInputColor());
-            layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
+            if (!paintProperty->HasBackgroundColor()) {
+                renderContext->UpdateBackgroundColor(textFieldTheme->GetPasswordErrorInputColor());
+            }
+            if (!paintProperty->HasTextColorFlagByUser()) {
+                layoutProperty->UpdateTextColor(textFieldTheme->GetPasswordErrorTextColor());
+            }
             if (!layoutProperty->HasPlaceholderTextColor()) {
                 layoutProperty->UpdatePlaceholderTextColor(textFieldTheme->GetPlaceholderColor());
             }
