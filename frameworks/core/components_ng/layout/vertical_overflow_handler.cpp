@@ -107,6 +107,7 @@ void VerticalOverflowHandler::AdjustChildrenOffset(float offset, bool useParentA
             continue;
         }
         auto geometryNode = childNode->GetGeometryNode();
+        CHECK_NULL_CONTINUE(geometryNode);
         auto currentOffset = geometryNode->GetMarginFrameOffset();
         if (selfExpansive && useParentAjust) {
             currentOffset += geometryNode->GetParentAdjust().GetOffset();
