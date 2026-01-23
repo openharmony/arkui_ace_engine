@@ -67,7 +67,8 @@ def parse_xml(xml_file_path):
         testsuite_failures = testsuite.attrib.get("failures")
         for testcase in testsuite.findall(".//testcase"):
             testcase_status = testcase.attrib.get("status")
-            if testcase_status != "run":
+            testcase_result = testcase.attrib.get("result")
+            if testcase_status != "run" or testcase_result != "completed":
                 continue
             testcase_name = testcase.attrib.get("name")
             failure = testcase.find("failure")

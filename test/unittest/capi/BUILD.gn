@@ -34,8 +34,13 @@ ace_unittest("capi_fake_test") {
   extra_deps += [ "..:run_linux_unittest_capi" ]
 }
 
+removed_sources = [
+  "implementation/calendar_picker_dialog_accessor.cpp",
+  "implementation/web_modifier.cpp",
+]
+
 rebased_generated_sources = []
-ut_generated_sources = generated_sources - [ "implementation/web_modifier.cpp" ]
+ut_generated_sources = generated_sources - removed_sources
 foreach(src, ut_generated_sources) {
   rebased_generated_sources += [ native_root + "/" + src ]
 }
@@ -207,6 +212,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/test/mock/core/modifier/mock_calendar_picker_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/calendar_picker/bridge/calendar_picker_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/indexer/bridge/indexer_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/calendar_picker/bridge/calendar_picker_dialog_static_modifier.cpp",
   ]
   sources += rebased_common_sources
   sources += rebased_generated_sources
