@@ -42,6 +42,18 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
             return { "SEARCH", "ONWILLDELETE" };
         case StatisticEventType::SEARCH_ONDIDDELETE:
             return { "SEARCH", "ONDIDDELETE" };
+        case StatisticEventType::CLICK_AI_MENU_PHONE_NUMBER:
+            return { "CLICK_AI_MENU", "PHONE_NUMBER" };
+        case StatisticEventType::CLICK_AI_MENU_URL:
+            return { "CLICK_AI_MENU", "URL" };
+        case StatisticEventType::CLICK_AI_MENU_EMAIL:
+            return { "CLICK_AI_MENU", "EMAIL" };
+        case StatisticEventType::CLICK_AI_MENU_ADDRESS:
+            return { "CLICK_AI_MENU", "ADDRESS" };
+        case StatisticEventType::CLICK_AI_MENU_DATE_TIME:
+            return { "CLICK_AI_MENU", "DATE_TIME" };
+        case StatisticEventType::CLICK_AI_MENU_ASK_CELIA:
+            return { "CLICK_AI_MENU", "ASK_CELIA" };
         default:
             return { "", "" };
     }
