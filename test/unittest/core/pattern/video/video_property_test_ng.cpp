@@ -125,7 +125,7 @@ constexpr uint32_t VIDEO_DURATION = 10u;
 constexpr uint32_t VIDEO_CURRENT_TIME = 5u;
 constexpr float VOLUME_STEP = 0.05f;
 constexpr int32_t MILLISECONDS_TO_SECONDS = 1000;
-TestProperty g_testProperty;
+TestProperty testProperty;
 } // namespace
 
 class VideoPropertyTestNg : public testing::Test {
@@ -141,13 +141,13 @@ protected:
 
 void VideoPropertyTestNg::SetUpTestSuite()
 {
-    g_testProperty.progressRate = VIDEO_PROGRESS_RATE;
-    g_testProperty.showFirstFrame = SHOW_FIRST_FRAME;
-    g_testProperty.muted = MUTED_VALUE;
-    g_testProperty.autoPlay = AUTO_PLAY;
-    g_testProperty.controls = CONTROL_VALUE;
-    g_testProperty.loop = LOOP_VALUE;
-    g_testProperty.objectFit = VIDEO_IMAGE_FIT;
+    testProperty.progressRate = VIDEO_PROGRESS_RATE;
+    testProperty.showFirstFrame = SHOW_FIRST_FRAME;
+    testProperty.muted = MUTED_VALUE;
+    testProperty.autoPlay = AUTO_PLAY;
+    testProperty.controls = CONTROL_VALUE;
+    testProperty.loop = LOOP_VALUE;
+    testProperty.objectFit = VIDEO_IMAGE_FIT;
     MockPipelineContext::SetUp();
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
@@ -1136,7 +1136,7 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest026, TestSize.Level1)
      * @tc.steps: step1. Create Video
      * @tc.expected: step1. Create Video successfully
      */
-    auto frameNode = CreateVideoNode(g_testProperty);
+    auto frameNode = CreateVideoNode(testProperty);
     ASSERT_TRUE(frameNode);
     auto videoPattern = frameNode->GetPattern<VideoPattern>();
     ASSERT_TRUE(videoPattern);
