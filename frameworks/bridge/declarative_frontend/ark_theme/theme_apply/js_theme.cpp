@@ -15,8 +15,6 @@
 
 #include "bridge/declarative_frontend/ark_theme/theme_apply/js_theme.h"
 
-#include "bridge/declarative_frontend/jsview/js_view_abstract.h"
-
 namespace OHOS::Ace::Framework {
 void JSThemeColors::SetColors(const std::vector<ResourceValue>& colors)
 {

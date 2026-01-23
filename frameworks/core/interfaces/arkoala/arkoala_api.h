@@ -7634,6 +7634,7 @@ struct ArkUIPatternLockControllerModifier {
 };
 
 struct ArkUIPatternLockModifier {
+    void (*createModel)(ArkUI_Bool isObject, void* controller);
     void (*setPatternLockActiveColor)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*setPatternLockActiveColorRes)(ArkUINodeHandle node, ArkUI_Uint32 value, void* activeColorRawPtr);
     void (*resetPatternLockActiveColor)(ArkUINodeHandle node);
@@ -7673,6 +7674,7 @@ struct ArkUIPatternLockModifier {
     void (*resetPatternLockOnPatternComplete)(ArkUINodeHandle node);
     void (*setPatternLockOnDotConnect)(ArkUINodeHandle node, void* callback);
     void (*resetPatternLockOnDotConnect)(ArkUINodeHandle node);
+    ArkUINodeHandle (*createFrameNode)(ArkUI_Int32 nodeId);
 };
 
 struct ArkUIColumnSplitModifier {

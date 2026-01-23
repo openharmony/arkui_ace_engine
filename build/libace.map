@@ -948,6 +948,7 @@
       *OHOS::Ace::NG::Converter::Convert*;
       *OHOS::Ace::NG::Converter::AssignCast*;
       *OHOS::Ace::NG::Converter::AssignArkValue*;
+      OHOS::Ace::V2::PatternLockComponent::*;
 
       OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas*;
       "OHOS::Ace::RosenRenderOffscreenCanvas::RosenRenderOffscreenCanvas(OHOS::Ace::WeakPtr<OHOS::Ace::PipelineBase> const&, int, int)";

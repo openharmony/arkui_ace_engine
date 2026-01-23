@@ -34,6 +34,7 @@ arkui_modules = [
   "datapanel",
   "flowitem",
   "gauge",
+  "patternlock",
   "counter",
   "sidebarcontainer",
   "checkbox",

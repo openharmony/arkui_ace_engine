@@ -103,7 +103,7 @@
 #include "bridge/declarative_frontend/jsview/js_paste_button.h"
 #include "bridge/declarative_frontend/jsview/js_path.h"
 #include "bridge/declarative_frontend/jsview/js_path_shape.h"
-#include "bridge/declarative_frontend/jsview/js_pattern_lock.h"
+#include "bridge/declarative_frontend/jsview/js_pattern_lock_controller_binding.h"
 #include "bridge/declarative_frontend/jsview/js_persistent.h"
 #include "bridge/declarative_frontend/jsview/js_polygon.h"
 #include "bridge/declarative_frontend/jsview/js_polyline.h"
@@ -683,8 +683,7 @@ static const std::unordered_map<std::string, std::function<void(BindingTarget)>>
     { "TextClockController", JSTextClockController::JSBind },
     { "Sheet", JSSheet::JSBind },
     { "JSClipboard", JSClipboard::JSBind },
-    { "PatternLock", JSPatternLock::JSBind },
-    { "PatternLockController", JSPatternLockController::JSBind },
+    { "PatternLockController", JSPatternLockControllerBinding::JSBind },
     { "TextTimer", JSTextTimer::JSBind },
     { "TextAreaController", JSTextAreaController::JSBind },
     { "TextInputController", JSTextInputController::JSBind },

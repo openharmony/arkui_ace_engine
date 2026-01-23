@@ -1334,10 +1334,78 @@ class PathModifier extends ArkPathComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class PatternLockModifier extends ArkPatternLockComponent {
+
+class LazyArkPatternLockComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkPatternLockComponent.module === undefined) {
+      LazyArkPatternLockComponent.module = globalThis.requireNapi('arkui.components.arkpatternlock');
+    }
+    this.lazyComponent = LazyArkPatternLockComponent.module.createComponent(nativePtr, classType);
+    console.log('LazyArkPatternLockComponent lazyload nativeModule');
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  sideLength(value) {
+    this.lazyComponent.sideLength(value);
+    return this;
+  }
+  circleRadius(value) {
+    this.lazyComponent.circleRadius(value);
+    return this;
+  }
+  regularColor(value) {
+    this.lazyComponent.regularColor(value);
+    return this;
+  }
+  selectedColor(value) {
+    this.lazyComponent.selectedColor(value);
+    return this;
+  }
+  activeColor(value) {
+    this.lazyComponent.activeColor(value);
+    return this;
+  }
+  pathColor(value) {
+    this.lazyComponent.pathColor(value);
+    return this;
+  }
+  pathStrokeWidth(value) {
+    this.lazyComponent.pathStrokeWidth(value);
+    return this;
+  }
+  autoReset(value) {
+    this.lazyComponent.autoReset(value);
+    return this;
+  }
+  activateCircleStyle(value) {
+    this.lazyComponent.activateCircleStyle(value);
+    return this;
+  }
+  skipUnselectedPoint(value) {
+    this.lazyComponent.skipUnselectedPoint(value);
+    return this;
+  }
+  backgroundColor(value) {
+    this.lazyComponent.backgroundColor(value);
+    return this;
+  }
+  onPatternComplete(callback) {
+    this.lazyComponent.onPatternComplete(callback);
+    return this;
+  }
+  onDotConnect(callback) {
+    this.lazyComponent.onDotConnect(callback);
+    return this;
+  }
+}
+class PatternLockModifier extends LazyArkPatternLockComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);
