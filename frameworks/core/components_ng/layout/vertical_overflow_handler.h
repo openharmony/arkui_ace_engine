@@ -78,8 +78,8 @@ public:
     {
         std::string result = "overflow: ";
         result.append(scrollableEvent_ ? "true" : "false");
-        result.append(std::string(" scrollDistance_: "));
-        result.append(scrollDistance_.has_value() ? std::to_string(scrollDistance_.value()) : "NA");
+        result.append(std::string(" childFrameTop_: "));
+        result.append(childFrameTop_.has_value() ? std::to_string(childFrameTop_.value()) : "NA");
         result.append(std::string(" totalChildFrameRect_: "));
         result.append(totalChildFrameRect_.ToString());
         result.append(std::string(" contentRect_: "));
@@ -100,10 +100,20 @@ public:
         }
         totalChildFrameRect_ += adjustRect;
     }
+
+    RectF GetChildFrameRect()
+    {
+        return totalChildFrameRect_;
+    }
+
+    RectF GetContentRect()
+    {
+        return contentRect_;
+    }
 private:
     float offsetToChildFrameBottom_ = 0.0f;
     RefPtr<ScrollableEvent> scrollableEvent_;
-    std::optional<float> scrollDistance_;
+    std::optional<float> childFrameTop_;
     RectF totalChildFrameRect_;
     RectF contentRect_;
     bool overflowDisabled_ = false;

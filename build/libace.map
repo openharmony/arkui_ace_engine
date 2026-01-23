@@ -237,6 +237,11 @@
       OHOS::Ace::NG::SliderModelNG::*;
       OHOS::Ace::SpanModel::*;
       OHOS::Ace::StackModel::*;
+      "OHOS::Ace::NG::StackPattern::CreateEventHub()";
+      "OHOS::Ace::NG::StackPattern::DumpInfo()";
+      "OHOS::Ace::NG::StackPattern::GetOrCreateVerticalOverflowHandler(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode> const&)";
+      VTT?for?OHOS::Ace::NG::StackPattern;
+      vtable?for?OHOS::Ace::NG::StackPattern;
       OHOS::Ace::SwiperModel::*;
       OHOS::Ace::SymbolModel::*;
       OHOS::Ace::SymbolSpanModel::*;

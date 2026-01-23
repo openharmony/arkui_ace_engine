@@ -39,7 +39,9 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_stack_model.h"
+#include "core/components_ng/event/overflow_scroll_event_hub.h"
 #include "core/components_ng/pattern/shape/shape_abstract_model_ng.h"
+#include "core/components_ng/pattern/stack/stack_model_ng.h"
 #include "core/components_ng/pattern/text/image_span_view.h"
 #include "core/components_ng/pattern/text/span_model_ng.h"
 #include "core/components_ng/pattern/text/span/span_string.h"
@@ -12610,6 +12612,52 @@ void SetOnCoastingAxisEvent(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnCoastingAxisEvent(frameNode, onEvent);
 }
 
+void SetOnCustomOverflowScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() != "Custom") {
+        return;
+    }
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](int32_t scrollId, float offset) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_CUSTOM_OVERFLOW_SCROLL;
+        event.componentAsyncEvent.data[0].i32 = scrollId;
+        event.componentAsyncEvent.data[1].f32 = static_cast<ArkUI_Float32>(offset);
+        SendArkUISyncEvent(&event);
+    };
+    auto hub = frameNode->GetEventHub<OverflowScrollEventHub>();
+    CHECK_NULL_VOID(hub);
+    hub->SetOverflowScrollEvent(std::move(onEvent));
+}
+
+void SetOnStackOverflowScroll(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() != V2::STACK_ETS_TAG) {
+        return;
+    }
+    int32_t nodeId = frameNode->GetId();
+    auto onEvent = [nodeId, extraParam](int32_t scrollId, float offset) {
+        ArkUINodeEvent event;
+        event.kind = COMPONENT_ASYNC_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.componentAsyncEvent.subKind = ON_STACK_OVERFLOW_SCROLL;
+        event.componentAsyncEvent.data[0].i32 = scrollId;
+        event.componentAsyncEvent.data[1].f32 = static_cast<ArkUI_Float32>(offset);
+        SendArkUISyncEvent(&event);
+    };
+    auto hub = frameNode->GetEventHub<OverflowScrollEventHub>();
+    CHECK_NULL_VOID(hub);
+    hub->SetOverflowScrollEvent(std::move(onEvent));
+}
+
 void SetOnAccessibilityActions(ArkUINodeHandle node, void* extraParam)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -12770,6 +12818,28 @@ void ResetOnChildTouchTest(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetOnTouchTestFunc(frameNode, nullptr);
+}
+
+void ResetOnCustomOverflowScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == "Custom") {
+        auto hub = frameNode->GetEventHub<OverflowScrollEventHub>();
+        CHECK_NULL_VOID(hub);
+        hub->ClearOverflowScrollEvent();
+    }
+}
+
+void ResetOnStackOverflowScroll(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    if (frameNode->GetTag() == V2::STACK_ETS_TAG) {
+        auto hub = frameNode->GetEventHub<OverflowScrollEventHub>();
+        CHECK_NULL_VOID(hub);
+        hub->ClearOverflowScrollEvent();
+    }
 }
 } // namespace NodeModifier
 } // namespace OHOS::Ace::NG

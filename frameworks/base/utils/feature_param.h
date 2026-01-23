@@ -33,6 +33,7 @@ public:
     // UINodeGcParamParser
     static bool IsUINodeGcEnabled();
     static bool IsPageOverflowEnabled();
+    static bool IsRnOverflowEnable();
     static bool IsDialogCorrectionEnabled();
 };
 } // namespace OHOS::Ace

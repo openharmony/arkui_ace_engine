@@ -424,6 +424,10 @@ ArkUI_Int32 ConvertOriginEventType(ArkUI_NodeEventType type, int32_t nodeType)
             return ON_COASTING_AXIS_EVENT;
         case NODE_ON_CHILD_TOUCH_TEST:
             return ON_CHILD_TOUCH_TEST;
+        case NODE_ON_CUSTOM_OVERFLOW_SCROLL:
+            return ON_CUSTOM_OVERFLOW_SCROLL;
+        case NODE_ON_STACK_OVERFLOW_SCROLL:
+            return ON_STACK_OVERFLOW_SCROLL;
         case NODE_PICKER_EVENT_ON_CHANGE :
             return ON_CONTAINER_PICKER_CHANGE;
         case NODE_PICKER_EVENT_ON_SCROLL_STOP :
@@ -736,6 +740,10 @@ ArkUI_Int32 ConvertToNodeEventType(ArkUIEventSubKind type)
             return NODE_ON_COASTING_AXIS_EVENT;
         case ON_CHILD_TOUCH_TEST:
             return NODE_ON_CHILD_TOUCH_TEST;
+        case ON_CUSTOM_OVERFLOW_SCROLL:
+            return NODE_ON_CUSTOM_OVERFLOW_SCROLL;
+        case ON_STACK_OVERFLOW_SCROLL:
+            return NODE_ON_STACK_OVERFLOW_SCROLL;
         case ON_CONTAINER_PICKER_CHANGE:
             return NODE_PICKER_EVENT_ON_CHANGE;
         case ON_CONTAINER_PICKER_SCROLL_STOP :

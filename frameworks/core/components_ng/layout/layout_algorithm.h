@@ -118,6 +118,7 @@ public:
         return postponeForIgnore_;
     }
     void HandleContentOverflow(LayoutWrapper* layoutWrapper);
+    void HandleStackContentOverflow(LayoutWrapper* layoutWrapper);
     bool IsContentOverflow(LayoutWrapper* layoutWrapper, OverflowCollector& collector);
 
 protected:

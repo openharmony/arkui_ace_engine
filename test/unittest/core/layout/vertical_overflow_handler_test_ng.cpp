@@ -34,13 +34,13 @@ HWTEST_F(OverflowTestNg, OutOfBoundaryTest, TestSize.Level1)
     VerticalOverflowHandler handler;
     handler.SetContentRect(RectF(0.f, 100.f, 200.f, 200.f));
     handler.SetTotalChildFrameRect(RectF(0.f, 100.f, 400.f, 400.f));
-    handler.scrollDistance_ = 0.0f;
+    handler.childFrameTop_ = 0.0f;
     /**
      * @tc.expected: scrollDistance_ == 0 means we can only scroll up the child components.
      */
     EXPECT_TRUE(handler.OutOfBoundary(10.f));
     EXPECT_FALSE(handler.OutOfBoundary(-10.f));
-    handler.scrollDistance_ = -50.0f;
+    handler.childFrameTop_ = -50.0f;
     /**
      * @tc.expected: scrollDistance_ == -50.0f means we can scroll up or scroll down the child components.
      */
@@ -50,7 +50,7 @@ HWTEST_F(OverflowTestNg, OutOfBoundaryTest, TestSize.Level1)
      * @tc.expected: scrollDistance_ == contentRect——.Height() - totalChildFrameRect_.Height()
      *               means we can only scroll down the child components.
      */
-    handler.scrollDistance_ = -200.0f;
+    handler.childFrameTop_ = -200.0f;
     EXPECT_FALSE(handler.OutOfBoundary(10.f));
     EXPECT_TRUE(handler.OutOfBoundary(-10.f));
 }
@@ -175,7 +175,7 @@ HWTEST_F(OverflowTestNg, InitOffsetAfterLayoutTest01, TestSize.Level1)
      * @tc.expected: scrollDistance_ is set to totalChildFrameRect.GetY() - contentRect_.GetY()
      *               offsetToChildFrameBottom_ is set to totalChildFrameRect.Bottom() - contentRect_.Bottom()
      */
-    EXPECT_EQ(vOverflowHandler->scrollDistance_.value_or(-1), 0.f);
+    EXPECT_EQ(vOverflowHandler->childFrameTop_.value_or(-1), 0.f);
     EXPECT_EQ(vOverflowHandler->offsetToChildFrameBottom_, 200.0f);
     /**
      * @tc.steps: step2. scroll up by 100 and change the totalChildFrameRect
@@ -187,14 +187,14 @@ HWTEST_F(OverflowTestNg, InitOffsetAfterLayoutTest01, TestSize.Level1)
      * @tc.expected: scrollDistance_ is not changed
      *               when the totalFrameRect's height is decreased, we first adjust the totalFrameRect's bottom edge
      */
-    EXPECT_EQ(vOverflowHandler->scrollDistance_.value_or(-1), -100.f);
+    EXPECT_EQ(vOverflowHandler->childFrameTop_.value_or(-1), -100.f);
     EXPECT_EQ(vOverflowHandler->offsetToChildFrameBottom_, 0.0f);
     vOverflowHandler->SetTotalChildFrameRect(RectF(0.f, 100.f, 400.f, 200.f));
     vOverflowHandler->InitOffsetAfterLayout();
     /**
      * @tc.expected: when reaching the bottom boundary, we start to adjust the totalFrameRect's top edge
      */
-    EXPECT_EQ(vOverflowHandler->scrollDistance_.value_or(-1), 0.f);
+    EXPECT_EQ(vOverflowHandler->childFrameTop_.value_or(-1), 0.f);
     EXPECT_EQ(vOverflowHandler->offsetToChildFrameBottom_, 0.0f);
 }
 
@@ -226,7 +226,7 @@ HWTEST_F(OverflowTestNg, InitOffsetAfterLayoutTest02, TestSize.Level1)
      * @tc.expected: scrollDistance_ is set to totalChildFrameRect.GetY() - contentRect_.GetY()
      *               offsetToChildFrameBottom_ is set to totalChildFrameRect.Bottom() - contentRect_.Bottom()
      */
-    EXPECT_EQ(vOverflowHandler->scrollDistance_.value_or(-1), -200.0f);
+    EXPECT_EQ(vOverflowHandler->childFrameTop_.value_or(-1), -200.0f);
     EXPECT_EQ(vOverflowHandler->offsetToChildFrameBottom_, 0.0f);
     /**
      * @tc.steps: step2. scroll down by 100 and change the totalChildFrameRect
@@ -237,14 +237,14 @@ HWTEST_F(OverflowTestNg, InitOffsetAfterLayoutTest02, TestSize.Level1)
     /**
      * @tc.expected: when the totalFrameRect's height is decreased, we first adjust the totalFrameRect's top edge
      */
-    EXPECT_EQ(vOverflowHandler->scrollDistance_.value_or(-1), 0.f);
+    EXPECT_EQ(vOverflowHandler->childFrameTop_.value_or(-1), 0.f);
     EXPECT_EQ(vOverflowHandler->offsetToChildFrameBottom_, 100.0f);
     vOverflowHandler->SetTotalChildFrameRect(RectF(0.f, 100.f, 400.f, 200.f));
     vOverflowHandler->InitOffsetAfterLayout();
     /**
      * @tc.expected: when reaching the top boundary, we start to adjust the totalFrameRect's bottom edge
      */
-    EXPECT_EQ(vOverflowHandler->scrollDistance_.value_or(-1), 0.f);
+    EXPECT_EQ(vOverflowHandler->childFrameTop_.value_or(-1), 0.f);
     EXPECT_EQ(vOverflowHandler->offsetToChildFrameBottom_, 0.0f);
 }
 
@@ -306,21 +306,21 @@ HWTEST_F(OverflowTestNg, HandleScrollImplTest01, TestSize.Level1)
      * @tc.expected: when scrolling up by 100, the scrollDistance_ is equal to -100
      *               offsetToChildFrameBottom_ is -100 + 400 - 200 = 100
      */
-    EXPECT_EQ(vOverflowHandler->scrollDistance_.value_or(-1), -100.0f);
+    EXPECT_EQ(vOverflowHandler->childFrameTop_.value_or(-1), -100.0f);
     EXPECT_EQ(vOverflowHandler->offsetToChildFrameBottom_, 100.0f);
     vOverflowHandler->HandleScrollImpl(-200.0f, 0);
     /**
      * @tc.expected: when scrolling up by -200, we should clamp scrollDistance_ to avoid exceeding scrolling boundary
      *               the scrollDistance_ is equal to -200 and offsetToChildFrameBottom_ is equal to 0
      */
-    EXPECT_EQ(vOverflowHandler->scrollDistance_.value_or(-1), -200.0f);
+    EXPECT_EQ(vOverflowHandler->childFrameTop_.value_or(-1), -200.0f);
     EXPECT_EQ(vOverflowHandler->offsetToChildFrameBottom_, 0.0f);
     vOverflowHandler->HandleScrollImpl(300.0f, 0);
     /**
      * @tc.expected: when scrolling down by 300, we should clamp scrollDistance_ to avoid exceeding scrolling boundary
      *               the scrollDistance_ is equal to 0 and offsetToChildFrameBottom_ is equal to 0 + 400 - 200 = 200
      */
-    EXPECT_EQ(vOverflowHandler->scrollDistance_.value_or(-1), 0.0f);
+    EXPECT_EQ(vOverflowHandler->childFrameTop_.value_or(-1), 0.0f);
     EXPECT_EQ(vOverflowHandler->offsetToChildFrameBottom_, 200.0f);
 }
 
@@ -358,7 +358,7 @@ HWTEST_F(OverflowTestNg, HandleContentOverflowTest, TestSize.Level1)
     /**
      * @tc.expected: register scrollEvent and initialize
      */
-    EXPECT_EQ(handler.scrollDistance_.value_or(-1), 0);
+    EXPECT_EQ(handler.childFrameTop_.value_or(-1), 0);
     EXPECT_EQ(handler.offsetToChildFrameBottom_, 60);
     EXPECT_NE(handler.scrollableEvent_, nullptr);
     EXPECT_FALSE(handler.hasParentAdjust_);
@@ -366,7 +366,7 @@ HWTEST_F(OverflowTestNg, HandleContentOverflowTest, TestSize.Level1)
     /**
      * @tc.expected: After scrolling up by 20, scrollDistance == 20 and children have correct offset
      */
-    EXPECT_EQ(handler.scrollDistance_.value_or(-1), -20);
+    EXPECT_EQ(handler.childFrameTop_.value_or(-1), -20);
     EXPECT_EQ(handler.offsetToChildFrameBottom_, 40);
     EXPECT_TRUE(handler.hasParentAdjust_);
     EXPECT_EQ(child4->GetGeometryNode()->GetMarginFrameOffset(), OffsetF(0, -20));
@@ -376,7 +376,7 @@ HWTEST_F(OverflowTestNg, HandleContentOverflowTest, TestSize.Level1)
      /**
      * @tc.expected: Unregister scrollEvent and reset
      */
-    EXPECT_FALSE(handler.scrollDistance_.has_value());
+    EXPECT_FALSE(handler.childFrameTop_.has_value());
     EXPECT_EQ(handler.scrollableEvent_, nullptr);
     EXPECT_FALSE(handler.hasParentAdjust_);
 }
