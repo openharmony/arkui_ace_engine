@@ -19,6 +19,7 @@
 #include "base/utils/utf_helper.h"
 #include "core/common/ai/data_detector_mgr.h"
 #include "core/common/ai/data_url_analyzer_mgr.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components/text_overlay/text_overlay_theme.h"
 #include "core/pipeline_ng/pipeline_context.h"
 
@@ -47,6 +48,15 @@ const std::unordered_map<std::string, TextDataDetectType> TEXT_DETECT_MAP_REVERS
     { "phoneNum", TextDataDetectType::PHONE_NUMBER }, { "url", TextDataDetectType::URL },
     { "email", TextDataDetectType::EMAIL }, { "location", TextDataDetectType::ADDRESS },
     { "datetime", TextDataDetectType::DATE_TIME }
+};
+
+static const std::unordered_map<TextDataDetectType, StatisticEventType> REPORT_TYPE_MAP = {
+    { TextDataDetectType::PHONE_NUMBER, StatisticEventType::CLICK_AI_MENU_PHONE_NUMBER },
+    { TextDataDetectType::URL, StatisticEventType::CLICK_AI_MENU_URL },
+    { TextDataDetectType::EMAIL, StatisticEventType::CLICK_AI_MENU_EMAIL },
+    { TextDataDetectType::ADDRESS, StatisticEventType::CLICK_AI_MENU_ADDRESS },
+    { TextDataDetectType::DATE_TIME, StatisticEventType::CLICK_AI_MENU_DATE_TIME },
+    { TextDataDetectType::ASK_CELIA, StatisticEventType::CLICK_AI_MENU_ASK_CELIA },
 };
 
 void DataDetectorAdapter::GetAIEntityMenu()
@@ -190,13 +200,16 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
                 std::get<std::function<void(int, std::string)>>(funcVariant)) {
                 TAG_LOGI(AceLogTag::ACE_TEXT, "DataDetectorAdapter::OnClickAIMenuOption, call ask celia");
                 std::get<std::function<void(int, std::string)>>(funcVariant)(true, aiSpan.content);
+                ReportStatisticEvent(pipeline, aiSpan.type);
             }
         }
         hasClickedMenuOption_ = false;
         return;
     }
+    bool isAIOptionClicked = true;
     if (onClickMenu_ && std::holds_alternative<std::function<std::string()>>(menuOption.second)) {
         onClickMenu_(std::get<std::function<std::string()>>(menuOption.second)());
+        isAIOptionClicked = false;
     } else if (std::holds_alternative<std::function<void(sptr<IRemoteObject>, std::string)>>(menuOption.second)) {
         std::get<std::function<void(sptr<IRemoteObject>, std::string)>>(menuOption.second)(token, aiSpan.content);
     } else if (std::holds_alternative<std::function<void(int32_t, std::string)>>(menuOption.second)) {
@@ -209,6 +222,9 @@ void DataDetectorAdapter::OnClickAIMenuOption(const AISpan& aiSpan,
             static_cast<int32_t>(textForAI_.length()), aiSpan.start, static_cast<int32_t>(aiSpan.content.length()));
     } else {
         TAG_LOGW(AceLogTag::ACE_TEXT, "No matching menu option");
+    }
+    if (isAIOptionClicked) {
+        ReportStatisticEvent(pipeline, aiSpan.type);
     }
     hasClickedMenuOption_ = false;
 }
@@ -659,6 +675,16 @@ void DataDetectorAdapter::MarkDirtyNode() const
 bool DataDetectorAdapter::IsAskCeliaSupported()
 {
     return DataDetectorMgr::GetInstance().IsAskCeliaSupported();
+}
+
+void DataDetectorAdapter::ReportStatisticEvent(const RefPtr<NG::PipelineContext>& pipeline, TextDataDetectType type)
+{
+    CHECK_NULL_VOID(pipeline);
+    auto iter = REPORT_TYPE_MAP.find(type);
+    CHECK_NULL_VOID(iter != REPORT_TYPE_MAP.end());
+    StatisticEventType eventType = iter->second;
+    TAG_LOGI(AceLogTag::ACE_TEXT, "SendStatisticEvent, type=%{public}d", eventType);
+    pipeline->GetStatisticEventReporter()->SendEvent(eventType);
 }
 
 } // namespace OHOS::Ace
