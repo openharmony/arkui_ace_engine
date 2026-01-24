@@ -47,6 +47,7 @@
 
 namespace OHOS::Ace {
 class ImageAnalyzerManager;
+enum class StatisticEventType;
 }
 namespace OHOS::Ace::NG {
 class XComponentExtSurfaceCallbackClient;
@@ -369,6 +370,7 @@ public:
     void UnlockCanvasAndPost(RSCanvas* canvas);
     void SetSurfaceIsOpaque(bool isOpaque);
     ArkUI_AccessibilityProvider* GetNativeProvider();
+    void PushType(StatisticEventType type);
     void OnFrameNodeChanged(FrameNodeChangeInfoFlag flag) override;
 protected:
     void OnAttachToMainTree() override;
@@ -423,6 +425,7 @@ protected:
     std::shared_ptr<AccessibilityChildTreeCallback> accessibilityChildTreeCallback_;
     ArkUI_AccessibilityProvider* arkuiAccessibilityProvider_ = nullptr;
     bool isNeedSoftKeyboard_ = false;
+    std::list<StatisticEventType> statisticEventTypes_;
 
 private:
     void OnAreaChangedInner() override;

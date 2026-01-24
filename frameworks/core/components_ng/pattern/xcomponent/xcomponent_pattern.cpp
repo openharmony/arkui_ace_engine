@@ -35,6 +35,7 @@
 #include "core/common/ace_engine.h"
 #include "core/common/ace_view.h"
 #include "core/common/ai/image_analyzer_manager.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components/common/layout/constants.h"
 #include "core/components_ng/event/gesture_event_hub.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
@@ -79,6 +80,29 @@ const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
 const int TEXTURETYPE_XCOMPONENT = 1;
 #endif
 
+void SendStatisticEvent(RefPtr<FrameNode> frameNode, StatisticEventType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto statisticEventReporter = context->GetStatisticEventReporter();
+    CHECK_NULL_VOID(statisticEventReporter);
+    statisticEventReporter->SendEvent(type);
+}
+
+void SendStatisticEvent(RefPtr<FrameNode> frameNode, std::list<StatisticEventType>& types)
+{
+    CHECK_NULL_VOID(!types.empty());
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto statisticEventReporter = context->GetStatisticEventReporter();
+    CHECK_NULL_VOID(statisticEventReporter);
+    for (auto type : types) {
+        statisticEventReporter->SendEvent(type);
+    }
+    types.clear();
+}
 } // namespace
 
 XComponentPattern::XComponentPattern(const std::optional<std::string>& id, XComponentType type,
@@ -264,6 +288,7 @@ void XComponentPattern::OnAttachToMainTree()
 {
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
+    SendStatisticEvent(host, statisticEventTypes_);
     TAG_LOGI(AceLogTag::ACE_XCOMPONENT, "XComponent[%{public}s] AttachToMainTree", GetId().c_str());
     ACE_SCOPED_TRACE("XComponent[%s] AttachToMainTree", GetId().c_str());
     isOnTree_ = true;
@@ -405,6 +430,11 @@ void XComponentPattern::RequestFocus()
     focusHub->RequestFocusImmediately();
 }
 #endif
+
+void XComponentPattern::PushType(StatisticEventType type)
+{
+    statisticEventTypes_.emplace_back(type);
+}
 
 void XComponentPattern::OnFrameNodeChanged(FrameNodeChangeInfoFlag flag)
 {
@@ -1070,6 +1100,7 @@ void XComponentPattern::InitNativeNodeCallbacks()
         CHECK_NULL_VOID(host);
         host->AddChild(node);
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
+        SendStatisticEvent(host, StatisticEventType::XCOMPONENT_NATIVE_ATTACH_NATIVE_ROOT_NODE);
     };
 
     auto OnDetachRootNativeNode = [](void* container, void* root) {
@@ -1079,6 +1110,7 @@ void XComponentPattern::InitNativeNodeCallbacks()
         auto host = AceType::Claim(reinterpret_cast<NG::FrameNode*>(container));
         CHECK_NULL_VOID(host);
         host->RemoveChild(node);
+        SendStatisticEvent(host, StatisticEventType::XCOMPONENT_NATIVE_DETACH_NATIVE_ROOT_NODE);
     };
 
     nativeXComponentImpl_->registerNativeNodeCallbacks(

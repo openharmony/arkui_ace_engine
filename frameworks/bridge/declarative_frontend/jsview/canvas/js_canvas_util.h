@@ -18,7 +18,16 @@
 
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 
+namespace OHOS::Ace {
+enum class StatisticEventType;
+}
+
 namespace OHOS::Ace::Framework {
+
+void SendStatisticEvent(StatisticEventType type);
+
+bool GetDoubleArg(const JSCallbackInfo& info, size_t index, double& value, bool isJudgeSpecialValue);
+
 bool ExtractInfoToRadii(const JSRef<JSVal> value, std::vector<double>& radii);
 
 bool ParseRadii(const JSCallbackInfo& info, std::vector<double>& radii);

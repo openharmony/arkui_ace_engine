@@ -29,6 +29,7 @@
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 #include "test/mock/core/rosen/mock_canvas.h"
 
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/canvas/canvas_layout_algorithm.h"
 #include "core/components_ng/pattern/canvas/canvas_model.h"
 #include "core/components_ng/pattern/canvas/canvas_model_ng.h"
@@ -867,5 +868,29 @@ HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo029, Te
     ColorSpace beginColorSpace = gradient.GetColors().front().GetColor().GetColorSpace();
     ColorSpace backColorSpace = gradient.GetColors().back().GetColor().GetColorSpace();
     EXPECT_TRUE(beginColorSpace == backColorSpace);
+}
+
+/**
+ * @tc.name: CanvasCustomPaintMethodTestTwo030
+ * @tc.desc: Test the function 'SetAlpha' of the class 'CustomPaintPaintMethod'.
+ * @tc.type: FUNC
+ */
+HWTEST_F(CanvasCustomPaintMethodTestTwoNg, CanvasCustomPaintMethodTestTwo030, TestSize.Level1)
+{
+    auto paintMethod = AceType::MakeRefPtr<OffscreenCanvasPaintMethod>();
+    ASSERT_TRUE(paintMethod);
+    MockPipelineContext::SetUp();
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    MockPipelineContext::GetCurrent()->statisticEventReporter_ = reporter;
+    paintMethod->SetAlpha(-1);
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
+    EXPECT_EQ(reporter->totalEventCount_, 1);
+    paintMethod->SetAlpha(0);
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
+    EXPECT_EQ(reporter->totalEventCount_, 1);
+    paintMethod->SetAlpha(1);
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
+    EXPECT_EQ(reporter->totalEventCount_, 1);
+    MockPipelineContext::TearDown();
 }
 } // namespace OHOS::Ace::NG

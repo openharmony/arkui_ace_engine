@@ -15,6 +15,7 @@
 
 #include "core/components_ng/pattern/xcomponent/xcomponent_model_ng.h"
 
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_pattern_v2.h"
 #include "base/display_manager/display_manager.h"
@@ -22,6 +23,17 @@
 
 namespace OHOS::Ace::NG {
 const uint32_t DEFAULT_SURFACE_SIZE = 0;
+namespace {
+void SendStatisticEvent(FrameNode* frameNode, StatisticEventType type)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContext();
+    CHECK_NULL_VOID(context);
+    auto statisticEventReporter = context->GetStatisticEventReporter();
+    CHECK_NULL_VOID(statisticEventReporter);
+    statisticEventReporter->SendEvent(type);
+}
+} // namespace
 void XComponentModelNG::Create(XComponentType type)
 {
     auto* stack = ViewStackProcessor::GetInstance();
@@ -394,6 +406,11 @@ void XComponentModelNG::SetXComponentType(FrameNode* frameNode, XComponentType t
 {
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
+    if (frameNode->IsOnMainTree()) {
+        SendStatisticEvent(frameNode, StatisticEventType::XCOMPONENT_SET_ATTRIBUTE_NODE_TYPE);
+    } else {
+        xcPattern->PushType(StatisticEventType::XCOMPONENT_SET_ATTRIBUTE_NODE_TYPE);
+    }
     xcPattern->SetType(type);
     ACE_UPDATE_NODE_LAYOUT_PROPERTY(XComponentLayoutProperty, XComponentType, type, frameNode);
 }
@@ -402,6 +419,11 @@ void XComponentModelNG::SetXComponentSurfaceSize(FrameNode* frameNode, uint32_t 
 {
     auto xcPattern = AceType::DynamicCast<XComponentPattern>(frameNode->GetPattern());
     CHECK_NULL_VOID(xcPattern);
+    if (frameNode->IsOnMainTree()) {
+        SendStatisticEvent(frameNode, StatisticEventType::XCOMPONENT_SET_ATTRIBUTE_NODE_SURFACE_SIZE);
+    } else {
+        xcPattern->PushType(StatisticEventType::XCOMPONENT_SET_ATTRIBUTE_NODE_SURFACE_SIZE);
+    }
     xcPattern->ConfigSurface(width, height);
 }
 

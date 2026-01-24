@@ -32,6 +32,7 @@
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
 #include "core/common/ai/image_analyzer_mgr.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_controller_ng.h"
@@ -940,8 +941,18 @@ HWTEST_F(XComponentTestTwoNg, SetXComponentSurfaceSizeTest, TestSize.Level1)
     ASSERT_TRUE(pattern);
     EXPECT_CALL(*AceType::DynamicCast<MockRenderSurface>(pattern->renderSurface_),
         ConfigSurface(SURFACE_WIDTH_SIZE, SURFACE_HEIGHT_SIZE))
+        .WillOnce(Return())
         .WillOnce(Return());
+    auto reporter = std::make_shared<StatisticEventReporter>();
+    PipelineContext* context = frameNode->GetContext();
+    context->statisticEventReporter_ = reporter;
+    frameNode->onMainTree_ = true;
     XComponentModelNG::SetXComponentSurfaceSize(Referenced::RawPtr(frameNode), SURFACE_WIDTH_SIZE, SURFACE_HEIGHT_SIZE);
+    EXPECT_EQ(reporter->statisitcEventMap_.size(), 1);
+    EXPECT_EQ(reporter->totalEventCount_, 1);
+    frameNode->onMainTree_ = false;
+    XComponentModelNG::SetXComponentSurfaceSize(Referenced::RawPtr(frameNode), SURFACE_WIDTH_SIZE, SURFACE_HEIGHT_SIZE);
+    EXPECT_EQ(pattern->statisticEventTypes_.size(), 1);
 }
 
 /**
