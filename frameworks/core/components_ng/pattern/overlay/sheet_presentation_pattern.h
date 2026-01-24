@@ -1113,6 +1113,16 @@ public:
         return needDoubleAvoidAfterLayout_;
     }
 
+    void SetEnableDragControl(bool enable)
+    {
+        enableDragControl_ = enable;
+    }
+
+    bool GetEnableDragControl() const
+    {
+        return enableDragControl_;
+    }
+
 protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
@@ -1288,6 +1298,7 @@ private:
     RefPtr<SheetObject> sheetObject_;
     WeakPtr<FrameNode> dragBarNode_;
     float sheetHeightForTranslate_ { 0.0 };
+    bool enableDragControl_ = true;
     bool needDoubleAvoidAfterLayout_ = false;
 };
 } // namespace OHOS::Ace::NG
