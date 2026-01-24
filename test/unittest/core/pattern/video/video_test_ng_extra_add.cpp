@@ -57,6 +57,7 @@
 #include "core/components_ng/pattern/video/video_layout_algorithm.h"
 #include "core/components_ng/pattern/video/video_layout_property.h"
 #include "core/components_ng/pattern/video/video_model_ng.h"
+#include "core/components_ng/pattern/video/video_model_static.h"
 #include "core/components_ng/pattern/video/video_node.h"
 #include "core/components_ng/pattern/video/video_pattern.h"
 #include "core/components_ng/pattern/video/video_styles.h"
@@ -1525,4 +1526,29 @@ HWTEST_F(VideoTestExtraAddNg, RecoverState002, TestSize.Level1)
     EXPECT_TRUE(fullScreenPattern->ExitFullScreen());
 }
 
+/**
+ * @tc.name: VideoModelStaticEnableAnalyzerTest
+ * @tc.desc: Test VideoModelStatic::EnableAnalyzer
+ * @tc.type: FUNC
+ */
+HWTEST_F(VideoTestExtraAddNg, VideoModelStaticEnableAnalyzerTest, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create Video
+     * @tc.expected: step1. Create Video successfully
+     */
+    VideoModelNG videoModelNG;
+    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
+    videoModelNG.Create(videoController);
+    auto frameNode = AceType::Claim<FrameNode>(ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    ASSERT_NE(frameNode, nullptr);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    ASSERT_NE(videoPattern, nullptr);
+    /**
+     * @tc.steps: step2. Call VideoModelStatic::EnableAnalyzer
+     * @tc.expected: step2. enable analyzer is updated
+     */
+    VideoModelStatic::EnableAnalyzer(AceType::RawPtr(frameNode), true);
+    EXPECT_TRUE(videoPattern->isEnableAnalyzer_);
+}
 } // namespace OHOS::Ace::NG
