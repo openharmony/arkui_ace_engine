@@ -4190,6 +4190,18 @@ void TextPattern::AddSubComponentInfoForAISpan(std::vector<SubComponentInfo>& su
     subComponentInfos_.emplace_back(subComponentInfoEx);
 }
 
+std::string GetImageColorFilterStr(const std::vector<float>& colorFilter)
+{
+    if (colorFilter.empty()) {
+        return "";
+    }
+    std::string result = "[" + std::to_string(colorFilter[0]);
+    for (uint32_t idx = 1; idx < colorFilter.size(); ++idx) {
+        result += ", " + std::to_string(colorFilter[idx]);
+    }
+    return result + "]";
+}
+
 void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
 {
     json->PutFixedAttr("content", UtfUtils::Str16ToStr8(textForDisplay_).c_str(), filter, FIXED_ATTR_CONTENT);
@@ -4219,6 +4231,27 @@ void TextPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorF
     json->PutExtAttr("selectedBackgroundColor", GetSelectedBackgroundColor().c_str(), filter);
     json->PutExtAttr("enableHapticFeedback", isEnableHapticFeedback_ ? "true" : "false", filter);
     json->PutExtAttr("shaderStyle", GetShaderStyleInJson(), filter);
+
+    auto imageArr = JsonUtil::CreateArray(true);
+    int32_t i = 0;
+    for (auto& childNode: childNodes_) {
+        auto imageNode = DynamicCast<FrameNode>(childNode);
+        if (!imageNode || imageNode->GetTag() != V2::IMAGE_ETS_TAG) {
+            continue;
+        }
+        auto imageRenderProperty = imageNode->GetPaintProperty<ImageRenderProperty>();
+        if (!imageRenderProperty) {
+            continue;
+        }
+        auto imageItem = JsonUtil::Create(true);
+        auto imageColorFilter = imageRenderProperty->GetColorFilter();
+        imageItem->Put("colorFilterMatrix", imageColorFilter.has_value() ?
+            GetImageColorFilterStr(imageColorFilter.value()).c_str() : "undefined");
+        auto index = std::to_string(i);
+        imageArr->Put(index.c_str(), imageItem);
+        ++i;
+    }
+    json->PutExtAttr("imageNodes", imageArr, filter);
 }
 
 std::unique_ptr<JsonValue> TextPattern::GetShaderStyleInJson() const
