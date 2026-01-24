@@ -335,7 +335,7 @@ void ScrollerPeerImpl::TriggerScrollBy(Ark_VMContext vmContext, const Dimension&
     ContainerScope scope(instanceId_);
     auto deltaX = xOffset.Value();
     auto deltaY = yOffset.Value();
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     if (container) {
         auto context = container->GetPipelineContext();
         if (context) {
@@ -394,7 +394,7 @@ Ark_Int32 ScrollerPeerImpl::TriggerGetItemIndex(Ark_VMContext vmContext, const A
     ContainerScope scope(instanceId_);
     auto deltaX = xOffset.Value();
     auto deltaY = yOffset.Value();
-    auto container = Container::Current();
+    auto container = Container::CurrentSafely();
     if (container) {
         auto context = container->GetPipelineContext();
         if (context) {

@@ -40,6 +40,7 @@ public:
     static void SetScrollSnapAlign(FrameNode* frameNode, const std::optional<ScrollSnapAlign>& scrollSnapAlign);
     static void SetListFriction(FrameNode* frameNode, const std::optional<double>& friction);
     static RefPtr<ScrollProxy> GetOrCreateScrollBarProxy(FrameNode* frameNode);
+    static void SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollProxy> proxy);
     static void SetInitialIndex(FrameNode* frameNode, const std::optional<int32_t>& initialIndex);
     static void SetListNestedScroll(FrameNode* frameNode, const std::optional<NestedScrollMode>& forward,
         const std::optional<NestedScrollMode>& backward);
