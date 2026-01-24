@@ -1,0 +1,37 @@
+# Local temporary files
+dump_temp.txt
+log.txt
+
+# Build artifacts (generated)
+event_tree_visualizer.py
+event_tree_visualizer.sh
+
+# Python cache
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Output files
+output/
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Thumbnails
+._*
