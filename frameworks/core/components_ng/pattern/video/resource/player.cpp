@@ -199,11 +199,12 @@ void Player::OnPrepared(const std::string& param)
     currentPos_ = 0;
     width_ = static_cast<uint32_t>(GetIntParam(param, PLAYER_PARAM_WIDTH));
     height_ = static_cast<uint32_t>(GetIntParam(param, PLAYER_PARAM_HEIGHT));
-    duration_ = static_cast<uint32_t>(GetIntParam(param, PLAYER_PARAM_DURATION) / DURATION_THOUSAND);
+    int32_t milliDuration = GetIntParam(param, PLAYER_PARAM_DURATION);
+    duration_ = static_cast<uint32_t>(milliDuration / DURATION_THOUSAND);
     isPlaying_ = GetIntParam(param, PLAYER_PARAM_ISPLAYING) == 1;
     isNeedFreshForce_ = GetIntParam(param, PLAYER_PARAM_NEEDFRESHFORCE) == 1;
     isPrepared_ = true;
-    if (width_ == 0 || height_ == 0 || duration_ == 0) {
+    if (width_ == 0 || height_ == 0 || milliDuration <= 0) {
         if (onError_) {
             onError_(PLAYER_ERROR_CODE_FILEINVALID, PLAYER_ERROR_MSG_FILEINVALID);
         }
