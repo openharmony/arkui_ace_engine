@@ -5434,5 +5434,29 @@
     {
         "first_introduced": "23",
         "name": "OH_ArkUI_NativeModule_GetNativeAccessibilityProvider"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Swiper_StartFakeDrag"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Swiper_FakeDragBy"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Swiper_StopFakeDrag"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Swiper_IsFakeDragging"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Swiper_ShowPrevious"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_Swiper_ShowNext"
     }
 ]

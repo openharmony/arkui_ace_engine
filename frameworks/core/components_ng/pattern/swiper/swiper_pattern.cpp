@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2022-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -193,6 +193,9 @@ RefPtr<LayoutAlgorithm> SwiperPattern::CreateLayoutAlgorithm()
         algo->SetJumpIndex(jumpIndex_.value());
     } else if (targetIndex_) {
         algo->SetTargetIndex(targetIndex_.value());
+    } else {
+        // Priority lower than index change.
+        algo->SetIsFakeDragging(isFakeDragging_);
     }
     algo->SetCachedShow(IsCachedShow());
     algo->SetCurrentIndex(currentIndex_);
@@ -1526,6 +1529,7 @@ void SwiperPattern::UpdateLayoutProperties(const RefPtr<SwiperLayoutAlgorithm>& 
     layoutConstraint_ = algo->GetLayoutConstraint();
     itemPosition_ = std::move(algo->GetItemPosition());
     currentOffset_ -= algo->GetCurrentOffset();
+    CheckOffsetAfterLyout(algo->GetCurrentOffset());
     contentMainSize_ = algo->GetContentMainSize();
 }
 
@@ -1692,6 +1696,10 @@ void SwiperPattern::FireAnimationEndEvent(
 
 void SwiperPattern::FireGestureSwipeEvent(int32_t currentIndex, const AnimationCallbackInfo& info) const
 {
+    // fakedrag needs not to fire GestureSwipeEvent.
+    if (isFakeDragging_) {
+        return;
+    }
     auto swiperEventHub = GetEventHub<SwiperEventHub>();
     CHECK_NULL_VOID(swiperEventHub);
     swiperEventHub->FireGestureSwipeEvent(currentIndex, info);
@@ -3021,16 +3029,20 @@ void SwiperPattern::UpdateCurrentOffset(float offset)
         MarkDirtyNodeSelf();
         return;
     }
-    if (!IsLoop() && (isDragging_ || childScrolling_)) {
-        // handle edge effects
-        if (CheckOverScroll(offset)) {
-            ResetCurrentFrameNodeAnimation();
-            return;
+    // Fakedrag needs not to adjust the offset.
+    if (!isFakeDragging_) {
+        if (!IsLoop() && (isDragging_ || childScrolling_)) {
+            // handle edge effects
+            if (CheckOverScroll(offset)) {
+                ResetCurrentFrameNodeAnimation();
+                return;
+            }
         }
-    }
-    if (!IsLoop() && GetEdgeEffect() != EdgeEffect::SPRING && IsOutOfBoundary(offset)) {
-        offset = IsOutOfStart(offset) ? -itemPosition_.begin()->second.startPos
-                                      : CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+        // has another judgment for reaching the boundary.
+        if (!IsLoop() && (GetEdgeEffect() != EdgeEffect::SPRING) && IsOutOfBoundary(offset)) {
+            offset = IsOutOfStart(offset) ? -itemPosition_.begin()->second.startPos
+                                        : CalculateVisibleSize() - itemPosition_.rbegin()->second.endPos;
+        }
     }
     currentDelta_ -= offset;
     currentIndexOffset_ += offset;
@@ -3312,6 +3324,7 @@ void SwiperPattern::UpdateAnimationProperty(float velocity)
     if (fastAnimationRunning_) {
         return;
     }
+
     if (isDragging_ || childScrolling_) {
         targetIndex_ = CheckTargetIndex(ComputeNextIndexByVelocity(velocity));
         velocity_ = velocity;
@@ -3326,6 +3339,10 @@ void SwiperPattern::UpdateAnimationProperty(float velocity)
 
 void SwiperPattern::NestedScrollToParent(float velocity)
 {
+    // Fakedrag need not to effect nestedscroll.
+    if (isFakeDragging_) {
+        return;
+    }
     auto parent = GetNestedScrollParent();
     if (NearZero(GetDistanceToEdge())) {
         ResetCurrentFrameNodeAnimation();
@@ -3376,7 +3393,7 @@ void SwiperPattern::UpdateOverlongForceStopPageRate(float forceStopPageRate)
     updateOverlongForceStopPageRateFunc_(forceStopPageRate);
 }
 
-void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
+void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo, bool isFakeDragging)
 {
     ACE_SCOPED_TRACE("Swiper HandleTouchDown");
     TAG_LOGI(AceLogTag::ACE_SWIPER, "Swiper HandleTouchDown id: %{public}d", swiperId_);
@@ -3385,7 +3402,8 @@ void SwiperPattern::HandleTouchDown(const TouchLocationInfo& locationInfo)
     }
     isTouchDown_ = true;
     isTouchDownOnOverlong_ = true;
-    if (InsideIndicatorRegion(locationInfo)) {
+    // fakedrag without locationInfo.
+    if (!isFakeDragging && InsideIndicatorRegion(locationInfo)) {
         return;
     }
 
@@ -3488,6 +3506,8 @@ void SwiperPattern::HandleDragStart(const GestureEvent& info)
 
     gestureSwipeIndex_ = currentIndex_;
     isDragging_ = true;
+    // fakedrag interrupted by real drag.
+    isFakeDragging_ = false;
     isTouchDown_ = true;
     isTouchDownOnOverlong_ = true;
     mainDeltaSum_ = 0.0f;
@@ -3735,16 +3755,18 @@ int32_t SwiperPattern::ComputeNextIndexByVelocity(float velocity, bool onlyDista
     } else {
         nextIndex = direction ? firstIndex + 1 : firstItemInfoInVisibleArea.first;
     }
+    // fakedrag without being limited by the page flipping range.
+    if (!isFakeDragging_) {
+        auto props = GetLayoutProperty<SwiperLayoutProperty>();
+        // don't run this in nested scroll. Parallel nested scroll can deviate > 1 page from currentIndex_
+        if (!childScrolling_ && SwiperUtils::IsStretch(props) && GetDisplayCount() == 1) {
+            nextIndex =
+                std::clamp(ComputeNextIndexInSinglePage(velocity, onlyDistance), currentIndex_ - 1, currentIndex_ + 1);
+        }
 
-    auto props = GetLayoutProperty<SwiperLayoutProperty>();
-    // don't run this in nested scroll. Parallel nested scroll can deviate > 1 page from currentIndex_
-    if (!childScrolling_ && SwiperUtils::IsStretch(props) && GetDisplayCount() == 1) {
-        nextIndex =
-            std::clamp(ComputeNextIndexInSinglePage(velocity, onlyDistance), currentIndex_ - 1, currentIndex_ + 1);
-    }
-
-    if (!IsAutoLinear() && nextIndex > currentIndex_ + GetDisplayCount()) {
-        nextIndex = currentIndex_ + GetDisplayCount();
+        if (!IsAutoLinear() && nextIndex > currentIndex_ + GetDisplayCount()) {
+            nextIndex = currentIndex_ + GetDisplayCount();
+        }
     }
 
     if (!IsLoop()) {
@@ -7960,5 +7982,136 @@ void SwiperPattern::LoadCompleteManagerStopCollect(bool needSwiperChangeEnd)
         return;
     }
     mgr->OnSwiperChangeEnd(GetHost(), hasTabsAncestor_);
+}
+
+bool SwiperPattern::StartFakeDrag()
+{
+    if (isDragging_ || isFakeDragging_) {
+        return false;
+    }
+    // Fade edge animation needs to be reset.
+    StopFadeAnimation();
+
+    TouchLocationInfo touch(0);
+    HandleTouchDown(touch, true);
+    GestureEvent info;
+    HandleDragStart(info);
+    velocityTracker_.Reset();
+    offsetXY_.Reset();
+    isFakeDragging_ = true;
+    return true;
+}
+
+bool SwiperPattern::FakeDragBy(float offset)
+{
+    if (!isFakeDragging_) {
+        return false;
+    }
+
+    if (itemPosition_.empty()) {
+        return false;
+    }
+
+    if (NearZero(offset)) {
+        return false;
+    }
+    // The coverage of unconsumed events is the latest.
+    if (lastDragByOffset_.has_value()) {
+        currentDelta_ += lastDragByOffset_.value();
+        currentIndexOffset_ -= lastDragByOffset_.value();
+        lastDragByOffset_.reset();
+    }
+
+    offset = Dimension(offset, DimensionUnit::VP).ConvertToPx();
+    bool ret = false;
+    if (Positive(offset)) {
+        ret = FakeDragCheckAtStart(offset);
+    } else if (Negative(offset)) {
+        ret = FakeDragCheckAtEnd(offset);
+    }
+    if (!ret) {
+        return false;
+    }
+
+    lastDragByOffset_ = offset;
+    // Do not use handledragupdate.
+    UpdateCurrentOffset(offset);
+    FireScrollStateEvent(ScrollState::SCROLL);
+    UpdateItemRenderGroup(true);
+    return true;
+}
+
+bool SwiperPattern::StopFakeDrag()
+{
+    if (!isFakeDragging_) {
+        return false;
+    }
+    auto rawVelocity = velocityTracker_.GetVelocity();
+    auto velocity = direction_ == Axis::VERTICAL ? rawVelocity.GetVelocityY() : rawVelocity.GetVelocityX();
+    HandleTouchUp();
+    // Calculate velocity
+    HandleDragEnd(velocity);
+    isFakeDragging_ = false;
+    return true;
+}
+
+bool SwiperPattern::FakeDragCheckAtStart(float& offset)
+{
+    if (hasCachedCapture_) {
+        offset = fmod(offset, contentMainSize_);
+        return true;
+    }
+
+    if (IsLoop() || itemPosition_.begin()->first != 0) {
+        return true;
+    }
+
+    auto remainOffset = -itemPosition_.begin()->second.startPos;
+    if (NeedEnableIgnoreBlankOffset()) {
+        auto baseOffset = GetPrevMarginWithItemSpace() + ignoreBlankOffset_;
+        remainOffset -= baseOffset;
+    }
+
+    if (NonPositive(remainOffset)) {
+        return false;
+    }
+    offset = std::min(offset, remainOffset);
+    return true;
+}
+
+bool SwiperPattern::FakeDragCheckAtEnd(float& offset)
+{
+    if (hasCachedCapture_) {
+        offset = fmod(offset, -contentMainSize_);
+        return true;
+    }
+
+    if (IsLoop() || itemPosition_.rbegin()->first != TotalCount() - 1) {
+        return true;
+    }
+
+    auto remainOffset = itemPosition_.rbegin()->second.endPos - CalculateVisibleSize();
+    if (NeedEnableIgnoreBlankOffset()) {
+        auto baseOffset = GetNextMarginWithItemSpace() - ignoreBlankOffset_;
+        remainOffset -= baseOffset;
+    }
+    if (NonPositive(remainOffset)) {
+        return false;
+    }
+    offset = std::max(offset, -remainOffset);
+    return true;
+}
+
+void SwiperPattern::CheckOffsetAfterLyout(float offset)
+{
+    // UpdateTrackerPoint after layout.
+    lastDragByOffset_.reset();
+    offset = -offset;
+    if (direction_ == Axis::VERTICAL) {
+        offsetXY_ += Offset(0, offset);
+    } else {
+        offsetXY_ += Offset(offset, 0);
+    }
+    velocityTracker_.UpdateTrackerPoint(offsetXY_.GetX(), offsetXY_.GetY(), std::chrono::high_resolution_clock::now());
 }
 } // namespace OHOS::Ace::NG

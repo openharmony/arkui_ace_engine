@@ -4223,6 +4223,12 @@ struct ArkUISwiperModifier {
     void (*setSwiperFillType)(ArkUINodeHandle node, ArkUI_Int32 fillType);
     void (*resetSwiperFillType)(ArkUINodeHandle node);
     ArkUI_Int32 (*getSwiperFillType)(ArkUINodeHandle node);
+    void (*callSwiperStartFakeDrag)(ArkUINodeHandle node, bool* isSuccessful);
+    void (*callSwiperFakeDragBy)(ArkUINodeHandle node, float offset, bool* isConsumedOffset);
+    void (*callSwiperStopFakeDrag)(ArkUINodeHandle node, bool* isSuccessful);
+    void (*callSwiperIsFakeDragging)(ArkUINodeHandle node, bool* isFakeDragging);
+    void (*callSwiperShowPrevious)(ArkUINodeHandle node);
+    void (*callSwiperShowNext)(ArkUINodeHandle node);
 };
 
 struct ArkUISwiperControllerModifier {
