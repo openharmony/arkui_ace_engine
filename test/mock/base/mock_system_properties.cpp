@@ -151,6 +151,11 @@ bool SystemProperties::GetIsUseMemoryMonitor()
     return false;
 }
 
+int32_t SystemProperties::GetComponentLoadNumber()
+{
+    return 1;
+}
+
 bool SystemProperties::GetMultiInstanceEnabled()
 {
     return g_isMultiInstanceEnabled || multiInstanceEnabled_;
