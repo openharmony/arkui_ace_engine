@@ -28,6 +28,7 @@ public:
     void* GetImageAnalyzerConfig() override;
     void* ConvertPixmapNapi(const RefPtr<PixelMap>& pixelMap) override;
     bool HasImageAnalyzerConfig() override;
+    void* GetNapiEnv() const override;
 private:
     napi_env env_ = nullptr;
     napi_ref analyzerConfigRef_ = nullptr;
