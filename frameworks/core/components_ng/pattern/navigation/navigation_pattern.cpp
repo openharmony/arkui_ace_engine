@@ -4113,8 +4113,12 @@ std::unique_ptr<JsonValue> NavigationPattern::GetNavdestinationJsonArray()
         if (!navdestinationPattern) {
             continue;
         }
+        auto pathInfo = navdestinationPattern->GetNavPathInfo();
+        if (!pathInfo) {
+            continue;
+        }
         auto name = navdestinationPattern->GetName();
-        auto param = navigationStack_->GetStringifyParamByIndex(navdestinationNode->GetIndex());
+        auto param = pathInfo->GetInitParamString();
         auto mode = static_cast<int32_t>(navdestinationNode->GetNavDestinationMode());
         navdestinationInfo->Put("name", name.c_str());
         navdestinationInfo->Put("param", param.c_str());

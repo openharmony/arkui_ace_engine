@@ -18,6 +18,7 @@
 #include "base/log/ace_scoring_log.h"
 #include "base/memory/ace_type.h"
 #include "base/utils/utils.h"
+#include "bridge/common/utils/engine_helper.h"
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
@@ -188,5 +189,45 @@ void JSNavPathInfo::UpdateNavPathInfo(const RefPtr<NG::NavPathInfo>& info)
     }
     param_ = jsPathInfo->GetParam();
     onPop_ = jsPathInfo->GetOnPop();
+    auto initParam = jsPathInfo->GetInitParam();
+    if (!initParam->IsEmpty()) {
+        initParam_ = initParam;
+    }
+}
+
+std::string JSNavPathInfo::GetInitParamString() const
+{
+    std::string undefinedVal = "undefined";
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, undefinedVal);
+    auto env = reinterpret_cast<napi_env>(engine->GetNativeEngine());
+    if (!env) {
+        return undefinedVal;
+    }
+    napi_handle_scope scope = nullptr;
+    napi_open_handle_scope(env, &scope);
+    if (scope == nullptr) {
+        return undefinedVal;
+    }
+    napi_value param = JsConverter::ConvertJsValToNapiValue(initParam_);
+    napi_value globalValue;
+    napi_get_global(env, &globalValue);
+    napi_value jsonClass;
+    napi_get_named_property(env, globalValue, "JSON", &jsonClass);
+    napi_value stringifyFunc;
+    napi_get_named_property(env, jsonClass, "stringify", &stringifyFunc);
+    napi_value stringifyParam;
+    if (napi_call_function(env, jsonClass, stringifyFunc, 1, &param, &stringifyParam) != napi_ok) {
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Can not stringify current param!");
+        napi_get_and_clear_last_exception(env, &stringifyParam);
+        napi_close_handle_scope(env, scope);
+        return undefinedVal;
+    }
+    size_t len = 0;
+    napi_get_value_string_utf8(env, stringifyParam, nullptr, 0, &len);
+    std::unique_ptr<char[]> paramChar = std::make_unique<char[]>(len + 1);
+    napi_get_value_string_utf8(env, stringifyParam, paramChar.get(), len + 1, &len);
+    napi_close_handle_scope(env, scope);
+    return paramChar.get();
 }
 } // namespace OHOS::Ace::Framework
