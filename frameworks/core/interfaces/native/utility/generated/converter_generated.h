@@ -3164,6 +3164,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_SubTabBarIndicatorStyle_DrawableTabBarIndicator& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_UIAbilityContext_UIContext& src)
 {
     switch (src.selector) {
@@ -5261,6 +5276,7 @@ ASSIGN_OPT(Opt_DividerOptions)
 ASSIGN_OPT(Opt_DividerStyle)
 ASSIGN_OPT(Opt_DotIndicator)
 ASSIGN_OPT(Opt_DoubleLengthDetents)
+ASSIGN_OPT(Opt_DrawableTabBarIndicator)
 ASSIGN_OPT(Opt_dragController_SpringLoadingContext)
 ASSIGN_OPT(Opt_EdgeOutlineWidths)
 ASSIGN_OPT(Opt_Edges)
@@ -5355,6 +5371,7 @@ ASSIGN_OPT(Opt_Union_ResourceStr_CustomBuilder_NavigationCommonTitle_NavigationC
 ASSIGN_OPT(Opt_Union_SingleLengthDetent_DoubleLengthDetents_TripleLengthDetents)
 ASSIGN_OPT(Opt_Union_SizeOptions_ImageSize)
 ASSIGN_OPT(Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource)
+ASSIGN_OPT(Opt_Union_SubTabBarIndicatorStyle_DrawableTabBarIndicator)
 ASSIGN_OPT(Opt_Union_UIAbilityContext_UIContext)
 ASSIGN_OPT(Opt_Union_Union_Padding_Dimension_LocalizedPadding)
 ASSIGN_OPT(Opt_Union_XComponentParameters_XComponentOptions_NativeXComponentParameters)
