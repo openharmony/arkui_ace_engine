@@ -258,6 +258,8 @@ HWTEST_F(GestureEventHubTestNg, GetPixelMapOffset_001, TestSize.Level1)
     PreparedInfoForDrag dragInfoData;
     float scale = 0.0f;
     RectF innerRect(0.0f, 0.0f, 0.0f, 0.0f);
+    dragInfoData.displayPoint.SetX(0.0f);
+    dragInfoData.displayPoint.SetY(0.0f);
     guestureEventHub->GetPixelMapOffset(info, size, dragInfoData, scale, innerRect);
     EXPECT_EQ(innerRect.Width(), 0.0);
 

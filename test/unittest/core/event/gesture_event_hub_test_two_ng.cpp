@@ -256,6 +256,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset002, TestSize.Le
     gestureEventHub->frameNodeOffset_.SetX(1);
     gestureEventHub->frameNodeOffset_.SetY(1);
     PreparedInfoForDrag data;
+    data.displayPoint.SetX(0.0f);
+    data.displayPoint.SetY(0.0f);
     gestureEventHub->GetPixelMapOffset(info, size, data, -1.0f);
     auto frameNode2 = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode2, nullptr);
@@ -290,6 +292,8 @@ HWTEST_F(GestureEventHubTestNg, GestureEventHubGetPixelMapOffset003, TestSize.Le
     PreparedInfoForDrag data;
     data.isNeedCreateTiled = true;
 
+    data.displayPoint.SetX(0.0f);
+    data.displayPoint.SetY(0.0f);
     gestureEventHub->GetPixelMapOffset(info, size, data, -1.0f);
     auto frameNode = gestureEventHub->GetFrameNode();
     EXPECT_NE(frameNode, nullptr);

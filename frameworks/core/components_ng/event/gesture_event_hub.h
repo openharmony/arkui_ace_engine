@@ -121,6 +121,7 @@ struct PreparedInfoForDrag {
     SourceType deviceType = SourceType::NONE;
     bool isMenuNotShow = false;
     bool isSceneBoardTouchDrag = false;
+    PointF displayPoint = { 0.0f, 0.0f };
 };
 
 struct PreparedAsyncCtxForAnimate {
@@ -327,7 +328,7 @@ public:
     const RefPtr<ClickEventActuator>& GetUserClickEventActuator();
     OnDragCallbackCore GetDragCallback();
     void GenerateMousePixelMap(const GestureEvent& info);
-    OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, const PreparedInfoForDrag& dragInfoData,
+    OffsetF GetPixelMapOffset(const GestureEvent& info, const SizeF& size, PreparedInfoForDrag& dragInfoData,
         const float scale = 1.0f, const RectF& innerRect = RectF()) const;
     void CalcFrameNodeOffsetAndSize(const RefPtr<FrameNode> frameNode, bool isMenuShow);
     OffsetF GetDragPreviewInitPositionToScreen(const RefPtr<PipelineBase>& context, PreparedInfoForDrag& data);
