@@ -1289,13 +1289,12 @@ ArkUINativeModuleValue SelectBridge::SetOnSelect(ArkUIRuntimeCallInfo* runtimeCa
         return panda::JSValueRef::Undefined(vm);
     }
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[NUM_1]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), node = targetNode](
+    auto onSelect = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), frameNode](
                         int32_t index, const std::string& value) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("Select.onSelect");
         TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "fire change event %{public}d %{public}s", index, value.c_str());
-        PipelineContext::SetCallBackNode(node);
+        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
         JSRef<JSVal> params[NUM_2];
         params[NUM_0] = JSRef<JSVal>::Make(ToJSValue(index));
         params[NUM_1] = JSRef<JSVal>::Make(ToJSValue(value));
@@ -1303,7 +1302,7 @@ ArkUINativeModuleValue SelectBridge::SetOnSelect(ArkUIRuntimeCallInfo* runtimeCa
         UiSessionManager::GetInstance()->ReportComponentChangeEvent("event", "Select.onSelect",
             ComponentEventType::COMPONENT_EVENT_SELECT);
     };
-    SelectModel::GetInstance()->SetOnSelect(std::move(onSelect));
+    SelectModelNG::SetOnSelect(frameNode, std::move(onSelect));
     info.ReturnSelf();
     return panda::JSValueRef::Undefined(vm);
 }
