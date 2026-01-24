@@ -3272,15 +3272,22 @@ bool JsAccessibilityManager::IsSendAccessibilityEventForHost(
         return true;
     }
 
+    auto containerId = ngPipeline ? ngPipeline->GetInstanceId() : 0;
+    bool sameInstance = false;
     for (const auto& [node, status] : extensionComponentStatusVec_) {
         auto frameNode = node.Upgrade();
         CHECK_NULL_CONTINUE(frameNode);
+        auto uecPipeline = frameNode->GetContextRefPtr();
+        auto uecContainerId = uecPipeline ? uecPipeline->GetInstanceId() : 0;
+        if (uecContainerId == containerId) {
+            sameInstance = true;
+        }
         auto nodePageId = frameNode->GetPageId();
         if (!pageIdEventMap_.count(nodePageId)) {
             pageIdEventMap_[nodePageId] = std::nullopt;
         }
     }
-    if (!CheckExtensionComponentReadyByPageId(pageId, extensionComponentStatusVec_)) {
+    if ((!CheckExtensionComponentReadyByPageId(pageId, extensionComponentStatusVec_)) && sameInstance) {
         if (pageIdEventMap_.count(pageId) && pageIdEventMap_[pageId].has_value()) {
             auto event = pageIdEventMap_[pageId].value();
             auto eventType = GetEventTypeByAccessibilityEvent(event);
@@ -3293,7 +3300,6 @@ bool JsAccessibilityManager::IsSendAccessibilityEventForHost(
         pageIdEventMap_[pageId] = event;
         return false;
     } else if (!isPageEventControllerEmpty) {
-        auto containerId = ngPipeline ? ngPipeline->GetInstanceId() : 0;
         auto cached = CachePageEventByController(accessibilityEvent, componentType, pageId, containerId);
         return !cached;
     }
