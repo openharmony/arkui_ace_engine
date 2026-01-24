@@ -68,8 +68,7 @@ bool FormSnapshotUtil::GetNonTransparentRatio(
     std::shared_ptr<Media::PixelMap> targetPixelMap = pixelMap;
     if (targetPixelMap->GetPixelFormat() != Media::PixelFormat::RGBA_8888) {
         ACE_SCOPED_TRACE("ConvertFormPixelMap_%dx%d", targetPixelMap->GetWidth(), targetPixelMap->GetHeight());
-        TAG_LOGW(AceLogTag::ACE_FORM, "GetNonTransparentRatio pixelFormat[%{public}d] not matched",
-            targetPixelMap->GetPixelFormat());
+        TAG_LOGW(AceLogTag::ACE_FORM, "pixelFormat[%{public}d] not matched", targetPixelMap->GetPixelFormat());
         Media::InitializationOptions opts = {
             .size = {targetPixelMap->GetWidth(), targetPixelMap->GetHeight()},
             .pixelFormat = Media::PixelFormat::RGBA_8888,
@@ -106,9 +105,8 @@ bool FormSnapshotUtil::GetNonTransparentRatio(
     }
     AceTraceEnd();
     percentageValue = std::round((static_cast<double>(count) / dataLength) * PERCENTAGE_DENOMINATOR);
-    TAG_LOGW(AceLogTag::ACE_FORM,
-        "GetNonTransparentRatio count:%{public}d, total:%{public}d, percentageValue:%{public}d", count, dataLength,
-        percentageValue);
+    TAG_LOGW(AceLogTag::ACE_FORM, "GetNonTransparentRatio count:%{public}d, total:%{public}d, percentageValue:%{public}d",
+        count, dataLength, percentageValue);
     return true;
 }
 } // namespace OHOS::Ace::NG
