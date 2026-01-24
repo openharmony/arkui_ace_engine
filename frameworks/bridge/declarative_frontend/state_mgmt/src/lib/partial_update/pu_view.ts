@@ -1086,7 +1086,9 @@ abstract class ViewPU extends PUV2ViewBase
         this.updateStateVars(params);
         this.aboutToReuse(params);
         this.__lifecycle__Internal.setParams(params as Record<string, Object>);
-        this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_REUSE);
+        if (this['__newLifecycleNeedWork__Internal']) {
+          this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_REUSE);
+        }
       }
     }, 'aboutToReuse', this.constructor.name);
 
@@ -1118,7 +1120,9 @@ abstract class ViewPU extends PUV2ViewBase
     stateMgmtConsole.debug(`ViewPU ${this.debugInfo__()} aboutToRecycleInternal`);
     stateMgmtTrace.scopedTrace(() => {
       this.aboutToRecycle();
-      this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_RECYCLE);
+      if (this['__newLifecycleNeedWork__Internal']) {
+        this.__lifecycle__Internal.handleEvent(LifeCycleEvent.ON_RECYCLE);
+      }
     }, 'aboutToRecycle', this.constructor.name);
     if (this.preventRecursiveRecycle_) {
       this.preventRecursiveRecycle_ = false;
