@@ -3952,12 +3952,18 @@ void ArkTSUtils::ParseBlurOption(const EcmaVM* vm, const Local<JSValueRef>& jsBl
 {
     auto blurOptionProperty = GetProperty(vm, jsBlurOption, "grayscale");
     if (blurOptionProperty->IsArray(vm)) {
-        Local<panda::ArrayRef> params = blurOptionProperty->ToObject(vm);
-        auto grey1 = panda::ArrayRef::GetValueAt(vm, params, 0)->ToNumber(vm)->Int32Value(vm);
-        auto grey2 = panda::ArrayRef::GetValueAt(vm, params, 1)->ToNumber(vm)->Int32Value(vm);
-        std::vector<float> greyVec(2); // 2 number
-        greyVec[0] = grey1;
-        greyVec[1] = grey2;
+        std::vector<float> greyVec(NUM_2);
+        Local<panda::ArrayRef> valueArray = static_cast<Local<panda::ArrayRef>>(blurOptionProperty);
+        Local<JSValueRef> valueGrey1 = valueArray->GetValueAt(vm, blurOptionProperty, 0);
+        if (valueGrey1->IsNumber()) {
+            auto grey1 = valueGrey1->Int32Value(vm);
+            greyVec[0] = grey1;
+        }
+        Local<JSValueRef> valueGrey2 = valueArray->GetValueAt(vm, blurOptionProperty, 1);
+        if (valueGrey2->IsNumber()) {
+            auto grey2 = valueGrey2->Int32Value(vm);
+            greyVec[1] = grey2;
+        }
         blurOption.grayscale = greyVec;
     }
 }
@@ -4025,7 +4031,7 @@ void ArkTSUtils::ParseBlurStyleOption(const EcmaVM* vm, const Local<JSValueRef>&
     }
 
     if (GetProperty(vm, jsOption, "blurOptions")->IsObject(vm)) {
-        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions")->ToObject(vm);
+        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions");
         BlurOption blurOption;
         ParseBlurOption(vm, jsBlurOption, blurOption);
         styleOption.blurOption = blurOption;
@@ -4158,7 +4164,7 @@ void ArkTSUtils::ParseEffectOption(const EcmaVM* vm, const Local<JSValueRef>& js
 
     BlurOption blurOption;
     if (GetProperty(vm, jsOption, "blurOptions")->IsObject(vm)) {
-        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions")->ToString(vm);
+        auto jsBlurOption = GetProperty(vm, jsOption, "blurOptions");
         ParseBlurOption(vm, jsBlurOption, blurOption);
         effectOption.blurOption = blurOption;
     }

@@ -2029,33 +2029,43 @@ class LazyArkTimePickerComponent extends ArkComponent {
   }
   loop(value) {
     this.lazyComponent.loop(value);
+    return this;
   }
   digitalCrownSensitivity(value) {
     this.lazyComponent.digitalCrownSensitivity(value);
+    return this;
   }
   useMilitaryTime(value) {
     this.lazyComponent.useMilitaryTime(value);
+    return this;
   }
   disappearTextStyle(value) {
     this.lazyComponent.disappearTextStyle(value);
+    return this;
   }
   textStyle(value) {
     this.lazyComponent.textStyle(value);
+    return this;
   }
   selectedTextStyle(value) {
     this.lazyComponent.selectedTextStyle(value);
+    return this;
   }
   enableCascade(value) {
     this.lazyComponent.enableCascade(value);
+    return this;
   }
-  onChange(callback) {
+  onChange(value) {
     this.lazyComponent.onChange(value);
+    return this;
   }
   dateTimeOptions(value) {
     this.lazyComponent.dateTimeOptions(value);
+    return this;
   }
   enableHapticFeedback(value) {
     this.lazyComponent.enableHapticFeedback(value);
+    return this;
   }
 }
 
