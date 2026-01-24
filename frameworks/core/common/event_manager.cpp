@@ -2619,6 +2619,7 @@ bool EventManager::OnNonPointerEvent(const NonPointerEvent& event)
     } else if (event.eventType == UIInputEventType::CROWN) {
         return OnCrownEvent(static_cast<const CrownEvent&>(event));
     } else if (event.eventType == UIInputEventType::TOUCHPAD_ACTIVE) {
+        NotifyTouchpadInteraction();
         return OnTouchpadInteractionBegin();
     } else {
         return false;
@@ -2944,6 +2945,56 @@ void EventManager::NotifyHitTestFrameNodeListener(const TouchEvent& touchEvent)
         auto hitIter = hitTestFrameNodeListener_.find(nodeId);
         if (hitIter != hitTestFrameNodeListener_.end() && hitIter->second) {
             hitIter->second(touchEvent);
+        }
+    }
+}
+
+void EventManager::AddTouchpadInteractionListenerInner(int32_t frameNodeId, NG::TouchpadInteractionListener&& listener)
+{
+    CHECK_NULL_VOID(listener.frameNode.Upgrade());
+    CHECK_NULL_VOID(listener.callback);
+    auto iter = touchpadInteractionListeners_.find(frameNodeId);
+    if (iter == touchpadInteractionListeners_.end()) {
+        touchpadInteractionListeners_.emplace(frameNodeId, std::move(listener));
+    } else {
+        iter->second = std::move(listener);
+    }
+}
+
+void EventManager::UnregisterTouchpadInteractionListenerInner(int32_t frameNodeId)
+{
+    auto iter = touchpadInteractionListeners_.find(frameNodeId);
+    if (iter == touchpadInteractionListeners_.end()) {
+        return;
+    }
+    touchpadInteractionListeners_.erase(iter);
+}
+
+void EventManager::NotifyTouchpadInteraction()
+{
+    std::vector<int32_t> invalidIds;
+    invalidIds.reserve(touchpadInteractionListeners_.size());
+
+    std::vector<NG::TouchpadInteractionCallback> validCallbacks;
+    validCallbacks.reserve(touchpadInteractionListeners_.size());
+
+    for (const auto& pair : touchpadInteractionListeners_) {
+        if (pair.second.frameNode.Upgrade()) {
+            if (pair.second.callback) {
+                validCallbacks.push_back(pair.second.callback);
+            }
+        } else {
+            invalidIds.push_back(pair.first);
+        }
+    }
+
+    for (int32_t id : invalidIds) {
+        touchpadInteractionListeners_.erase(id);
+    }
+
+    for (auto& callback : validCallbacks) {
+        if (callback) {
+            callback();
         }
     }
 }

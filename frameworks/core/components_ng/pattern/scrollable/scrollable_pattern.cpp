@@ -582,6 +582,7 @@ void ScrollablePattern::AddScrollEvent()
     });
     gestureHub->AddScrollableEvent(scrollableEvent_);
     InitTouchEvent(gestureHub);
+    RegisterTouchpadInteractionCallback();
     RegisterWindowStateChangedCallback();
     if (!clickRecognizer_) {
         InitScrollBarClickEvent();
@@ -1049,6 +1050,24 @@ void ScrollablePattern::InitTouchEvent(const RefPtr<GestureEventHub>& gestureHub
 
     touchEvent_ = MakeRefPtr<TouchEventImpl>(std::move(touchTask));
     gestureHub->AddTouchEvent(touchEvent_);
+}
+
+void ScrollablePattern::RegisterTouchpadInteractionCallback()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto inputEventHub = host->GetOrCreateInputEventHub();
+    CHECK_NULL_VOID(inputEventHub);
+    inputEventHub->AddTouchpadInteractionListenerInner([weak = WeakClaim(this)]() {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        pattern->StopScrollAnimation();
+        if (pattern->GetNestedScrolling() && !NearZero(pattern->GetNestedScrollVelocity())) {
+            auto child = pattern->GetScrollOriginChild();
+            CHECK_NULL_VOID(child);
+            child->StopScrollAnimation();
+        }
+    });
 }
 
 void ScrollablePattern::RegisterWindowStateChangedCallback()
