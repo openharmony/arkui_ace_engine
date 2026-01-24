@@ -189,14 +189,20 @@ void SetListOptionsImpl(Ark_NativePointer node,
     auto space = optionsOpt.value().space;
     ListModelStatic::SetListSpace(frameNode, space);
 
-    RefPtr<ScrollControllerBase> positionController = ListModelStatic::GetOrCreateController(frameNode);
-    RefPtr<ScrollProxy> scrollBarProxy = ListModelStatic::GetOrCreateScrollBarProxy(frameNode);
     auto abstPeerPtrOpt = optionsOpt.value().scroller;
     CHECK_NULL_VOID(abstPeerPtrOpt);
     auto peerImplPtr = *abstPeerPtrOpt;
     CHECK_NULL_VOID(peerImplPtr);
+
+    if (peerImplPtr->GetScrollBarProxy()) {
+        ListModelStatic::SetScrollBarProxy(frameNode, peerImplPtr->GetScrollBarProxy());
+    } else {
+        RefPtr<ScrollProxy> scrollBarProxy = ListModelStatic::GetOrCreateScrollBarProxy(frameNode);
+        peerImplPtr->SetScrollBarProxy(scrollBarProxy);
+    }
+
+    RefPtr<ScrollControllerBase> positionController = ListModelStatic::GetOrCreateController(frameNode);
     peerImplPtr->SetController(positionController);
-    peerImplPtr->SetScrollBarProxy(scrollBarProxy);
 }
 } // ListInterfaceModifier
 namespace ListAttributeModifier {

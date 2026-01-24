@@ -166,6 +166,14 @@ RefPtr<ScrollProxy> ListModelStatic::GetOrCreateScrollBarProxy(FrameNode* frameN
     return scrollBarProxy;
 }
 
+void ListModelStatic::SetScrollBarProxy(FrameNode* frameNode, const RefPtr<ScrollProxy> proxy)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<ListPattern>();
+    CHECK_NULL_VOID(pattern);
+    pattern->SetScrollBarProxy(AceType::DynamicCast<ScrollBarProxy>(proxy));
+}
+
 void ListModelStatic::SetInitialIndex(FrameNode* frameNode, const std::optional<int32_t>& initialIndex)
 {
     if (initialIndex.has_value() && initialIndex.value() >= 0) {
