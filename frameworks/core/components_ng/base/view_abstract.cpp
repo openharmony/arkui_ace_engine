@@ -3244,6 +3244,11 @@ const std::string ViewAbstract::GetGeometryTransition(FrameNode* frameNode,
             *followWithoutTransition = geometryTransition->GetFollowWithoutTransition();
             *doRegisterSharedTransition = geometryTransition->GetDoRegisterSharedTransition();
             return geometryTransition->GetId();
+        } else {
+            auto result = layoutProperty->GetGeometryTransitionInfo();
+            *followWithoutTransition = std::get<1>(result);
+            *doRegisterSharedTransition = std::get<2>(result);
+            return std::get<0>(result);
         }
     }
     return "";

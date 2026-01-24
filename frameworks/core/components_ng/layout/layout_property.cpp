@@ -1289,6 +1289,12 @@ void LayoutProperty::ResetGeometryTransition()
     UpdateGeometryTransition("");
 }
 
+void LayoutProperty::SetGeometryTransitionInfo(const std::string& id,
+    bool followWithoutTransition, bool doRegisterSharedTransition)
+{
+    geometryTransitionInfo_ = std::make_tuple(id, followWithoutTransition, doRegisterSharedTransition);
+}
+
 void LayoutProperty::UpdateLayoutDirection(TextDirection value)
 {
     if (layoutDirection_ == value) {

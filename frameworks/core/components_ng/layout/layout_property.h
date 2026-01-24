@@ -196,6 +196,13 @@ public:
 
     void ResetGeometryTransition();
 
+    void SetGeometryTransitionInfo(const std::string& id,
+        bool followWithoutTransition = false, bool doRegisterSharedTransition = true);
+    std::tuple<std::string, bool, bool> GetGeometryTransitionInfo() const
+    {
+        return geometryTransitionInfo_;
+    }
+
     void UpdateAspectRatio(float ratio);
     void ResetAspectRatio();
 
@@ -529,6 +536,8 @@ private:
     std::optional<uint32_t> localizedBackgroundIgnoresLayoutSafeAreaEdges_;
 
     WeakPtr<GeometryTransition> geometryTransition_;
+
+    std::tuple<std::string, bool, bool> geometryTransitionInfo_ = std::make_tuple("", false, true);
 
     WeakPtr<FrameNode> host_;
 
