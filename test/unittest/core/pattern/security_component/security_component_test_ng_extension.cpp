@@ -818,6 +818,34 @@ HWTEST_F(SecurityComponentModelTestNg, SecurityComponentInitChildInfo001, TestSi
 }
 
 /**
+ * @tc.name: SecurityComponentGetSizeWithScale001
+ * @tc.desc: Test security component GetSizeWithScale
+ * @tc.type: FUNC
+ * @tc.author:
+ */
+HWTEST_F(SecurityComponentModelTestNg, SecurityComponentGetSizeWithScale001, TestSize.Level0)
+{
+    RefPtr<FrameNode> parent = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(parent, nullptr);
+    auto parentContext = parent->GetRenderContext();
+    parentContext->UpdateTransformScale({2.0f, 2.0f});
+    RefPtr<FrameNode> child = CreateSecurityComponent(0, 0,
+        static_cast<int32_t>(ButtonType::CAPSULE), V2::PASTE_BUTTON_ETS_TAG);
+    ASSERT_NE(child, nullptr);
+    parent->AddChild(child);
+    
+    auto render = child->GetRenderContext();
+    ASSERT_NE(render, nullptr);
+    auto rect = render->GetPaintRectWithTransform();
+    double width;
+    double height;
+    ASSERT_TRUE(SecurityComponentHandler::GetSizeWithScale(child, width, height));
+    ASSERT_EQ(width, rect.Width() * 2.0);
+    ASSERT_EQ(height, rect.Height() * 2.0);
+}
+
+/**
  * @tc.name: SecurityComponentInitButtonInfo001
  * @tc.desc: Test security component InitButtonInfo
  * @tc.type: FUNC
