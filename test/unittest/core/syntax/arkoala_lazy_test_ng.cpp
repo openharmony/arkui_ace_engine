@@ -813,6 +813,32 @@ TEST_F(ArkoalaLazyNodeTest, IsInCacheRange003)
 }
 
 /**
+ * @tc.name: IsInCacheRange004
+ * @tc.desc: Test ArkoalaLazyNode IsInCacheRange with isLoop = true.
+ * @tc.type: FUNC
+ */
+TEST_F(ArkoalaLazyNodeTest, IsInCacheRange004)
+{
+    auto lazyNode = AceType::MakeRefPtr<ArkoalaLazyNode>(GetNextId());
+    int32_t total = 3;
+    lazyNode->totalCount_ = total;
+    lazyNode->isLoop_ = true;
+    int32_t cachedCount = 1;
+    bool isInRange;
+    ActiveRangeParam activeRangeParam;
+
+    /**
+     * @tc.steps: step1. Test loop container full coverage case
+     * @tc.expected: (0,1,1,1,true) -> [0,2]
+     */
+    activeRangeParam = {0, 1, cachedCount, cachedCount};
+    for (int32_t i = 0; i < lazyNode->totalCount_; ++i) {
+        isInRange = lazyNode->IsInCacheRange(i, activeRangeParam);
+        EXPECT_TRUE(isInRange);
+    }
+}
+
+/**
  * @tc.name: NeedBuildAll001
  * @tc.desc: Test ArkoalaLazyNode needBuildAll_ flag and BuildAll
  * @tc.type: FUNC
