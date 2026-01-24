@@ -202,7 +202,6 @@ ohos_unittest("form_snapshot_util_test") {
  
   deps = [
     "$ace_root/test/unittest:ace_base",
-#    "$ace_root/test/unittest:ace_core_extra",
     "$ace_root/test/unittest:ace_unittest_log",
   ]
   external_deps = [
