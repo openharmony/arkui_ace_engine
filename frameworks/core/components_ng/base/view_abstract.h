@@ -1178,6 +1178,7 @@ private:
     static void AddOverlayToFrameNode(const RefPtr<NG::FrameNode>& overlayNode,
         const std::optional<Alignment>& align, const std::optional<Dimension>& offsetX,
         const std::optional<Dimension>& offsetY, TextDirection direction = TextDirection::LTR);
+    static void ResetSystemMaterialEffect(FrameNode* frameNode);
     static void CheckIfParentNeedMarkDirty(FrameNode* frameNode);
 
     static OEMVisualEffectFunc oemVisualEffectFunc;
