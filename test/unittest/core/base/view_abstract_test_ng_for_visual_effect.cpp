@@ -382,4 +382,39 @@ HWTEST_F(ViewAbstractTestNg, SetSystemMaterialImmediate001, TestSize.Level1)
     EXPECT_FALSE(pattern->resourceMgr_->Empty());
     g_isConfigChangePerform = false;
 }
+
+/**
+ * @tc.name: ResetSystemMaterialEffect001
+ * @tc.desc: Test the ResetSystemMaterialEffect function of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, ResetSystemMaterialEffect001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Check node state.
+     */
+    auto node = AceType::MakeRefPtr<FrameNode>("testNode", -1, AceType::MakeRefPtr<Pattern>());
+    auto renderContext = node->GetRenderContext();
+    ASSERT_NE(renderContext, nullptr);
+
+    /**
+     * @tc.steps: step2. call SetSystemMaterial.
+     */
+    auto material = AceType::MakeRefPtr<UiMaterial>();
+    material->SetType(static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT));
+    ViewAbstract::SetSystemMaterial(AceType::RawPtr(node), AceType::RawPtr(material));
+
+    /**
+     * @tc.steps: step3. updateColor.
+     */
+    Color testColor(0xFF00FF);
+    renderContext->UpdatePreBackgroundColor(testColor);
+
+    /**
+     * @tc.steps: step4. call ResetSystemMaterialEffect.
+     * @tc.expected: step4. Colors equals PreColors.
+     */
+    ViewAbstract::ResetSystemMaterialEffect(AceType::RawPtr(node));
+    EXPECT_EQ(renderContext->GetBackgroundColor().value(), testColor);
+}
 } // namespace OHOS::Ace::NG
