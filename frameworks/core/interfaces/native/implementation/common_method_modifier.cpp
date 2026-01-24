@@ -33,6 +33,7 @@
 #include "core/components_ng/property/flex_property.h"
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
+#include "core/components_ng/pattern/button/toggle_button_model_ng.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
@@ -2638,6 +2639,10 @@ void SetBackgroundColorImpl(Ark_NativePointer node,
         NavDestinationModelStatic::SetBackgroundColor(frameNode, backgroundColor, isValid);
     } else if (frameNode->GetTag() == V2::PROGRESS_ETS_TAG) {
         ProgressModelStatic::SetBackgroundColor(frameNode, colorValue);
+    } else if (frameNode->GetTag() == V2::TOGGLE_ETS_TAG) {
+        if (colorValue.has_value()) {
+            ToggleButtonModelNG::SetBackgroundColor(frameNode, colorValue.value());
+        }
     } else {
         ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue);
     }
