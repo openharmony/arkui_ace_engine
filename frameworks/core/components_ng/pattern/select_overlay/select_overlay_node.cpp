@@ -1390,13 +1390,21 @@ void SetMenuItemStartImageIcon(const RefPtr<FrameNode>& menuItem, const OptionPa
     iconNode->MountToParent(leftRow);
 }
 
-void UpdatePasteOpacityFont(bool isPaste, RefPtr<FrameNode>& leftRowNode, OptionParam& param,
+struct RowNodePair {
+    RefPtr<FrameNode>& leftRowNode;
+    RefPtr<FrameNode>& rightRowNode;
+};
+
+void UpdateMenuItemOpacityAndAction(const MenuItemSetupInfo& cfg, const RowNodePair& rowNodePair, OptionParam& param,
     const RefPtr<SelectTheme>& theme, const RefPtr<FrameNode>& menuItem)
 {
-    CHECK_NULL_VOID(leftRowNode);
+    RefPtr<FrameNode>& leftRowNode = rowNodePair.leftRowNode;
+    RefPtr<FrameNode>& rightRowNode = rowNodePair.rightRowNode;
+    CHECK_NULL_VOID(leftRowNode && rightRowNode);
     auto leftRowRenderContext = leftRowNode->GetRenderContext();
-    CHECK_NULL_VOID(leftRowRenderContext);
-    if (isPaste) {
+    auto rightRowRenderContext = rightRowNode->GetRenderContext();
+    CHECK_NULL_VOID(leftRowRenderContext && rightRowRenderContext);
+    if (cfg.isPaste) {
         if (!param.enabled) {
             leftRowRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
             leftRowNode->MarkModifyDone();
@@ -1416,6 +1424,10 @@ void UpdatePasteOpacityFont(bool isPaste, RefPtr<FrameNode>& leftRowNode, Option
     if (menuItemPattern->IsDisabled()) {
         leftRowRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
         leftRowNode->MarkModifyDone();
+        if (!param.subMenuItems.empty() && cfg.isUsingMouse) {
+            rightRowRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
+            rightRowNode->MarkModifyDone();
+        }
     }
     menuItemPattern->SetBlockClick(param.disableSystemClick);
 }
@@ -1467,6 +1479,7 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const Menu
     UpdatePasteMenuItemOpaque(leftTextNode, cfg);
     leftRow->MountToParent(menuItem);
     leftRow->MarkModifyDone();
+
     auto rightRow = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
         AceType::MakeRefPtr<LinearLayoutPattern>(false));
     CHECK_NULL_VOID(rightRow);
@@ -1478,13 +1491,16 @@ void SetupMenuItemChildrenAndFocus(const RefPtr<FrameNode>& menuItem, const Menu
     auto rightTextNode = CreateMenuTextNode(rowText.labelInfo, rightRow, cfg, param.isAIMenuOption ||
         param.isAskCeliaOption);
     CHECK_NULL_VOID(rightTextNode);
-    SetMenuItemEndSymbolIcon(menuItem, param, rightRow, cfg.isUsingMouse);
-    rightRow->MountToParent(menuItem);
-    UpdatePasteOpacityFont(cfg.isPaste, leftRow, param, theme, menuItem);
     auto rightTextRenderContext = rightTextNode->GetRenderContext();
     CHECK_NULL_VOID(rightTextRenderContext);
     rightTextRenderContext->UpdateOpacity(theme->GetDisabledFontColorAlpha());
     rightTextNode->MarkModifyDone();
+    SetMenuItemEndSymbolIcon(menuItem, param, rightRow, cfg.isUsingMouse);
+    rightRow->MountToParent(menuItem);
+    rightRow->MarkModifyDone();
+
+    RowNodePair rowNodePair = { leftRow, rightRow };
+    UpdateMenuItemOpacityAndAction(cfg, rowNodePair, param, theme, menuItem);
 }
 
 void GetExtensionMenuItemDividerInfo(const RefPtr<FrameNode>& node, V2::ItemDivider& divider)

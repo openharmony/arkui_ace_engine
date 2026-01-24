@@ -325,7 +325,7 @@ void TextFieldSelectOverlay::OnUpdateMenuInfo(SelectMenuInfo& menuInfo, SelectOv
     if (IsUsingMouse()) {
         menuInfo.menuIsShow = !isHideSelectionMenu || manager->IsOpen();
     } else {
-        menuInfo.menuIsShow = (hasText || IsShowPaste() || menuInfo.showCameraInput) &&
+        menuInfo.menuIsShow = (hasText || IsShowPaste() || menuInfo.showCameraInput || pattern->IsShowAutoFill()) &&
             !isHideSelectionMenu && IsShowMenu();
     }
     menuInfo.menuDisable = isHideSelectionMenu;

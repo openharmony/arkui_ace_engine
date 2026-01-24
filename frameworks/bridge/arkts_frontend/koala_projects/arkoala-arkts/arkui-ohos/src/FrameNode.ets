@@ -2230,6 +2230,18 @@ export namespace typeNode {
     }
 
     // @ts-ignore
+    export function getProgressAttribute(node: FrameNode): ProgressAttribute | undefined {
+        if (node.getType() !== 'Progress') {
+            return undefined
+        }
+        let progressNode = node as ProgressFrameNode
+        if (progressNode !== undefined) {
+            return progressNode.attribute
+        }
+        return undefined
+    }
+
+    // @ts-ignore
     function createLoadingProgressNode(context: UIContext): LoadingProgressFrameNode {
         return new LoadingProgressFrameNode(context, 'LoadingProgress', (node: FrameNode, type: ModifierType): ArkLoadingProgressNode => {
             let arknode = new ArkLoadingProgressNode();
@@ -2238,6 +2250,18 @@ export namespace typeNode {
             arknode.setPeer(peer);
             return arknode;
         });
+    }
+
+    // @ts-ignore
+    export function getLoadingProgressAttribute(node: FrameNode): LoadingProgressAttribute | undefined {
+        if (node.getType() !== 'Progress') {
+            return undefined
+        }
+        let loadingProgressNode = node as LoadingProgressFrameNode
+        if (loadingProgressNode !== undefined) {
+            return loadingProgressNode.attribute
+        }
+        return undefined
     }
 
     // @ts-ignore

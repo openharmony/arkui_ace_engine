@@ -140,6 +140,14 @@ struct PreState {
     bool hasBorderColor = false;
 };
 
+enum class RequestAutoFillReason {
+    UNKNOWN = 0,
+    SINGLE_CLICK,
+    FIELD_FOCUS_EVENT,
+    REQUEST_AGAIN_NOT_FOCUS,
+    TEXT_MENU_MANUAL_REQUEST
+};
+
 enum class RequestKeyboardReason {
     UNKNOWN = 0,
     ON_KEY_EVENT,
@@ -1479,8 +1487,19 @@ public:
 
     bool ProcessAutoFill(bool& isPopup, bool ignoreFillType = false, bool isNewPassWord = false,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
-    void ProcessAutoFillAndKeyboard(SourceType sourceType = SourceType::NONE, bool ignoreFillType = false,
-        bool isNewPassWord = false, AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
+    void ProcessAutoFillAndKeyboard(RequestAutoFillReason autoFillReason, SourceType sourceType = SourceType::NONE,
+        bool ignoreFillType = false, bool isNewPassWord = false,
+        AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST);
+    void SetAutoFillRequestSuccessOnFocus(bool autoFillRequestSuccessOnFocus)
+    {
+        autoFillRequestSuccessOnFocus_ = autoFillRequestSuccessOnFocus;
+    }
+
+    bool IsAutoFillRequestSuccessOnFocus()
+    {
+        return autoFillRequestSuccessOnFocus_;
+    }
+
     void SetAutoFillUserName(const std::string& userName)
     {
         autoFillUserName_ = userName;
@@ -2117,7 +2136,7 @@ private:
     void SetAutoFillTriggeredStateByType(const AceAutoFillType& autoFillType);
     AceAutoFillType GetAutoFillType(bool isNeedToHitType = true);
     bool IsAutoFillPasswordType(const AceAutoFillType& autoFillType);
-    void DoProcessAutoFill(SourceType sourceType = SourceType::NONE);
+    void DoProcessAutoFill(RequestAutoFillReason autoFillReason, SourceType sourceType = SourceType::NONE);
     void KeyboardContentTypeToInputType();
     void ProcessScroll();
     void ProcessCounter();
@@ -2381,6 +2400,7 @@ private:
     bool hasMousePressed_ = false;
     bool showCountBorderStyle_ = false;
     OffsetF movingCaretOffset_;
+    bool autoFillRequestSuccessOnFocus_ = false;
     std::string autoFillUserName_;
     std::string autoFillNewPassword_;
     uint32_t autoFillSessionId_ = 0;
