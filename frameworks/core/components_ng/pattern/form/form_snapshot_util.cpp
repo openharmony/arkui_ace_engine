@@ -53,33 +53,50 @@ bool FormSnapshotUtil::IsTransparent(const std::shared_ptr<Media::PixelMap> &pix
     return (pixelDump & ALPHA_MASK) == 0;
 }
 
-int32_t FormSnapshotUtil::GetNonTransparentRatio(const std::shared_ptr<Media::PixelMap> &pixelMap)
+bool FormSnapshotUtil::GetNonTransparentRatio(
+    const std::shared_ptr<Media::PixelMap> &pixelMap, int32_t &percentageValue)
 {
     if (!pixelMap) {
-        TAG_LOGW(AceLogTag::ACE_FORM, "GetNonTransparentRatio pixelmap is nullptr");
-        return 0;
+        TAG_LOGE(AceLogTag::ACE_FORM, "GetNonTransparentRatio pixelmap is nullptr");
+        return false;
     }
-
-    AceTraceBeginWithArgs("CreateAlphaPixelMap_%dx%d", pixelMap->GetWidth(), pixelMap->GetHeight());
-    Media::InitializationOptions opts = {
-        .size = {pixelMap->GetWidth(), pixelMap->GetHeight()},
-        .pixelFormat = Media::PixelFormat::ALPHA_8,
-    };
-    std::unique_ptr<Media::PixelMap> alphaPixelMap = Media::PixelMap::Create(*pixelMap, opts);
-    AceTraceEnd();
-    if (!alphaPixelMap) {
-        TAG_LOGE(AceLogTag::ACE_FORM, "GetNonTransparentRatio create new pixel map failed");
-        return 0;
+    if (pixelMap->GetWidth() <= 0 || pixelMap->GetHeight() <= 0) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "GetNonTransparentRatio width or height not valid");
+        return false;
     }
-
-    AceTraceBeginWithArgs("CalculateTransparentRatio_%dx%d", pixelMap->GetWidth(), pixelMap->GetHeight());
-    const uint8_t *data = alphaPixelMap->GetPixels();
-    const int32_t dataLength = alphaPixelMap->GetByteCount();
+ 
+    std::shared_ptr<Media::PixelMap> targetPixelMap = pixelMap;
+    if (targetPixelMap->GetPixelFormat() != Media::PixelFormat::RGBA_8888) {
+        ACE_SCOPED_TRACE("ConvertFormPixelMap_%dx%d", targetPixelMap->GetWidth(), targetPixelMap->GetHeight());
+        TAG_LOGW(AceLogTag::ACE_FORM, "GetNonTransparentRatio pixelFormat[%{public}d] not matched",
+            targetPixelMap->GetPixelFormat());
+        Media::InitializationOptions opts = {
+            .size = {targetPixelMap->GetWidth(), targetPixelMap->GetHeight()},
+            .pixelFormat = Media::PixelFormat::RGBA_8888,
+        };
+        std::unique_ptr<Media::PixelMap> uniquePixelMap = Media::PixelMap::Create(*targetPixelMap, opts);
+        if (!uniquePixelMap) {
+            TAG_LOGE(AceLogTag::ACE_FORM, "GetNonTransparentRatio pixelFormat convert failed");
+            return false;
+        }
+        targetPixelMap = std::move(uniquePixelMap);
+    }
+ 
+    // PixelFormat::RGBA_8888图像格式单个像素占4个字节
+    int32_t pixelBytes = 4;
+    const uint32_t *data = reinterpret_cast<const uint32_t *>(targetPixelMap->GetPixels());
+    const int32_t dataLength = targetPixelMap->GetByteCount() / pixelBytes;
+    if (dataLength == 0) {
+        TAG_LOGE(AceLogTag::ACE_FORM, "GetNonTransparentRatio dataLength is 0");
+        return false;
+    }
+ 
+    AceTraceBeginWithArgs("CalculateTransparentRatio_%dx%d", targetPixelMap->GetWidth(), targetPixelMap->GetHeight());
     int32_t threshold = dataLength * THRESHOLD_FOR_NONTRANSPARENCY_RATIO / PERCENTAGE_DENOMINATOR;
     int32_t count = 0;
     for (int32_t index = 0; index < dataLength; index++) {
         auto pixelDump = data[index];
-        if ((pixelDump & ALPHA_8_MASK) == 0) {
+        if ((pixelDump & ALPHA_MASK) == 0) {
             continue;
         }
         count++;
@@ -88,19 +105,10 @@ int32_t FormSnapshotUtil::GetNonTransparentRatio(const std::shared_ptr<Media::Pi
         }
     }
     AceTraceEnd();
-    
-    if (count == 0 || dataLength == 0) {
-        return 0;
-    }
-
-    if (count >= threshold) {
-        return THRESHOLD_FOR_NONTRANSPARENCY_RATIO;
-    }
-
-    int32_t percentageValue = std::round((static_cast<double>(count) / dataLength) * PERCENTAGE_DENOMINATOR);
+    percentageValue = std::round((static_cast<double>(count) / dataLength) * PERCENTAGE_DENOMINATOR);
     TAG_LOGW(AceLogTag::ACE_FORM,
         "GetNonTransparentRatio count:%{public}d, total:%{public}d, percentageValue:%{public}d", count, dataLength,
         percentageValue);
-    return percentageValue;
+    return true;
 }
 } // namespace OHOS::Ace::NG

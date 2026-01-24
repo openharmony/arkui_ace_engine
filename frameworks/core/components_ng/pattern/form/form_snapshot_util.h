@@ -35,10 +35,11 @@ public:
 
     /**
      * @brief Get the snapshot transparency percentage value.
-     * @param pixelMap the snapshot of SurfaceNode
-     * @return Non-transparent percentage value, The value range is 0 to 100.
+     * @param pixelMap the snapshot of SurfaceNode.
+     * @param percentageValue Non-transparent percentage value, The value range is 0 to 100.
+     * @return true if pixelMap is valid, false otherwise.
      */
-    static int32_t GetNonTransparentRatio(const std::shared_ptr<Media::PixelMap> &pixelMap);
+    static bool GetNonTransparentRatio(const std::shared_ptr<Media::PixelMap> &pixelMap, int32_t &percentageValue);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_FORM_FORM_UTIL_H
