@@ -477,27 +477,27 @@ void SheetPresentationPattern::InitPanEvent()
 
     auto actionStartTask = [weak = WeakClaim(this)](const GestureEvent& event) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
+        if (pattern && pattern->enableDragControl_) {
             pattern->HandleDragStart();
         }
     };
 
     auto actionUpdateTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
+        if (pattern && pattern->enableDragControl_) {
             pattern->HandleDragUpdate(info);
         }
     };
 
     auto actionEndTask = [weak = WeakClaim(this)](const GestureEvent& info) {
         auto pattern = weak.Upgrade();
-        if (pattern) {
+        if (pattern && pattern->enableDragControl_) {
             pattern->HandleDragEnd(info.GetMainVelocity());
         }
     };
     auto actionCancelTask = [weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
-        if (pattern) {
+        if (pattern && pattern->enableDragControl_) {
             pattern->HandleDragEnd({});
         }
     };

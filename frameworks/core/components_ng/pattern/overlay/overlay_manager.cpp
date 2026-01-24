@@ -6150,17 +6150,27 @@ void OverlayManager::CloseBindSheetByUIContext(const RefPtr<NG::FrameNode>& shee
     CloseSheet(sheetKey);
 }
 
-void OverlayManager::OpenImageGenerator(BindSheetCreateParam&& param)
+void OverlayManager::OpenImageGenerator(BindSheetCreateParam&& param, int32_t instanceId)
 {
-    if (!param.style.instanceId.has_value()) {
-        TAG_LOGE(AceLogTag::ACE_SHEET, "instanceId invalid, open image generator failed");
-        return;
-    }
-    int32_t instanceId = param.style.instanceId.value();
     ContainerScope scope(instanceId);
     OnBindSheetInner(nullptr, param.sheetContentNode, nullptr, param.style, nullptr, nullptr, nullptr,
         std::move(param.onWillDismiss), nullptr, nullptr, nullptr, nullptr, nullptr, nullptr,
         std::move(param.sheetSpringBack), param.targetNode, true);
+    // disable image generator's drag control
+    auto parent = param.sheetContentNode;
+    while (parent) {
+        if (parent->GetTag() == "SheetPage") {
+            break;
+        }
+        parent = parent->GetParent();
+    }
+    auto sheetNode = AceType::DynamicCast<FrameNode>(parent);
+    if (sheetNode) {
+        auto pattern = sheetNode->GetPattern<SheetPresentationPattern>();
+        if (pattern) {
+            pattern->SetEnableDragControl(false);
+        }
+    }
 }
 
 void OverlayManager::OnBindSheetInner(std::function<void(const std::string&)>&& callback,
