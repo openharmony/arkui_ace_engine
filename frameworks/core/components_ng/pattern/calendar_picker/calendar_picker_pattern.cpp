@@ -1266,24 +1266,22 @@ void CalendarPickerPattern::OnWindowSizeChanged(int32_t width, int32_t height, W
 
 void CalendarPickerPattern::OnColorConfigurationUpdate()
 {
-    if (SystemProperties::ConfigChangePerform()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto pickerProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
-        CHECK_NULL_VOID(pickerProperty);
-        auto pipelineContext = host->GetContext();
-        CHECK_NULL_VOID(pipelineContext);
-        auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>(host->GetThemeScopeId());
-        CHECK_NULL_VOID(calendarTheme);
-        if (!pickerProperty->GetNormalTextColorSetByUser().value_or(false)) {
-            pickerProperty->UpdateColor(calendarTheme->GetEntryFontColor());
-        }
-        auto renderContext = host->GetRenderContext();
-        CHECK_NULL_VOID(renderContext);
-        BorderColorProperty borderColor;
-        borderColor.SetColor(calendarTheme->GetEntryBorderColor());
-        renderContext->UpdateBorderColor(borderColor);
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto pickerProperty = host->GetLayoutProperty<CalendarPickerLayoutProperty>();
+    CHECK_NULL_VOID(pickerProperty);
+    auto pipelineContext = host->GetContext();
+    CHECK_NULL_VOID(pipelineContext);
+    auto calendarTheme = pipelineContext->GetTheme<CalendarTheme>(host->GetThemeScopeId());
+    CHECK_NULL_VOID(calendarTheme);
+    if (!pickerProperty->GetNormalTextColorSetByUser().value_or(false)) {
+        pickerProperty->UpdateColor(calendarTheme->GetEntryFontColor());
     }
+    auto renderContext = host->GetRenderContext();
+    CHECK_NULL_VOID(renderContext);
+    BorderColorProperty borderColor;
+    borderColor.SetColor(calendarTheme->GetEntryBorderColor());
+    renderContext->UpdateBorderColor(borderColor);
 
     if (IsDialogShow()) {
         return;
