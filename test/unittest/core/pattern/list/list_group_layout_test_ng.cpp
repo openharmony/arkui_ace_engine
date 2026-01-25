@@ -1837,7 +1837,7 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle001, TestSize.Level1)
 HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create List and ListItemGroup, set TextDirection to RTL and set ListDirection to HORIZONTAL.
+     * @tc.steps: step1. Create List and ListItemGroup.
      */
     ListModelNG model = CreateList();
     ListItemGroupModelNG groupModel = CreateListItemGroup();
@@ -1848,12 +1848,21 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle002, TestSize.Level1)
     auto listItemGroupLayoutAlgorithm = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithm);
     CreateListItems(20, V2::ListItemStyle::NONE);
     CreateDone();
+
+    /**
+     * @tc.steps: step2. set CachedCount to 3.
+     */
+    ListModelNG::SetCachedCount(AceType::RawPtr(frameNode_), 3);
+
+    /**
+     * @tc.steps: step3. set TextDirection to RTL and set ListDirection to HORIZONTAL.
+     */
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     auto horizontal = 1;
     ListModelNG::SetListDirection(AceType::RawPtr(frameNode_), horizontal);
     
     /**
-     * @tc.steps: step2. FlushUITasks
+     * @tc.steps: step4. FlushUITasks
      * @tc.expected: The size of cachedItemPosition is 0.
      */
     FlushUITasks();
@@ -1869,7 +1878,7 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle002, TestSize.Level1)
 HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create List and ListItemGroup, set TextDirection to RTL and set ListDirection to HORIZONTAL.
+     * @tc.steps: step1. Create List and ListItemGroup.
      */
     ListModelNG model = CreateList();
     ListItemGroupModelNG groupModel = CreateListItemGroup();
@@ -1880,13 +1889,16 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle003, TestSize.Level1)
     auto listItemGroupLayoutAlgorithm = AceType::DynamicCast<ListItemGroupLayoutAlgorithm>(layoutAlgorithm);
     CreateListItems(20, V2::ListItemStyle::NONE);
     CreateDone();
-    ListModelNG::SetCachedCount(AceType::RawPtr(frameNode_), 3);
+
+    /**
+     * @tc.steps: step2. set TextDirection to RTL and set ListDirection to HORIZONTAL.
+     */
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
     auto horizontal = 1;
     ListModelNG::SetListDirection(AceType::RawPtr(frameNode_), horizontal);
     
     /**
-     * @tc.steps: step2. FlushUITasks
+     * @tc.steps: step3. FlushUITasks
      * @tc.expected: The size of cachedItemPosition is 0.
      */
     FlushUITasks();
