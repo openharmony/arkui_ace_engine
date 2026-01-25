@@ -47,6 +47,8 @@ private:
     const static std::unordered_map<BlurStyle, std::string> validBlurStyles_;
     RefPtr<ThemeStyle> themeStyle_;
     std::unordered_map<uint32_t, BlurParameter> blurParams_;
+
+    std::mutex blurMultiThreadMutex_;
 };
 
 } // namespace OHOS::Ace

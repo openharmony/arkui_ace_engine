@@ -244,6 +244,7 @@ RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type)
     if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
         return GetThemeMultiThread(type);
     }
+    std::lock_guard<std::recursive_mutex> lock(themeMultiThreadMutex_);
     return GetThemeNormal(type);
 }
 
@@ -319,6 +320,7 @@ RefPtr<Theme> ThemeManagerImpl::GetTheme(ThemeType type, TokenThemeScopeId theme
     if (MultiThreadBuildManager::IsThreadSafeNodeScope()) {
         return GetThemeMultiThread(type, themeScopeId);
     }
+    std::lock_guard<std::recursive_mutex> lock(themeMultiThreadMutex_);
     return GetThemeNormal(type, themeScopeId);
 }
 
@@ -449,6 +451,7 @@ void ThemeManagerImpl::LoadResourceThemes()
         LoadResourceThemesMultiThread();
         return;
     }
+    std::lock_guard<std::recursive_mutex> lock(themeMultiThreadMutex_);
     LoadResourceThemesInner();
 }
 

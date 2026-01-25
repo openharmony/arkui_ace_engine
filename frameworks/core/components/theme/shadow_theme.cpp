@@ -37,6 +37,7 @@ RefPtr<ShadowTheme> ShadowTheme::Builder::Build(const RefPtr<ThemeConstants>& th
 
 Shadow ShadowTheme::GetShadow(ShadowStyle style, ColorMode colorMode)
 {
+    std::lock_guard<std::mutex> lock(shadowMultiThreadMutex_);
     auto key = GetKeyOfShadowStyle(style, colorMode);
     auto iter = shadowStyles_.find(key);
     if (iter != shadowStyles_.end()) {
