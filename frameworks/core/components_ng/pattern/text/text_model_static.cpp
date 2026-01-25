@@ -70,7 +70,7 @@ void TextModelStatic::SetFontWeight(FrameNode* frameNode, const std::optional<Ac
     if (value.has_value()) {
         TextModelNG::SetFontWeight(frameNode, value.value());
     } else {
-        ACE_RESET_NODE_LAYOUT_PROPERTY(TextLayoutProperty, FontWeight, frameNode);
+        TextModelNG::SetFontWeight(frameNode, FontWeight::NORMAL);
     }
 }
 
