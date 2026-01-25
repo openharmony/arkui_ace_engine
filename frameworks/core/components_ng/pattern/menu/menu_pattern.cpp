@@ -294,7 +294,10 @@ void MenuPattern::OnModifyDone()
     CHECK_NULL_VOID(menuLayoutProperty);
     if (menuLayoutProperty->GetBorderRadius().has_value()) {
         BorderRadiusProperty borderRadius = menuLayoutProperty->GetBorderRadiusValue();
-        UpdateBorderRadius(host, borderRadius);
+        if (!borderRadius.HasPercentUnit()) {
+            // Percentage unit border radius must be set after layout. See OnDirtyLayoutWrapperSwap.
+            UpdateBorderRadius(host, borderRadius);
+        }
     }
 
     SetAccessibilityAction();

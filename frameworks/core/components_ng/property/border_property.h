@@ -139,7 +139,19 @@ struct ACE_FORCE_EXPORT BorderRadiusPropertyT<Dimension> {
             .append("]");
         return str;
     }
-    
+
+    bool HasPercentUnit()
+    {
+        return (radiusTopLeft.has_value() && radiusTopLeft.value().Unit() == DimensionUnit::PERCENT) ||
+            (radiusTopRight.has_value() && radiusTopRight.value().Unit() == DimensionUnit::PERCENT) ||
+            (radiusBottomRight.has_value() && radiusBottomRight.value().Unit() == DimensionUnit::PERCENT) ||
+            (radiusBottomLeft.has_value() && radiusBottomLeft.value().Unit() == DimensionUnit::PERCENT) ||
+            (radiusTopStart.has_value() && radiusTopStart.value().Unit() == DimensionUnit::PERCENT) ||
+            (radiusTopEnd.has_value() && radiusTopEnd.value().Unit() == DimensionUnit::PERCENT) ||
+            (radiusBottomEnd.has_value() && radiusBottomEnd.value().Unit() == DimensionUnit::PERCENT) ||
+            (radiusBottomStart.has_value() && radiusBottomStart.value().Unit() == DimensionUnit::PERCENT);
+    }
+
     void AddResource(
         const std::string& key,
         const RefPtr<ResourceObject>& resObj,
