@@ -307,7 +307,7 @@ public:
     }
 
     int32_t GetLanesInGroup() const
-    {cd
+    {
         return lanes_;
     }
 
@@ -318,7 +318,7 @@ public:
 
     void SetAxisChanged(bool value)
     {
-        isAxisChanged = value;
+        isAxisChanged_ = value;
     }
 
     V2::ListItemGroupStyle GetListItemGroupStyle()

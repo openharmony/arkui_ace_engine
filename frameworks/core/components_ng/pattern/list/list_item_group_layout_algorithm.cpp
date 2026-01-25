@@ -1218,7 +1218,7 @@ void ListItemGroupLayoutAlgorithm::UpdateLayoutedItemInfo()
 void ListItemGroupLayoutAlgorithm::CheckRecycle(
     const RefPtr<LayoutWrapper>& layoutWrapper, float startPos, float endPos, float referencePos, bool forwardLayout)
 {
-    if (isOnAxisChange) {
+    if (isAxisChanged_) {
         return;
     }
     referencePos = UpdateReferencePos(layoutWrapper->GetLayoutProperty(), forwardLayout, referencePos);
