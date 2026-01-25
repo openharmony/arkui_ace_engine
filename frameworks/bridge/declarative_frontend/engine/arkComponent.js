@@ -36469,12 +36469,9 @@ if (globalThis.Rating === undefined) {
       getUINativeModule().loadNativeModule('Rating');
       const module = globalThis.requireNapi('arkui.components.arkrating');
       module.exportView();
-      if (params !== undefined && params !== null) {
-        getUINativeModule().rating.create(true, params);
-      } else {
-        getUINativeModule().rating.create(0, false);
-      }
-    }
+      getUINativeModule().rating.create(params);
+    },
+    name: 'JSRating'
   };
 }
 

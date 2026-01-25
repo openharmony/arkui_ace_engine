@@ -72,23 +72,6 @@ bool IsJsView(const Local<JSValueRef>& firstArg, panda::ecmascript::EcmaVM* vm)
     return firstArg->IsBoolean() && firstArg->ToBoolean(vm)->Value();
 }
 
-ArkUINativeModuleValue RatingBridge::CreateRating(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
-    if (IsJsView(firstArg, vm)) {
-        return JsCreateRating(runtimeCallInfo);
-    }
-    CHECK_NULL_RETURN(firstArg->IsNumber(), panda::JSValueRef::Undefined(vm));
-    double rating = static_cast<double>(firstArg->ToNumber(vm)->Value());
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
-    CHECK_NULL_RETURN(secondArg->IsBoolean(), panda::JSValueRef::Undefined(vm));
-    bool indicator = static_cast<bool>(secondArg->ToBoolean(vm)->Value());
-    GetArkUINodeModifiers()->getRatingModifier()->createRating(rating, indicator);
-    return panda::JSValueRef::Undefined(vm);
-}
-
 ArkUINativeModuleValue JsCreateSetOnChangeEvent(const EcmaVM* vm, const Local<JSValueRef>& changeEventVal)
 {
     panda::Local<panda::FunctionRef> func = changeEventVal->ToObject(vm);
@@ -108,45 +91,46 @@ ArkUINativeModuleValue JsCreateSetOnChangeEvent(const EcmaVM* vm, const Local<JS
     return panda::JSValueRef::Undefined(vm);
 }
 
-ArkUINativeModuleValue RatingBridge::JsCreateRating(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue RatingBridge::CreateRating(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    CHECK_NULL_RETURN(secondArg->IsObject(vm), panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     double rating = RATING_SCORE_DEFAULT_VALUE;
     bool indicator = false;
     Local<JSValueRef> changeEventVal = panda::JSValueRef::Undefined(vm);
-    auto obj = secondArg->ToObject(vm);
-    auto getRating = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "rating"));
-    auto getIndicator = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "indicator"));
-    auto bindingV1 = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "$rating"));
-    if (getRating->IsObject(vm)) {
-        auto getRatingObj = getRating->ToObject(vm);
-        changeEventVal = getRatingObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "changeEvent"));
-        auto ratingValue = getRatingObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
-        if (ratingValue->IsNumber()) {
-            rating = static_cast<double>(ratingValue->ToNumber(vm)->Value());
-        }
-    } else if (!bindingV1->IsUndefined() && !bindingV1->IsNull()) {
-        changeEventVal = bindingV1;
-        if (getRating->IsNumber()) {
+    if (firstArg->IsObject(vm)) {
+        auto obj = firstArg->ToObject(vm);
+        auto getRating = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "rating"));
+        auto getIndicator = obj->Get(vm, panda::StringRef::NewFromUtf8(vm, "indicator"));
+        if (getRating->IsObject(vm)) {
+            auto getRatingObj = getRating->ToObject(vm);
+            changeEventVal = getRatingObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "changeEvent"));
+            auto ratingValue = getRatingObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
+            if (ratingValue->IsNumber()) {
+                rating = static_cast<double>(ratingValue->ToNumber(vm)->Value());
+            }
+        } else if (ArkTSUtils::HasProperty(vm, obj, "$rating")) {
+            auto bindingV1 = ArkTSUtils::GetProperty(vm, obj, "$rating");
+            changeEventVal = bindingV1;
+            if (getRating->IsNumber()) {
+                rating = static_cast<double>(getRating->ToNumber(vm)->Value());
+            }
+        } else if (getRating->IsNumber()) {
             rating = static_cast<double>(getRating->ToNumber(vm)->Value());
         }
-    } else if (getRating->IsNumber()) {
-        rating = static_cast<double>(getRating->ToNumber(vm)->Value());
-    }
-    if (rating < 0) {
-        rating = RATING_SCORE_DEFAULT_VALUE;
-    }
-    if (getIndicator->IsBoolean()) {
-        indicator = getIndicator->ToBoolean(vm)->Value();
+        if (rating < 0) {
+            rating = RATING_SCORE_DEFAULT_VALUE;
+        }
+        if (getIndicator->IsBoolean()) {
+            indicator = getIndicator->ToBoolean(vm)->Value();
+        }
     }
     GetArkUINodeModifiers()->getRatingModifier()->createRating(rating, indicator);
-    if (changeEventVal->IsUndefined() || changeEventVal->IsNull() || !changeEventVal->IsFunction(vm)) {
-        return panda::JSValueRef::Undefined(vm);
+    if (!changeEventVal->IsUndefined() && !changeEventVal->IsNull() && changeEventVal->IsFunction(vm)) {
+        return JsCreateSetOnChangeEvent(vm, changeEventVal);
     }
-    return JsCreateSetOnChangeEvent(vm, changeEventVal);
+    return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue RatingBridge::SetStars(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -157,10 +141,6 @@ ArkUINativeModuleValue RatingBridge::SetStars(ArkUIRuntimeCallInfo* runtimeCallI
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
-    if (IsJsView(firstArg, vm) && (secondArg->IsNull() || !secondArg->IsNumber())) {
-        GetArkUINodeModifiers()->getRatingModifier()->setStars(nativeNode, STARS_DEFAULT);
-        return panda::JSValueRef::Undefined(vm);
-    }
     int32_t stars = secondArg->Int32Value(vm);
     if (stars <= 0) {
         stars = STARS_DEFAULT;
