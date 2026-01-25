@@ -61,6 +61,45 @@ constexpr bool DEFAULT_ENABLE_PREVIEW_TEXT_VALUE = true;
 constexpr bool DEFAULT_ENABLE_HAPTIC_FEEDBACK_VALUE = true;
 constexpr int32_t ELLIPSIS_MODE_TAIL = 2;
 
+void ParseBorderColor(NG::BorderColorProperty& borderColors, const RefPtr<ResourceObject>& topResObj,
+    const RefPtr<ResourceObject>& rightResObj, const RefPtr<ResourceObject>& bottomResObj,
+    const RefPtr<ResourceObject>& leftResObj)
+{
+    borderColors.resMap_.clear();
+    if (topResObj != nullptr) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.topColor = result;
+        };
+        borderColors.AddResource("borderColor.top", topResObj, std::move(updateFunc));
+    }
+    if (rightResObj != nullptr) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.rightColor = result;
+        };
+        borderColors.AddResource("borderColor.right", rightResObj, std::move(updateFunc));
+    }
+    if (bottomResObj != nullptr) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.bottomColor = result;
+        };
+        borderColors.AddResource("borderColor.bottom", bottomResObj, std::move(updateFunc));
+    }
+    if (leftResObj != nullptr) {
+        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
+            Color result;
+            ResourceParseUtils::ParseResColor(resObj, result);
+            borderColors.leftColor = result;
+        };
+        borderColors.AddResource("borderColor.left", leftResObj, std::move(updateFunc));
+    }
+}
+
 void SetTextAreaStyle(ArkUINodeHandle node, ArkUI_Int32 style)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -1836,8 +1875,34 @@ void SetAllOptionalBorderStyle(
     SetOptionalBorderStyle(borderStyles.styleBottom, values, valuesSize, offset);
 }
 
+void RegisterBorderColorRes(FrameNode* frameNode, void* colorRawPtr, NG::BorderColorProperty& borderColors)
+{
+    CHECK_NULL_VOID(frameNode);
+    std::vector<RefPtr<ResourceObject>> objs;
+    if (colorRawPtr) {
+        objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(colorRawPtr));
+    }
+    if (objs.size() < NUM_4) {
+        objs.resize(NUM_4);
+        auto tag = frameNode->GetTag();
+        if (borderColors.topColor.has_value()) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_0], borderColors.topColor.value(), tag);
+        }
+        if (borderColors.rightColor.has_value()) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_1], borderColors.rightColor.value(), tag);
+        }
+        if (borderColors.bottomColor.has_value()) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_2], borderColors.bottomColor.value(), tag);
+        }
+        if (borderColors.leftColor.has_value()) {
+            ResourceParseUtils::CompleteResourceObjectFromColor(objs[NUM_3], borderColors.leftColor.value(), tag);
+        }
+    }
+    ParseBorderColor(borderColors, objs[NUM_0], objs[NUM_1], objs[NUM_2], objs[NUM_3]);
+}
+
 void SetTextAreaBorder(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
-    const uint32_t* colorAndStyle, int32_t colorAndStyleSize)
+    const uint32_t* colorAndStyle, int32_t colorAndStyleSize, void* colorRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
@@ -1867,6 +1932,9 @@ void SetTextAreaBorder(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_
     SetAllOptionalBorderColor(borderColors, colorAndStyle,
         colorAndStyleSize, colorAndStyleOffset);
     borderColors.multiValued = true;
+    if (SystemProperties::ConfigChangePerform()) {
+        RegisterBorderColorRes(frameNode, colorRawPtr, borderColors);
+    }
     TextFieldModelNG::SetBorderColor(frameNode, borderColors);
 
     NG::BorderStyleProperty borderStyles;
@@ -1993,44 +2061,6 @@ void ResetTextAreaBorderWidth(ArkUINodeHandle node)
     BorderWidthProperty borderWidth;
     borderWidth.SetBorderWidth(Dimension(0));
     TextFieldModelNG::SetBorderWidth(frameNode, borderWidth);
-}
-
-void ParseBorderColor(NG::BorderColorProperty& borderColors, RefPtr<ResourceObject> topResObj,
-    RefPtr<ResourceObject> rightResObj, RefPtr<ResourceObject> bottomResObj, RefPtr<ResourceObject> leftResObj)
-{
-    borderColors.resMap_.clear();
-    if (topResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            borderColors.topColor = result;
-        };
-        borderColors.AddResource("borderColor.top", topResObj, std::move(updateFunc));
-    }
-    if (rightResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            borderColors.rightColor = result;
-        };
-        borderColors.AddResource("borderColor.right", rightResObj, std::move(updateFunc));
-    }
-    if (bottomResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            borderColors.bottomColor = result;
-        };
-        borderColors.AddResource("borderColor.bottom", bottomResObj, std::move(updateFunc));
-    }
-    if (leftResObj != nullptr) {
-        auto&& updateFunc = [](const RefPtr<ResourceObject>& resObj, NG::BorderColorProperty& borderColors) {
-            Color result;
-            ResourceParseUtils::ParseResColor(resObj, result);
-            borderColors.leftColor = result;
-        };
-        borderColors.AddResource("borderColor.left", leftResObj, std::move(updateFunc));
-    }
 }
 
 void SetTextAreaBorderColor(ArkUINodeHandle node, uint32_t topColorInt, uint32_t rightColorInt, uint32_t bottomColorInt,
@@ -2481,11 +2511,21 @@ ArkUI_Float32 GetTextAreaStrokeWidth(ArkUINodeHandle node)
     return TextFieldModelNG::GetStrokeWidth(frameNode).Value();
 }
 
-void SetTextAreaStrokeColor(ArkUINodeHandle node, ArkUI_Uint32 color)
+void SetTextAreaStrokeColor(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::SetStrokeColor(frameNode, Color(color));
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        if (resRawPtr) {
+            auto resObj = AceType::Claim(reinterpret_cast<ResourceObject*>(resRawPtr));
+            pattern->RegisterResource<Color>("strokeColor", resObj, Color(color));
+        } else {
+            pattern->UnRegisterResource("strokeColor");
+        }
+    }
 }
 
 void ResetTextAreaStrokeColor(ArkUINodeHandle node)
@@ -2493,6 +2533,11 @@ void ResetTextAreaStrokeColor(ArkUINodeHandle node)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     TextFieldModelNG::ResetStrokeColor(frameNode);
+    if (SystemProperties::ConfigChangePerform()) {
+        auto pattern = frameNode->GetPattern();
+        CHECK_NULL_VOID(pattern);
+        pattern->UnRegisterResource("strokeColor");
+    }
 }
 
 ArkUI_Uint32 GetTextAreaStrokeColor(ArkUINodeHandle node)

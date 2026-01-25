@@ -5420,7 +5420,7 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaEnableAutoFill)(ArkUINodeHandle node, ArkUI_Uint32 enableAutoFill);
     void (*resetTextAreaEnableAutoFill)(ArkUINodeHandle node);
     void (*setTextAreaBorder)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize,
-        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize);
+        const ArkUI_Uint32* colorAndStyle, ArkUI_Int32 colorAndStyleSize, void* colorRawPtr);
     void (*resetTextAreaBorder)(ArkUINodeHandle node);
     void (*setTextAreaBorderWidth)(
         ArkUINodeHandle node, const ArkUI_Float32* values, const ArkUI_Int32* units, ArkUI_Int32 length);
@@ -5476,7 +5476,7 @@ struct ArkUITextAreaModifier {
     void (*setTextAreaStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextAreaStrokeWidth)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextAreaStrokeWidth)(ArkUINodeHandle node);
-    void (*setTextAreaStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setTextAreaStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetTextAreaStrokeColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextAreaStrokeColor)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
@@ -5745,7 +5745,7 @@ struct ArkUITextInputModifier {
     void (*setTextInputStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetTextInputStrokeWidth)(ArkUINodeHandle node);
     ArkUI_Float32 (*getTextInputStrokeWidth)(ArkUINodeHandle node);
-    void (*setTextInputStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setTextInputStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetTextInputStrokeColor)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextInputStrokeColor)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
@@ -7037,7 +7037,7 @@ struct ArkUISearchModifier {
     void (*resetSearchKeyboardAppearance)(ArkUINodeHandle node);
     void (*setSearchStrokeWidth)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetSearchStrokeWidth)(ArkUINodeHandle node);
-    void (*setSearchStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
+    void (*setSearchStrokeColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetSearchStrokeColor)(ArkUINodeHandle node);
     void (*setEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool enableAutoSpacing);
     void (*resetEnableAutoSpacing)(ArkUINodeHandle node);

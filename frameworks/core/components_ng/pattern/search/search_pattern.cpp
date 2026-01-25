@@ -3298,6 +3298,16 @@ void SearchPattern::UpdatePropertyImpl(const std::string& key, RefPtr<PropertyVa
                 }
             }
         },
+
+        {"strokeColor",
+            [wp = WeakClaim(this)](SearchLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto pattern = wp.Upgrade();
+                    CHECK_NULL_VOID(pattern);
+                    pattern->UpdateStrokeColorResource(*realValue);
+                }
+            }
+        },
     };
 
     auto it = handlers.find(key);
@@ -3490,6 +3500,16 @@ void SearchPattern::UpdateDividerColorResource(const Color& value)
 
     dividerRenderProperty->UpdateDividerColor(value);
     dividerFrameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
+}
+
+void SearchPattern::UpdateStrokeColorResource(const Color& value)
+{
+    auto frameNode = GetHost();
+    CHECK_NULL_VOID(frameNode);
+    auto searchLayoutProperty = frameNode->GetLayoutProperty<SearchLayoutProperty>();
+    CHECK_NULL_VOID(searchLayoutProperty);
+    searchLayoutProperty->UpdateStrokeColor(value);
+    frameNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
 }
 
 void SearchPattern::UpdateMinFontSizeResource(const Dimension& value)

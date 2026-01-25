@@ -384,6 +384,8 @@ public:
         const std::optional<Color>& valueColor, std::vector<uint32_t> &options);
     static void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo,
         EcmaVM* vm, std::vector<uint32_t>& values, int32_t argsIndex);
+    static void ParseOuterBorderColor(ArkUIRuntimeCallInfo* runtimeCallInfo, EcmaVM* vm, std::vector<uint32_t>& values,
+        int32_t argsIndex, std::vector<RefPtr<ResourceObject>>& resObjs, const NodeInfo& nodeInfo);
     static void ParseOuterBorderRadius(ArkUIRuntimeCallInfo* runtimeCallInfo,
         EcmaVM* vm, std::vector<ArkUI_Float32>& values, int32_t argsIndex);
     static void SetTextBackgroundStyle(std::shared_ptr<TextBackgroundStyle> style, Color color,

@@ -2923,10 +2923,13 @@ ArkUINativeModuleValue TextInputBridge::SetStrokeColor(ArkUIRuntimeCallInfo *run
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
     Color color;
-    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color)) {
+    RefPtr<ResourceObject> resourceObject;
+    auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(nativeNode);
+    if (!ArkTSUtils::ParseJsColorAlpha(vm, secondArg, color, resourceObject, nodeInfo)) {
         GetArkUINodeModifiers()->getTextInputModifier()->resetTextInputStrokeColor(nativeNode);
     } else {
-        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputStrokeColor(nativeNode, color.GetValue());
+        GetArkUINodeModifiers()->getTextInputModifier()->setTextInputStrokeColor(nativeNode, color.GetValue(),
+            AceType::RawPtr(resourceObject));
     }
     return panda::JSValueRef::Undefined(vm);
 }
