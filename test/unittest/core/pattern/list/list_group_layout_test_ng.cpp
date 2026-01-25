@@ -1837,7 +1837,7 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle001, TestSize.Level1)
 HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle002, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create List and ListItemGroup. 
+     * @tc.steps: step1. Create List and ListItemGroup.
      */
     ListModelNG model = CreateList();
     ListItemGroupModelNG groupModel = CreateListItemGroup();
