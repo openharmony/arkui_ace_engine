@@ -118,6 +118,7 @@ RefPtr<LayoutAlgorithm> ListItemGroupPattern::CreateLayoutAlgorithm()
     layoutAlgorithm->SetPrevTotalMainSize(mainSize_);
     layoutAlgorithm->SetPrevMeasureBreak(prevMeasureBreak_);
     layoutAlgorithm->SetLanes(lanes_);
+    layoutAlgorithm->SetAxisChange(isAxisChange_);
     if (childrenSize_ && ListChildrenSizeExist()) {
         if (!posMap_) {
             posMap_ = MakeRefPtr<ListPositionMap>();

@@ -307,13 +307,18 @@ public:
     }
 
     int32_t GetLanesInGroup() const
-    {
+    {cd
         return lanes_;
     }
 
     void SetLanes(int32_t num)
     {
         lanes_ = num;
+    }
+
+    void SetAxisChanged(bool value)
+    {
+        isAxisChanged = value;
     }
 
     V2::ListItemGroupStyle GetListItemGroupStyle()
@@ -516,6 +521,7 @@ private:
     std::optional<LayoutedItemInfo> layoutedItemInfo_;
     std::map<int32_t, uint32_t> noDividerItems_;
     bool layouted_ = false;
+    bool isAxisChanged_ = false;
 
     bool reCache_ = false;
     int32_t backwardCachedIndex_ = INT_MAX;

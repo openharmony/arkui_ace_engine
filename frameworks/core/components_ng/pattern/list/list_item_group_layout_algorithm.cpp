@@ -260,7 +260,7 @@ void ListItemGroupLayoutAlgorithm::Layout(LayoutWrapper* layoutWrapper)
         }
     }
     isLayouted_ = true;
-    needAllLayout_ = false;
+    isAxisChanged_ = false;
 }
 
 void ListItemGroupLayoutAlgorithm::CheckUpdateGroupAndItemPos(LayoutWrapper* layoutWrapper,
@@ -558,6 +558,7 @@ void ListItemGroupLayoutAlgorithm::MeasureListItem(
     prevStartPos_ = startPos_;
     prevEndPos_ = endPos_;
     if (needAllLayout_) {
+        needAllLayout_ = false;
         itemPosition_.clear();
         cachedItemPosition_.clear();
         LayoutListItemAll(layoutWrapper, layoutConstraint, startPos);
@@ -1217,7 +1218,7 @@ void ListItemGroupLayoutAlgorithm::UpdateLayoutedItemInfo()
 void ListItemGroupLayoutAlgorithm::CheckRecycle(
     const RefPtr<LayoutWrapper>& layoutWrapper, float startPos, float endPos, float referencePos, bool forwardLayout)
 {
-    if (needAllLayout_) {
+    if (isOnAxisChange) {
         return;
     }
     referencePos = UpdateReferencePos(layoutWrapper->GetLayoutProperty(), forwardLayout, referencePos);
