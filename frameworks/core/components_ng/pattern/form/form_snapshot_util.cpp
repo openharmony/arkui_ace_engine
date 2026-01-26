@@ -104,8 +104,8 @@ bool FormSnapshotUtil::GetNonTransparentRatio(
     }
     AceTraceEnd();
     percentageValue = std::round((static_cast<double>(count) / dataLength) * PERCENTAGE_DENOMINATOR);
-    TAG_LOGW(AceLogTag::ACE_FORM, "GetNonTransparentRatio count:%{public}d, total:%{public}d,
-        percentageValue:%{public}d", count, dataLength, percentageValue);
+    TAG_LOGW(AceLogTag::ACE_FORM, "GetNonTransparentRatio count:%{public}d, total:%{public}d," \
+        "percentageValue:%{public}d", count, dataLength, percentageValue);
     return true;
 }
 } // namespace OHOS::Ace::NG
