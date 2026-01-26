@@ -34,6 +34,10 @@ public:
 
     void ProcessSurfaceDestroy() override;
 
+#ifdef RENDER_EXTRACT_SUPPORTED
+    void ProcessTextureRefresh(int32_t instanceId, int64_t textureId) override;
+#endif
+
 private:
     WeakPtr<XComponentPattern> weakXComponentPattern_;
 };
