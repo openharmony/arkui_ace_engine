@@ -4325,6 +4325,14 @@ void SetEnabledImpl(Ark_NativePointer node,
         return;
     }
     ViewAbstract::SetEnabled(frameNode, *convValue);
+    auto eventHub = frameNode->GetEventHub<EventHub>();
+    if (eventHub && eventHub->HasStateStyle(UI_STATE_DISABLED)) {
+        if (*convValue) {
+            eventHub->ResetCurrentUIState(UI_STATE_DISABLED);
+        } else {
+            eventHub->UpdateCurrentUIState(UI_STATE_DISABLED);
+        }
+    }
 }
 void SetAlignRulesInternal(FrameNode *frameNode, std::optional<std::map<AlignDirection, AlignRule>> convMapValue,
                            std::optional<BiasOpt> convBiasValue)
