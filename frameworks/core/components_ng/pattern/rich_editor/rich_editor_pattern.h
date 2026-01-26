@@ -547,12 +547,22 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnableAutoSpacing: [%{public}d]", isEnableAutoSpacing_);
     }
 
+    bool IsEnableAutoSpacing()
+    {
+        return isEnableAutoSpacing_;
+    }
+
     void SetCompressLeadingPunctuation(bool enabled)
     {
         CHECK_NULL_VOID(isCompressLeadingPunctuation_ != enabled);
         isCompressLeadingPunctuation_ = enabled;
         paragraphCache_.Clear();
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetCompressLeadingPunctuation: %{public}d", isCompressLeadingPunctuation_);
+    }
+
+    bool IsCompressLeadingPunctuation()
+    {
+        return isCompressLeadingPunctuation_;
     }
 
     void OnAttachToMainTree() override;
@@ -937,6 +947,19 @@ public:
     bool IsHandlesShow() override;
     bool IsHandleMoving();
     void SetPreKeyboardNode();
+
+    void SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboardNode);
+ 
+    RefPtr<UINode> GetCustomKeyboardNode()
+    {
+        return customKeyboardNode_;
+    }
+ 
+    bool GetCustomKeyboardOption()
+    {
+        return keyboardAvoidance_;
+    }
+
     void ProcessCloseKeyboard(const RefPtr<FrameNode>& currentNode);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
@@ -1238,6 +1261,11 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
 
+    bool GetEnableHapticFeedback()
+    {
+        return isEnableHapticFeedback_;
+    }
+
     bool InsertOrDeleteSpace(int32_t index) override;
 
     void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
@@ -1250,6 +1278,11 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetRequestKeyboardOnFocus=%{public}d", needToRequest);
         needToRequestKeyboardOnFocus_ = needToRequest;
+    }
+
+    bool GetRequestKeyboardOnFocus()
+    {
+        return needToRequestKeyboardOnFocus_;
     }
 
     bool IsTextEditableForStylus() const override;
@@ -1346,6 +1379,11 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetIncludeFontPadding: [%{public}d]", isIncludeFontPadding_);
     }
 
+    bool IsIncludeFontPadding()
+    {
+        return isIncludeFontPadding_;
+    }
+
     void SetFallbackLineSpacing(bool isFallbackLineSpacing)
     {
         CHECK_NULL_VOID(isFallbackLineSpacing_ != isFallbackLineSpacing);
@@ -1355,6 +1393,11 @@ public:
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         paragraphCache_.Clear();
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetFallbackLineSpacing: [%{public}d]", isFallbackLineSpacing_);
+    }
+
+    bool IsFallbackLineSpacing()
+    {
+        return isFallbackLineSpacing_;
     }
 
     void SetKeyboardAppearance(KeyboardAppearance value)

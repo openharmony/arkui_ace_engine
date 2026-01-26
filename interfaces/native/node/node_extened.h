@@ -275,6 +275,22 @@ struct ArkUI_TextDataDetectorConfig {
     bool enablePreviewMenu;
 };
 
+struct ArkUI_RichEditorSelectionMenuOptions {
+	ArkUI_RichEditorSpanType richEditorSpanType;
+	ArkUI_NodeHandle contentNode;
+	ArkUI_RichEditorResponseType responseType;
+	void* onMenuAppear;
+    void* onMenuAppearUserData;
+    void* onMenuDisappear;
+    void* onMenuDisappearUserData;
+    ArkUI_TextMenuType menuType;
+    void* onMenuShow;
+    void* onMenuShowUserData;
+    void* onMenuHide;
+    void* onMenuHideUserData;
+    ArkUI_HapticFeedbackMode hapticFeedbackMode;
+};
+
 #ifdef __cplusplus
 };
 #endif

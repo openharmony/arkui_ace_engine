@@ -75,7 +75,7 @@ bool GetRichEditorDetectEnable(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_RETURN(frameNode, false);
-    return RichEditorModelNG::GetSelectDetectEnable(frameNode);
+    return RichEditorModelNG::GetTextDetectEnable(frameNode);
 }
 
 void NodeModifier::ResetRichEditorDetectEnable(ArkUINodeHandle node)
@@ -160,6 +160,13 @@ void SetRichEditorCopyOptions(ArkUINodeHandle node, ArkUI_Int32 copyOptionsValue
     CopyOptions copyOptions = static_cast<CopyOptions>(copyOptionsValue);
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetCopyOption(frameNode, copyOptions);
+}
+
+ArkUI_Int32 GetRichEditorCopyOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(RichEditorModelNG::GetCopyOption(frameNode));
 }
 
 void ResetRichEditorCopyOptions(ArkUINodeHandle node)
@@ -400,6 +407,13 @@ void SetRichEditorSelectedBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 col
     RegisterRichEditorPatternResource(frameNode, "selectedBackgroundColor", resRawPtr, result);
 }
 
+ArkUI_Uint32 GetRichEditorSelectedBackgroundColor(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_UINT_CODE);
+    return RichEditorModelNG::GetSelectedBackgroundColor(frameNode).GetValue();
+}
+
 void ResetRichEditorSelectedBackgroundColor(ArkUINodeHandle node)
 {
     auto pipeline = PipelineContext::GetCurrentContext();
@@ -541,6 +555,13 @@ void SetRichEditorEnableKeyboardOnFocus(ArkUINodeHandle node, ArkUI_Bool value)
     RichEditorModelNG::SetRequestKeyboardOnFocus(frameNode, value);
 }
 
+ArkUI_Int32 GetRichEditorEnableKeyboardOnFocus(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(RichEditorModelNG::GetRequestKeyboardOnFocus(frameNode));
+}
+
 void ResetRichEditorEnableKeyboardOnFocus(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -561,7 +582,6 @@ void ResetRichEditorEnablePreviewText(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetSupportPreviewText(frameNode, true);
 }
-
 
 void SetRichEditorEditMenuOptions(ArkUINodeHandle node, void* onCreateMenuCallback, void* onMenuItemClickCallback,
     void* onPrepareMenuCallback)
@@ -607,6 +627,71 @@ void ResetRichEditorEditMenuOptions(ArkUINodeHandle node)
     NG::OnPrepareMenuCallback onPrepareMenuCallback;
     RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback), std::move(onMenuItemClick),
         std::move(onPrepareMenuCallback));
+}
+
+SelectMenuParam parseMenuParam(ArkUIRichEditorBindMenuParam* menuParam)
+{
+    SelectMenuParam selectMenuParam;
+    selectMenuParam.previewMenuOptions.hapticFeedbackMode =
+        static_cast<HapticFeedbackMode>(menuParam->hapticFeedbackMode);
+    if (menuParam->onMenuShow) {
+        auto onMenuShow = reinterpret_cast<void (*)(int32_t, int32_t, void*)>(menuParam->onMenuShow);
+        selectMenuParam.onMenuShow = [onMenuShow, userData = menuParam->onMenuShowUserData](
+                                         int32_t start, int32_t end) {
+            if (onMenuShow) {
+                onMenuShow(start, end, userData);
+            }
+        };
+    }
+    if (menuParam->onMenuHide) {
+        auto onMenuHide = reinterpret_cast<void (*)(int32_t, int32_t, void*)>(menuParam->onMenuHide);
+        selectMenuParam.onMenuHide = [onMenuHide, userData = menuParam->onMenuHideUserData](
+                                         int32_t start, int32_t end) {
+            if (onMenuHide) {
+                onMenuHide(start, end, userData);
+            }
+        };
+    }
+    if (menuParam->onMenuAppear) {
+        auto onMenuAppear = reinterpret_cast<void (*)(int32_t, int32_t, void*)>(menuParam->onMenuAppear);
+        selectMenuParam.onAppear = [onMenuAppear, userData = menuParam->onMenuAppearUserData](
+                                         int32_t start, int32_t end) {
+            if (onMenuAppear) {
+                onMenuAppear(start, end, userData);
+            }
+        };
+    }
+    if (menuParam->onMenuDisappear) {
+        auto onMenuDisappear = reinterpret_cast<void (*)(void*)>(menuParam->onMenuDisappear);
+        selectMenuParam.onDisappear = [onMenuDisappear, userData = menuParam->onMenuDisappearUserData]() {
+            if (onMenuDisappear) {
+                onMenuDisappear(userData);
+            }
+        };
+    }
+    return selectMenuParam;
+}
+ 
+void SetRichEditorBindSelectionMenu(ArkUINodeHandle node, ArkUIRichEditorBindMenuParam* menuParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    auto* contentNode = reinterpret_cast<FrameNode*>(menuParam->contentNode);
+    CHECK_NULL_VOID(contentNode);
+    auto richEditorSpanType = static_cast<TextSpanType>(menuParam->richEditorSpanType);
+    auto responseType = static_cast<TextResponseType>(menuParam->responseType);
+    std::function<void()> builderFunc = [contentNode = AceType::Claim(contentNode)]() {
+        ViewStackProcessor::GetInstance()->Push(contentNode);
+    };
+    SelectMenuParam selectMenuParam = parseMenuParam(menuParam);
+    RichEditorModelNG::BindSelectionMenu(frameNode, richEditorSpanType, responseType, builderFunc, selectMenuParam);
+}
+ 
+void ResetRichEditorBindSelectionMenu(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::ResetBindSelectionMenu(frameNode);
 }
 
 void SetRichEditorOnWillChange(ArkUINodeHandle node, void* callback)
@@ -822,6 +907,13 @@ void SetRichEditorMaxLength(ArkUINodeHandle node, ArkUI_Uint32 value)
     RichEditorModelNG::SetMaxLength(frameNode, value);
 }
 
+ArkUI_Int32 GetRichEditorMaxLength(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return RichEditorModelNG::GetMaxLength(frameNode);
+}
+
 void ResetRichEditorMaxLength(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -840,6 +932,13 @@ void SetRichEditorMaxLines(ArkUINodeHandle node, ArkUI_Uint32 maxLine)
     RichEditorModelNG::SetMaxLines(frameNode, maxLine);
 }
 
+ArkUI_Int32 GetRichEditorMaxLines(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return RichEditorModelNG::GetMaxLines(frameNode);
+}
+
 void ResetRichEditorMaxLines(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -852,6 +951,13 @@ void SetRichEditorStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetStopBackPress(frameNode, static_cast<bool>(value));
+}
+
+ArkUI_Int32 GetRichEditorStopBackPress(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(RichEditorModelNG::IsStopBackPress(frameNode));
 }
 
 void ResetRichEditorStopBackPress(ArkUINodeHandle node)
@@ -873,6 +979,13 @@ void SetRichEditorKeyboardAppearance(ArkUINodeHandle node, ArkUI_Uint32 keyboard
     RichEditorModelNG::SetKeyboardAppearance(frameNode, value);
 }
 
+ArkUI_Int32 GetRichEditorKeyboardAppearance(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(RichEditorModelNG::GetKeyboardAppearance(frameNode));
+}
+
 void ResetRichEditorKeyboardAppearance(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -888,6 +1001,22 @@ void SetRichEditorCustomKeyboard(ArkUINodeHandle node, ArkUINodeHandle customKey
     auto *customKeyboardNode = reinterpret_cast<FrameNode*>(customKeyboard);
     CHECK_NULL_VOID(customKeyboardNode);
     RichEditorModelNG::SetCustomKeyboardWithNode(frameNode, customKeyboardNode, supportAvoidance);
+}
+
+ArkUINodeHandle GetRichEditorCustomKeyboard(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    auto customKeyboard = RichEditorModelNG::GetCustomKeyboardNode(frameNode);
+    CHECK_NULL_RETURN(customKeyboard, nullptr);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(customKeyboard));
+}
+ 
+ArkUI_Int32 GetRichEditorCustomKeyboardOption(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(RichEditorModelNG::GetCustomKeyboardOption(frameNode));
 }
 
 void ResetRichEditorCustomKeyboard(ArkUINodeHandle node)
@@ -949,11 +1078,25 @@ void ResetRichEditorEnableHapticFeedback(ArkUINodeHandle node)
     RichEditorModelNG::SetEnableHapticFeedback(frameNode, true);
 }
 
+ArkUI_Int32 GetRichEditorEnableHapticFeedback(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(RichEditorModelNG::GetEnableHapticFeedback(frameNode));
+}
+
 void SetRichEditorEnableAutoSpacing(ArkUINodeHandle node, ArkUI_Bool value)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetEnableAutoSpacing(frameNode, value);
+}
+
+ArkUI_Int32 GetRichEditorEnableAutoSpacing(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(RichEditorModelNG::IsEnableAutoSpacing(frameNode));
 }
  
 void ResetRichEditorEnableAutoSpacing(ArkUINodeHandle node)
@@ -970,6 +1113,13 @@ void SetRichEditorCompressLeadingPunctuation(ArkUINodeHandle node, ArkUI_Bool va
     RichEditorModelNG::SetCompressLeadingPunctuation(frameNode, value);
 }
 
+ArkUI_Int32 GetRichEditorCompressLeadingPunctuation(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return RichEditorModelNG::IsCompressLeadingPunctuation(frameNode);
+}
+
 void ResetRichEditorCompressLeadingPunctuation(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode *>(node);
@@ -982,6 +1132,13 @@ void SetRichEditorIncludeFontPadding(ArkUINodeHandle node, ArkUI_Bool value)
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
     RichEditorModelNG::SetIncludeFontPadding(frameNode, value);
+}
+
+ArkUI_Int32 GetRichEditorIncludeFontPadding(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return RichEditorModelNG::IsIncludeFontPadding(frameNode);
 }
 
 void ResetRichEditorIncludeFontPadding(ArkUINodeHandle node)
@@ -998,6 +1155,13 @@ void SetRichEditorFallbackLineSpacing(ArkUINodeHandle node, ArkUI_Bool value)
     RichEditorModelNG::SetFallbackLineSpacing(frameNode, value);
 }
 
+ArkUI_Int32 GetRichEditorFallbackLineSpacing(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, false);
+    return RichEditorModelNG::IsFallbackLineSpacing(frameNode);
+}
+
 void ResetRichEditorFallbackLineSpacing(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1011,6 +1175,15 @@ void SetRichEditorUndoStyle(ArkUINodeHandle node, ArkUI_Int32 undoStyleValue)
     CHECK_NULL_VOID(frameNode);
     bool enable = (undoStyleValue == static_cast<int32_t>(UndoStyle::KEEP_STYLE));
     RichEditorModelNG::SetSupportStyledUndo(frameNode, enable);
+}
+
+ArkUI_Int32 GetRichEditorUndoStyle(ArkUINodeHandle node)
+{
+    auto *frameNode = reinterpret_cast<FrameNode *>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    UndoStyle style = RichEditorModelNG::IsSupportStyledUndo(frameNode)
+        ? UndoStyle::KEEP_STYLE : UndoStyle::CLEAR_STYLE;
+    return static_cast<ArkUI_Int32>(style);
 }
  
 void ResetRichEditorUndoStyle(ArkUINodeHandle node)
@@ -1501,6 +1674,7 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .setRichEditorOnIMEInputComplete = SetRichEditorOnIMEInputComplete,
         .resetRichEditorOnIMEInputComplete = ResetRichEditorOnIMEInputComplete,
         .setRichEditorCopyOptions = SetRichEditorCopyOptions,
+        .getRichEditorCopyOptions = GetRichEditorCopyOptions,
         .resetRichEditorCopyOptions = ResetRichEditorCopyOptions,
         .setRichEditorOnSelectionChange = SetRichEditorOnSelectionChange,
         .resetRichEditorOnSelectionChange = ResetRichEditorOnSelectionChange,
@@ -1523,6 +1697,7 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .setRichEditorNapiOnEditingChange = SetRichEditorNapiOnEditingChange,
         .resetOnEditingChange = ResetRichEditorOnEditingChange,
         .setRichEditorSelectedBackgroundColor = SetRichEditorSelectedBackgroundColor,
+        .getRichEditorSelectedBackgroundColor = GetRichEditorSelectedBackgroundColor,
         .resetRichEditorSelectedBackgroundColor = ResetRichEditorSelectedBackgroundColor,
         .setRichEditorOnPaste = SetRichEditorOnPaste,
         .resetRichEditorOnPaste = ResetRichEditorOnPaste,
@@ -1536,6 +1711,7 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorEnterKeyType = ResetRichEditorEnterKeyType,
         .getRichEditorEnterKeyType = GetRichEditorEnterKeyType,
         .setRichEditorEnableKeyboardOnFocus = SetRichEditorEnableKeyboardOnFocus,
+        .getRichEditorEnableKeyboardOnFocus = GetRichEditorEnableKeyboardOnFocus,
         .resetRichEditorEnableKeyboardOnFocus = ResetRichEditorEnableKeyboardOnFocus,
         .setRichEditorEnablePreviewText = SetRichEditorEnablePreviewText,
         .resetRichEditorEnablePreviewText = ResetRichEditorEnablePreviewText,
@@ -1555,30 +1731,42 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .resetRichEditorBarState = ResetRichEditorBarState,
         .getRichEditorBarState = GetRichEditorBarState,
         .setRichEditorMaxLength = SetRichEditorMaxLength,
+        .getRichEditorMaxLength = GetRichEditorMaxLength,
         .resetRichEditorMaxLength = ResetRichEditorMaxLength,
         .setRichEditorMaxLines = SetRichEditorMaxLines,
+        .getRichEditorMaxLines = GetRichEditorMaxLines,
         .resetRichEditorMaxLines = ResetRichEditorMaxLines,
         .setRichEditorStopBackPress = SetRichEditorStopBackPress,
+        .getRichEditorStopBackPress = GetRichEditorStopBackPress,
         .resetRichEditorStopBackPress = ResetRichEditorStopBackPress,
         .setRichEditorKeyboardAppearance = SetRichEditorKeyboardAppearance,
+        .getRichEditorKeyboardAppearance = GetRichEditorKeyboardAppearance,
         .resetRichEditorKeyboardAppearance = ResetRichEditorKeyboardAppearance,
         .setRichEditorCustomKeyboard = SetRichEditorCustomKeyboard,
+        .getRichEditorCustomKeyboard = GetRichEditorCustomKeyboard,
+        .getRichEditorCustomKeyboardOption = GetRichEditorCustomKeyboardOption,
         .resetRichEditorCustomKeyboard = ResetRichEditorCustomKeyboard,
         .setRichEditorOnDidIMEInput = SetRichEditorOnDidIMEInput,
         .resetRichEditorOnDidIMEInput = ResetRichEditorOnDidIMEInput,
         .setRichEditorOnWillAttachIME = SetRichEditorOnWillAttachIME,
         .resetRichEditorOnWillAttachIME = ResetRichEditorOnWillAttachIME,
         .setRichEditorEnableHapticFeedback = SetRichEditorEnableHapticFeedback,
+        .getRichEditorEnableHapticFeedback = GetRichEditorEnableHapticFeedback,
         .resetRichEditorEnableHapticFeedback = ResetRichEditorEnableHapticFeedback,
         .setRichEditorEnableAutoSpacing = SetRichEditorEnableAutoSpacing,
+        .getRichEditorEnableAutoSpacing = GetRichEditorEnableAutoSpacing,
         .resetRichEditorEnableAutoSpacing = ResetRichEditorEnableAutoSpacing,
         .setRichEditorCompressLeadingPunctuation = SetRichEditorCompressLeadingPunctuation,
+        .getRichEditorCompressLeadingPunctuation = GetRichEditorCompressLeadingPunctuation,
         .resetRichEditorCompressLeadingPunctuation = ResetRichEditorCompressLeadingPunctuation,
         .setRichEditorIncludeFontPadding = SetRichEditorIncludeFontPadding,
+        .getRichEditorIncludeFontPadding = GetRichEditorIncludeFontPadding,
         .resetRichEditorIncludeFontPadding = ResetRichEditorIncludeFontPadding,
         .setRichEditorFallbackLineSpacing = SetRichEditorFallbackLineSpacing,
+        .getRichEditorFallbackLineSpacing = GetRichEditorFallbackLineSpacing,
         .resetRichEditorFallbackLineSpacing = ResetRichEditorFallbackLineSpacing,
         .setRichEditorUndoStyle = SetRichEditorUndoStyle,
+        .getRichEditorUndoStyle = GetRichEditorUndoStyle,
         .resetRichEditorUndoStyle = ResetRichEditorUndoStyle,
         .setRichEditorScrollBarColor = SetRichEditorScrollBarColor,
         .resetRichEditorScrollBarColor = ResetRichEditorScrollBarColor,
@@ -1607,7 +1795,9 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .getRichEditorLineMetrics = GetRichEditorLineMetrics,
         .setTypingParagraphStyle = SetTypingParagraphStyle,
         .setRichEditorTypingStyle = SetRichEditorTypingStyle,
-        .getRichEditorTypingStyle = GetRichEditorTypingStyle
+        .getRichEditorTypingStyle = GetRichEditorTypingStyle,
+        .setRichEditorBindSelectionMenu = SetRichEditorBindSelectionMenu,
+        .resetRichEditorBindSelectionMenu = ResetRichEditorBindSelectionMenu,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
@@ -1620,6 +1810,7 @@ const CJUIRichEditorModifier* GetCJUIRichEditorModifier()
         .setRichEditorEnableDataDetector = SetRichEditorDetectEnable,
         .resetRichEditorEnableDataDetector = ResetRichEditorDetectEnable,
         .setRichEditorCopyOptions = SetRichEditorCopyOptions,
+        .getRichEditorCopyOptions = GetRichEditorCopyOptions,
         .resetRichEditorCopyOptions = ResetRichEditorCopyOptions,
         .setRichEditorCaretColor = SetRichEditorCaretColor,
         .resetRichEditorCaretColor = ResetRichEditorCaretColor,
@@ -1631,6 +1822,7 @@ const CJUIRichEditorModifier* GetCJUIRichEditorModifier()
         .setOnEditingChange = SetRichEditorOnEditingChange,
         .resetOnEditingChange = ResetRichEditorOnEditingChange,
         .setRichEditorSelectedBackgroundColor = SetRichEditorSelectedBackgroundColor,
+        .getRichEditorSelectedBackgroundColor = GetRichEditorSelectedBackgroundColor,
         .resetRichEditorSelectedBackgroundColor = ResetRichEditorSelectedBackgroundColor,
         .setRichEditorEnterKeyType = SetRichEditorEnterKeyType,
         .resetRichEditorEnterKeyType = ResetRichEditorEnterKeyType,
