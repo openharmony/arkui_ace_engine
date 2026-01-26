@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -182,6 +182,15 @@ export class CanvasPath implements MaterializedBase {
         this.rect_serialize(x_casted, y_casted, w_casted, h_casted)
         return
     }
+    public roundRect(x: double, y: double, w: double, h: double, radii?: double | Array<double>): void {
+        const x_casted = x as (double)
+        const y_casted = y as (double)
+        const w_casted = w as (double)
+        const h_casted = h as (double)
+        const radii_casted = radii as (double | Array<double> | undefined)
+        this.roundRect_serialize(x_casted, y_casted, w_casted, h_casted, radii_casted)
+        return
+    }
     arc_serialize(x: double, y: double, radius: double, startAngle: double, endAngle: double, counterclockwise?: boolean): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (counterclockwise !== undefined) {
@@ -226,6 +235,30 @@ export class CanvasPath implements MaterializedBase {
     }
     rect_serialize(x: double, y: double, w: double, h: double): void {
         ArkUIGeneratedNativeModule._CanvasPath_rect(this.peer!.ptr, x, y, w, h)
+    }
+    roundRect_serialize(x: double, y: double, w: double, h: double, radii?: double | Array<double>): void {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        if (radii !== undefined) {
+            thisSerializer.writeInt8(RuntimeType.OBJECT)
+            const radiiTmpValue  = radii!
+            if (radiiTmpValue instanceof double) {
+                thisSerializer.writeInt8((0).toByte())
+                const radiiTmpValueForIdx0  = radiiTmpValue as double
+                thisSerializer.writeFloat64(radiiTmpValueForIdx0)
+            } else if (TypeChecker.isArray_Float64(radiiTmpValue)) {
+                thisSerializer.writeInt8((1).toByte())
+                const radiiTmpValueForIdx1  = radiiTmpValue as Array<double>
+                thisSerializer.writeInt32((radiiTmpValueForIdx1.length).toInt())
+                for (let radiiTmpValueForIdx1CounterI = 0; radiiTmpValueForIdx1CounterI < radiiTmpValueForIdx1.length; radiiTmpValueForIdx1CounterI++) {
+                    const radiiTmpValueForIdx1TmpElement : double = radiiTmpValueForIdx1[radiiTmpValueForIdx1CounterI]
+                    thisSerializer.writeFloat64(radiiTmpValueForIdx1TmpElement)
+                }
+            }
+        } else {
+            thisSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
+        ArkUIGeneratedNativeModule._CanvasPath_roundRect(this.peer!.ptr, x, y, w, h, thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
     }
 }
 export interface CanvasPattern {

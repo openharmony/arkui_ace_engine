@@ -41,9 +41,9 @@ export class RectModifier extends CommonMethodModifier implements RectAttribute,
     applyDisabledAttribute(instance: RectAttribute): void { }
     applySelectedAttribute(instance: RectAttribute): void { }
     _radiusWidth_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _radiusWidth_0_0value?: double | string | undefined
+    _radiusWidth_0_0value?: Length | undefined
     _radiusHeight_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _radiusHeight_0_0value?: double | string | undefined
+    _radiusHeight_0_0value?: Length | undefined
     _radius_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _radius_0_0value?: Length | Array<RadiusItem> | undefined
     _stroke_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
@@ -76,7 +76,7 @@ export class RectModifier extends CommonMethodModifier implements RectAttribute,
         {
             switch (this._radiusWidth_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setRadiusWidthAttribute((this._radiusWidth_0_0value as double | string | undefined));
+                    peer.setRadiusWidthAttribute((this._radiusWidth_0_0value as Length | undefined));
                     this._radiusWidth_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -86,7 +86,7 @@ export class RectModifier extends CommonMethodModifier implements RectAttribute,
                 }
                 default: {
                     this._radiusWidth_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setRadiusWidthAttribute((undefined as double | string | undefined));
+                    peer.setRadiusWidthAttribute((undefined as Length | undefined));
                 }
             }
         }
@@ -94,7 +94,7 @@ export class RectModifier extends CommonMethodModifier implements RectAttribute,
         {
             switch (this._radiusHeight_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setRadiusHeightAttribute((this._radiusHeight_0_0value as double | string | undefined));
+                    peer.setRadiusHeightAttribute((this._radiusHeight_0_0value as Length | undefined));
                     this._radiusHeight_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -104,7 +104,7 @@ export class RectModifier extends CommonMethodModifier implements RectAttribute,
                 }
                 default: {
                     this._radiusHeight_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setRadiusHeightAttribute((undefined as double | string | undefined));
+                    peer.setRadiusHeightAttribute((undefined as Length | undefined));
                 }
             }
         }
@@ -337,7 +337,7 @@ export class RectModifier extends CommonMethodModifier implements RectAttribute,
                     break;
                 }
                 default: {
-                    this.radiusWidth((undefined as double | string | undefined));
+                    this.radiusWidth((undefined as Length | undefined));
                 }
             }
         }
@@ -350,7 +350,7 @@ export class RectModifier extends CommonMethodModifier implements RectAttribute,
                     break;
                 }
                 default: {
-                    this.radiusHeight((undefined as double | string | undefined));
+                    this.radiusHeight((undefined as Length | undefined));
                 }
             }
         }
@@ -511,7 +511,7 @@ export class RectModifier extends CommonMethodModifier implements RectAttribute,
             }
         }
     }
-    radiusWidth(value: double | string | undefined): this {
+    radiusWidth(value: Length | undefined): this {
         if (((this._radiusWidth_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._radiusWidth_0_0value) !== (value)))
         {
             this._radiusWidth_0_flag = AttributeUpdaterFlag.UPDATE
@@ -523,7 +523,7 @@ export class RectModifier extends CommonMethodModifier implements RectAttribute,
         }
         return this
     }
-    radiusHeight(value: double | string | undefined): this {
+    radiusHeight(value: Length | undefined): this {
         if (((this._radiusHeight_0_flag) == (AttributeUpdaterFlag.INITIAL)) || ((this._radiusHeight_0_0value) !== (value)))
         {
             this._radiusHeight_0_flag = AttributeUpdaterFlag.UPDATE

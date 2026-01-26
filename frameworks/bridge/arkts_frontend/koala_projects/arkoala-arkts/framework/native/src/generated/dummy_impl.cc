@@ -51164,6 +51164,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             CanvasPathAccessor::MoveToImpl,
             CanvasPathAccessor::QuadraticCurveToImpl,
             CanvasPathAccessor::RectImpl,
+            CanvasPathAccessor::RoundRectImpl,
         };
         return &CanvasPathAccessorImpl;
     }

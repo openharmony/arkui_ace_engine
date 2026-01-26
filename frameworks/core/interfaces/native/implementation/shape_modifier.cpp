@@ -96,7 +96,7 @@ void SetFillImpl(Ark_NativePointer node,
     ShapeModelStatic::SetFill(frameNode, Converter::OptConvertPtr<Color>(value).value_or(Color::BLACK));
 }
 void SetStrokeDashOffsetImpl(Ark_NativePointer node,
-                             const Opt_Union_F64_String* value)
+                             const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -144,7 +144,7 @@ void SetStrokeLineJoinImpl(Ark_NativePointer node,
     ShapeModelStatic::SetStrokeLineJoin(frameNode, intLineJoinStyle);
 }
 void SetStrokeMiterLimitImpl(Ark_NativePointer node,
-                             const Opt_Union_F64_String* value)
+                             const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
@@ -173,7 +173,7 @@ void SetFillOpacityImpl(Ark_NativePointer node,
     ShapeModelStatic::SetFillOpacity(frameNode, strokeOpacity);
 }
 void SetStrokeWidthImpl(Ark_NativePointer node,
-                        const Opt_Union_F64_String* value)
+                        const Opt_Length* value)
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);

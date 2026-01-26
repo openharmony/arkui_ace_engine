@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -18,17 +18,20 @@
 
 import { ArkThemeScopeManager } from "#arktheme"
 import { SerializerBase, DeserializerBase, nullptr, KPointer, KInt, KBoolean, KStringPtr, runtimeType, RuntimeType, MaterializedBase, toPeerPtr, NativeBuffer, CallbackResource, InteropNativeModule, Tags, KSerializerBuffer, KUint8ArrayPtr } from "@koalaui/interop"
+import { Resource_serializer } from "./../framework/resource"
 import { int32, int64, float32, unsafeCast } from "@koalaui/common"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonShapeMethodPeer, CommonShapeMethod, CommonMethod, ArkCommonShapeMethodComponent, ArkCommonShapeMethodStyle, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ResourceStr, Length } from "./units"
+import { Resource } from "global.resource"
 import { AttributeModifier, hookPathAttributeModifier, AttributeUpdater } from "#handwritten"
-import { ModifierStateManager } from '../CommonModifier';
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { ModifierStateManager } from "./../CommonModifier"
 import { PathModifier } from "./../PathModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkPathPeer extends ArkCommonShapeMethodPeer {
@@ -56,12 +59,20 @@ export class ArkPathPeer extends ArkCommonShapeMethodPeer {
         ArkUIGeneratedNativeModule._PathInterface_setPathOptions(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setCommandsAttribute(value: string | undefined): void {
+    setCommandsAttribute(value: ResourceStr | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            thisSerializer.writeString(valueTmpValue)
+            if (valueTmpValue instanceof string) {
+                thisSerializer.writeInt8((0).toByte())
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((1).toByte())
+                const valueTmpValueForIdx1  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
+            }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -70,15 +81,15 @@ export class ArkPathPeer extends ArkCommonShapeMethodPeer {
     }
 }
 export interface PathOptions {
-    width?: double | string;
-    height?: double | string;
-    commands?: string;
+    width?: Length;
+    height?: Length;
+    commands?: ResourceStr;
 }
 export interface PathAttribute extends CommonShapeMethod {
     setPathOptions(options?: PathOptions): this {
         throw new Error("Unimplemented method setPathOptions")
     }
-    commands(value: string | undefined): this {
+    commands(value: ResourceStr | undefined): this {
         throw new Error("Unimplemented method commands")
     }
     attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
@@ -86,12 +97,12 @@ export interface PathAttribute extends CommonShapeMethod {
     }
 }
 export class ArkPathStyle extends ArkCommonShapeMethodStyle implements PathAttribute {
-    commands_value?: string | undefined
+    commands_value?: ResourceStr | undefined
     attributeModifier_value?: AttributeModifier<PathAttribute> | AttributeModifier<CommonMethod> | undefined
     setPathOptions(options?: PathOptions): this {
         return this
     }
-    commands(value: string | undefined): this {
+    commands(value: ResourceStr | undefined): this {
         return this
     }
     public attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
@@ -115,9 +126,9 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements P
         }
         return this
     }
-    public commands(value: string | undefined): this {
+    public commands(value: ResourceStr | undefined): this {
         if (this.checkPriority("commands")) {
-            const value_casted = value as (string | undefined)
+            const value_casted = value as (ResourceStr | undefined)
             this.getPeer()?.setCommandsAttribute(value_casted)
             return this
         }
@@ -125,7 +136,7 @@ export class ArkPathComponent extends ArkCommonShapeMethodComponent implements P
     }
     public attributeModifier(value: AttributeModifier<PathAttribute> | AttributeModifier<CommonShapeMethod> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookPathAttributeModifier(this, value);
+            hookPathAttributeModifier(this, value);
         })
         return this
     }
@@ -160,14 +171,18 @@ export class PathOptions_serializer {
         if (valueHolderForWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
-            if (valueHolderForWidthTmpValue instanceof double) {
+            if (valueHolderForWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as double
-                valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx0)
-            } else if (valueHolderForWidthTmpValue instanceof string) {
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
+            } else if (valueHolderForWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as string
-                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx1)
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx1)
+            } else if (valueHolderForWidthTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -176,14 +191,18 @@ export class PathOptions_serializer {
         if (valueHolderForHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
-            if (valueHolderForHeightTmpValue instanceof double) {
+            if (valueHolderForHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as double
-                valueSerializer.writeFloat64(valueHolderForHeightTmpValueForIdx0)
-            } else if (valueHolderForHeightTmpValue instanceof string) {
+                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
+                valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
+            } else if (valueHolderForHeightTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as string
-                valueSerializer.writeString(valueHolderForHeightTmpValueForIdx1)
+                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForHeightTmpValueForIdx1)
+            } else if (valueHolderForHeightTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -192,7 +211,15 @@ export class PathOptions_serializer {
         if (valueHolderForCommands !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForCommandsTmpValue  = valueHolderForCommands!
-            valueSerializer.writeString(valueHolderForCommandsTmpValue)
+            if (valueHolderForCommandsTmpValue instanceof string) {
+                valueSerializer.writeInt8((0).toByte())
+                const valueHolderForCommandsTmpValueForIdx0  = valueHolderForCommandsTmpValue as string
+                valueSerializer.writeString(valueHolderForCommandsTmpValueForIdx0)
+            } else if (valueHolderForCommandsTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((1).toByte())
+                const valueHolderForCommandsTmpValueForIdx1  = valueHolderForCommandsTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForCommandsTmpValueForIdx1)
+            }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
@@ -200,41 +227,54 @@ export class PathOptions_serializer {
     public static read(buffer: DeserializerBase): PathOptions {
         let valueDeserializer : DeserializerBase = buffer
         const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let widthTmpBuf : double | string | undefined = undefined
+        let widthTmpBuf : Length | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : double | string | undefined
-            if (widthTmpBuf_UnionSelector == (0).toChar()) {
-                widthTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
+            let widthTmpBuf_ : string | double | Resource | undefined
+            if (widthTmpBuf_UnionSelector == (0).toByte()) {
                 widthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (widthTmpBuf_UnionSelector == (1).toByte()) {
+                widthTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (widthTmpBuf_UnionSelector == (2).toByte()) {
+                widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            widthTmpBuf = (widthTmpBuf_ as double | string)
+            widthTmpBuf = (widthTmpBuf_ as string | double | Resource)
         }
-        const widthTmpResult : double | string | undefined = widthTmpBuf
+        const widthTmpResult : Length | undefined = widthTmpBuf
         const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let heightTmpBuf : double | string | undefined = undefined
+        let heightTmpBuf : Length | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBuf_ : double | string | undefined
-            if (heightTmpBuf_UnionSelector == (0).toChar()) {
-                heightTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
+            let heightTmpBuf_ : string | double | Resource | undefined
+            if (heightTmpBuf_UnionSelector == (0).toByte()) {
                 heightTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (heightTmpBuf_UnionSelector == (1).toByte()) {
+                heightTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (heightTmpBuf_UnionSelector == (2).toByte()) {
+                heightTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
             }
-            heightTmpBuf = (heightTmpBuf_ as double | string)
+            heightTmpBuf = (heightTmpBuf_ as string | double | Resource)
         }
-        const heightTmpResult : double | string | undefined = heightTmpBuf
+        const heightTmpResult : Length | undefined = heightTmpBuf
         const commandsTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let commandsTmpBuf : string | undefined = undefined
+        let commandsTmpBuf : ResourceStr | undefined = undefined
         if ((commandsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            commandsTmpBuf = (valueDeserializer.readString() as string)
+            const commandsTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
+            let commandsTmpBuf_ : string | Resource | undefined
+            if (commandsTmpBuf_UnionSelector == (0).toByte()) {
+                commandsTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (commandsTmpBuf_UnionSelector == (1).toByte()) {
+                commandsTmpBuf_ = Resource_serializer.read(valueDeserializer)
+            } else {
+                throw new Error("One of the branches for commandsTmpBuf_ has to be chosen through deserialisation.")
+            }
+            commandsTmpBuf = (commandsTmpBuf_ as string | Resource)
         }
-        const commandsTmpResult : string | undefined = commandsTmpBuf
+        const commandsTmpResult : ResourceStr | undefined = commandsTmpBuf
         let value : PathOptions = ({width: widthTmpResult, height: heightTmpResult, commands: commandsTmpResult} as PathOptions)
         return value
     }
