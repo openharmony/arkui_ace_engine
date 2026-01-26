@@ -17,6 +17,7 @@ import(
 build_component_ng("render_ng") {
   sources = [
     "adapter/animated_image.cpp",
+    "adapter/drawing_lattice_impl.cpp",
     "adapter/fake_animation_utils.cpp",
     "adapter/fake_modifier_adapter.cpp",
     "adapter/form_render_window.cpp",

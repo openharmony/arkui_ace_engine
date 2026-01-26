@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024 Huawei Device Co., Ltd.
+ * Copyright (c) 2025 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,34 +13,37 @@
  * limitations under the License.
  */
 
-#include "drawing_lattice_preview.h"
-
-#include "draw/core_canvas.h"
-#include "lattice_napi/js_lattice.h"
+#include "core/components_ng/render/adapter/drawing_lattice_impl.h"
 
 #include "base/utils/utils.h"
 
 namespace OHOS::Ace {
-RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLattice(void* sptrAddr)
+RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromSptr(void* sptrAddr)
 {
     CHECK_NULL_RETURN(sptrAddr, nullptr);
-    auto* jsLattice = reinterpret_cast<OHOS::Rosen::Drawing::JsLattice*>(sptrAddr);
-    return AceType::MakeRefPtr<DrawingLatticePreview>(jsLattice->GetLattice());
+    auto* lattice = reinterpret_cast<std::shared_ptr<Rosen::Drawing::Lattice>*>(sptrAddr);
+    return AceType::MakeRefPtr<DrawingLatticeImpl>(*lattice, 0);
 }
 
-RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromNative(void* sptrAddr)
+RefPtr<DrawingLattice> DrawingLattice::CreateDrawingLatticeFromNative(void* addr)
 {
-    CHECK_NULL_RETURN(sptrAddr, nullptr);
-    auto* lattice = reinterpret_cast<std::shared_ptr<OHOS::Rosen::Drawing::Lattice>*>(sptrAddr);
-    return AceType::MakeRefPtr<DrawingLatticePreview>(*lattice);
+    CHECK_NULL_RETURN(addr, nullptr);
+    auto* lattice = reinterpret_cast<Rosen::Drawing::Lattice*>(addr);
+    return AceType::MakeRefPtr<DrawingLatticeImpl>(lattice, 1);
 }
 
-void* DrawingLatticePreview::GetDrawingLatticeSptrAddr()
+Rosen::Drawing::Lattice* DrawingLatticeImpl::GetLattice()
 {
-    return static_cast<void*>(&lattice_);
+    if (type_ == 0 && lattice_) {
+        return lattice_.get();
+    }
+    if (type_ == 1 && latticeNative_) {
+        return latticeNative_;
+    }
+    return nullptr;
 }
 
-std::string DrawingLatticePreview::DumpToString()
+std::string DrawingLatticeImpl::DumpToString()
 {
     if (lattice_) {
         std::string drawingConfigStr;

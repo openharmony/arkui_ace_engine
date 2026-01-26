@@ -14,6 +14,8 @@
  */
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_image_bridge.h"
 
+#include "lattice_napi/js_lattice.h"
+
 #include "base/image/image_color_filter.h"
 #include "base/image/pixel_map.h"
 #include "base/memory/referenced.h"
@@ -341,9 +343,12 @@ ArkUINativeModuleValue ImageBridge::SetResizableLattice(ArkUIRuntimeCallInfo* ru
         return panda::JSValueRef::Undefined(vm);
     }
 
-    auto lattice = ArkTSUtils::UnwrapNapiValue(vm, latticeArg);
+    auto* lattice = ArkTSUtils::UnwrapNapiValue(vm, latticeArg);
     if (lattice) {
-        GetArkUINodeModifiers()->getImageModifier()->setResizableLattice(nativeNode, lattice);
+        auto* jsLattice = reinterpret_cast<OHOS::Rosen::Drawing::JsLattice*>(lattice);
+        auto latticeSptr = jsLattice->GetLattice();
+        CHECK_NULL_RETURN(latticeSptr, panda::NativePointerRef::New(vm, nullptr));
+        GetArkUINodeModifiers()->getImageModifier()->setResizableLattice(nativeNode, &latticeSptr, false);
     } else {
         GetArkUINodeModifiers()->getImageModifier()->resetResizableLattice(nativeNode);
     }

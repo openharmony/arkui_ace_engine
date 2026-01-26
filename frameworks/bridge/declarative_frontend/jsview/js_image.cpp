@@ -27,6 +27,7 @@
 
 #include "interfaces/inner_api/ace/ai/image_analyzer.h"
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
+#include "lattice_napi/js_lattice.h"
 
 #include "base/geometry/ng/vector.h"
 #include "base/image/drawing_color_filter.h"
@@ -665,7 +666,12 @@ void JSImage::ParseResizableLattice(const JSRef<JSObject>& resizableObject)
         ImageModel::GetInstance()->ResetResizableLattice();
     }
     CHECK_NULL_VOID(latticeValue->IsObject());
-    auto drawingLattice = CreateDrawingLattice(latticeValue);
+    auto* lattice = UnwrapNapiValue(latticeValue);
+    CHECK_NULL_VOID(lattice);
+    auto* jsLattice = reinterpret_cast<OHOS::Rosen::Drawing::JsLattice*>(lattice);
+    auto latticeSptr = jsLattice->GetLattice();
+    CHECK_NULL_VOID(latticeSptr);
+    auto drawingLattice = DrawingLattice::CreateDrawingLatticeFromSptr(&latticeSptr);
     if (drawingLattice) {
         ImageModel::GetInstance()->SetResizableLattice(drawingLattice);
     } else {

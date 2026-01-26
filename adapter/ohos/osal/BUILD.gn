@@ -203,7 +203,6 @@ template("ace_osal_ohos_source_set") {
       "device_config.cpp",
       "display_manager_ohos.cpp",
       "drawing_color_filter_ohos.cpp",
-      "drawing_lattice_ohos.cpp",
       "file_uri_helper_ohos.cpp",
       "image_packer_ohos.cpp",
       "image_source_ohos.cpp",
