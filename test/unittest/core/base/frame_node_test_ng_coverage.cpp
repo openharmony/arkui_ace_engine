@@ -1675,7 +1675,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeCalculateOffsetRelativeToWindow01, TestSize.L
      * @tc.expected: expect res is frameNode offset + parentNode offset
      */
     EXPECT_EQ(frameNode->CalculateOffsetRelativeToWindow(TIMESTAMP_1), OffsetF(5.3, 7.4));
- 
+
     /**
      * @tc.steps: step4. call the function CalculateOffsetRelativeToWindow and create TIMESTAMP_1 cache.
      * @tc.expected: expect res is frameNode2 offset + framenode cache offset
@@ -2592,7 +2592,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeProcessThrottledVisibleCallback01, TestSize.L
      * @tc.steps: step1. create frameNode.
      */
     auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
-    
+
     /**
      * @tc.steps: step2. set VisibleAreaUserCallback.
      */
@@ -2668,7 +2668,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeProcessThrottledVisibleCallback03, TestSize.L
     frameNode->SetVisibleAreaUserCallback({ 0.2, 0.8, 0.21, 0.79, 0.5 }, callbackInfo);
     auto context = MockPipelineContext::GetCurrentContext();
     context->taskExecutor_ = AceType::MakeRefPtr<MockTaskExecutor>();
-    
+
     /**
      * @tc.steps: step2. call the function ProcessThrottledVisibleCallback.
      */

@@ -647,8 +647,10 @@ void TextContentModifier::ContentChangeReport()
     if (!mgr->IsTextAABBCollecting() || host->GetTag() == "SymbolGlyph") {
         return;
     }
-    auto textRect = host->GetTransformRectRelativeToWindow();
-    mgr->OnTextChangeEnd(textRect);
+    auto textRect = host->GetTransformRectRelativeToWindowOnlyVisible();
+    auto rootNode = pipeline->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    mgr->OnTextChangeEnd(textRect, rootNode->GetRectWithRender());
 }
 
 void TextContentModifier::DrawTextRacing(DrawingContext& drawingContext, const FadeoutInfo& info,

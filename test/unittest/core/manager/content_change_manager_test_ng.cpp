@@ -612,6 +612,7 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest009, TestSize.Level
      */
     auto contentChangeMgr = GetContentChangeManager();
     ASSERT_NE(contentChangeMgr, nullptr);
+    RectF rootRect(0.0, 0.0, 100.0, 100.0);
     RectF rect1(0.0, 0.0, 10.0, 10.0);
     RectF rect2(0.0, 0.0, 5.0, 20.0);
     RectF emptyRect(0.0, 0.0, 0.0, 0.0);
@@ -621,23 +622,23 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest009, TestSize.Level
      * @tc.expected: textAABB_ is empty.
      */
     EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
-    contentChangeMgr->OnTextChangeEnd(emptyRect);
+    contentChangeMgr->OnTextChangeEnd(emptyRect, rootRect);
     EXPECT_TRUE(contentChangeMgr->textAABB_.IsEmpty());
 
     ContentChangeConfig config;
     contentChangeMgr->currentContentChangeConfig_ = config;
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
     EXPECT_FALSE(contentChangeMgr->textCollecting_);
-    contentChangeMgr->OnTextChangeEnd(emptyRect);
+    contentChangeMgr->OnTextChangeEnd(emptyRect, rootRect);
     EXPECT_TRUE(contentChangeMgr->textAABB_.IsEmpty());
 
     contentChangeMgr->textCollecting_ = true;
-    contentChangeMgr->OnTextChangeEnd(emptyRect);
+    contentChangeMgr->OnTextChangeEnd(emptyRect, rootRect);
     EXPECT_TRUE(contentChangeMgr->textAABB_.IsEmpty());
 
     SetScrollingNodes();
     EXPECT_TRUE(contentChangeMgr->IsScrolling());
-    contentChangeMgr->OnTextChangeEnd(rect1);
+    contentChangeMgr->OnTextChangeEnd(rect1, rootRect);
     EXPECT_TRUE(contentChangeMgr->textAABB_.IsEmpty());
     ResetScrollingNodes();
 
@@ -648,14 +649,14 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest009, TestSize.Level
     EXPECT_TRUE(contentChangeMgr->IsContentChangeDetectEnable());
     EXPECT_TRUE(contentChangeMgr->textCollecting_);
     EXPECT_FALSE(contentChangeMgr->IsScrolling());
-    contentChangeMgr->OnTextChangeEnd(rect1);
+    contentChangeMgr->OnTextChangeEnd(rect1, rootRect);
     EXPECT_FALSE(contentChangeMgr->textAABB_.IsEmpty());
     EXPECT_FLOAT_EQ(contentChangeMgr->textAABB_.GetX(), 0.0);
     EXPECT_FLOAT_EQ(contentChangeMgr->textAABB_.GetY(), 0.0);
     EXPECT_FLOAT_EQ(contentChangeMgr->textAABB_.Width(), 10.0);
     EXPECT_FLOAT_EQ(contentChangeMgr->textAABB_.Height(), 10.0);
 
-    contentChangeMgr->OnTextChangeEnd(rect2);
+    contentChangeMgr->OnTextChangeEnd(rect2, rootRect);
     EXPECT_FALSE(contentChangeMgr->textAABB_.IsEmpty());
     EXPECT_FLOAT_EQ(contentChangeMgr->textAABB_.GetX(), 0.0);
     EXPECT_FLOAT_EQ(contentChangeMgr->textAABB_.GetY(), 0.0);
