@@ -1398,6 +1398,27 @@ FontWeightInt Convert(const Ark_String& src)
 }
 
 template<>
+FontWeightInt Convert(const Ark_Resource& src)
+{
+    FontWeightInt dst = {};
+    ResourceConverter resourceConverter(src);
+    auto resourceStrOpt = resourceConverter.ToString();
+    if (resourceStrOpt.has_value()) {
+        Ark_String arkStr;
+        std::string weightStr = resourceStrOpt.value();
+        arkStr.chars = weightStr.c_str();
+        arkStr.length = static_cast<int32_t>(weightStr.length());
+        dst = Convert<FontWeightInt>(arkStr);
+    }
+    auto resourceIntOpt = resourceConverter.ToInt();
+    if (resourceIntOpt.has_value()) {
+        Ark_Int32 intVal = resourceIntOpt.value();
+        dst = Convert<FontWeightInt>(intVal);
+    }
+    return dst;
+}
+
+template<>
 Gradient Convert(const Ark_LinearGradient& value)
 {
     Gradient gradient;

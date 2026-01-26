@@ -224,7 +224,7 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._TextAreaAttribute_setFontStyle(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
+    setFontWeightAttribute(value: int32 | FontWeight | ResourceStr | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -237,10 +237,18 @@ export class ArkTextAreaPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
                 thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
-            } else if (valueTmpValue instanceof string) {
+            } else if (valueTmpValue instanceof ResourceStr) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as ResourceStr
+                if (valueTmpValueForIdx2 instanceof string) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const valueTmpValueForIdx2ForIdx0  = valueTmpValueForIdx2 as string
+                    thisSerializer.writeString(valueTmpValueForIdx2ForIdx0)
+                } else if (valueTmpValueForIdx2 instanceof Resource) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const valueTmpValueForIdx2ForIdx1  = valueTmpValueForIdx2 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx2ForIdx1)
+                }
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -1215,7 +1223,7 @@ export interface TextAreaAttribute extends CommonMethod {
     fontStyle(value: FontStyle | undefined): this {
         throw new Error("Unimplemented method fontStyle")
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     fontFamily(value: ResourceStr | undefined): this {
@@ -1509,7 +1517,7 @@ export class ArkTextAreaStyle extends ArkCommonMethodStyle implements TextAreaAt
     fontStyle(value: FontStyle | undefined): this {
         return this
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         return this
     }
     fontFamily(value: ResourceStr | undefined): this {
@@ -1786,9 +1794,9 @@ export class ArkTextAreaComponent extends ArkCommonMethodComponent implements Te
         }
         return this
     }
-    public fontWeight(value: int32 | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (int32 | FontWeight | string | undefined)
+            const value_casted = value as (int32 | FontWeight | ResourceStr | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }

@@ -24,7 +24,7 @@ import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
 import { ArkUIGeneratedNativeModule, TypeChecker } from "#components"
 import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
-import { ResourceColor, Length } from "./units"
+import { ResourceColor, Length, ResourceStr } from "./units"
 import { Color, FontWeight, MarqueeUpdateStrategy } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, hookMarqueeAttributeModifier, AttributeUpdater } from "#handwritten"
@@ -118,7 +118,7 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._MarqueeAttribute_setAllowScale(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setFontWeightAttribute(value: int32 | FontWeight | string | undefined): void {
+    setFontWeightAttribute(value: int32 | FontWeight | ResourceStr | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
@@ -131,10 +131,18 @@ export class ArkMarqueePeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as FontWeight
                 thisSerializer.writeInt32(valueTmpValueForIdx1.valueOf())
-            } else if (valueTmpValue instanceof string) {
+            } else if (valueTmpValue instanceof ResourceStr) {
                 thisSerializer.writeInt8((2).toByte())
-                const valueTmpValueForIdx2  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx2)
+                const valueTmpValueForIdx2  = valueTmpValue as ResourceStr
+                if (valueTmpValueForIdx2 instanceof string) {
+                    thisSerializer.writeInt8((0).toByte())
+                    const valueTmpValueForIdx2ForIdx0  = valueTmpValueForIdx2 as string
+                    thisSerializer.writeString(valueTmpValueForIdx2ForIdx0)
+                } else if (valueTmpValueForIdx2 instanceof Resource) {
+                    thisSerializer.writeInt8((1).toByte())
+                    const valueTmpValueForIdx2ForIdx1  = valueTmpValueForIdx2 as Resource
+                    Resource_serializer.write(thisSerializer, valueTmpValueForIdx2ForIdx1)
+                }
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -231,7 +239,7 @@ export interface MarqueeAttribute extends CommonMethod {
     allowScale(value: boolean | undefined): this {
         throw new Error("Unimplemented method allowScale")
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         throw new Error("Unimplemented method fontWeight")
     }
     fontFamily(value: string | Resource | undefined): this {
@@ -257,7 +265,7 @@ export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttr
     fontColor_value?: ResourceColor | undefined
     fontSize_value?: Length | undefined
     allowScale_value?: boolean | undefined
-    fontWeight_value?: int32 | FontWeight | string | undefined
+    fontWeight_value?: int32 | FontWeight | ResourceStr | undefined
     fontFamily_value?: string | Resource | undefined
     marqueeUpdateStrategy_value?: MarqueeUpdateStrategy | undefined
     onStart_value?: (() => void) | undefined
@@ -276,7 +284,7 @@ export class ArkMarqueeStyle extends ArkCommonMethodStyle implements MarqueeAttr
     allowScale(value: boolean | undefined): this {
         return this
     }
-    fontWeight(value: int32 | FontWeight | string | undefined): this {
+    fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         return this
     }
     fontFamily(value: string | Resource | undefined): this {
@@ -339,9 +347,9 @@ export class ArkMarqueeComponent extends ArkCommonMethodComponent implements Mar
         }
         return this
     }
-    public fontWeight(value: int32 | FontWeight | string | undefined): this {
+    public fontWeight(value: int32 | FontWeight | ResourceStr | undefined): this {
         if (this.checkPriority("fontWeight")) {
-            const value_casted = value as (int32 | FontWeight | string | undefined)
+            const value_casted = value as (int32 | FontWeight | ResourceStr | undefined)
             this.getPeer()?.setFontWeightAttribute(value_casted)
             return this
         }
