@@ -31,7 +31,6 @@ namespace {
 constexpr int32_t TIMEOUT_VALUE = 3000;
 constexpr float NANOSECOND_CONVERSION = 1000 * 1000; // Millisecond and nanosecond conversion.
 constexpr float STOP_COLLECT_TIME_WAIT = 100; // Stop collecting asynchronous task waiting time.
-constexpr float COMPONENT_LOAD_NUMBER = 100; // Number of components loaded in 100 milliseconds.
 } // namespace
 
 namespace OHOS::Ace::NG {
@@ -72,7 +71,7 @@ void LoadCompleteManager::StartCollect(const std::string& pageUrl)
 
 void LoadCompleteManager::TryStopCollect()
 {
-    if (nodeNum_ > COMPONENT_LOAD_NUMBER) {
+    if (nodeNum_ > SystemProperties::GetComponentLoadNumber()) {
         nodeNum_ = 0;
         auto taskExecutor = Container::CurrentTaskExecutor();
         CHECK_NULL_VOID(taskExecutor);

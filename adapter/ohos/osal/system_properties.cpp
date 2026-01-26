@@ -413,6 +413,12 @@ bool IsUseMemoryMonitor()
     return (system::GetParameter("persist.ace.memorymonitor.enabled", "0") == "1");
 }
 
+int32_t ReadComponentLoadNumber()
+{
+    return system::GetIntParameter(
+        "persist.ace.componentload.number", 1); // Number of components loaded in 100 milliseconds.
+}
+
 bool IsExtSurfaceEnabled()
 {
 #ifdef EXT_SURFACE_ENABLE
@@ -1094,6 +1100,12 @@ ACE_WEAK_SYM bool SystemProperties::GetIsUseMemoryMonitor()
 {
     static bool isUseMemoryMonitor = IsUseMemoryMonitor();
     return isUseMemoryMonitor;
+}
+
+ACE_WEAK_SYM int32_t SystemProperties::GetComponentLoadNumber()
+{
+    static int32_t componentLoadNumber = ReadComponentLoadNumber();
+    return componentLoadNumber;
 }
 
 bool SystemProperties::IsFormAnimationLimited()
