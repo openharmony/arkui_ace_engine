@@ -139,7 +139,7 @@ ace_engine/
 │   │   ├── declarative_frontend/  # ArkTS/TS declarative UI (recommended)
 │   │   ├── arkts_frontend/        # ArkTS language support
 │   │   ├── js_frontend/           # JavaScript frontend
-│   │   └── cj_frontend/           # ChakraJS frontend
+│   │   └── cj_frontend/           # Cangjie frontend
 │   └── core/            # Core components and rendering
 │       ├── components/    # Legacy component implementations
 │       └── components_ng/ # New generation components (preferred)
