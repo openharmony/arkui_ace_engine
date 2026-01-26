@@ -1894,16 +1894,12 @@ void JSViewAbstract::SetPopupDismiss(
         bool onWillDismissBool = onWillDismissFunc->ToBoolean();
         popupParam->SetInteractiveDismiss(onWillDismissBool);
         popupParam->SetOnWillDismiss(nullptr);
-        if (onWillDismissBool) {
-            TAG_LOGI(AceLogTag::ACE_FORM, "popup register onWillDismiss");
-        }
+        TAG_LOGI(AceLogTag::ACE_FORM, "popup register onWillDismiss, type is bool.");
     } else if (onWillDismissFunc->IsFunction()) {
         auto onWillDismissCallback = ParsePopupCallback(info, popupObj);
         popupParam->SetOnWillDismiss(std::move(onWillDismissCallback));
         popupParam->SetInteractiveDismiss(true);
-        if (onWillDismissCallback != nullptr) {
-            TAG_LOGI(AceLogTag::ACE_FORM, "popup register onWillDismiss");
-        }
+        TAG_LOGI(AceLogTag::ACE_FORM, "popup register onWillDismiss, type is function.");
     }
 }
 

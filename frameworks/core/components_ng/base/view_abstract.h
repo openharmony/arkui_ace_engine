@@ -1166,7 +1166,7 @@ public:
     static void UpdatePopupBorderColorResource(const PopupLinearGradientProperties& gradientProperties,
         const RefPtr<FrameNode>& frameNode, bool isOutlineGradient);
     static void AddResObjWithCallBack(std::string key, const RefPtr<ResourceObject>& resObj,
-        const int32_t index, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient);
+        const uint32_t index, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient);
     static void CheckMainThread();
     static void AllowForceDark(bool forceDarkAllowed);
     static void AllowForceDark(UINode* node, bool forceDarkAllowed);
