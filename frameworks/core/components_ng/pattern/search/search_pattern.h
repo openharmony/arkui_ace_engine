@@ -221,6 +221,7 @@ public:
     void UpdateInputFilterResource(const std::string& value);
     void UpdateFontSizeResource(const Dimension& value);
     void UpdateBorderResource() override;
+    int32_t OnInjectionEvent(const std::string& command) override;
     void ProcessTextFieldDefaultStyleAndBehaviors();
     void ProcessDividerDefaultStyleAndBehaviors();
 

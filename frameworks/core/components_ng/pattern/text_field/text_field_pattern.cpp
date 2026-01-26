@@ -502,6 +502,98 @@ TextFieldPattern::TextFieldPattern() : twinklingInterval_(TWINKLING_INTERVAL_MS)
     callbackOldPreviewText_.offset = -1;
 }
 
+int32_t TextFieldPattern::OnInjectionEvent(const std::string& command)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, RET_FAILED);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "OnInjectionEvent command : %{public}s, nodeId : %{public}d", command.c_str(),
+        host->GetId());
+    if (!ParseCommand(command)) {
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
+}
+
+bool TextFieldPattern::ParseCommand(const std::string& command)
+{
+    std::string cmd;
+    std::unique_ptr<JsonValue> json = nullptr;
+    std::unique_ptr<JsonValue> params = nullptr;
+    if (!HandleTextBoxComponentCommand(command, cmd, json, params)) {
+        return false;
+    }
+    if (cmd == "addText") {
+        std::string valueStr = params->GetString("value");
+        CHECK_NULL_RETURN(!valueStr.empty(), true);
+        auto textValue = UtfUtils::Str8ToStr16(valueStr);
+        int32_t offsetIndex = -1;
+        if (params->Contains("offset")) {
+            int32_t offset = params->GetInt("offset");
+            offsetIndex = std::max(0, offset);
+        }
+        int32_t length = static_cast<int32_t>(contentController_->GetTextUtf16Value().length());
+        if (offsetIndex == -1 || offsetIndex > length) {
+            offsetIndex = length;
+        }
+        InputCommandInfo inputCommandInfo;
+        inputCommandInfo.insertOffset = offsetIndex;
+        inputCommandInfo.insertValue = textValue;
+        inputCommandInfo.reason = InputReason::COMMAND_INJECTION;
+        AddInputCommand(inputCommandInfo);
+    } else if (cmd == "setText") {
+        std::string valueStr = params->GetString("value");
+        auto textValue = UtfUtils::Str8ToStr16(valueStr);
+        InputCommandInfo inputCommandInfo;
+        inputCommandInfo.deleteRange = { 0, static_cast<int32_t>(contentController_->GetTextUtf16Value().length()) };
+        inputCommandInfo.insertOffset = 0;
+        inputCommandInfo.insertValue = textValue;
+        inputCommandInfo.reason = InputReason::COMMAND_INJECTION;
+        AddInputCommand(inputCommandInfo);
+    } else if (cmd == "deleteText") {
+        HandleDeleteTextCommand(params);
+    } else {
+        TAG_LOGE(AceLogTag::ACE_TEXT_FIELD, "OnInjectionEvent unknown cmd : %{public}s", cmd.c_str());
+        return false;
+    }
+    return true;
+}
+
+void TextFieldPattern::HandleDeleteTextCommand(const std::unique_ptr<JsonValue>& params)
+{
+    int32_t startIndex = -1;
+    int32_t endIndex = -1;
+    if (params->Contains("start")) {
+        startIndex = params->GetInt("start");
+        startIndex = startIndex < 0 ? 0 : startIndex;
+    }
+    if (params->Contains("end")) {
+        endIndex = params->GetInt("end");
+        endIndex = endIndex < 0 ? -1 : endIndex;
+    }
+    int32_t length = static_cast<int32_t>(GetTextUtf16Value().length());
+    if (startIndex == -1 && endIndex == -1) {
+        // delete all
+        DeleteRange(0, length, false);
+    }
+    if (startIndex == -1) {
+        startIndex = 0;
+    }
+    if (endIndex == -1) {
+        endIndex = length;
+    }
+    startIndex = std::clamp(startIndex, 0, length);
+    endIndex = std::clamp(endIndex, 0, length);
+    if (startIndex > endIndex) {
+        std::swap(startIndex, endIndex);
+    }
+    InputCommandInfo inputCommandInfo;
+    inputCommandInfo.deleteRange = { startIndex, endIndex };
+    inputCommandInfo.insertOffset = startIndex;
+    inputCommandInfo.insertValue = u"";
+    inputCommandInfo.reason = InputReason::COMMAND_INJECTION;
+    AddInputCommand(inputCommandInfo);
+}
+
 bool TextFieldPattern::GetIndependentControlKeyboard()
 {
     auto context = PipelineContext::GetCurrentContextSafelyWithCheck();
@@ -11728,7 +11820,9 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
     auto caretIndex = info.insertOffset;
     auto originCaretIndex =
             TextRange { selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex() };
-    if ((info.reason == InputReason::IME || info.reason == InputReason::AI_WRITE) && !insertValue.empty()) {
+    auto isIMEReason = info.reason == InputReason::IME || info.reason == InputReason::AI_WRITE ||
+            info.reason == InputReason::COMMAND_INJECTION;
+    if (isIMEReason && !insertValue.empty()) {
         auto isInsert = BeforeIMEInsertValue(insertValue, caretIndex - (end - start));
         CHECK_NULL_VOID(isInsert);
     }
@@ -11742,12 +11836,12 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
     auto isDelete = true;
     if (start != end) {
         auto deleteValue = contentController_->GetSelectedValue(start, end);
-        if (info.reason == InputReason::IME || info.reason == InputReason::AI_WRITE) {
+        if (isIMEReason) {
             isDelete = BeforeIMEDeleteValue(deleteValue, TextDeleteDirection::BACKWARD, end);
         }
         contentController_->erase(start, end - start);
         selectController_->UpdateCaretIndex(start);
-        if ((info.reason == InputReason::IME || info.reason == InputReason::AI_WRITE) && isDelete) {
+        if (isIMEReason && isDelete) {
             AfterIMEDeleteValue(deleteValue, TextDeleteDirection::BACKWARD);
         }
     }
@@ -11768,7 +11862,7 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
         }
         selectController_->UpdateCaretIndex(caretIndex);
         UpdateObscure(insertValue, hasInsertValue);
-        if (info.reason == InputReason::IME || info.reason == InputReason::AI_WRITE) {
+        if (isIMEReason) {
             AfterIMEInsertValue(contentController_->GetInsertValue());
         }
     }
