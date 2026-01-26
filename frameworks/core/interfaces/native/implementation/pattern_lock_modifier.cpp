@@ -19,9 +19,15 @@
 #include "core/interfaces/native/generated/interface/arkoala_api_generated.h"
 
 namespace OHOS::Ace::NG::GeneratedModifier {
+#ifdef ACE_UNITTEST
+const GENERATED_ArkUIPatternLockModifier* GetPatternLockStaticModifier();
+#endif
 
 const GENERATED_ArkUIPatternLockModifier* GetPatternLockModifier()
 {
+#ifdef ACE_UNITTEST
+    return GetPatternLockStaticModifier();
+#else
     static const GENERATED_ArkUIPatternLockModifier* cachedModifier = nullptr;
 
     if (cachedModifier == nullptr) {
@@ -31,6 +37,7 @@ const GENERATED_ArkUIPatternLockModifier* GetPatternLockModifier()
     }
 
     return cachedModifier;
+#endif
 }
 
 } // namespace OHOS::Ace::NG::GeneratedModifier
