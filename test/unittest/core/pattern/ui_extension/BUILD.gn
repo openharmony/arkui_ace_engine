@@ -69,6 +69,7 @@ ace_unittest("accessibility_session_adapter_ui_extension_test_ng") {
     external_deps = [
       "ability_base:want",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:napi_common",
       "accessibility:accessibility_common",
       "c_utils:utils",
       "ffrt:libffrt",
@@ -269,6 +270,7 @@ ace_unittest("modal_ui_extension_proxy_impl_test_ng") {
     external_deps = [
       "ability_base:want",
       "ability_runtime:abilitykit_native",
+      "ability_runtime:napi_common",
       "accessibility:accessibility_common",
       "ace_engine:ace_uicontent",
       "c_utils:utils",
