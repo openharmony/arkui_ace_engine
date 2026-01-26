@@ -3812,6 +3812,8 @@ export class ArkUIGeneratedNativeModule {
     native static _CanvasPath_quadraticCurveTo(ptr: KPointer, cpx: KDouble, cpy: KDouble, x: KDouble, y: KDouble): void
     @ani.unsafe.Quick
     native static _CanvasPath_rect(ptr: KPointer, x: KDouble, y: KDouble, w: KDouble, h: KDouble): void
+    @ani.unsafe.Quick
+    native static _CanvasPath_roundRect(ptr: KPointer, x: KDouble, y: KDouble, w: KDouble, h: KDouble, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _CanvasPattern_construct(): KPointer
     @ani.unsafe.Direct

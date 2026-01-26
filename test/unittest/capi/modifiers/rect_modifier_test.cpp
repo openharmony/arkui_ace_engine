@@ -72,8 +72,8 @@ public:
 Opt_Union_RectOptions_RoundedRectOptions BuildRectOptions(double width, double height, double radius)
 {
     Ark_RectOptions radiusOpt;
-    radiusOpt.width = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(width);
-    radiusOpt.height = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(height);
+    radiusOpt.width = Converter::ArkValue<Opt_Length>(width);
+    radiusOpt.height = Converter::ArkValue<Opt_Length>(height);
     radiusOpt.radius = Converter::ArkUnion<Opt_Union_Length_Array_RadiusItem, Ark_Length>(radius);
     return Converter::ArkUnion<Opt_Union_RectOptions_RoundedRectOptions,
         Ark_RectOptions>(radiusOpt);
@@ -122,7 +122,7 @@ HWTEST_F(RectModifierTest, RectModifierSetRadiusWidthTest, TestSize.Level1)
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    auto options = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(RADIUS_X);
+    auto options = Converter::ArkValue<Opt_Length>(RADIUS_X);
     modifier_->setRadiusWidth(frameNode, &options);
 
     auto checkVal1 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_WIDTH_NAME);
@@ -130,7 +130,7 @@ HWTEST_F(RectModifierTest, RectModifierSetRadiusWidthTest, TestSize.Level1)
     auto checkVal2 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_HEIGHT_NAME);
     EXPECT_EQ(checkVal2, DEFAULT_VALUE);
 
-    options = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(SIZE_STR);
+    options = Converter::ArkValue<Opt_Length>(SIZE_STR);
     modifier_->setRadiusWidth(frameNode, &options);
     checkVal1 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_WIDTH_NAME);
     EXPECT_EQ(checkVal1, SIZE);
@@ -146,7 +146,7 @@ HWTEST_F(RectModifierTest, RectModifierSetRadiusHeightTest, TestSize.Level1)
     auto* frameNode = reinterpret_cast<FrameNode*>(node_);
     ASSERT_NE(frameNode, nullptr);
 
-    auto options = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(RADIUS_Y);
+    auto options = Converter::ArkValue<Opt_Length>(RADIUS_Y);
     modifier_->setRadiusHeight(frameNode, &options);
 
     auto checkVal1 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_WIDTH_NAME);
@@ -154,7 +154,7 @@ HWTEST_F(RectModifierTest, RectModifierSetRadiusHeightTest, TestSize.Level1)
     auto checkVal2 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_HEIGHT_NAME);
     EXPECT_EQ(checkVal2, RADIUS_Y);
 
-    options = Converter::ArkUnion<Opt_Union_F64_String, Ark_String>(SIZE_STR);
+    options = Converter::ArkValue<Opt_Length>(SIZE_STR);
     modifier_->setRadiusHeight(frameNode, &options);
     checkVal1 = GetAttrValue<int>(node_, ATTRIBUTE_RADIUS_HEIGHT_NAME);
     EXPECT_EQ(checkVal1, SIZE);

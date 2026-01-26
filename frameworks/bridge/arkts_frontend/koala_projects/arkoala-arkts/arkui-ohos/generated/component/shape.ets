@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -29,12 +29,13 @@ import { ResourceColor, Length } from "./units"
 import { Color, LineCapStyle, LineJoinStyle } from "./enums"
 import { Resource } from "global.resource"
 import { AttributeModifier, extractors, hookShapeAttributeModifier, AttributeUpdater } from "#handwritten"
-import { ModifierStateManager } from '../CommonModifier';
 import { default as image } from "@ohos.multimedia.image"
+import { CustomBuilder } from "./builder"
 import { CallbackKind } from "./../framework/peers/CallbackKind"
 import { CallbackTransformer } from "./../CallbackTransformer"
 import { memo, memo_stable } from "@koalaui/runtime/annotations"
 import { ComponentBuilder, Builder } from "@koalaui/builderLambda"
+import { ModifierStateManager } from "./../CommonModifier"
 import { ShapeModifier } from "./../ShapeModifier"
 import { NodeAttach, remember } from "@koalaui/runtime"
 export class ArkShapePeer extends ArkCommonMethodPeer {
@@ -130,19 +131,23 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ShapeAttribute_setFill(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setStrokeDashOffsetAttribute(value: double | string | undefined): void {
+    setStrokeDashOffsetAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof double) {
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as double
-                thisSerializer.writeFloat64(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof string) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -202,19 +207,23 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ShapeAttribute_setStrokeLineJoin(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setStrokeMiterLimitAttribute(value: double | string | undefined): void {
+    setStrokeMiterLimitAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof double) {
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as double
-                thisSerializer.writeFloat64(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof string) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -270,19 +279,23 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
         ArkUIGeneratedNativeModule._ShapeAttribute_setFillOpacity(this.peer.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
     }
-    setStrokeWidthAttribute(value: double | string | undefined): void {
+    setStrokeWidthAttribute(value: Length | undefined): void {
         const thisSerializer : SerializerBase = SerializerBase.hold()
         if (value !== undefined) {
             thisSerializer.writeInt8(RuntimeType.OBJECT)
             const valueTmpValue  = value!
-            if (valueTmpValue instanceof double) {
+            if (valueTmpValue instanceof string) {
                 thisSerializer.writeInt8((0).toByte())
-                const valueTmpValueForIdx0  = valueTmpValue as double
-                thisSerializer.writeFloat64(valueTmpValueForIdx0)
-            } else if (valueTmpValue instanceof string) {
+                const valueTmpValueForIdx0  = valueTmpValue as string
+                thisSerializer.writeString(valueTmpValueForIdx0)
+            } else if (valueTmpValue instanceof double) {
                 thisSerializer.writeInt8((1).toByte())
-                const valueTmpValueForIdx1  = valueTmpValue as string
-                thisSerializer.writeString(valueTmpValueForIdx1)
+                const valueTmpValueForIdx1  = valueTmpValue as double
+                thisSerializer.writeFloat64(valueTmpValueForIdx1)
+            } else if (valueTmpValue instanceof Resource) {
+                thisSerializer.writeInt8((2).toByte())
+                const valueTmpValueForIdx2  = valueTmpValue as Resource
+                Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)
             }
         } else {
             thisSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -334,10 +347,10 @@ export class ArkShapePeer extends ArkCommonMethodPeer {
     }
 }
 export interface ViewportRect {
-    x?: double | string;
-    y?: double | string;
-    width?: double | string;
-    height?: double | string;
+    x?: Length;
+    y?: Length;
+    width?: Length;
+    height?: Length;
 }
 export interface ShapeAttribute extends CommonMethod {
     setShapeOptions(value?: image.PixelMap): this {
@@ -352,7 +365,7 @@ export interface ShapeAttribute extends CommonMethod {
     fill(value: ResourceColor | undefined): this {
         throw new Error("Unimplemented method fill")
     }
-    strokeDashOffset(value: double | string | undefined): this {
+    strokeDashOffset(value: Length | undefined): this {
         throw new Error("Unimplemented method strokeDashOffset")
     }
     strokeDashArray(value: Array<Length> | undefined): this {
@@ -364,7 +377,7 @@ export interface ShapeAttribute extends CommonMethod {
     strokeLineJoin(value: LineJoinStyle | undefined): this {
         throw new Error("Unimplemented method strokeLineJoin")
     }
-    strokeMiterLimit(value: double | string | undefined): this {
+    strokeMiterLimit(value: Length | undefined): this {
         throw new Error("Unimplemented method strokeMiterLimit")
     }
     strokeOpacity(value: double | string | Resource | undefined): this {
@@ -373,7 +386,7 @@ export interface ShapeAttribute extends CommonMethod {
     fillOpacity(value: double | string | Resource | undefined): this {
         throw new Error("Unimplemented method fillOpacity")
     }
-    strokeWidth(value: double | string | undefined): this {
+    strokeWidth(value: Length | undefined): this {
         throw new Error("Unimplemented method strokeWidth")
     }
     antiAlias(value: boolean | undefined): this {
@@ -390,14 +403,14 @@ export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribut
     viewPort_value?: ViewportRect | undefined
     stroke_value?: ResourceColor | undefined
     fill_value?: ResourceColor | undefined
-    strokeDashOffset_value?: double | string | undefined
+    strokeDashOffset_value?: Length | undefined
     strokeDashArray_value?: Array<Length> | undefined
     strokeLineCap_value?: LineCapStyle | undefined
     strokeLineJoin_value?: LineJoinStyle | undefined
-    strokeMiterLimit_value?: double | string | undefined
+    strokeMiterLimit_value?: Length | undefined
     strokeOpacity_value?: double | string | Resource | undefined
     fillOpacity_value?: double | string | Resource | undefined
-    strokeWidth_value?: double | string | undefined
+    strokeWidth_value?: Length | undefined
     antiAlias_value?: boolean | undefined
     attributeModifier_value?: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined
     setShapeOptions(value?: image.PixelMap): this {
@@ -412,7 +425,7 @@ export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribut
     fill(value: ResourceColor | undefined): this {
         return this
     }
-    strokeDashOffset(value: double | string | undefined): this {
+    strokeDashOffset(value: Length | undefined): this {
         return this
     }
     strokeDashArray(value: Array<Length> | undefined): this {
@@ -424,7 +437,7 @@ export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribut
     strokeLineJoin(value: LineJoinStyle | undefined): this {
         return this
     }
-    strokeMiterLimit(value: double | string | undefined): this {
+    strokeMiterLimit(value: Length | undefined): this {
         return this
     }
     strokeOpacity(value: double | string | Resource | undefined): this {
@@ -433,7 +446,7 @@ export class ArkShapeStyle extends ArkCommonMethodStyle implements ShapeAttribut
     fillOpacity(value: double | string | Resource | undefined): this {
         return this
     }
-    strokeWidth(value: double | string | undefined): this {
+    strokeWidth(value: Length | undefined): this {
         return this
     }
     antiAlias(value: boolean | undefined): this {
@@ -487,9 +500,9 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         }
         return this
     }
-    public strokeDashOffset(value: double | string | undefined): this {
+    public strokeDashOffset(value: Length | undefined): this {
         if (this.checkPriority("strokeDashOffset")) {
-            const value_casted = value as (double | string | undefined)
+            const value_casted = value as (Length | undefined)
             this.getPeer()?.setStrokeDashOffsetAttribute(value_casted)
             return this
         }
@@ -519,9 +532,9 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         }
         return this
     }
-    public strokeMiterLimit(value: double | string | undefined): this {
+    public strokeMiterLimit(value: Length | undefined): this {
         if (this.checkPriority("strokeMiterLimit")) {
-            const value_casted = value as (double | string | undefined)
+            const value_casted = value as (Length | undefined)
             this.getPeer()?.setStrokeMiterLimitAttribute(value_casted)
             return this
         }
@@ -543,9 +556,9 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
         }
         return this
     }
-    public strokeWidth(value: double | string | undefined): this {
+    public strokeWidth(value: Length | undefined): this {
         if (this.checkPriority("strokeWidth")) {
-            const value_casted = value as (double | string | undefined)
+            const value_casted = value as (Length | undefined)
             this.getPeer()?.setStrokeWidthAttribute(value_casted)
             return this
         }
@@ -571,7 +584,7 @@ export class ArkShapeComponent extends ArkCommonMethodComponent implements Shape
     }
     public attributeModifier(value: AttributeModifier<ShapeAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookShapeAttributeModifier(this, value);
+            hookShapeAttributeModifier(this, value);
         })
         return this
     }
@@ -609,14 +622,18 @@ export class ViewportRect_serializer {
         if (valueHolderForX !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForXTmpValue  = valueHolderForX!
-            if (valueHolderForXTmpValue instanceof double) {
+            if (valueHolderForXTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForXTmpValueForIdx0  = valueHolderForXTmpValue as double
-                valueSerializer.writeFloat64(valueHolderForXTmpValueForIdx0)
-            } else if (valueHolderForXTmpValue instanceof string) {
+                const valueHolderForXTmpValueForIdx0  = valueHolderForXTmpValue as string
+                valueSerializer.writeString(valueHolderForXTmpValueForIdx0)
+            } else if (valueHolderForXTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForXTmpValueForIdx1  = valueHolderForXTmpValue as string
-                valueSerializer.writeString(valueHolderForXTmpValueForIdx1)
+                const valueHolderForXTmpValueForIdx1  = valueHolderForXTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForXTmpValueForIdx1)
+            } else if (valueHolderForXTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForXTmpValueForIdx2  = valueHolderForXTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForXTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -625,14 +642,18 @@ export class ViewportRect_serializer {
         if (valueHolderForY !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForYTmpValue  = valueHolderForY!
-            if (valueHolderForYTmpValue instanceof double) {
+            if (valueHolderForYTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForYTmpValueForIdx0  = valueHolderForYTmpValue as double
-                valueSerializer.writeFloat64(valueHolderForYTmpValueForIdx0)
-            } else if (valueHolderForYTmpValue instanceof string) {
+                const valueHolderForYTmpValueForIdx0  = valueHolderForYTmpValue as string
+                valueSerializer.writeString(valueHolderForYTmpValueForIdx0)
+            } else if (valueHolderForYTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForYTmpValueForIdx1  = valueHolderForYTmpValue as string
-                valueSerializer.writeString(valueHolderForYTmpValueForIdx1)
+                const valueHolderForYTmpValueForIdx1  = valueHolderForYTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForYTmpValueForIdx1)
+            } else if (valueHolderForYTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForYTmpValueForIdx2  = valueHolderForYTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForYTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -641,14 +662,18 @@ export class ViewportRect_serializer {
         if (valueHolderForWidth !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForWidthTmpValue  = valueHolderForWidth!
-            if (valueHolderForWidthTmpValue instanceof double) {
+            if (valueHolderForWidthTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as double
-                valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx0)
-            } else if (valueHolderForWidthTmpValue instanceof string) {
+                const valueHolderForWidthTmpValueForIdx0  = valueHolderForWidthTmpValue as string
+                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx0)
+            } else if (valueHolderForWidthTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as string
-                valueSerializer.writeString(valueHolderForWidthTmpValueForIdx1)
+                const valueHolderForWidthTmpValueForIdx1  = valueHolderForWidthTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForWidthTmpValueForIdx1)
+            } else if (valueHolderForWidthTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForWidthTmpValueForIdx2  = valueHolderForWidthTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForWidthTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -657,14 +682,18 @@ export class ViewportRect_serializer {
         if (valueHolderForHeight !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
             const valueHolderForHeightTmpValue  = valueHolderForHeight!
-            if (valueHolderForHeightTmpValue instanceof double) {
+            if (valueHolderForHeightTmpValue instanceof string) {
                 valueSerializer.writeInt8((0).toByte())
-                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as double
-                valueSerializer.writeFloat64(valueHolderForHeightTmpValueForIdx0)
-            } else if (valueHolderForHeightTmpValue instanceof string) {
+                const valueHolderForHeightTmpValueForIdx0  = valueHolderForHeightTmpValue as string
+                valueSerializer.writeString(valueHolderForHeightTmpValueForIdx0)
+            } else if (valueHolderForHeightTmpValue instanceof double) {
                 valueSerializer.writeInt8((1).toByte())
-                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as string
-                valueSerializer.writeString(valueHolderForHeightTmpValueForIdx1)
+                const valueHolderForHeightTmpValueForIdx1  = valueHolderForHeightTmpValue as double
+                valueSerializer.writeFloat64(valueHolderForHeightTmpValueForIdx1)
+            } else if (valueHolderForHeightTmpValue instanceof Resource) {
+                valueSerializer.writeInt8((2).toByte())
+                const valueHolderForHeightTmpValueForIdx2  = valueHolderForHeightTmpValue as Resource
+                Resource_serializer.write(valueSerializer, valueHolderForHeightTmpValueForIdx2)
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -673,65 +702,73 @@ export class ViewportRect_serializer {
     public static read(buffer: DeserializerBase): ViewportRect {
         let valueDeserializer : DeserializerBase = buffer
         const xTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let xTmpBuf : double | string | undefined = undefined
+        let xTmpBuf : Length | undefined = undefined
         if ((xTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const xTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let xTmpBuf_ : double | string | undefined
-            if (xTmpBuf_UnionSelector == (0).toChar()) {
-                xTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (xTmpBuf_UnionSelector == (1).toChar()) {
+            let xTmpBuf_ : string | double | Resource | undefined
+            if (xTmpBuf_UnionSelector == (0).toByte()) {
                 xTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (xTmpBuf_UnionSelector == (1).toByte()) {
+                xTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (xTmpBuf_UnionSelector == (2).toByte()) {
+                xTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for xTmpBuf_ has to be chosen through deserialisation.")
             }
-            xTmpBuf = (xTmpBuf_ as double | string)
+            xTmpBuf = (xTmpBuf_ as string | double | Resource)
         }
-        const xTmpResult : double | string | undefined = xTmpBuf
+        const xTmpResult : Length | undefined = xTmpBuf
         const yTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let yTmpBuf : double | string | undefined = undefined
+        let yTmpBuf : Length | undefined = undefined
         if ((yTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const yTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let yTmpBuf_ : double | string | undefined
-            if (yTmpBuf_UnionSelector == (0).toChar()) {
-                yTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (yTmpBuf_UnionSelector == (1).toChar()) {
+            let yTmpBuf_ : string | double | Resource | undefined
+            if (yTmpBuf_UnionSelector == (0).toByte()) {
                 yTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (yTmpBuf_UnionSelector == (1).toByte()) {
+                yTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (yTmpBuf_UnionSelector == (2).toByte()) {
+                yTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for yTmpBuf_ has to be chosen through deserialisation.")
             }
-            yTmpBuf = (yTmpBuf_ as double | string)
+            yTmpBuf = (yTmpBuf_ as string | double | Resource)
         }
-        const yTmpResult : double | string | undefined = yTmpBuf
+        const yTmpResult : Length | undefined = yTmpBuf
         const widthTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let widthTmpBuf : double | string | undefined = undefined
+        let widthTmpBuf : Length | undefined = undefined
         if ((widthTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const widthTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let widthTmpBuf_ : double | string | undefined
-            if (widthTmpBuf_UnionSelector == (0).toChar()) {
-                widthTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (widthTmpBuf_UnionSelector == (1).toChar()) {
+            let widthTmpBuf_ : string | double | Resource | undefined
+            if (widthTmpBuf_UnionSelector == (0).toByte()) {
                 widthTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (widthTmpBuf_UnionSelector == (1).toByte()) {
+                widthTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (widthTmpBuf_UnionSelector == (2).toByte()) {
+                widthTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for widthTmpBuf_ has to be chosen through deserialisation.")
             }
-            widthTmpBuf = (widthTmpBuf_ as double | string)
+            widthTmpBuf = (widthTmpBuf_ as string | double | Resource)
         }
-        const widthTmpResult : double | string | undefined = widthTmpBuf
+        const widthTmpResult : Length | undefined = widthTmpBuf
         const heightTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let heightTmpBuf : double | string | undefined = undefined
+        let heightTmpBuf : Length | undefined = undefined
         if ((heightTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const heightTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
-            let heightTmpBuf_ : double | string | undefined
-            if (heightTmpBuf_UnionSelector == (0).toChar()) {
-                heightTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (heightTmpBuf_UnionSelector == (1).toChar()) {
+            let heightTmpBuf_ : string | double | Resource | undefined
+            if (heightTmpBuf_UnionSelector == (0).toByte()) {
                 heightTmpBuf_ = (valueDeserializer.readString() as string)
+            } else if (heightTmpBuf_UnionSelector == (1).toByte()) {
+                heightTmpBuf_ = valueDeserializer.readFloat64()
+            } else if (heightTmpBuf_UnionSelector == (2).toByte()) {
+                heightTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for heightTmpBuf_ has to be chosen through deserialisation.")
             }
-            heightTmpBuf = (heightTmpBuf_ as double | string)
+            heightTmpBuf = (heightTmpBuf_ as string | double | Resource)
         }
-        const heightTmpResult : double | string | undefined = heightTmpBuf
+        const heightTmpResult : Length | undefined = heightTmpBuf
         let value : ViewportRect = ({x: xTmpResult, y: yTmpResult, width: widthTmpResult, height: heightTmpResult} as ViewportRect)
         return value
     }
