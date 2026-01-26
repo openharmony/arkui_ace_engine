@@ -1031,7 +1031,7 @@ void CalendarDialogView::UpdateBackgroundStyle(const RefPtr<RenderContext>& rend
     const DialogProperties& dialogProperties, const RefPtr<CalendarTheme>& calendarTheme,
     const RefPtr<FrameNode>& dialogNode)
 {
-    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN) && renderContext->IsUniRenderEnabled()) {
+    if (Container::GreatOrEqualAPIVersion(PlatformVersion::VERSION_ELEVEN)) {
         CHECK_NULL_VOID(calendarTheme);
         auto contentRenderContext = dialogNode->GetRenderContext();
         CHECK_NULL_VOID(contentRenderContext);
