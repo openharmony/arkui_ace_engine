@@ -5383,6 +5383,7 @@ struct ArkUITextAreaModifier {
     void (*resetTextAreaCaretStyle)(ArkUINodeHandle node);
     void (*setTextAreaTextOverflow)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextAreaTextOverflow)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextAreaTextOverflow)(ArkUINodeHandle node);
     void (*setTextAreaTextIndent)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
     void (*resetTextAreaTextIndent)(ArkUINodeHandle node);
     void (*setTextAreaLineSpacing)(
@@ -5470,6 +5471,7 @@ struct ArkUITextAreaModifier {
     ArkUI_Bool (*getTextAreaEnablePreviewText)(ArkUINodeHandle node);
     void (*setEllipsisMode)(ArkUINodeHandle node, ArkUI_Uint32 ellipsisMode);
     void (*resetEllipsisMode)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getEllipsisMode)(ArkUINodeHandle node);
     void (*setTextAreaBorderDash)(ArkUINodeHandle node, const ArkUI_Float32* values, ArkUI_Int32 valuesSize);
     void (*setTextAreaMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 number, void* resRawPtr);
     void (*resetTextAreaMinFontScale)(ArkUINodeHandle node);
@@ -5645,6 +5647,7 @@ struct ArkUITextInputModifier {
 
     void (*setTextInputTextOverflow)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetTextInputTextOverflow)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getTextInputTextOverflow)(ArkUINodeHandle node);
     void (*setTextInputTextIndent)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit, void* resRawPtr);
     void (*resetTextInputTextIndent)(ArkUINodeHandle node);
     void (*setTextInputSelectAll)(ArkUINodeHandle node, ArkUI_Uint32 enableSelectAll);
@@ -5736,6 +5739,7 @@ struct ArkUITextInputModifier {
     ArkUI_Bool (*getTextInputEnablePreviewText)(ArkUINodeHandle node);
     void (*setEllipsisMode)(ArkUINodeHandle node, ArkUI_Uint32 ellipsisMode);
     void (*resetEllipsisMode)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getEllipsisMode)(ArkUINodeHandle node);
     void (*setTextInputMinFontScale)(ArkUINodeHandle node, ArkUI_Float32 number, void* resRawPtr);
     void (*resetTextInputMinFontScale)(ArkUINodeHandle node);
     void (*setTextInputMaxFontScale)(ArkUINodeHandle node, ArkUI_Float32 number, void* resRawPtr);

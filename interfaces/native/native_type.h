@@ -1999,6 +1999,16 @@ typedef enum {
     ARKUI_ELLIPSIS_MODE_CENTER,
     /** An ellipsis is used at the end of the line of text. */
     ARKUI_ELLIPSIS_MODE_END,
+    /**
+     *@brief An ellipsis is used at the start of the line of text for multiline and single line.
+     *@since 24
+     */
+    ARKUI_ELLIPSIS_MODE_MULTILINE_START,
+    /**
+     *@brief An ellipsis is used at the center of the line of text for multiline and single line.
+     *@since 24
+     */
+    ARKUI_ELLIPSIS_MODE_MULTILINE_CENTER,
 } ArkUI_EllipsisMode;
 
 /**

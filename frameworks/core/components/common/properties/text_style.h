@@ -199,6 +199,8 @@ enum class EllipsisMode {
     HEAD,
     MIDDLE,
     TAIL,
+    MULTILINE_HEAD,
+    MULTILINE_MIDDLE,
 };
 
 enum class TextFlipDirection {
