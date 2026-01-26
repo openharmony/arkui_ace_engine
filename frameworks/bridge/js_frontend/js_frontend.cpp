@@ -469,6 +469,15 @@ void JsFrontend::InitializeFrontendDelegate(const RefPtr<TaskExecutor>& taskExec
         }
     };
 
+    builder.onCrownEventCallback = [weakEngine = WeakPtr<Framework::JsEngine>(jsEngine_)](
+        const std::string& callbackId, const std::string& args)-> bool {
+        auto jsEngine = weakEngine.Upgrade();
+        if (!jsEngine) {
+            return false;
+        }
+        return jsEngine->OnMonitorForCrownEvents(callbackId, args);
+    };
+
     builder.taskExecutor = taskExecutor;
     delegate_ = AceType::MakeRefPtr<Framework::FrontendDelegateImpl>(builder);
     if (disallowPopLastPage_) {

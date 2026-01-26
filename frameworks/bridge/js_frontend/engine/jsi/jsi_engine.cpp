@@ -1062,6 +1062,24 @@ shared_ptr<JsValue> JsHandleAnimationFrame(
     return runtime->NewNull();
 }
 
+shared_ptr<JsValue> JsHandleCrownEvent(
+    const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg, const std::string& methodName)
+{
+    std::string callbackId = arg->ToString(runtime);
+    if (callbackId.empty()) {
+        LOGW("system digitalCrown callbackId is null");
+        return runtime->NewNull();
+    }
+    if (methodName == DIGITAL_CROWN_SET_MONITOR_FOR_CROWN_EVENT) {
+        GetFrontendDelegate(runtime)->SetMonitorForCrownEvents(callbackId);
+    } else if (methodName == DIGITAL_CROWN_CLEAR_MONITOR_FOR_CROWN_EVENT) {
+        GetFrontendDelegate(runtime)->ClearMonitorForCrownEvents();
+    } else {
+        LOGW("digitalCrown not support method = %{private}s", methodName.c_str());
+    }
+    return runtime->NewNull();
+}
+
 shared_ptr<JsValue> JsHandleCallback(
     const shared_ptr<JsRuntime>& runtime, const shared_ptr<JsValue>& arg, const std::string& methodName)
 {
@@ -1851,6 +1869,9 @@ shared_ptr<JsValue> JsHandleModule(const std::string& moduleName, const std::str
             { "animation",
                 [](const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv,
                     const std::string& methodName) { return JsHandleAnimationFrame(runtime, argv[1], methodName); } },
+            { "digitalCrown",
+                [](const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv,
+                    const std::string& methodName) { return JsHandleCrownEvent(runtime, argv[1], methodName); } },
             { "internal.jsResult",
                 [](const shared_ptr<JsRuntime>& runtime, const std::vector<shared_ptr<JsValue>>& argv,
                     const std::string& methodName) { return JsHandleCallback(runtime, argv[1], methodName); } },
@@ -3063,6 +3084,33 @@ void JsiEngineInstance::CallJs(const std::string& callbackId, const std::string&
     func->Call(runtime_, global, argv, argv.size());
 }
 
+bool JsiEngineInstance::CallJsWithReturnBool(
+    const std::string& callbackId, const std::string& args, bool keepAlive, bool isGlobal)
+{
+    std::string keepAliveStr = keepAlive ? "true" : "false";
+    std::string callBuff = std::string("[{\"args\": [\"")
+                               .append(callbackId)
+                               .append("\",")
+                               .append(args)
+                               .append(",")
+                               .append(keepAliveStr)
+                               .append("], \"method\":\"callback\"}]");
+    int32_t instanceId = isGlobal ? DEFAULT_APP_ID : runningPage_->GetPageId();
+
+    std::vector<shared_ptr<JsValue>> argv;
+    argv.push_back(runtime_->NewString(std::to_string(instanceId)));
+    argv.push_back(runtime_->ParseJson(callBuff));
+
+    shared_ptr<JsValue> global = runtime_->GetGlobal();
+    shared_ptr<JsValue> func = global->GetProperty(runtime_, "callJS");
+    if (!func->IsFunction(runtime_)) {
+        LOGE("\"callJs\" is not a function!");
+        return false;
+    }
+    auto result = func->Call(runtime_, global, argv, argv.size());
+    return (result->ToString(runtime_) == "true");
+}
+
 #if defined(PREVIEW)
 bool JsiEngineInstance::CallCurlFunction(const OHOS::Ace::RequestData& requestData, int32_t callbackId)
 {
@@ -3576,6 +3624,14 @@ void JsiEngine::RequestAnimationCallback(const std::string& callbackId, uint64_t
         engineInstance_->CallJs(callbackId, std::to_string(timeStamp), false, true);
         engineInstance_->GetFrontendDelegate()->CancelAnimationFrame(callbackId);
     }
+}
+
+bool JsiEngine::OnMonitorForCrownEvents(const std::string& callbackId, const std::string& args)
+{
+    if (engineInstance_) {
+        return engineInstance_->CallJsWithReturnBool(callbackId, args, true, true);
+    }
+    return false;
 }
 
 void JsiEngine::JsCallback(const std::string& callbackId, const std::string& args)
