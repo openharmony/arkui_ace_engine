@@ -15,7 +15,6 @@ import { AceTrace } from "arkui/base/AceTrace"
 import { ObserveSingleton } from "arkui/stateManagement/base/observeSingleton";
 import { OBSERVE } from "arkui/stateManagement";
 
-TaskScheduler.instance
 class ContextScope {
     private oldManager: StateManager | undefined
     private manager: StateManager
