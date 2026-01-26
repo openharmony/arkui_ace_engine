@@ -162,13 +162,13 @@ export class NavigationOpsHandWritten {
         if (info.length <= dataIndex) {
             return config;
         }
-        let jsonStr: JSONValue = JSONParser.parse(info[dataIndex]);
-        if (jsonStr instanceof JSONObject) {
-            let keys: Array<JSONString> = jsonStr.keys_;
-            let values: Array<JSONValue> = jsonStr.values;
+        let value: jsonx.JsonElement = JSON.parseJsonElement(info[dataIndex]);
+        let vType: jsonx.JsonType = value.jsonType;
+        if (vType === jsonx.JsonType.JsonObject) {
+            let iterVal: IterableIterator<[string, jsonx.JsonElement]> = value.$_iterator();
             let result: Record<string, string> = new Record<string, string>();
-            for (let i: int = 0; i < keys.length; i++) {
-                result[keys[i].value] = (values[i] as JSONString).value;
+            for (let t of iterVal) {
+                result[t[0]] = t[1].asString();
             }
             config.data = result;
         }
