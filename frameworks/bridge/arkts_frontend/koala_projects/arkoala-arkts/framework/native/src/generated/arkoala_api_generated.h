@@ -1659,10 +1659,10 @@ typedef struct InterceptionShowCallback InterceptionShowCallback;
 typedef struct Opt_InterceptionShowCallback Opt_InterceptionShowCallback;
 typedef struct LoadingProgressModifierBuilder LoadingProgressModifierBuilder;
 typedef struct Opt_LoadingProgressModifierBuilder Opt_LoadingProgressModifierBuilder;
+typedef struct Map_Float64_SliderStepItemAccessibility Map_Float64_SliderStepItemAccessibility;
+typedef struct Opt_Map_Float64_SliderStepItemAccessibility Opt_Map_Float64_SliderStepItemAccessibility;
 typedef struct Map_AxisModel_Float64 Map_AxisModel_Float64;
 typedef struct Opt_Map_AxisModel_Float64 Opt_Map_AxisModel_Float64;
-typedef struct Map_Number_SliderStepItemAccessibility Map_Number_SliderStepItemAccessibility;
-typedef struct Opt_Map_Number_SliderStepItemAccessibility Opt_Map_Number_SliderStepItemAccessibility;
 typedef struct Map_SourceTool_Float64 Map_SourceTool_Float64;
 typedef struct Opt_Map_SourceTool_Float64 Opt_Map_SourceTool_Float64;
 typedef struct Map_Int32_text_RunMetrics Map_Int32_text_RunMetrics;
@@ -13141,6 +13141,16 @@ typedef struct Opt_Map_AxisModel_Float64 {
     Ark_Tag tag;
     Map_AxisModel_Float64 value;
 } Opt_Map_AxisModel_Float64;
+typedef struct Map_Float64_SliderStepItemAccessibility {
+    /* kind: ContainerType */
+    Ark_Int32 size;
+    Ark_Float64* keys;
+    Ark_SliderStepItemAccessibility* values;
+} Map_Float64_SliderStepItemAccessibility;
+typedef struct Opt_Map_Float64_SliderStepItemAccessibility {
+    Ark_Tag tag;
+    Map_Float64_SliderStepItemAccessibility value;
+} Opt_Map_Float64_SliderStepItemAccessibility;
 typedef struct Map_Int32_text_RunMetrics {
     /* kind: ContainerType */
     Ark_Int32 size;
@@ -13151,16 +13161,6 @@ typedef struct Opt_Map_Int32_text_RunMetrics {
     Ark_Tag tag;
     Map_Int32_text_RunMetrics value;
 } Opt_Map_Int32_text_RunMetrics;
-typedef struct Map_Number_SliderStepItemAccessibility {
-    /* kind: ContainerType */
-    Ark_Int32 size;
-    Ark_Number* keys;
-    Ark_SliderStepItemAccessibility* values;
-} Map_Number_SliderStepItemAccessibility;
-typedef struct Opt_Map_Number_SliderStepItemAccessibility {
-    Ark_Tag tag;
-    Map_Number_SliderStepItemAccessibility value;
-} Opt_Map_Number_SliderStepItemAccessibility;
 typedef struct Map_SourceTool_Float64 {
     /* kind: ContainerType */
     Ark_Int32 size;
@@ -17241,7 +17241,7 @@ typedef struct Opt_SliderConfiguration {
 } Opt_SliderConfiguration;
 typedef struct Ark_SliderShowStepOptions {
     /* kind: Interface */
-    Opt_Map_Number_SliderStepItemAccessibility stepsAccessibility;
+    Opt_Map_Float64_SliderStepItemAccessibility stepsAccessibility;
 } Ark_SliderShowStepOptions;
 typedef struct Opt_SliderShowStepOptions {
     Ark_Tag tag;
