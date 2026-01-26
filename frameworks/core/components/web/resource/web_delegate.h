@@ -23,6 +23,7 @@
 #include "base/memory/referenced.h"
 #include "core/components_ng/render/render_surface.h"
 #include "core/pipeline/pipeline_base.h"
+#include "display_manager.h"
 #if defined (OHOS_STANDARD_SYSTEM) && defined (ENABLE_ROSEN_BACKEND)
 #include <ui/rs_surface_node.h>
 #endif
@@ -1536,6 +1537,9 @@ public:
     void OnStatusBarClick();
     bool IsQuickMenuShow();
     void WebScrollStopFling();
+    void UpdateWebLtpoInfo();
+    void UnRegisterDisplayInfoChange();
+    void RegisterDisplayInfoChange();
 private:
     void InitWebEvent();
     void RegisterWebEvent();
@@ -1789,6 +1793,7 @@ private:
     bool isVisible_ = false;
 
     sptr<OHOS::Rosen::ISwitchFreeMultiWindowListener> freeMultiWindowListener_ = nullptr;
+    sptr<OHOS::Rosen::DisplayManager::IDisplayAttributeListener> displayListener_ = nullptr;
 
     uint32_t blanklessFrameWidth_ = 0;
     uint32_t blanklessFrameHeight_ = 0;

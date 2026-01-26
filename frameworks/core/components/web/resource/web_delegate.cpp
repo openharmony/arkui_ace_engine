@@ -135,6 +135,8 @@ const std::vector<std::string> CANONICALENCODINGNAMES = {
 #define VISIBLERATIO_LENGTH 4
 #define VISIBLERATIO_FLOAT_TO_INT 100
 
+std::vector<std::string> LISTEN_ATTRIBUTES = {"densityDPI", "densityPixels", "xDPI", "yDPI", "width", "height"};
+
 static bool IsDeviceTabletOr2in1()
 {
     return OHOS::system::GetDeviceType() == "tablet" || OHOS::system::GetDeviceType() == "2in1";
@@ -1109,6 +1111,7 @@ WebDelegate::~WebDelegate()
     if (IsDeviceTabletOr2in1() && GetWebOptimizationValue()) {
         OHOS::Rosen::RSInterfaces::GetInstance().UnRegisterSurfaceOcclusionChangeCallback(surfaceNodeId_);
     }
+    UnRegisterDisplayInfoChange();
     if (nweb_) {
         nweb_->OnDestroy();
     }
@@ -3360,6 +3363,67 @@ void WebDelegate::SetPartitionPoints(std::vector<float>& partition)
         }
     }
 }
+
+void WebDelegate::UpdateWebLtpoInfo()
+{
+    if (nweb_) {
+        nweb_->UpdateWebLtpoInfo();
+    }
+}
+
+class LtpoDisplayInfoListener : public OHOS::Rosen::DisplayManager::IDisplayAttributeListener {
+public:
+    explicit LtpoDisplayInfoListener(const WeakPtr<WebDelegate>& delegate) : delegate_(delegate) {}
+    ~LtpoDisplayInfoListener() = default;
+    void OnAttributeChange(Rosen::DisplayId dId, const std::vector<std::string>& attributes) override
+    {
+        std::string changedAttributes;
+        for (const auto &s:attributes) {
+            changedAttributes += s + ";";
+        }
+        auto delegate = delegate_.Upgrade();
+        TAG_LOGI(AceLogTag::ACE_WEB, "Ltpo info changed, changedAttributes:%{public}s", changedAttributes.c_str());
+        if (delegate) {
+            delegate->UpdateWebLtpoInfo();
+        }
+    }
+private:
+    WeakPtr<WebDelegate> delegate_;
+};
+
+void WebDelegate::RegisterDisplayInfoChange()
+{
+    if (displayListener_) {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DisplayInfoChange is already registed.");
+        return;
+    }
+    displayListener_ = sptr<LtpoDisplayInfoListener>::MakeSptr(WeakClaim(this));
+    if (!displayListener_) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "displayListener_ is null.");
+        return;
+    }
+    auto ret = OHOS::Rosen::DisplayManager::GetInstance().RegisterDisplayAttributeListener(LISTEN_ATTRIBUTES,
+        displayListener_);
+    if (ret != OHOS::Rosen::DMError::DM_OK) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "DisplayInfoChange register fail, error: %{public}d", static_cast<int>(ret));
+        displayListener_ = nullptr;
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DisplayInfoChange register success.");
+    }
+}
+
+void WebDelegate::UnRegisterDisplayInfoChange()
+{
+    CHECK_NULL_VOID(displayListener_);
+    auto ret = OHOS::Rosen::DisplayManager::GetInstance().UnRegisterDisplayAttributeListener(displayListener_);
+    if (ret != OHOS::Rosen::DMError::DM_OK) {
+        TAG_LOGW(AceLogTag::ACE_WEB, "DisplayInfoChange unregister fail, error: %{public}d", static_cast<int>(ret));
+        displayListener_ = nullptr;
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "DisplayInfoChange unregister success.");
+    }
+}
+
 void WebDelegate::RegisterSurfaceOcclusionChangeFun()
 {
     if (!GetWebOptimizationValue()) {
@@ -3644,6 +3708,7 @@ void WebDelegate::InitWebViewWithSurface()
             delegate->nweb_->SetFocusWindowId(foucus_window_id);
             delegate->SetToken();
             delegate->RegisterSurfaceOcclusionChangeFun();
+            delegate->RegisterDisplayInfoChange();
             delegate->nweb_->SetDrawMode(renderMode);
             delegate->nweb_->SetFitContentMode(layoutMode);
             delegate->RegisterConfigObserver();
