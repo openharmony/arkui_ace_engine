@@ -26528,7 +26528,8 @@ if (globalThis.Menu === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkmenu');
       module.exportView();
       getUINativeModule().menu.create();
-    }
+    },
+    name: 'JSMenu'
   }
 }
 
@@ -26540,7 +26541,8 @@ if (globalThis.MenuItem === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkmenuitem');
       module.exportView();
       getUINativeModule().menuitem.create(params);
-    }
+    },
+    name: 'JSMenuItem'
   }
 }
 
@@ -26551,7 +26553,8 @@ if (globalThis.MenuItemGroup === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkmenuitemgroup');
       module.exportView();
       getUINativeModule().menuitemgroup.createMenuItemGroup(params);
-    }
+    },
+    name: 'JSMenuItemGroup'
   }
 }
 
