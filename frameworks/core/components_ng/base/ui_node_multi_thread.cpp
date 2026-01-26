@@ -84,7 +84,7 @@ void UINode::MarkNodeTreeFree(bool isNeedMarkNodeTreeFree)
         parent = parent->GetParent();
     }
     CHECK_NULL_VOID(root);
-    if (!root->CheckThreadSafeNodeTree()) {
+    if (!root->IsThreadSafeNode() || !root->CheckThreadSafeNodeTree()) {
         return;
     }
     root->MarkNodeFree();
