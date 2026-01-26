@@ -42,7 +42,7 @@ function ReusableV2<T extends Constructor>(BaseClass: T): T {
  *
  */
 
-abstract class ViewV2 extends PUV2ViewBase implements IView {
+abstract class ViewV2 extends PUV2ViewBase implements IView, IPropertySubscriber {
 
     // Set of elmtIds that need re-render
     protected dirtDescendantElementIds_: Set<number> = new Set<number>();
@@ -68,7 +68,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
             stateMgmtConsole.debug(`Both V1 and V2 components are involved. Disabling Parent-Child optimization`)
             ObserveV2.getObserve().isParentChildOptimizable_ = false;
         }
-        ObserveV2.getObserve().id2ViewV2_[this.id_] = new WeakRef(this);
+        SubscriberManager.Add(this);
         stateMgmtConsole.debug(`ViewV2 constructor: Creating @ComponentV2 '${this.constructor.name}' from parent '${parent?.constructor.name}'`);
     }
     
@@ -404,7 +404,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
 
         ObserveV2.getObserve().clearBinding(this.id_);
         delete ObserveV2.getObserve().id2cmp_[this.id_];
-        delete ObserveV2.getObserve().id2ViewV2_[this.id_];
+        SubscriberManager.Delete(this.id_);
 
         this.updateFuncByElmtId.clear();
         if (this.parent_) {
@@ -1088,7 +1088,7 @@ abstract class ViewV2 extends PUV2ViewBase implements IView {
                 return undefined;
             }
         }
-        if (value === null || value === undefined || typeof value !== 'object') {
+        if (value === null || value === undefined) {
             return undefined;
         }
         return this.__findPathValueInJson__Internal(value, jsonPath);

@@ -6,6 +6,8 @@
     "pages/repeat_tests",
     "pages/v2_card_tests",
     "pages/v2_reusable_tests",
-    "pages/performance_tests"
+    "pages/performance_tests",
+    "pages/v1_get_statemgmt_info_test",
+    "pages/v2_get_statemgmt_info_test"
   ]
 }
