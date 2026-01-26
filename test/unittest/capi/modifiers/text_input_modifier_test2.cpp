@@ -202,13 +202,9 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder, TestSize.L
 
     int callsCount = 0;
     CustomNodeBuilderTestHelper<TextInputModifierTest2> builderHelper(this, frameNode);
-    const auto customNodeBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
-    Opt_Union_CustomBuilder_ComponentContentBase builder; 
-    Ark_Union_CustomBuilder_ComponentContentBase unionData;
-    unionData.selector = 0;
-    unionData.value0 = customNodeBuilder.value;
-    builder.value = unionData;
-    modifier_->setCustomKeyboard(node_, &builder, nullptr);
+    const auto customNodeBuilder = Converter::ArkUnion<Opt_Union_CustomBuilder_ComponentContentBase,
+        CustomNodeBuilder>(Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder()).value);
+    modifier_->setCustomKeyboard(node_, &customNodeBuilder, nullptr);
 
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     EXPECT_TRUE(textFieldPattern->HasCustomKeyboard());
@@ -232,13 +228,9 @@ HWTEST_F(TextInputModifierTest2, setCustomKeyboard_CustomNodeBuilder_KeyboardOpt
 
     int callsCount = 0;
     CustomNodeBuilderTestHelper<TextInputModifierTest2> builderHelper(this, frameNode);
-    const auto customNodeBuilder = Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder());
-    Opt_Union_CustomBuilder_ComponentContentBase builder; 
-    Ark_Union_CustomBuilder_ComponentContentBase unionData;
-    unionData.selector = 0;
-    unionData.value0 = customNodeBuilder.value;
-    builder.value = unionData;
-    modifier_->setCustomKeyboard(node_, &builder, &optKeyboardOptions);
+    const auto customNodeBuilder = Converter::ArkUnion<Opt_Union_CustomBuilder_ComponentContentBase,
+        CustomNodeBuilder>(Converter::ArkValue<Opt_CustomNodeBuilder>(builderHelper.GetBuilder()).value);
+    modifier_->setCustomKeyboard(node_, &customNodeBuilder, &optKeyboardOptions);
 
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     EXPECT_TRUE(textFieldPattern->HasCustomKeyboard());

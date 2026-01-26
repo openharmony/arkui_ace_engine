@@ -134,10 +134,13 @@ void DeleteBackwardImpl(Ark_TextContentControllerBase peer)
 void SetStyledPlaceholderImpl(Ark_TextContentControllerBase peer,
                               Ark_StyledString styledString)
 {
-    CHECK_NULL_VOID(peer && peer->controller_);
+    CHECK_NULL_VOID(peer);
     CHECK_NULL_VOID(styledString);
-    RefPtr<SpanStringBase> placeholderStyledString = styledString->spanString;
-    peer->controller_->SetPlaceholderStyledString(placeholderStyledString);
+    if (!peer->controller_) {
+        peer->SetStyledStringCache(styledString->spanString);
+        return;
+    }
+    peer->controller_->SetPlaceholderStyledString(styledString->spanString);
 }
 } // TextContentControllerBaseAccessor
 const GENERATED_ArkUITextContentControllerBaseAccessor* GetTextContentControllerBaseAccessor()

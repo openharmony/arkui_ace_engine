@@ -27,8 +27,8 @@ struct ContentTransitionPeer {
 protected:
     explicit ContentTransitionPeer(
         OHOS::Ace::TextFlipDirection flipDirection = OHOS::Ace::TextFlipDirection::DOWN,
-        bool enableBlur = false)
-        : flipDirection(flipDirection), enableBlur(enableBlur) {}
+        bool enableBlur = false
+    ) : flipDirection(flipDirection), enableBlur(enableBlur) {}
     ~ContentTransitionPeer() = default;
     friend OHOS::Ace::NG::PeerUtils;
 };
