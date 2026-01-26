@@ -6343,7 +6343,7 @@ typedef enum {
      * .value[0].i32: copy option {@link ArkUI_CopyOptions}. The default value is <b>ARKUI_COPY_OPTIONS_LOCAL_DEVICE</b>.\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: copy option {@link ArkUI_CopyOptions. \n
+     * .value[0].i32: copy option {@link ArkUI_CopyOptions}. \n
      *
      * @since 24
      */
@@ -6378,20 +6378,6 @@ typedef enum {
     NODE_RICH_EDITOR_STOP_BACK_PRESS,
  
     /**
-    * @brief Sets whether to retain the original content style when undoing or redoing an action.
-    *
-    * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-    * .value[0].i32：keyboard style，the parameter type is {@link ArkUI_RichEditorUndoStyle}.
-    * The default value is <b>ARKUI_RICH_EDITOR_UNDO_STYLE_CLEAR_STYLE</b>\n
-    * \n
-    * Format of the return value {@link ArkUI_AttributeItem}:\n
-    * .value[0].i32：keyboard style，the parameter type is {@link ArkUI_RichEditorUndoStyle}.\n
-    *
-    * @since 24
-    */
-    NODE_RICH_EDITOR_UNDO_STYLE,
- 
-    /**
      * @brief Sets whether to enable automatic spacing between Chinese and Western characters.
      * This attribute can be set, reset, and obtained as required through APIs.
      *
@@ -6409,11 +6395,11 @@ typedef enum {
      * @brief Sets up a custom keyboard.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .object: custom keyboard,The parameter type is {@Link ArkUI_NodeHandle}.\n
+     * .object: custom keyboard,The parameter type is {@link ArkUI_NodeHandle}.\n
      * .value[0]?.i32: Sets whether the custom keyboard supports the avoidance feature, default value false.\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .object:custom keyboard,The parameter type is {@Link ArkUI_NodeHandle}.\n
+     * .object:custom keyboard,The parameter type is {@link ArkUI_NodeHandle}.\n
      * .value[0].i32: Set whether the custom keyboard supports the avoidance function.\n
      *
      * @since 24
@@ -6424,7 +6410,7 @@ typedef enum {
      * @brief Bind the selection menu for RichEditor.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .object: the custom selection menu of RichEditor.
+     * .object: the selection selection menu of RichEditor.
      *     The parameter type is {@link ArkUI_RichEditorSelectionMenuOptions}.\n
      *
      * @since 24
@@ -6477,13 +6463,13 @@ typedef enum {
      * @brief Sets the selected drag preview style. \n
      * This attribute can be set, reset, and obtained as required through APIs.
      *
-     * Format of the [@link Arkui_AttributeItem] parameter for setting the attribute: \n
+     * Format of the {@link Arkui_AttributeItem} parameter for setting the attribute: \n
      * .object: selected drag preview style configuration. \n
-     * The parameter type is [@link Arkui_SelectedDragPreviewStyle]. \n
+     * The parameter type is {@link Arkui_SelectedDragPreviewStyle}. \n
      * \n
-     * Format of the return value [@link Arkui_AttributeItem]: \n
+     * Format of the return value {@link Arkui_AttributeItem}: \n
      * .object: selected drag preview style configuration. \n
-     * The parameter type is [@link Arkui_SelectedDragPreviewStyle]. \n
+     * The parameter type is {@link Arkui_SelectedDragPreviewStyle}. \n
      * 
      * @since 24
      */

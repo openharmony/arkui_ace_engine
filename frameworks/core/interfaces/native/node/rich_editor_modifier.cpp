@@ -558,7 +558,7 @@ void SetRichEditorEnableKeyboardOnFocus(ArkUINodeHandle node, ArkUI_Bool value)
 ArkUI_Int32 GetRichEditorEnableKeyboardOnFocus(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    CHECK_NULL_RETURN(frameNode, false);
     return static_cast<ArkUI_Int32>(RichEditorModelNG::GetRequestKeyboardOnFocus(frameNode));
 }
 
@@ -956,7 +956,7 @@ void SetRichEditorStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
 ArkUI_Int32 GetRichEditorStopBackPress(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    CHECK_NULL_RETURN(frameNode, false);
     return static_cast<ArkUI_Int32>(RichEditorModelNG::IsStopBackPress(frameNode));
 }
 
@@ -1081,7 +1081,7 @@ void ResetRichEditorEnableHapticFeedback(ArkUINodeHandle node)
 ArkUI_Int32 GetRichEditorEnableHapticFeedback(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    CHECK_NULL_RETURN(frameNode, false);
     return static_cast<ArkUI_Int32>(RichEditorModelNG::GetEnableHapticFeedback(frameNode));
 }
 
@@ -1095,7 +1095,7 @@ void SetRichEditorEnableAutoSpacing(ArkUINodeHandle node, ArkUI_Bool value)
 ArkUI_Int32 GetRichEditorEnableAutoSpacing(ArkUINodeHandle node)
 {
     auto *frameNode = reinterpret_cast<FrameNode*>(node);
-    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    CHECK_NULL_RETURN(frameNode, false);
     return static_cast<ArkUI_Int32>(RichEditorModelNG::IsEnableAutoSpacing(frameNode));
 }
  

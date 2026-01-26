@@ -182,7 +182,7 @@ public:
     static void ResetSingleLine(FrameNode* frameNode);
     static bool GetSingleLine(FrameNode* frameNode);
     static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType,
-        TextResponseType& responseType, std::function<void()>& buildFunc, SelectMenuParam& menuParam);
+        TextResponseType& responseType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
     static void ResetBindSelectionMenu(FrameNode* frameNode);
 
 private:

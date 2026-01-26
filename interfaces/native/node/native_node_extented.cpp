@@ -1790,9 +1790,7 @@ ArkUI_RichEditorSelectionMenuOptions* OH_ArkUI_RichEditorSelectionMenuOptions_Cr
  
 void OH_ArkUI_RichEditorSelectionMenuOptions_Dispose(ArkUI_RichEditorSelectionMenuOptions* options)
 {
-    if (!options) {
-        return;
-    }
+    CHECK_NULL_VOID(options);
     delete options;
     options = nullptr;
 }

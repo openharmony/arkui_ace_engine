@@ -3030,9 +3030,9 @@ typedef enum {
  */
 typedef enum {
     /** clear the original style*/
-	ARKUI_RICH_EDITOR_UNDO_STYLE_CLEAR_STYLE,
+    ARKUI_RICH_EDITOR_UNDO_STYLE_CLEAR_STYLE = 0,
     /** retain the original style*/
-	ARKUI_RICH_EDITOR_UNDO_STYLE_KEEP_STYLE,
+    ARKUI_RICH_EDITOR_UNDO_STYLE_KEEP_STYLE = 1,
 } ArkUI_RichEditorUndoStyle;
 
 /**

@@ -302,7 +302,7 @@ void RichEditorModelNG::BindSelectionMenu(TextSpanType& editorType, TextResponse
 }
 
 void RichEditorModelNG::BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType,
-    TextResponseType& responseType, std::function<void()>& buildFunc, SelectMenuParam& menuParam)
+    TextResponseType& responseType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam)
 {
     CHECK_NULL_VOID(frameNode);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();

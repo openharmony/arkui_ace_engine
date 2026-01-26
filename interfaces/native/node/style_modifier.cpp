@@ -774,12 +774,6 @@ bool CheckAttributeObjectAndSize(const ArkUI_AttributeItem* item)
     return true;
 }
 
-bool CheckAttributeRichEditorUndoStyle(int32_t value)
-{
-    return value == static_cast<int32_t>(ArkUI_RichEditorUndoStyle::ARKUI_RICH_EDITOR_UNDO_STYLE_CLEAR_STYLE) ||
-           value == static_cast<int32_t>(ArkUI_RichEditorUndoStyle::ARKUI_RICH_EDITOR_UNDO_STYLE_KEEP_STYLE);
-}
-
 bool ParseImages(const ArkUI_AttributeItem* item, ArkUIImageFrameInfo* imageInfos, ArkUI_NodeHandle node)
 {
     auto images = reinterpret_cast<ArkUI_ImageAnimatorFrameInfo**>(item->object);
@@ -5381,28 +5375,6 @@ void ResetRichEditorStopBackPress(ArkUI_NodeHandle node)
 {
     GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->resetRichEditorStopBackPress(
         node->uiNodeHandle);
-}
- 
-int32_t SetRichEditorSupportUndoStyle(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item) {
-    auto fullImpl = GetFullImpl();
-    if (item->size == 0 || !CheckAttributeRichEditorUndoStyle(item->value[0].i32)) {
-        return ERROR_CODE_PARAM_INVALID;
-    }
-    fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorUndoStyle(node->uiNodeHandle,
-        item->value[0].i32);
-    return ERROR_CODE_NO_ERROR;
-}
- 
-const ArkUI_AttributeItem* GetRichEditorSupportUndoStyle(ArkUI_NodeHandle node)
-{
-    g_numberValues[0].i32 = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorUndoStyle(
-        node->uiNodeHandle);
-    return &g_attributeItem;
-}
- 
-void ResetRichEditorSupportUndoStyle(ArkUI_NodeHandle node)
-{
-    GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->resetRichEditorUndoStyle(node->uiNodeHandle);
 }
  
 int32_t SetRichEditorCustomKeyboard(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
