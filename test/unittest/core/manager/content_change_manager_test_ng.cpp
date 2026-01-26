@@ -448,11 +448,16 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerTest006, TestSize.Level
     contentChangeMgr->OnScrollChangeEnd(nullptr);
 
     EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
-    contentChangeMgr->scrollingNodes_.emplace(node->GetId());
     EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _))
         .Times(NEVER_ONCE);
     contentChangeMgr->OnScrollChangeEnd(node);
     EXPECT_EQ(static_cast<int32_t>(contentChangeMgr->scrollingNodes_.count(node->GetId())), 0);
+
+    EXPECT_FALSE(contentChangeMgr->IsContentChangeDetectEnable());
+    contentChangeMgr->scrollingNodes_.emplace(node->GetId());
+    EXPECT_CALL(*mockUiSessionManager, ReportContentChangeEvent(_, _)).Times(NEVER_ONCE);
+    contentChangeMgr->OnScrollChangeEnd(node);
+    EXPECT_NE(static_cast<int32_t>(contentChangeMgr->scrollingNodes_.count(node->GetId())), 0);
 
     ContentChangeConfig config;
     contentChangeMgr->currentContentChangeConfig_ = config;
