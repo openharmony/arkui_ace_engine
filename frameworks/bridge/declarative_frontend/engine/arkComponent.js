@@ -36404,11 +36404,7 @@ if (globalThis.Gauge === undefined) {
       getUINativeModule().loadNativeModule('Gauge');
       let module = globalThis.requireNapi('arkui.components.arkgauge');
       module.exportView();
-      if (params !== undefined) {
-        getUINativeModule().gauge.create(params.value ?? 0, params.min ?? 0, params.max ?? 100);
-      } else {
-        getUINativeModule().gauge.create(0, 0, 100);
-      }
+      getUINativeModule().gauge.create(params);
     }
   }
 }

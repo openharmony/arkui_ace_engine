@@ -209,12 +209,7 @@ GaugePrivacySensitiveModifier.identity = Symbol('gaugePrivacySensitive');
 
 class JSGauge extends JSViewAbstract {
     static create(params) {
-        console.log('JSGauge create nativeModule');
-        if (params !== undefined) {
-            getUINativeModule().gauge.create(params.value ?? 0, params.min ?? 0, params.max ?? 100);
-        } else {
-            getUINativeModule().gauge.create(0, 0, 100);
-        }
+        getUINativeModule().gauge.create(params);
     }
 
     static value(value) {
@@ -273,7 +268,7 @@ class JSGauge extends JSViewAbstract {
         __Common__.onAppear(value);
     }
     static onDetach(value) {
-        __Common__.onAttach(value);
+        __Common__.onDetach(value);
     }
     static onDisAppear(value) {
         __Common__.onDisAppear(value);
@@ -281,9 +276,6 @@ class JSGauge extends JSViewAbstract {
 
     static onTouch(value) {
         __Common__.onTouch(value);
-    }
-    static onHover(value) {
-        __Common__.onHover(value);
     }
 }
 
