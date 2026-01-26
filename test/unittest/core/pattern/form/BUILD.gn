@@ -249,7 +249,6 @@ group("ace_form_test") {
     ":form_scoped_rs_transaction_test",
     ":form_special_style_test",
     ":form_test_ng",
-    ":form_special_style_test",
     ":form_snapshot_util_test",
   ]
 }

@@ -23,7 +23,6 @@
 namespace OHOS::Ace::NG {
 namespace {
 constexpr uint32_t ALPHA_MASK = 0xFF000000;
-constexpr uint8_t ALPHA_8_MASK = 0xFF;
 constexpr int32_t THRESHOLD_FOR_NONTRANSPARENCY_RATIO = 10;
 constexpr int32_t PERCENTAGE_DENOMINATOR = 100;
 
