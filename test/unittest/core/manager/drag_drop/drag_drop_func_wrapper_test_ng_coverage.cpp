@@ -1907,19 +1907,6 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, UpdateDragDropInitiatingStatus002, T
 }
 
 /**
- * @tc.name: UpdateDragDropInitiatingStatus_MovingStatus
- * @tc.desc: Verify that MOVING status updates currentDragNode_
- * @tc.type: FUNC
- */
-HWTEST_F(DragDropFuncWrapperTestNgCoverage, UpdateDragDropInitiatingStatus003, TestSize.Level1)
-{
-    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(frameNode, nullptr);
-    DragDropGlobalController::GetInstance().UpdateDragDropInitiatingStatus(frameNode, DragDropInitiatingStatus::MOVING);
-    EXPECT_EQ(DragDropGlobalController::GetInstance().currentDragNode_, frameNode);
-}
-
-/**
  * @tc.name: GetDragDropManagerForDragAnimation001
  * @tc.desc: Test GetDragDropManagerForDragAnimation context equals nodeContext
  * @tc.type: FUNC
@@ -1945,5 +1932,18 @@ HWTEST_F(DragDropFuncWrapperTestNgCoverage, GetDragDropManagerForDragAnimation00
     manager = DragDropFuncWrapper::GetDragDropManagerForDragAnimation(
         pipelineContext, pipelineContext, subwindow);
     ASSERT_EQ(dragDropManager, manager);
+}
+
+/**
+ * @tc.name: UpdateDragDropInitiatingStatus_MovingStatus
+ * @tc.desc: Verify that MOVING status updates currentDragNode_
+ * @tc.type: FUNC
+ */
+HWTEST_F(DragDropFuncWrapperTestNgCoverage, UpdateDragDropInitiatingStatus003, TestSize.Level1)
+{
+    auto frameNode = FrameNode::CreateFrameNode(V2::ROW_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    ASSERT_NE(frameNode, nullptr);
+    DragDropGlobalController::GetInstance().UpdateDragDropInitiatingStatus(frameNode, DragDropInitiatingStatus::MOVING);
+    EXPECT_EQ(DragDropGlobalController::GetInstance().currentDragNode_, frameNode);
 }
 } // namespace OHOS::Ace::NG
