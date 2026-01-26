@@ -3813,8 +3813,59 @@ void ViewAbstract::UpdatePopupParamResource(const RefPtr<PopupParam>& param, con
         auto borderResourceObject = param->GetBorderWidthResourceObject();
         optionsType = POPUP_OPTIONTYPE_BORDERWIDTH;
         ViewAbstractModel::GetInstance()->CreateWithResourceObj(frameNode, borderResourceObject, optionsType);
+        auto outlineGradient = param->GetOutlineLinearGradient();
+        UpdatePopupBorderColorResource(outlineGradient, frameNode, true);
+        auto innerGradient = param->GetInnerBorderLinearGradient();
+        UpdatePopupBorderColorResource(innerGradient, frameNode, false);
     }
 #endif
+}
+
+void ViewAbstract::UpdatePopupBorderColorResource(const PopupLinearGradientProperties& gradientProperties, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(pattern);
+    int32_t index = 0;
+    for (const auto& objParam : gradientProperties.gradientColors) {
+        RefPtr<ResourceObject> resValueObj = objParam.gradientColorObj;
+        std::string keyValue = "popupborderColor" + std::to_string(index);
+        if (isOutlineGradient) {
+            keyValue = "popupOutlineColor" + std::to_string(index);
+        } else {
+            keyValue = "popupInnerlineColor" + std::to_string(index);
+        }
+        AddResObjWithCallBack(keyValue, resValueObj, index, frameNode, isOutlineGradient);
+        index++;
+    }
+}
+
+void ViewAbstract::AddResObjWithCallBack(
+    std::string key, const RefPtr<ResourceObject>& resObj, const int32_t index, const RefPtr<FrameNode>& frameNode, bool isOutlineGradient)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern<BubblePattern>();
+    CHECK_NULL_VOID(pattern);
+    if (!resObj) {
+        pattern->RemoveResObj(key);
+        return;
+    }
+    auto&& updateFunc = [index, key, isOutlineGradient, weak = AceType::WeakClaim(AceType::RawPtr(pattern))](
+                            const RefPtr<ResourceObject>& resObj) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(resObj);
+        std::string color = pattern->GetResCacheMapByKey(key);
+        Color result;
+        if (color.empty()) {
+            ResourceParseUtils::ParseResColor(resObj, result);
+            pattern->AddResCache(key, result.ColorToString());
+        } else {
+            result = Color::FromString(color);
+        }
+        pattern->UpdateBubbleGradient(index, result, isOutlineGradient);
+    };
+    pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
 void ViewAbstract::SetTransform3DMatrix(const Matrix4& matrix)
