@@ -483,8 +483,6 @@ export class ArkTimePickerComponent extends ArkCommonMethodComponent implements 
 export function TimePickerImpl(
     @memo
     style: ((attributes: TimePickerAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkTimePickerComponent>((): ArkTimePickerComponent => {
         return new ArkTimePickerComponent()
@@ -493,7 +491,6 @@ export function TimePickerImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
