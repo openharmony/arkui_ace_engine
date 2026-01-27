@@ -397,24 +397,6 @@ class RadioContentModifier extends ModifierWithKey {
   }
 }
 RadioContentModifier.identity = Symbol('radioContentModifier');
-// @ts-ignore
-if (globalThis.Radio !== undefined) {
-  globalThis.Radio.attributeModifier = function (modifier) {
-    attributeModifierFunc.call(this, modifier, (nativePtr) => {
-      return new ArkRadioComponent(nativePtr);
-    }, (nativePtr, classType, modifierJS) => {
-      return new modifierJS.RadioModifier(nativePtr, classType);
-    });
-  };
-  globalThis.Radio.contentModifier = function (modifier) {
-    const elmtId = ViewStackProcessor.GetElmtIdToAccountFor();
-    let nativeNode = getUINativeModule().getFrameNodeById(elmtId);
-    let component = this.createOrGetNode(elmtId, () => {
-      return new ArkRadioComponent(nativeNode);
-    });
-    component.setContentModifier(modifier);
-  };
-}
 
 class JSRadio extends JSViewAbstract {
   static create(params) {

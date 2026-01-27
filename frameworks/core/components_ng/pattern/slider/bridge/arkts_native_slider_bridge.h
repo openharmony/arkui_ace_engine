@@ -78,6 +78,11 @@ public:
     static ArkUINativeModuleValue JsSetBlockStyle(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue JsSetPrefix(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue JsSetSuffix(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static napi_value GetIteratorNext(const napi_env env, napi_value iterator, napi_value func, bool *done);
+    static napi_value ParseStepOptionsMap(
+        EcmaVM* vm, const panda::Local<panda::JSValueRef>& jsStepOptionsMap, StepOptions& stepOptionsMap);
+    static int32_t ParseStepOptionItemKey(const napi_env env, napi_value item);
+    static bool ParseStepOptionItemValue(EcmaVM* vm, const napi_env env, napi_value item, std::string& stepText);
 };
 } // namespace OHOS::Ace::NG
 

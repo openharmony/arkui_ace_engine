@@ -1025,129 +1025,6 @@ ArkUINodeHandle CreateSliderFrameNode(ArkUI_Uint32 nodeId)
     return node;
 }
 
-void SliderPatternUpdateValue(ArkUINodeHandle node, float value)
-{
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    CHECK_NULL_VOID(frameNode);
-    auto pattern = frameNode->GetPattern<SliderPattern>();
-    CHECK_NULL_VOID(pattern);
-    pattern->UpdateValue(static_cast<float>(value));
-}
-
-void SliderLayoutPropertyUpdatePadding(ArkUINodeHandle node, ArkUIPaddingType value)
-{
-    auto* frameNode = GetFrameNode(node);
-    CHECK_NULL_VOID(frameNode);
-    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
-    CHECK_NULL_VOID(sliderLayoutProperty);
-
-    CalcLength topDimen;
-    CalcLength endDimen;
-    CalcLength bottomDimen;
-    CalcLength startDimen;
-    if (value.top.string != nullptr) {
-        topDimen = CalcLength(value.top.string);
-    } else {
-        topDimen = CalcLength(value.top.value, static_cast<DimensionUnit>(value.top.unit));
-    }
-    if (value.end.string != nullptr) {
-        endDimen = CalcLength(value.end.string);
-    } else {
-        endDimen = CalcLength(value.end.value, static_cast<DimensionUnit>(value.end.unit));
-    }
-    if (value.bottom.string != nullptr) {
-        bottomDimen = CalcLength(value.bottom.string);
-    } else {
-        bottomDimen = CalcLength(value.bottom.value, static_cast<DimensionUnit>(value.bottom.unit));
-    }
-    if (value.start.string != nullptr) {
-        startDimen = CalcLength(value.start.string);
-    } else {
-        startDimen = CalcLength(value.start.value, static_cast<DimensionUnit>(value.start.unit));
-    }
-
-    NG::PaddingProperty paddings;
-    paddings.top = std::optional<CalcLength>(topDimen);
-    paddings.bottom = std::optional<CalcLength>(bottomDimen);
-    paddings.right = std::optional<CalcLength>(endDimen);
-    paddings.left = std::optional<CalcLength>(startDimen);
-
-    sliderLayoutProperty->UpdatePadding(paddings);
-}
-
-void SliderLayoutPropertyUpdateLayoutWeight(ArkUINodeHandle node, ArkUI_Float32 value)
-{
-    auto* frameNode = GetFrameNode(node);
-    CHECK_NULL_VOID(frameNode);
-    auto sliderLayoutProperty = frameNode->GetLayoutProperty<SliderLayoutProperty>();
-    CHECK_NULL_VOID(sliderLayoutProperty);
-    sliderLayoutProperty->UpdateLayoutWeight(static_cast<float>(value));
-}
-
-void SliderEventHubSetOnChange(ArkUINodeHandle node, void* callback)
-{
-    auto* frameNode = GetFrameNode(node);
-    CHECK_NULL_VOID(frameNode);
-    auto eventHub = frameNode->GetEventHub<SliderEventHub>();
-    CHECK_NULL_VOID(eventHub);
-    auto onChange = reinterpret_cast<std::function<void(float, int32_t)>*>(callback);
-    eventHub->SetOnChange(std::move(*onChange));
-}
-
-void SliderPaintPropertyUpdateMin(ArkUINodeHandle node, ArkUI_Float32 value)
-{
-    auto* frameNode = GetFrameNode(node);
-    CHECK_NULL_VOID(frameNode);
-    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(sliderPaintProperty);
-    sliderPaintProperty->UpdateMin(static_cast<float>(value));
-}
-
-void SliderPaintPropertyUpdateMax(ArkUINodeHandle node, ArkUI_Float32 value)
-{
-    auto* frameNode = GetFrameNode(node);
-    CHECK_NULL_VOID(frameNode);
-    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(sliderPaintProperty);
-    sliderPaintProperty->UpdateMax(static_cast<float>(value));
-}
-
-void SliderPaintPropertyUpdateSelectGradientColor(ArkUINodeHandle node, ArkUI_Uint32 color)
-{
-    auto* frameNode = GetFrameNode(node);
-    CHECK_NULL_VOID(frameNode);
-    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(sliderPaintProperty);
-    sliderPaintProperty->UpdateSelectGradientColor(SliderModelNG::CreateSolidGradient(Color(color)));
-}
-
-void SliderPaintPropertyUpdateSelectIsResourceColor(ArkUINodeHandle node, ArkUI_Bool value)
-{
-    auto* frameNode = GetFrameNode(node);
-    CHECK_NULL_VOID(frameNode);
-    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(sliderPaintProperty);
-    sliderPaintProperty->UpdateSelectIsResourceColor(value);
-}
-
-void SliderPaintPropertyUpdateTrackBackgroundColor(ArkUINodeHandle node, ArkUI_Uint32 color)
-{
-    auto* frameNode = GetFrameNode(node);
-    CHECK_NULL_VOID(frameNode);
-    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(sliderPaintProperty);
-    sliderPaintProperty->UpdateTrackBackgroundColor(SliderModelNG::CreateSolidGradient(Color(color)));
-}
-
-void SliderPaintPropertyUpdateTrackBackgroundIsResourceColor(ArkUINodeHandle node, ArkUI_Bool value)
-{
-    auto* frameNode = GetFrameNode(node);
-    CHECK_NULL_VOID(frameNode);
-    auto sliderPaintProperty = frameNode->GetPaintProperty<SliderPaintProperty>();
-    CHECK_NULL_VOID(sliderPaintProperty);
-    sliderPaintProperty->UpdateTrackBackgroundIsResourceColor(value);
-}
-
 void SliderPaintPropertyUpdateValue(ArkUINodeHandle node, ArkUI_Float32 value)
 {
     auto* frameNode = GetFrameNode(node);
@@ -1580,17 +1457,6 @@ const ArkUISliderModifier* GetSliderDynamicModifier()
             .getLinearBlockColor = nullptr,
             .createSlider = CreateSliderImpl,
             .createSliderFrameNode = nullptr,
-            .sliderPatternUpdateValue = nullptr,
-            .sliderLayoutPropertyUpdatePadding = nullptr,
-            .sliderLayoutPropertyUpdateLayoutWeight = nullptr,
-            .sliderEventHubSetOnChange = nullptr,
-            .sliderPaintPropertyUpdateMin = nullptr,
-            .sliderPaintPropertyUpdateMax = nullptr,
-            .sliderPaintPropertyUpdateSelectGradientColor = nullptr,
-            .sliderPaintPropertyUpdateSelectIsResourceColor = nullptr,
-            .sliderPaintPropertyUpdateTrackBackgroundColor = nullptr,
-            .sliderPaintPropertyUpdateTrackBackgroundIsResourceColor = nullptr,
-            .sliderPaintPropertyUpdateValue = nullptr,
             .setOnChangeEvent = nullptr,
             .setOnSliderChange = nullptr,
         };
@@ -1699,17 +1565,6 @@ const ArkUISliderModifier* GetSliderDynamicModifier()
         .getLinearBlockColor = SliderModifier::GetLinearBlockColor,
         .createSlider = CreateSlider,
         .createSliderFrameNode = CreateSliderFrameNode,
-        .sliderPatternUpdateValue = SliderPatternUpdateValue,
-        .sliderLayoutPropertyUpdatePadding = SliderLayoutPropertyUpdatePadding,
-        .sliderLayoutPropertyUpdateLayoutWeight = SliderLayoutPropertyUpdateLayoutWeight,
-        .sliderEventHubSetOnChange = SliderEventHubSetOnChange,
-        .sliderPaintPropertyUpdateMin = SliderPaintPropertyUpdateMin,
-        .sliderPaintPropertyUpdateMax = SliderPaintPropertyUpdateMax,
-        .sliderPaintPropertyUpdateSelectGradientColor = SliderPaintPropertyUpdateSelectGradientColor,
-        .sliderPaintPropertyUpdateSelectIsResourceColor = SliderPaintPropertyUpdateSelectIsResourceColor,
-        .sliderPaintPropertyUpdateTrackBackgroundColor = SliderPaintPropertyUpdateTrackBackgroundColor,
-        .sliderPaintPropertyUpdateTrackBackgroundIsResourceColor = SliderPaintPropertyUpdateTrackBackgroundIsResourceColor,
-        .sliderPaintPropertyUpdateValue = SliderPaintPropertyUpdateValue,
         .setOnChangeEvent = SetOnChangeEvent,
         .setOnSliderChange = SetOnSliderChange,
     };
