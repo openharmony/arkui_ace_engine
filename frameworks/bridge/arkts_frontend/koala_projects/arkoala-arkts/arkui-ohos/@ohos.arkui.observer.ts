@@ -6,6 +6,7 @@ import { NavDestinationMode } from 'arkui/framework'
 import { HeightBreakpoint, WidthBreakpoint } from '/arkui/component/enums';
 import { int32 } from "@koalaui/common"
 import { Size } from 'arkui/Graphics'
+import { Axis } from '/arkui/component/enums';
 
 declare namespace uiObserver {
     export class DensityInfo {
@@ -177,13 +178,6 @@ declare namespace uiObserver {
     export enum ScrollEventType {
       SCROLL_START = 0,
       SCROLL_STOP = 1
-    }
-
-    export enum Axis {
-        VERTICAL = 0,
-        Vertical = 0,
-        HORIZONTAL = 1,
-        Horizontal = 1
     }
 
     export enum TabContentState {

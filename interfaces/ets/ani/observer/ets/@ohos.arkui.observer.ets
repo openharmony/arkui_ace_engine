@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 import { NavPathStack, NavigationOperation, NavBar, ResourceStr, Resource, NavDestinationMode,
-HeightBreakpoint, WidthBreakpoint } from "@ohos.arkui.component"
+HeightBreakpoint, WidthBreakpoint, Axis } from "@ohos.arkui.component"
 import { UIContext } from "@ohos.arkui.UIContext"
 import UIAbilityContext from 'application.UIAbilityContext';
 import transfer from '@ohos.transfer';
@@ -471,13 +471,6 @@ import { Size } from '@ohos.arkui.node'
     export enum ScrollEventType {
       SCROLL_START = 0,
       SCROLL_STOP = 1
-    }
-
-    export enum Axis {
-        VERTICAL = 0,
-        Vertical = 0,
-        HORIZONTAL = 1,
-        Horizontal = 1
     }
 
     export interface ScrollEventInfo {
