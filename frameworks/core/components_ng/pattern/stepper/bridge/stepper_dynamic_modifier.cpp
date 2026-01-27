@@ -31,12 +31,10 @@ StepperModel* GetStepperModelImpl()
 
 namespace OHOS::Ace::NG {
 namespace {
-#ifndef CROSS_PLATFORM
 FrameNode* GetFrameNode(ArkUINodeHandle node)
 {
     return node ? reinterpret_cast<FrameNode*>(node) : ViewStackProcessor::GetInstance()->GetMainFrameNode();
 }
-#endif
 
 void CreateModel(ArkUI_Uint32 index)
 {
