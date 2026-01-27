@@ -659,6 +659,8 @@ HWTEST_F(StackNewTestNG, StackIgnoreLayoutSafeArea003, TestSize.Level0)
     parentLayoutProperty->UpdateIgnoreLayoutSafeAreaOpts(opts);
     stackNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     FlushUITasks(stackNode);
+
+    // Excepect child's frameRect equal parent's frameRect.
     EXPECT_EQ(child1->GetGeometryNode()->GetFrameSize(), SizeF(300.0f, 300.0f))
         << child1->GetGeometryNode()->GetFrameRect().ToString();
     EXPECT_EQ(parent1->GetGeometryNode()->GetFrameSize(), SizeF(500.0f, 500.0f))
@@ -701,6 +703,8 @@ HWTEST_F(StackNewTestNG, StackOverFlow001, TestSize.Level0)
     FlushUITasks(stackNode);
     auto pattern = stackNode->GetPattern();
     ASSERT_NE(pattern, nullptr);
+
+    // beacause FeatureParam is false, use vOverflowHandler instead.
     const auto &vOverflowHandler =
         pattern->GetOrCreateVerticalOverflowHandler(AceType::WeakClaim(AceType::RawPtr(stackNode)));
     ASSERT_NE(vOverflowHandler, nullptr);
@@ -710,6 +714,8 @@ HWTEST_F(StackNewTestNG, StackOverFlow001, TestSize.Level0)
     vOverflowHandler->SetTotalChildFrameRect(totalChildFrameRect.value_or(RectF()));
     vOverflowHandler->CreateContentRect();
     vOverflowHandler->HandleContentOverflow();
+
+    // Expect vOverflowHandler's param is correct.
     EXPECT_EQ(child->GetGeometryNode()->GetFrameSize(), SizeF(500.0f, 800.0f))
         << child->GetGeometryNode()->GetFrameRect().ToString();
     EXPECT_EQ(child->GetGeometryNode()->GetFrameOffset(), OffsetF(0.0f, -150.0f))

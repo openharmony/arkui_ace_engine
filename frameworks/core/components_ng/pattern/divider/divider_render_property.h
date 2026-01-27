@@ -127,7 +127,9 @@ public:
                 return;
             }
         }
-        propDividerColor_ = value;
+        if (!SystemProperties::ConfigChangePerform()) {
+            propDividerColor_ = value;
+        }
         UpdatePropertyChangeFlag(PROPERTY_UPDATE_RENDER);
     }
 
