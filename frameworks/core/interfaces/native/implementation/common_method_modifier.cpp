@@ -5775,19 +5775,19 @@ void SetOnDragSpringLoadingImpl(Ark_NativePointer node,
     auto config = AceType::MakeRefPtr<NG::DragSpringLoadingConfiguration>();
     CHECK_NULL_VOID(config);
     auto stillTimeLimit = Converter::OptConvert<int32_t>(configValue->stillTimeLimit);
-    if (stillTimeLimit.has_value()) {
+    if (stillTimeLimit.has_value() && stillTimeLimit.value() >= 0) {
         config->stillTimeLimit = stillTimeLimit.value();
     }
     auto updateInterval = Converter::OptConvert<int32_t>(configValue->updateInterval);
-    if (updateInterval.has_value()) {
+    if (updateInterval.has_value() && updateInterval.value() >= 0) {
         config->updateInterval = updateInterval.value();
     }
     auto updateNotifyCount = Converter::OptConvert<int32_t>(configValue->updateNotifyCount);
-    if (updateNotifyCount.has_value()) {
+    if (updateNotifyCount.has_value() && updateNotifyCount.value() >= 0) {
         config->updateNotifyCount = updateNotifyCount.value();
     }
     auto updateToFinishInterval = Converter::OptConvert<int32_t>(configValue->updateToFinishInterval);
-    if (updateToFinishInterval.has_value()) {
+    if (updateToFinishInterval.has_value() && updateToFinishInterval.value() >= 0) {
         config->updateToFinishInterval = updateToFinishInterval.value();
     }
     ViewAbstract::SetOnDragSpringLoadingConfiguration(frameNode, std::move(config));
