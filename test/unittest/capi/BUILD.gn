@@ -213,6 +213,7 @@ ohos_source_set("ace_core_interfaces_native_node_linux_unittest") {
     "$ace_root/frameworks/core/components_ng/pattern/calendar_picker/bridge/calendar_picker_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/indexer/bridge/indexer_static_modifier.cpp",
     "$ace_root/frameworks/core/components_ng/pattern/calendar_picker/bridge/calendar_picker_dialog_static_modifier.cpp",
+    "$ace_root/frameworks/core/components_ng/pattern/patternlock/bridge/patternlock_static_modifier.cpp",
   ]
   sources += rebased_common_sources
   sources += rebased_generated_sources
