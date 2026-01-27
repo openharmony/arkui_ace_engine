@@ -506,7 +506,6 @@ class ArkWaterFlowComponent extends ArkScrollable {
 
 class JSWaterFlow extends JSContainerBase {
   static create(params) {
-    getUINativeModule().waterFlow.create();
     getUINativeModule().waterFlow.setWaterFlowInitialize(true,
       params === null || params === void 0 ? void 0 : params.scroller,
       params === null || params === void 0 ? void 0 : params.sections,

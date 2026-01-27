@@ -34262,7 +34262,6 @@ if (globalThis.WaterFlow === undefined) {
       getUINativeModule().loadNativeModule('WaterFlow');
       let module = globalThis.requireNapi('arkui.components.arkwaterflow');
       module.exportView();
-      getUINativeModule().waterFlow.create();
       getUINativeModule().waterFlow.setWaterFlowInitialize(true,
         params === null || params === void 0 ? void 0 : params.scroller,
         params === null || params === void 0 ? void 0 : params.sections,

@@ -482,7 +482,6 @@ void SetWaterFlowFooterOrSection(
 void WaterFlowBridge::RegisterWaterFlowAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     const char* functionNames[] = {
-        "create",
         "resetColumnsTemplate",
         "setColumnsTemplate",
         "resetRowsTemplate",
@@ -532,7 +531,6 @@ void WaterFlowBridge::RegisterWaterFlowAttributes(Local<panda::ObjectRef> object
         "setJSScrollBarColor",
     };
     Local<JSValueRef> funcValues[] = {
-        panda::FunctionRef::New(vm, WaterFlowBridge::CreateWaterFlow),
         panda::FunctionRef::New(vm, WaterFlowBridge::ResetColumnsTemplate),
         panda::FunctionRef::New(vm, WaterFlowBridge::SetColumnsTemplate),
         panda::FunctionRef::New(vm, WaterFlowBridge::ResetRowsTemplate),
@@ -583,15 +581,6 @@ void WaterFlowBridge::RegisterWaterFlowAttributes(Local<panda::ObjectRef> object
     };
     auto waterflow = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(functionNames), functionNames, funcValues);
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "waterFlow"), waterflow);
-}
-
-ArkUINativeModuleValue WaterFlowBridge::CreateWaterFlow(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-
-    GetArkUINodeModifiers()->getWaterFlowModifier()->create();
-    return panda::JSValueRef::Undefined(vm);
 }
 
 ArkUINativeModuleValue WaterFlowBridge::ResetColumnsTemplate(ArkUIRuntimeCallInfo* runtimeCallInfo)
@@ -1193,11 +1182,14 @@ ArkUINativeModuleValue WaterFlowBridge::SetWaterFlowInitialize(ArkUIRuntimeCallI
     ArkUINodeHandle nativeNode = nullptr;
     CHECK_EQUAL_RETURN(GetNativeNode(nativeNode, nodeArg, vm), false, panda::JSValueRef::Undefined(vm));
 
+    bool isJSView = nodeArg->IsBoolean() && nodeArg->ToBoolean(vm)->Value();
+    if (isJSView) {
+        GetArkUINodeModifiers()->getWaterFlowModifier()->create();
+    }
     SetWaterFlowScroller(runtimeCallInfo);
 
     if (layoutModeArgs->IsUndefined() || layoutModeArgs->IsNull() || !layoutModeArgs->IsNumber()) {
         GetArkUINodeModifiers()->getWaterFlowModifier()->resetWaterFlowLayoutMode(nativeNode);
-        bool isJSView = nodeArg->IsBoolean() && nodeArg->ToBoolean(vm)->Value();
         if (isJSView) {
             SetWaterFlowFooterOrSection(vm, runtimeCallInfo, nativeNode);
             return panda::JSValueRef::Undefined(vm);
