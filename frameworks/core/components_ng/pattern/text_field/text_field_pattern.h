@@ -2210,6 +2210,7 @@ private:
     void BeforeAutoFillAnimation(const std::u16string& content, const AceAutoFillType& type);
     void ProcessAutoFillOnPaste();
     void HandleOnPasteCommon(const std::string& data);
+    void HandleOnAutoFillSecurePaste(const std::string& data);
     void RemoveFillContentMap();
     bool NeedsSendFillContent();
     void UpdateSelectOverlay(const RefPtr<OHOS::Ace::TextFieldTheme>& textFieldTheme);
