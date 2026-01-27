@@ -54,6 +54,7 @@ struct Index {
     { title: '示例28：菜单基本功能_20_bindMenu菜单无障碍功能/MenuAccessibilityTestLevel0_1', url: 'pages/Examples/MenuAccessibilityTestLevel0_1' },
     { title: '示例29：菜单基本功能_20_bindMenuContextMenu菜单无障碍功能/MenuAccessibilityTestLevel0_2', url: 'pages/Examples/MenuAccessibilityTestLevel0_2' },
     { title: '示例30：菜单基本功能_21_MenuItem入参_MenuItem自有属性_MenuItemGroup入参/MenuTestLevel0_10', url: 'pages/Examples/MenuTestLevel0_10' },
+    { title: '示例31：菜单基本功能_22_验证菜单的边框圆角半径/MenuTestLevel0_12', url: 'pages/Examples/MenuTestLevel0_12' },
   ]
 
   build() {

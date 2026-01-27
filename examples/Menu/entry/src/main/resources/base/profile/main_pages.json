@@ -32,6 +32,7 @@
     "pages/Examples/MenuAccessibilityTestLevel0_1",
     "pages/Examples/MenuAccessibilityTestLevel0_2",
     "pages/Examples/MenuTestLevel0_10",
+    "pages/Examples/MenuTestLevel0_12",
 
     "pages/LifeCycle/Index",
     "pages/LifeCycle/aboutToAppear/BindMenu",
