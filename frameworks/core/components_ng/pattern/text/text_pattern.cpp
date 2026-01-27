@@ -2745,8 +2745,10 @@ void TextPattern::ContentChangeByDetaching(PipelineContext* context)
     }
     auto host = GetHost();
     CHECK_NULL_VOID(host);
-    auto rect = host->GetTransformRectRelativeToWindow();
-    contentChangeManager->OnTextChangeEnd(rect);
+    auto rect = host->GetTransformRectRelativeToWindowOnlyVisible();
+    auto rootNode = context->GetRootElement();
+    CHECK_NULL_VOID(rootNode);
+    contentChangeManager->OnTextChangeEnd(rect, rootNode->GetRectWithRender());
 }
 
 void TextPattern::HandleMouseLeftReleaseAction(const MouseInfo& info, const Offset& textOffset)

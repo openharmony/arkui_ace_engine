@@ -948,12 +948,6 @@ void AssignArkValue(Ark_TextDecorationType& dst, const OHOS::Ace::TextDecoration
     }
 }
 
-void AssignArkValue(Ark_ResourceColor& dst, const Color& src, ConvContext *ctx)
-{
-    dst.selector = 0;
-    dst.value0 = Converter::ArkValue<Ark_Color>(src, ctx);
-}
-
 void AssignArkValue(Ark_Color& dst, const Color& src)
 {
     if (src == OHOS::Ace::Color::WHITE) {

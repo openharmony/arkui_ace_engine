@@ -20,6 +20,7 @@
 
 #include "core/common/ace_application_info.h"
 #include "core/common/statistic_event_reporter.h"
+#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -349,5 +350,26 @@ HWTEST_F(StatisticEventReporterTest, ForceReportStatisticEvents004, TestSize.Lev
     reporter->ForceReportStatisticEvents();
     EXPECT_EQ(reporter->statisitcEventMap_.size(), 0);
     EXPECT_EQ(reporter->totalEventCount_, 0);
+}
+
+/**
+ * @tc.name: StatisticEventReporterTest
+ * @tc.desc: Test SetBundleName
+ * @tc.type: FUNC
+ */
+HWTEST_F(StatisticEventReporterTest, SetBundleName001, TestSize.Level1)
+{
+    AceApplicationInfo::GetInstance().SetPackageName("test");
+    auto reporter = std::make_shared<StatisticEventReporter>(0);
+    ASSERT_TRUE(reporter != nullptr);
+    EXPECT_EQ(reporter->appInfo_.bundleName, "test");
+
+    MockContainer::SetUp();
+    auto container = Container::Current();
+    container->SetBundleName("testContainer");
+    auto reporter2 = std::make_shared<StatisticEventReporter>(1);
+    ASSERT_TRUE(reporter2 != nullptr);
+    EXPECT_EQ(reporter2->appInfo_.bundleName, "testContainer");
+    MockContainer::TearDown();
 }
 } // namespace OHOS::Ace

@@ -23,7 +23,6 @@
 
 #include "adapter/ohos/entrance/ui_session/content_change_config_impl.h"
 #include "adapter/ohos/entrance/ui_session/get_inspector_tree_config_impl.h"
-#include "adapter/ohos/entrance/ui_session/include/large_string_ashmem.h"
 #include "adapter/ohos/entrance/ui_session/include/ui_session_log.h"
 
 namespace OHOS::Ace {
@@ -593,18 +592,7 @@ int32_t UiContentStub::GetWebInfoByRequestInner(MessageParcel& data, MessageParc
     int32_t processId = data.ReadInt32();
     UiSessionManager::GetInstance()->SaveProcessId("GetWebInfoByRequest", processId);
     int32_t webId = data.ReadInt32();
-    sptr<LargeStringAshmem> largeStringAshmem = data.ReadParcelable<LargeStringAshmem>();
-    if (!largeStringAshmem) {
-        LOGW("GetWebInfoByRequestInner read LargeStringAshmem failed");
-        reply.WriteInt32(FAILED);
-        return FAILED;
-    }
-    std::string request = "";
-    if (!largeStringAshmem->ReadFromAshmem(request)) {
-        LOGW("GetWebInfoByRequestInner read request failed");
-        reply.WriteInt32(FAILED);
-        return FAILED;
-    }
+    std::string request = data.ReadString();
     reply.WriteInt32(GetWebInfoByRequest(webId, request, nullptr));
     return NO_ERROR;
 }

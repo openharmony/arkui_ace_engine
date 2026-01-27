@@ -619,6 +619,8 @@ inline std::string ConvertEllipsisModeToString(EllipsisMode value)
         { EllipsisMode::HEAD, "EllipsisMode.START" },
         { EllipsisMode::MIDDLE, "EllipsisMode.CENTER" },
         { EllipsisMode::TAIL, "EllipsisMode.END" },
+        { EllipsisMode::MULTILINE_HEAD, "EllipsisMode.MULTILINE_HEAD" },
+        { EllipsisMode::MULTILINE_MIDDLE, "EllipsisMode.MULTILINE_MIDDLE" },
     };
     auto index = BinarySearchFindIndex(modalTable, ArraySize(modalTable), value);
     return index < 0 ? "EllipsisMode.END" : modalTable[index].value;

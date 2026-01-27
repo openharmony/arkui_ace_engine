@@ -366,9 +366,10 @@ void ContentChangeManager::OnDialogChangeEnd(const RefPtr<FrameNode>& keyNode, b
 #endif
 }
 
-void ContentChangeManager::OnTextChangeEnd(const RectF& rect)
+void ContentChangeManager::OnTextChangeEnd(const RectF& rect, const RectF& rootRect)
 {
-    if (!IsContentChangeDetectEnable() || !textCollecting_ || rect.IsEmpty() || IsScrolling()) {
+    if (!IsContentChangeDetectEnable() || !textCollecting_ || rect.IsEmpty() ||
+        !rootRect.IsIntersectWith(rect) || IsScrolling()) {
         return;
     }
     ACE_SCOPED_TRACE("[ContentChangeManager] OntextChange {%s}", rect.ToString().c_str());
@@ -534,7 +535,7 @@ bool ContentChangeManager::IsScrolling() const
     return !scrollingNodes_.empty();
 }
 
-uint32_t ContentChangeManager::ConvertEventStringToEnum(std::string type) const
+uint32_t ContentChangeManager::ConvertEventStringToEnum(const std::string& type) const
 {
     std::map<std::string, uint32_t> eventMap = {
         { "scrollTo", SCROLL_TO },
@@ -543,7 +544,7 @@ uint32_t ContentChangeManager::ConvertEventStringToEnum(std::string type) const
     return it == eventMap.end() ? NONE : it->second;
 }
 
-uint32_t ContentChangeManager::GetIgnoreEventMask(std::string ignoreEventType) const
+uint32_t ContentChangeManager::GetIgnoreEventMask(const std::string& ignoreEventType) const
 {
     uint32_t mask = 0;
     auto json = JsonUtil::ParseJsonString(ignoreEventType);

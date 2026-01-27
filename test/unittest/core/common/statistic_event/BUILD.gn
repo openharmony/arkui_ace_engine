@@ -35,11 +35,23 @@ ohos_unittest("statistic_event_test") {
     "$ace_root/adapter/ohos/services/uiservice/src/ui_service_statistic_event.cpp",
     "$ace_root/frameworks/core/common/statistic_event_reporter.cpp",
     "$ace_root/test/mock/adapter/mock_statistic_event_adapter.cpp",
+    "$ace_root/test/mock/base/mock_event_report.cpp",
+    "$ace_root/test/mock/base/mock_ace_trace.cpp",
+    "$ace_root/test/mock/base/mock_lifecycle_checkable.cpp",
+    "$ace_root/test/mock/base/mock_system_properties.cpp",
     "$ace_root/test/mock/core/common/mock_ace_application_info.cpp",
+    "$ace_root/test/mock/core/common/mock_container.cpp",
+    "$ace_root/test/mock/core/image_provider/mock_image_file_cache.cpp",
+    "$ace_root/test/mock/core/pipeline/mock_pipeline_context.cpp",
+    "$ace_root/test/unittest/core/rosen/mock_internal_resource.cpp",
     "statistic_event_manager_test.cpp",
     "statistic_event_reporter_test.cpp",
   ]
   deps = [
+    "$ace_root/test/unittest:ace_base",
+    "$ace_root/test/unittest:ace_components_base",
+    "$ace_root/test/unittest:ace_core_animation",
+    "$ace_root/test/unittest:ace_core_extra",
     "$ace_root/test/unittest:ace_unittest_log",
   ]
   external_deps = [

@@ -743,6 +743,8 @@ void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src)
         case ARK_ELLIPSIS_MODE_START: dst = EllipsisMode::HEAD; break;
         case ARK_ELLIPSIS_MODE_CENTER: dst = EllipsisMode::MIDDLE; break;
         case ARK_ELLIPSIS_MODE_END: dst = EllipsisMode::TAIL; break;
+        case ARK_ELLIPSIS_MODE_MULTILINE_START: dst = EllipsisMode::MULTILINE_HEAD; break;
+        case ARK_ELLIPSIS_MODE_MULTILINE_CENTER: dst = EllipsisMode::MULTILINE_MIDDLE; break;
         default: LOGE("Unexpected enum value in Ark_EllipsisMode: %{public}d", src);
     }
 }

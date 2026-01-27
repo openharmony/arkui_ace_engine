@@ -2112,7 +2112,7 @@ void FormPattern::OnActionEvent(const std::string& action)
         }
     }
 
-    formManagerBridge_->OnActionEvent(action);
+    formManagerBridge_->OnActionEvent(action, isManuallyClick_);
 }
 
 bool FormPattern::ISAllowUpdate() const

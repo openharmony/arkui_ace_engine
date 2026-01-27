@@ -135,6 +135,11 @@ void SetSearchOptionsImpl(Ark_NativePointer node,
         // pass the internal controller to external management
         auto internalSearchController = SearchModelNG::GetSearchController(frameNode);
         peerImplPtr->SetController(internalSearchController);
+        auto styledStringCache = peerImplPtr->GetStyledStringCache();
+        if (styledStringCache) {
+            peerImplPtr->controller_->SetPlaceholderStyledString(styledStringCache);
+            peerImplPtr->SetStyledStringCache(nullptr);
+        }
     }
 }
 } // SearchInterfaceModifier

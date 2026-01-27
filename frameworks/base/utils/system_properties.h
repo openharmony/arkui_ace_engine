@@ -649,6 +649,8 @@ public:
 
     static bool GetIsUseMemoryMonitor();
 
+    static int32_t GetComponentLoadNumber();
+
     static bool IsFormAnimationLimited();
 
     static bool GetResourceDecoupling();

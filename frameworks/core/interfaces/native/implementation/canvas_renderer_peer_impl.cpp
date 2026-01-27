@@ -25,6 +25,8 @@
 #include "canvas_gradient_peer.h"
 #include "canvas_pattern_peer.h"
 
+#include "base/error/error_code.h"
+#include "core/interfaces/native/implementation/drawing_rendering_context_peer_impl.h"
 #include "core/pipeline/base/constants.h"
 
 namespace OHOS::Ace::NG {
@@ -1342,5 +1344,86 @@ void CanvasRendererPeerImpl::Path2DRect(double x, double y, double width, double
         double density = GetDensity();
         renderingContext2DModel_->AddRect({x * density, y * density, width * density, height * density});
     }
+}
+void CanvasRendererPeerImpl::Path2DRoundRect(double x, double y, double width, double height)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (!IfJudgeSpecialValue(x) || !IfJudgeSpecialValue(y) || !IfJudgeSpecialValue(width) ||
+        !IfJudgeSpecialValue(height)) {
+        return;
+    }
+    Rect rect = { x, y, width, height };
+    std::vector<double> radii = std::vector<double>(4, 0.0);
+    double density = GetDensity();
+    renderingContext2DModel_->AddRoundRect(rect * density, radii);
+}
+void CanvasRendererPeerImpl::Path2DRoundRect(double x, double y, double width, double height, double radiusValue)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (!IfJudgeSpecialValue(x) || !IfJudgeSpecialValue(y) || !IfJudgeSpecialValue(width) ||
+        !IfJudgeSpecialValue(height)) {
+        return;
+    }
+    if (LessNotEqual(radiusValue, 0.0)) {
+        DrawingRenderingContextPeerImpl::ThrowError(ERROR_CODE_CANVAS_PARAM_INVALID,
+            "radii parameter error: The param radii contains negative value.");
+        return;
+    }
+    Rect rect = { x, y, width, height };
+    double density = GetDensity();
+    std::vector<double> radii = std::vector<double>(4, radiusValue * density);
+    renderingContext2DModel_->AddRoundRect(rect * density, radii);
+}
+void CanvasRendererPeerImpl::Path2DRoundRect(
+    double x, double y, double width, double height, const std::vector<double>& radiiVec)
+{
+    CHECK_NULL_VOID(renderingContext2DModel_);
+    if (!IfJudgeSpecialValue(x) || !IfJudgeSpecialValue(y) || !IfJudgeSpecialValue(width) ||
+        !IfJudgeSpecialValue(height)) {
+        return;
+    }
+    if (radiiVec.size() <= 0 || radiiVec.size() > 4) { // The size of the fifth param > 4 or <= 0
+        DrawingRenderingContextPeerImpl::ThrowError(ERROR_CODE_CANVAS_PARAM_INVALID,
+            "radii parameter error: The param radii is a list that has zero or more than four elements.");
+        return;
+    }
+    for (size_t i = 0; i < radiiVec.size(); ++i) {
+        if (LessNotEqual(radiiVec[i], 0.0)) {
+            DrawingRenderingContextPeerImpl::ThrowError(ERROR_CODE_CANVAS_PARAM_INVALID,
+                "radii parameter error: The param radii contains negative value.");
+            return;
+        }
+    }
+    std::vector<double> radii;
+    double density = GetDensity();
+    switch (radiiVec.size()) {
+        case 1:                                                 // 1: The fifth param has 1 values.
+            radii = std::vector<double>(4, radiiVec[0] * density); // 4: four corners are radii[0].
+            break;
+        case 2: // 2: The fifth param has 2 values.
+            radii = {
+                radiiVec[0] * density,
+                radiiVec[1] * density, // 0: top-left-and-bottom-right, 1: top-right-and-bottom-left.
+                radiiVec[0] * density,
+                radiiVec[1] * density // 0: top-left-and-bottom-right, 1: top-right-and-bottom-left.
+            };
+            break;
+        case 3: // 3: The fifth param has 3 values.
+            radii = {
+                radiiVec[0] * density, radiiVec[1] * density, // 0: top-left, 1: top-right-and-bottom-left.
+                radiiVec[2] * density, radiiVec[1] * density  // 2: bottom-right, 1: top-right-and-bottom-left.
+            };
+            break;
+        case 4: // 4: The fifth param has 4 values.
+            radii = {
+                radiiVec[0] * density, radiiVec[1] * density, // 0: top-left, 1: top-right.
+                radiiVec[2] * density, radiiVec[3] * density  // 2: bottom-right, 3: bottom-left.
+            };
+            break;
+        default:
+            return;
+    }
+    Rect rect = { x, y, width, height };
+    renderingContext2DModel_->AddRoundRect(rect * density, radii);
 }
 } // namespace OHOS::Ace::NG::GeneratedModifier

@@ -563,6 +563,8 @@ public:
 
     RectF GetTransformRectRelativeToWindow(bool checkBoundary = false) const;
 
+    RectF GetTransformRectRelativeToWindowOnlyVisible(bool checkBoundary = false) const;
+
     // deprecated, please use GetPaintRectOffsetNG.
     // this function only consider transform of itself when calculate transform,
     // do not consider the transform of its ansestors
@@ -1438,7 +1440,7 @@ public:
         return GetTag() == V2::SCREEN_ETS_TAG;
     }
 
-    bool CheckVisibleAndActive() override;
+    bool CheckVisibleAndActive() const override;
 
     void SetPaintNode(const RefPtr<FrameNode>& paintNode)
     {

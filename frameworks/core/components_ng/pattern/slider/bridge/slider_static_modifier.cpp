@@ -67,7 +67,7 @@ SliderModel::SliderShowStepOptions Convert(const Ark_SliderShowStepOptions& src)
     if (accessibilityOpt.tag == InteropTag::INTEROP_TAG_UNDEFINED) {
         return dst;
     }
-    auto stepItemAccessibility = Converter::OptConvert<Map_Number_SliderStepItemAccessibility>(accessibilityOpt.value);
+    auto stepItemAccessibility = Converter::OptConvert<Map_Float64_SliderStepItemAccessibility>(accessibilityOpt.value);
     if (!stepItemAccessibility) {
         return dst;
     }
@@ -78,8 +78,11 @@ SliderModel::SliderShowStepOptions Convert(const Ark_SliderShowStepOptions& src)
         return dst;
     }
     for (int32_t i = 0; i < mapSize; i++) {
-        uint32_t key = Converter::Convert<uint32_t>(stepItemMap.keys[i]);
-        if (key < 0) {
+        double step = Converter::Convert<double>(stepItemMap.keys[i]);
+        uint32_t key;
+        if ((step >= 0) && (NearZero(std::abs(step - std::floor(step)))) && (step <= INT32_MAX)) {
+            key = static_cast<uint32_t>(step);
+        } else {
             continue;
         }
         auto stepItem = Converter::Convert<Ark_SliderStepItemAccessibility>(stepItemMap.values[i]);

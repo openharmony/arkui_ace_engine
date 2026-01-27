@@ -66,12 +66,18 @@ void RichEditorParagraphManagetTestNg::TearDownTestSuite()
  */
 HWTEST_F(RichEditorParagraphManagetTestNg, GetParagraphsRects001, TestSize.Level0)
 {
+    /**
+ 	* @tc.steps: step1. get richEditor controller
+ 	*/
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
     ParagraphManager::ParagraphInfo info;
     info.start = 3;
     richEditorPattern->paragraphs_.paragraphs_.emplace_back(info);
+    /**
+ 	* @tc.steps: step2. get paragraphs rects
+ 	*/
     std::vector<std::pair<std::vector<RectF>, TextDirection>> result =
         richEditorPattern->paragraphs_.GetParagraphsRects(1, 2);
     EXPECT_EQ(result.size(), 0);

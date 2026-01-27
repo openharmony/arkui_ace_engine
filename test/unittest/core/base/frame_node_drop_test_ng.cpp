@@ -777,7 +777,7 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg017, TestSize.Level1)
     frameNode->SetDisallowDropForcedly(isDisallowDrop);
     bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
     ASSERT_FALSE(isDisallowDropForcedly);
-    
+
     /**
      * @tc.steps: step5. ReportingSupported is set to false.
      * @tc.expected: reportingEnabledFalse is false.
@@ -829,7 +829,7 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg018, TestSize.Level1)
     frameNode->SetDisallowDropForcedly(isDisallowDrop);
     bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
     ASSERT_FALSE(isDisallowDropForcedly);
-    
+
     /**
      * @tc.steps: step5. ReportingSupported is set to false.
      * @tc.expected: reportingEnabledFalse is false.
@@ -881,7 +881,7 @@ HWTEST_F(FrameNodeDropTestNg, FrameNodeDropTestNg019, TestSize.Level1)
     frameNode->SetDisallowDropForcedly(isDisallowDrop);
     bool isDisallowDropForcedly = frameNode->GetDisallowDropForcedly();
     ASSERT_FALSE(isDisallowDropForcedly);
-    
+
     /**
      * @tc.steps: step5. ReportingSupported is set to false.
      * @tc.expected: reportingEnabledFalse is false.

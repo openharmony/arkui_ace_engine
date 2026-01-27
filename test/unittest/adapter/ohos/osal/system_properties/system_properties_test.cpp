@@ -68,4 +68,18 @@ HWTEST_F(SystemPropertiesTest, SystemPropertiesTest002, TestSize.Level1)
     SystemProperties::ReadSystemParametersCallOnce();
     EXPECT_EQ(SystemProperties::developerModeOn_, true);
 }
+
+/**
+ * @tc.name: SystemPropertiesTest003
+ * @tc.desc: Test InitDeviceInfo init
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemPropertiesTest, SystemPropertiesTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call GetComponentLoadNumber
+     * @tc.expected: step1. componentLoadNumber param init success.
+     */
+    EXPECT_EQ(SystemProperties::GetComponentLoadNumber(), 1);
+}
 }

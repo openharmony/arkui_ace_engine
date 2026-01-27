@@ -1116,7 +1116,7 @@ function getAccessibilityText(resource: ResourceStr): string {
     if (typeof resource === 'string') {
       resourceString = resource as string;
     } else {
-      let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+      let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
       if (uiContent) {
         (uiContent as common.UIAbilityContext).resourceManager.getStringSync((resource as Resource).id as Long);
       }

@@ -183,6 +183,7 @@ public:
     void SetTextOverflow(Ace::TextOverflow value) override;
     void SetTextIndent(const Dimension& value) override;
     static void SetTextOverflow(FrameNode* frameNode, Ace::TextOverflow value);
+    static TextOverflow GetTextOverflow(FrameNode* frameNode);
     static void SetTextIndent(FrameNode* frameNode, const Dimension& value);
     static void UpdateTextFieldPattern(const RefPtr<FrameNode>& frameNode, const std::optional<std::u16string>& value);
     static RefPtr<FrameNode> CreateTextInputNode(
@@ -373,6 +374,7 @@ public:
     static Dimension GetLetterSpacing(FrameNode* frameNode);
     static bool GetEnablePreviewText(FrameNode* frameNode);
     static void SetEllipsisMode(FrameNode* frameNode, EllipsisMode modal);
+    static EllipsisMode GetEllipsisMode(FrameNode* frameNode);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
     static int32_t GetKeyboardAppearance(FrameNode* frameNode);

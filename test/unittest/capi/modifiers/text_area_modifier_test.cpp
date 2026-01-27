@@ -879,7 +879,6 @@ HWTEST_F(TextAreaModifierTest, DISABLED_setEnterKeyTypeTest2, TestSize.Level1)
     ASSERT_NE(modifier_->setMaxLines, nullptr);
     auto maxLines = Converter::ArkValue<Opt_Int32>(1);
     modifier_->setMaxLines(node_, &maxLines, nullptr);
-    ///
 
     auto checkVal = GetStringAttribute(node_, propName);
     EXPECT_EQ(checkVal, "EnterKeyType.NEW_LINE");
@@ -1875,16 +1874,12 @@ HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
             actualParentNode = reinterpret_cast<FrameNode*>(parentNode);
             CallbackHelper(continuation).Invoke(reinterpret_cast<Ark_NativePointer>(expectedCustomNode));
         };
-    auto customBuilder = Converter::ArkCallback<Opt_CustomNodeBuilder>(func);
-    Opt_Union_CustomBuilder_ComponentContentBase builder; 
-    Ark_Union_CustomBuilder_ComponentContentBase unionData;
-    unionData.selector = 0;
-    unionData.value0 = customBuilder.value;
-    builder.value = unionData;
+    auto customBuilder = Converter::ArkUnion<Opt_Union_CustomBuilder_ComponentContentBase, CustomNodeBuilder>(
+        Converter::ArkCallback<Opt_CustomNodeBuilder>(func).value);
     KeyboardOptions keyboardOptions = { .supportAvoidance = true };
     auto optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
 
-    modifier_->setCustomKeyboard(node_, &builder, &optKeyboardOptions);
+    modifier_->setCustomKeyboard(node_, &customBuilder, &optKeyboardOptions);
     auto pattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(pattern, nullptr);
     ASSERT_EQ(actualParentNode, expectedParentNode);
@@ -1892,7 +1887,7 @@ HWTEST_F(TextAreaModifierTest, setCustomKeyboardValidValues, TestSize.Level1)
 
     keyboardOptions = { .supportAvoidance = false };
     optKeyboardOptions = Converter::ArkValue<Opt_KeyboardOptions>(keyboardOptions);
-    modifier_->setCustomKeyboard(node_, &builder, &optKeyboardOptions);
+    modifier_->setCustomKeyboard(node_, &customBuilder, &optKeyboardOptions);
     ASSERT_EQ(actualParentNode, expectedParentNode);
     ASSERT_FALSE(pattern->GetCustomKeyboardOption());
 }

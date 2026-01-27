@@ -1655,10 +1655,10 @@ typedef struct LoadingProgressModifierBuilder LoadingProgressModifierBuilder;
 typedef struct Opt_LoadingProgressModifierBuilder Opt_LoadingProgressModifierBuilder;
 typedef struct Map_AxisModel_Float64 Map_AxisModel_Float64;
 typedef struct Opt_Map_AxisModel_Float64 Opt_Map_AxisModel_Float64;
+typedef struct Map_Float64_SliderStepItemAccessibility Map_Float64_SliderStepItemAccessibility;
+typedef struct Opt_Map_Float64_SliderStepItemAccessibility Opt_Map_Float64_SliderStepItemAccessibility;
 typedef struct Map_Int32_text_RunMetrics Map_Int32_text_RunMetrics;
 typedef struct Opt_Map_Int32_text_RunMetrics Opt_Map_Int32_text_RunMetrics;
-typedef struct Map_Number_SliderStepItemAccessibility Map_Number_SliderStepItemAccessibility;
-typedef struct Opt_Map_Number_SliderStepItemAccessibility Opt_Map_Number_SliderStepItemAccessibility;
 typedef struct Map_SourceTool_Float64 Map_SourceTool_Float64;
 typedef struct Opt_Map_SourceTool_Float64 Opt_Map_SourceTool_Float64;
 typedef struct Map_String_ComponentContent Map_String_ComponentContent;
@@ -2704,6 +2704,8 @@ typedef struct Ark_Union_EdgeOutlineStyles_OutlineStyle Ark_Union_EdgeOutlineSty
 typedef struct Opt_Union_EdgeOutlineStyles_OutlineStyle Opt_Union_EdgeOutlineStyles_OutlineStyle;
 typedef struct Ark_Union_EdgeStyles_BorderStyle Ark_Union_EdgeStyles_BorderStyle;
 typedef struct Opt_Union_EdgeStyles_BorderStyle Opt_Union_EdgeStyles_BorderStyle;
+typedef struct Ark_Union_F64_Array_F64 Ark_Union_F64_Array_F64;
+typedef struct Opt_Union_F64_Array_F64 Opt_Union_F64_Array_F64;
 typedef struct Ark_Union_F64_Bindable Ark_Union_F64_Bindable;
 typedef struct Opt_Union_F64_Bindable Opt_Union_F64_Bindable;
 typedef struct Ark_Union_F64_Resource Ark_Union_F64_Resource;
@@ -4938,6 +4940,8 @@ typedef enum Ark_EllipsisMode {
     ARK_ELLIPSIS_MODE_START = 0,
     ARK_ELLIPSIS_MODE_CENTER = 1,
     ARK_ELLIPSIS_MODE_END = 2,
+    ARK_ELLIPSIS_MODE_MULTILINE_START = 3,
+    ARK_ELLIPSIS_MODE_MULTILINE_CENTER = 4,
 } Ark_EllipsisMode;
 typedef struct Opt_EllipsisMode {
     Ark_Tag tag;
@@ -6251,11 +6255,16 @@ typedef struct Opt_Placement {
     Ark_Placement value;
 } Opt_Placement;
 typedef enum Ark_PlaybackSpeed {
-    ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_75_X = 0,
-    ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_00_X = 1,
-    ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_25_X = 2,
-    ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_75_X = 3,
-    ARK_PLAYBACK_SPEED_SPEED_FORWARD_2_00_X = 4,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_75_X,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_00_X,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_25_X,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_75_X,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_2_00_X,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_50_X,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_1_50_X,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_3_00_X,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_25_X,
+    ARK_PLAYBACK_SPEED_SPEED_FORWARD_0_125_X,
 } Ark_PlaybackSpeed;
 typedef struct Opt_PlaybackSpeed {
     Ark_Tag tag;
@@ -13147,6 +13156,16 @@ typedef struct Opt_Map_AxisModel_Float64 {
     Ark_Tag tag;
     Map_AxisModel_Float64 value;
 } Opt_Map_AxisModel_Float64;
+typedef struct Map_Float64_SliderStepItemAccessibility {
+    /* kind: ContainerType */
+    Ark_Int32 size;
+    Ark_Float64* keys;
+    Ark_SliderStepItemAccessibility* values;
+} Map_Float64_SliderStepItemAccessibility;
+typedef struct Opt_Map_Float64_SliderStepItemAccessibility {
+    Ark_Tag tag;
+    Map_Float64_SliderStepItemAccessibility value;
+} Opt_Map_Float64_SliderStepItemAccessibility;
 typedef struct Map_Int32_text_RunMetrics {
     /* kind: ContainerType */
     Ark_Int32 size;
@@ -14187,16 +14206,6 @@ typedef struct Opt_SizeChangeCallback {
     Ark_Tag tag;
     SizeChangeCallback value;
 } Opt_SizeChangeCallback;
-typedef struct Map_Number_SliderStepItemAccessibility {
-    /* kind: ContainerType */
-    Ark_Int32 size;
-    Ark_Number* keys;
-    Ark_SliderStepItemAccessibility* values;
-} Map_Number_SliderStepItemAccessibility;
-typedef struct Opt_Map_Number_SliderStepItemAccessibility {
-    Ark_Tag tag;
-    Map_Number_SliderStepItemAccessibility value;
-} Opt_Map_Number_SliderStepItemAccessibility;
 typedef struct Map_SourceTool_Float64 {
     /* kind: ContainerType */
     Ark_Int32 size;
@@ -14914,10 +14923,47 @@ typedef struct Opt_Circle {
     Ark_Tag tag;
     Ark_Circle value;
 } Opt_Circle;
+typedef struct Ark_Resource {
+    /* kind: Interface */
+    Ark_String bundleName;
+    Ark_String moduleName;
+    Ark_Int64 id;
+    Opt_Array_Union_String_I32_I64_F64_Resource params;
+    Opt_Int32 type;
+} Ark_Resource;
+typedef struct Opt_Resource {
+    Ark_Tag tag;
+    Ark_Resource value;
+} Opt_Resource;
+typedef struct Ark_ResourceStr {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_String value0;
+        Ark_Resource value1;
+    };
+} Ark_ResourceStr;
+typedef struct Opt_ResourceStr {
+    Ark_Tag tag;
+    Ark_ResourceStr value;
+} Opt_ResourceStr;
+typedef struct Ark_Length {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_String value0;
+        Ark_Float64 value1;
+        Ark_Resource value2;
+    };
+} Ark_Length;
+typedef struct Opt_Length {
+    Ark_Tag tag;
+    Ark_Length value;
+} Opt_Length;
 typedef struct Ark_CircleOptions {
     /* kind: Interface */
-    Opt_Union_String_F64 width;
-    Opt_Union_String_F64 height;
+    Opt_Length width;
+    Opt_Length height;
 } Ark_CircleOptions;
 typedef struct Opt_CircleOptions {
     Ark_Tag tag;
@@ -15404,8 +15450,8 @@ typedef struct Opt_EffectComponentOptions {
 } Opt_EffectComponentOptions;
 typedef struct Ark_EllipseOptions {
     /* kind: Interface */
-    Opt_Union_String_F64 width;
-    Opt_Union_String_F64 height;
+    Opt_Length width;
+    Opt_Length height;
 } Ark_EllipseOptions;
 typedef struct Opt_EllipseOptions {
     Ark_Tag tag;
@@ -16043,8 +16089,8 @@ typedef struct Opt_LinearIndicatorStartOptions {
 } Opt_LinearIndicatorStartOptions;
 typedef struct Ark_LineOptions {
     /* kind: Interface */
-    Opt_Union_String_F64 width;
-    Opt_Union_String_F64 height;
+    Opt_Length width;
+    Opt_Length height;
 } Ark_LineOptions;
 typedef struct Opt_LineOptions {
     Ark_Tag tag;
@@ -16691,9 +16737,9 @@ typedef struct Opt_ParticlesInner {
 } Opt_ParticlesInner;
 typedef struct Ark_PathOptions {
     /* kind: Interface */
-    Opt_Union_F64_String width;
-    Opt_Union_F64_String height;
-    Opt_String commands;
+    Opt_Length width;
+    Opt_Length height;
+    Opt_ResourceStr commands;
 } Ark_PathOptions;
 typedef struct Opt_PathOptions {
     Ark_Tag tag;
@@ -16738,8 +16784,8 @@ typedef struct Opt_PointParticleParameters {
 } Opt_PointParticleParameters;
 typedef struct Ark_PolygonOptions {
     /* kind: Interface */
-    Opt_Union_String_F64 width;
-    Opt_Union_String_F64 height;
+    Opt_Length width;
+    Opt_Length height;
 } Ark_PolygonOptions;
 typedef struct Opt_PolygonOptions {
     Ark_Tag tag;
@@ -16747,8 +16793,8 @@ typedef struct Opt_PolygonOptions {
 } Opt_PolygonOptions;
 typedef struct Ark_PolylineOptions {
     /* kind: Interface */
-    Opt_Union_String_F64 width;
-    Opt_Union_String_F64 height;
+    Opt_Length width;
+    Opt_Length height;
 } Ark_PolylineOptions;
 typedef struct Opt_PolylineOptions {
     Ark_Tag tag;
@@ -16802,6 +16848,7 @@ typedef struct Opt_PositionLengthMetricsInner {
 typedef struct Ark_PosterOptions {
     /* kind: Interface */
     Opt_Boolean showFirstFrame;
+    Opt_ContentTransitionEffect contentTransitionEffect;
 } Ark_PosterOptions;
 typedef struct Opt_PosterOptions {
     Ark_Tag tag;
@@ -16918,18 +16965,6 @@ typedef struct Opt_ReplaceSymbolEffect {
     Ark_Tag tag;
     Ark_ReplaceSymbolEffect value;
 } Opt_ReplaceSymbolEffect;
-typedef struct Ark_Resource {
-    /* kind: Interface */
-    Ark_String bundleName;
-    Ark_String moduleName;
-    Ark_Int64 id;
-    Opt_Array_Union_String_I32_I64_F64_Resource params;
-    Opt_Int32 type;
-} Ark_Resource;
-typedef struct Opt_Resource {
-    Ark_Tag tag;
-    Ark_Resource value;
-} Opt_Resource;
 typedef struct Ark_ResourceColor {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -16944,18 +16979,6 @@ typedef struct Opt_ResourceColor {
     Ark_Tag tag;
     Ark_ResourceColor value;
 } Opt_ResourceColor;
-typedef struct Ark_ResourceStr {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_String value0;
-        Ark_Resource value1;
-    };
-} Ark_ResourceStr;
-typedef struct Opt_ResourceStr {
-    Ark_Tag tag;
-    Ark_ResourceStr value;
-} Opt_ResourceStr;
 typedef struct Ark_RichEditorDeleteValue {
     /* kind: Interface */
     Ark_Int32 offset;
@@ -17045,10 +17068,10 @@ typedef struct Opt_RotateOptions {
 } Opt_RotateOptions;
 typedef struct Ark_RoundedRectOptions {
     /* kind: Interface */
-    Opt_Union_F64_String width;
-    Opt_Union_F64_String height;
-    Opt_Union_F64_String radiusWidth;
-    Opt_Union_F64_String radiusHeight;
+    Opt_Length width;
+    Opt_Length height;
+    Opt_Length radiusWidth;
+    Opt_Length radiusHeight;
 } Ark_RoundedRectOptions;
 typedef struct Opt_RoundedRectOptions {
     Ark_Tag tag;
@@ -17251,7 +17274,7 @@ typedef struct Opt_SliderConfiguration {
 } Opt_SliderConfiguration;
 typedef struct Ark_SliderShowStepOptions {
     /* kind: Interface */
-    Opt_Map_Number_SliderStepItemAccessibility stepsAccessibility;
+    Opt_Map_Float64_SliderStepItemAccessibility stepsAccessibility;
 } Ark_SliderShowStepOptions;
 typedef struct Opt_SliderShowStepOptions {
     Ark_Tag tag;
@@ -17961,6 +17984,18 @@ typedef struct Opt_Union_EdgeStyles_BorderStyle {
     Ark_Tag tag;
     Ark_Union_EdgeStyles_BorderStyle value;
 } Opt_Union_EdgeStyles_BorderStyle;
+typedef struct Ark_Union_F64_Array_F64 {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_Float64 value0;
+        Array_Float64 value1;
+    };
+} Ark_Union_F64_Array_F64;
+typedef struct Opt_Union_F64_Array_F64 {
+    Ark_Tag tag;
+    Ark_Union_F64_Array_F64 value;
+} Opt_Union_F64_Array_F64;
 typedef struct Ark_Union_F64_Bindable {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -18766,10 +18801,10 @@ typedef struct Opt_Union_Tuple_Double_Double_Array_ParticlePropertyAnimationNumb
 } Opt_Union_Tuple_Double_Double_Array_ParticlePropertyAnimationNumberInner;
 typedef struct Ark_ViewportRect {
     /* kind: Interface */
-    Opt_Union_F64_String x;
-    Opt_Union_F64_String y;
-    Opt_Union_F64_String width;
-    Opt_Union_F64_String height;
+    Opt_Length x;
+    Opt_Length y;
+    Opt_Length width;
+    Opt_Length height;
 } Ark_ViewportRect;
 typedef struct Opt_ViewportRect {
     Ark_Tag tag;
@@ -19395,19 +19430,6 @@ typedef struct Opt_Layoutable {
     Ark_Tag tag;
     Ark_Layoutable value;
 } Opt_Layoutable;
-typedef struct Ark_Length {
-    /* kind: UnionType */
-    Ark_Int32 selector;
-    union {
-        Ark_String value0;
-        Ark_Float64 value1;
-        Ark_Resource value2;
-    };
-} Ark_Length;
-typedef struct Opt_Length {
-    Ark_Tag tag;
-    Ark_Length value;
-} Opt_Length;
 typedef struct Ark_LengthConstrain {
     /* kind: Interface */
     Ark_Length minLength;
@@ -21339,8 +21361,8 @@ typedef struct Opt_Rectangle {
 } Opt_Rectangle;
 typedef struct Ark_RectOptions {
     /* kind: Interface */
-    Opt_Union_F64_String width;
-    Opt_Union_F64_String height;
+    Opt_Length width;
+    Opt_Length height;
     Opt_Union_Length_Array_RadiusItem radius;
 } Ark_RectOptions;
 typedef struct Opt_RectOptions {
@@ -25535,7 +25557,7 @@ typedef struct GENERATED_ArkUIPathModifier {
     void (*setPathOptions)(Ark_NativePointer node,
                            const Opt_PathOptions* options);
     void (*setCommands)(Ark_NativePointer node,
-                        const Opt_String* value);
+                        const Opt_ResourceStr* value);
 } GENERATED_ArkUIPathModifier;
 
 typedef struct GENERATED_ArkUIPatternLockModifier {
@@ -25662,9 +25684,9 @@ typedef struct GENERATED_ArkUIRectModifier {
     void (*setRectOptions)(Ark_NativePointer node,
                            const Opt_Union_RectOptions_RoundedRectOptions* options);
     void (*setRadiusWidth)(Ark_NativePointer node,
-                           const Opt_Union_F64_String* value);
+                           const Opt_Length* value);
     void (*setRadiusHeight)(Ark_NativePointer node,
-                            const Opt_Union_F64_String* value);
+                            const Opt_Length* value);
     void (*setRadius)(Ark_NativePointer node,
                       const Opt_Union_Length_Array_RadiusItem* value);
 } GENERATED_ArkUIRectModifier;
@@ -26283,7 +26305,7 @@ typedef struct GENERATED_ArkUIShapeModifier {
     void (*setFill)(Ark_NativePointer node,
                     const Opt_ResourceColor* value);
     void (*setStrokeDashOffset)(Ark_NativePointer node,
-                                const Opt_Union_F64_String* value);
+                                const Opt_Length* value);
     void (*setStrokeDashArray)(Ark_NativePointer node,
                                const Opt_Array_Length* value);
     void (*setStrokeLineCap)(Ark_NativePointer node,
@@ -26291,13 +26313,13 @@ typedef struct GENERATED_ArkUIShapeModifier {
     void (*setStrokeLineJoin)(Ark_NativePointer node,
                               const Opt_LineJoinStyle* value);
     void (*setStrokeMiterLimit)(Ark_NativePointer node,
-                                const Opt_Union_F64_String* value);
+                                const Opt_Length* value);
     void (*setStrokeOpacity)(Ark_NativePointer node,
                              const Opt_Union_F64_String_Resource* value);
     void (*setFillOpacity)(Ark_NativePointer node,
                            const Opt_Union_F64_String_Resource* value);
     void (*setStrokeWidth)(Ark_NativePointer node,
-                           const Opt_Union_F64_String* value);
+                           const Opt_Length* value);
     void (*setAntiAlias)(Ark_NativePointer node,
                          const Opt_Boolean* value);
     void (*setMesh)(Ark_NativePointer node,
@@ -28182,6 +28204,12 @@ typedef struct GENERATED_ArkUICanvasPathAccessor {
                  Ark_Float64 y,
                  Ark_Float64 w,
                  Ark_Float64 h);
+    void (*roundRect)(Ark_CanvasPath peer,
+                      Ark_Float64 x,
+                      Ark_Float64 y,
+                      Ark_Float64 w,
+                      Ark_Float64 h,
+                      const Opt_Union_F64_Array_F64* radii);
 } GENERATED_ArkUICanvasPathAccessor;
 
 typedef struct GENERATED_ArkUICanvasPatternAccessor {

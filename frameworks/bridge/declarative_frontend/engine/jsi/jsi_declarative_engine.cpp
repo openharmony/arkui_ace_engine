@@ -2982,6 +2982,11 @@ void JsiDeclarativeEngine::MediaQueryCallback(const std::string& callbackId, con
 
 void JsiDeclarativeEngine::RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) {}
 
+bool JsiDeclarativeEngine::OnMonitorForCrownEvents(const std::string& callbackId, const std::string& args)
+{
+    return false;
+}
+
 void JsiDeclarativeEngine::JsCallback(const std::string& callbackId, const std::string& args) {}
 
 void JsiDeclarativeEngine::RunGarbageCollection()

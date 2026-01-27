@@ -551,13 +551,15 @@ void JSRenderingContext::JsOn(const JSCallbackInfo& info)
         JSException::Throw(ERROR_CODE_PARAM_INVALID, "%s", "Input parameter error.");
         return;
     }
-    TAG_LOGI(AceLogTag::ACE_CANVAS, "Add %{public}s callback to Canvas.",
-        type == CanvasCallbackType::ON_ATTACH ? "onAttach" : "onDetach");
     auto jsFunc = AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(info[1]));
     std::function<void()> onFunc = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc), id = instanceId_,
                                        callbackType = type]() {
-        TAG_LOGI(AceLogTag::ACE_CANVAS, "Canvas is executing %{public}s callback.",
-            callbackType == CanvasCallbackType::ON_ATTACH ? "onAttach" : "onDetach");
+        auto pipeline = NG::PipelineContext::GetContextByContainerId(id);
+        CHECK_NULL_VOID(pipeline);
+        auto taskExecutor = pipeline->GetTaskExecutor();
+        if (!taskExecutor || !taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+            return;
+        }
         ContainerScope scope(id);
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         func->Execute();

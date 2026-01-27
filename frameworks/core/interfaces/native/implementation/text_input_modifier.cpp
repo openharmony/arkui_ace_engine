@@ -156,6 +156,11 @@ void SetTextInputOptionsImpl(Ark_NativePointer node,
     auto controller = TextFieldModelStatic::GetController(frameNode, placeholder, text);
     if (peerPtr) {
         peerPtr->SetController(controller);
+        auto styledStringCache = peerPtr->GetStyledStringCache();
+        if (styledStringCache) {
+            peerPtr->controller_->SetPlaceholderStyledString(styledStringCache);
+            peerPtr->SetStyledStringCache(nullptr);
+        }
     }
 }
 } // TextInputInterfaceModifier

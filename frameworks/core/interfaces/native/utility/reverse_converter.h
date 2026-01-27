@@ -30,7 +30,6 @@
 #include "base/geometry/ng/rect_t.h" // Using type
 #include "core/components_ng/pattern/slider/slider_model.h" // Inner types
 #include "core/components_ng/property/border_property.h" // Using type
-#include "frameworks/core/components_ng/pattern/text/span/span_object.h" // Using type DrawableLeadingMargin
 #include "interfaces/native/ui_input_event.h" // Unscoped enum types
 
 #include "arkoala_api_generated.h"
@@ -109,6 +108,7 @@ enum class TextAlign;
 enum class TextDecoration;
 enum class TextDecorationStyle;
 enum class TextDeleteDirection;
+enum class TextFlipDirection;
 enum class TextInputAction;
 enum class TextOverflow;
 enum class TouchType : size_t;
@@ -137,6 +137,7 @@ struct TextStyleResult;
 namespace NG {
 class NavDestinationContext;
 class NavigationTransitionProxy;
+class PanRecognizer;
 enum class DialogDismissReason;
 enum class NavigationMode;
 enum class NavigationOperation;
@@ -398,7 +399,6 @@ namespace OHOS::Ace::NG::Converter {
     void AssignArkValue(Ark_RenderExitReason& dst, const RenderExitReason& src);
     void AssignArkValue(Ark_RenderProcessNotRespondingReason& dst, const RenderProcessNotRespondingReason& src);
     void AssignArkValue(Ark_Resource& dst, const ResourceObject& src, ConvContext *ctx);
-    void AssignArkValue(Ark_ResourceColor& dst, const Color& src, ConvContext *ctx);
     void AssignArkValue(Ark_LinearGradientOptions& dst, const NG::Gradient& src, ConvContext *ctx);
     void AssignArkValue(Ark_RadialGradientOptions& dst, const NG::Gradient& src, ConvContext *ctx);
     void AssignArkValue(Ark_RichEditorDeleteDirection& dst, const RichEditorDeleteDirection& src);

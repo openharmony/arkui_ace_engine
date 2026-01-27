@@ -5285,10 +5285,10 @@ export class TypeChecker {
         return Placement.fromValue(ordinal)
     }
     static PlaybackSpeed_ToNumeric(value: PlaybackSpeed): int32 {
-        return value.valueOf()
+        return value.getOrdinal()
     }
     static PlaybackSpeed_FromNumeric(ordinal: int32): PlaybackSpeed {
-        return PlaybackSpeed.fromValue(ordinal)
+        return PlaybackSpeed.values()[ordinal]
     }
     static PlayMode_ToNumeric(value: PlayMode): int32 {
         return value.valueOf()

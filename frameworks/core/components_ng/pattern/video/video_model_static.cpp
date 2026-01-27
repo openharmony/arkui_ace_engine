@@ -131,6 +131,14 @@ void VideoModelStatic::SetShowFirstFrame(FrameNode* frameNode, bool showFirstFra
     videoPattern->UpdateShowFirstFrame(showFirstFrame);
 }
 
+void VideoModelStatic::SetContentTransition(FrameNode* frameNode, ContentTransitionType contentTransition)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
+    CHECK_NULL_VOID(videoPattern);
+    videoPattern->SetContentTransition(contentTransition);
+}
+
 void VideoModelStatic::SetProgressRate(FrameNode* frameNode, double progressRate)
 {
     CHECK_NULL_VOID(frameNode);

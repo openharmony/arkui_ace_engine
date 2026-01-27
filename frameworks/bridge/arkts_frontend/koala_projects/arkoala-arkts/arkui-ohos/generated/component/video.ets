@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2024-2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2024-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -24,7 +24,7 @@ import { ColorMetrics_serializer } from "./../Graphics"
 import { ImageAnalyzerConfig_serializer, ImageAnalyzerConfig, ImageAIOptions, ImageAIOptions_serializer } from "./imageCommon"
 import { ComponentBase } from "./../ComponentBase"
 import { PeerNode } from "./../PeerNode"
-import { ArkCommonMethodPeer, CommonMethod, ArkCommonMethodComponent, ArkCommonMethodStyle } from "./common"
+import { ArkCommonMethodPeer, CommonMethod, ContentTransitionEffect, ArkCommonMethodComponent, ArkCommonMethodStyle, ContentTransitionEffect_serializer } from "./common"
 import { ImageFit } from "./enums"
 import { VoidCallback } from "./units"
 import { ErrorCallback } from "@ohos.base"
@@ -391,16 +391,21 @@ export enum SeekMode {
     Accurate = 3
 }
 export enum PlaybackSpeed {
-    SPEED_FORWARD_0_75_X = 0,
-    Speed_Forward_0_75_X = 0,
-    SPEED_FORWARD_1_00_X = 1,
-    Speed_Forward_1_00_X = 1,
-    SPEED_FORWARD_1_25_X = 2,
-    Speed_Forward_1_25_X = 2,
-    SPEED_FORWARD_1_75_X = 3,
-    Speed_Forward_1_75_X = 3,
-    SPEED_FORWARD_2_00_X = 4,
-    Speed_Forward_2_00_X = 4
+    SPEED_FORWARD_0_75_X = "'0.75'",
+    Speed_Forward_0_75_X = "'0.75'",
+    SPEED_FORWARD_1_00_X = "'1.00'",
+    Speed_Forward_1_00_X = "'1.00'",
+    SPEED_FORWARD_1_25_X = "'1.25'",
+    Speed_Forward_1_25_X = "'1.25'",
+    SPEED_FORWARD_1_75_X = "'1.75'",
+    Speed_Forward_1_75_X = "'1.75'",
+    SPEED_FORWARD_2_00_X = "'2.00'",
+    Speed_Forward_2_00_X = "'2.00'",
+    SPEED_FORWARD_0_50_X = "'0.50'",
+    SPEED_FORWARD_1_50_X = "'1.50'",
+    SPEED_FORWARD_3_00_X = "'3.00'",
+    SPEED_FORWARD_0_25_X = "'0.25'",
+    SPEED_FORWARD_0_125_X = "'0.125'"
 }
 export interface FullscreenInfo {
     fullscreen: boolean;
@@ -413,6 +418,7 @@ export interface PlaybackInfo {
 }
 export interface PosterOptions {
     showFirstFrame?: boolean;
+    contentTransitionEffect?: ContentTransitionEffect;
 }
 export interface VideoOptions {
     src?: string | Resource;
@@ -696,7 +702,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
     }
     public onError(value: VoidCallback | ErrorCallback | undefined): this {
         if (this.checkPriority("onError")) {
-            hookVideoOnError(this, value);
+            hookVideoOnError(this, value)
         }
         return this
     }
@@ -740,7 +746,7 @@ export class ArkVideoComponent extends ArkCommonMethodComponent implements Video
     }
     public attributeModifier(value: AttributeModifier<VideoAttribute> | AttributeModifier<CommonMethod> | undefined): this {
         ModifierStateManager.INSTANCE.scope(() => {
-          hookVideoAttributeModifier(this, value);
+            hookVideoAttributeModifier(this, value);
         })
         return this
     }
@@ -829,6 +835,14 @@ export class PosterOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForContentTransitionEffect  = value.contentTransitionEffect
+        if (valueHolderForContentTransitionEffect !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForContentTransitionEffectTmpValue  = valueHolderForContentTransitionEffect!
+            ContentTransitionEffect_serializer.write(valueSerializer, valueHolderForContentTransitionEffectTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): PosterOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -838,7 +852,13 @@ export class PosterOptions_serializer {
             showFirstFrameTmpBuf = valueDeserializer.readBoolean()
         }
         const showFirstFrameTmpResult : boolean | undefined = showFirstFrameTmpBuf
-        let value : PosterOptions = ({showFirstFrame: showFirstFrameTmpResult} as PosterOptions)
+        const contentTransitionEffectTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let contentTransitionEffectTmpBuf : ContentTransitionEffect | undefined = undefined
+        if ((contentTransitionEffectTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            contentTransitionEffectTmpBuf = (ContentTransitionEffect_serializer.read(valueDeserializer) as ContentTransitionEffect)
+        }
+        const contentTransitionEffectTmpResult : ContentTransitionEffect | undefined = contentTransitionEffectTmpBuf
+        let value : PosterOptions = ({showFirstFrame: showFirstFrameTmpResult, contentTransitionEffect: contentTransitionEffectTmpResult} as PosterOptions)
         return value
     }
 }
@@ -876,7 +896,7 @@ export class VideoOptions_serializer {
             } else if (valueHolderForCurrentProgressRateTmpValue instanceof PlaybackSpeed) {
                 valueSerializer.writeInt8((2).toByte())
                 const valueHolderForCurrentProgressRateTmpValueForIdx2  = valueHolderForCurrentProgressRateTmpValue as PlaybackSpeed
-                valueSerializer.writeInt32(valueHolderForCurrentProgressRateTmpValueForIdx2.valueOf())
+                valueSerializer.writeInt32(valueHolderForCurrentProgressRateTmpValueForIdx2.getOrdinal())
             }
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
@@ -933,9 +953,9 @@ export class VideoOptions_serializer {
         if ((srcTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const srcTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let srcTmpBuf_ : string | Resource | undefined
-            if (srcTmpBuf_UnionSelector == (0).toChar()) {
+            if (srcTmpBuf_UnionSelector == (0).toByte()) {
                 srcTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (srcTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (srcTmpBuf_UnionSelector == (1).toByte()) {
                 srcTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for srcTmpBuf_ has to be chosen through deserialisation.")
@@ -948,12 +968,12 @@ export class VideoOptions_serializer {
         if ((currentProgressRateTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const currentProgressRateTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let currentProgressRateTmpBuf_ : double | string | PlaybackSpeed | undefined
-            if (currentProgressRateTmpBuf_UnionSelector == (0).toChar()) {
+            if (currentProgressRateTmpBuf_UnionSelector == (0).toByte()) {
                 currentProgressRateTmpBuf_ = valueDeserializer.readFloat64()
-            } else if (currentProgressRateTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (currentProgressRateTmpBuf_UnionSelector == (1).toByte()) {
                 currentProgressRateTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (currentProgressRateTmpBuf_UnionSelector == (2).toChar()) {
-                currentProgressRateTmpBuf_ = PlaybackSpeed.fromValue(valueDeserializer.readInt32())
+            } else if (currentProgressRateTmpBuf_UnionSelector == (2).toByte()) {
+                currentProgressRateTmpBuf_ = PlaybackSpeed.values()[valueDeserializer.readInt32()]
             } else {
                 throw new Error("One of the branches for currentProgressRateTmpBuf_ has to be chosen through deserialisation.")
             }
@@ -965,11 +985,11 @@ export class VideoOptions_serializer {
         if ((previewUriTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const previewUriTmpBuf_UnionSelector : int32 = valueDeserializer.readInt8()
             let previewUriTmpBuf_ : string | image.PixelMap | Resource | undefined
-            if (previewUriTmpBuf_UnionSelector == (0).toChar()) {
+            if (previewUriTmpBuf_UnionSelector == (0).toByte()) {
                 previewUriTmpBuf_ = (valueDeserializer.readString() as string)
-            } else if (previewUriTmpBuf_UnionSelector == (1).toChar()) {
+            } else if (previewUriTmpBuf_UnionSelector == (1).toByte()) {
                 previewUriTmpBuf_ = (image_PixelMap_serializer.read(valueDeserializer) as image.PixelMap)
-            } else if (previewUriTmpBuf_UnionSelector == (2).toChar()) {
+            } else if (previewUriTmpBuf_UnionSelector == (2).toByte()) {
                 previewUriTmpBuf_ = Resource_serializer.read(valueDeserializer)
             } else {
                 throw new Error("One of the branches for previewUriTmpBuf_ has to be chosen through deserialisation.")

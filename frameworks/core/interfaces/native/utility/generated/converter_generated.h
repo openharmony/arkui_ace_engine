@@ -1057,6 +1057,21 @@ void AssignUnionTo(std::optional<T>& dst,
 
 template<typename T>
 void AssignUnionTo(std::optional<T>& dst,
+                   const Ark_Union_F64_Array_F64& src)
+{
+    switch (src.selector) {
+        case SELECTOR_ID_0: AssignTo(dst, src.value0); break;
+        case SELECTOR_ID_1: AssignTo(dst, src.value1); break;
+        default:
+        {
+            LOGE("Unexpected src->selector: %{public}d\n", src.selector);
+            return;
+        }
+    }
+}
+
+template<typename T>
+void AssignUnionTo(std::optional<T>& dst,
                    const Ark_Union_EdgeStyles_BorderStyle& src)
 {
     switch (src.selector) {
@@ -4509,6 +4524,7 @@ ASSIGN_OPT(Opt_InterceptionModeCallback)
 ASSIGN_OPT(Opt_InterceptionShowCallback)
 ASSIGN_OPT(Opt_LoadingProgressModifierBuilder)
 ASSIGN_OPT(Opt_Map_AxisModel_Float64)
+ASSIGN_OPT(Opt_Map_Float64_SliderStepItemAccessibility)
 ASSIGN_OPT(Opt_Map_Int32_text_RunMetrics)
 ASSIGN_OPT(Opt_Map_SourceTool_Float64)
 ASSIGN_OPT(Opt_Map_String_ComponentContent)
@@ -4995,6 +5011,7 @@ ASSIGN_OPT(Opt_Union_Date_Bindable)
 ASSIGN_OPT(Opt_Union_DragPreviewMode_Array_DragPreviewMode)
 ASSIGN_OPT(Opt_Union_EdgeOutlineStyles_OutlineStyle)
 ASSIGN_OPT(Opt_Union_EdgeStyles_BorderStyle)
+ASSIGN_OPT(Opt_Union_F64_Array_F64)
 ASSIGN_OPT(Opt_Union_F64_Bindable)
 ASSIGN_OPT(Opt_Union_F64_Resource)
 ASSIGN_OPT(Opt_Union_F64_ResourceStr)

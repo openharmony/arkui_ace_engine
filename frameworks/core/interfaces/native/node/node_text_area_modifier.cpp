@@ -1295,6 +1295,14 @@ void ResetTextAreaTextOverflow(ArkUINodeHandle node)
     TextFieldModelNG::SetTextOverflow(frameNode, TextOverflow::DEFAULT);
 }
 
+int32_t GetTextAreaTextOverflow(ArkUINodeHandle node)
+{
+    int defaultTextOverflow = static_cast<int32_t>(TextOverflow::DEFAULT);
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, defaultTextOverflow);
+    return static_cast<int32_t>(TextFieldModelNG::GetTextOverflow(frameNode));
+}
+
 void SetTextAreaTextIndent(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* resRawPtr)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2446,6 +2454,13 @@ void ResetEllipsisMode(ArkUINodeHandle node)
     TextFieldModelNG::SetEllipsisMode(frameNode, ELLIPSIS_MODES[ELLIPSIS_MODE_TAIL]);
 }
 
+ArkUI_Int32 GetEllipsisMode(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(TextFieldModelNG::GetEllipsisMode(frameNode));
+}
+
 void SetStopBackPress(ArkUINodeHandle node, ArkUI_Uint32 value)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -2825,6 +2840,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .resetTextAreaCaretStyle = ResetTextAreaCaretStyle,
         .setTextAreaTextOverflow = SetTextAreaTextOverflow,
         .resetTextAreaTextOverflow = ResetTextAreaTextOverflow,
+        .getTextAreaTextOverflow = GetTextAreaTextOverflow,
         .setTextAreaTextIndent = SetTextAreaTextIndent,
         .resetTextAreaTextIndent = ResetTextAreaTextIndent,
         .setTextAreaLineSpacing = SetTextAreaLineSpacing,
@@ -2906,6 +2922,7 @@ const ArkUITextAreaModifier* GetTextAreaModifier()
         .setTextAreaBorderDash = SetTextAreaBorderDash,
         .setEllipsisMode = SetEllipsisMode,
         .resetEllipsisMode = ResetEllipsisMode,
+        .getEllipsisMode = GetEllipsisMode,
         .setTextAreaMinFontScale = SetTextAreaMinFontScale,
         .resetTextAreaMinFontScale = ResetTextAreaMinFontScale,
         .setTextAreaMaxFontScale = SetTextAreaMaxFontScale,

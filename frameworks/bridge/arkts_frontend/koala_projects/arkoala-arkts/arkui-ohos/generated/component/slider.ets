@@ -622,7 +622,7 @@ export interface SliderStepItemAccessibility {
     text?: ResourceStr;
 }
 export interface SliderShowStepOptions {
-    stepsAccessibility?: Map<number, SliderStepItemAccessibility>;
+    stepsAccessibility?: Map<double, SliderStepItemAccessibility>;
 }
 export interface SliderAttribute extends CommonMethod {
     setSliderOptions(options?: SliderOptions): this {
@@ -1161,7 +1161,7 @@ export class SliderShowStepOptions_serializer {
             for (const pair of valueHolderForStepsAccessibilityTmpValue) {
                 const valueHolderForStepsAccessibilityTmpValueKeyVar = pair[0]
                 const valueHolderForStepsAccessibilityTmpValueValueVar = pair[1]
-                valueSerializer.writeNumber(valueHolderForStepsAccessibilityTmpValueKeyVar)
+                valueSerializer.writeFloat64(valueHolderForStepsAccessibilityTmpValueKeyVar)
                 SliderStepItemAccessibility_serializer.write(valueSerializer, valueHolderForStepsAccessibilityTmpValueValueVar)
             }
         } else {
@@ -1171,19 +1171,19 @@ export class SliderShowStepOptions_serializer {
     public static read(buffer: DeserializerBase): SliderShowStepOptions {
         let valueDeserializer : DeserializerBase = buffer
         const stepsAccessibilityTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
-        let stepsAccessibilityTmpBuf : Map<number, SliderStepItemAccessibility> | undefined = undefined
+        let stepsAccessibilityTmpBuf : Map<double, SliderStepItemAccessibility> | undefined = undefined
         if ((stepsAccessibilityTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
             const stepsAccessibilityTmpBuf_SizeVar : int32 = valueDeserializer.readInt32()
-            let stepsAccessibilityTmpBuf_ : Map<number, SliderStepItemAccessibility> = new Map<number, SliderStepItemAccessibility>()
+            let stepsAccessibilityTmpBuf_ : Map<double, SliderStepItemAccessibility> = new Map<double, SliderStepItemAccessibility>()
             // TODO: TS map resize
             for (let stepsAccessibilityTmpBuf_IVar = 0; stepsAccessibilityTmpBuf_IVar < stepsAccessibilityTmpBuf_SizeVar; stepsAccessibilityTmpBuf_IVar++) {
-                const stepsAccessibilityTmpBuf_KeyVar : number = (valueDeserializer.readNumber() as number)
+                const stepsAccessibilityTmpBuf_KeyVar : double = valueDeserializer.readFloat64()
                 const stepsAccessibilityTmpBuf_ValueVar : SliderStepItemAccessibility = SliderStepItemAccessibility_serializer.read(valueDeserializer)
                 stepsAccessibilityTmpBuf_.set(stepsAccessibilityTmpBuf_KeyVar, stepsAccessibilityTmpBuf_ValueVar)
             }
             stepsAccessibilityTmpBuf = stepsAccessibilityTmpBuf_
         }
-        const stepsAccessibilityTmpResult : Map<number, SliderStepItemAccessibility> | undefined = stepsAccessibilityTmpBuf
+        const stepsAccessibilityTmpResult : Map<double, SliderStepItemAccessibility> | undefined = stepsAccessibilityTmpBuf
         let value : SliderShowStepOptions = ({stepsAccessibility: stepsAccessibilityTmpResult} as SliderShowStepOptions)
         return value
     }

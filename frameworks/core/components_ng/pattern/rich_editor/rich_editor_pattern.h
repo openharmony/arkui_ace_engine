@@ -642,6 +642,7 @@ public:
     int32_t CalculateDeleteLength(int32_t length, bool isBackward);
     void DeleteBackward(int32_t length = 1) override;
     void DeleteBackward(int32_t length, TextChangeReason reason, bool isByIME = false);
+    int32_t OnInjectionEvent(const std::string& command) override;
     void DeleteBackwardFunction();
 #ifndef ACE_UNITTEST
     void DeleteSpans(const RangeOptions& options, TextChangeReason reason);
@@ -1498,6 +1499,7 @@ private:
     friend class RichEditorLayoutAlgorithm;
     friend class RichEditorPaintMethod;
     friend class RichEditorScrollController;
+    bool ParseCommand(const std::string& command);
     bool HandleUrlSpanClickEvent(const GestureEvent& info);
     void HandleUrlSpanForegroundClear();
     bool HandleUrlSpanShowShadow(const Offset& localLocation, const Offset& globalOffset, const Color& color);

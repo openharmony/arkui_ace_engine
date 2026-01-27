@@ -907,12 +907,12 @@ void BubblePattern::UpdateStyleOption(BlurStyle blurStyle, bool needUpdateShadow
 
 void BubblePattern::UpdateShadow()
 {
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
+    CHECK_NULL_VOID(childNode);
+    auto renderContext = childNode->GetRenderContext();
     if (IsShadowStyle()) {
-        auto host = GetHost();
-        CHECK_NULL_VOID(host);
-        auto childNode = AceType::DynamicCast<FrameNode>(host->GetFirstChild());
-        CHECK_NULL_VOID(childNode);
-        auto renderContext = childNode->GetRenderContext();
         CHECK_EQUAL_VOID(renderContext->HasBackShadow(), false);
         auto shadow = renderContext->GetBackShadow().value();
         auto context = host->GetContext();
@@ -923,6 +923,10 @@ void BubblePattern::UpdateShadow()
         if (shadowTheme) {
             shadow = shadowTheme->GetShadow(shadowStyle, colorMode);
         }
+        renderContext->UpdateBackShadow(shadow);
+    } else if (SystemProperties::ConfigChangePerform() && shadow_.has_value()) {
+        auto shadow = shadow_.value();
+        shadow.ReloadResources();
         renderContext->UpdateBackShadow(shadow);
     }
 }
@@ -1042,6 +1046,19 @@ void BubblePattern::UpdateWidth(const CalcDimension& dimension)
     }
     host->MarkModifyDone();
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+}
+
+void BubblePattern::UpdateBubbleGradient(const int32_t index, const Color& result, bool isOutlineGradient)
+{
+    if (isOutlineGradient) {
+        if (outlineLinearGradient_.gradientColors.size() > index) {
+            outlineLinearGradient_.gradientColors[index].gradientColor = result;
+        }
+    } else {
+        if (innerBorderLinearGradient_.gradientColors.size() > index) {
+            innerBorderLinearGradient_.gradientColors[index].gradientColor = result;
+        }
+    }
 }
 
 void BubblePattern::UpdateRadius(const CalcDimension& dimension)

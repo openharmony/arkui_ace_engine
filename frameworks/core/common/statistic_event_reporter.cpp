@@ -17,6 +17,7 @@
 
 #include "base/thread/task_executor.h"
 #include "core/common/ace_application_info.h"
+#include "core/common/container.h"
 #include "core/common/statistic_event_adapter.h"
 #include "core/pipeline/pipeline_base.h"
 
@@ -27,6 +28,17 @@ constexpr int32_t MAX_PENDING_EVENT_COUNT = 20;
 StatisticEventReporter::StatisticEventReporter()
 {
     appInfo_.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+}
+
+StatisticEventReporter::StatisticEventReporter(int32_t instanceId)
+{
+    auto container = Container::GetContainer(instanceId);
+    if (!container) {
+        appInfo_.bundleName = AceApplicationInfo::GetInstance().GetPackageName();
+        return;
+    }
+    auto bundleName = container->GetBundleName();
+    appInfo_.bundleName = bundleName != "" ? bundleName : AceApplicationInfo::GetInstance().GetPackageName();
 }
 
 StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eventType)

@@ -19,6 +19,18 @@
 
 struct TextContentControllerBasePeer {
     using TextFieldController = OHOS::Ace::RefPtr<OHOS::Ace::TextFieldControllerBase>;
+
+    void SetStyledStringCache(const OHOS::Ace::RefPtr<OHOS::Ace::SpanStringBase>& styledString)
+    {
+        styledStringCache_ = styledString;
+    }
+
+    OHOS::Ace::RefPtr<OHOS::Ace::SpanStringBase> GetStyledStringCache() const
+    {
+        return styledStringCache_;
+    }
+
     TextFieldController controller_;
+    OHOS::Ace::RefPtr<OHOS::Ace::SpanStringBase> styledStringCache_;
 };
 #endif // FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_TEXT_CONTENT_CONTROLLER_BASE_PEER_H

@@ -136,7 +136,7 @@ public:
     void AddFormRenderDiedCallback(FormRenderDiedCallback&& callback);
     void OnActionEventHandle(const std::string& action);
     void SetAllowUpdate(bool allowUpdate);
-    void OnActionEvent(const std::string& action);
+    void OnActionEvent(const std::string& action, bool isManuallyClick);
     void DispatchPointerEvent(const std::shared_ptr<MMI::PointerEvent>& pointerEvent,
         SerializedGesture& serializedGesture);
     void AddRenderDelegate();
@@ -262,7 +262,7 @@ private:
     bool isMultiInstanceEnable_ = false;
 #ifdef OHOS_STANDARD_SYSTEM
     void OnRouterActionEvent(const std::string& action);
-    void OnCallActionEvent(const std::string& action);
+    void OnCallActionEvent(const std::string& action, bool isManuallyClick);
     int64_t runningCardId_ = -1;
     std::string runningCompId_;
     std::mutex wantCacheMutex_;

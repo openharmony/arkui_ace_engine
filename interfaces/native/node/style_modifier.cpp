@@ -5397,11 +5397,10 @@ int32_t SetRichEditorDataDetectorConfig(ArkUI_NodeHandle node, const ArkUI_Attri
  
     ArkUITextDetectConfigStruct arkUITextDetectConfig;
     std::string typesString;
-    for (size_t i = 0; i < item->size; i++) {
+    for (auto i = 0; i < item->size; i++) {
         ArkUI_TextDataDetectorType value = dataDetectorConfig->types[i];
-        auto index = static_cast<size_t>(value);;
-        CHECK_NULL_RETURN(index >= 0 && index < static_cast<int32_t>(TEXT_DETECT_TYPES.size()),
-            ERROR_CODE_PARAM_INVALID);
+        auto index = static_cast<size_t>(value);
+        CHECK_NULL_RETURN(index >= 0 && index < TEXT_DETECT_TYPES.size(), ERROR_CODE_PARAM_INVALID);
         if (i != 0) {
             typesString.append(",");
         }
@@ -13175,6 +13174,118 @@ void ResetTextMinLines(ArkUI_NodeHandle node)
     fullImpl->getNodeModifiers()->getTextModifier()->resetTextMinLines(node->uiNodeHandle);
 }
 
+int32_t SetTextInputEllipsisMode(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setEllipsisMode(
+        node->uiNodeHandle, static_cast<uint32_t>(item->value[0].i32));
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetTextInputEllipsisMode(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextInputModifier()->getEllipsisMode(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetTextInputEllipsisMode(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextInputModifier()->resetEllipsisMode(node->uiNodeHandle);
+}
+
+int32_t SetTextInputTextOverflow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (item->value[0].i32 < 0 || item->value[0].i32 > static_cast<int32_t>(ARKUI_TEXT_OVERFLOW_MARQUEE)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getTextInputModifier()->setTextInputTextOverflow(
+        node->uiNodeHandle, static_cast<uint32_t>(item->value[0].i32));
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextInputTextOverflow(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextInputModifier()->resetTextInputTextOverflow(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetTextInputTextOverflow(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_numberValues[0].i32 =
+        fullImpl->getNodeModifiers()->getTextInputModifier()->getTextInputTextOverflow(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+int32_t SetTextAreaEllipsisMode(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setEllipsisMode(
+        node->uiNodeHandle, static_cast<uint32_t>(item->value[0].i32));
+    return ERROR_CODE_NO_ERROR;
+}
+
+const ArkUI_AttributeItem* GetTextAreaEllipsisMode(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_numberValues[0].i32 = fullImpl->getNodeModifiers()->getTextAreaModifier()->getEllipsisMode(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
+void ResetTextAreaEllipsisMode(ArkUI_NodeHandle node)
+{
+    auto* fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->resetEllipsisMode(node->uiNodeHandle);
+}
+
+int32_t SetTextAreaTextOverflow(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
+{
+    auto* fullImpl = GetFullImpl();
+    auto actualSize = CheckAttributeItemArray(item, REQUIRED_ONE_PARAM);
+    if (actualSize < 0) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    if (item->value[0].i32 < 0 || item->value[0].i32 > static_cast<int32_t>(ARKUI_TEXT_OVERFLOW_MARQUEE)) {
+        return ERROR_CODE_PARAM_INVALID;
+    }
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->setTextAreaTextOverflow(
+        node->uiNodeHandle, static_cast<uint32_t>(item->value[0].i32));
+    return ERROR_CODE_NO_ERROR;
+}
+
+void ResetTextAreaTextOverflow(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    fullImpl->getNodeModifiers()->getTextAreaModifier()->resetTextAreaTextOverflow(node->uiNodeHandle);
+}
+
+const ArkUI_AttributeItem* GetTextAreaTextOverflow(ArkUI_NodeHandle node)
+{
+    auto fullImpl = GetFullImpl();
+    g_numberValues[0].i32 =
+        fullImpl->getNodeModifiers()->getTextAreaModifier()->getTextAreaTextOverflow(node->uiNodeHandle);
+    g_attributeItem.size = REQUIRED_ONE_PARAM;
+    return &g_attributeItem;
+}
+
 int32_t SetLineHeightMultiple(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
 {
     auto* fullImpl = GetFullImpl();
@@ -19854,8 +19965,8 @@ int32_t SetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ar
         SetTextInputShowKeyBoardOnFocus, SetTextInputNumberOfLines, SetLetterSpacing, SetEnablePreviewText,
         SetTextInputHalfLeading, SetTextInputKeyboardAppearance, SetTextInputEnableAutoFillAnimation,
         SetTextInputLineHeight, SetSelectDetectorEnable, nullptr, SetTextInputShowCounter,
-        TextInputBaseControllerAttribute, nullptr, nullptr, SetCompressLeadingPunctuation, SetIncludeFontPadding,
-        SetFallbackLineSpacing, SetTextInputDirection, SetSelectedDragPreviewStyle };
+        TextInputBaseControllerAttribute, SetTextInputEllipsisMode, nullptr, SetCompressLeadingPunctuation, SetIncludeFontPadding,
+        SetFallbackLineSpacing, SetTextInputDirection, SetSelectedDragPreviewStyle, SetTextInputTextOverflow };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -19874,8 +19985,8 @@ const ArkUI_AttributeItem* GetTextInputAttribute(ArkUI_NodeHandle node, int32_t 
         GetTextInputSelectionMenuHidden, GetBlurOnSubmit, GetInputCustomKeyboard, GetTextInputWordBreak,
         GetTextInputShowKeyBoardOnFocus, GetTextInputNumberOfLines, GetLetterSpacing, GetEnablePreviewText,
         GetTextInputHalfLeading, GetTextInputKeyboardAppearance, GetTextInputEnableAutoFillAnimation, GetTextInputLineHeight,
-        GetSelectDetectorEnable, nullptr, GetTextInputShowCounter, nullptr, nullptr, nullptr, GetCompressLeadingPunctuation,
-        GetIncludeFontPadding, GetFallbackLineSpacing, GetTextInputDirection, GetSelectedDragPreviewStyle };
+        GetSelectDetectorEnable, nullptr, GetTextInputShowCounter, nullptr, GetTextInputEllipsisMode, nullptr, GetCompressLeadingPunctuation,
+        GetIncludeFontPadding, GetFallbackLineSpacing, GetTextInputDirection, GetSelectedDragPreviewStyle, GetTextInputTextOverflow };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -19894,9 +20005,9 @@ void ResetTextInputAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextInputSelectionMenuHidden, ResetBlurOnSubmit, ResetInputCustomKeyboard, ResetTextInputWordBreak,
         ResetTextInputShowKeyBoardOnFocus, ResetTextInputNumberOfLines, ResetLetterSpacing, ResetEnablePreviewText,
         ResetTextInputHalfLeading, ResetTextInputKeyboardAppearance, ResetTextInputEnableAutoFillAnimation,
-        ResetTextInputLineHeight, ResetSelectDetectorEnable, nullptr, ResetTextInputShowCounter, nullptr, nullptr,
+        ResetTextInputLineHeight, ResetSelectDetectorEnable, nullptr, ResetTextInputShowCounter, nullptr, ResetTextInputEllipsisMode,
         nullptr, ResetCompressLeadingPunctuation, ResetIncludeFontPadding, ResetFallbackLineSpacing,
-        ResetTextInputDirection, ResetSelectedDragPreviewStyle };
+        ResetTextInputDirection, ResetSelectedDragPreviewStyle, ResetTextInputTextOverflow };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textinput node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;
@@ -19916,9 +20027,9 @@ int32_t SetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId, const Ark
         SetLetterSpacing, SetEnablePreviewText, SetTextInputHalfLeading, SetTextInputKeyboardAppearance,
         SetTextAreaMaxLines, SetTextAreaLineSpacing, SetTextAreaMinLines, SetTextAreaMaxLinesWithScroll,
         SetTextAreaLineHeight, SetTextAreaBarState, SetSelectDetectorEnable, nullptr,
-        SetTextAreaScrollBarColor, SetTextAreaCustomKeyboard, TextAreaBaseControllerAttribute, nullptr, nullptr,
+        SetTextAreaScrollBarColor, SetTextAreaCustomKeyboard, TextAreaBaseControllerAttribute, SetTextAreaEllipsisMode, nullptr,
         SetCompressLeadingPunctuation, SetIncludeFontPadding, SetFallbackLineSpacing, nullptr, SetTextAreaDirection,
-        SetSelectedDragPreviewStyle };
+        SetSelectedDragPreviewStyle, SetTextAreaTextOverflow };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Setter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return ERROR_CODE_NATIVE_IMPL_TYPE_NOT_SUPPORTED;
@@ -19936,9 +20047,9 @@ const ArkUI_AttributeItem* GetTextAreaAttribute(ArkUI_NodeHandle node, int32_t s
         GetTextInputNumberOfLines, GetLetterSpacing, GetEnablePreviewText, GetTextInputHalfLeading,
         GetTextInputKeyboardAppearance, GetTextAreaMaxLines, GetTextAreaLineSpacing, GetTextAreaMinLines,
         GetTextAreaMaxLines, GetTextAreaLineHeight, GetTextAreaBarState, GetSelectDetectorEnable,
-        nullptr, GetTextAreaScrollBarColor, GetTextAreaCustomKeyboard, nullptr, nullptr, nullptr,
+        nullptr, GetTextAreaScrollBarColor, GetTextAreaCustomKeyboard, nullptr, GetTextAreaEllipsisMode, nullptr,
         GetCompressLeadingPunctuation, GetIncludeFontPadding, GetFallbackLineSpacing, nullptr, GetTextAreaDirection,
-        GetSelectedDragPreviewStyle };
+        GetSelectedDragPreviewStyle, GetTextAreaTextOverflow };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(getters) / sizeof(Getter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea span node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return nullptr;
@@ -19959,9 +20070,9 @@ void ResetTextAreaAttribute(ArkUI_NodeHandle node, int32_t subTypeId)
         ResetTextInputShowKeyBoardOnFocus, ResetTextInputNumberOfLines, ResetLetterSpacing, ResetEnablePreviewText,
         ResetTextInputHalfLeading, ResetTextInputKeyboardAppearance, ResetTextAreaMaxLines, ResetTextAreaLineSpacing,
         ResetTextAreaMinLines, ResetTextAreaMaxLinesWithScroll, ResetTextAreaLineHeight, ResetTextAreaBarState,
-        ResetSelectDetectorEnable, nullptr, ResetTextAreaScrollBarColor, ResetTextAreaCustomKeyboard, nullptr, nullptr,
+        ResetSelectDetectorEnable, nullptr, ResetTextAreaScrollBarColor, ResetTextAreaCustomKeyboard, nullptr, ResetTextAreaEllipsisMode,
         nullptr, ResetCompressLeadingPunctuation, ResetIncludeFontPadding, ResetFallbackLineSpacing, nullptr,
-        ResetTextAreaDirection, ResetSelectedDragPreviewStyle };
+        ResetTextAreaDirection, ResetSelectedDragPreviewStyle, ResetTextAreaTextOverflow };
     if (static_cast<uint32_t>(subTypeId) >= sizeof(setters) / sizeof(Resetter*)) {
         TAG_LOGE(AceLogTag::ACE_NATIVE_NODE, "textarea node attribute: %{public}d NOT IMPLEMENT", subTypeId);
         return;

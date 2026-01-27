@@ -97,7 +97,7 @@ FrontendDelegateImpl::FrontendDelegateImpl(const FrontendDelegateImplBuilder& bu
       manifestParser_(AceType::MakeRefPtr<ManifestParser>()),
       jsAccessibilityManager_(AccessibilityNodeManager::Create()),
       mediaQueryInfo_(AceType::MakeRefPtr<MediaQueryInfo>()), taskExecutor_(builder.taskExecutor),
-      callNativeHandler_(builder.callNativeHandler)
+      callNativeHandler_(builder.callNativeHandler), onCrownEventCallback_(builder.onCrownEventCallback)
 {}
 
 FrontendDelegateImpl::~FrontendDelegateImpl()
@@ -494,6 +494,7 @@ void FrontendDelegateImpl::OnNewRequest(const std::string& data)
 
 void FrontendDelegateImpl::CallPopPage()
 {
+    ClearMonitorForCrownEvents();
     std::lock_guard<std::mutex> lock(mutex_);
     auto& currentPage = pageRouteStack_.back();
     if (!pageRouteStack_.empty() && currentPage.alertCallback) {
@@ -618,6 +619,7 @@ void FrontendDelegateImpl::PushWithCallback(const std::string& uri, const std::s
 void FrontendDelegateImpl::Push(const std::string& uri, const std::string& params,
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
+    ClearMonitorForCrownEvents();
     if (uri.empty()) {
         LOGE("router.Push uri is empty");
         return;
@@ -670,6 +672,7 @@ void FrontendDelegateImpl::ReplaceWithCallback(const std::string& uri, const std
 void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& params,
     const std::function<void(const std::string&, int32_t)>& errorCallback)
 {
+    ClearMonitorForCrownEvents();
     if (uri.empty()) {
         LOGE("router.Replace uri is empty");
         return;
@@ -691,6 +694,7 @@ void FrontendDelegateImpl::Replace(const std::string& uri, const std::string& pa
 
 void FrontendDelegateImpl::Back(const std::string& uri, const std::string& params)
 {
+    ClearMonitorForCrownEvents();
     auto pipelineContext = pipelineContextHolder_.Get();
     {
         std::lock_guard<std::mutex> lock(mutex_);
@@ -1966,6 +1970,28 @@ void FrontendDelegateImpl::CancelAnimationFrame(const std::string& callbackId)
     } else {
         LOGW("cancelAnimationFrame callbackId not found");
     }
+}
+
+void FrontendDelegateImpl::SetMonitorForCrownEvents(const std::string& callbackId)
+{
+    auto crownEventTask =
+        ([callbackId, call = onCrownEventCallback_, weak = AceType::WeakClaim(this)](const std::string& args) -> bool {
+            auto delegate = weak.Upgrade();
+            if (delegate && call) {
+                return call(callbackId, args);
+            }
+            return false;
+        });
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->RequestCrownEventMonitor(crownEventTask);
+}
+
+void FrontendDelegateImpl::ClearMonitorForCrownEvents()
+{
+    auto pipelineContext = AceType::DynamicCast<PipelineContext>(pipelineContextHolder_.Get());
+    CHECK_NULL_VOID(pipelineContext);
+    pipelineContext->RequestCrownEventMonitor({});
 }
 
 void FrontendDelegateImpl::FlushAnimationTasks()

@@ -182,6 +182,36 @@ void RectImpl(Ark_CanvasPath peer,
     auto ph = Converter::Convert<double>(h);
     peerImpl->Path2DRect(px, py, pw, ph);
 }
+void RoundRectImpl(Ark_CanvasPath peer, Ark_Float64 x, Ark_Float64 y, Ark_Float64 w, Ark_Float64 h,
+    const Opt_Union_F64_Array_F64* radii)
+{
+    CHECK_NULL_VOID(peer);
+    auto peerImpl = reinterpret_cast<CanvasPathPeerImpl*>(peer);
+    CHECK_NULL_VOID(peerImpl);
+    auto px = Converter::Convert<double>(x);
+    auto py = Converter::Convert<double>(y);
+    auto pw = Converter::Convert<double>(w);
+    auto ph = Converter::Convert<double>(h);
+    Converter::VisitUnion(
+        *radii,
+        [x = px, y = py, width = pw, height = ph, weak = AceType::WeakClaim(peerImpl)](const Ark_Float64& value) {
+            auto peer = weak.Upgrade();
+            CHECK_NULL_VOID(peer);
+            auto radiiVal = Converter::Convert<double>(value);
+            peer->Path2DRoundRect(x, y, width, height, radiiVal);
+        },
+        [x = px, y = py, width = pw, height = ph, weak = AceType::WeakClaim(peerImpl)](const Array_Float64& value) {
+            auto peer = weak.Upgrade();
+            CHECK_NULL_VOID(peer);
+            auto radiiVal = Converter::Convert<std::vector<double>>(value);
+            peer->Path2DRoundRect(x, y, width, height, radiiVal);
+        },
+        [x = px, y = py, width = pw, height = ph, weak = AceType::WeakClaim(peerImpl)]() {
+            auto peer = weak.Upgrade();
+            CHECK_NULL_VOID(peer);
+            peer->Path2DRoundRect(x, y, width, height);
+        });
+}
 } // CanvasPathAccessor
 const GENERATED_ArkUICanvasPathAccessor* GetCanvasPathAccessor()
 {
@@ -198,6 +228,7 @@ const GENERATED_ArkUICanvasPathAccessor* GetCanvasPathAccessor()
         CanvasPathAccessor::MoveToImpl,
         CanvasPathAccessor::QuadraticCurveToImpl,
         CanvasPathAccessor::RectImpl,
+        CanvasPathAccessor::RoundRectImpl,
     };
     return &CanvasPathAccessorImpl;
 }

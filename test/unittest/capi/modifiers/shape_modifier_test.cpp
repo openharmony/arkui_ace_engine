@@ -36,7 +36,7 @@ using namespace OHOS::Ace::NG::Converter;
 namespace {
 using OneTestColorStep = std::pair<Opt_ResourceColor, std::string>;
 using OneUnionNumStrResStep = std::pair<Opt_Union_F64_String_Resource, std::string>;
-using OneUnionNumStrStep = std::pair<Opt_Union_F64_String, double>;
+using OneUnionNumStrStep = std::pair<Opt_Length, double>;
 
 // Names
 constexpr auto ATTRIBUTE_WIDTH_NAME = "width";
@@ -101,10 +101,10 @@ public:
 Ark_ViewportRect BuildViewPort(double x, double y, double width, double height)
 {
     Ark_ViewportRect viewPort;
-    viewPort.x = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(x);
-    viewPort.y = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(y);
-    viewPort.width = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(width);
-    viewPort.height = Converter::ArkUnion<Opt_Union_F64_String, Ark_Float64>(height);
+    viewPort.x = Converter::ArkValue<Opt_Length>(x);
+    viewPort.y = Converter::ArkValue<Opt_Length>(y);
+    viewPort.width = Converter::ArkValue<Opt_Length>(width);
+    viewPort.height = Converter::ArkValue<Opt_Length>(height);
     return viewPort;
 }
 
@@ -184,24 +184,24 @@ HWTEST_F(ShapeModifierTest, setFillTest, TestSize.Level1)
  */
 HWTEST_F(ShapeModifierTest, DISABLED_setStrokeDashOffset, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Opt_Union_F64_String, std::string>;
+    using OneTestStep = std::pair<Opt_Length, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Opt_Union_F64_String, Ark_Float64>(1.), "1.00vp" },
-        { ArkUnion<Opt_Union_F64_String, Ark_Float64>(0.), "0.00px" },
-        { ArkUnion<Opt_Union_F64_String, Ark_Float64>(2.45), "2.45vp" },
-        { ArkUnion<Opt_Union_F64_String, Ark_Float64>(-2.45), "0.00px" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("5px"), "5.00px" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("22.35px"), "22.35px" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("7vp"), "7.00vp" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("1.65vp"), "1.65vp" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("65fp"), "65.00fp" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("4.3fp"), "4.30fp" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("11lpx"), "11.00lpx" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("0.5lpx"), "0.50lpx" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("3"), "3.00fp" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>(""), "0.00px" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("10.65"), "10.65fp" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("23%"), "0.00px" },
+        { ArkUnion<Opt_Length, Ark_Float64>(1.), "1.00vp" },
+        { ArkUnion<Opt_Length, Ark_Float64>(0.), "0.00px" },
+        { ArkUnion<Opt_Length, Ark_Float64>(2.45), "2.45vp" },
+        { ArkUnion<Opt_Length, Ark_Float64>(-2.45), "0.00px" },
+        { ArkUnion<Opt_Length, Ark_String>("5px"), "5.00px" },
+        { ArkUnion<Opt_Length, Ark_String>("22.35px"), "22.35px" },
+        { ArkUnion<Opt_Length, Ark_String>("7vp"), "7.00vp" },
+        { ArkUnion<Opt_Length, Ark_String>("1.65vp"), "1.65vp" },
+        { ArkUnion<Opt_Length, Ark_String>("65fp"), "65.00fp" },
+        { ArkUnion<Opt_Length, Ark_String>("4.3fp"), "4.30fp" },
+        { ArkUnion<Opt_Length, Ark_String>("11lpx"), "11.00lpx" },
+        { ArkUnion<Opt_Length, Ark_String>("0.5lpx"), "0.50lpx" },
+        { ArkUnion<Opt_Length, Ark_String>("3"), "3.00fp" },
+        { ArkUnion<Opt_Length, Ark_String>(""), "0.00px" },
+        { ArkUnion<Opt_Length, Ark_String>("10.65"), "10.65fp" },
+        { ArkUnion<Opt_Length, Ark_String>("23%"), "0.00px" },
     };
 
     std::unique_ptr<JsonValue> jsonValue;
@@ -336,24 +336,24 @@ HWTEST_F(ShapeModifierTest, setStrokeLineJoinTestInvalidValues, TestSize.Level1)
  */
 HWTEST_F(ShapeModifierTest, setStrokeMiterLimitTest, TestSize.Level1)
 {
-    using OneTestStep = std::pair<Opt_Union_F64_String, std::string>;
+    using OneTestStep = std::pair<Opt_Length, std::string>;
     static const std::vector<OneTestStep> testPlan = {
-        { ArkUnion<Opt_Union_F64_String, Ark_Float64>(1.), "1.000000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_Float64>(0.), "1.000000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_Float64>(2.45), "2.450000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("5px"), "4.000000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("22.35px"), "4.000000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("7vp"), "4.000000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("1.65vp"), "4.000000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("65fp"), "4.000000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("4.3fp"), "4.000000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("11lpx"), "4.000000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("0.5lpx"), "4.000000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("3"), "3.000000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("-3"), "1.000000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>(""), "4.000000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("10.65"), "10.650000" },
-        { ArkUnion<Opt_Union_F64_String, Ark_String>("23%"), "1.000000" },
+        { ArkUnion<Opt_Length, Ark_Float64>(1.), "1.000000" },
+        { ArkUnion<Opt_Length, Ark_Float64>(0.), "1.000000" },
+        { ArkUnion<Opt_Length, Ark_Float64>(2.45), "2.450000" },
+        { ArkUnion<Opt_Length, Ark_String>("5px"), "4.000000" },
+        { ArkUnion<Opt_Length, Ark_String>("22.35px"), "4.000000" },
+        { ArkUnion<Opt_Length, Ark_String>("7vp"), "4.000000" },
+        { ArkUnion<Opt_Length, Ark_String>("1.65vp"), "4.000000" },
+        { ArkUnion<Opt_Length, Ark_String>("65fp"), "4.000000" },
+        { ArkUnion<Opt_Length, Ark_String>("4.3fp"), "4.000000" },
+        { ArkUnion<Opt_Length, Ark_String>("11lpx"), "4.000000" },
+        { ArkUnion<Opt_Length, Ark_String>("0.5lpx"), "4.000000" },
+        { ArkUnion<Opt_Length, Ark_String>("3"), "3.000000" },
+        { ArkUnion<Opt_Length, Ark_String>("-3"), "1.000000" },
+        { ArkUnion<Opt_Length, Ark_String>(""), "4.000000" },
+        { ArkUnion<Opt_Length, Ark_String>("10.65"), "10.650000" },
+        { ArkUnion<Opt_Length, Ark_String>("23%"), "1.000000" },
     };
 
     std::unique_ptr<JsonValue> jsonValue;
@@ -441,13 +441,13 @@ HWTEST_F(ShapeModifierTest, setStrokeWidthTestValidValues, TestSize.Level1)
     double result;
 
     static const std::vector<OneUnionNumStrStep> UNION_NUM_STR_RES_TEST_PLAN = {
-        { ArkUnion<Opt_Union_F64_String, Ark_Float64>(1.0), 1.0f },
-        { ArkUnion<Opt_Union_F64_String, Ark_Float64>(0.0), 0.0f },
-        { ArkUnion<Opt_Union_F64_String, Ark_Float64>(2.45), 2.45f },
-        { ArkUnion<Opt_Union_F64_String, Ark_Float64>(5.0), 5.0f },
-        { ArkUnion<Opt_Union_F64_String, Ark_Float64>(22.35), 22.35f },
-        { ArkUnion<Opt_Union_F64_String, Ark_Float64>(-0.1), 0.0f },
-        { ArkUnion<Opt_Union_F64_String, Ark_Float64>(-5.0), 0.0f },
+        { ArkUnion<Opt_Length, Ark_Float64>(1.0), 1.0f },
+        { ArkUnion<Opt_Length, Ark_Float64>(0.0), 0.0f },
+        { ArkUnion<Opt_Length, Ark_Float64>(2.45), 2.45f },
+        { ArkUnion<Opt_Length, Ark_Float64>(5.0), 5.0f },
+        { ArkUnion<Opt_Length, Ark_Float64>(22.35), 22.35f },
+        { ArkUnion<Opt_Length, Ark_Float64>(-0.1), 0.0f },
+        { ArkUnion<Opt_Length, Ark_Float64>(-5.0), 0.0f },
     };
 
     for (const auto &[value, expected]: UNION_NUM_STR_RES_TEST_PLAN) {

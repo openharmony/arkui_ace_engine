@@ -256,17 +256,17 @@ void UiReportStub::OnGetWebInfoByRequestInner(MessageParcel& data)
 {
     uint32_t windowId = data.ReadUint32();
     int32_t webId = data.ReadInt32();
+    std::string request = data.ReadString();
     sptr<LargeStringAshmem> largeStringAshmem = data.ReadParcelable<LargeStringAshmem>();
     if (!largeStringAshmem) {
         LOGW("OnGetWebInfoByRequestInner read LargeStringAshmem failed");
         return;
     }
-    std::string request = "";
-    if (!largeStringAshmem->ReadFromAshmem(request)) {
-        LOGW("OnGetWebInfoByRequestInner read request failed");
+    std::string result = "";
+    if (!largeStringAshmem->ReadFromAshmem(result)) {
+        LOGW("OnGetWebInfoByRequestInner read result failed");
         return;
     }
-    std::string result = data.ReadString();
     WebRequestErrorCode errorCode = static_cast<WebRequestErrorCode>(data.ReadInt32());
     SendWebInfoRequestResult(windowId, webId, request, result, errorCode);
 }
@@ -577,7 +577,6 @@ void UiReportStub::SendExeAppAIFunctionResult(uint32_t result)
         exeAppAIFunctionCallback_(result);
     }
 }
-
 
 void UiReportStub::RegisterContentChangeCallback(
     const std::function<void(ChangeType type, const std::string& simpleTree)> callback)

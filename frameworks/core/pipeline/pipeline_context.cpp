@@ -1747,13 +1747,31 @@ double GetCrownRotateVP(const CrownEvent& event)
     return vp;
 }
 
-bool PipelineContext::OnNonPointerEvent(const NonPointerEvent& nonPointerEvent)
+bool PipelineContext::OnMonitorForCrownEvents(const CrownEvent &crownEvent)
+{
+    if (crownEventMonitorCallback_) {
+        std::string args = std::string("{\"timestamp\":")
+                               .append(std::to_string(crownEvent.timeStamp.time_since_epoch().count()))
+                               .append(", \"angularVelocity\":")
+                               .append(std::to_string(crownEvent.angularVelocity))
+                               .append(", \"degree\":")
+                               .append(std::to_string(crownEvent.degree))
+                               .append("}");
+        return crownEventMonitorCallback_(args);
+    }
+    return false;
+}
+
+bool PipelineContext::OnNonPointerEvent(const NonPointerEvent &nonPointerEvent)
 {
     CHECK_RUN_ON(UI);
     if (nonPointerEvent.eventType == UIInputEventType::KEY) {
         return OnKeyEvent(nonPointerEvent);
     } else if (nonPointerEvent.eventType == UIInputEventType::CROWN) {
         const auto& crownEvent = static_cast<const CrownEvent&>(nonPointerEvent);
+        if (OnMonitorForCrownEvents(crownEvent)) {
+            return true;
+        }
         RotationEvent rotationEvent;
         rotationEvent.value = GetCrownRotateVP(crownEvent);
         return OnRotationEvent(rotationEvent);

@@ -208,7 +208,7 @@ struct ListFilterRow {
       } else if (typeof resource === 'string') {
         resourceString = resource as string;
       } else {
-        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
         resourceString = (uiContent as common.UIAbilityContext).resourceManager
           .getStringSync((resource as Resource).id) as string;
       }
@@ -468,7 +468,7 @@ struct MultiFilterRow {
       } else if (typeof resource === 'string') {
         resourceString = resource as string;
       } else {
-        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
         resourceString = (uiContent as common.UIAbilityContext).resourceManager
           .getStringSync((resource as Resource).id) as string;
       }
@@ -1043,7 +1043,7 @@ export struct Filter {
       } else if (typeof resource === 'string') {
         resourceString = resource as string;
       } else {
-        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
         resourceString = (uiContent as common.UIAbilityContext).resourceManager
           .getStringSync((resource as Resource).id) as string;
       }
@@ -1122,7 +1122,7 @@ export struct Filter {
       const selectedValueFilters = this.selectedFilters?.filter(item => item?.value !== undefined)
         .map((item: FilterResult): ResourceStr => {
           if (typeof item.value !== 'string') {
-            let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+            let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
             return (uiContent as common.UIAbilityContext).resourceManager
               .getStringSync((item.value as Resource).id as Long)
           } else {
@@ -1143,7 +1143,7 @@ export struct Filter {
       if (typeof resource === 'string') {
         resourceString = resource as string;
       } else {
-        let uiContent: Context | undefined = UIContext.getFocusedUIContext()?.getHostContext();
+        let uiContent: Context | undefined = UIContext.resolveUIContext()?.getHostContext();
         resourceString = (uiContent as common.UIAbilityContext).resourceManager.
         getStringSync((resource as Resource).id as Long)
       }

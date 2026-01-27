@@ -1882,8 +1882,6 @@ export class ArkRichEditorComponent extends ArkCommonMethodComponent implements 
 export function RichEditorImpl(
     @memo
     style: ((attributes: RichEditorAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkRichEditorComponent>((): ArkRichEditorComponent => {
         return new ArkRichEditorComponent()
@@ -1892,7 +1890,6 @@ export function RichEditorImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 
