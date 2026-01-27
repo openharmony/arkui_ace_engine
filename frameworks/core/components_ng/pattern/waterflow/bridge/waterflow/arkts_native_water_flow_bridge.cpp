@@ -1609,7 +1609,7 @@ ArkUINativeModuleValue WaterFlowBridge::SetJSItemConstraintSize(ArkUIRuntimeCall
     RefPtr<ResourceObject> resObjMaxHeight;
     auto minWidthValue = ArkTSUtils::GetProperty(vm, sizeObj, "minWidth");
     CalcDimension minWidth;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, minWidthValue, minWidth, resObjMinWidth)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, minWidthValue, minWidth, resObjMinWidth, false)) {
         std::string calcMinWidthStr = minWidth.Unit() == DimensionUnit::CALC ? minWidth.CalcValue() : "";
         GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMinWidth(nativeNode,
             static_cast<ArkUI_Float32>(minWidth.Value()), static_cast<int32_t>(minWidth.Unit()),
@@ -1618,7 +1618,7 @@ ArkUINativeModuleValue WaterFlowBridge::SetJSItemConstraintSize(ArkUIRuntimeCall
 
     auto maxWidthValue = ArkTSUtils::GetProperty(vm, sizeObj, "maxWidth");
     CalcDimension maxWidth;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, maxWidthValue, maxWidth, resObjMaxWidth)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, maxWidthValue, maxWidth, resObjMaxWidth, false)) {
         std::string calcMaxWidthStr = maxWidth.Unit() == DimensionUnit::CALC ? maxWidth.CalcValue() : "";
         GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMaxWidth(nativeNode,
             static_cast<ArkUI_Float32>(maxWidth.Value()), static_cast<int32_t>(maxWidth.Unit()),
@@ -1627,7 +1627,7 @@ ArkUINativeModuleValue WaterFlowBridge::SetJSItemConstraintSize(ArkUIRuntimeCall
 
     auto minHeightValue = ArkTSUtils::GetProperty(vm, sizeObj, "minHeight");
     CalcDimension minHeight;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, minHeightValue, minHeight, resObjMinHeight)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, minHeightValue, minHeight, resObjMinHeight, false)) {
         std::string calcMinHeightStr = minHeight.Unit() == DimensionUnit::CALC ? minHeight.CalcValue() : "";
         GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMinHeight(nativeNode,
             static_cast<ArkUI_Float32>(minHeight.Value()), static_cast<int32_t>(minHeight.Unit()),
@@ -1636,7 +1636,7 @@ ArkUINativeModuleValue WaterFlowBridge::SetJSItemConstraintSize(ArkUIRuntimeCall
 
     auto maxHeightValue = ArkTSUtils::GetProperty(vm, sizeObj, "maxHeight");
     CalcDimension maxHeight;
-    if (ArkTSUtils::ParseJsDimensionVp(vm, maxHeightValue, maxHeight, resObjMaxHeight)) {
+    if (ArkTSUtils::ParseJsDimensionVp(vm, maxHeightValue, maxHeight, resObjMaxHeight, false)) {
         std::string calcMaxHeightStr = maxHeight.Unit() == DimensionUnit::CALC ? maxHeight.CalcValue() : "";
         GetArkUINodeModifiers()->getWaterFlowModifier()->setItemMaxHeight(nativeNode,
             static_cast<ArkUI_Float32>(maxHeight.Value()), static_cast<int32_t>(maxHeight.Unit()),
