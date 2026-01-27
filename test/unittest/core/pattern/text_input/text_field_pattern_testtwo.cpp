@@ -952,6 +952,9 @@ HWTEST_F(TextFieldPatternTestTwo, UpdateErrorTextMargin001, TestSize.Level0)
     // set showError and update error textmargin
     pattern->SetShowError();
     pattern->UpdateErrorTextMargin();
+
+    // use showErrorOnTV
+    pattern->SetShowErrorForTV();
 }
 
 /**

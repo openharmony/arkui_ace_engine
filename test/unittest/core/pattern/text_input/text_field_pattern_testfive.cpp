@@ -198,6 +198,9 @@ HWTEST_F(TextFieldPatternTestFive, SetShowError001, TestSize.Level0)
     paintProperty->ResetBorderWidthFlagByUser();
     pattern_->SetShowError();
     ASSERT_EQ(paintProperty->GetInnerBorderWidthValue(), Dimension(1.0_vp));
+
+    // use showErrorOnTV
+    pattern_->SetShowErrorForTV();
 }
 
 /**
