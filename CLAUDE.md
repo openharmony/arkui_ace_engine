@@ -2,6 +2,166 @@
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Knowledge Base
+
+This project maintains a comprehensive knowledge base for in-depth component analysis and development guidance:
+
+### Component Knowledge Base
+
+- **[Menu Component Knowledge Base](docs/pattern/menu/Menu_Knowledge_Base.md)** - Complete guide for Menu component
+  - Legacy Menu vs NG Menu architecture comparison
+  - JS bridge integration (JsBindMenu, JsBindContextMenu)
+  - Pattern/Model/Property/Algorithm layer analysis
+  - Lifecycle management and event handling
+  - Layout algorithms and paint methods
+  - Test coverage and debugging guides
+
+**Usage**: When user asks about Menu-related functionality (menu creation, binding, events, layout, styling, testing), **automatically reference** the Menu Knowledge Base for comprehensive information.
+
+### Skills & Guidelines
+
+- **[TDD Writing Guidelines](.claude/skills/tdd/)** - Test-driven development best practices
+  - 7 core principles for TDD
+  - Test templates and examples
+  - Common pitfalls and solutions
+  - Mandatory self-checklist
+
+**Usage**: When writing unit tests or TDD test cases, reference this guide for standardized testing practices.
+
+## Core Working Principles
+
+### 1. Code Verification: Actual Code Only
+
+When answering questions about ace_engine code:
+
+- **Always provide actual code from the repository**
+  - Use Read/Grep tools to locate and read actual source code
+  - Reference complete file paths when mentioning code (e.g., `frameworks/core/xxx/yyy.cpp:123`)
+  - Never guess or fabricate code implementations
+
+- **Missing information triggers user feedback**
+  - If required code is not found in ace_engine, explicitly state: "此代码在 ace_engine 中未找到"
+  - Do not make assumptions or write hypothetical code
+  - Ask user to provide the missing implementation
+
+**Example**:
+
+```cpp
+// ✅ Correct: Read actual source
+// Source: frameworks/core/components_ng/pattern/menu/menu_pattern.cpp:123
+Size GetSubWindowSize(int32_t parentContainerId, uint32_t displayId)
+{
+    auto finalDisplayId = displayId;
+    auto defaultDisplay = Rosen::DisplayManager::GetInstance().GetDisplayById(displayId);
+    // ... actual implementation
+}
+
+// ❌ Wrong: Fabricated code
+// Do not write hypothetical implementations without verification
+```
+
+### 2. Speculation Management
+
+When dealing with uncertain or incomplete information:
+
+- **Explicitly label speculation**
+  - Clearly mark any unverified content as: "推测" (speculation)
+  - Provide reasoning for the speculation when possible
+  - Request user confirmation for speculative statements
+
+- **Verify before implementation**
+  - If speculating about behavior, first use Grep/Read to verify
+  - If implementation is not found in ace_engine, ask user to provide it
+  - Never implement based on speculation alone
+
+**Example**:
+
+```markdown
+✅ Correct:
+基于 menu_pattern.cpp:123 的分析，推测 OnModifyDone 在以下情况下会被调用...（推测）
+
+❌ Wrong:
+OnModifyDone 会在以下情况下调用...（未标注推测）
+```
+
+### 3. Code Logic Verification: Code Over Suggestions
+
+When receiving suggestions or corrections:
+
+- **Verify suggestions against actual code**
+  - User suggestions about code logic may be incorrect
+  - Always verify with Read/Grep tools before accepting suggestions
+  - Base conclusions on actual code behavior, not assumptions
+
+- **Evidence-based reasoning**
+  - When user questions code behavior, analyze actual implementation
+  - Use "代码为准原则" (Code-first principle)
+  - Provide evidence from source code to support or refute suggestions
+
+**Example**:
+
+```
+User: "这个函数应该在初始化时调用，对吗？"
+Claude: 让我先查看源码验证...
+[Read source file]
+根据 frameworks/xxx/yyy.cpp:456，该函数实际上是在 OnDirtyLayoutWrapperSwap 时调用，而非初始化时。
+```
+
+### 4. Error Learning: Knowledge Base Updates
+
+When errors are corrected by users:
+
+- **Learn from corrections**
+  - Document the error and correction in knowledge base
+  - Identify root cause of the misunderstanding
+  - Add preventive measures to avoid similar errors
+
+- **Update documentation**
+  - Create or update knowledge base entries with correct information
+  - Reference actual code locations (file:line)
+  - Share lessons learned across sessions
+
+**Example**:
+
+```markdown
+## Learned Lessons
+
+### Error: Incorrect GetSubWindowSize Branch Coverage
+**Date**: 2025-01-27
+**Issue**: Assumed defaultDisplay is always available
+**Root Cause**: Did not verify Rosen::DisplayManager dependency
+**Correction**: User clarified that mock infrastructure is required
+**Prevention**: Always verify external dependencies with user before assuming availability
+**Reference**: adapter/ohos/entrance/subwindow/subwindow_ohos.cpp:199-243
+```
+
+### 5. Knowledge Base Maintenance
+
+When discovering discrepancies between documentation and actual code:
+
+- **Verify actual code first**
+  - Use Read/Grep to confirm current implementation
+  - Compare documented behavior with actual code
+
+- **Update documentation**
+  - Fix incorrect information in knowledge base files
+  - Update code references (file paths, line numbers)
+  - Ensure all examples match actual code
+
+- **Notify user**
+  - Report discovered discrepancies
+  - Propose corrections for approval
+  - Document the correction after update
+
+**Example**:
+```
+Discrepancy Found:
+Documented: frameworks/xxx/yyy.cpp:299 calls UpdateBorderRadius
+Actual: frameworks/xxx/yyy.cpp:303 calls UpdateBorderRadius (after code refactoring)
+
+Action: Updating knowledge base to reflect current code location...
+```
+
 ## Project Overview
 
 **ACE Engine** (`@ohos/ace_engine`) is the core execution framework for ArkUI applications in OpenHarmony. It provides comprehensive support for applications developed using ArkTS-based declarative development paradigm, delivering complete capabilities from component parsing to rendering.
