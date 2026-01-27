@@ -86,6 +86,7 @@ public:
     virtual void ResetStrokeRadius() {}
     virtual void SetBorderRadius(const Dimension& value) {}
     virtual void ResetBorderRadius() {}
+    virtual void SetGradientColorResObj(const NG::Gradient& value) = 0;
     virtual void CreateWithResourceObj(JsProgressResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) = 0;
     virtual void SetCapsuleStyleFontColor(bool value) = 0;
     virtual void SetCapsuleStyle(bool value) = 0;

@@ -822,6 +822,23 @@ void ProgressModelNG::SetProgressColor(FrameNode* frameNode, const RefPtr<Resour
     pattern->AddResObj(key, resObj, std::move(updateFunc));
 }
 
+void ProgressModelNG::SetGradientColorResObj(const NG::Gradient& value)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    CHECK_NULL_VOID(frameNode);
+    auto pattern = frameNode->GetPattern();
+    CHECK_NULL_VOID(pattern);
+    RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>("", "", -1);
+    auto&& updateFunc = [value, weak = AceType::WeakClaim(frameNode)](const RefPtr<ResourceObject>& resObj) {
+        auto frameNode = weak.Upgrade();
+        CHECK_NULL_VOID(frameNode);
+        NG::Gradient& gradientValue = const_cast<NG::Gradient&>(value);
+        gradientValue.ReloadResources();
+        SetGradientColor(AceType::RawPtr(frameNode), gradientValue);
+    };
+    pattern->AddResObj("progress.color", resObj, std::move(updateFunc));
+}
+
 void ProgressModelNG::SetLSStrokeWidth(FrameNode* frameNode, const RefPtr<ResourceObject>& resObj)
 {
     CHECK_NULL_VOID(frameNode);

@@ -257,7 +257,19 @@ void ProgressModifier::StartCapsuleSweepingAnimationImpl(float value, float spee
 void ProgressModifier::SetRingProgressColor(const Gradient& color)
 {
     CHECK_NULL_VOID(ringProgressColors_);
-    ringProgressColors_->Set(GradientArithmetic(color));
+    AnimationOption option;
+    option.SetCurve(Curves::LINEAR);
+    option.SetDuration(0);
+
+    auto pattern = pattern_.Upgrade();
+    auto host = pattern ? pattern->GetHost() : nullptr;
+    auto context = host ? host->GetContextRefPtr() : nullptr;
+    auto propertyCallback = [weak = WeakClaim(this), color]() {
+        auto progressModifier = weak.Upgrade();
+        CHECK_NULL_VOID(progressModifier);
+        progressModifier->SetGradientColor(color);
+    };
+    AnimationUtils::Animate(option, propertyCallback, nullptr, nullptr, context);
 }
 
 void ProgressModifier::SetPaintShadow(bool paintShadow)
@@ -313,7 +325,6 @@ void ProgressModifier::SetInVisibleArea(bool value)
         }
     }
 }
-
 
 void ProgressModifier::StopAllLoopAnimation()
 {

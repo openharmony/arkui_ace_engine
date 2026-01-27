@@ -20,6 +20,7 @@
 #include "ui/properties/color.h"
 
 #include "base/memory/referenced.h"
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace::Framework {
 class JSLinearGradient final : public Referenced {
@@ -32,9 +33,15 @@ public:
         return gradient_;
     }
 
+    std::vector<std::pair<RefPtr<ResourceObject>, RefPtr<ResourceObject>>> GetGradientResObj()
+    {
+        return gradientResObj_;
+    }
+
 private:
     friend class JSLinearGradientBinding;
     std::vector<std::pair<Color, Dimension>> gradient_;
+    std::vector<std::pair<RefPtr<ResourceObject>, RefPtr<ResourceObject>>> gradientResObj_;
     ACE_DISALLOW_COPY_AND_MOVE(JSLinearGradient);
 };
 } // namespace OHOS::Ace::Framework
