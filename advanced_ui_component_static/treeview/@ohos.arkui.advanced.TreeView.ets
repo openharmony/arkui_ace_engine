@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -3018,8 +3018,8 @@ export class ListNodeDataSource extends BasicDataSource {
   }
 
   public clearTimeOutAboutDelayHighLightAndExpand(currentIndex: number): void {
-    if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has(this.lastPassId as number)) {
-      let index: number = this.loadedNodeIdAndIndexMap.get(this.lastPassId as number) as number;
+    if (this.lastPassId !== this.INITIAL_INVALID_VALUE && this.loadedNodeIdAndIndexMap.has((this.lastPassId as int).toDouble())) {
+      let index: number = this.loadedNodeIdAndIndexMap.get((this.lastPassId as int).toDouble()) as number;
       this.listNode.forEach((value) => {
         if (value.getNodeCurrentNodeId() === this.lastPassId) {
           value.setCanShowFlagLine(false);
