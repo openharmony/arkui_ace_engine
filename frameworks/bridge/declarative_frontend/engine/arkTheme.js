@@ -1125,6 +1125,7 @@ class ArkThemeWhiteList {
         return false;
     }
 }
+// Keep whiteList sorted A~Z (binary search depends on it).
 ArkThemeWhiteList.whiteList = [
     'AlphabetIndexer',
     'Badge',

@@ -785,7 +785,6 @@ ArkUINativeModuleValue RadioBridge::SetRadioResponseRegion(ArkUIRuntimeCallInfo*
     int32_t regionUnits[length];
     if (isJsView) {
         if (!ArkTSUtils::ParseJsResponseRegion(vm, valueArg, regionArray, regionUnits, length)) {
-            GetArkUINodeModifiers()->getRadioModifier()->resetRadioResponseRegion(nativeNode);
             return panda::JSValueRef::Undefined(vm);
         }
     } else if (!ArkTSUtils::ParseResponseRegion(vm, valueArg, regionArray, regionUnits, length)) {
@@ -952,11 +951,11 @@ ArkUINativeModuleValue RadioBridge::SetMarginByJs(ArkUIRuntimeCallInfo* runtimeC
         return panda::JSValueRef::Undefined(vm);
     }
     ArkUIPaddingType margins;
-    std::vector<RefPtr<ResourceObject>> resObjs;
     CalcDimension topDimen(0, DimensionUnit::VP);
     CalcDimension bottomDimen(0, DimensionUnit::VP);
     CalcDimension startDimen(0, DimensionUnit::VP);
     CalcDimension endDimen(0, DimensionUnit::VP);
+    std::vector<RefPtr<ResourceObject>> resObjs;
     if (marginArg->IsObject(vm)) {
         bool useLengthMetrics = false;
         auto jsObj = marginArg->ToObject(vm);
@@ -973,7 +972,7 @@ ArkUINativeModuleValue RadioBridge::SetMarginByJs(ArkUIRuntimeCallInfo* runtimeC
             ArkTSUtils::ParseMargin(vm, GetProperty(vm, jsObj, "end"), endDimen, margins.end, resObjs);
         }
         if (margins.start.isSet || margins.end.isSet || margins.top.isSet || margins.bottom.isSet) {
-            auto rawPtr = static_cast<void*>(&resObjs);
+            auto rawPtr = useLengthMetrics ? nullptr : static_cast<void*>(&resObjs);
             GetArkUINodeModifiers()->getRadioModifier()->setRadioMarginByJs(&margins, useLengthMetrics, rawPtr, true);
             return panda::JSValueRef::Undefined(vm);
         }
@@ -990,7 +989,6 @@ ArkUINativeModuleValue RadioBridge::SetMarginByJs(ArkUIRuntimeCallInfo* runtimeC
     auto rawPtr = static_cast<void*>(&resObjs);
     GetArkUINodeModifiers()->getRadioModifier()->setRadioMarginByJs(&margins, false, rawPtr, true);
     return panda::JSValueRef::Undefined(vm);
-    ;
 }
 
 ArkUINativeModuleValue RadioBridge::SetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)

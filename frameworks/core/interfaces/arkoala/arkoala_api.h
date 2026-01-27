@@ -5021,17 +5021,6 @@ struct ArkUISliderModifier {
         ArkUI_Float32 (*stop)[ARKUI_SLIDER_LINEAR_GRADIENT_LIMIT]);
     void (*createSlider)(ArkUI_Float32 value, ArkUI_Float32 step, ArkUI_Float32 min, ArkUI_Float32 max);
     ArkUINodeHandle (*createSliderFrameNode)(ArkUI_Uint32 nodeId);
-    void (*sliderPatternUpdateValue)(ArkUINodeHandle node, ArkUI_Float32 value);
-    void (*sliderLayoutPropertyUpdatePadding)(ArkUINodeHandle node, ArkUIPaddingType value);
-    void (*sliderLayoutPropertyUpdateLayoutWeight)(ArkUINodeHandle node, ArkUI_Float32 value);
-    void (*sliderEventHubSetOnChange)(ArkUINodeHandle node, void* callback);
-    void (*sliderPaintPropertyUpdateMin)(ArkUINodeHandle node, ArkUI_Float32 value);
-    void (*sliderPaintPropertyUpdateMax)(ArkUINodeHandle node, ArkUI_Float32 value);
-    void (*sliderPaintPropertyUpdateSelectGradientColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*sliderPaintPropertyUpdateSelectIsResourceColor)(ArkUINodeHandle node, ArkUI_Bool value);
-    void (*sliderPaintPropertyUpdateTrackBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color);
-    void (*sliderPaintPropertyUpdateTrackBackgroundIsResourceColor)(ArkUINodeHandle node, ArkUI_Bool value);
-    void (*sliderPaintPropertyUpdateValue)(ArkUINodeHandle node, ArkUI_Float32 value);
     void (*setOnChangeEvent)(void* callback);
     void (*setOnSliderChange)(ArkUINodeHandle node, void* extraParam);
 };
