@@ -28,7 +28,8 @@ constexpr uint32_t SCROLLBAR_DRAG_FRAME_RATE_TYPE = (1 << 3);
 constexpr uint32_t SPLIT_DRAG_FRAME_RATE_TYPE = (1 << 4);
 constexpr uint32_t PICKER_DRAG_FRAME_RATE_TYPE = (1 << 5);
 constexpr uint32_t SCROLLABLE_MULTI_TASK_FRAME_RATE_TYPE = (1 << 6);
-constexpr uint32_t ACE_COMPONENT_FRAME_RATE_TYPE = 0b1111111;
+constexpr uint32_t WEB_FRAME_RATE_TYPE = (1 << 7);
+constexpr uint32_t ACE_COMPONENT_FRAME_RATE_TYPE = 0b11111111;
 // animator
 constexpr uint32_t ANIMATION_STATE_FIRST_FRAME = (1 << 12);
 constexpr uint32_t RS_ANIMATION_FRAME_RATE_TYPE = (1 << 13);
