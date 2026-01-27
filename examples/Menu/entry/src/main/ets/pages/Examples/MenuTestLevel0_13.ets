@@ -45,7 +45,7 @@ struct MenuTestLevel0_13 {
   @State subMenuMode: SubMenuExpandingMode = 0
 
   //divider测试参数
-  @State MenuDividerTestList: (DividerStyleOptions | undefined)[] = [
+  @State menuDividerTestList: (DividerStyleOptions | undefined)[] = [
   //1
     ,
     //2
@@ -277,8 +277,8 @@ struct MenuTestLevel0_13 {
         endIcon: this.iconStr2,
       })
     }
-    .menuItemDivider(this.MenuDividerTestList[this.index[0]])
-    .menuItemGroupDivider(this.MenuDividerTestList[this.index[0]])
+    .menuItemDivider(this.menuDividerTestList[this.index[0]])
+    .menuItemGroupDivider(this.menuDividerTestList[this.index[0]])
   }
   @Builder
   MenuBuilder_Divider(){
@@ -326,8 +326,8 @@ struct MenuTestLevel0_13 {
     }
     .subMenuExpandingMode(this.subMenuMode)
     .backgroundColor('#D2CAB3')
-    .menuItemDivider(this.MenuDividerTestList[this.index[0]])
-    .menuItemGroupDivider(this.MenuDividerTestList[this.index[0]])
+    .menuItemDivider(this.menuDividerTestList[this.index[0]])
+    .menuItemGroupDivider(this.menuDividerTestList[this.index[0]])
   }
 
   //
@@ -391,15 +391,12 @@ struct MenuTestLevel0_13 {
             startIcon: $r('app.media.app_icon'), 
             content: 'item选项-1' 
         })
-      }
-
-      else if (this.dividerLayoutInfo === 'item布局') {
+      } else if (this.dividerLayoutInfo === 'item布局') {
         MenuItem({ 
             startIcon: $r('app.media.app_icon'), 
             content: 'item选项-1' 
         })
-      }
-      else if (this.dividerLayoutInfo === 'group布局') {
+      } else if (this.dividerLayoutInfo === 'group布局') {
         MenuItemGroup({ header: '小标题' }) {
           MenuItem({
             startIcon: this.iconStr,
@@ -412,8 +409,7 @@ struct MenuTestLevel0_13 {
             content: 'group选项-1',
           })
         }
-      }
-      else if (this.dividerLayoutInfo === 'group特殊布局') {
+      } else if (this.dividerLayoutInfo === 'group特殊布局') {
         this.MenuItemGroupBuilder_inRow()
       }
 
@@ -544,19 +540,19 @@ struct MenuTestLevel0_13 {
           Row({space:2}){
             Text(`${this.index[0] + 1}` + ' / ')
               .fontSize(9)
-            Text(`${this.MenuDividerTestList.length}`)
+            Text(`${this.menuDividerTestList.length}`)
               .key('paramSets_key_0')
               .fontSize(9)
             MyComponent({ title: 'Test0+', func: () => {
               this.index[0]++
-              if (this.index[0] == this.MenuDividerTestList.length) {
+              if (this.index[0] == this.menuDividerTestList.length) {
                 this.index[0] = 0
               }
             } })
             MyComponent({ title: 'Test0-', func: () => {
               this.index[0]--
               if (this.index[0] <= -1) {
-                this.index[0] = this.MenuDividerTestList.length - 1
+                this.index[0] = this.menuDividerTestList.length - 1
               }
             } })
           }

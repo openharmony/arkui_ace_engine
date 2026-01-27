@@ -44,16 +44,14 @@ struct MenuTestLevel0_21 {
           MyComponent({title: '隐藏Target窗口', func: () => {
             if (this.targetVisible == Visibility.Visible) {
               this.targetVisible = Visibility.None
-            }
-            else {
+            } else {
               this.targetVisible = Visibility.Visible
             }
           }})
           MyComponent({title: '隐藏UEC窗口', func: () => {
             if (this.uecVisible == Visibility.Visible) {
               this.uecVisible = Visibility.None
-            }
-            else {
+            } else {
               this.uecVisible = Visibility.Visible
             }
           }})
