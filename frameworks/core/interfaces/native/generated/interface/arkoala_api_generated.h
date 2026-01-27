@@ -22480,6 +22480,7 @@ typedef struct Ark_ContextMenuOptions {
     Opt_Position anchorPosition;
     Opt_MenuKeyboardAvoidMode keyboardAvoidMode;
     Opt_LengthMetrics minKeyboardAvoidDistance;
+    Opt_uiMaterial_Material systemMaterial;
 } Ark_ContextMenuOptions;
 typedef struct Opt_ContextMenuOptions {
     Ark_Tag tag;
@@ -22716,6 +22717,7 @@ typedef struct Ark_MenuOptions {
     Opt_Boolean showInSubWindow;
     Opt_MenuKeyboardAvoidMode keyboardAvoidMode;
     Opt_LengthMetrics minKeyboardAvoidDistance;
+    Opt_uiMaterial_Material systemMaterial;
 } Ark_MenuOptions;
 typedef struct Opt_MenuOptions {
     Ark_Tag tag;
@@ -26288,6 +26290,8 @@ typedef struct GENERATED_ArkUISelectModifier {
                                  const Opt_MenuKeyboardAvoidMode* value);
     void (*setMinKeyboardAvoidDistance)(Ark_NativePointer node,
                                         const Opt_LengthMetrics* value);
+    void (*setMenuSystemMaterial)(Ark_NativePointer node,
+                              const Opt_uiMaterial_Material* value);
     void (*setMenuAlign)(Ark_NativePointer node,
                          const Opt_MenuAlignType* alignType,
                          const Opt_Offset* offset);

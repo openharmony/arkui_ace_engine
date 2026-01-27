@@ -84,6 +84,8 @@ public:
     static ArkUINativeModuleValue ResetMenuKeyboardAvoidMode(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue SetMinKeyboardAvoidDistance(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetMinKeyboardAvoidDistance(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue SetMenuSystemMaterial(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue ResetMenuSystemMaterial(ArkUIRuntimeCallInfo* runtimeCallInfo);
 private:
     static Local<panda::ObjectRef> ConstructSelect(EcmaVM* vm, FrameNode* frameNode, MenuItemConfiguration& config);
 };

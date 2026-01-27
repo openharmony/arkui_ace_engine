@@ -32,6 +32,7 @@ import { DividerOptions } from "./component/textPicker"
 import { TextModifier } from "arkui.TextModifier"
 import { SymbolGlyphModifier } from "arkui.SymbolGlyphModifier"
 import { LengthMetrics } from "arkui.Graphics"
+import { default as uiMaterial } from "@ohos.arkui.uiMaterial"
 export class SelectModifier extends CommonMethodModifier implements SelectAttribute,AttributeModifier<SelectAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState	
@@ -106,6 +107,8 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
     _keyboardAvoidMode_0_0value?: MenuKeyboardAvoidMode | undefined
     _minKeyboardAvoidDistance_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _minKeyboardAvoidDistance_0_0value?: LengthMetrics | undefined
+    _menuSystemMaterial_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    _menuSystemMaterial_0_0value?: uiMaterial.Material | undefined
     _menuAlign_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _menuAlign_0_0value?: MenuAlignType | undefined
     _menuAlign_0_1value?: Offset | undefined
@@ -673,6 +676,24 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
+        if (this._menuSystemMaterial_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (this._menuSystemMaterial_0_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setMenuSystemMaterialAttribute((this._menuSystemMaterial_0_0value as uiMaterial.Material | undefined));
+                    this._menuSystemMaterial_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._menuSystemMaterial_0_flag = AttributeUpdaterFlag.RESET;
+                    break;
+                }
+                default: {
+                    this._menuSystemMaterial_0_flag = AttributeUpdaterFlag.INITIAL;
+                    peer.setMenuSystemMaterialAttribute((undefined as uiMaterial.Material | undefined));
+                }
+            }
+        }
         if (this._menuAlign_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (this._menuAlign_0_flag) {
@@ -1116,6 +1137,19 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
                 }
             }
         }
+        if (modifier._menuSystemMaterial_0_flag != AttributeUpdaterFlag.INITIAL)
+        {
+            switch (modifier._menuSystemMaterial_0_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.menuSystemMaterial(modifier._menuSystemMaterial_0_0value);
+                    break;
+                }
+                default: {
+                    this.menuSystemMaterial((undefined as uiMaterial.Material | undefined));
+                }
+            }
+        }
         if (modifier._menuAlign_0_flag != AttributeUpdaterFlag.INITIAL)
         {
             switch (modifier._menuAlign_0_flag) {
@@ -1483,6 +1517,18 @@ export class SelectModifier extends CommonMethodModifier implements SelectAttrib
         } else
         {
             this._minKeyboardAvoidDistance_0_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    menuSystemMaterial(value: uiMaterial.Material | undefined): this {
+        if (((this._menuSystemMaterial_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true))
+        {
+            this._menuSystemMaterial_0_flag = AttributeUpdaterFlag.UPDATE
+            this._menuSystemMaterial_0_0value = value
+            this._state.fireChange()
+        } else
+        {
+           this._menuSystemMaterial_0_flag = AttributeUpdaterFlag.SKIP
         }
         return this
     }

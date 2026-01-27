@@ -24,6 +24,7 @@
 #include "ui/base/geometry/dimension.h"
 #include "ui/base/macros.h"
 #include "ui/base/referenced.h"
+#include "ui/properties/ui_material.h"
 #include "ui/view/frame_node.h"
 
 namespace OHOS::Ace::Kit {
@@ -52,6 +53,7 @@ struct MenuParam {
     int32_t placement;
     int32_t targetId;
     std::string targetTag;
+    RefPtr<UiMaterial> systemMaterial;
 };
 
 class ACE_FORCE_EXPORT MenuView {

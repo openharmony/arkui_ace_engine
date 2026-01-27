@@ -18,6 +18,7 @@
 #include "base/geometry/dimension.h"
 #include "base/memory/ace_type.h"
 #include "core/common/container.h"
+#include "core/components/common/properties/ui_material.h"
 #include "core/components_ng/manager/drag_drop/utils/drag_animation_helper.h"
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_func_wrapper.h"
@@ -1111,6 +1112,19 @@ MenuHoverScaleStatus MenuView::GetMenuHoverScaleStatus(int32_t targetId)
     return result != menuHoverStatus_.end() ? result->second : MenuHoverScaleStatus::NONE;
 }
 
+void MenuView::SetMenuSystemMaterial(const RefPtr<FrameNode>& menuNode, const MenuParam& menuParam)
+{
+    CHECK_NULL_VOID(menuNode);
+    if (menuParam.systemMaterial &&
+        menuParam.systemMaterial->GetType() >= static_cast<int32_t>(Ace::MaterialType::NONE) &&
+        menuParam.systemMaterial->GetType() <= static_cast<int32_t>(Ace::MaterialType::MAX)) {
+        auto renderContext = menuNode->GetRenderContext();
+        CHECK_NULL_VOID(renderContext);
+        renderContext->UpdateBackBlurStyle(std::nullopt);
+        ViewAbstract::SetSystemMaterial(AceType::RawPtr(menuNode), AceType::RawPtr(menuParam.systemMaterial));
+    }
+}
+
 void MenuView::ShowMenuTargetScaleToOrigin(
     const RefPtr<MenuWrapperPattern>& wrapperPattern, const RefPtr<MenuPreviewPattern>& previewPattern)
 {
@@ -1392,6 +1406,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, int32_t ta
         }
     }
     UpdateMenuPaintProperty(menuNode, menuParam, type);
+    SetMenuSystemMaterial(menuNode, menuParam);
     auto scroll = CreateMenuScroll(column);
     CHECK_NULL_RETURN(scroll, nullptr);
     scroll->MountToParent(menuNode);
@@ -1594,6 +1609,7 @@ void MenuView::UpdateMenuProperties(const RefPtr<FrameNode>& wrapperNode, const 
     } else {
         UpdateMenuOutlineWithArrow(menuNode, wrapperNode, menuParam);
     }
+    SetMenuSystemMaterial(menuNode, menuParam);
     menuNode->MarkModifyDone();
 
     auto menuProperty = menuNode->GetLayoutProperty<MenuLayoutProperty>();

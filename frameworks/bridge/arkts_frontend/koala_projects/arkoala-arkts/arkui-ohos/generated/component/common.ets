@@ -7734,6 +7734,7 @@ export interface ContextMenuOptions {
     anchorPosition?: Position;
     keyboardAvoidMode?: MenuKeyboardAvoidMode;
     minKeyboardAvoidDistance?: LengthMetrics;
+    systemMaterial?: uiMaterial.Material;
 }
 export interface MenuOptions extends ContextMenuOptions {
     title?: ResourceStr;
@@ -19111,6 +19112,14 @@ export class ContextMenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSystemMaterial  = value.systemMaterial
+        if (valueHolderForSystemMaterial !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSystemMaterialTmpValue  = valueHolderForSystemMaterial!
+            uiMaterial_Material_serializer.write(valueSerializer, valueHolderForSystemMaterialTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
     }
     public static read(buffer: DeserializerBase): ContextMenuOptions {
         let valueDeserializer : DeserializerBase = buffer
@@ -19539,7 +19548,13 @@ export class ContextMenuOptions_serializer {
             minKeyboardAvoidDistanceTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const minKeyboardAvoidDistanceTmpResult : LengthMetrics | undefined = minKeyboardAvoidDistanceTmpBuf
-        let value : ContextMenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult} as ContextMenuOptions)
+        const systemMaterialTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let systemMaterialTmpBuf : uiMaterial.Material | undefined = undefined
+        if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
+        }
+        const systemMaterialTmpResult : uiMaterial.Material | undefined = systemMaterialTmpBuf
+        let value : ContextMenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, systemMaterial: systemMaterialTmpResult} as ContextMenuOptions)
         return value
     }
 }
@@ -20724,6 +20739,14 @@ export class MenuOptions_serializer {
         } else {
             valueSerializer.writeInt8(RuntimeType.UNDEFINED)
         }
+        const valueHolderForSystemMaterial  = value.systemMaterial
+        if (valueHolderForSystemMaterial !== undefined) {
+            valueSerializer.writeInt8(RuntimeType.OBJECT)
+            const valueHolderForSystemMaterialTmpValue  = valueHolderForSystemMaterial!
+            uiMaterial_Material_serializer.write(valueSerializer, valueHolderForSystemMaterialTmpValue)
+        } else {
+            valueSerializer.writeInt8(RuntimeType.UNDEFINED)
+        }
         const valueHolderForTitle  = value.title
         if (valueHolderForTitle !== undefined) {
             valueSerializer.writeInt8(RuntimeType.OBJECT)
@@ -21176,6 +21199,12 @@ export class MenuOptions_serializer {
             minKeyboardAvoidDistanceTmpBuf = LengthMetrics_serializer.read(valueDeserializer)
         }
         const minKeyboardAvoidDistanceTmpResult : LengthMetrics | undefined = minKeyboardAvoidDistanceTmpBuf
+        const systemMaterialTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
+        let systemMaterialTmpBuf : uiMaterial.Material | undefined = undefined
+        if ((systemMaterialTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
+            systemMaterialTmpBuf = (uiMaterial_Material_serializer.read(valueDeserializer) as uiMaterial.Material)
+        }
+        const systemMaterialTmpResult : uiMaterial.Material | undefined = systemMaterialTmpBuf
         const titleTmpBuf_runtimeType  = valueDeserializer.readInt8().toInt()
         let titleTmpBuf : ResourceStr | undefined = undefined
         if ((titleTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
@@ -21197,7 +21226,7 @@ export class MenuOptions_serializer {
             showInSubWindowTmpBuf = valueDeserializer.readBoolean()
         }
         const showInSubWindowTmpResult : boolean | undefined = showInSubWindowTmpBuf
-        let value : MenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, title: titleTmpResult, showInSubWindow: showInSubWindowTmpResult} as MenuOptions)
+        let value : MenuOptions = ({offset: offsetTmpResult, placement: placementTmpResult, enableArrow: enableArrowTmpResult, arrowOffset: arrowOffsetTmpResult, preview: previewTmpResult, previewBorderRadius: previewBorderRadiusTmpResult, borderRadius: borderRadiusTmpResult, onAppear: onAppearTmpResult, onDisappear: onDisappearTmpResult, aboutToAppear: aboutToAppearTmpResult, aboutToDisappear: aboutToDisappearTmpResult, layoutRegionMargin: layoutRegionMarginTmpResult, previewAnimationOptions: previewAnimationOptionsTmpResult, backgroundColor: backgroundColorTmpResult, backgroundBlurStyle: backgroundBlurStyleTmpResult, backgroundBlurStyleOptions: backgroundBlurStyleOptionsTmpResult, backgroundEffect: backgroundEffectTmpResult, transition: transitionTmpResult, enableHoverMode: enableHoverModeTmpResult, hapticFeedbackMode: hapticFeedbackModeTmpResult, outlineColor: outlineColorTmpResult, outlineWidth: outlineWidthTmpResult, mask: maskTmpResult, modalMode: modalModeTmpResult, onDidAppear: onDidAppearTmpResult, onDidDisappear: onDidDisappearTmpResult, onWillAppear: onWillAppearTmpResult, onWillDisappear: onWillDisappearTmpResult, previewScaleMode: previewScaleModeTmpResult, availableLayoutArea: availableLayoutAreaTmpResult, anchorPosition: anchorPositionTmpResult, keyboardAvoidMode: keyboardAvoidModeTmpResult, minKeyboardAvoidDistance: minKeyboardAvoidDistanceTmpResult, systemMaterial: systemMaterialTmpResult, title: titleTmpResult, showInSubWindow: showInSubWindowTmpResult} as MenuOptions)
         return value
     }
 }

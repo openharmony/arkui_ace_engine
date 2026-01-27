@@ -16,6 +16,7 @@
 
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_abstract.h"
 #include "bridge/declarative_frontend/jsview/js_symbol_modifier.h"
 #include "core/components_ng/base/frame_node.h"
@@ -1378,6 +1379,38 @@ ArkUINativeModuleValue SelectBridge::ResetMinKeyboardAvoidDistance(ArkUIRuntimeC
     Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(0);
     auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
     GetArkUINodeModifiers()->getSelectModifier()->resetMinKeyboardAvoidDistance(nativeNode);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::SetMenuSystemMaterial(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> menuSystemMaterialArg = runtimeCallInfo->GetCallArgRef(NUM_1);
+    CHECK_NULL_RETURN(!menuSystemMaterialArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    if (!menuSystemMaterialArg->IsObject(vm)) {
+        GetArkUINodeModifiers()->getSelectModifier()->resetMenuSystemMaterial(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
+    }
+
+    Framework::JsiCallbackInfo info = Framework::JsiCallbackInfo(runtimeCallInfo);
+    auto jsValMenuSystemMaterial = info[NUM_1];
+    auto* menuSystemMaterial = Framework::UnwrapNapiValue(jsValMenuSystemMaterial);
+    GetArkUINodeModifiers()->getSelectModifier()->setMenuSystemMaterial(nativeNode, menuSystemMaterial);
+    return panda::JSValueRef::Undefined(vm);
+}
+
+ArkUINativeModuleValue SelectBridge::ResetMenuSystemMaterial(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
+    Local<JSValueRef> nodeArg = runtimeCallInfo->GetCallArgRef(NUM_0);
+    CHECK_NULL_RETURN(!nodeArg.IsNull(), panda::NativePointerRef::New(vm, nullptr));
+    auto nativeNode = nodePtr(nodeArg->ToNativePointer(vm)->Value());
+    GetArkUINodeModifiers()->getSelectModifier()->resetMenuSystemMaterial(nativeNode);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

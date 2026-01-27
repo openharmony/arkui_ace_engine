@@ -53,6 +53,7 @@ RefPtr<FrameNode> MenuView::Create(std::vector<OptionParam>&& params, MenuType t
     NG::MenuParam aceMenuParam;
     aceMenuParam.isShowInSubWindow = menuParam.isShowInSubWindow;
     aceMenuParam.placement = static_cast<Placement>(menuParam.placement);
+    aceMenuParam.systemMaterial = menuParam.systemMaterial;
     RefPtr<NG::FrameNode> aceNode = OHOS::Ace::NG::MenuView::Create(std::move(aceParams), menuParam.targetId,
         menuParam.targetTag, static_cast<NG::MenuType>(type), aceMenuParam);
     RefPtr<FrameNode> node = AceType::MakeRefPtr<FrameNodeImpl>(aceNode);
@@ -70,6 +71,7 @@ std::pair<RefPtr<FrameNode>, RefPtr<FrameNode>> MenuView::NavigationCreateMenu(
     NG::MenuParam aceMenuParam;
     aceMenuParam.isShowInSubWindow = menuParam.isShowInSubWindow;
     aceMenuParam.placement = static_cast<Placement>(menuParam.placement);
+    aceMenuParam.systemMaterial = menuParam.systemMaterial;
     RefPtr<NG::FrameNode> menuWrapperAceNode =
         OHOS::Ace::NG::MenuView::Create(menuAceNode, menuParam.targetId, menuParam.targetTag, aceMenuParam);
     CHECK_NULL_RETURN(menuWrapperAceNode, NULL_MENU_PAIR);
