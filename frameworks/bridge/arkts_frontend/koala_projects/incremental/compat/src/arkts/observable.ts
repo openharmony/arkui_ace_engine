@@ -414,7 +414,7 @@ class ObservableArray<T> extends Array<T> {
         return super.flat<U>(depth)
     }
 
-    override flatMap<U>(fn: (v: T, k: int, arr: Array<T>) => U): Array<U> {
+    override flatMap<U>(fn: (v: T, k: int, arr: Array<T>) => U | ReadonlyArray<U>): Array<U> {
         this.handler?.onAccess()
         return super.flatMap<U>(fn)
     }
