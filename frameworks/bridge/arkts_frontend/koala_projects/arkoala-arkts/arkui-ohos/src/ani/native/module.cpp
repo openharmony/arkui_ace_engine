@@ -100,6 +100,11 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToImagePixelMapPtr)
         },
         ani_native_function {
+            "_Extractors_ToInputMethodExtraConfigPtr",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::ExtractorsToInputMethodExtraConfigPtr)
+        },
+        ani_native_function {
             "_Image_ResizableOptions",
             nullptr,
             reinterpret_cast<void*>(OHOS::Ace::Ani::ImageResizableOptions)

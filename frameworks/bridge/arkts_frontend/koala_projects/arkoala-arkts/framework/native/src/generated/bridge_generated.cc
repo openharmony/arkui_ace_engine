@@ -34644,13 +34644,11 @@ Ark_NativePointer impl_IMEClient_getFinalizer() {
         return GetAccessors()->getIMEClientAccessor()->getFinalizer();
 }
 KOALA_INTEROP_DIRECT_0(IMEClient_getFinalizer, Ark_NativePointer)
-void impl_IMEClient_setExtraConfig(Ark_NativePointer thisPtr, KSerializerBuffer thisArray, int32_t thisLength) {
+void impl_IMEClient_setExtraConfig(Ark_NativePointer thisPtr, Ark_NativePointer config) {
         Ark_IMEClient self = reinterpret_cast<Ark_IMEClient>(thisPtr);
-        DeserializerBase thisDeserializer(thisArray, thisLength);
-        Ark_CustomObject configValueTemp = static_cast<Ark_CustomObject>(thisDeserializer.readCustomObject("object"));;
-        GetAccessors()->getIMEClientAccessor()->setExtraConfig(self, static_cast<Ark_CustomObject*>(&configValueTemp));
+        GetAccessors()->getIMEClientAccessor()->setExtraConfig(self, static_cast<Ark_InputMethodExtraConfig>(config));
 }
-KOALA_INTEROP_DIRECT_V3(IMEClient_setExtraConfig, Ark_NativePointer, KSerializerBuffer, int32_t)
+KOALA_INTEROP_DIRECT_V2(IMEClient_setExtraConfig, Ark_NativePointer, Ark_NativePointer)
 Ark_Int32 impl_IMEClient_getNodeId(Ark_NativePointer thisPtr) {
         Ark_IMEClient self = reinterpret_cast<Ark_IMEClient>(thisPtr);
         return GetAccessors()->getIMEClientAccessor()->getNodeId(self);

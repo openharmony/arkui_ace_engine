@@ -1667,6 +1667,8 @@ typedef struct Map_SourceTool_Float64 Map_SourceTool_Float64;
 typedef struct Opt_Map_SourceTool_Float64 Opt_Map_SourceTool_Float64;
 typedef struct Map_String_ComponentContent Map_String_ComponentContent;
 typedef struct Opt_Map_String_ComponentContent Opt_Map_String_ComponentContent;
+typedef struct Map_String_CustomValueType Map_String_CustomValueType;
+typedef struct Opt_Map_String_CustomValueType Opt_Map_String_CustomValueType;
 typedef struct Map_String_Int32 Map_String_Int32;
 typedef struct Opt_Map_String_Int32 Opt_Map_String_Int32;
 typedef struct Map_String_Number Map_String_Number;
@@ -2084,6 +2086,8 @@ typedef struct Ark_CustomSpanMetrics Ark_CustomSpanMetrics;
 typedef struct Opt_CustomSpanMetrics Opt_CustomSpanMetrics;
 typedef struct Ark_CustomTheme Ark_CustomTheme;
 typedef struct Opt_CustomTheme Opt_CustomTheme;
+typedef struct Ark_CustomValueType Ark_CustomValueType;
+typedef struct Opt_CustomValueType Opt_CustomValueType;
 typedef struct DataItemPeer DataItemPeer;
 typedef struct DataItemPeer* Ark_DataItem;
 typedef struct Opt_DataItem Opt_DataItem;
@@ -2257,6 +2261,9 @@ typedef struct IMEClientPeer* Ark_IMEClient;
 typedef struct Opt_IMEClient Opt_IMEClient;
 typedef struct Ark_InnerGestureObserverConfigs Ark_InnerGestureObserverConfigs;
 typedef struct Opt_InnerGestureObserverConfigs Opt_InnerGestureObserverConfigs;
+typedef struct InputMethodExtraConfigPeer InputMethodExtraConfigPeer;
+typedef struct InputMethodExtraConfigPeer* Ark_InputMethodExtraConfig;
+typedef struct Opt_InputMethodExtraConfig Opt_InputMethodExtraConfig;
 typedef struct Ark_InsertValue Ark_InsertValue;
 typedef struct Opt_InsertValue Opt_InsertValue;
 typedef struct Ark_IntelligentTrackingPreventionDetails Ark_IntelligentTrackingPreventionDetails;
@@ -13217,6 +13224,16 @@ typedef struct Opt_Map_String_ComponentContent {
     Ark_Tag tag;
     Map_String_ComponentContent value;
 } Opt_Map_String_ComponentContent;
+typedef struct Map_String_CustomValueType {
+    /* kind: ContainerType */
+    Ark_Int32 size;
+    Ark_String* keys;
+    Ark_CustomValueType* values;
+} Map_String_CustomValueType;
+typedef struct Opt_Map_String_CustomValueType {
+    Ark_Tag tag;
+    Map_String_CustomValueType value;
+} Opt_Map_String_CustomValueType;
 typedef struct Map_String_Int32 {
     /* kind: ContainerType */
     Ark_Int32 size;
@@ -15210,6 +15227,19 @@ typedef struct Opt_CustomTheme {
     Ark_Tag tag;
     Ark_CustomTheme value;
 } Opt_CustomTheme;
+typedef struct Ark_CustomValueType {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_Int32 value0;
+        Ark_String value1;
+        Ark_Boolean value2;
+    };
+} Ark_CustomValueType;
+typedef struct Opt_CustomValueType {
+    Ark_Tag tag;
+    Ark_CustomValueType value;
+} Opt_CustomValueType;
 typedef struct Opt_DataItem {
     Ark_Tag tag;
     Ark_DataItem value;
@@ -15922,6 +15952,10 @@ typedef struct Opt_InputCounterOptions {
     Ark_Tag tag;
     Ark_InputCounterOptions value;
 } Opt_InputCounterOptions;
+typedef struct Opt_InputMethodExtraConfig {
+    Ark_Tag tag;
+    Ark_InputMethodExtraConfig value;
+} Opt_InputMethodExtraConfig;
 typedef struct Ark_InsertValue {
     /* kind: Interface */
     Ark_Int32 insertOffset;
@@ -29510,7 +29544,7 @@ typedef struct GENERATED_ArkUIIMEClientAccessor {
     Ark_IMEClient (*construct)();
     Ark_NativePointer (*getFinalizer)();
     void (*setExtraConfig)(Ark_IMEClient peer,
-                           const Ark_CustomObject* config);
+                           Ark_InputMethodExtraConfig config);
     Ark_Int64 (*getNodeId)(Ark_IMEClient peer);
     void (*setNodeId)(Ark_IMEClient peer,
                       Ark_Int64 nodeId);

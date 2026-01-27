@@ -2989,6 +2989,9 @@ HWTEST_F(TextFieldPatternTest, GetAutoFillTriggeredStateByType001, TestSize.Leve
  */
 HWTEST_F(TextFieldPatternTest, SetAutoFillTriggeredStateByType001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. create target node.
+     */
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -3000,7 +3003,9 @@ HWTEST_F(TextFieldPatternTest, SetAutoFillTriggeredStateByType001, TestSize.Leve
         []() { return AceType::MakeRefPtr<PagePattern>(AceType::MakeRefPtr<PageInfo>()); });
     ASSERT_NE(parentFrameNode, nullptr);
     textFieldNode->SetParent(parentFrameNode);
-
+    /**
+     * @tc.steps: step2. get firset autolfill container node.
+     */
     auto autoFillContainerNode = textFieldNode->GetFirstAutoFillContainerNode();
     ASSERT_NE(autoFillContainerNode, nullptr);
     auto stateHolder = autoFillContainerNode->GetPattern<AutoFillTriggerStateHolder>();

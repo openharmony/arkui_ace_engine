@@ -5004,7 +5004,7 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _IMEClient_getFinalizer(): KPointer
     @ani.unsafe.Direct
-    native static _IMEClient_setExtraConfig(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
+    native static _IMEClient_setExtraConfig(ptr: KPointer, config: KPointer): void
     @ani.unsafe.Direct
     native static _IMEClient_getNodeId(ptr: KPointer): int64
     @ani.unsafe.Direct

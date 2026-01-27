@@ -748,6 +748,7 @@ struct ArkUIAniTextBasedModifier {
     void* (*fromTextModifierPeer)(void* ptr);
     void* (*toTextModifierPeer)(std::function<void(OHOS::Ace::WeakPtr<OHOS::Ace::NG::FrameNode>)>& textApply,
         void* textModifierAni);
+    void* (*toIMEExtraCfgPeer)(void* extraConfigPtr);
 };
 struct ArkUIAniStyledStringModifier {
     void (*setPixelMap)(ArkUIStyledString peer, void* nativePixelMap);
