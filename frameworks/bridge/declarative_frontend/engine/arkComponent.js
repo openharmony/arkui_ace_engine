@@ -36455,7 +36455,8 @@ if (globalThis.AlphabetIndexer === undefined) {
         getUINativeModule().alphabetIndexer.create(undefined, true);
       }
       return this;
-    }
+    },
+    name: 'JSAlphabetIndexer'
   }
 }
 
