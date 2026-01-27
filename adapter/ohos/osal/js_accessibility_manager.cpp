@@ -3455,6 +3455,12 @@ bool JsAccessibilityManager::CheckPageEventCached(const RefPtr<NG::FrameNode>& n
 
 void JsAccessibilityManager::AddFrameNodeToUecStatusVec(const RefPtr<NG::FrameNode>& node)
 {
+    for (const auto& [vecNode, status] : extensionComponentStatusVec_) {
+        auto frameNode = vecNode.Upgrade();
+        if (frameNode && (frameNode->GetAccessibilityId() == node->GetAccessibilityId())) {
+            return;
+        }
+    }
     extensionComponentStatusVec_.emplace_back(WeakPtr(node), false);
 }
 
