@@ -1446,9 +1446,8 @@ const ArkUIAlphabetIndexerModifier* GetAlphabetIndexerDynamicModifier()
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
-    }
 #endif
-
+    }
     CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
     static const ArkUIAlphabetIndexerModifier modifier = {
         .setPopupItemFont = SetPopupItemFont,
