@@ -552,6 +552,14 @@ bool AccessibilityProperty::CheckHoverConsumeByComponent(const RefPtr<FrameNode>
     return accessibilityProperty->IsAccessibilityHoverConsume(point);
 }
 
+static const std::set<std::string> TAGS_FOCUSABLE_SEARCH_SELF = {
+    V2::PATTERN_LOCK_ETS_TAG,
+    V2::QRCODE_ETS_TAG,
+    V2::IMAGE_ANIMATOR_ETS_TAG,
+    V2::LOADING_PROGRESS_ETS_TAG,
+    V2::VIDEO_ETS_TAG
+};
+
 std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefPtr<FrameNode>& node,
     bool& ancestorGroupFlag)
 {
@@ -595,6 +603,8 @@ std::tuple<bool, bool, bool> AccessibilityProperty::GetSearchStrategy(const RefP
         }
     } while (0);
     shouldSearchSelf = IsTagInSubTreeComponent(node->GetTag()) ? true : shouldSearchSelf;
+    shouldSearchSelf = (TAGS_FOCUSABLE_SEARCH_SELF.find(node->GetTag()) != TAGS_FOCUSABLE_SEARCH_SELF.end()) ?
+        true : shouldSearchSelf;
     if (ancestorGroupFlag == true) {
         if (level != AccessibilityProperty::Level::YES_STR) {
             shouldSearchSelf = false;
@@ -680,9 +690,8 @@ bool AccessibilityProperty::IsAccessibilityFocusableDebug(const RefPtr<FrameNode
 
 bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& node)
 {
-    if (node->IsRootNode()) {
-        return false;
-    }
+    CHECK_NULL_RETURN(node, false);
+    CHECK_EQUAL_RETURN(node->IsRootNode(), true, false);
     bool focusable = false;
     do {
         auto accessibilityProperty = node->GetAccessibilityProperty<NG::AccessibilityProperty>();
@@ -724,9 +733,11 @@ bool AccessibilityProperty::IsAccessibilityFocusable(const RefPtr<FrameNode>& no
             break;
         }
     } while (0);
-    if (IsTagInSubTreeComponent(node->GetTag())) {
-        focusable = true;
-    }
+
+    focusable = focusable ||
+        IsTagInSubTreeComponent(node->GetTag()) ||
+        (TAGS_FOCUSABLE_SEARCH_SELF.find(node->GetTag()) != TAGS_FOCUSABLE_SEARCH_SELF.end());
+
     return focusable;
 }
 
