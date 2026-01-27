@@ -16,6 +16,7 @@
 
 #include "cj_view_context_ffi.h"
 #include "cj_lambda.h"
+#include "adapter/ohos/entrance/ace_container.h"
 #include "base/log/jank_frame_report.h"
 #include "core/common/ace_engine.h"
 #include "core/components_ng/base/view_stack_model.h"
@@ -117,6 +118,17 @@ void AnimateToForStageMode(const RefPtr<PipelineBase>& pipelineContext, Animatio
 }
 
 extern "C" {
+int64_t FfiOHOSAceFrameworkViewContextGetHostContext()
+{
+    auto container = Container::CurrentSafelyWithCheck();
+    CHECK_NULL_RETURN(container, 0);
+    auto aceContainer = OHOS::Ace::AceType::DynamicCast<OHOS::Ace::Platform::AceContainer>(container);
+    CHECK_NULL_RETURN(aceContainer, 0);
+    auto context = aceContainer->GetAbilityContext();
+    CHECK_NULL_RETURN(context, 0);
+    return reinterpret_cast<int64_t>(context.get());
+}
+
 void FfiOHOSAceFrameworkViewContextAnimation(NativeOptionAnimateParam animateOptParam)
 {
     ACE_FUNCTION_TRACE();
