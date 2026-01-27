@@ -58,6 +58,7 @@ struct Index {
     { title: '示例32：菜单基本功能_22_验证Menu的divider分割线样式_分割线组合测试/MenuTestLevel0_14', url: 'pages/Examples/MenuTestLevel0_14' },
     { title: '示例33：菜单基本功能_23_验证MenuItem组件设置不同尺寸/MenuTestLevel0_19', url: 'pages/Examples/MenuTestLevel0_19' },
     { title: '示例34：菜单基本功能_24_菜单边框外描边属性/MenuTestLevel0_20', url: 'pages/Examples/MenuTestLevel0_20' },
+    { title: '示例35：菜单基本功能_25_菜单蒙层效果/MenuTestLevel0_21', url: 'pages/Examples/MenuTestLevel0_21' },
   ]
 
   build() {
