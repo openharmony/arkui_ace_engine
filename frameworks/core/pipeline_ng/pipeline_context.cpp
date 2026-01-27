@@ -3995,6 +3995,10 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "--stylus") {
         StylusDetectorDefault::GetInstance()->ExecuteCommand(params);
     } else if (params[0] == "-simplify") {
+        if (!onShow_) {
+            LOGW("window background, cancel collect simplify dump info");
+            return false;
+        }
         LOGI("start collect simplify dump info");
         if (params.size() >= 3 && params[1] == "-compname") {
             rootNode_->DumpTreeByComponentName(params[2]);

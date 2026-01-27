@@ -2558,12 +2558,15 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg407, TestSize.Level1)
      * @tc.expected: Test that the member window_ is empty.
      */
     ASSERT_NE(context_, nullptr);
+    bool onShow = context_->onShow_;
+    context_->onShow_ = true;
     std::vector<std::string> params;
     params.push_back("-simplify");
     params.push_back("-compname");
     params.push_back("test");
     auto ret = context_->OnDumpInfo(params);
     EXPECT_TRUE(ret);
+    context_->onShow_ = onShow;
 }
 
 /**
@@ -2647,12 +2650,15 @@ HWTEST_F(PipelineContextTestNg, ConsumeTouchEventsInterpolationTest001, TestSize
 HWTEST_F(PipelineContextTestNg, PipelineContextTestNg500, TestSize.Level1)
 {
     ASSERT_NE(context_, nullptr);
+    bool onShow = context_->onShow_;
+    context_->onShow_ = true;
     std::vector<std::string> params;
     params.push_back("-simplify");
     params.push_back("-compname");
     params.push_back("test");
     auto ret = context_->OnDumpInfo(params);
     EXPECT_TRUE(ret);
+    context_->onShow_ = onShow;
 }
 
 /**
