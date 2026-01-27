@@ -27,6 +27,7 @@
 #include "base/log/dump_log.h"
 #include "base/ressched/ressched_click_optimizer.h"
 #include "base/ressched/ressched_touch_optimizer.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/button/button_event_hub.h"
 #include "core/components_ng/pattern/container_modal/container_modal_pattern.h"
 #include "core/components_ng/pattern/container_modal/container_modal_theme.h"
@@ -82,6 +83,7 @@ void PipelineContextTestNg::SetUpTestSuite()
         window, AceType::MakeRefPtr<MockTaskExecutor>(), nullptr, nullptr, DEFAULT_INSTANCE_ID);
     context_->SetEventManager(AceType::MakeRefPtr<EventManager>());
     context_->fontManager_ = FontManager::Create();
+    context_->statisticEventReporter_ = std::make_shared<StatisticEventReporter>();
     MockContainer::SetUp();
     MockContainer::Current()->pipelineContext_ = context_;
 

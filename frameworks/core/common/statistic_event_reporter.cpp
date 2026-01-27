@@ -46,6 +46,76 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
     switch (eventType) {
         case StatisticEventType::FA_APP_START:
             return { "FRAMEWORK", "FA_APP_START" };
+        case StatisticEventType::XCOMPONENT_TYPE_USE_STRING:
+            return { "XCOMPONENT", "TYPE_USE_STRING" };
+        case StatisticEventType::XCOMPONENT_SET_SURFACE_SIZE:
+            return { "XCOMPONENT", "SET_SURFACE_SIZE" };
+        case StatisticEventType::XCOMPONENT_TYPE_COMPONENT:
+            return { "XCOMPONENT", "TYPE_COMPONENT" };
+        case StatisticEventType::XCOMPONENT_TYPE_NODE:
+            return { "XCOMPONENT", "TYPE_NODE" };
+        case StatisticEventType::XCOMPONENT_NATIVE_ATTACH_NATIVE_ROOT_NODE:
+            return { "XCOMPONENT", "NATIVE_ATTACH_NATIVE_ROOT_NODE" };
+        case StatisticEventType::XCOMPONENT_NATIVE_DETACH_NATIVE_ROOT_NODE:
+            return { "XCOMPONENT", "NATIVE_DETACH_NATIVE_ROOT_NODE" };
+        case StatisticEventType::XCOMPONENT_SET_ATTRIBUTE_NODE_TYPE:
+            return { "XCOMPONENT", "SET_ATTRIBUTE_NODE_TYPE" };
+        case StatisticEventType::XCOMPONENT_SET_ATTRIBUTE_NODE_SURFACE_SIZE:
+            return { "XCOMPONENT", "SET_ATTRIBUTE_NODE_SURFACE_SIZE" };
+        case StatisticEventType::CANVAS_FILL_STYLE_GETTER:
+            return { "CANVAS", "FILL_STYLE_GETTER" };
+        case StatisticEventType::CANVAS_LINE_WIDTH_GETTER:
+            return { "CANVAS", "LINE_WIDTH_GETTER" };
+        case StatisticEventType::CANVAS_STROKE_STYLE_GETTER:
+            return { "CANVAS", "STROKE_STYLE_GETTER" };
+        case StatisticEventType::CANVAS_LINE_CAP_GETTER:
+            return { "CANVAS", "LINE_CAP_GETTER" };
+        case StatisticEventType::CANVAS_LINE_JOIN_GETTER:
+            return { "CANVAS", "LINE_JOIN_GETTER" };
+        case StatisticEventType::CANVAS_MITER_LIMIT_GETTER:
+            return { "CANVAS", "MITER_LIMIT_GETTER" };
+        case StatisticEventType::CANVAS_FONT_GETTER:
+            return { "CANVAS", "FONT_GETTER" };
+        case StatisticEventType::CANVAS_TEXT_ALIGN_GETTER:
+            return { "CANVAS", "TEXT_ALIGN_GETTER" };
+        case StatisticEventType::CANVAS_TEXT_BASELINE_GETTER:
+            return { "CANVAS", "TEXT_BASELINE_GETTER" };
+        case StatisticEventType::CANVAS_GLOBAL_ALPHA_GETTER:
+            return { "CANVAS", "GLOBAL_ALPHA_GETTER" };
+        case StatisticEventType::CANVAS_LINE_DASH_OFFSET_GETTER:
+            return { "CANVAS", "LINE_DASH_OFFSET_GETTER" };
+        case StatisticEventType::CANVAS_SHADOW_BLUR_GETTER:
+            return { "CANVAS", "SHADOW_BLUR_GETTER" };
+        case StatisticEventType::CANVAS_GLOBAL_COMPOSITE_OPERATION_GETTER:
+            return { "CANVAS", "GLOBAL_COMPOSITE_OPERATION_GETTER" };
+        case StatisticEventType::CANVAS_SHADOW_COLOR_GETTER:
+            return { "CANVAS", "SHADOW_COLOR_GETTER" };
+        case StatisticEventType::CANVAS_SHADOW_OFFSET_X_GETTER:
+            return { "CANVAS", "SHADOW_OFFSET_X_GETTER" };
+        case StatisticEventType::CANVAS_SHADOW_OFFSET_Y_GETTER:
+            return { "CANVAS", "SHADOW_OFFSET_Y_GETTER" };
+        case StatisticEventType::CANVAS_IMAGE_SMOOTHING_ENABLE_GETTER:
+            return { "CANVAS", "IMAGE_SMOOTHING_ENABLE_GETTER" };
+        case StatisticEventType::CANVAS_IMAGE_SMOOTHING_QUALITY_GETTER:
+            return { "CANVAS", "IMAGE_SMOOTHING_QUALITY_GETTER" };
+        case StatisticEventType::CANVAS_DIRECTION_GETTER:
+            return { "CANVAS", "DIRECTION_GETTER" };
+        case StatisticEventType::CANVAS_FILTER_GETTER:
+            return { "CANVAS", "FILTER_GETTER" };
+        case StatisticEventType::CANVAS_LETTER_SPACING_GETTER:
+            return { "CANVAS", "LETTER_SPACING_GETTER" };
+        case StatisticEventType::CANVAS_TASKS_OVERFLOW:
+            return { "CANVAS", "TASKS_OVERFLOW" };
+        case StatisticEventType::CANVAS_BITMAP_SIZE_EXCEED_LIMIT:
+            return { "CANVAS", "BITMAP_SIZE_EXCEED_LIMIT" };
+        case StatisticEventType::CANVAS_CUSTOM_FONT:
+            return { "CANVAS", "CUSTOM_FONT" };
+        case StatisticEventType::CANVAS_NAN_INFINITY_PARAM:
+            return { "CANVAS", "NAN_INFINITY_PARAM" };
+        case StatisticEventType::CANVAS_NINE_PARAM_DRAWIMAGE:
+            return { "CANVAS", "NINE_PARAM_DRAWIMAGE" };
+        case StatisticEventType::CANVAS_GLOBAL_ALPHA_MINUS_ONE:
+            return { "CANVAS", "GLOBAL_ALPHA_MINUS_ONE" };
         case StatisticEventType::CALL_SET_CACHE_RANGE:
             return { "List", "CALL_SET_CACHE_RANGE" };
         case StatisticEventType::SEARCH_ONDIDINSERT:

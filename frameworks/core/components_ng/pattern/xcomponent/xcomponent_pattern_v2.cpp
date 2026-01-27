@@ -19,6 +19,7 @@
 #include "base/utils/multi_thread.h"
 #include "base/utils/utils.h"
 #include "core/accessibility/accessibility_session_adapter.h"
+#include "core/common/statistic_event_reporter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_child_tree_callback.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_accessibility_session_adapter.h"
 #include "core/components_ng/pattern/xcomponent/xcomponent_ext_surface_callback_client.h"
@@ -43,6 +44,20 @@ const std::string BUFFER_USAGE_XCOMPONENT = "xcomponent";
 inline std::string BoolToString(bool value)
 {
     return value ? "true" : "false";
+}
+
+void SendStatisticEvent(RefPtr<FrameNode> frameNode, std::list<StatisticEventType>& types)
+{
+    CHECK_NULL_VOID(!types.empty());
+    CHECK_NULL_VOID(frameNode);
+    auto context = frameNode->GetContextRefPtr();
+    CHECK_NULL_VOID(context);
+    auto statisticEventReporter = context->GetStatisticEventReporter();
+    CHECK_NULL_VOID(statisticEventReporter);
+    for (auto type : types) {
+        statisticEventReporter->SendEvent(type);
+    }
+    types.clear();
 }
 } // namespace
 
@@ -103,6 +118,7 @@ void XComponentPatternV2::OnAttachToMainTree()
     }
     auto host = GetHost();
     THREAD_SAFE_NODE_CHECK(host, OnAttachToMainTree, host);
+    SendStatisticEvent(host, statisticEventTypes_);
     isOnTree_ = true;
     if (autoInitialize_) {
         HandleSurfaceCreated();
