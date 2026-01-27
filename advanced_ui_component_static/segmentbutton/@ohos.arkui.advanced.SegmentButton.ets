@@ -79,7 +79,8 @@ import {
   HoverEvent,
   OverlayOptions,
   CustomBuilder,
-  Position
+  Position,
+  PanDirection
 } from '@ohos.arkui.component';
 import {
   Observed,
@@ -834,21 +835,21 @@ struct SegmentButtonItem {
   public onCalculateBorderRadius?: () => void
 
   private getTextPadding(): Padding | Dimension | LocalizedPadding {
-    if (this.options.localizedTextPadding) {
+    if (this.options.localizedTextPadding !== undefined) {
       return this.options.localizedTextPadding as LocalizedPadding;
     }
     if (this.options.textPadding !== undefined) {
-      return this.options.textPadding as Padding;
+      return this.options.textPadding!;
     }
     return 0.0;
   }
 
   private getButtonPadding(): Padding | Dimension | LocalizedPadding {
-    if (this.options.localizedButtonPadding) {
-      return this.options.localizedButtonPadding as LocalizedPadding;
+    if (this.options.localizedButtonPadding !== undefined) {
+      return this.options.localizedButtonPadding! as LocalizedPadding;
     }
     if (this.options.buttonPadding !== undefined) {
-      return this.options.buttonPadding as Padding;
+      return this.options.buttonPadding!;
     }
     if (this.options.type === 'capsule' && this.options.showText && this.options.showIcon) {
       return {
@@ -1262,7 +1263,7 @@ struct SegmentButtonItemArrayComponent {
     const buttonsLength = this.optionsArray.length;
 
     for (let index = 0; index < this.buttonBorderRadius.length; index++) {
-      let halfButtonItemsSizeHeight = (this.buttonItemsSize[index].height as double ?? 0.0) / 2.0;
+      let halfButtonItemsSizeHeight = (this.buttonItemsSize[index].height ?? 0.0) as double / 2.0;
       let radius = this.options.iconTextRadius ?? halfButtonItemsSizeHeight;
       const isCustomMode = this.options.borderRadiusMode === BorderRadiusMode.CUSTOM &&
         this.options.itemBorderRadius !== undefined;
@@ -1775,7 +1776,7 @@ export struct SegmentButton {
     })
     .accessibilityLevel('no')
     .priorityGesture(
-      GestureGroup(GestureMode.Parallel,
+      GestureGroup(GestureMode.Exclusive,
         TapGesture()
           .onAction((event: GestureEvent) => {
             if (this.isGestureInProgress) {
@@ -1852,29 +1853,38 @@ export struct SegmentButton {
               event.sourceTool === SourceTool.TOUCHPAD) {
               return;
             }
-            if (this.options.type === 'capsule' && (this.options.multiply ?? false)) {
+            if (this.isMultiply()) {
               // Non swipe gesture in multi-select mode
               return;
             }
             if (this.isCurrentPositionSelected) {
               return;
             }
-            if (Math.abs(event.angle) < 90.0 &&
-              this.selectedIndexes[0] !== Math.min(this!.options!.buttons!.length as number,
-                this.buttonItemsSize.length as number) - 1.0) {
+            let isHorizontalSwipe = (Math.abs(event.angle) <= 45) || (Math.abs(event.angle) >= 135);
+            if (!isHorizontalSwipe) {
+              return;
+            }
+
+            let isSwipeRight = Math.abs(event.angle) <= 45; // swipe right
+            let isSwipeLeft = Math.abs(event.angle) >= 135; // swipe left
+
+            let isSwipeToNext = this.isShouldMirror() ? isSwipeLeft : isSwipeRight;
+            let isSwipeToPrevious = this.isShouldMirror() ? isSwipeRight : isSwipeLeft;
+
+            if (isSwipeToNext && this.selectedIndexes[0] !== Math.min(this.options!.buttons!.length,
+              this.buttonItemsSize!.length) - 1) {
               // Move to next
-              this.doSelectedChangeAnimate = true;
-              this.selectedIndexes[0] = this.selectedIndexes[0] + 1;
-              this.doSelectedChangeAnimate = false;
-            } else if (Math.abs(event.angle) > 90.0 && this.selectedIndexes[0] !== 0) {
+              this.doSelectedChangeAnimate = true
+              this.selectedIndexes[0] = this.selectedIndexes[0] + 1
+              this.doSelectedChangeAnimate = false
+            } else if (isSwipeToPrevious && this.selectedIndexes[0] !== 0) {
               // Move to previous
-              this.doSelectedChangeAnimate = true;
-              this.selectedIndexes[0] = this.selectedIndexes[0] - 1;
-              this.doSelectedChangeAnimate = false;
-            } else {
+              this.doSelectedChangeAnimate = true
+              this.selectedIndexes[0] = this.selectedIndexes[0] - 1
+              this.doSelectedChangeAnimate = false
             }
           }),
-        PanGesture()
+        PanGesture({direction: PanDirection.Horizontal})
           .onActionStart((event: GestureEvent) => {
             this.isGestureInProgress = true;
             if (this.options === undefined || this.options.buttons === undefined) {
@@ -1892,11 +1902,13 @@ export struct SegmentButton {
             this.panGestureStartPoint =
               { x: (fingerInfo?.globalX ?? 0) as number, y: (fingerInfo?.globalY ?? 0) as number };
             this.isPanGestureMoved = false;
-            for (let i: number = 0.0;
-              i < Math.min(this!.options!.buttons!.length as number, this!.buttonItemsSize!.length as number); i++) {
-              selectedInfo = selectedInfo - ((this.buttonItemsSize[i as int].width ?? 0) as number);
+
+            let buttonLength = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length);
+            for (let i = 0; i < buttonLength; i++) {
+              selectedInfo = selectedInfo - ((this.buttonItemsSize[i].width ?? 0) as number);
               if (selectedInfo < 0.0) {
-                this.isCurrentPositionSelected = i === this.selectedIndexes[0] ? true : false;
+                let realIndex = this.isShouldMirror() ? buttonLength - 1 - i : i;
+                this.isCurrentPositionSelected = realIndex === this.selectedIndexes[0] ? true : false;
                 break;
               }
             }
@@ -1921,12 +1933,13 @@ export struct SegmentButton {
               fingerInfo!.globalY ?? 0)) {
               this.isPanGestureMoved = true;
             }
-            for (let i: int = 0;
-              i < Math.min(this!.options!.buttons!.length as number, this!.buttonItemsSize!.length as number); i++) {
-              selectedInfo = selectedInfo - ((this.buttonItemsSize[i as int].width ?? 0) as number)
+            let buttonLength: int = Math.min(this.options!.buttons!.length, this.buttonItemsSize!.length) as int;
+            for (let i = 0; i < buttonLength; i++) {
+              selectedInfo = selectedInfo - ((this.buttonItemsSize[i].width ?? 0) as number)
               if (selectedInfo < 0.0) {
+                let realIndex: int = this.isShouldMirror() ? buttonLength - 1 - i : i;
                 this.doSelectedChangeAnimate = true;
-                this.selectedIndexes[0] = i;
+                this.selectedIndexes[0] = realIndex;
                 this.doSelectedChangeAnimate = false;
                 break
               }
@@ -1935,12 +1948,12 @@ export struct SegmentButton {
               if (index === this.selectedIndexes[0]) {
                 this.getUIContext()?.animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve },
                   () => {
-                    this.zoomScaleArray[index as int] = 0.95;
+                    this.zoomScaleArray[index] = 0.95;
                   });
               } else {
                 this.getUIContext()?.animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve },
                   () => {
-                    this.zoomScaleArray[index as int] = 1.0;
+                    this.zoomScaleArray[index] = 1.0;
                   });
               }
             })
@@ -1963,20 +1976,24 @@ export struct SegmentButton {
               this.isPanGestureMoved = true;
             }
             if (this.isMouseWheelScroll(event)) {
-              let offset: number = event.offsetX !== 0.0 ? event.offsetX : event.offsetY
-              this.doSelectedChangeAnimate = true;
-              if (offset > 0.0 && this.selectedIndexes[0] > 0) {
+              let offset = event.offsetX !== 0 ? event.offsetX : event.offsetY
+              this.doSelectedChangeAnimate = true
+
+              // Reverse mouse wheel direction in mirrored layout
+              let shouldMoveNext = this.isShouldMirror() ? offset > 0 : offset < 0;
+              let shouldMovePrevious = this.isShouldMirror() ? offset < 0 : offset > 0;
+
+              if (shouldMovePrevious && this.selectedIndexes[0] > 0) {
                 this.selectedIndexes[0] -= 1;
-              } else if (offset < 0.0 && this.selectedIndexes[0] < Math.min(this!.options!.buttons!.length as number,
-                this.buttonItemsSize.length as number) - 1.0) {
-                this.selectedIndexes[0] += 1;
-              } else {
+              } else if (shouldMoveNext && this.selectedIndexes[0] < Math.min(this.options!.buttons!.length,
+                this.buttonItemsSize!.length) - 1) {
+                this.selectedIndexes[0] += 1
               }
               this.doSelectedChangeAnimate = false
             }
             this.getUIContext()?.animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve },
               () => {
-                this.zoomScaleArray[this.selectedIndexes[0] as int] = 1.0;
+                this.zoomScaleArray[this.selectedIndexes[0]] = 1.0;
               })
             this.isCurrentPositionSelected = false;
           })
@@ -1990,7 +2007,7 @@ export struct SegmentButton {
             }
             this.getUIContext()?.animateTo({ curve: curves.interpolatingSpring(10.0, 1.0, 410.0, 38.0) as ICurve },
               () => {
-                this.zoomScaleArray[this.selectedIndexes[0] as int] = 1.0;
+                this.zoomScaleArray[this.selectedIndexes[0]] = 1.0;
               })
             this.isCurrentPositionSelected = false;
           })
@@ -2051,7 +2068,7 @@ export struct SegmentButton {
       if (this.selectedIndexes.length === 0.0) {
         this.selectedItemPosition = {} as LocalizedEdges;
       } else {
-        const selectedIndex = this.selectedIndexes[0] as int;
+        const selectedIndex = this.selectedIndexes[0];
         this.selectedItemPosition = this.buttonItemsPosition[selectedIndex];
       }
 
@@ -2060,7 +2077,7 @@ export struct SegmentButton {
           this.options.selectedFontColor ?? (this.options.type === 'tab' ?
             segmentButtonTheme.TAB_SELECTED_FONT_COLOR : segmentButtonTheme.CAPSULE_SELECTED_FONT_COLOR) :
           this.options.fontColor ?? segmentButtonTheme.FONT_COLOR;
-        this.buttonItemProperty[index as int].fontColor = newColor;
+        this.buttonItemProperty[index].fontColor = newColor;
       })
     }
     if (curve) {
@@ -2070,12 +2087,12 @@ export struct SegmentButton {
     }
 
     this.buttonItemsSelected.forEach((selected, index) => {
-      this.buttonItemProperty[index as int].fontSize = selected ? this.options.selectedFontSize ??
+      this.buttonItemProperty[index].fontSize = selected ? this.options.selectedFontSize ??
       segmentButtonTheme.SELECTED_FONT_SIZE : this.options.fontSize ?? segmentButtonTheme.FONT_SIZE;
-      this.buttonItemProperty[index as int].fontWeight =
+      this.buttonItemProperty[index].fontWeight =
         selected ? this.options.selectedFontWeight ?? FontWeight.Medium :
           this.options.fontWeight ?? FontWeight.Regular;
-      this.buttonItemProperty[index as int].isSelected = selected;
+      this.buttonItemProperty[index].isSelected = selected;
     })
   }
 }
