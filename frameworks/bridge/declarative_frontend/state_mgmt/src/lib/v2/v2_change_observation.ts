@@ -1116,8 +1116,6 @@ class ObserveV2 {
             // current Monitor will be override, and will be GC soon
             // to avoid the Monitor be triggered anymore, invalidate it
             ObserveV2.getObserve().clearWatch(existingMonitor.getWatchId());
-            stateMgmtConsole.warn(`@Monitor ${monitorFunc.name} ${pathString} in ${owningObjectName} instance with same name already exists.
-              The new ${monitorFunc.name} will override the previous one, and the old one will no longer take effect.`);
           }
           refs[monitorFunc.name] = monitor;
         }
@@ -1247,8 +1245,6 @@ class ObserveV2 {
           // current computed will be override, and will be GC soon
           // to avoid the Computed be triggered anymore, invalidate it
           this.clearBinding(existingComputed.getComputedId());
-          stateMgmtConsole.frequentWarn(`@Computed ${computedPropertyName} in ${owningObjectName} instance with same name already exists.
-            The new ${computedPropertyName} will override the previous one, and the old one will no longer take effect.`);
         }
         refs[computedPropertyName] = computed;
       });
