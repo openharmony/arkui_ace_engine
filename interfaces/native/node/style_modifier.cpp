@@ -5342,9 +5342,8 @@ int32_t SetRichEditorEnableHapticFeedback(ArkUI_NodeHandle node, const ArkUI_Att
  
 const ArkUI_AttributeItem* GetRichEditorEnableHapticFeedback(ArkUI_NodeHandle node)
 {
-    auto resultValue = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->getRichEditorEnableHapticFeedback(
-        node->uiNodeHandle);
-    g_numberValues[0].i32 = resultValue;
+    g_numberValues[0].i32 = GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->
+        getRichEditorEnableHapticFeedback(node->uiNodeHandle);
     return &g_attributeItem;
 }
  
@@ -5478,15 +5477,13 @@ int32_t SetRichEditorBindSelectionMenu(ArkUI_NodeHandle node, const ArkUI_Attrib
     richEditorBindMenuParam.onMenuAppearUserData = menuOptions->onMenuAppearUserData;
     richEditorBindMenuParam.onMenuDisappear = menuOptions->onMenuDisappear;
     richEditorBindMenuParam.onMenuDisappearUserData = menuOptions->onMenuDisappearUserData;
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getRichEditorModifier()->setRichEditorBindSelectionMenu(node->uiNodeHandle, &richEditorBindMenuParam);
+    GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->setRichEditorBindSelectionMenu(node->uiNodeHandle, &richEditorBindMenuParam);
     return ERROR_CODE_NO_ERROR;
 }
  
 void ResetRichEditorBindSelectionMenu(ArkUI_NodeHandle node)
 {
-    auto* fullImpl = GetFullImpl();
-    fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorBindSelectionMenu(node->uiNodeHandle);
+    GetFullImpl()->getNodeModifiers()->getRichEditorModifier()->resetRichEditorBindSelectionMenu(node->uiNodeHandle);
 }
  
 int32_t SetRichEditorScrollBarColor(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
