@@ -3772,7 +3772,7 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
         responseRegionResult.emplace_back(rect);
         return responseRegionResult;
     }
-    
+
     auto toolType = it->second;
     if (responseRegionMap.find(toolType) != responseRegionMap.end()) {
         for (const auto& region : responseRegionMap[toolType]) {
@@ -7995,6 +7995,10 @@ void FrameNode::CleanupPipelineResources()
         pipeline->RemoveChangedFrameNode(nodeId_);
         pipeline->RemoveFrameNodeChangeListener(nodeId_);
         pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
+        auto eventManager = pipeline->GetEventManager();
+        if (eventManager) {
+            eventManager->UnregisterTouchpadInteractionListenerInner(GetId());
+        }
     }
 }
 

@@ -2619,7 +2619,6 @@ bool EventManager::OnNonPointerEvent(const NonPointerEvent& event)
     } else if (event.eventType == UIInputEventType::CROWN) {
         return OnCrownEvent(static_cast<const CrownEvent&>(event));
     } else if (event.eventType == UIInputEventType::TOUCHPAD_ACTIVE) {
-        NotifyTouchpadInteraction();
         return OnTouchpadInteractionBegin();
     } else {
         return false;
@@ -2793,10 +2792,11 @@ void EventManager::DelegateTouchEvent(const TouchEvent& touchEvent)
     }
 }
 
-bool EventManager::OnTouchpadInteractionBegin() const
+bool EventManager::OnTouchpadInteractionBegin()
 {
     CHECK_NULL_RETURN(coastingAxisEventGenerator_, true);
     coastingAxisEventGenerator_->NotifyStop();
+    NotifyTouchpadInteraction();
     return true;
 }
 
@@ -2972,29 +2972,19 @@ void EventManager::UnregisterTouchpadInteractionListenerInner(int32_t frameNodeI
 
 void EventManager::NotifyTouchpadInteraction()
 {
-    std::vector<int32_t> invalidIds;
-    invalidIds.reserve(touchpadInteractionListeners_.size());
-
-    std::vector<NG::TouchpadInteractionCallback> validCallbacks;
-    validCallbacks.reserve(touchpadInteractionListeners_.size());
-
-    for (const auto& pair : touchpadInteractionListeners_) {
-        if (pair.second.frameNode.Upgrade()) {
-            if (pair.second.callback) {
-                validCallbacks.push_back(pair.second.callback);
-            }
-        } else {
-            invalidIds.push_back(pair.first);
+    auto iter = touchpadInteractionListeners_.begin();
+    while (iter != touchpadInteractionListeners_.end()) {
+        if (!iter->second.frameNode.Upgrade()) {
+            iter = touchpadInteractionListeners_.erase(iter);
+            continue;
         }
-    }
 
-    for (int32_t id : invalidIds) {
-        touchpadInteractionListeners_.erase(id);
-    }
-
-    for (auto& callback : validCallbacks) {
-        if (callback) {
+        if (auto& callback = iter->second.callback) {
             callback();
+            ++iter;
+        } else {
+            iter = touchpadInteractionListeners_.erase(iter);
+            continue;
         }
     }
 }
