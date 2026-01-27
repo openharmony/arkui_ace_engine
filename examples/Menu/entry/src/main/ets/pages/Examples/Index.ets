@@ -56,6 +56,8 @@ struct Index {
     { title: '示例30：菜单基本功能_21_MenuItem入参_MenuItem自有属性_MenuItemGroup入参/MenuTestLevel0_10', url: 'pages/Examples/MenuTestLevel0_10' },
     { title: '示例31：菜单基本功能_22_验证Menu的divider分割线样式/MenuTestLevel0_13', url: 'pages/Examples/MenuTestLevel0_13' },
     { title: '示例32：菜单基本功能_22_验证Menu的divider分割线样式_分割线组合测试/MenuTestLevel0_14', url: 'pages/Examples/MenuTestLevel0_14' },
+    { title: '示例33：菜单基本功能_23_验证MenuItem组件设置不同尺寸/MenuTestLevel0_19', url: 'pages/Examples/MenuTestLevel0_19' },
+    { title: '示例34：菜单基本功能_24_菜单边框外描边属性/MenuTestLevel0_20', url: 'pages/Examples/MenuTestLevel0_20' },
   ]
 
   build() {
