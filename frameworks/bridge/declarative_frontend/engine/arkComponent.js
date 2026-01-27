@@ -36543,7 +36543,8 @@ if (globalThis.Stepper === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkstepper');
       module.exportView();
       getUINativeModule().stepper.create(params);
-    }
+    },
+    name: 'JSStepper'
   };
 }
 
@@ -36555,7 +36556,8 @@ if (globalThis.StepperItem === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkstepperitem');
       module.exportView();
       getUINativeModule().stepperItem.create(params);
-    }
+    },
+    name: 'JSStepperItem'
   };
 }
 

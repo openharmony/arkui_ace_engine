@@ -1966,19 +1966,21 @@ class LazyArkStepperItemComponent extends ArkComponent {
       LazyArkStepperItemComponent.module = globalThis.requireNapi('arkui.components.arkstepperitem');
     }
     this.lazyComponent = LazyArkStepperItemComponent.module.createComponent(nativePtr, classType);
-    console.log('LazyArkStepperItemComponent lazyload nativeModule');
   }
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
   }
   prevLabel(value) {
     this.lazyComponent.prevLabel(value);
+    return this;
   }
   nextLabel(value) {
     this.lazyComponent.nextLabel(value);
+    return this;
   }
   status(value) {
     this.lazyComponent.status(value);
+    return this;
   }
 }
 class StepperItemModifier extends LazyArkStepperItemComponent {
@@ -2440,7 +2442,6 @@ class LazyArkStepperComponent extends ArkComponent {
       LazyArkStepperComponent.module = globalThis.requireNapi('arkui.components.arkstepper');
     }
     this.lazyComponent = LazyArkStepperComponent.module.createComponent(nativePtr, classType);
-    console.log('LazyArkStepperComponent lazyload nativeModule');
   }
   setMap() {
     this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
