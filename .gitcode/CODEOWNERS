@@ -2440,6 +2440,8 @@ frameworks/core/components_ng/manager/privacy_sensitive/privacy_sensitive_manage
 frameworks/core/components_ng/manager/safe_area/ @arkuilayout1
 frameworks/core/components_ng/manager/select_content_overlay/ @huawei_g_five
 frameworks/core/components_ng/manager/select_overlay/ @huawei_g_five
+frameworks/core/components_ng/manager/select_overlay/service_collaboration_menu_ace_helper.h @arkui_rich_editor
+frameworks/core/components_ng/manager/select_overlay/service_collaboration_menu_ace_helper.cpp @arkui_rich_editor
 frameworks/core/components_ng/manager/shared_overlay/ @arkui_framework_xnode
 frameworks/core/components_ng/manager/toolbar/ @ArkUI_Event
 frameworks/core/components_ng/pattern/ability_component/ @arkuieco3
