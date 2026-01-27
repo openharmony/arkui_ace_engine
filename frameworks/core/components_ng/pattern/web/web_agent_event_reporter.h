@@ -82,6 +82,7 @@ protected:
 
     static constexpr int32_t DELAYED_SCROLL_EVENT_PROCESS_MS = 16;
     static constexpr int32_t MAX_SCROLL_EVENT_UPDATE_RETRY = 2;
+    static constexpr int32_t LAST_START_RECORD_INDEX = 0;
 
     virtual void ProcessScrollQueue();
 
