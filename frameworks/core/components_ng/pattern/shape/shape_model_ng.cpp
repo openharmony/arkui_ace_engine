@@ -106,6 +106,7 @@ void ShapeModelNG::SetViewPort(FrameNode* frameNode, const std::vector<Dimension
         shapeViewBox.SetHeight(result[SHAPE_VIEW_BOX_HEIGHT]);
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapeContainerPaintProperty, ShapeViewBox, shapeViewBox, frameNode);
     };
+    ACE_UINODE_TRACE(frameNode);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     pattern->AddResObj("ShapeViewPort", resObj, std::move(updateFunc));
 }
@@ -288,6 +289,7 @@ void ShapeModelNG::SetStrokeDashArray(FrameNode* frameNode, const std::vector<Ac
         }
         ACE_UPDATE_NODE_PAINT_PROPERTY(ShapePaintProperty, StrokeDashArray, result, frameNode);
     };
+    ACE_UINODE_TRACE(frameNode);
     RefPtr<ResourceObject> resObj = AceType::MakeRefPtr<ResourceObject>();
     pattern->AddResObj("ShapeStrokeDashArray", resObj, std::move(updateFunc));
 }

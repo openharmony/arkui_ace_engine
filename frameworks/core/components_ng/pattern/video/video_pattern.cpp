@@ -998,6 +998,7 @@ void VideoPattern::OnAttachToFrameNode()
     static RenderContext::ContextParam param = { RenderContext::ContextType::HARDWARE_SURFACE, "MediaPlayerSurface",
                                                  RenderContext::PatternType::VIDEO };
 #endif
+    ACE_UINODE_TRACE(host);
     renderContextForMediaPlayer_->InitContext(false, param);
 
     if (SystemProperties::GetExtSurfaceEnabled()) {
@@ -1817,9 +1818,10 @@ void VideoPattern::SetResetImpl(
 void VideoPattern::SetMethodCall()
 {
     ContainerScope scope(instanceId_);
-    auto videoController = AceType::MakeRefPtr<VideoController>();
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
+    auto videoController = AceType::MakeRefPtr<VideoController>();
     auto context = host->GetContext();
     CHECK_NULL_VOID(context);
     auto uiTaskExecutor = SingleTaskExecutor::Make(context->GetTaskExecutor(), TaskExecutor::TaskType::UI);
@@ -2068,6 +2070,7 @@ void VideoPattern::FullScreen()
     CHECK_NULL_VOID(host);
     auto videoNode = AceType::DynamicCast<VideoNode>(host);
     CHECK_NULL_VOID(videoNode);
+    ACE_UINODE_TRACE(host);
     auto fullScreenPattern = AceType::MakeRefPtr<VideoFullScreenPattern>(videoControllerV2_);
     fullScreenPattern->InitFullScreenParam(
         AceType::Claim(this), renderSurface_, mediaPlayer_, renderContextForMediaPlayer_);
@@ -2186,6 +2189,7 @@ void VideoPattern::EnableAnalyzer(bool enable)
     CHECK_NULL_VOID(!imageAnalyzerManager_);
     auto host = GetHost();
     CHECK_NULL_VOID(host);
+    ACE_UINODE_TRACE(host);
     imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::VIDEO_CUSTOM);
 }
 
@@ -2220,7 +2224,9 @@ void VideoPattern::SetImageAnalyzerConfig(void* config)
 void VideoPattern::SetImageAIOptions(void* options)
 {
     if (!imageAnalyzerManager_) {
-        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(GetHost(), ImageAnalyzerHolder::VIDEO_CUSTOM);
+        auto host = GetHost();
+        ACE_UINODE_TRACE(host);
+        imageAnalyzerManager_ = std::make_shared<ImageAnalyzerManager>(host, ImageAnalyzerHolder::VIDEO_CUSTOM);
     }
     CHECK_NULL_VOID(imageAnalyzerManager_);
     imageAnalyzerManager_->SetImageAIOptions(options);
@@ -2489,6 +2495,7 @@ void VideoPattern::OnAttachToFrameNodeMultiThread(const RefPtr<FrameNode>& host)
     TAG_LOGI(AceLogTag::ACE_VIDEO, "Video[%{public}d] Create MediaPlayer SurfaceNode with SkipCheckInMultiInstance",
         hostId_);
 #endif
+    ACE_UINODE_TRACE(host);
     renderContextForMediaPlayer_->InitContext(false, param);
 
     if (SystemProperties::GetExtSurfaceEnabled()) {
