@@ -43,16 +43,19 @@ void BaseTextSelectOverlay::ProcessOverlay(const OverlayRequest& request)
         return;
     }
     isSuperFoldDisplayDevice_ = SystemProperties::IsSuperFoldDisplayDevice();
-    auto checkClipboard = [weak = WeakClaim(this), request](bool hasData) {
-        TAG_LOGI(AceLogTag::ACE_TEXT, "HasData callback from clipboard, data available ? %{public}d", hasData);
+    isAutoFillPaste = false;
+    auto checkClipboard = [weak = WeakClaim(this), request](bool hasData, bool isAutoFill) {
+        TAG_LOGI(AceLogTag::ACE_TEXT, "HasData callback from clipboard, hasData:%{public}d, isAutoFill:%{public}d",
+            hasData, isAutoFill);
         auto overlay = weak.Upgrade();
         CHECK_NULL_VOID(overlay);
+        overlay->isAutoFillPaste = isAutoFill;
         overlay->ShowSelectOverlay(request, hasData);
     };
     CheckHasPasteData(checkClipboard);
 }
 
-void BaseTextSelectOverlay::CheckHasPasteData(const std::function<void(bool)>& callback)
+void BaseTextSelectOverlay::CheckHasPasteData(const std::function<void(bool, bool)>& callback)
 {
     auto textBase = hostTextBase_.Upgrade();
     CHECK_NULL_VOID(textBase);
@@ -65,7 +68,7 @@ void BaseTextSelectOverlay::CheckHasPasteData(const std::function<void(bool)>& c
         }
         clipboard->HasData(callback);
     } else {
-        callback(false);
+        callback(false, false);
     }
 }
 
