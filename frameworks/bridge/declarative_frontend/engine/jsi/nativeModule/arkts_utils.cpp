@@ -3671,10 +3671,14 @@ void ArkTSUtils::ParseStepOptionsMap(
 {
     Local<panda::MapRef> StepMapRef(optionsArg);
     int32_t StepMapSize = StepMapRef->GetSize(vm);
+    std::string src;
     for (int32_t i = 0; i < StepMapSize; i++) {
         auto number = StepMapRef->GetKey(vm, i)->ToNumber(vm)->Value();
-        auto itemAccessibility = StepMapRef->GetValue(vm, i)->ToString(vm)->ToString(vm);
-        optionsMap[static_cast<int32_t>(number)] = itemAccessibility;
+        auto itemAccessibility = StepMapRef->GetValue(vm, i);
+        auto itemAccessibilityText =
+            itemAccessibility->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "text"));
+        ArkTSUtils::ParseJsString(vm, itemAccessibilityText, src);
+        optionsMap[static_cast<int32_t>(number)] = src.c_str();
     }
 }
 

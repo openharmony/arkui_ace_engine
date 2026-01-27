@@ -711,6 +711,8 @@ void CreateRadioImpl(ArkUI_CharPtr namePtr, ArkUI_CharPtr groupPtr, ArkUI_Int32 
     GetRadioModelImpl()->Create(radioName, radioGroup, indicatorOpt);
 }
 
+void SetBuilderImpl(void* indicator) {}
+
 void SetOnRadioChangeImpl(ArkUINodeHandle node, void* extraParam) {}
 
 void SetRadioPaddingByJsImpl(const struct ArkUIPaddingType* oldPaddings, const struct ArkUIPaddingType* newPaddings)
@@ -849,7 +851,7 @@ const ArkUIRadioModifier* GetRadioDynamicModifier()
         .setOnChangeEvent = SetOnChangeEventImpl,
         .updateUncheckStatus = UpdateUncheckStatusImpl,
         .createRadio = CreateRadioImpl,
-        .setBuilder = nullptr,
+        .setBuilder = SetBuilderImpl,
         .setOnRadioChange = SetOnRadioChangeImpl,
         .setRadioPaddingByJs = SetRadioPaddingByJsImpl,
         .setRadioMarginByJs = SetRadioMarginByJsImpl,
