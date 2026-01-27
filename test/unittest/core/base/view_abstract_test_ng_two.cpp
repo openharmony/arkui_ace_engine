@@ -184,4 +184,23 @@ HWTEST_F(ViewAbstractTestNg, GetDashParamsTest001, TestSize.Level1)
     EXPECT_EQ(ViewAbstract::GetDashGap(frameNode).rightDimen, Dimension(2));
     EXPECT_EQ(ViewAbstract::GetDashWidth(frameNode).rightDimen, Dimension(5));
 }
+
+/**
+ * @tc.name: GetChainStyleTest001
+ * @tc.desc: Test GetChainStyle of View_Abstract
+ * @tc.type: FUNC
+ */
+HWTEST_F(ViewAbstractTestNg, GetChainStyleTest001, TestSize.Level1)
+{
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    ASSERT_NE(frameNode, nullptr);
+    ChainInfo chainInfo;
+    chainInfo.direction = LineDirection::HORIZONTAL;
+    chainInfo.style = ChainStyle::SPREAD;
+
+    ViewAbstract::SetChainStyle(frameNode, chainInfo);
+
+    EXPECT_EQ(ViewAbstract::GetChainStyle(frameNode).direction, LineDirection::HORIZONTAL);
+    EXPECT_EQ(ViewAbstract::GetChainStyle(frameNode).style, ChainStyle::SPREAD);
+}
 } // namespace OHOS::Ace::NG
