@@ -17,6 +17,12 @@
 #include "gtest/internal/gtest-internal.h"
 
 #define private public
+#include "test/mock/base/mock_system_properties.h"
+#include "test/mock/core/common/mock_container.h"
+#include "test/mock/core/common/mock_theme_manager.h"
+#include "test/mock/core/pipeline/mock_pipeline_context.h"
+#include "test/mock/core/rosen/mock_canvas.h"
+
 #include "base/geometry/ng/offset_t.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/base/modifier.h"
@@ -27,11 +33,7 @@
 #include "core/components_ng/pattern/data_panel/data_panel_modifier.h"
 #include "core/components_ng/pattern/data_panel/data_panel_paint_property.h"
 #include "core/components_ng/pattern/data_panel/data_panel_pattern.h"
-#include "test/mock/core/rosen/mock_canvas.h"
-#include "test/mock/core/common/mock_theme_manager.h"
 #include "core/pipeline/base/constants.h"
-#include "test/mock/core/pipeline/mock_pipeline_context.h"
-#include "test/mock/core/common/mock_container.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -90,6 +92,7 @@ public:
 
 class DataPanelTheme : public Theme {
     DECLARE_ACE_TYPE(DataPanelTheme, Theme);
+
 public:
     DataPanelTheme()
     {
@@ -888,7 +891,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintSpaceTest001, TestSize.Level0)
 
     LinearData linearData;
     dataPanelModifier.PaintSpace(rsCanvas, linearData, SPACEWIDTH);
-    
+
     /**
      * @tc.case: layout direction rtl
      */
@@ -933,7 +936,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintColorSegmentTest001, TestSize.Level0)
     gradientColorEnd.SetDimension(Dimension(1.0));
     linerData.segmentColor = gradient;
     dataPanelModifier.PaintColorSegment(rsCanvas, linerData);
-    
+
     /**
      * @tc.case: layout direction rtl
      */
@@ -1113,7 +1116,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest004, TestSize.Level0)
     DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
-    
+
     std::vector<Gradient> valueColors;
     // test Solid color when the valueColors >0 and valueColors <=9
     Gradient gradient;
@@ -1167,7 +1170,7 @@ HWTEST_F(DataPanelTestNg, DataPanelPaintCircleTest005, TestSize.Level0)
     DataPanelModifier dataPanelModifier(nullptr);
     Testing::MockCanvas rsCanvas;
     DrawingContext context { rsCanvas, 10.0f, 10.0f };
-    
+
     std::vector<Gradient> valueColors;
     // test Solid color when the valueColors >0 and valueColors <=9
     Gradient gradient;
@@ -2381,4 +2384,246 @@ HWTEST_F(DataPanelTestNg, DataPanelUpdateDateTest002, TestSize.Level0)
     dataPanelModifier.UpdateDate();
     EXPECT_EQ(1.0f, dataPanelModifier.date_->Get());
 }
+
+/**
+ * @tc.name: DataPanelModelNGTest025
+ * @tc.desc: Test SetValueColorsSetByUser method of DataPanelModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelModelNGTest025, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create data panel and set ConfigChangePerform to true, then call SetValueColorsSetByUser(true).
+     * @tc.expected: step1. ValueColorsSetByUser is set to true.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_CYCLE);
+
+    OHOS::Ace::g_isConfigChangePerform = true;
+    dataPanel.SetValueColorsSetByUser(true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    auto paintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetValueColorsSetByUser(), true);
+
+    /**
+     * @tc.steps: step2. Set ConfigChangePerform to false, then call SetValueColorsSetByUser(false).
+     * @tc.expected: step2. ValueColorsSetByUser remains true (no change).
+     */
+    OHOS::Ace::g_isConfigChangePerform = false;
+    dataPanel.SetValueColorsSetByUser(false);
+    EXPECT_EQ(paintProperty->GetValueColorsSetByUser(), true);
+}
+
+/**
+ * @tc.name: DataPanelModelNGTest026
+ * @tc.desc: Test SetTrackBackgroundSetByUser method of DataPanelModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelModelNGTest026, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create data panel and set ConfigChangePerform to true, then call
+     * SetTrackBackgroundSetByUser(true).
+     * @tc.expected: step1. TrackBackgroundSetByUser is set to true.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_CYCLE);
+
+    OHOS::Ace::g_isConfigChangePerform = true;
+    dataPanel.SetTrackBackgroundSetByUser(true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    auto paintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetTrackBackgroundSetByUser(), true);
+
+    /**
+     * @tc.steps: step2. Set ConfigChangePerform to false, then call SetTrackBackgroundSetByUser(false).
+     * @tc.expected: step2. TrackBackgroundSetByUser remains true (no change).
+     */
+    OHOS::Ace::g_isConfigChangePerform = false;
+    dataPanel.SetTrackBackgroundSetByUser(false);
+    EXPECT_EQ(paintProperty->GetTrackBackgroundSetByUser(), true);
+}
+
+/**
+ * @tc.name: DataPanelModelNGTest027
+ * @tc.desc: Test SetStrokeWidthSetByUser method of DataPanelModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelModelNGTest027, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create data panel and set ConfigChangePerform to true, then call SetStrokeWidthSetByUser(true).
+     * @tc.expected: step1. StrokeWidthSetByUser is set to true.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_CYCLE);
+
+    OHOS::Ace::g_isConfigChangePerform = true;
+    dataPanel.SetStrokeWidthSetByUser(true);
+
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    auto paintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetStrokeWidthSetByUser(), true);
+
+    /**
+     * @tc.steps: step2. Set ConfigChangePerform to false, then call SetStrokeWidthSetByUser(false).
+     * @tc.expected: step2. StrokeWidthSetByUser remains true (no change).
+     */
+    OHOS::Ace::g_isConfigChangePerform = false;
+    dataPanel.SetStrokeWidthSetByUser(false);
+    EXPECT_EQ(paintProperty->GetStrokeWidthSetByUser(), true);
+}
+
+/**
+ * @tc.name: DataPanelModelNGTest028
+ * @tc.desc: Test static SetValueColorsSetByUser method of DataPanelModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelModelNGTest028, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create data panel, get frameNode.
+     * @tc.expected: step1. frameNode is created successfully.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_CYCLE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set ConfigChangePerform to true, then call static SetValueColorsSetByUser with frameNode and
+     * true.
+     * @tc.expected: step2. ValueColorsSetByUser is set to true.
+     */
+    OHOS::Ace::g_isConfigChangePerform = true;
+    DataPanelModelNG::SetValueColorsSetByUser(frameNode, true);
+
+    auto paintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetValueColorsSetByUser(), true);
+
+    /**
+     * @tc.steps: step3. Set ConfigChangePerform to false, then call static SetValueColorsSetByUser with frameNode and
+     * false.
+     * @tc.expected: step3. ValueColorsSetByUser remains true (no change).
+     */
+    OHOS::Ace::g_isConfigChangePerform = false;
+    DataPanelModelNG::SetValueColorsSetByUser(frameNode, false);
+    EXPECT_EQ(paintProperty->GetValueColorsSetByUser(), true);
+
+    /**
+     * @tc.steps: step4. Call static SetValueColorsSetByUser with nullptr frameNode.
+     * @tc.expected: step4. No crash occurs.
+     */
+    OHOS::Ace::g_isConfigChangePerform = true;
+    DataPanelModelNG::SetValueColorsSetByUser(nullptr, true);
+    // Just verify no crash
+    EXPECT_EQ(paintProperty->GetValueColorsSetByUser(), true);
+}
+
+/**
+ * @tc.name: DataPanelModelNGTest029
+ * @tc.desc: Test static SetTrackBackgroundSetByUser method of DataPanelModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelModelNGTest029, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create data panel, get frameNode.
+     * @tc.expected: step1. frameNode is created successfully.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_CYCLE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set ConfigChangePerform to true, then call static SetTrackBackgroundSetByUser with frameNode
+     * and true.
+     * @tc.expected: step2. TrackBackgroundSetByUser is set to true.
+     */
+    OHOS::Ace::g_isConfigChangePerform = true;
+    DataPanelModelNG::SetTrackBackgroundSetByUser(frameNode, true);
+
+    auto paintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetTrackBackgroundSetByUser(), true);
+
+    /**
+     * @tc.steps: step3. Set ConfigChangePerform to false, then call static SetTrackBackgroundSetByUser with frameNode
+     * and false.
+     * @tc.expected: step3. TrackBackgroundSetByUser remains true (no change).
+     */
+    OHOS::Ace::g_isConfigChangePerform = false;
+    DataPanelModelNG::SetTrackBackgroundSetByUser(frameNode, false);
+    EXPECT_EQ(paintProperty->GetTrackBackgroundSetByUser(), true);
+
+    /**
+     * @tc.steps: step4. Call static SetTrackBackgroundSetByUser with nullptr frameNode.
+     * @tc.expected: step4. No crash occurs.
+     */
+    OHOS::Ace::g_isConfigChangePerform = true;
+    DataPanelModelNG::SetTrackBackgroundSetByUser(nullptr, true);
+    // Just verify no crash
+    EXPECT_EQ(paintProperty->GetTrackBackgroundSetByUser(), true);
+}
+
+/**
+ * @tc.name: DataPanelModelNGTest030
+ * @tc.desc: Test static SetStrokeWidthSetByUser method of DataPanelModelNG.
+ * @tc.type: FUNC
+ */
+HWTEST_F(DataPanelTestNg, DataPanelModelNGTest030, TestSize.Level0)
+{
+    /**
+     * @tc.steps: step1. Create data panel, get frameNode.
+     * @tc.expected: step1. frameNode is created successfully.
+     */
+    DataPanelModelNG dataPanel;
+    dataPanel.Create(VALUES, MAX, TYPE_CYCLE);
+    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
+    EXPECT_NE(frameNode, nullptr);
+
+    /**
+     * @tc.steps: step2. Set ConfigChangePerform to true, then call static SetStrokeWidthSetByUser with frameNode and
+     * true.
+     * @tc.expected: step2. StrokeWidthSetByUser is set to true.
+     */
+    OHOS::Ace::g_isConfigChangePerform = true;
+    DataPanelModelNG::SetStrokeWidthSetByUser(frameNode, true);
+
+    auto paintProperty = frameNode->GetPaintProperty<DataPanelPaintProperty>();
+    EXPECT_NE(paintProperty, nullptr);
+    EXPECT_EQ(paintProperty->GetStrokeWidthSetByUser(), true);
+
+    /**
+     * @tc.steps: step3. Set ConfigChangePerform to false, then call static SetStrokeWidthSetByUser with frameNode and
+     * false.
+     * @tc.expected: step3. StrokeWidthSetByUser remains true (no change).
+     */
+    OHOS::Ace::g_isConfigChangePerform = false;
+    DataPanelModelNG::SetStrokeWidthSetByUser(frameNode, false);
+    EXPECT_EQ(paintProperty->GetStrokeWidthSetByUser(), true);
+
+    /**
+     * @tc.steps: step4. Call static SetStrokeWidthSetByUser with nullptr frameNode.
+     * @tc.expected: step4. No crash occurs.
+     */
+    OHOS::Ace::g_isConfigChangePerform = true;
+    DataPanelModelNG::SetStrokeWidthSetByUser(nullptr, true);
+    // Just verify no crash
+    EXPECT_EQ(paintProperty->GetStrokeWidthSetByUser(), true);
+}
+
 } // namespace OHOS::Ace::NG

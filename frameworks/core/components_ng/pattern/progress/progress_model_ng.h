@@ -57,6 +57,7 @@ public:
     void SetBorderRadius(const Dimension& value) override;
     void ResetBorderRadius() override;
     void CreateWithResourceObj(JsProgressResourceType jsResourceType, const RefPtr<ResourceObject>& resObj) override;
+    void SetGradientColorResObj(const NG::Gradient& value) override;
     void SetProgressColor(const RefPtr<ResourceObject>& resObj);
     void SetLSStrokeWidth(const RefPtr<ResourceObject>& resObj);
     void SetLSSweepingEffect(const RefPtr<ResourceObject>& resObj);

@@ -81,6 +81,10 @@ public:
     Color CalculateHoverPressColor(const Color& color);
     void StopAllLoopAnimation();
     void SetInVisibleArea(bool value);
+    void SetGradientColor(const NG::Gradient& gradient)
+    {
+        ringProgressColors_->Set(GradientArithmetic(gradient));
+    }
 
 private:
     void PaintScaleRingForApiNine(RSCanvas& canvas, const OffsetF& offset, const SizeF& contentSize) const;
