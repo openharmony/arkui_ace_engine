@@ -51,6 +51,7 @@ group("advanced_ui_component_static") {
       "arcbutton:arcButton",
       #"formmenu:formMenu",
       "arcslider:arcSlider",
+      "downloadfilebutton:downloadFileButton",
     ]
   }
 }
