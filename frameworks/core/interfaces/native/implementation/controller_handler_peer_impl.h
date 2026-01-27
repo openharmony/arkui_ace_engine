@@ -57,11 +57,12 @@ struct ControllerHandlerPeer {
         if (!iter->second.controller) {
             return {};
         }
+        auto controller = iter->second.controller;
         if (parentId) {
             *parentId = iter->second.parentWebId;
         }
         controllerMap.erase(iter);
-        return iter->second.controller;
+        return controller;
     }
 
     static bool ExistController(int64_t nativeController, int32_t& parentWebId)
