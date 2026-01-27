@@ -8556,11 +8556,11 @@ HWTEST_F(NativeNodeTest, NativeNodeTest149, TestSize.Level1)
 }
 
 /**
- * @tc.name: NativeNodeTestRichEditor
+ * @tc.name: NativeNodeTestRichEditor1
  * @tc.desc: Test textinputNode function.
  * @tc.type: FUNC
  */
-HWTEST_F(NativeNodeTest, NativeNodeTestRichEditor, TestSize.Level1)
+HWTEST_F(NativeNodeTest, NativeNodeTestRichEditor1, TestSize.Level1)
 {
     auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
         OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
@@ -8593,6 +8593,98 @@ HWTEST_F(NativeNodeTest, NativeNodeTestRichEditor, TestSize.Level1)
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_SCROLL_BAR_COLOR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_DATA_DETECTOR), nullptr);
     EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_PREVIEW_TEXT), nullptr);
+
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTestRichEditor2
+ * @tc.desc: Test RichEditor function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTestRichEditor2, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_RICH_EDITOR, nullptr, true});
+    uint32_t color = 0XFFFF0000;
+    ArkUI_NumberValue value[] = {{.u32 = color}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    value[0].i32 = false;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_SELECTED_DATA_DETECTOR, &item);
+    value[0].u32 = 0xFFFF0000;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_SELECTED_BACKGROUND_COLOR, &item);
+    value[0].i32 = true;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_KEYBOARD_ON_FOCUS, &item);
+    value[0].i32 = 500;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_MAX_LENGTH, &item);
+    value[0].i32 = 10;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_MAX_LINES, &item);
+    value[0].i32 = true;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_HAPTIC_FEEDBACK, &item);
+
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_SELECTED_DATA_DETECTOR),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_SELECTED_BACKGROUND_COLOR),
+        ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_KEYBOARD_ON_FOCUS),ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_MAX_LENGTH), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_MAX_LINES), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_HAPTIC_FEEDBACK), ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_SELECTED_DATA_DETECTOR), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_SELECTED_BACKGROUND_COLOR), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_KEYBOARD_ON_FOCUS), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_MAX_LENGTH), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_MAX_LINES), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_HAPTIC_FEEDBACK), nullptr);
+
+    nodeAPI->disposeNode(rootNode);
+}
+
+/**
+ * @tc.name: NativeNodeTestRichEditor3
+ * @tc.desc: Test RichEditor function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, NativeNodeTestRichEditor3, TestSize.Level1)
+{
+    auto nodeAPI = reinterpret_cast<ArkUI_NativeNodeAPI_1*>(
+        OH_ArkUI_QueryModuleInterfaceByName(ARKUI_NATIVE_NODE, "ArkUI_NativeNodeAPI_1"));
+    auto rootNode = new ArkUI_Node({ARKUI_NODE_RICH_EDITOR, nullptr, true});
+    uint32_t color = 0XFFFF0000;
+    ArkUI_NumberValue value[] = {{.u32 = color}};
+    ArkUI_AttributeItem item = {value, sizeof(value) / sizeof(ArkUI_NumberValue)};
+    value[0].i32 = ArkUI_CopyOptions::ARKUI_COPY_OPTIONS_LOCAL_DEVICE;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_COPY_OPTION, &item);
+    value[0].i32 = ArkUI_KeyboardAppearance::ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_KEYBOARD_APPEARANCE, &item);
+    value[0].i32 = true;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_STOP_BACK_PRESS, &item);
+    value[0].i32 = false;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_AUTO_SPACING, &item);
+    value[0].i32 = true;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_INCLUDE_FONT_PADDING, &item);
+    value[0].i32 = true;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_FALLBACK_LINE_SPACING, &item);
+    value[0].i32 = false;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_COMPRESS_LEADING_PUNCTUATION, &item);
+    value[0].i32 = false;
+    nodeAPI->setAttribute(rootNode, NODE_RICH_EDITOR_SINGLE_LINE, &item);
+
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_KEYBOARD_APPEARANCE), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_STOP_BACK_PRESS), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_AUTO_SPACING), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_FALLBACK_LINE_SPACING), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_COMPRESS_LEADING_PUNCTUATION), ARKUI_ERROR_CODE_NO_ERROR);
+    EXPECT_EQ(nodeAPI->resetAttribute(rootNode, NODE_RICH_EDITOR_SINGLE_LINE), ARKUI_ERROR_CODE_NO_ERROR);
+
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_KEYBOARD_APPEARANCE), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_STOP_BACK_PRESS), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_ENABLE_AUTO_SPACING), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_FALLBACK_LINE_SPACING), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_COMPRESS_LEADING_PUNCTUATION), nullptr);
+    EXPECT_NE(nodeAPI->getAttribute(rootNode, NODE_RICH_EDITOR_SINGLE_LINE), nullptr);
 
     nodeAPI->disposeNode(rootNode);
 }
