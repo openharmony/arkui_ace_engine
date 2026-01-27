@@ -53,6 +53,16 @@ void ProgressPattern::OnAttachToFrameNode()
     host->GetRenderContext()->SetClipToFrame(true);
 }
 
+void ProgressPattern::OnDetachFromFrameNode(FrameNode* frameNode)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto pipeline = PipelineContext::GetCurrentContextSafely();
+    CHECK_NULL_VOID(pipeline);
+    pipeline->RemoveVisibleAreaChangeNode(frameNode->GetId());
+    pipeline->RemoveWindowStateChangedCallback(frameNode->GetId());
+    hasVisibleChangeRegistered_ = false;
+}
+
 void ProgressPattern::OnDetachFromMainTree()
 {
     CHECK_NULL_VOID(progressModifier_);
@@ -138,6 +148,34 @@ void ProgressPattern::CalculateStrokeWidth(const SizeF& contentSize)
         default:
             break;
     }
+}
+
+void ProgressPattern::RegisterVisibleAreaChange()
+{
+    if (hasVisibleChangeRegistered_) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto paintProperty = host->GetPaintProperty<ProgressPaintProperty>();
+    CHECK_NULL_VOID(paintProperty);
+    bool isScan = paintProperty->GetEnableScanEffect().value_or(false)
+        || paintProperty->GetEnableRingScanEffect().value_or(false)
+        || paintProperty->GetEnableLinearScanEffect().value_or(false);
+    ProgressStatus progressStatus = paintProperty->GetProgressStatusValue(ProgressStatus::PROGRESSING);
+    CHECK_NULL_VOID(isScan || progressStatus == ProgressStatus::LOADING);
+    auto pipeline = host->GetContext();
+    CHECK_NULL_VOID(pipeline);
+    auto callback = [weak = WeakClaim(this)](bool visible, double ratio) {
+        auto pattern = weak.Upgrade();
+        CHECK_NULL_VOID(pattern);
+        CHECK_NULL_VOID(pattern->progressModifier_);
+        pattern->progressModifier_->SetInVisibleArea(visible);
+    };
+    std::vector<double> ratioList = {0.0};
+    pipeline->AddVisibleAreaChangeNode(host, ratioList, callback, false, true);
+    pipeline->AddWindowStateChangedCallback(host->GetId());
+    hasVisibleChangeRegistered_ = true;
 }
 
 void ProgressPattern::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
@@ -536,6 +574,7 @@ void ProgressPattern::OnModifyDone()
         padding.SetEdges(CalcLength(theme->GetRingDefaultPadding()));
         progressLayoutProperty->UpdatePadding(padding);
     }
+    RegisterVisibleAreaChange();
     OnAccessibilityEvent();
     ReportProgressEvent();
 }

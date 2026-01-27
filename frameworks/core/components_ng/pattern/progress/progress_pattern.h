@@ -192,8 +192,10 @@ private:
     void InitColorProperty(ProgressAnimatableProperty& progressAnimatableProperty,
         const RefPtr<ProgressTheme>& progressTheme, const RefPtr<ProgressPaintProperty>& paintProperty);
     void CalculateStrokeWidth(const SizeF& contentSize);
+    void RegisterVisibleAreaChange();
     bool OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, const DirtySwapConfig& config) override;
     void OnAttachToFrameNode() override;
+    void OnDetachFromFrameNode(FrameNode* frameNode) override;
     void OnDetachFromMainTree() override;
     void OnModifyDone() override;
     void DumpInfo() override;
@@ -259,6 +261,7 @@ private:
     bool isModifierInitiatedColor_ = false;
     bool isModifierInitiatedBgColor_ = false;
     double reportLastValue_ = 0.0f;
+    bool hasVisibleChangeRegistered_ = false;
     ACE_DISALLOW_COPY_AND_MOVE(ProgressPattern);
 };
 } // namespace OHOS::Ace::NG
