@@ -94,7 +94,7 @@ ani_ref CreateNavDestinationMode(ani_env* env, ani_size modeValue)
     return static_cast<ani_ref>(navModeItem);
 }
 
-ani_ref GetNavDestinationParamByIndex(ani_env* env, ani_ref nativeStack, int32_t index)
+ani_ref GetNavDestinationParamByIndex(ani_env* env, ani_long nativeStack, int32_t index)
 {
     CHECK_NULL_RETURN(env, nullptr);
     CHECK_NULL_RETURN(nativeStack, nullptr);
@@ -106,7 +106,7 @@ ani_ref GetNavDestinationParamByIndex(ani_env* env, ani_ref nativeStack, int32_t
     }
     ani_ref pathStack;
     if ((status = env->Class_CallStaticMethodByName_Ref(
-        interCls, "fromPtr", nullptr, &pathStack, nativeStack)) != ANI_OK) {
+        interCls, "fromPtr", "l:C{arkui.component.navigation.NavPathStack}", &pathStack, nativeStack)) != ANI_OK) {
         HILOGE("failed to find fromPtr static method of %{public}s class, status:%{public}d",
             ANI_NAV_PATH_STACK_INTERNAL_CLS, status);
         return nullptr;
@@ -357,9 +357,21 @@ ani_object QueryNavigationInfo(ani_env* env, [[maybe_unused]] ani_object, ani_lo
     // set pathStack
     ani_class interCls;
     env->FindClass("arkui.component.navigation.NavPathStackInternal", &interCls);
-    ani_ref pathStack;
-    env->Class_CallStaticMethodByName_Ref(interCls, "fromPtr", nullptr, &pathStack, info.navPathStack);
-    env->Object_SetPropertyByName_Ref(res, "pathStack", static_cast<ani_object>(pathStack));
+    do {
+        if (info.navPathStack == 0) {
+            HILOGE("failed to get NavPathStack in QueryNavigationInfo");
+            break;
+        }
+        ani_status status;
+        ani_ref pathStack;
+        if ((status = env->Class_CallStaticMethodByName_Ref(
+            interCls, "fromPtr", "l:C{arkui.component.navigation.NavPathStack}",
+            &pathStack, info.navPathStack)) != ANI_OK) {
+            HILOGE("failed to find fromPtr static method, status:%{public}d", status);
+            break;
+        }
+        env->Object_SetPropertyByName_Ref(res, "pathStack", static_cast<ani_object>(pathStack));
+    } while (false);
 
     if (info.uniqueId.has_value()) {
         ani_status status;
@@ -416,7 +428,7 @@ ani_object QueryNavDestinationInfo(ani_env* env, [[maybe_unused]] ani_object, an
         ani_string param {};
         env->String_NewUTF8(info.param.value().c_str(), info.param.value().size(), &param);
         env->Object_SetPropertyByName_Ref(res, "param", param);
-    } else if (info.navPathStack) {
+    } else if (info.navPathStack != 0) {
         auto paramRef = GetNavDestinationParamByIndex(env, info.navPathStack, info.index);
         if (paramRef) {
             env->Object_SetPropertyByName_Ref(res, "param", paramRef);
@@ -476,7 +488,7 @@ ani_object QueryNavDestinationInfo0(ani_env* env, [[maybe_unused]] ani_object, a
         ani_string param {};
         env->String_NewUTF8(info.param.value().c_str(), info.param.value().size(), &param);
         env->Object_SetPropertyByName_Ref(res, "param", param);
-    } else if (info.navPathStack) {
+    } else if (info.navPathStack != 0) {
         auto paramRef = GetNavDestinationParamByIndex(env, info.navPathStack, info.index);
         if (paramRef) {
             env->Object_SetPropertyByName_Ref(res, "param", paramRef);
@@ -533,7 +545,7 @@ ani_object QueryNavDestinationInfo1(ani_env* env, [[maybe_unused]] ani_object, a
         ani_string param {};
         env->String_NewUTF8(info.param.value().c_str(), info.param.value().size(), &param);
         env->Object_SetPropertyByName_Ref(res, "param", param);
-    } else if (info.navPathStack) {
+    } else if (info.navPathStack != 0) {
         auto paramRef = GetNavDestinationParamByIndex(env, info.navPathStack, info.index);
         if (paramRef) {
             env->Object_SetPropertyByName_Ref(res, "param", paramRef);
