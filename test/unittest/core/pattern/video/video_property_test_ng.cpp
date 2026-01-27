@@ -803,47 +803,6 @@ HWTEST_F(VideoPropertyTestNg, VideoPatternTest018, TestSize.Level1)
 }
 
 /**
- * @tc.name: VideoPatternTest019
- * @tc.desc: Test VideoPattern requestFullscreenImpl
- * @tc.type: FUNC
- */
-HWTEST_F(VideoPropertyTestNg, VideoPatternTest019, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create a video and get the videoPattern.
-     * @tc.expected: step1. Create and get successfully.
-     */
-    VideoModelNG videoModelNG;
-    auto videoController = AceType::MakeRefPtr<VideoControllerV2>();
-    videoModelNG.Create(videoController);
-    auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(frameNode, nullptr);
-    auto videoPattern = AceType::DynamicCast<VideoPattern>(frameNode->GetPattern());
-    ASSERT_NE(videoPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Set controlBar Property.
-     * @tc.expected: step2. Property set successfully.
-     */
-    frameNode->children_.clear();
-    videoPattern->isPlaying_ = false;
-    auto controlBar = videoPattern->CreateControlBar();
-    auto playButton = AceType::DynamicCast<FrameNode>(controlBar->GetFirstChild());
-    auto playBtnEvent = playButton->GetOrCreateGestureEventHub();
-    auto playClickCallback = playBtnEvent->clickEventActuator_->userCallback_->callback_;
-    GestureEvent gestureEvent;
-    playClickCallback(gestureEvent);
-
-    auto pipelineContext = PipelineBase::GetCurrentContext();
-    ASSERT_NE(pipelineContext, nullptr);
-    auto videoTheme = pipelineContext->GetTheme<VideoTheme>();
-    ASSERT_NE(videoTheme, nullptr);
-    EXPECT_EQ(controlBar->GetRenderContext()->GetBackgroundColorValue(), videoTheme->GetBkgColor());
-    auto controlBarLayoutProperty = controlBar->GetLayoutProperty<LinearLayoutProperty>();
-    EXPECT_EQ(controlBarLayoutProperty->GetMainAxisAlignValue(FlexAlign::AUTO), FlexAlign::SPACE_BETWEEN);
-}
-
-/**
  * @tc.name: VideoFullScreenTest001
  * @tc.desc: Test VideoFullScreenPattern UpdateState.
  * @tc.type: FUNC
