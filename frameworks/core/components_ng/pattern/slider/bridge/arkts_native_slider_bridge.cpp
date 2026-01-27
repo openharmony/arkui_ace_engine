@@ -23,6 +23,8 @@
 #include "core/components_ng/pattern/slider/slider_model_ng.h"
 #include "frameworks/bridge/common/utils/engine_helper.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/nativeModule/arkts_utils.h"
+#include "native_engine/impl/ark/ark_native_engine.h"
+#include "napi/native_api.h"
 
 namespace OHOS::Ace::NG {
 constexpr int NUM_0 = 0;
@@ -38,6 +40,11 @@ constexpr int SLIDER_MAX = 100;
 constexpr int PARAM_ARR_LENGTH_1 = 1;
 constexpr int PARAM_ARR_LENGTH_2 = 2;
 const char* SLIDER_NODEPTR_OF_UINODE = "nodePtr_";
+constexpr char ENTRIES_STRING[] = "entries";
+constexpr char NEXT_STRING[] = "next";
+constexpr char VALUE_STRING[] = "value";
+constexpr char TEXT_STRING[] = "text";
+constexpr char DONE_STRING[] = "done";
 namespace {
 struct SliderOptions {
     double value = 0;
@@ -111,7 +118,7 @@ bool ConvertSliderGradientColor(const EcmaVM* vm, const Local<JSValueRef>& value
 }
 
 bool ConvertSliderMetricsGradientColor(
-    const EcmaVM* vm, const Local<JSValueRef>& value, OHOS::Ace::NG::Gradient& gradient)
+    const EcmaVM* vm, const Local<JSValueRef>& value, OHOS::Ace::NG::Gradient& gradient, bool isJsView = false)
 {
     if (!value->IsObject(vm)) {
         return false;
@@ -126,6 +133,17 @@ bool ConvertSliderMetricsGradientColor(
     if (colorLength == 0) {
         return false;
     }
+
+    if (isJsView && colorLength == 1) {
+        OHOS::Ace::NG::GradientColor gradientColor;
+        gradientColor.SetLinearColor(
+            LinearColor(jsColorMetricsLinearGradient->GetColorMetricsGradient().front().color));
+        gradientColor.SetDimension(jsColorMetricsLinearGradient->GetColorMetricsGradient().front().offset);
+        gradient.AddColor(gradientColor);
+        gradient.AddColor(gradientColor);
+        return true;
+    }
+
     for (size_t colorIndex = 0; colorIndex < colorLength; ++colorIndex) {
         OHOS::Ace::NG::GradientColor gradientColor;
         gradientColor.SetLinearColor(
@@ -196,7 +214,8 @@ static void ParseOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, SliderOptions& o
     ParseStyleOptions(runtimeCallInfo, options);
 }
 
-static void ParsePrefixOrSuffixOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, ArkUISliderCustomContentOptions& options)
+static void ParsePrefixOrSuffixOptions(ArkUIRuntimeCallInfo* runtimeCallInfo,
+    std::string& text, std::string& desc, std::string& level, bool& group)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_VOID(vm);
@@ -205,7 +224,7 @@ static void ParsePrefixOrSuffixOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, Ar
     Local<JSValueRef> levelArg = Local<JSValueRef>();
     Local<JSValueRef> groupArg = Local<JSValueRef>();
     if (runtimeCallInfo->GetArgsNumber() < NUM_6) {
-        Local<JSValueRef> optionsArg = runtimeCallInfo->GetCallArgRef(NUM_3);
+        Local<JSValueRef> optionsArg = runtimeCallInfo->GetCallArgRef(NUM_2);
         textArg = optionsArg->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "accessibilityText"));
         descriptionArg =
             optionsArg->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "accessibilityDescription"));
@@ -218,32 +237,19 @@ static void ParsePrefixOrSuffixOptions(ArkUIRuntimeCallInfo* runtimeCallInfo, Ar
         groupArg = runtimeCallInfo->GetCallArgRef(NUM_5);
     }
 
-    CalcDimension dimension;
     if (!textArg.IsNull() && !textArg->IsUndefined()) {
-        if (textArg->IsString(vm)) {
-            options.accessibilityText = textArg->ToString(vm)->ToString(vm).c_str();
-        } else if (ArkTSUtils::ParseJsResource(vm, textArg, dimension)) {
-            options.accessibilityText = dimension.ToString().c_str();
-        }
+        ArkTSUtils::ParseJsString(vm, textArg, text);
     }
 
     if (!descriptionArg.IsNull() && !descriptionArg->IsUndefined()) {
-        if (descriptionArg->IsString(vm)) {
-            options.accessibilityDescription = descriptionArg->ToString(vm)->ToString(vm).c_str();
-        } else if (ArkTSUtils::ParseJsResource(vm, descriptionArg, dimension)) {
-            options.accessibilityDescription = dimension.ToString().c_str();
-        }
+        ArkTSUtils::ParseJsString(vm, descriptionArg, desc);
     }
 
     if (!levelArg.IsNull() && !levelArg->IsUndefined()) {
-        if (levelArg->IsString(vm)) {
-            options.accessibilityLevel = levelArg->ToString(vm)->ToString(vm).c_str();
-        } else if (ArkTSUtils::ParseJsResource(vm, levelArg, dimension)) {
-            options.accessibilityLevel = dimension.ToString().c_str();
-        }
+        ArkTSUtils::ParseJsString(vm, levelArg, level);
     }
     if (!groupArg.IsNull() && !groupArg->IsUndefined() && groupArg->IsBoolean()) {
-        options.accessibilityGroup = groupArg->ToBoolean(vm)->Value();
+        group = groupArg->ToBoolean(vm)->Value();
     }
 }
 
@@ -548,19 +554,22 @@ ArkUINativeModuleValue SliderBridge::SetBlockSize(ArkUIRuntimeCallInfo* runtimeC
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     Local<JSValueRef> secondArg = Local<JSValueRef>();
     Local<JSValueRef> thirdArg = Local<JSValueRef>();
+    ArkUINodeHandle nativeNode = nullptr;
+    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     if (IsJsView(firstArg, vm)) {
         Local<JSValueRef> sizeOptionArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-        if (sizeOptionArg->IsObject(vm)) {
+        if (!sizeOptionArg->IsNull() && !sizeOptionArg->IsUndefined() && sizeOptionArg->IsObject(vm)) {
             secondArg = sizeOptionArg->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "width"));
             thirdArg = sizeOptionArg->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "height"));
+        } else {
+            GetArkUINodeModifiers()->getSliderModifier()->resetBlockSize(nativeNode);
+            return panda::JSValueRef::Undefined(vm);
         }
     } else {
         secondArg = runtimeCallInfo->GetCallArgRef(NUM_1);
         thirdArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     }
 
-    ArkUINodeHandle nativeNode = nullptr;
-    CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     CalcDimension blockWidth;
     CalcDimension blockHeight;
     bool hasBlockWidth = ArkTSUtils::ParseJsDimensionVp(vm, secondArg, blockWidth);
@@ -836,11 +845,12 @@ ArkUINativeModuleValue SliderBridge::SetTrackColorMetrics(ArkUIRuntimeCallInfo* 
     CHECK_NE_RETURN(GetNativeNode(nativeNode, firstArg, vm), true, panda::JSValueRef::Undefined(vm));
     Gradient gradient;
     RefPtr<ResourceObject> colorResObj;
-    auto frameNode = IsJsView(firstArg, vm)
+    bool isJsView = IsJsView(firstArg, vm);
+    auto frameNode = isJsView
                          ? reinterpret_cast<ArkUINodeHandle>(ViewStackProcessor::GetInstance()->GetMainFrameNode())
                          : nativeNode;
     auto nodeInfo = ArkTSUtils::MakeNativeNodeInfo(frameNode);
-    if (ConvertSliderMetricsGradientColor(vm, secondArg, gradient)) {
+    if (ConvertSliderMetricsGradientColor(vm, secondArg, gradient, isJsView)) {
         ArkUIGradientType gradientObj;
         auto colorLength = gradient.GetColors().size();
         std::vector<uint32_t> colorValues;
@@ -946,8 +956,8 @@ ArkUINativeModuleValue SliderBridge::SetShowSteps(ArkUIRuntimeCallInfo* runtimeC
     StepOptions optionsMap {};
     Local<JSValueRef> optionsArg = runtimeCallInfo->GetCallArgRef(NUM_2);
     auto stepsMap = optionsArg->ToObject(vm)->Get(vm, panda::StringRef::NewFromUtf8(vm, "stepsAccessibility"));
-    if (!stepsMap.IsNull() && !stepsMap->IsUndefined() && stepsMap->IsMap(vm)) {
-        ArkTSUtils::ParseStepOptionsMap(vm, stepsMap, optionsMap);
+    if (!stepsMap.IsNull() && !stepsMap->IsUndefined() && stepsMap->IsObject(vm)) {
+        SliderBridge::ParseStepOptionsMap(vm, stepsMap, optionsMap);
     }
     if (optionsMap.size() > 0) {
         auto optionLength = NUM_0;
@@ -1396,8 +1406,16 @@ ArkUINativeModuleValue SliderBridge::SetPrefix(ArkUIRuntimeCallInfo* runtimeCall
     auto prefixNode = nodePtr(prefixArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(prefixNode, panda::NativePointerRef::New(vm, nullptr));
 
+    std::string text = "";
+    std::string desc = "";
+    std::string level = "";
+    bool group = false;
+    ParsePrefixOrSuffixOptions(runtimeCallInfo, text, desc, level, group);
     ArkUISliderCustomContentOptions options;
-    ParsePrefixOrSuffixOptions(runtimeCallInfo, options);
+    options.accessibilityText = text.c_str();
+    options.accessibilityDescription = desc.c_str();
+    options.accessibilityLevel = level.c_str();
+    options.accessibilityGroup = group;
 
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
@@ -1451,10 +1469,20 @@ ArkUINativeModuleValue SliderBridge::JsSetPrefix(ArkUIRuntimeCallInfo* runtimeCa
         }
     }
 
-    ArkUISliderCustomContentOptions options;
+    std::string text = "";
+    std::string desc = "";
+    std::string level = "";
+    bool group = false;
+
     if (!thirdArg.IsNull() && !thirdArg->IsUndefined() && thirdArg->IsObject(vm)) {
-        ParsePrefixOrSuffixOptions(runtimeCallInfo, options);
+        ParsePrefixOrSuffixOptions(runtimeCallInfo, text, desc, level, group);
     }
+    ArkUISliderCustomContentOptions options;
+    options.accessibilityText = text.c_str();
+    options.accessibilityDescription = desc.c_str();
+    options.accessibilityLevel = level.c_str();
+    options.accessibilityGroup = group;
+
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
     auto sliderModifier = nodeModifiers->getSliderModifier();
@@ -1482,8 +1510,16 @@ ArkUINativeModuleValue SliderBridge::SetSuffix(ArkUIRuntimeCallInfo* runtimeCall
     auto suffixNode = nodePtr(suffixArg->ToNativePointer(vm)->Value());
     CHECK_NULL_RETURN(suffixNode, panda::NativePointerRef::New(vm, nullptr));
 
+    std::string text = "";
+    std::string desc = "";
+    std::string level = "";
+    bool group = false;
+    ParsePrefixOrSuffixOptions(runtimeCallInfo, text, desc, level, group);
     ArkUISliderCustomContentOptions options;
-    ParsePrefixOrSuffixOptions(runtimeCallInfo, options);
+    options.accessibilityText = text.c_str();
+    options.accessibilityDescription = desc.c_str();
+    options.accessibilityLevel = level.c_str();
+    options.accessibilityGroup = group;
 
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
@@ -1538,10 +1574,20 @@ ArkUINativeModuleValue SliderBridge::JsSetSuffix(ArkUIRuntimeCallInfo* runtimeCa
         }
     }
 
-    ArkUISliderCustomContentOptions options;
+    std::string text = "";
+    std::string desc = "";
+    std::string level = "";
+    bool group = false;
+
     if (!thirdArg.IsNull() && !thirdArg->IsUndefined() && thirdArg->IsObject(vm)) {
-        ParsePrefixOrSuffixOptions(runtimeCallInfo, options);
+        ParsePrefixOrSuffixOptions(runtimeCallInfo, text, desc, level, group);
     }
+    ArkUISliderCustomContentOptions options;
+    options.accessibilityText = text.c_str();
+    options.accessibilityDescription = desc.c_str();
+    options.accessibilityLevel = level.c_str();
+    options.accessibilityGroup = group;
+
     auto nodeModifiers = GetArkUINodeModifiers();
     CHECK_NULL_RETURN(nodeModifiers, panda::NativePointerRef::New(vm, nullptr));
     auto sliderModifier = nodeModifiers->getSliderModifier();
@@ -1627,5 +1673,105 @@ ArkUINativeModuleValue SliderBridge::SetMaxLabel(ArkUIRuntimeCallInfo* runtimeCa
 
     GetArkUINodeModifiers()->getSliderModifier()->setMaxLabel(nativeNode, maxLabel);
     return panda::JSValueRef::Undefined(vm);
+}
+
+napi_value SliderBridge::GetIteratorNext(const napi_env env, napi_value iterator, napi_value func, bool* done)
+{
+    napi_value next = nullptr;
+    NAPI_CALL_BASE(env, napi_call_function(env, iterator, func, 0, nullptr, &next), nullptr);
+    CHECK_NULL_RETURN(next, nullptr);
+    napi_value doneValue = nullptr;
+    NAPI_CALL_BASE(env, napi_get_named_property(env, next, DONE_STRING, &doneValue), nullptr);
+    CHECK_NULL_RETURN(doneValue, nullptr);
+    NAPI_CALL_BASE(env, napi_get_value_bool(env, doneValue, done), nullptr);
+    return next;
+}
+
+int32_t SliderBridge::ParseStepOptionItemKey(const napi_env env, napi_value item)
+{
+    int32_t result = INT32_MIN;
+    napi_value entry = nullptr;
+    napi_value key = nullptr;
+    napi_valuetype kType = napi_undefined;
+    NAPI_CALL_BASE(env, napi_get_named_property(env, item, VALUE_STRING, &entry), result);
+    CHECK_NULL_RETURN(entry, result);
+    NAPI_CALL_BASE(env, napi_get_element(env, entry, NUM_0, &key), result);
+    CHECK_NULL_RETURN(key, result);
+    NAPI_CALL_BASE(env, napi_typeof(env, key, &kType), result);
+    CHECK_NULL_RETURN(kType, result);
+    if (napi_number == kType) {
+        double step = NUM_0;
+        NAPI_CALL_BASE(env, napi_get_value_double(env, key, &step), result);
+        if ((step >= 0) && (NearZero(std::abs(step - std::floor(step)))) && (step <= INT32_MAX)) {
+            result = static_cast<int32_t>(step);
+        }
+    }
+    return result;
+}
+
+bool SliderBridge::ParseStepOptionItemValue(EcmaVM* vm, const napi_env env, napi_value item, std::string& stepText)
+{
+    bool result = false;
+    CHECK_NULL_RETURN(vm, result);
+    napi_value entry = nullptr;
+    napi_value value = nullptr;
+    napi_value textObject = nullptr;
+    napi_valuetype vType = napi_undefined;
+    NAPI_CALL_BASE(env, napi_get_named_property(env, item, VALUE_STRING, &entry), result);
+    CHECK_NULL_RETURN(entry, result);
+    NAPI_CALL_BASE(env, napi_get_element(env, entry, NUM_1, &value), result);
+    CHECK_NULL_RETURN(value, result);
+    NAPI_CALL_BASE(env, napi_typeof(env, value, &vType), result);
+    CHECK_NULL_RETURN(vType, result);
+    if (napi_object == vType) {
+        NAPI_CALL_BASE(env, napi_get_named_property(env, value, TEXT_STRING, &textObject), result);
+        CHECK_NULL_RETURN(textObject, result);
+        panda::Local<panda::JSValueRef> localValue = NapiValueToLocalValue(textObject);
+        result = ArkTSUtils::ParseJsString(vm, localValue, stepText);
+    }
+    return result;
+}
+
+napi_value SliderBridge::ParseStepOptionsMap(
+    EcmaVM* vm, const panda::Local<panda::JSValueRef>& jsStepOptionsMap, StepOptions& stepOptionsMap)
+{
+    CHECK_NULL_RETURN(vm, nullptr);
+    auto engine = EngineHelper::GetCurrentEngine();
+    CHECK_NULL_RETURN(engine, nullptr);
+    NativeEngine* nativeEngine = engine->GetNativeEngine();
+    CHECK_NULL_RETURN(nativeEngine, nullptr);
+    auto env = reinterpret_cast<napi_env>(nativeEngine);
+
+    panda::Local<panda::JSValueRef> localValue = jsStepOptionsMap;
+
+    JSValueWrapper valueWrapper = localValue;
+    napi_value nativeValue = nativeEngine->ValueToNapiValue(valueWrapper);
+
+    napi_value entriesFunc = nullptr;
+    napi_value iterator = nullptr;
+    napi_value nextFunc = nullptr;
+    bool done = false;
+
+    NAPI_CALL_BASE(env, napi_get_named_property(env, nativeValue, ENTRIES_STRING, &entriesFunc), nullptr);
+    CHECK_NULL_RETURN(entriesFunc, nullptr);
+
+    NAPI_CALL_BASE(env, napi_call_function(env, nativeValue, entriesFunc, NUM_0, nullptr, &iterator), nullptr);
+    CHECK_NULL_RETURN(iterator, nullptr);
+
+    NAPI_CALL_BASE(env, napi_get_named_property(env, iterator, NEXT_STRING, &nextFunc), nullptr);
+    CHECK_NULL_RETURN(nextFunc, nullptr);
+
+    napi_value next = SliderBridge::GetIteratorNext(env, iterator, nextFunc, &done);
+    while ((nullptr != next) && !done) {
+        auto optionKey = SliderBridge::ParseStepOptionItemKey(env, next);
+        std::string optionStr = "";
+        auto praseResult = SliderBridge::ParseStepOptionItemValue(vm, env, next, optionStr);
+        next = SliderBridge::GetIteratorNext(env, iterator, nextFunc, &done);
+        if ((optionKey < 0) || (!praseResult)) {
+            continue;
+        }
+        stepOptionsMap[static_cast<uint32_t>(optionKey)] = optionStr;
+    }
+    return next;
 }
 } // namespace OHOS::Ace::NG

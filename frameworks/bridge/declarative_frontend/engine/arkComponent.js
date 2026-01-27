@@ -36557,7 +36557,8 @@ if (globalThis.Radio === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkradio');
       module.exportView();
       getUINativeModule().radio.create(params);
-    }
+    },
+    name: 'JSRadio'
   }
 }
 
@@ -36569,7 +36570,8 @@ if (globalThis.Slider === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkslider');
       module.exportView();
       getUINativeModule().slider.create(params);
-    }
+    },
+    name: 'JSSlider'
   }
 }
 
