@@ -234,7 +234,7 @@ bool SheetPresentationPattern::OnDirtyLayoutWrapperSwap(
     ClipSheetNode();
 
     sheetObject_->AvoidKeyboardInDirtyLayoutProcess();
-    
+    SetNeedDoubleAvoidAfterLayout(false);
     if (sheetType_ == SheetType::SHEET_POPUP) {
         MarkSheetPageNeedRender();
     }
@@ -981,7 +981,6 @@ float SheetPresentationPattern::GetSheetHeightChange()
         inputH = textFieldManager ? (pipelineContext->GetRootHeight() -
             textFieldManager->GetFocusedNodeCaretRect().Top() - textFieldManager->GetHeight()) : 0.f;
     }
-    SetNeedDoubleAvoidAfterLayout(false);
     // keyboardH : keyboard height + height of the bottom navigation bar
     auto keyboardH = keyboardInsert.Length() + manager->GetSystemSafeArea().bottom_.Length();
     // The minimum height of the input component from the bottom of the screen after popping up the soft keyboard
@@ -3162,6 +3161,16 @@ void SheetPresentationPattern::StopModifySheetTransition()
     }
 }
 
+bool SheetPresentationPattern::IsDoubleAvoid(bool forceAvoid)
+{
+    auto host = GetHost();
+    CHECK_NULL_RETURN(host, false);
+    auto pipelineContext = PipelineContext::GetCurrentContext();
+    CHECK_NULL_RETURN(pipelineContext, false);
+    auto manager = pipelineContext->GetSafeAreaManager();
+    return forceAvoid && (manager->GetKeyboardInset().Length() != 0);
+}
+
 void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
 {
     if (keyboardAvoidMode_ == SheetKeyboardAvoidMode::NONE ||
@@ -3174,7 +3183,7 @@ void SheetPresentationPattern::AvoidKeyboardBySheetMode(bool forceAvoid)
     auto pipelineContext = host->GetContext();
     CHECK_NULL_VOID(pipelineContext);
     auto manager = pipelineContext->GetSafeAreaManager();
-    if (keyboardHeight_ == manager->GetKeyboardInset().Length() && !forceAvoid) {
+    if (keyboardHeight_ == manager->GetKeyboardInset().Length() && !IsDoubleAvoid(forceAvoid)) {
         return;
     }
     keyboardHeight_ = manager->GetKeyboardInset().Length();

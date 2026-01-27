@@ -1172,6 +1172,7 @@ private:
     float GetBottomSafeArea();
     void StopModifySheetTransition();
     void AvoidKeyboardBySheetMode(bool forceAvoid = false);
+    bool IsDoubleAvoid(bool forceAvoid);
     void DecreaseScrollHeightInSheet(float decreaseHeight);
     void UpdateSheetWhenSheetTypeChanged();
     void RecoverAvoidKeyboardStatus();
