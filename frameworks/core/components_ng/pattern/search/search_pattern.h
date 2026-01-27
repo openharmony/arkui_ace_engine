@@ -210,6 +210,7 @@ public:
     void UpdatePlaceholderFontSizeResource(const Dimension& value);
     void UpdateDecorationColorResource(const Color& value);
     void UpdateDividerColorResource(const Color& value);
+    void UpdateStrokeColorResource(const Color& value);
     void UpdateMinFontSizeResource(const Dimension& value);
     void UpdateMaxFontSizeResource(const Dimension& value);
     void UpdateLetterSpacingResource(const Dimension& value);

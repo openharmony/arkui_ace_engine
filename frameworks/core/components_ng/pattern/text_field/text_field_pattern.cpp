@@ -12851,6 +12851,13 @@ void TextFieldPattern::UpdatePropertyImpl(const std::string& key, RefPtr<Propert
                 }
             }
         },
+        {"strokeColor", [](TextFieldLayoutProperty* prop, RefPtr<PropertyValueBase> value) {
+                if (auto realValue = std::get_if<Color>(&(value->GetValue()))) {
+                    auto strokeColor = Color(*realValue);
+                    prop->UpdateStrokeColor(strokeColor);
+                }
+            }
+        },
     };
 
     auto it = handlers.find(key);
