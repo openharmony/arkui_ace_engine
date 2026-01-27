@@ -616,7 +616,7 @@ HWTEST_F(ObserverTestNg, ObserverTestNg022, TestSize.Level1)
  */
 HWTEST_F(ObserverTestNg, ObserverTestNg023, TestSize.Level1)
 {
-    int32_t instanceId = 4;
+    int32_t instanceId = 3;
     static int firstCallbackCount = 0;
     static int secondCallbackCount = 0;
     firstCallbackCount = 0;
@@ -639,7 +639,7 @@ HWTEST_F(ObserverTestNg, ObserverTestNg023, TestSize.Level1)
  */
 HWTEST_F(ObserverTestNg, ObserverTestNg024, TestSize.Level1)
 {
-    int32_t instanceId = 5;
+    int32_t instanceId = 3;
     static bool callbackCalled = false;
     callbackCalled = false;
     WindowSizeBreakpoint breakpoint { WidthBreakpoint::WIDTH_SM, HeightBreakpoint::HEIGHT_SM };
