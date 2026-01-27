@@ -134,8 +134,10 @@ RefPtr<AceType> JSTabsController::CreateController()
 #ifdef NG_BUILD
     return nullptr;
 #else
-    if (auto modifier = GetTabsInnerModifier()) {
-        return modifier->getController(++g_tabControllerId);
+    if (!Container::IsCurrentUseNewPipeline()) {
+        if (auto modifier = GetTabsInnerModifier()) {
+            return modifier->getController(++g_tabControllerId);
+        }
     }
     return nullptr;
 #endif
