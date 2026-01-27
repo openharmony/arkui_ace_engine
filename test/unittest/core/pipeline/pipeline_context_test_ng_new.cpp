@@ -4033,10 +4033,12 @@ HWTEST_F(PipelineContextTestNg, PipelineContextTestNg259, TestSize.Level1)
 
     /**
      * @tc.steps4: find topNavNode.
-     * @tc.expected: topNavNode found.
+     * @tc.expected: topNavNode found, navDesNodes is not empty.
      */
-    RefPtr<FrameNode> topNavNode;
-    rootNode->FindTopNavDestination(topNavNode);
+    std::list<RefPtr<FrameNode>> navDesNodes;
+    rootNode->FindTopNavDestination(navDesNodes);
+    ASSERT_NE(navDesNodes.size(), 0);
+    auto topNavNode = navDesNodes.back();
     ASSERT_NE(topNavNode, nullptr);
     EXPECT_EQ(topNavNode, navDestinationNode4);
 

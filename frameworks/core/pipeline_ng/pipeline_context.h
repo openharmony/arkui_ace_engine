@@ -1447,8 +1447,8 @@ private:
 
     void FlushWindowSizeChangeCallback(int32_t width, int32_t height, WindowSizeChangeReason type);
 
-    void DumpSimplifyTreeJsonFromTopNavNode(
-        std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> topNavNode, const ParamConfig& config) const;
+    void DumpSimplifyTreeJsonFromTopNavNode(std::shared_ptr<JsonValue>& root,
+        std::list<RefPtr<NG::FrameNode>> navNodeList, const ParamConfig& config) const;
 
     uint64_t GetResampleStamp() const;
     void ConsumeTouchEvents(std::list<TouchEvent>& touchEvents, std::unordered_map<int, TouchEvent>& idToTouchPoints);

@@ -4016,18 +4016,20 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-visibleInfoHasTopNavNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
-        RefPtr<NG::FrameNode> topNavNode;
-        rootNode_->FindTopNavDestination(topNavNode);
-        if (topNavNode != nullptr) {
+        std::list<RefPtr<NG::FrameNode>> navDesNodes;
+        rootNode_->FindTopNavDestination(navDesNodes);
+        if (!navDesNodes.empty()) {
             GetOverlayInspector(root, { true, true, true });
             if (!root->Contains("$children")) {
                 auto array = JsonUtil::CreateArray();
                 root->PutRef("$children", std::move(array));
             }
             auto childrenJson = root->GetValue("$children");
-            auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
-            topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, { true, true, true });
-            childrenJson->Put(topNavDestinationJson);
+            for (auto& navDesNode : navDesNodes) {
+                auto navDestinationJson = JsonUtil::CreateSharedPtrJson();
+                navDesNode->DumpSimplifyTreeWithParamConfig(0, navDestinationJson, true, { true, true, true });
+                childrenJson->Put(navDestinationJson);
+            }
         }
         DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-visibleInfoHasNoTopNavNode") {
@@ -4043,13 +4045,16 @@ bool PipelineContext::OnDumpInfo(const std::vector<std::string>& params) const
     } else if (params[0] == "-visibleInfoFromTopPageNodeWithWeb") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
-        RefPtr<NG::FrameNode> topNavNode = nullptr;
+        std::list<RefPtr<NG::FrameNode>> navDesNodes;
         auto lastPageNode = stageManager_->GetLastPage();
         if (lastPageNode != nullptr) {
-            lastPageNode->FindTopNavDestination(topNavNode);
-            DumpSimplifyTreeJsonFromTopNavNode(root, topNavNode, { true, true, true, true });
-            DumpLog::GetInstance().Print(root->ToString());
+            lastPageNode->FindTopNavDestination(navDesNodes);
+            if (navDesNodes.empty()) {
+                navDesNodes.emplace_back(lastPageNode);
+            }
+            DumpSimplifyTreeJsonFromTopNavNode(root, navDesNodes, { true, true, true, true });
         }
+        DumpLog::GetInstance().Print(root->ToString());
     } else if (params[0] == "-infoOfRootNode") {
         auto root = JsonUtil::CreateSharedPtrJson(true);
         GetAppInfo(root);
@@ -6698,20 +6703,21 @@ void PipelineContext::GetOverlayInspector(std::shared_ptr<JsonValue>& root, Para
 }
 
 void PipelineContext::DumpSimplifyTreeJsonFromTopNavNode(
-    std::shared_ptr<JsonValue>& root, RefPtr<NG::FrameNode> topNavNode, const ParamConfig& config) const
+    std::shared_ptr<JsonValue>& root, std::list<RefPtr<NG::FrameNode>> navNodeList, const ParamConfig& config) const
 {
-    if (topNavNode != nullptr) {
-        GetOverlayInspector(root, config);
-        if (!root->Contains("$children")) {
-            auto array = JsonUtil::CreateArray();
-            root->PutRef("$children", std::move(array));
+    GetOverlayInspector(root, config);
+    if (!root->Contains("$children")) {
+        auto array = JsonUtil::CreateArray();
+        root->PutRef("$children", std::move(array));
+    }
+    auto childrenJson = root->GetValue("$children");
+    for (auto& navNode : navNodeList) {
+        if (navNode == nullptr) {
+            continue;
         }
-        auto childrenJson = root->GetValue("$children");
-        auto topNavDestinationJson = JsonUtil::CreateSharedPtrJson();
-        topNavNode->DumpSimplifyTreeWithParamConfig(0, topNavDestinationJson, true, config);
-        childrenJson->Put(topNavDestinationJson);
-    } else {
-        rootNode_->DumpSimplifyTreeWithParamConfig(0, root, true, config);
+        auto navNodeJson = JsonUtil::CreateSharedPtrJson();
+        navNode->DumpSimplifyTreeWithParamConfig(0, navNodeJson, true, config);
+        childrenJson->Put(navNodeJson);
     }
 }
 
@@ -6741,9 +6747,12 @@ void PipelineContext::GetInspectorTree(bool onlyNeedVisible, ParamConfig config)
          * step2: Get topNavNode from topPageNode. If top Page doesn't has a navigation child,
          * following dump will start at root node, inactive and hidden node will be ignored.
          */
-        RefPtr<NG::FrameNode> topNavNode = nullptr;
-        lastPageNode->FindTopNavDestination(topNavNode);
-        DumpSimplifyTreeJsonFromTopNavNode(root, topNavNode, config);
+        std::list<RefPtr<NG::FrameNode>> navNodes;
+        lastPageNode->FindTopNavDestination(navNodes);
+        if (navNodes.empty()) {
+            navNodes.emplace_back(lastPageNode);
+        }
+        DumpSimplifyTreeJsonFromTopNavNode(root, navNodes, config);
         taskExecutor_->PostTask(cb, TaskExecutor::TaskType::BACKGROUND, "ArkUIGetVisibleInspectorTree");
     } else {
         rootNode_->DumpSimplifyTreeWithParamConfig(0, root, false, config);
@@ -7358,18 +7367,22 @@ bool PipelineContext::CheckSourceTypeChange(SourceType currentSourceType)
 uint32_t PipelineContext::ExeAppAIFunctionCallback(const std::string& funcName, const std::string& params)
 {
     static constexpr uint32_t AI_CALL_NODE_INVALID = 3;
-    RefPtr<NG::FrameNode> topNavNode;
+    std::list<RefPtr<NG::FrameNode>> navNodes;
     CHECK_NULL_RETURN(rootNode_, AI_CALL_NODE_INVALID);
-    rootNode_->FindTopNavDestination(topNavNode);
+    rootNode_->FindTopNavDestination(navNodes);
+    CHECK_NULL_RETURN(!navNodes.empty(), AI_CALL_NODE_INVALID);
+    auto topNavNode = navNodes.back();
     CHECK_NULL_RETURN(topNavNode, AI_CALL_NODE_INVALID);
     return topNavNode->CallAIFunction(funcName, params);
 }
 
 void PipelineContext::OnDumpBindAICaller(const std::vector<std::string>& params) const
 {
-    RefPtr<NG::FrameNode> topNavNode;
+    std::list<RefPtr<NG::FrameNode>> navNodes;
     CHECK_NULL_VOID(rootNode_);
-    rootNode_->FindTopNavDestination(topNavNode);
+    rootNode_->FindTopNavDestination(navNodes);
+    CHECK_NULL_VOID(!navNodes.empty());
+    auto topNavNode = navNodes.back();
     CHECK_NULL_VOID(topNavNode);
     if (params.size() > 1) {
         if (params[1] == "-bind") {

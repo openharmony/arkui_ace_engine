@@ -1221,7 +1221,7 @@ public:
 
     void ExecuteAfterAttachMainTreeTasks();
 
-    void FindTopNavDestination(RefPtr<FrameNode>& result);
+    void FindTopNavDestination(std::list<RefPtr<FrameNode>>& result);
 
     bool SubtreeWithIgnoreChild() const
     {
