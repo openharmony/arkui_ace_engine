@@ -39,10 +39,11 @@ build_component_ng("marquee_pattern_ng") {
       "bridge/marquee_static_modifier.cpp",
     ]
   }
-
-  deps = [
-    "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility"
-  ]
+  if (!is_arkui_x) {
+    deps = [
+      "${ace_root}/interfaces/inner_api/ace:ace_forward_compatibility"
+    ]
+  }
 
   if (!build_ohos_sdk && !is_arkui_x) {
       deps += [ "${ace_root}/interfaces/inner_api/ui_session:ui_session" ]
