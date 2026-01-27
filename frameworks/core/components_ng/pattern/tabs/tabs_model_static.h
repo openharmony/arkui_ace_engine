@@ -41,7 +41,7 @@ public:
     static void SetIsVertical(FrameNode* frameNode, bool isVertical);
     static void SetScrollable(FrameNode* frameNode, bool scrollable);
     static void SetScrollableBarModeOptions(FrameNode* frameNode, const ScrollableBarModeOptions& option);
-    static void SetTabBarMode(FrameNode* frameNode, const std::optional<TabBarMode>& tabBarModeOpt);
+    static void SetTabBarMode(FrameNode* frameNode, const TabBarMode& tabBarMode);
     static void SetTabBarWidth(FrameNode* frameNode, const std::optional<Dimension>& tabBarWidth);
     static void SetTabBarHeight(FrameNode* frameNode, const std::optional<Dimension>& tabBarHeightOpt);
     static void SetBarAdaptiveHeight(FrameNode* frameNode, bool barAdaptiveHeight);
@@ -75,6 +75,7 @@ public:
         std::optional<TabsCacheMode> cacheMode);
     static void SetOnChangeEvent(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& onChangeEvent);
     static void ApplyAttributesFinish(FrameNode* frameNode);
+    static void ResetScrollableBarModeOptions(FrameNode* frameNode);
 
 private:
     static RefPtr<TabsNode> GetOrCreateTabsNode(
