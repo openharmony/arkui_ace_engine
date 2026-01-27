@@ -11691,4 +11691,55 @@ HWTEST_F(NativeNodeTest, ShowCounterConfigTest002, TestSize.Level1)
     nodeAPI->disposeNode(textinput);
     nodeAPI->disposeNode(textarea);
 }
+
+/**
+ * @tc.name: TriggerNodeEventUafTest001
+ * @tc.desc: Test TriggerNodeEvent with empty event listeners set
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, TriggerNodeEventUafTest001, TestSize.Level1)
+{
+    auto node = new ArkUI_Node();
+    node->type = static_cast<int32_t>(ArkUI_NodeType::ARKUI_NODE_COLUMN);
+
+    auto eventListenersSet = new std::set<void (*)(ArkUI_NodeEvent*)>();
+
+    ArkUI_NodeEvent event;
+    event.node = node;
+    event.eventId = 1;
+    event.userData = nullptr;
+    event.origin = nullptr;
+
+    // Should not crash with empty set
+    NodeModel::TriggerNodeEvent(&event, eventListenersSet);
+
+    EXPECT_TRUE(true);
+
+    delete eventListenersSet;
+    delete node;
+}
+
+/**
+ * @tc.name: TriggerNodeEventUafTest002
+ * @tc.desc: Test TriggerNodeEvent with null event listeners set
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeNodeTest, TriggerNodeEventUafTest002, TestSize.Level1)
+{
+    auto node = new ArkUI_Node();
+    node->type = static_cast<int32_t>(ArkUI_NodeType::ARKUI_NODE_COLUMN);
+
+    ArkUI_NodeEvent event;
+    event.node = node;
+    event.eventId = 1;
+    event.userData = nullptr;
+    event.origin = nullptr;
+
+    // Should not crash with null set
+    NodeModel::TriggerNodeEvent(&event, nullptr);
+
+    EXPECT_TRUE(true);
+
+    delete node;
+}
 } // namespace OHOS::Ace
