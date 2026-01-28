@@ -1436,6 +1436,7 @@ bool ImagePattern::RecycleImageData()
     rsRenderContext->RemoveContentModifier(contentMod_);
     contentMod_ = nullptr;
     imagePaintMethod_ = nullptr;
+    imagePaintMethod_ = nullptr;
     image_ = nullptr;
     altLoadingCtx_ = nullptr;
     altImage_ = nullptr;
@@ -1471,6 +1472,7 @@ void ImagePattern::OnRecycle()
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->RemoveContentModifier(contentMod_);
     contentMod_ = nullptr;
+    imagePaintMethod_ = nullptr;
     UnregisterWindowStateChangedCallback();
     frameNode->SetTrimMemRecycle(false);
 }
@@ -2510,6 +2512,7 @@ void ImagePattern::ResetImage()
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
+        imagePaintMethod_ = nullptr;
     }
     host->SetTrimMemRecycle(false);
 }
@@ -2527,6 +2530,7 @@ void ImagePattern::ResetAltImage()
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
+        imagePaintMethod_ = nullptr;
     }
 }
 
@@ -2556,6 +2560,7 @@ void ImagePattern::ResetImageAndAlt()
     CHECK_NULL_VOID(rsRenderContext);
     rsRenderContext->RemoveContentModifier(contentMod_);
     contentMod_ = nullptr;
+    imagePaintMethod_ = nullptr;
     CloseSelectOverlay();
     DestroyAnalyzerOverlay();
     frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
@@ -2881,6 +2886,7 @@ void ImagePattern::ResetAltImageError()
             imageDfxConfig_.ToStringWithoutSrc().c_str(), imageDfxConfig_.GetImageSrc().c_str());
         rsRenderContext->RemoveContentModifier(contentMod_);
         contentMod_ = nullptr;
+        imagePaintMethod_ = nullptr;
     }
 }
 } // namespace OHOS::Ace::NG
