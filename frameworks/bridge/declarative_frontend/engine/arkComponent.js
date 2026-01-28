@@ -36519,7 +36519,8 @@ if (globalThis.RowSplit === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkrowsplit');
       module.exportView();
       getUINativeModule().rowSplit.create();
-    }
+    },
+    name: 'JSRowSplit'
   };
 }
 
@@ -36531,7 +36532,8 @@ if (globalThis.ColumnSplit === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkcolumnsplit');
       module.exportView();
       getUINativeModule().columnSplit.create();
-    }
+    },
+    name: 'JSColumnSplit'
   };
 }
 // @ts-ignore
@@ -36618,7 +36620,8 @@ if (globalThis.FolderStack === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkfolderstack');
       module.exportView();
       getUINativeModule().folderStack.create(params);
-    }
+    },
+    name: 'JSFolderStack'
   };
 }
 
