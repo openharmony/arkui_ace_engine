@@ -56,11 +56,52 @@ Build commands are typically run from the OpenHarmony root directory:
 
 ### Build Targets
 
-Main libraries defined in `build/BUILD.gn`:
-- `libace` - Main engine library
-- `libace_compatible` - Compatibility layer
-- `libace_engine_*` - Engine with different JS backends
-- `libace_engine_declarative_*` - Declarative frontend variants
+Build outputs are located in `out/rk3568/arkui/ace_engine/` and mainly include the following types:
+
+#### 1. Core Engine Libraries (libace*.z.so)
+- `libace.z.so` - Main engine library containing only NG_BUILD-configured core UI framework; currently used for compilation monitoring only, not packaged into final images
+- `libace_compatible.z.so` - Web-style compatible main engine library supporting legacy APIs; the current core library and primary build output
+- `libace_compatible_components.z.so` - Compatible component library; gradually migrating compatible components from libace_compatible to this library for dynamic on-demand loading at runtime
+- `libace_engine_pa_ark.z.so` - PA (Particle Ability) engine support
+- `libace_ndk.z.so` - NDK interface library
+- `libace_form_render.z.so` - Form/card rendering
+- `libace_xcomponent_controller.z.so` - XComponent controller
+- `libace_*.z.so` - Other specialized sub-libraries
+
+#### 2. Frontend Bridge Libraries
+- `libarkts_frontend.z.so` - ArkTS static frontend bridge
+- `libcj_frontend_ohos.z.so` - Cangjie frontend bridge
+
+#### 3. Component Libraries (libarkui_*.z.so)
+Independent shared libraries for each component, gradually being refactored and separated from the core to support on-demand loading:
+- `libarkui_slider.z.so` - Slider component
+- `libarkui_checkbox.z.so` - Checkbox component
+- And other component libraries...
+
+#### 4. ArkTS Native Interface Libraries (*_ani.so)
+Provide bridge interfaces between ArkTS static and Native code:
+- `libanimator_ani.so` - Animation Native interface
+- `libarkuicustomnode_ani.so` - Custom node interface
+- And other *_ani.so libraries
+
+#### 5. Functional Module Libraries (lib*.z.so)
+Independent libraries for various API modules:
+- `libanimator.z.so` - Animation
+- `libdialog.z.so` - Dialog
+- `libdragcontroller.z.so` - Drag controller
+- And other functional libraries
+
+#### 6. ArkTS Bytecode Files (.abc)
+Bytecode files compiled from ArkTS source code, dynamically loaded at runtime:
+- `ark*.abc` - Component bytecode (e.g., arkbutton.abc, arkslider.abc)
+- `modifier.abc` - Component property modifiers
+- `node.abc` - Imperative nodes
+- `statemanagement.abc` - State management
+- `uicontext.abc` - UI context
+- And others
+
+#### 7. Testing Tools
+- `rawinput` - Input event testing tool
 
 ### Testing
 
