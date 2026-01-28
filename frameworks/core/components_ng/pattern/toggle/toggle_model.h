@@ -23,7 +23,8 @@
 #include "core/common/resource/resource_object.h"
 #include "core/components/common/properties/color.h"
 #include "core/components_ng/pattern/toggle/switch_event_hub.h"
-#include "frameworks/core/components_ng/property/measure_property.h"
+#include "core/components_ng/property/measure_property.h"
+#include "core/event/mouse_constants.h"
 
 namespace OHOS::Ace::NG {
 

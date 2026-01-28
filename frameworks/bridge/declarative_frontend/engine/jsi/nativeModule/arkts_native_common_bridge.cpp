@@ -18,6 +18,8 @@
 #include "ark_native_engine.h"
 #include "jsnapi_expo.h"
 
+#include "ui/focus/focus_constants.h"
+
 #include "base/memory/ace_type.h"
 #include "base/memory/referenced.h"
 #include "base/utils/string_utils.h"

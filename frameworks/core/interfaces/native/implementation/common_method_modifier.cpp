@@ -17,6 +17,8 @@
 #include <variant>
 #include "arkoala_api_generated.h"
 
+#include "ui/focus/focus_constants.h"
+
 #include "base/geometry/response_region.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"

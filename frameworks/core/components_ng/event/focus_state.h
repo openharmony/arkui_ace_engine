@@ -20,18 +20,13 @@
 #include <map>
 #include <variant>
 #include "base/memory/ace_type.h"
+#include "core/components_ng/event/focus_type.h"
 
 namespace OHOS::Ace::NG {
 class FocusHub;
 class FrameNode;
 class EventHub;
 class GeometryNode;
-
-enum class FocusType : int32_t {
-    DISABLE = 0,
-    NODE = 1,
-    SCOPE = 2,
-};
 
 class FocusState : public virtual AceType {
     DECLARE_ACE_TYPE(FocusState, AceType);

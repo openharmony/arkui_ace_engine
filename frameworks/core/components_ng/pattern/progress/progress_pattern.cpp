@@ -622,6 +622,11 @@ void ProgressPattern::OnLanguageConfigurationUpdate()
     isRightToLeft_ = isRtl;
 }
 
+FocusPattern ProgressPattern::GetFocusPattern() const
+{
+    return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
+}
+
 void ProgressPattern::OnVisibleChange(bool isVisible)
 {
     auto host = GetHost();

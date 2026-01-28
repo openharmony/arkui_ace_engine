@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/corner_mark/corner_mark.h"
 #include "core/common/resource/resource_parse_utils.h"
+#include "core/components_ng/event/focus_hub.h"
  
 namespace OHOS::Ace::NG {
 int32_t Pattern::OnRecvCommand(const std::string& command)
@@ -99,5 +100,15 @@ void Pattern::RemoveResObj(const std::string& key)
 void Pattern::UnRegisterResource(const std::string& key)
 {
     RemoveResObj(key);
+}
+
+ScopeFocusAlgorithm Pattern::GetScopeFocusAlgorithm()
+{
+    return ScopeFocusAlgorithm();
+}
+
+FocusPattern Pattern::GetFocusPattern() const
+{
+    return { FocusType::DISABLE, false, FocusStyleType::NONE };
 }
 } // namespace OHOS::Ace::NG

@@ -16,6 +16,7 @@
 #include "core/components_ng/pattern/gesture/gesture_model_ng.h"
 
 #include "core/components_ng/base/view_stack_processor.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/gestures/long_press_gesture.h"
 #include "core/components_ng/gestures/rotation_gesture.h"
 #include "core/components_ng/gestures/pinch_gesture.h"

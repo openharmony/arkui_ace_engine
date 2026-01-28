@@ -94,10 +94,7 @@ public:
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::NODE, true, FocusStyleType::CUSTOM_REGION };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     void SetTextFromUser(bool value)
     {

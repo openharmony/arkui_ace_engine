@@ -26,36 +26,13 @@
 #include "ui/base/type_info_base.h"
 #include "ui/base/utils/type_definition.h"
 #include "ui/event/event_constants.h"
+#include "ui/base/event_source.h"
 
 namespace OHOS::Ace {
 
 using ConvertInfo = std::pair<UIInputEventType, UIInputEventType>;
 
 enum class KeyCode : int32_t;
-
-enum class SourceType : int32_t {
-    NONE = 0,
-    MOUSE = 1,
-    TOUCH = 2,
-    TOUCH_PAD = 3,
-    KEYBOARD = 4,
-    JOYSTICK = 5,
-    CROWN = 6,
-};
-
-enum class SourceTool : int32_t {
-    UNKNOWN = 0,
-    FINGER = 1,
-    PEN = 2,
-    RUBBER = 3,
-    BRUSH = 4,
-    PENCIL = 5,
-    AIRBRUSH = 6,
-    MOUSE = 7,
-    LENS = 8,
-    TOUCHPAD = 9,
-    JOYSTICK = 10,
-};
 
 struct EventTarget final {
     std::string id;

@@ -16,6 +16,7 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_ITEM_PATTERN_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERNS_WATERFLOW_WATER_FLOW_ITEM_PATTERN_H
 
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/pattern.h"
 #include "core/components_ng/pattern/waterflow/water_flow_item_layout_property.h"
 

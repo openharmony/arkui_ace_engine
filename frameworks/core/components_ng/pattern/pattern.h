@@ -54,6 +54,8 @@ struct UiMaterialParam;
 namespace OHOS::Ace::NG {
 class AccessibilitySessionAdapter;
 class InspectorFilter;
+class FocusPattern;
+struct ScopeFocusAlgorithm;
 
 class ScrollingListener : public AceType {
     DECLARE_ACE_TYPE(ScrollingListener, AceType);
@@ -489,15 +491,9 @@ public:
     // Called before frameNode CreatePaintWrapper.
     virtual void BeforeCreatePaintWrapper() {}
 
-    virtual FocusPattern GetFocusPattern() const
-    {
-        return { FocusType::DISABLE, false, FocusStyleType::NONE };
-    }
+    virtual FocusPattern GetFocusPattern() const;
 
-    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm()
-    {
-        return ScopeFocusAlgorithm();
-    }
+    virtual ScopeFocusAlgorithm GetScopeFocusAlgorithm();
 
     virtual bool ScrollToNode(const RefPtr<FrameNode>& focusFrameNode)
     {

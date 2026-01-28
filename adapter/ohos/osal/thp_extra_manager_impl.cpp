@@ -18,6 +18,7 @@
 #include <dlfcn.h>
 
 #include "adapter/ohos/entrance/utils.h"
+#include "base/json/json_util.h"
 
 namespace OHOS::Ace::NG {
 void* THPExtraManagerImpl::lib_ = nullptr;

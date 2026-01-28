@@ -19,7 +19,6 @@
 #include <cstdint>
 #include <string>
 
-#include "ui/focus/focus_constants.h"
 #include "ui/properties/flex.h"
 
 #include "base/utils/linear_map.h"

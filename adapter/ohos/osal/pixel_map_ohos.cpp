@@ -19,6 +19,7 @@
 #include "media_errors.h"
 #include "pixel_map_manager.h"
 
+#include "base/log/log.h"
 #include "core/image/image_file_cache.h"
 
 namespace OHOS::Ace {
