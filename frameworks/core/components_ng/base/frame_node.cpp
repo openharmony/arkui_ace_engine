@@ -3729,9 +3729,11 @@ void FrameNode::ParseRegionAndAdd(const CalcDimensionRect& region, const ScalePr
     auto y = ParseDimensionToPx(region.GetY(), scaleProperty, rect.Height());
     auto width = ParseDimensionToPx(region.GetWidth(), scaleProperty, rect.Width());
     auto height = ParseDimensionToPx(region.GetHeight(), scaleProperty, rect.Height());
-    if (!x.has_value() || !y.has_value()) {
-        responseRegionResult.emplace_back(rect);
-        return;
+    if (!x.has_value()) {
+        x = 0.0;
+    }
+    if (!y.has_value()) {
+        y = 0.0;
     }
     if (!width.has_value() || LessOrEqual(width.value(), 0.0)) {
         width = rect.Width();

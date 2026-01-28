@@ -1579,6 +1579,106 @@ HWTEST_F(FrameNodeTestNg, FrameNodeGetIgnoreLayoutSafeAreaOptsTest001, TestSize.
     EXPECT_EQ(opts.edges, NG::SAFE_AREA_EDGE_ALL);
 }
 
+std::vector<CalcDimensionRect> inputsWithPercent1 = {
+    CalcDimensionRect { CalcDimension("calc(10% - 0vp)", DimensionUnit::CALC),
+        CalcDimension("calc(100% + 100PX)", DimensionUnit::CALC), CalcDimension(0.0, DimensionUnit::PERCENT),
+        CalcDimension(0.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension("calc(20% - 0vp)", DimensionUnit::CALC),
+        CalcDimension("calc(100% + percent(10))", DimensionUnit::CALC), CalcDimension(0.0, DimensionUnit::PERCENT),
+        CalcDimension(0.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension("calc(30% - 0vp)", DimensionUnit::CALC),
+        CalcDimension("calc(100% * 100px)", DimensionUnit::CALC), CalcDimension(0.0, DimensionUnit::PERCENT),
+        CalcDimension(0.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension("calc(40% - 0vp)", DimensionUnit::CALC),
+        CalcDimension("calc(100% / 100px)", DimensionUnit::CALC), CalcDimension(0.0, DimensionUnit::PERCENT),
+        CalcDimension(0.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension("calc(50% - 0vp)", DimensionUnit::CALC),
+        CalcDimension("calc(0.1 + 100px)", DimensionUnit::CALC), CalcDimension(0.0, DimensionUnit::PERCENT),
+        CalcDimension(0.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension("calc(60% - 0vp)", DimensionUnit::CALC),
+        CalcDimension("calc(100% + 100)", DimensionUnit::CALC), CalcDimension(0.0, DimensionUnit::PERCENT),
+        CalcDimension(0.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension("calc(70% - 0vp)", DimensionUnit::CALC),
+        CalcDimension("calc(100%+100px)", DimensionUnit::CALC), CalcDimension(0.0, DimensionUnit::PERCENT),
+        CalcDimension(0.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension("calc(80% - 0vp)", DimensionUnit::CALC),
+        CalcDimension("calc(100% + 100s)", DimensionUnit::CALC), CalcDimension(0.0, DimensionUnit::PERCENT),
+        CalcDimension(0.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension("calc(90% - 0vp)", DimensionUnit::CALC),
+        CalcDimension("calc（100% + 100px）", DimensionUnit::CALC), CalcDimension(0.0, DimensionUnit::PERCENT),
+        CalcDimension(0.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension("calc(100% - 0vp)", DimensionUnit::CALC), CalcDimension("", DimensionUnit::CALC),
+        CalcDimension(0.0, DimensionUnit::PERCENT), CalcDimension(0.0, DimensionUnit::PERCENT) },
+
+    CalcDimensionRect { CalcDimension(0.0, DimensionUnit::PERCENT), CalcDimension(0.0, DimensionUnit::PERCENT),
+        CalcDimension(0.0, DimensionUnit::PERCENT), CalcDimension(0.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension(1.0, DimensionUnit::PERCENT), CalcDimension(1.0, DimensionUnit::PERCENT),
+        CalcDimension(0.0, DimensionUnit::PERCENT), CalcDimension(0.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension(1.5, DimensionUnit::PERCENT), CalcDimension(1.5, DimensionUnit::PERCENT),
+        CalcDimension(0.0, DimensionUnit::PERCENT), CalcDimension(0.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension(-0.5, DimensionUnit::PERCENT), CalcDimension(-0.5, DimensionUnit::PERCENT),
+        CalcDimension(0.0, DimensionUnit::PERCENT), CalcDimension(0.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension(0.0, DimensionUnit::PERCENT), CalcDimension(0.0, DimensionUnit::PERCENT),
+        CalcDimension(-1.0, DimensionUnit::PERCENT), CalcDimension(-1.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension(0.0, DimensionUnit::PERCENT), CalcDimension(0.0, DimensionUnit::PERCENT),
+        CalcDimension(-1.0, DimensionUnit::PERCENT), CalcDimension(1.0, DimensionUnit::PERCENT) },
+    CalcDimensionRect { CalcDimension(0.0, DimensionUnit::PERCENT), CalcDimension(0.0, DimensionUnit::PERCENT),
+        CalcDimension(1.0, DimensionUnit::PERCENT), CalcDimension(-1.0, DimensionUnit::PERCENT) }
+};
+
+std::vector<RectF> resultsToDuplicate1 = {
+    RectF { 0.0, 0.0, 0.1, 1.0 },
+    RectF { 0.0, 0.0, 0.2, 1.0 },
+    RectF { 0.0, 0.0, 0.3, 1.0 },
+    RectF { 0.0, 0.0, 0.4, 1.0 },
+    RectF { 0.0, 0.0, 0.5, 1.0 },
+    RectF { 0.0, 0.0, 0.6, 1.0 },
+    RectF { 0.0, 0.0, 0.7, 1.0 },
+    RectF { 0.0, 0.0, 0.8, 1.0 },
+    RectF { 0.0, 0.0, 0.9, 1.0 },
+    RectF { 0.0, 0.0, 1.0, 1.0 },
+
+    RectF { 0.0, 0.0, 1.0, 1.0 },
+    RectF { 0.0, 0.0, 1.0, 1.0 },
+    RectF { 0.0, 0.0, 1.5, 1.5 },
+    RectF { 0.0, 0.0, 1.0, 1.0 },
+    RectF { -1.0, -1.0, 1.0, 1.0 },
+    RectF { -1.0, 1.0, 1.0, 1.0 },
+    RectF { 1.0, -1.0, 1.0, 1.0 }
+};
+
+/**
+ * @tc.name: FrameNodeParseRegionAndAdd001
+ * @tc.desc: Test method ParseRegionAndAdd
+ * @tc.type: FUNC
+ */
+HWTEST_F(FrameNodeTestNg, FrameNodeParseRegionAndAdd001, TestSize.Level1)
+{
+    EXPECT_EQ(inputsWithPercent1.size(), resultsToDuplicate1.size());
+
+    auto frameNode = FrameNode::CreateFrameNode("framenode", 1, AceType::MakeRefPtr<Pattern>(), true);
+    auto n = inputsWithPercent1.size();
+
+    auto gestureEventHub = frameNode->GetEventHub<EventHub>()->GetOrCreateGestureEventHub();
+    auto rect = frameNode->renderContext_->GetPaintRectWithoutTransform();
+
+    std::unordered_map<ResponseRegionSupportedTool, std::vector<CalcDimensionRect>> regionMap;
+    auto toolType = NG::ResponseRegionSupportedTool::FINGER;
+
+    for (auto i = 0; i < n; ++i) {
+        auto dimenRect = inputsWithPercent1[i];
+        regionMap[toolType].push_back(dimenRect);
+        gestureEventHub->SetResponseRegionMap(regionMap);
+        auto region = frameNode->GetResponseRegionList(rect, 1, 1);
+        EXPECT_EQ(region.size(), 1);
+        EXPECT_EQ(region[0].Width(), resultsToDuplicate1[i].Width() * rect.Width());
+        EXPECT_EQ(region[0].Height(), resultsToDuplicate1[i].Height() * rect.Height());
+        EXPECT_EQ(region[0].GetX(), resultsToDuplicate1[i].GetX() * rect.Width() + rect.GetX());
+        EXPECT_EQ(region[0].GetY(), resultsToDuplicate1[i].GetY() * rect.Height() + rect.GetY());
+        regionMap[toolType].clear();
+    }
+}
+
 /**
  * @tc.name: FrameNodeInResponseRegionListTest001
  * @tc.desc: Test the function InResponseRegionList
