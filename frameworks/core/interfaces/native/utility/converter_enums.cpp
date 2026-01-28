@@ -101,7 +101,7 @@ void AssignCast(std::optional<WebRotateEffect>& dst, const Ark_WebRotateEffect& 
 }
 
 template<>
-void AssignCast(std::optional<AutoCapitalizationMode>& dst, const Ark_AutoCapitalizationMode& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<AutoCapitalizationMode>& dst, const Ark_AutoCapitalizationMode& src)
 {
     switch (src) {
         case ARK_AUTO_CAPITALIZATION_MODE_NONE: dst = AutoCapitalizationMode::NONE; break;
@@ -750,7 +750,7 @@ void AssignCast(std::optional<EllipsisMode>& dst, const Ark_EllipsisMode& src)
 }
 
 template<>
-void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextAlign>& dst, const Ark_TextAlign& src)
 {
     switch (src) {
         case ARK_TEXT_ALIGN_CENTER: dst = TextAlign::CENTER; break;
@@ -850,7 +850,7 @@ void AssignCast(std::optional<TextOverflow>& dst, const Ark_TextOverflow& src)
 }
 
 template<>
-void AssignCast(std::optional<TextInputType>& dst, const Ark_SearchType& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextInputType>& dst, const Ark_SearchType& src)
 {
     switch (src) {
         case ARK_SEARCH_TYPE_NORMAL: dst = TextInputType::TEXT; break;
@@ -864,7 +864,7 @@ void AssignCast(std::optional<TextInputType>& dst, const Ark_SearchType& src)
 }
 
 template<>
-void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonStyle& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<CancelButtonStyle>& dst, const Ark_CancelButtonStyle& src)
 {
     switch (src) {
         case ARK_CANCEL_BUTTON_STYLE_CONSTANT : dst = CancelButtonStyle::CONSTANT; break;
@@ -1457,7 +1457,7 @@ void AssignCast(std::optional<LineBreakStrategy>& dst, const Ark_LineBreakStrate
 }
 
 template<>
-void AssignCast(std::optional<TextDirection>& dst, const Ark_TextDirection& src)
+ACE_FORCE_EXPORT void AssignCast(std::optional<TextDirection>& dst, const Ark_TextDirection& src)
 {
     switch (src) {
         case ARK_TEXT_DIRECTION_LTR: dst = TextDirection::LTR; break;

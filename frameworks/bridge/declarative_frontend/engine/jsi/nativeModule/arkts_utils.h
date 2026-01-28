@@ -513,6 +513,11 @@ public:
     static bool CheckJavaScriptScope(const EcmaVM* vm);
     static void ParseStepOptionsMap(const EcmaVM* vm, const Local<JSValueRef>& optionsArg, StepOptions& optionsMap);
     static ACE_FORCE_EXPORT RefPtr<BasicShape> GetJSBasicShape(const EcmaVM* vm, const Local<JSValueRef>& jsValue);
+    static DragPreviewOption ParseDragPreviewOptions(ArkUIRuntimeCallInfo* info, const EcmaVM* vm);
+    static void ParseDragInteractionOptions(
+        ArkUIRuntimeCallInfo* info, const EcmaVM* vm, DragPreviewOption& previewOption);
+    static void SetDragNumberBadge(ArkUIRuntimeCallInfo* info, const EcmaVM* vm, DragPreviewOption& option);
+    static void SetDragPreviewOptionApply(ArkUIRuntimeCallInfo* info, const EcmaVM* vm, DragPreviewOption& option);
 
     template<typename T>
     static Local<JSValueRef> ToJsValueWithVM(const EcmaVM* vm, T val);

@@ -239,7 +239,7 @@ bool BorderStyleProperty::operator==(const BorderStyleProperty& value) const
            (styleBottom == value.styleBottom);
 }
 
-void BorderWidthPropertyT<Dimension>::SetBorderWidth(const Dimension& borderWidth)
+ACE_FORCE_EXPORT void BorderWidthPropertyT<Dimension>::SetBorderWidth(const Dimension& borderWidth)
 {
     leftDimen = borderWidth;
     rightDimen = borderWidth;
@@ -261,7 +261,7 @@ void BorderRadiusPropertyT<Dimension>::SetRadius(const Dimension& borderRadius)
     radiusBottomRight = borderRadius;
 }
 
-bool BorderRadiusPropertyT<Dimension>::operator==(const BorderRadiusPropertyT<Dimension>& value) const
+ACE_FORCE_EXPORT bool BorderRadiusPropertyT<Dimension>::operator==(const BorderRadiusPropertyT<Dimension>& value) const
 {
     return (radiusTopLeft == value.radiusTopLeft) && (radiusTopRight == value.radiusTopRight) &&
            (radiusBottomLeft == value.radiusBottomLeft) && (radiusBottomRight == value.radiusBottomRight);

@@ -52,7 +52,7 @@ public:
 
     ~RecognizerGroup() override = default;
 
-    void AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& recognizers);
+    ACE_FORCE_EXPORT void AddChildren(const std::list<RefPtr<NGGestureRecognizer>>& recognizers);
     void RemoveRecognizerInGroup(const RefPtr<NGGestureRecognizer>& recognizer);
 
     void OnFlushTouchEventsBegin() override;

@@ -35,6 +35,7 @@ constexpr float AGING_MIN_SCALE = 1.75f;
 constexpr float MAX_FONT_SCALE = 2.0f;
 constexpr int TWO = 2;
 constexpr Dimension DEFAULT_DIVIDER_HEIGHT = 12.0_vp;
+const char SYMBOL_ETS_TAG[] = "SymbolGlyph";
 } // namespace
 
 bool SearchLayoutAlgorithm::IsFixedHeightMode(LayoutWrapper* layoutWrapper)
@@ -100,7 +101,7 @@ void SearchLayoutAlgorithm::CancelImageMeasure(LayoutWrapper* layoutWrapper)
         layoutProperty->GetCancelButtonUDSizeValue().ConvertToPxDistribute(
             minFontScale_, maxFontScale_) : defaultImageHeight,
         searchHeight_));
-    if (cancelImageWrapper->GetHostTag() == V2::SYMBOL_ETS_TAG) {
+    if (cancelImageWrapper->GetHostTag() == SYMBOL_ETS_TAG) {
         imageHeight = CalcSymbolIconHeight(layoutWrapper, CANCEL_IMAGE_INDEX, defaultImageHeight);
     }
     CalcSize imageCalcSize;
@@ -305,7 +306,7 @@ void SearchLayoutAlgorithm::ImageMeasure(LayoutWrapper* layoutWrapper)
     auto imageHeight = static_cast<float>(std::min(layoutProperty->HasSearchIconUDSize() ?
         layoutProperty->GetSearchIconUDSizeValue().ConvertToPx() : defaultImageHeight,
         searchHeight_));
-    if (imageWrapper->GetHostTag() == V2::SYMBOL_ETS_TAG) {
+    if (imageWrapper->GetHostTag() == SYMBOL_ETS_TAG) {
         imageHeight = CalcSymbolIconHeight(layoutWrapper, IMAGE_INDEX, defaultImageHeight);
     }
     CalcSize imageCalcSize;

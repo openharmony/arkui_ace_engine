@@ -81,6 +81,7 @@ DynamicModule* DynamicModuleHelper::GetDynamicModule(const std::string& name)
         { "Rating", "rating" },
         { "Richeditor", "richeditor" },
         { "RowSplit", "linearsplit" },
+        { "Search", "search" },
         { "Sidebar", "sidebar" },
         { "Slider", "slider" },
         { "Stepper", "stepper" },
