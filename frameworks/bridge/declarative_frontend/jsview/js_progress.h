@@ -43,7 +43,8 @@ public:
 
 private:
     static bool ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradient& gradient);
-    static void ParseGradientColor(NG::Gradient& gradient, RefPtr<ResourceObject>& colorResObj, int32_t& indx);
+    static void ParseGradientColor(
+        NG::Gradient& gradient, RefPtr<ResourceObject>& colorResObj, Color& color, int32_t& indx);
     static void ParseGradientOffset(NG::Gradient& gradient, RefPtr<ResourceObject>& offsetResObj, int32_t& indx);
     static NG::ProgressStatus ConvertStrToProgressStatus(const std::string& value);
     static void JsSetProgressStyleOptions(const JSCallbackInfo& info);
