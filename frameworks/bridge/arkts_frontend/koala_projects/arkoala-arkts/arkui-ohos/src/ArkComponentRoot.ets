@@ -57,11 +57,18 @@ export function ArkComponentRoot(
                 FreeRootNode.current?.setComponent(node.getComponent()?.getInstance());
                 content(node);
             });
+            node.setCustomNodeBuilder(func);
+            const weakNode = new WeakRef<ArkCustomComponentRootPeer>(node);
             node.setBuildFunction((): Long => {
-                const childPeerPtr = node.getChildPeerPtr();
+                const root = weakNode.deref();
+                if (!root) {
+                    console.error('node is released when call build function');
+                    return new Long();
+                }
+                const childPeerPtr = root.getChildPeerPtr();
                 if (childPeerPtr === nullptr) {
-                    const ptr = func(node.peer.ptr);
-                    node.setChildPeerPtr(ptr);
+                    const ptr = root.callCustomNodeBuilder(root.peer.ptr);
+                    root.setChildPeerPtr(ptr);
                     return new Long(ptr);
                 } else {
                     return new Long(childPeerPtr);

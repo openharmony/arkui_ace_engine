@@ -1454,6 +1454,10 @@ class ScopeImpl<Value> implements ManagedScope, InternalScope<Value>, Computable
         this.node = undefined
         this.nodeRef = undefined
         this.scopeInternal = undefined
+        this.myCompute = undefined
+        this.myValue = undefined
+        this.incremental = undefined
+        this.statesNamed = undefined
         const statesCreated = this.statesCreated
         if (statesCreated) {
             disposeContentBackward<Disposable>(statesCreated)

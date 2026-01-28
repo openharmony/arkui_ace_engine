@@ -19,6 +19,7 @@ import { __StateMgmtFactoryImpl } from './base/stateMgmtFactory';
 import { LocalStorage } from './storage/localStorage';
 import { IBindingSource, ITrackedDecoratorRef } from './base/mutableStateMeta';
 import { IComputedDecoratorRef } from './decoratorImpl/decoratorComputed';
+import { DecoratedVariableBase } from './decoratorImpl/decoratorBase';
 
 export interface IVariableOwner {
     getUniqueId(): int;
@@ -28,6 +29,7 @@ export interface IVariableOwner {
     __findProvide__Internal<T>(alias: string): IProvideDecoratedVariable<T> | undefined;
     __addProvider__Internal<T>(alias: string, v: IProviderDecoratedVariable<T>): void;
     __findProvider__Internal<T>(alias: string): IProviderDecoratedVariable<T> | undefined;
+    __registerStateVariables__Internal(stateVariable: DecoratedVariableBase): void;
 }
 
 export interface IDecoratedVariable {
