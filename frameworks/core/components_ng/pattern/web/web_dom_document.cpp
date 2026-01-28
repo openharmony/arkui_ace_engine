@@ -122,6 +122,35 @@ std::shared_ptr<WebDomNode> WebDomDocument::CreateNode(std::unique_ptr<JsonValue
     return node;
 }
 
+ActiveNode WebDomDocument::CreateActiveNode(std::unique_ptr<JsonValue>& json)
+{
+    ActiveNode node;
+
+    node.id = json->GetInt(WEB_JSON_ID, WEB_ERROR_INT);
+    node.tagName = json->GetString(WEB_JSON_TYPE, WEB_ERROR_STRING);
+    node.type = WEB_DOM_JSON_TYPE_OUTER;
+
+    auto x = json->GetDouble(WEB_ATTR_X, WEB_ERROR_DOUBLE);
+    auto y = json->GetDouble(WEB_ATTR_Y, WEB_ERROR_DOUBLE);
+    auto width = json->GetDouble(WEB_ATTR_WIDTH, WEB_ERROR_DOUBLE);
+    auto height = json->GetDouble(WEB_ATTR_HEIGHT, WEB_ERROR_DOUBLE);
+    node.rect = RectF(x, y, width, height);
+
+    if (json->Contains(WEB_JSON_ATTRS) && json->GetValue(WEB_JSON_ATTRS)->IsObject()) {
+        auto current = json->GetValue(WEB_JSON_ATTRS);
+        node.attributes = std::move(current);
+    }
+
+    if (json->Contains(WEB_JSON_CHILDREN) && json->GetValue(WEB_JSON_CHILDREN)->IsArray()) {
+        auto children = json->GetValue(WEB_JSON_CHILDREN);
+        for (int32_t i = 0; i < children->GetArraySize(); ++i) {
+            auto item = children->GetArrayItem(i);
+            node.children.push_back(CreateActiveNode(item));
+        }
+    }
+    return node;
+}
+
 ActiveNode WebDomDocument::BuildActiveNode(const std::shared_ptr<WebDomNode>& domNode,
     int32_t parentId) const
 {
@@ -169,6 +198,26 @@ void WebDomDocument::MarkDirty()
 {
     TAG_LOGI(AceLogTag::ACE_WEB, "WebDomDocument::MarkDirty");
     Commit();
+}
+
+std::unique_ptr<JsonValue> WebDomDocument::CreateTempFromJsonString(const std::string &jsonString)
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebDomDocument CreateTempFromJsonString size:%{public}zu",
+        jsonString.size());
+
+    std::unique_ptr<JsonValue> children = JsonUtil::CreateArray(true);
+    auto snapshot = JsonUtil::ParseJsonString(jsonString);
+
+    if (snapshot->Contains(WEB_JSON_CHILD) && snapshot->GetValue(WEB_JSON_CHILD)->IsObject()) {
+        auto child = snapshot->GetValue(WEB_JSON_CHILD);
+        auto temp = CreateActiveNode(child);
+        auto rootJson = temp.ToJson(*this);
+        children->Put(rootJson);
+    } else {
+        TAG_LOGI(AceLogTag::ACE_WEB, "CreateTempFromJsonString no children");
+    }
+
+    return children;
 }
 
 void WebDomDocument::CreateFromJsonString(const std::string &jsonString)
