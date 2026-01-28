@@ -91,7 +91,7 @@ void CalendarPickerDialogBridge::ParseFontOfButtonStyle(
     panda::Local<panda::JSValueRef> fontColorValue =
         pickerButtonParamObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "fontColor"));
     Color fontColor;
-    if (ArkTSUtils::ParseJsColor(vm, fontColorValue, fontColor)) {
+    if (ArkTSUtils::ParseJsColorAlpha(vm, fontColorValue, fontColor)) {
         buttonInfo.fontColor = fontColor;
     }
     panda::Local<panda::JSValueRef> fontWeightValue =
@@ -204,7 +204,7 @@ void CalendarPickerDialogBridge::ParseBackgroundOfButtonStyle(EcmaVM* vm,
     panda::Local<panda::JSValueRef> backgroundColorValue =
         pickerButtonParamObject->Get(vm, panda::StringRef::NewFromUtf8(vm, "backgroundColor"));
     Color backgroundColor;
-    if (ArkTSUtils::ParseJsColor(vm, backgroundColorValue, backgroundColor)) {
+    if (ArkTSUtils::ParseJsColorAlpha(vm, backgroundColorValue, backgroundColor)) {
         buttonInfo.backgroundColor = backgroundColor;
     }
 }
@@ -753,7 +753,7 @@ DialogProperties CalendarPickerDialogBridge::BuildDialogProperties(EcmaVM* vm,
     
     auto backgroundColorValue = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "backgroundColor"));
     Color backgroundColor;
-    if (ArkTSUtils::ParseJsColor(vm, backgroundColorValue, backgroundColor)) {
+    if (ArkTSUtils::ParseJsColorAlpha(vm, backgroundColorValue, backgroundColor)) {
         properties.backgroundColor = backgroundColor;
     }
 
@@ -931,7 +931,7 @@ void CalendarPickerDialogBridge::GetEffectOptionColor(
 {
     auto colorValue = jsOption->Get(vm, panda::StringRef::NewFromUtf8(vm, "color"));
     if (!SystemProperties::ConfigChangePerform()) {
-        ArkTSUtils::ParseJsColor(vm, colorValue, effectOption.color);
+        ArkTSUtils::ParseJsColorAlpha(vm, colorValue, effectOption.color);
     } else {
         RefPtr<ResourceObject> colorResObj;
         ArkTSUtils::ParseJsColor(vm, colorValue, effectOption.color, colorResObj);
@@ -965,7 +965,7 @@ void CalendarPickerDialogBridge::GetEffectOptionInactiveColor(
     panda::Local<panda::JSValueRef> inactiveColorValue =
         jsOption->Get(vm, panda::StringRef::NewFromUtf8(vm, "inactiveColor"));
     if (!SystemProperties::ConfigChangePerform()) {
-        if (ArkTSUtils::ParseJsColor(vm, inactiveColorValue, effectOption.inactiveColor)) {
+        if (ArkTSUtils::ParseJsColorAlpha(vm, inactiveColorValue, effectOption.inactiveColor)) {
             effectOption.isValidColor = true;
         }
     } else {
