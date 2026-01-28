@@ -1267,7 +1267,11 @@ public:
         ani_enum axis;
         env->FindEnum(ANI_SCROLL_AXIS, &axis);
         ani_enum_item axisItem;
-        env->Enum_GetEnumItemByIndex(axis, static_cast<ani_size>(info.axis), &axisItem);
+        if (info.axis == Axis::VERTICAL) {
+            env->Enum_GetEnumItemByName(axis, "VERTICAL", &axisItem);
+        } else {
+            env->Enum_GetEnumItemByName(axis, "HORIZONTAL", &axisItem);
+        }
         env->Object_SetPropertyByName_Ref(res, "axis", axisItem);
     }
 
