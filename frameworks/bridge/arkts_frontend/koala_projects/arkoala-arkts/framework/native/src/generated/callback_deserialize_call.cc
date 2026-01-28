@@ -734,7 +734,7 @@ void deserializeAndCallCallback_DismissContentCoverAction_Void(KSerializerBuffer
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
     const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DismissContentCoverAction value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_DismissContentCoverAction_Void))));
     thisDeserializer.readPointer();
-    Ark_DismissContentCoverAction value0 = DismissContentCoverAction_serializer::read(thisDeserializer);
+    Ark_DismissContentCoverAction value0 = static_cast<Ark_DismissContentCoverAction>(DismissContentCoverAction_serializer::read(thisDeserializer));
     _call(_resourceId, value0);
 }
 void deserializeAndCallSyncCallback_DismissContentCoverAction_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -743,7 +743,8 @@ void deserializeAndCallSyncCallback_DismissContentCoverAction_Void(Ark_VMContext
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DismissContentCoverAction value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_DismissContentCoverAction_Void))));
-    Ark_DismissContentCoverAction value0 = DismissContentCoverAction_serializer::read(thisDeserializer);
+    Ark_DismissContentCoverAction value0 = static_cast<Ark_DismissContentCoverAction>(
+        DismissContentCoverAction_serializer::read(thisDeserializer));
     callSyncMethod(vmContext, resourceId, value0);
 }
 void deserializeAndCallCallback_DismissDialogAction_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -788,7 +789,7 @@ void deserializeAndCallCallback_DismissSheetAction_Void(KSerializerBuffer thisAr
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
     const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_DismissSheetAction value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_DismissSheetAction_Void))));
     thisDeserializer.readPointer();
-    Ark_DismissSheetAction value0 = DismissSheetAction_serializer::read(thisDeserializer);
+    Ark_DismissSheetAction value0 = static_cast<Ark_DismissSheetAction>(DismissSheetAction_serializer::read(thisDeserializer));
     _call(_resourceId, value0);
 }
 void deserializeAndCallSyncCallback_DismissSheetAction_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -797,7 +798,7 @@ void deserializeAndCallSyncCallback_DismissSheetAction_Void(Ark_VMContext vmCont
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_DismissSheetAction value0)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_DismissSheetAction_Void))));
-    Ark_DismissSheetAction value0 = DismissSheetAction_serializer::read(thisDeserializer);
+    Ark_DismissSheetAction value0 = static_cast<Ark_DismissSheetAction>(DismissSheetAction_serializer::read(thisDeserializer));
     callSyncMethod(vmContext, resourceId, value0);
 }
 void deserializeAndCallCallback_DragEvent_Opt_String_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -3330,7 +3331,7 @@ void deserializeAndCallCallback_SheetDismiss_Void(KSerializerBuffer thisArray, A
     const Ark_Int32 _resourceId = thisDeserializer.readInt32();
     const auto _call = reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_SheetDismiss sheetDismiss)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_Callback_SheetDismiss_Void))));
     thisDeserializer.readPointer();
-    Ark_SheetDismiss sheetDismiss = SheetDismiss_serializer::read(thisDeserializer);
+    Ark_SheetDismiss sheetDismiss = static_cast<Ark_SheetDismiss>(SheetDismiss_serializer::read(thisDeserializer));
     _call(_resourceId, sheetDismiss);
 }
 void deserializeAndCallSyncCallback_SheetDismiss_Void(Ark_VMContext vmContext, KSerializerBuffer thisArray, Ark_Int32 thisLength)
@@ -3339,7 +3340,7 @@ void deserializeAndCallSyncCallback_SheetDismiss_Void(Ark_VMContext vmContext, K
     const Ark_Int32 resourceId = thisDeserializer.readInt32();
     thisDeserializer.readPointer();
     const auto callSyncMethod = reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_SheetDismiss sheetDismiss)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_Callback_SheetDismiss_Void))));
-    Ark_SheetDismiss sheetDismiss = SheetDismiss_serializer::read(thisDeserializer);
+    Ark_SheetDismiss sheetDismiss = static_cast<Ark_SheetDismiss>(SheetDismiss_serializer::read(thisDeserializer));
     callSyncMethod(vmContext, resourceId, sheetDismiss);
 }
 void deserializeAndCallCallback_SheetType_Void(KSerializerBuffer thisArray, Ark_Int32 thisLength)

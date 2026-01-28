@@ -434,7 +434,7 @@ export function deserializeAndCallCallback_DeleteValue_Void(thisDeserializer: De
 export function deserializeAndCallCallback_DismissContentCoverAction_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: DismissContentCoverAction) => void))
-    let value0 : DismissContentCoverAction = DismissContentCoverAction_serializer.read(thisDeserializer)
+    let value0 : DismissContentCoverAction = (DismissContentCoverAction_serializer.read(thisDeserializer) as DismissContentCoverAction)
     _call(value0)
 }
 export function deserializeAndCallCallback_DismissDialogAction_Void(thisDeserializer: DeserializerBase): void {
@@ -452,7 +452,7 @@ export function deserializeAndCallCallback_DismissPopupAction_Void(thisDeseriali
 export function deserializeAndCallCallback_DismissSheetAction_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((value0: DismissSheetAction) => void))
-    let value0 : DismissSheetAction = DismissSheetAction_serializer.read(thisDeserializer)
+    let value0 : DismissSheetAction = (DismissSheetAction_serializer.read(thisDeserializer) as DismissSheetAction)
     _call(value0)
 }
 export function deserializeAndCallCallback_DragEvent_Opt_String_Void(thisDeserializer: DeserializerBase): void {
@@ -1645,7 +1645,7 @@ export function deserializeAndCallRouter_BusinessError_Void(thisDeserializer: De
 export function deserializeAndCallCallback_SheetDismiss_Void(thisDeserializer: DeserializerBase): void {
     const _resourceId : int32 = thisDeserializer.readInt32()
     const _call  = (ResourceHolder.instance().get(_resourceId) as ((sheetDismiss: SheetDismiss) => void))
-    let sheetDismiss : SheetDismiss = SheetDismiss_serializer.read(thisDeserializer)
+    let sheetDismiss : SheetDismiss = (SheetDismiss_serializer.read(thisDeserializer) as SheetDismiss)
     _call(sheetDismiss)
 }
 export function deserializeAndCallCallback_SheetType_Void(thisDeserializer: DeserializerBase): void {

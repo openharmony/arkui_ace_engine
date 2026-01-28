@@ -937,7 +937,7 @@ export class TypeChecker {
     static isDisappearSymbolEffect(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof DisappearSymbolEffect
     }
-    static isDismissContentCoverAction(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+    static isDismissContentCoverAction(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof DismissContentCoverAction
     }
     static isDismissDialogAction(value: Object | string | number | undefined, arg0: boolean): boolean {
@@ -949,7 +949,7 @@ export class TypeChecker {
     static isDismissReason(value: Object | string | number | undefined): boolean {
         return value instanceof DismissReason
     }
-    static isDismissSheetAction(value: Object | string | number | undefined, arg0: boolean, arg1: boolean): boolean {
+    static isDismissSheetAction(value: Object | string | number | undefined, arg0: boolean): boolean {
         return value instanceof DismissSheetAction
     }
     static isDistributionType(value: Object | string | number | undefined): boolean {
@@ -3007,7 +3007,7 @@ export class TypeChecker {
     static issharedTransitionOptions(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
         return value instanceof sharedTransitionOptions
     }
-    static isSheetDismiss(value: Object | string | number | undefined, arg0: boolean): boolean {
+    static isSheetDismiss(value: Object | string | number | undefined): boolean {
         return value instanceof SheetDismiss
     }
     static isSheetInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
