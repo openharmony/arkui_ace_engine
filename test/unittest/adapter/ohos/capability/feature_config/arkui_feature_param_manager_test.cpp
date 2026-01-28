@@ -67,6 +67,26 @@ HWTEST_F(ArkUIFeatureParamManagerTest, InitTest, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ParseEntryTest001
+ * @tc.desc: ParseEntry will only init once
+ * @tc.type: FUNC
+ */
+HWTEST_F(ArkUIFeatureParamManagerTest, ParseEntryTest001, TestSize.Level1)
+{
+    FeatureParamManager::GetInstance().FeatureParamParseEntry("");
+    auto curFeatureParser1 = FeatureParamManager::GetInstance().featureParser_;
+    FeatureParamManager::GetInstance().FeatureParamParseEntry("");
+    auto curFeatureParser2 = FeatureParamManager::GetInstance().featureParser_;
+    EXPECT_EQ(curFeatureParser1, curFeatureParser2);
+
+    FeatureParamManager::GetInstance().UICorrectionParamParseEntry("");
+    auto uiCorrectionParser1 = FeatureParamManager::GetInstance().uiCorrectionParser_;
+    FeatureParamManager::GetInstance().UICorrectionParamParseEntry("");
+    auto uiCorrectionParser2 = FeatureParamManager::GetInstance().uiCorrectionParser_;
+    EXPECT_EQ(uiCorrectionParser1, uiCorrectionParser2);
+}
+
+/**
  * @tc.name: ParseInternalWithBundleNameTest
  * @tc.desc: FeatureParamManager test
  * @tc.type: FUNC
