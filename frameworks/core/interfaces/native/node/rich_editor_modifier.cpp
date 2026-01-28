@@ -135,6 +135,27 @@ void NodeModifier::SetRichEditorNapiDataDetectorConfigWithEvent(
     RichEditorModelNG::SetTextDetectConfig(frameNode, textDetectConfig);
 }
 
+void SetSelectDetectorEnable(ArkUINodeHandle node, ArkUI_Uint32 value)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::SetSelectDetectEnable(frameNode, static_cast<bool>(value));
+}
+ 
+ArkUI_Int32 GetSelectDetectorEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_RETURN(frameNode, ERROR_INT_CODE);
+    return static_cast<ArkUI_Int32>(RichEditorModelNG::GetSelectDetectEnable(frameNode));
+}
+ 
+void ResetSelectDetectorEnable(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    RichEditorModelNG::ResetSelectDetectEnable(frameNode);
+}
+
 void SetRichEditorOnIMEInputComplete(ArkUINodeHandle node, void* callback)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -1671,6 +1692,9 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .setRichEditorDataDetectorConfigWithEvent = SetRichEditorDataDetectorConfigWithEvent,
         .setRichEditorNapiDataDetectorConfigWithEvent = SetRichEditorNapiDataDetectorConfigWithEvent,
         .resetRichEditorDataDetectorConfigWithEvent = ResetRichEditorDataDetectorConfigWithEvent,
+        .setSelectDetectorEnable = SetSelectDetectorEnable,
+        .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .getSelectDetectorEnable = GetSelectDetectorEnable,
         .setRichEditorOnIMEInputComplete = SetRichEditorOnIMEInputComplete,
         .resetRichEditorOnIMEInputComplete = ResetRichEditorOnIMEInputComplete,
         .setRichEditorCopyOptions = SetRichEditorCopyOptions,
@@ -1809,6 +1833,9 @@ const CJUIRichEditorModifier* GetCJUIRichEditorModifier()
     static const CJUIRichEditorModifier modifier = {
         .setRichEditorEnableDataDetector = SetRichEditorDetectEnable,
         .resetRichEditorEnableDataDetector = ResetRichEditorDetectEnable,
+        .setSelectDetectorEnable = SetSelectDetectorEnable,
+        .resetSelectDetectorEnable = ResetSelectDetectorEnable,
+        .getSelectDetectorEnable = GetSelectDetectorEnable,
         .setRichEditorCopyOptions = SetRichEditorCopyOptions,
         .getRichEditorCopyOptions = GetRichEditorCopyOptions,
         .resetRichEditorCopyOptions = ResetRichEditorCopyOptions,

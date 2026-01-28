@@ -7724,6 +7724,9 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorNapiDataDetectorConfigWithEvent)(
         ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig);
     void (*resetRichEditorDataDetectorConfigWithEvent)(ArkUINodeHandle node);
+    void (*setSelectDetectorEnable)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
+    void (*resetSelectDetectorEnable)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSelectDetectorEnable)(ArkUINodeHandle node);
     void (*setRichEditorOnIMEInputComplete)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnIMEInputComplete)(ArkUINodeHandle node);
     void (*setRichEditorCopyOptions)(ArkUINodeHandle node, ArkUI_Int32 copyOptionsValue);

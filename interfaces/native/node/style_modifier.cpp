@@ -5861,7 +5861,7 @@ const ArkUI_AttributeItem* GetSelectedBackgroundColor(ArkUI_NodeHandle node)
 void ResetSelectedBackgroundColor(ArkUI_NodeHandle node)
 {
     auto* fullImpl = GetFullImpl();
-    f (node->type == ARKUI_NODE_RICH_EDITOR) {
+    if (node->type == ARKUI_NODE_RICH_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorSelectedBackgroundColor(
             node->uiNodeHandle);
     } else {
