@@ -30,7 +30,6 @@ enum class InputCompatibleSource : int8_t {
 
 class ACE_EXPORT InputCompatiblePolicy : public AceType {
 public:
-    static InputCompatiblePolicy* GetInputCompatiblePolicyInstance();
     virtual bool IsInputCompatibleConvertingNeeded(InputCompatibleSource source) = 0;
     virtual ~InputCompatiblePolicy() {}
 };
