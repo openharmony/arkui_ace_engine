@@ -36427,7 +36427,8 @@ if (globalThis.Gauge === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkgauge');
       module.exportView();
       getUINativeModule().gauge.create(params);
-    }
+    },
+    name: 'JSGauge'
   }
 }
 
