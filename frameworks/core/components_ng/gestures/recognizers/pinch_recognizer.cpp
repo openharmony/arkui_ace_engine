@@ -349,6 +349,7 @@ void PinchRecognizer::HandleTouchCancelEvent(const AxisEvent& event)
 {
     extraInfo_ += "cancel received.";
     UpdateTouchPointWithAxisEvent(event);
+    lastAxisEvent_.isFalsifyCancel = event.isFalsifyCancel;
     if ((refereeState_ != RefereeState::SUCCEED) && (refereeState_ != RefereeState::FAIL)) {
         Adjudicate(AceType::Claim(this), GestureDisposal::REJECT);
         return;
@@ -474,6 +475,7 @@ void PinchRecognizer::GetGestureEventInfo(GestureEvent& info)
         info.SetPressedKeyCodes(lastAxisEvent_.pressedCodes);
         info.CopyConvertInfoFrom(lastAxisEvent_.convertInfo);
         info.SetTargetDisplayId(lastAxisEvent_.targetDisplayId);
+        info.SetIsFalsifyCancel(lastAxisEvent_.isFalsifyCancel);
     } else {
         info.CopyConvertInfoFrom(lastTouchEvent_.convertInfo);
         info.SetSourceTool(lastTouchEvent_.sourceTool);

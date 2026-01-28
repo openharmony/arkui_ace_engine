@@ -1310,6 +1310,7 @@ bool EventManager::DispatchTouchEvent(const AxisEvent& event, bool sendOnTouch)
     lastEventTime_ = event.time;
     lastTouchEventEndTimestamp_ = GetSysTimestamp();
     lastSourceTool_ = event.sourceTool;
+    lastAxisEvent_ = event;
     return true;
 }
 
@@ -1966,6 +1967,7 @@ bool EventManager::DispatchAxisEvent(const AxisEvent& event)
     if (responseNode) {
         responseNode->HandleAxisEvent(event);
     }
+    lastAxisEvent_ = event;
     return true;
 }
 
@@ -2005,6 +2007,7 @@ bool EventManager::DispatchAxisEventNG(const AxisEvent& event)
     }
     axisTestResultsMap_[event.id].clear();
     axisTestResultsMap_.erase(event.id);
+    lastAxisEvent_ = event;
     return true;
 }
 
@@ -2517,6 +2520,8 @@ void EventManager::FalsifyCancelEventAndDispatch(const AxisEvent& axisEvent, boo
     AxisEvent falsifyEvent = axisEvent;
     falsifyEvent.action = AxisAction::CANCEL;
     falsifyEvent.id = static_cast<int32_t>(axisTouchTestResults_.begin()->first);
+    falsifyEvent.pointerEvent = lastAxisEvent_.pointerEvent;
+    falsifyEvent.isFalsifyCancel = true;
     DispatchTouchEvent(falsifyEvent, sendOnTouch);
 }
 
