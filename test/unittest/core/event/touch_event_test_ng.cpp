@@ -606,6 +606,25 @@ HWTEST_F(TouchEventTestNg, TouchEventTest006, TestSize.Level1)
 }
 
 /**
+ * @tc.name: TouchEventTest007
+ * @tc.desc: TriggerTouchCallBack.
+ * @tc.type: FUNC
+ */
+HWTEST_F(TouchEventTestNg, TouchEventTest007, TestSize.Level1)
+{
+    TouchEvent touchEvent;
+    auto touchEventActuator = AceType::MakeRefPtr<TouchEventActuator>();
+    touchEvent.type = TouchType::DOWN;
+    SystemProperties::traceInputEventEnable_.store(false);
+    touchEvent.SetTiltX(TILT_X_VALUE).SetTiltY(TILT_Y_VALUE).SetPointers(POINTERS);
+    touchEventActuator->TriggerTouchCallBack(touchEvent);
+    touchEvent.type = TouchType::UP;
+    touchEventActuator->TriggerTouchCallBack(touchEvent);
+    touchEvent.type = TouchType::DOWN;
+    EXPECT_TRUE(touchEventActuator->TriggerTouchCallBack(touchEvent));
+}
+
+/**
  * @tc.name: StopPass001
  * @tc.desc: test functions SetNeedPropagation IsNeedPropagation.
  * @tc.type: FUNC
