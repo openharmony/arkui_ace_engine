@@ -661,9 +661,9 @@ ArkUINativeModuleValue GaugeBridge::SetGaugeIndicator(ArkUIRuntimeCallInfo* runt
     }
     CalcDimension space;
     RefPtr<ResourceObject> spaceResObj;
-    if (isJsView) {
-        ArkTSUtils::ParseJsDimensionVpNG(vm, spaceArg, space, spaceResObj, false);
-    } else if (!ArkTSUtils::ParseJsDimensionVpNG(vm, spaceArg, space, false)) {
+    bool parsed = isJsView ? ArkTSUtils::ParseJsDimensionVpNG(vm, spaceArg, space, spaceResObj, false)
+                           : ArkTSUtils::ParseJsDimensionVpNG(vm, spaceArg, space, false);
+    if (!parsed) {
         space = NG::INDICATOR_DISTANCE_TO_TOP;
     }
     if (space.IsNegative()) {
