@@ -150,7 +150,10 @@ export class SerializerBase implements Disposable {
             return new SerializerBase()
         }
         if (SerializerBase.poolTop === SerializerBase.pool.length) {
-            throw new Error("Pool empty! Release one of taken serializers")
+            // Dynamically expand the pool when all serializers are in use
+            const newSerializer = new SerializerBase()
+            SerializerBase.pool.push(newSerializer)
+            console.log(`SerializerBase pool expanded to size ${SerializerBase.pool.length}`)
         }
         return SerializerBase.pool[SerializerBase.poolTop++]
     }

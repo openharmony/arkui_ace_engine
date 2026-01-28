@@ -21,13 +21,13 @@ import { ArkUIGeneratedNativeModule, ArkUINativeModule } from "#components"
 export class ToggleHandWritten {
     static hookSetToggleOptions(toggle: ArkToggleComponent, options: ToggleOptions): void {
         if (!toggle.getPeer().peer.ptr) {
-            if (options.type == ToggleType.SWITCH) {
+            if (options.type == ToggleType.Switch) {
                 const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_construct(toggle.getPeer().getId(), 0)
                 toggle.getPeer().peer.ptr = _peerPtr
-            } else if (options.type == ToggleType.CHECKBOX) {
+            } else if (options.type == ToggleType.Checkbox) {
                 const _peerPtr  = ArkUIGeneratedNativeModule._ToggleExtender_constructCheckbox(toggle.getPeer().getId(), 0)
                 toggle.getPeer().peer.ptr = _peerPtr
-            } else if (options.type == ToggleType.BUTTON) {
+            } else if (options.type == ToggleType.Button) {
                 const _peerPtr  = ArkUIGeneratedNativeModule._ToggleExtender_constructButton(toggle.getPeer().getId(), 0)
                 toggle.getPeer().peer.ptr = _peerPtr
             } else {
@@ -46,13 +46,13 @@ export class ToggleHandWritten {
             node.peer.removeChild(toggle.getPeer().peer.ptr)
             ArkUINativeModule._DisposeNode(preNativePtr)
             
-            if (options.type == ToggleType.SWITCH) {
+            if (options.type == ToggleType.Switch) {
                 const _peerPtr  = ArkUIGeneratedNativeModule._Toggle_construct(toggle.getPeer().getId(), 0)
                 toggle.getPeer().peer.ptr = _peerPtr
-            } else if (options.type == ToggleType.CHECKBOX) {
+            } else if (options.type == ToggleType.Checkbox) {
                 const _peerPtr  = ArkUIGeneratedNativeModule._ToggleExtender_constructCheckbox(toggle.getPeer().getId(), 0)
                 toggle.getPeer().peer.ptr = _peerPtr
-            } else if (options.type == ToggleType.BUTTON) {
+            } else if (options.type == ToggleType.Button) {
                 const _peerPtr  = ArkUIGeneratedNativeModule._ToggleExtender_constructButton(toggle.getPeer().getId(), 0)
                 toggle.getPeer().peer.ptr = _peerPtr
             } else {

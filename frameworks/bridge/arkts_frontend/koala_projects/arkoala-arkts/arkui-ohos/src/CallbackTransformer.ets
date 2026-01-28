@@ -20,7 +20,7 @@ import { IncrementalNode, GlobalStateManager } from '@koalaui/runtime';
 import { PeerNode } from "./PeerNode"
 import { ArkUIAniModule } from "arkui.ani"
 import { CustomBuilder, CustomBuilderT } from "./component/builder"
-import { CustomNodeBuilder, ArkComponentRootPeer, CustomBuilderT_Arkui_Component_Enums_ResponseType } from "#generated"
+import { CustomNodeBuilder, ArkComponentRootPeer, CustomNodeBuilderT } from "#generated"
 import { UIContextUtil } from './base/UIContextUtil';
 import { UIContextImpl } from './base/UIContextImpl';
 import { ObserveSingleton } from './stateManagement/base/observeSingleton';
@@ -156,11 +156,11 @@ export class CallbackTransformer {
         return peer.peer.ptr
     }
 
-    static transformFromCustomBuilderT(value: CustomBuilderT<ResponseType>): CustomBuilderT_Arkui_Component_Enums_ResponseType {
+    static transformFromCustomBuilderT(value: CustomBuilderT<ResponseType>): CustomNodeBuilderT<ResponseType> {
         const context = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl;
         const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
         const currentExtendableComponent = ExtendableComponent.current;
-        return (t: ResponseType, parentNodeId: KPointer): KPointer => {
+        return (parentNodeId: KPointer, t: ResponseType): KPointer => {
             /** @memo */
             const cb = () => {
                 const lastRenderingComponent = ObserveSingleton.instance.renderingComponent;

@@ -15,7 +15,6 @@
 
 import { ArkBaseNode } from "./ArkBaseNode";
 import { BadgeAttribute, ArkBadgeComponent, BadgeParamWithNumber, BadgeParamWithString } from "../component/badge";
-import { TypeChecker } from "#components";
 import { runtimeType } from "@koalaui/interop";
 
 export class ArkBadgeNode extends ArkBaseNode  implements BadgeAttribute  {

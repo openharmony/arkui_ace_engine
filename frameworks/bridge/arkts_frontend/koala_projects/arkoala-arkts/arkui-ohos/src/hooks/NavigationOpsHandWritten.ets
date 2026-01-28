@@ -15,7 +15,7 @@
 
 import { SerializerBase, runtimeType, RuntimeType, InteropNativeModule, KPointer } from "@koalaui/interop"
 import { ArkUIGeneratedNativeModule } from "#components"
-import { NavPathStack, NavigationModuleInfo, ArkNavigationComponent, NavPathStack_serializer, NavigationModuleInfo_serializer, HomePathInfo_serializer, HomePathInfo } from "../component/navigation"
+import { NavPathStack, NavigationModuleInfo, ArkNavigationComponent, ArkNavigationPeer, NavPathStack_serializer, NavigationModuleInfo_serializer, HomePathInfo_serializer, HomePathInfo } from "../component/navigation"
 import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
 import { NavExtender, ArkComponentRootPeer } from "../component/idlize"
 import { int32 } from "@koalaui/common"
@@ -132,13 +132,13 @@ export class NavigationOpsHandWritten {
             return node.peer.ptr;
         })
     }
-    static hookSetNavDestinationImpl(component: ArkNavigationComponent, value: PageMapBuilder | undefined) {
+    static hookSetNavDestinationImpl(peer: ArkNavigationPeer, value: PageMapBuilder | undefined) {
         if (value === undefined) {
             return
         }
         const currentRenderingComponent = ObserveSingleton.instance.renderingComponent;
         const currentExtendableComponent = ExtendableComponent.current;
-        NavExtender.setNavDestinationBuilderCallback(component.getPeer().peer.ptr, (name: string, param?: Object) => {
+        NavExtender.setNavDestinationBuilderCallback(peer.peer.ptr, (name: string, param?: Object) => {
             let buildParam = {
                 currentRenderingComponent: currentRenderingComponent,
                 currentExtendableComponent: currentExtendableComponent,
@@ -149,8 +149,8 @@ export class NavigationOpsHandWritten {
             return peer.peer.ptr;
         });
     }
-    static hookSplitPlaceholderImpl(component: ArkNavigationComponent, value: ComponentContent) {
-        let peerPtr = component.getPeer().peer.ptr;
+    static hookSplitPlaceholderImpl(peer: ArkNavigationPeer, value: ComponentContent<Object>) {
+        let peerPtr = peer.peer.ptr;
         let ptr: KPointer = 0;
         if (value.getNodePtr() !== undefined) {
             ptr = value.getNodePtr() as KPointer;

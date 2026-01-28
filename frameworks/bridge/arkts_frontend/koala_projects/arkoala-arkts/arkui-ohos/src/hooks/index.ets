@@ -46,17 +46,17 @@ import { SymbolGlyphModifier } from "../SymbolGlyphModifier";
 import { TextModifier } from "../TextModifier";
 import { default as EventHub } from "application.EventHub";
 import { default as UIAbilityContext } from "application.UIAbilityContext";
-import { CommonMethod, StateStyles, ArkCommonMethodComponent, ArkCommonMethodPeer, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent, DragPreviewOptions, DragInteractionOptions, UniformDataType, DragEventInternal, FunctionKey, ModifierKey } from "#generated";
+import { CommonMethod, StateStyles, ArkCommonMethodComponent, ArkCommonMethodPeer, CustomProperty, GestureMask, GestureType, Gesture, GestureGroup, UIGestureEvent, DragPreviewOptions, DragInteractionOptions, UniformDataType, DragEventInternal, BaseEventInternal, KeyEventInternal, FunctionKey, ModifierKey, ModifierKeyStateGetter } from "#generated";
 import { CommonMethodModifier } from "../CommonMethodModifier"
 import { ModifierState } from '../CommonModifier';
 import { AnimateParam } from "#generated";
 import { GestureModifier } from "#generated";
-import { CanvasRenderer, ImageData, OffscreenCanvas, RenderingContextSettings, CanvasRenderingContext2D, OffscreenCanvasRenderingContext2D, VoidCallback, } from "#generated";
+import { CanvasRenderer, ImageData, CanvasRenderingContext2D, VoidCallback, } from "#generated";
 import { pointer } from "@koalaui/interop";
 import { ArkUIAniModule } from "arkui.ani"
 import { InteropNativeModule } from "@koalaui/interop"
 import { ErrorCallback } from "@ohos.base";
-import { NavPathStack, NavigationModuleInfo, HomePathInfo, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent } from "../component/navigation"
+import { NavPathStack, NavigationModuleInfo, HomePathInfo, NavPathInfo, NavigationOptions, PopInfo, ArkNavigationComponent, ArkNavigationPeer } from "../component/navigation"
 import { NavDestinationContextInternal, RouteMapConfig } from "../component/navDestination"
 import { CustomBuilder, PageMapBuilder } from '../component/builder';
 import { NavigationOpsHandWritten } from "./NavigationOpsHandWritten";
@@ -82,13 +82,15 @@ import { ArkSelectComponent, ArkSelectPeer, DividerOptions } from "#generated";
 import { ArkSliderComponent, ArkSliderPeer, SliderExtender, SliderPrefixOptions, SliderSuffixOptions } from '#generated';
 import { SelectExtender } from "#generated"
 import { ArkWebComponent, JavaScriptProxy } from "#generated";
-import { ArkListComponent, ArkListItemGroupComponent, ChildrenMainSize } from '#generated';
+import { ArkListComponent, ArkListPeer, ArkListItemGroupComponent, ArkListItemGroupPeer, ChildrenMainSize } from '#generated';
 import { ListHandWritten } from "./ListHandWritten"
 import { ArkWebComponent, JavaScriptProxy } from '#generated';
 import { WebHandWritten } from "./WebHandWritten";
 import { ArkSaveButtonComponent, ArkSaveButtonPeer, SaveButtonCallback, ArkPasteButtonComponent, ArkPasteButtonPeer, PasteButtonCallback } from '#generated';
 import { SaveButtonOpsHandWritten } from './SaveButtonOpsHandWritten';
 import { PasteButtonOpsHandWritten } from './PasteButtonOpsHandWritten';
+import { ArkDataPanelComponent, ArkDataPanelPeer, DataPanelShadowOptions, ArkGaugeComponent, ArkGaugePeer, GaugeIndicatorOptions, GaugeShadowOptions } from '#generated';
+import { DataPanelExtender, GaugeExtender } from '#generated';
 import { ArkToggleComponent, ToggleOptions } from "#generated";
 import { ToggleHandWritten } from "./ToggleHandWritten";
 
@@ -127,33 +129,49 @@ export function hookMergeKeyboardShortcuts(
 }
 
 export function hookGesture(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
+  hookGesture(commonMethod.getPeer(), gesture, mask)
+}
+
+export function hookGesture(peer: ArkCommonMethodPeer, gesture: GestureType | undefined, mask?: GestureMask): void {
     if (gesture instanceof Gesture) {
         let singleGesture = gesture as Gesture;
-        singleGesture.setGesture(0, commonMethod.getPeer(), mask);
+        singleGesture.setGesture(0, peer, mask);
     } else {
         let gestureGroup = gesture as GestureGroup;
-        gestureGroup.addGestureGroupToNode(0, commonMethod.getPeer(), mask)
+        gestureGroup.addGestureGroupToNode(0, peer, mask)
     }
 }
 
 export function hookPriorityGesture(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
+  hookPriorityGesture(commonMethod.getPeer(), gesture, mask)
+}
+
+export function hookPriorityGesture(peer: ArkCommonMethodPeer, gesture: GestureType | undefined, mask?: GestureMask): void {
     if (gesture instanceof Gesture) {
         let singleGesture = gesture as Gesture;
-        singleGesture.setGesture(1, commonMethod.getPeer(), mask);
+        singleGesture.setGesture(1, peer, mask);
     } else {
         let gestureGroup = gesture as GestureGroup;
-        gestureGroup.addGestureGroupToNode(1, commonMethod.getPeer(), mask)
+        gestureGroup.addGestureGroupToNode(1, peer, mask)
     }
 }
 
 export function hookParallelGesture(commonMethod: ArkCommonMethodComponent, gesture: GestureType | undefined, mask?: GestureMask): void {
+   hookParallelGesture(commonMethod.getPeer(), gesture, mask)
+}
+
+export function hookParallelGesture(peer: ArkCommonMethodPeer, gesture: GestureType | undefined, mask?: GestureMask): void {
     if (gesture instanceof Gesture) {
         let singleGesture = gesture as Gesture;
-        singleGesture.setGesture(2, commonMethod.getPeer(), mask);
+        singleGesture.setGesture(2, peer, mask);
     } else {
         let gestureGroup = gesture as GestureGroup;
-        gestureGroup.addGestureGroupToNode(2, commonMethod.getPeer(), mask)
+        gestureGroup.addGestureGroupToNode(2, peer, mask)
     }
+}
+
+export function hookGestureModifier(peer: ArkCommonMethodPeer, value: GestureModifier | undefined) {
+  throw new Error("Not implemented")
 }
 
 export function hookGestureModifier(commonMethod: ArkCommonMethodComponent, value: GestureModifier | undefined): void {
@@ -214,6 +232,27 @@ export function hookDragPreviewOptions(node: ArkCommonMethodComponent | ArkCommo
   }
 }
 
+export function hookBaseEventGetModifierKeyState(event: BaseEventInternal): ModifierKeyStateGetter | undefined  {
+  let returnResult: ModifierKeyStateGetter = (keys: Array<string>) => {
+    return ArkUIAniModule._BaseEvent_getModifierKeyState(event!.peer!.ptr, keys);
+  }
+  return returnResult
+}
+
+export function hookDragEventGetModifierKeyState(event: DragEventInternal): ModifierKeyStateGetter | undefined  {
+  let returnResult: ModifierKeyStateGetter = (keys: Array<string>) => {
+    return ArkUIAniModule._DragEvent_getModifierKeyState(event!.peer!.ptr, keys);
+  }
+  return returnResult
+}
+
+export function hookKeyEventGetModifierKeyState(event: KeyEventInternal): ModifierKeyStateGetter | undefined  {
+  let returnResult: ModifierKeyStateGetter = (keys: Array<string>) => {
+    return ArkUIAniModule._KeyEvent_getModifierKeyState(event!.peer!.ptr, keys);
+  }
+  return returnResult
+}
+
 export function hookDragEventStartDataLoading(event: DragEventInternal, options: unifiedDataChannel.GetDataParams) :
   string | undefined {
   return ArkUIAniModule._DragEvent_Start_Data_Loading(event.peer!.ptr, options)
@@ -244,10 +283,11 @@ class StateStyleCommonMethodModifier extends CommonMethodModifier {
     }
 }
 
-export function hookStateStyleImpl(
-  receiver: ArkCommonMethodComponent,
-  value: StateStyles | undefined
-) {
+export function hookStateStyleImpl(receiver: ArkCommonMethodComponent, value: StateStyles | undefined) {
+  hookStateStyleImpl(receiver.getPeer(), value)
+}
+
+export function hookStateStyleImpl(peer: ArkCommonMethodPeer, value: StateStyles | undefined) {
     if (value === undefined) {
         return;
     }
@@ -277,7 +317,7 @@ export function hookStateStyleImpl(
         curState |= UI_STATE_SELECTED;
     }
 
-    let currentState = receiver.getPeer().getOrCreateStateStyleMutable(curState);
+    let currentState = peer.getOrCreateStateStyleMutable(curState);
     if (currentState === undefined) {
       return;
     }
@@ -301,7 +341,7 @@ export function hookStateStyleImpl(
         value?.selected?.(cm)
     }
 
-    cm.applyModifierPatch(receiver.getPeer())
+    cm.applyModifierPatch(peer)
 }
 
 export class ElementIdToCustomProperties {
@@ -451,6 +491,10 @@ export function hookCommonMethodModifierCustomProperty(component: CommonMethodMo
 }
 
 export function hookDrawModifier(arkComponent: ArkCommonMethodComponent, value: DrawModifier | undefined): void {
+  hookDrawModifier(arkComponent.getPeer(), value)
+}
+
+export function hookDrawModifier(peer: ArkCommonMethodPeer, value: DrawModifier | undefined): void {
   if (value === undefined) {
     return;
   }
@@ -477,8 +521,8 @@ export function hookDrawModifier(arkComponent: ArkCommonMethodComponent, value: 
       }
     }
     if (flag) {
-      ArkUIAniModule._SetDrawModifier(arkComponent.getPeer().getPeerPtr(), flag, value!);
-      value.weakRefOfPeerNode = new WeakRef<PeerNode>(arkComponent.getPeer());
+      ArkUIAniModule._SetDrawModifier(peer.getPeerPtr(), flag, value!);
+      value.weakRefOfPeerNode = new WeakRef<PeerNode>(peer);
       break;
     }
   }
@@ -501,20 +545,28 @@ export function hookTabsApplyAttributesFinish(node: ArkTabsComponent): void  {
     TabsOpsHandWritten.hookTabsApplyAttributesFinish(node);
 }
 
-export function hookSetNavigationOptions0(component: ArkNavigationComponent, pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): void {
+export function hookSetNavigationOptions(component: ArkNavigationComponent, pathInfos?: NavPathStack, moduleInfo?: NavigationModuleInfo): void {
   NavigationOpsHandWritten.hookSetNavigationOptionsImpl(component, pathInfos, undefined, moduleInfo);
 }
 
-export function hookSetNavigationOptions1(component: ArkNavigationComponent, pathInfos?: NavPathStack, homeDestination?: HomePathInfo, moduleInfo?: NavigationModuleInfo): void {
+export function hookSetNavigationOptions(component: ArkNavigationComponent, pathInfos?: NavPathStack, homeDestination?: HomePathInfo, moduleInfo?: NavigationModuleInfo): void {
   NavigationOpsHandWritten.hookSetNavigationOptionsImpl(component, pathInfos, homeDestination, moduleInfo);
 }
 
 export function hookSetNavDestination(component: ArkNavigationComponent, value: PageMapBuilder | undefined): void {
-  NavigationOpsHandWritten.hookSetNavDestinationImpl(component, value);
+  NavigationOpsHandWritten.hookSetNavDestinationImpl(component.getPeer(), value);
 }
 
-export function hookSplitPlaceholder(component: ArkNavigationComponent, value: ComponentContent): void {
-  NavigationOpsHandWritten.hookSplitPlaceholderImpl(component, value);
+export function hookSetNavDestination(peer: ArkNavigationPeer, value: PageMapBuilder | undefined): void {
+  NavigationOpsHandWritten.hookSetNavDestinationImpl(peer, value);
+}
+
+export function hookSplitPlaceholder(component: ArkNavigationComponent, value: ComponentContent<Object>): void {
+  NavigationOpsHandWritten.hookSplitPlaceholderImpl(component.getPeer(), value);
+}
+
+export function hookSplitPlaceholder(peer: ArkNavigationPeer, value: ComponentContent<Object>): void {
+  NavigationOpsHandWritten.hookSplitPlaceholderImpl(peer, value);
 }
 
 export function hookGetConfigInRouteMap(info: NavDestinationContextInternal): RouteMapConfig | undefined {
@@ -636,13 +688,6 @@ export function hookPutImageData(peerPtr: CanvasRenderer, imagedata: ImageData,
         parseImageData(dirtyWidth, density), parseImageData(dirtyHeight, density))
     }
 }
-export function hookGetContext(
-  peerPtr: OffscreenCanvas,
-  contextType: string,
-  options: RenderingContextSettings
-): OffscreenCanvasRenderingContext2D {
-  return peerPtr.getContext2d(options)
-}
 let attachCallbackId: int = 0;
 let detachCallbackId: int = 0;
 const attachCallbackMap: Map<VoidCallback, int> = new Map<VoidCallback, int>()
@@ -759,7 +804,7 @@ export function hookSelectSetDividerMethod(
 }
 
 export function hookSliderSetPrefixMethod(node: ArkSliderComponent | ArkSliderPeer,
-  content: ComponentContent | undefined, options?: SliderPrefixOptions | undefined): void {
+  content: ComponentContent<Object> | undefined, options?: SliderPrefixOptions | undefined): void {
     const sliderPeer: ArkSliderPeer = node instanceof ArkSliderComponent ? (node as ArkSliderComponent).getPeer() :
        (node as ArkSliderPeer);
     if (!sliderPeer || !sliderPeer.peer || !sliderPeer.peer.ptr) {
@@ -779,7 +824,7 @@ export function hookSliderSetPrefixMethod(node: ArkSliderComponent | ArkSliderPe
 }
 
 export function hookSliderSetSuffixMethod(node: ArkSliderComponent | ArkSliderPeer,
-  content: ComponentContent | undefined, options?: SliderSuffixOptions | undefined): void {
+  content: ComponentContent<Object> | undefined, options?: SliderSuffixOptions | undefined): void {
     const sliderPeer: ArkSliderPeer = node instanceof ArkSliderComponent ? (node as ArkSliderComponent).getPeer() :
        (node as ArkSliderPeer);
     if (!sliderPeer || !sliderPeer.peer || !sliderPeer.peer.ptr) {
@@ -833,11 +878,19 @@ export function hookTextPickerDivider(receiver: ArkTextPickerComponent | ArkText
 }
 
 export function hookListChildrenMainSizeImpl(node: ArkListComponent, value: ChildrenMainSize | undefined): void {
-  ListHandWritten.hookListChildrenMainSizeImpl(node, value)
+  ListHandWritten.hookListChildrenMainSizeImpl(node.getPeer(), value)
+}
+
+export function hookListChildrenMainSizeImpl(peer: ArkListPeer, value: ChildrenMainSize | undefined): void {
+  ListHandWritten.hookListChildrenMainSizeImpl(peer, value)
 }
 
 export function hookListItemGroupChildrenMainSizeImpl(node: ArkListItemGroupComponent, value: ChildrenMainSize | undefined): void {
-  ListHandWritten.hookListItemGroupChildrenMainSizeImpl(node, value)
+  ListHandWritten.hookListItemGroupChildrenMainSizeImpl(node.getPeer(), value)
+}
+
+export function hookListItemGroupChildrenMainSizeImpl(peer: ArkListItemGroupPeer, value: ChildrenMainSize | undefined): void {
+  ListHandWritten.hookListItemGroupChildrenMainSizeImpl(peer, value)
 }
 
 export function hookJavaScriptProxy(
@@ -850,12 +903,12 @@ export function hookVideoOnError(
     VideoOpsHandWritten.hookSetVideoOnErrorImpl(component, value);
 }
 
-export function hookSaveButtonOnClick(
+export function hookSaveButtonOnClickImpl(
   receiver: ArkSaveButtonComponent | ArkSaveButtonPeer, value: SaveButtonCallback | undefined): void {
     SaveButtonOpsHandWritten.hookSaveButtonOnClickImpl(receiver, value);
 }
 
-export function hookPasteButtonOnClick(
+export function hookPasteButtonOnClickImpl(
   receiver: ArkPasteButtonComponent | ArkPasteButtonPeer, value: PasteButtonCallback | undefined): void {
     PasteButtonOpsHandWritten.hookPasteButtonOnClickImpl(receiver, value);
 }
@@ -878,7 +931,6 @@ export function hookGaugeIndicator(receiver: ArkGaugeComponent | ArkGaugePeer,
   }
 }
 
-<<<<<<< HEAD
 export function hookGaugeTrackShadow(receiver: ArkGaugeComponent | ArkGaugePeer,
   value: GaugeShadowOptions | null | undefined): void {
 
@@ -929,8 +981,7 @@ export function hookDataPanelTrackShadow(receiver: ArkDataPanelComponent | ArkDa
     DataPanelExtender.setTrackShadow(dataPanelPeer.peer.ptr, value);
   }
 }
-=======
+
 export function hookSetToggleOptions(toggle: ArkToggleComponent, options: ToggleOptions): void {
   ToggleHandWritten.hookSetToggleOptions(toggle, options)
 }
->>>>>>> 8ee86ea79c1 (Add ToggleExtender accessor and SetToggleOptions hook)

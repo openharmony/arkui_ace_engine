@@ -19,7 +19,7 @@ import { RenderNode } from "../RenderNode"
 import { ArkUIAniModule } from "arkui.ani"
 import hilog from '@ohos.hilog'
 import { Finalizable, runtimeType, RuntimeType, SerializerBase, registerCallback, wrapCallback, toPeerPtr, KPointer, MaterializedBase, InteropNativeModule } from "@koalaui/interop"
-import { TypeChecker, ArkUIGeneratedNativeModule } from "#components"
+import { ArkUIGeneratedNativeModule } from "#components"
 import { int16, uint32 } from "@koalaui/compat"
 import { ShapeClipTransfer } from "../handwritten/transfer/ShapeClipTransfer"
 import { ShapeMaskTransfer } from "../handwritten/transfer/ShapeMaskTransfer"

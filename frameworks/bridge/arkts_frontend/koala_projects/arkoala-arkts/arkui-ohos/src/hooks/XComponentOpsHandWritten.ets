@@ -14,7 +14,7 @@
  */
 
 import { SerializerBase, runtimeType, RuntimeType, InteropNativeModule, toPeerPtr, KPointer } from "@koalaui/interop"
-import { ArkXComponentComponent, ImageAIOptions, XComponentOptions, XComponentParameters, NativeXComponentParameters, XComponentController, XComponentOptionsInternal, SurfaceRect, ImageAnalyzerConfig } from "#generated";
+import { ArkXComponentComponent, ImageAIOptions, XComponentOptions, XComponentParameters, NativeXComponentParameters, XComponentController, XComponentControllerExtender, XComponentOptionsInternal, SurfaceRect, ImageAnalyzerConfig } from "#generated";
 import { ArkUIAniModule } from "arkui.ani";
 
 function wrapXComponentImageAIOptions(peerPtr: KPointer, imageAIOptions: ImageAIOptions): void{
@@ -76,7 +76,7 @@ export class XComponentOpsHandWritten {
         controller: XComponentController, config: ImageAnalyzerConfig): Promise<void> {
         const peer = controller.getPeer();
         if (peer === undefined) {
-            return controller.startImageAnalyzer_serialize(config);
+            return XComponentControllerExtender.startImageAnalyzer(controller, config);
         }
         const peerPtr = peer.ptr;
         let configObj = ESValue.instantiateEmptyObject();
@@ -93,6 +93,6 @@ export class XComponentOpsHandWritten {
         if (!(analyzerConfigFunc.isNull() || analyzerConfigFunc.isUndefined())) {
             analyzerConfigFunc.invoke(ESObject.wrap(peerPtr), configObj);
         }
-        return controller.startImageAnalyzer_serialize(config);
+        return XComponentControllerExtender.startImageAnalyzer(controller, config);
     }
 }

@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 
-import { TouchEvent, InputEventType } from './component/common'
+import { TouchEvent } from './component/common'
 import { Size } from "./Graphics"
 import { UIContext } from "@ohos/arkui/UIContext"
 import { Finalizable, InteropNativeModule, KPointer, loadNativeModuleLibrary, nullptr, pointer, InteropNativeModule } from "@koalaui/interop"
@@ -23,7 +23,7 @@ import { StateContext } from 'arkui.incremental.runtime.state';
 import { WrappedBuilder } from "./component/builder"
 import { BuilderRootFrameNode, FrameNode, FrameNodeUtils } from "./FrameNode"
 import { BuilderRootNodeType, findPeerNode, PeerNode, PeerNodeType } from "./PeerNode"
-import { BuilderNodeOps, BuilderNodeOptions } from "#generated"
+import { BuilderNodeOps, BuilderNodeOptions, InputEventType } from "#generated"
 import { ArkBuilderProxyNodePeer } from "./base/BuilderProxyNode"
 import { setNeedCreate } from "./ArkComponentRoot"
 import { UIContextUtil } from "arkui/base/UIContextUtil"

@@ -1689,7 +1689,7 @@ export class UIContextImpl extends UIContext {
         return this.atomicServiceBar_;
     }
 
-    public dispatchKeyEvent(node: number | string, event: KeyEvent): boolean {
+    public dispatchKeyEvent(node: int32 | string, event: KeyEvent): boolean {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         let result = IUIContext.dispatchKeyEvent(node, event);
         ArkUIAniModule._Common_Restore_InstanceId();
@@ -2037,7 +2037,10 @@ export class UIContextImpl extends UIContext {
 
     public setCustomKeyboardContinueFeature(feature: CustomKeyboardContinueFeature): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_)
-        IUIContext.setCustomKeyboardContinueFeature(feature);
+        // TODO: remove after regeneration
+        // instructive change start
+        // IUIContext.setCustomKeyboardContinueFeature(feature);
+        // instructive change end
         ArkUIAniModule._Common_Restore_InstanceId()
     }
 
@@ -2088,7 +2091,9 @@ export class UIContextImpl extends UIContext {
             ArkUIAniModule._Common_Restore_InstanceId();
             return [];
         }
-        let tag = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodeType(nodePtr);
+        const retval  = ArkUIGeneratedNativeModule._FrameNodeExtender_getNodeType(nodePtr)
+        let retvalDeserializer : DeserializerBase = new DeserializerBase(retval, retval.length)
+        const tag : string = (retvalDeserializer.readString() as string)
         if (tag === 'Swiper') {
             let ret: Array<SwiperDynamicSyncScene> =
                 [new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.GESTURE, nodePtr),
