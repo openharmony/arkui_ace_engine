@@ -101,7 +101,6 @@ ArkUINativeModuleValue PatternLockBridge::CreatePatternLock(ArkUIRuntimeCallInfo
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
 
-    Framework::JSPatternLockTheme::ApplyTheme();
     bool isObject = false;
     Framework::JSPatternLockController* jsController = nullptr;
     if (firstArg->IsObject(vm)) {
@@ -111,6 +110,7 @@ ArkUINativeModuleValue PatternLockBridge::CreatePatternLock(ArkUIRuntimeCallInfo
     }
 
     GetArkUINodeModifiers()->getPatternLockModifier()->createModel(isObject, static_cast<void*>(jsController));
+    Framework::JSPatternLockTheme::ApplyTheme();
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -130,6 +130,7 @@ ArkUINativeModuleValue PatternLockBridge::SetSideLength(ArkUIRuntimeCallInfo* ru
         CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockSideLength,
             panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockSideLength(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
     auto sideLengthRawPtr = AceType::RawPtr(sideLengthResObj);
     GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockSideLengthRes(
@@ -201,6 +202,7 @@ ArkUINativeModuleValue PatternLockBridge::SetPathStrokeWidth(ArkUIRuntimeCallInf
         CHECK_NULL_RETURN(GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockPathStrokeWidth,
             panda::JSValueRef::Undefined(vm));
         GetArkUINodeModifiers()->getPatternLockModifier()->resetPatternLockPathStrokeWidth(nativeNode);
+        return panda::JSValueRef::Undefined(vm);
     }
     GetArkUINodeModifiers()->getPatternLockModifier()->setPatternLockPathStrokeWidth(
         nativeNode, strokeWidth.Value(), static_cast<int8_t>(strokeWidth.Unit()));
