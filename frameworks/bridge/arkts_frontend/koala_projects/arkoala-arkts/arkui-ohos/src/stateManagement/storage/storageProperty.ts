@@ -69,6 +69,8 @@ export class AbstractProperty<T> extends DecoratedV1VariableBase<T> implements I
             // clear all register callbacks
             this._watchFuncs.clear();
             if (this.tempWatchId !== undefined) {
+                const watch = WatchFunc.watchId2WatchFunc.get(this.tempWatchId!)?.deref();
+                watch?.aboutToBeDeleted();
                 this.storageProperty_!.__unregister(this.tempWatchId!);
                 this.tempWatchId = undefined;
             }

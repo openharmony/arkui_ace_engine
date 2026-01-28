@@ -92,6 +92,11 @@ export class FreeRootNode extends PeerNode {
             root!.compute();
         }
     }
+    dispose(): void {
+        this.componentRoot = undefined;
+        this.context = undefined;
+        super.dispose();
+    }
 }
 
 function componentFreeRootFactory(component: object | undefined, context: UIContextImpl): IncrementalNode {

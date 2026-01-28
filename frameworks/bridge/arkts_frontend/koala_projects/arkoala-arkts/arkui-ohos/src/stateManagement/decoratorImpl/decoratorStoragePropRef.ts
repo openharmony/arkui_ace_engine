@@ -140,4 +140,10 @@ export class StoragePropRefDecoratedVariable<T>
             (handler as IWatchSubscriberRegister).addWatchSubscriber(this.storageWatchFunc_!.id());
         }
     }
+    public aboutToBeDeletedInternal(): void {
+        this.backingStorageValue_.onChange(undefined);
+        this.unregisterWatchFromObservedObjectChanges(this.backing_.get(false));
+        this.removePrivateWatchSubscription();
+        super.aboutToBeDeletedInternal();
+    }
 }

@@ -50,7 +50,7 @@ V2:
  * Base class of all decorated variable classes
  */
 export class DecoratedVariableBase {
-    protected readonly owningComponent_: IVariableOwner | undefined;
+    protected owningComponent_: IVariableOwner | undefined;
     // can be read publically
     public _varName: string;
     public decorator: string;
@@ -65,6 +65,7 @@ export class DecoratedVariableBase {
         this.decorator = decorator;
         this.owningComponent_ = owningComponent;
         this._varName = varName;
+        this.owningComponent_?.__registerStateVariables__Internal(this);
     }
 
     public getTraceInfo(): string {
@@ -81,6 +82,10 @@ export class DecoratedVariableBase {
 
     public shouldAddRef(): boolean {
         return OBSERVE.renderingComponent > 0;
+    }
+
+    public aboutToBeDeletedInternal(): void {
+        // base function, overwrite by derived class
     }
 }
 
@@ -109,6 +114,17 @@ export abstract class DecoratedV1VariableBase<T> extends DecoratedVariableBase i
             this._watchFuncs.set(w.id(), w);
         }
         this.onObservedObjectChangeExecWatchFuncs_ = new WatchFunc(this.execWatchFuncs);
+    }
+
+    public aboutToBeDeletedInternal(): void {
+        this.owningComponent_ = undefined;
+        this._watchFuncs.forEach((watch, id) => {
+            WatchFunc.watchId2WatchFunc.delete(id);
+            watch.aboutToBeDeleted();
+        });
+        this._watchFuncs.clear();
+        WatchFunc.watchId2WatchFunc.delete(this.onObservedObjectChangeExecWatchFuncs_.id());
+        this.onObservedObjectChangeExecWatchFuncs_.aboutToBeDeleted();
     }
 
     public info(): string {

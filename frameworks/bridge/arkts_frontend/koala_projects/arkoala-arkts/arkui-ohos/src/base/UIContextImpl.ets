@@ -1261,21 +1261,22 @@ export interface DetachedRootEntry {
 }
 
 export class DetachedRootEntryImpl<T extends IncrementalNode> implements DetachedRootEntry {
-    entry: ComputableState<T>;
+    entry?: ComputableState<T>;
     constructor(entry: ComputableState<T>) {
         this.entry = entry
     }
 
     compute(): void {
-        this.entry.value;
+        this.entry?.value;
     }
 
     dispose(): void {
-        this.entry.dispose();
+        this.entry?.dispose();
+        this.entry = undefined;
     }
 
     forceCompleteRerender(): void {
-        this.entry.forceCompleteRerender();
+        this.entry?.forceCompleteRerender();
     }
 }
 

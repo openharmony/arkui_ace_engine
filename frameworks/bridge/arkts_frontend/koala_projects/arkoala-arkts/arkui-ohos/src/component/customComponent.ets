@@ -233,7 +233,11 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         if (!this.executedAboutToDisappear) {
             this.instance.aboutToDisappear();
             this.executedAboutToDisappear = true;
+            this.aboutToBeDeletedInternal();
         }
+    }
+    aboutToBeDeletedInternal(): void {
+        this.instance.__clearStateVariables__Internal();
     }
     onDidBuild(): void {
         this.instance.onDidBuild();
