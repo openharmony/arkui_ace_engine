@@ -3024,18 +3024,6 @@ typedef enum {
 } ArkUI_ResponseRegionSupportedTool;
 
 /**
- * @brief Define the options for whether to retain the original style during undo/redo operations..
- *
- * @since 24
- */
-typedef enum {
-    /** clear the original style*/
-    ARKUI_RICH_EDITOR_UNDO_STYLE_CLEAR_STYLE = 0,
-    /** retain the original style*/
-    ARKUI_RICH_EDITOR_UNDO_STYLE_KEEP_STYLE = 1,
-} ArkUI_RichEditorUndoStyle;
-
-/**
  * @brief Defines parameter used by the system font style callback event.
  *
  * @since 12
@@ -9457,7 +9445,7 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_GetSpanType(
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
  * @since 24
  */
-ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_SetContentNode(ArkUI_RichEditorSelectionMenuOptions* options, 
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_SetContentNode(ArkUI_RichEditorSelectionMenuOptions* options,
     ArkUI_NodeHandle node);
  
 /**

@@ -723,7 +723,8 @@ void RichEditorModelNG::SetRequestKeyboardOnFocus(FrameNode* frameNode, bool nee
     richEditorPattern->SetRequestKeyboardOnFocus(needToRequest);
 }
 
-bool RichEditorModelNG::GetRequestKeyboardOnFocus(FrameNode* frameNode) {
+bool RichEditorModelNG::GetRequestKeyboardOnFocus(FrameNode* frameNode)
+{
     CHECK_NULL_RETURN(frameNode, true);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(richEditorPattern, true);
@@ -941,7 +942,8 @@ void RichEditorModelNG::SetEnableAutoSpacing(FrameNode* frameNode, bool enabled)
     pattern->SetEnableAutoSpacing(enabled);
 }
 
-bool RichEditorModelNG::IsEnableAutoSpacing(FrameNode* frameNode) {
+bool RichEditorModelNG::IsEnableAutoSpacing(FrameNode* frameNode)
+{
     CHECK_NULL_RETURN(frameNode, false);
     auto pattern = frameNode->GetPattern<RichEditorPattern>();
     CHECK_NULL_RETURN(pattern, false);

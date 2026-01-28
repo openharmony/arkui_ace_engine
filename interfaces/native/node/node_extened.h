@@ -276,10 +276,10 @@ struct ArkUI_TextDataDetectorConfig {
 };
 
 struct ArkUI_RichEditorSelectionMenuOptions {
-	ArkUI_RichEditorSpanType richEditorSpanType;
-	ArkUI_NodeHandle contentNode;
-	ArkUI_RichEditorResponseType responseType;
-	void* onMenuAppear;
+    ArkUI_RichEditorSpanType richEditorSpanType;
+    ArkUI_NodeHandle contentNode;
+    ArkUI_RichEditorResponseType responseType;
+    void* onMenuAppear;
     void* onMenuAppearUserData;
     void* onMenuDisappear;
     void* onMenuDisappearUserData;

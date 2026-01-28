@@ -1782,7 +1782,7 @@ ArkUI_RichEditorSelectionMenuOptions* OH_ArkUI_RichEditorSelectionMenuOptions_Cr
 {
     auto* options = new ArkUI_RichEditorSelectionMenuOptions();
     options->richEditorSpanType = ArkUI_RichEditorSpanType::ARKUI_RICH_EDITOR_SPAN_TYPE_TEXT;
-	options->responseType = ArkUI_RichEditorResponseType::ARKUI_RICH_EDITOR_RESPONSE_TYPE_LONG_PRESS;
+    options->responseType = ArkUI_RichEditorResponseType::ARKUI_RICH_EDITOR_RESPONSE_TYPE_LONG_PRESS;
     options->menuType = ArkUI_TextMenuType::SELECTION_MENU;
     options->hapticFeedbackMode = ArkUI_HapticFeedbackMode::ARKUI_HAPTIC_FEEDBACK_MODE_DISABLED;
     return options;
@@ -1812,7 +1812,7 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_GetSpanType(
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }
  
-ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_SetContentNode(ArkUI_RichEditorSelectionMenuOptions* options, 
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_SetContentNode(ArkUI_RichEditorSelectionMenuOptions* options,
     ArkUI_NodeHandle node)
 {
     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
@@ -1910,7 +1910,7 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuDisappearC
 ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_SetHapticFeedbackMode(
     ArkUI_RichEditorSelectionMenuOptions* options, ArkUI_HapticFeedbackMode mode)
 {
-     CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
+    CHECK_NULL_RETURN(options, ArkUI_ErrorCode::ARKUI_ERROR_CODE_PARAM_INVALID);
     options->hapticFeedbackMode = mode;
     return ArkUI_ErrorCode::ARKUI_ERROR_CODE_NO_ERROR;
 }

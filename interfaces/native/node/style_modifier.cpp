@@ -13828,6 +13828,7 @@ void ResetSelectDetectorEnable(ArkUI_NodeHandle node)
     }
     if (node->type == ARKUI_NODE_RICH_EDITOR) {
         fullImpl->getNodeModifiers()->getRichEditorModifier()->resetSelectDetectorEnable(node->uiNodeHandle);
+    }
 }
 
 int32_t SetFontFeature(ArkUI_NodeHandle node, const ArkUI_AttributeItem* item)
