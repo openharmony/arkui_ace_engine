@@ -402,6 +402,21 @@
       "buildFunction": "TipsStyleBuilder"
     },
     {
+      "name": "SoftKeyboardLevel00Test",
+      "pageSourceFile": "src/main/ets/pages/components/popup/keyboardTest/SoftKeyboardLevel0_0.ets",
+      "buildFunction": "SoftKeyboardLevel00Builder"
+    },
+    {
+      "name": "SoftKeyboardLevel01Test",
+      "pageSourceFile": "src/main/ets/pages/components/popup/keyboardTest/SoftKeyboardLevel0_1.ets",
+      "buildFunction": "SoftKeyboardLevel01Builder"
+    },
+    {
+      "name": "SoftKeyboardLevel02Test",
+      "pageSourceFile": "src/main/ets/pages/components/popup/keyboardTest/SoftKeyboardLevel0_2.ets",
+      "buildFunction": "SoftKeyboardLevel02Builder"
+    },
+    {
       "name": "MenuComplex",
       "pageSourceFile": "src/main/ets/pages/components/menu/MenuComplexTest.ets",
       "buildFunction": "MenuComplexBuilder"

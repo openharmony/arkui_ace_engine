@@ -203,6 +203,10 @@
     {
       "name": "outlineWidth1",
       "value": "30vp"
+    },
+    {
+      "name": "page_text_font_size",
+      "value": "10vp"
     }
   ]
 }
