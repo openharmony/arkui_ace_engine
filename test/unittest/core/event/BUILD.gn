@@ -18,6 +18,7 @@ ace_unittest("event_manager_test_ng") {
   type = "new"
   sources = [
     "$ace_root/frameworks/core/event/resample_algo.cpp",
+    "$ace_root/frameworks/core/common/event_info_manager.cpp",
     "$ace_root/test/mock/core/common/mock_watch_dog.cpp",
     "$ace_root/test/mock/core/common/mock_window.cpp",
     "event_dump_test_ng.cpp",

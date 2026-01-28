@@ -6483,4 +6483,46 @@ void UIContentImpl::SaveGetStateMgmtInfoFunction(const WeakPtr<TaskExecutor>& ta
     };
     UiSessionManager::GetInstance()->SaveGetStateMgmtInfoFunction(getStateMgmtInfoCallback);
 }
+
+const EcmaVM* UIContentImpl::GetEcmaVMOnJsThread() const
+{
+    auto container = Platform::AceContainer::GetContainer(instanceId_);
+    CHECK_NULL_RETURN(container, nullptr);
+    ContainerScope scope(instanceId_);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_RETURN(taskExecutor, nullptr);
+    if (!taskExecutor->WillRunOnCurrentThread(TaskExecutor::TaskType::UI)) {
+        TAG_LOGW(AceLogTag::ACE_INPUTTRACKING, "The JS object operation must be on UI thread!");
+        return nullptr;
+    }
+    auto env = reinterpret_cast<napi_env>(runtime_);
+    CHECK_NULL_RETURN(env, nullptr);
+    return reinterpret_cast<NativeEngine*>(env)->GetEcmaVm();
+}
+
+const std::shared_ptr<const OHOS::MMI::PointerEvent> UIContentImpl::GetPointerEventFromAxisEvent(napi_value event)
+{
+    auto vm = GetEcmaVMOnJsThread();
+    CHECK_NULL_RETURN(vm, nullptr);
+    panda::Local<panda::ObjectRef> localRef((uintptr_t)event);
+    if (localRef->GetNativePointerFieldCount(vm) > 0) {
+        auto axisInfo = (AxisInfo*)localRef->GetNativePointerField(vm, 0);
+        CHECK_NULL_RETURN(axisInfo, nullptr);
+        return axisInfo->GetPointerEvent();
+    }
+    return nullptr;
+}
+
+const std::shared_ptr<const OHOS::MMI::PointerEvent> UIContentImpl::GetPointerEventFromTouchEvent(napi_value event)
+{
+    auto vm = GetEcmaVMOnJsThread();
+    CHECK_NULL_RETURN(vm, nullptr);
+    panda::Local<panda::ObjectRef> localRef((uintptr_t)event);
+    if (localRef->GetNativePointerFieldCount(vm) > 0) {
+        auto touchEventInfo = (TouchEventInfo*)localRef->GetNativePointerField(vm, 0);
+        CHECK_NULL_RETURN(touchEventInfo, nullptr);
+        return touchEventInfo->GetPointerEvent();
+    }
+    return nullptr;
+}
 } // namespace OHOS::Ace

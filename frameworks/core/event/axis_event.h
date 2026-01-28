@@ -127,6 +127,7 @@ public:
     const Offset& GetLocalLocation() const;
     const Offset& GetGlobalLocation() const;
     AxisEvent ConvertToAxisEvent() const;
+    const std::shared_ptr<const MMI::PointerEvent>& GetPointerEvent() const;
 
 private:
     AxisAction action_ = AxisAction::NONE;
@@ -142,6 +143,7 @@ private:
     Offset screenLocation_;
     // The location where the touch point touches the screen when there are multiple screens.
     Offset globalDisplayLocation_;
+    std::shared_ptr<const MMI::PointerEvent> pointerEvent_;
 };
 
 class CoastingAxisInfo {
