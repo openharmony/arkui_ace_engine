@@ -98,11 +98,7 @@ HyperlinkResponseRegionModifier.identity = Symbol('hyperlinkResponseRegion');
 
 class JSHyperlink extends JSViewAbstract {
   static create(address, content) {
-    if (address !== undefined) {
-      getUINativeModule().hyperlink.create(address, content);
-    } else {
-      getUINativeModule().hyperlink.create('', '');
-    }
+    getUINativeModule().hyperlink.create(address, content);
   }
 
   static color(color) {

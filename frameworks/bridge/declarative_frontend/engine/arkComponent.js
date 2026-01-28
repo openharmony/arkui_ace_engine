@@ -36386,11 +36386,7 @@ if (globalThis.Hyperlink === undefined) {
       getUINativeModule().loadNativeModule("Hyperlink");
       let module = globalThis.requireNapi('arkui.components.arkhyperlink');
       module.exportView();
-      if (address !== undefined) {
-        getUINativeModule().hyperlink.create(address, content);
-      } else {
-        getUINativeModule().hyperlink.create('', '');
-      }
+      getUINativeModule().hyperlink.create(address, content);
     }
   }
 }
