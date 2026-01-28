@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2025 Huawei Device Co., Ltd.
+ * Copyright (c) 2025-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -130,8 +130,8 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param arrayLength amount of elements.
      * @param initialValue initial value of elements.
      */
-    public static create<T>(arrayLength: number, initialValue: T): WrappedArray<T> {
-        let other = new Array<T>(arrayLength as int);
+    public static create<T>(arrayLength: int, initialValue: T): WrappedArray<T> {
+        let other = new Array<T>(arrayLength);
         other.fill(initialValue);
         return new WrappedArray<T>(other);
     }
@@ -167,9 +167,9 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param arrayLength The length of the array to be created (optional).
      * @returns A new Array instance with the specified length
      */
-    public static $_invoke<T>(arrayLength?: number): WrappedArray<T> {
+    public static $_invoke<T>(arrayLength?: int): WrappedArray<T> {
         if (arrayLength) {
-            return new WrappedArray<T>(new Array<T>(arrayLength.toInt()));
+            return new WrappedArray<T>(new Array<T>(arrayLength));
         } else {
             return new WrappedArray<T>(new Array<T>());
         }
@@ -182,7 +182,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @returns `Array` intance constructed from `Object[]` primitive array.
      */
     public static from<T>(iterable: ArrayLike<T> | Iterable<T>): WrappedArray<T> {
-        return new WrappedArray<T>(Array.from<T, T>(iterable, (x: T, k: number): T => x));
+        return new WrappedArray<T>(Array.from<T, T>(iterable, (x: T, k: int): T => x));
     }
 
     /**
@@ -194,11 +194,11 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * is added to the array instead.
      * @returns `Array` intance constructed from `Object[]` primitive array and given function.
      */
-    public static from<T, U>(iterable: ArrayLike<T> | Iterable<T>, mapfn: (v: T, k: number) => U): WrappedArray<U> {
+    public static from<T, U>(iterable: ArrayLike<T> | Iterable<T>, mapfn: (v: T, k: int) => U): WrappedArray<U> {
         return new WrappedArray<U>(Array.from<T, U>(iterable, mapfn));
     }
 
-    public static from<T, U>(values: T[], mapfn: (v: T, k: number) => U): WrappedArray<U> {
+    public static from<T, U>(values: T[], mapfn: (v: T, k: int) => U): WrappedArray<U> {
         return new WrappedArray<U>(Array.from<T, U>(values, mapfn));
     }
 
@@ -218,7 +218,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param comparator function that defines the sort order.
      * @note Mutating method
      */
-    public sort(comparator?: (a: T, b: T) => number): this {
+    public sort(comparator?: (a: T, b: T) => int): this {
         this.store_.sort(comparator);
         this.meta_.fireChange(CONSTANT.OB_LENGTH);
         this.meta_.fireChange(CONSTANT.OB_ARRAY_ANY_KEY);
@@ -880,7 +880,7 @@ export class WrappedArray<T> extends Array<T> implements IObservedObject, Observ
      * @param comparator function to compare to elements of the Array
      * @returns sorted copy of the current instance comparator
      */
-    public override toSorted(comparator: (a: T, b: T) => number): Array<T> {
+    public override toSorted(comparator: (a: T, b: T) => int): Array<T> {
         if (this.shouldAddRef()) {
             this.meta_.addRef(CONSTANT.OB_ARRAY_ANY_KEY);
         }
