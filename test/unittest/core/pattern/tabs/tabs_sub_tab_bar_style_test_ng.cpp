@@ -1223,7 +1223,8 @@ HWTEST_F(TabsSubTabBarStyleTestNg, TabsSubTabBarStyleModelTest029, TestSize.Leve
     json = JsonUtil::Create(true);
     tabContentFrameNode->ToJsonValue(json, filter);
     EXPECT_EQ(json->ToString(), "{\"id\":\"\",\"isLayoutDirtyMarked\":false,\"isRenderDirtyMarked\":false,"
-    "\"isMeasureBoundary\":false,\"hasPendingRequest\":false,\"isFirstBuilding\":false}");
+                                "\"isMeasureBoundary\":false,\"hasPendingRequest\":false,\"isFirstBuilding\":false,"
+                                "\"enableClickSoundEffect\":true}");
 
     /**
      * @tc.steps: step3. check the frameNode.

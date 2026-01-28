@@ -1498,6 +1498,7 @@ void FrameNode::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFil
     } else if (getCustomPropertyMapFunc_) {
         json->Put("customProperty", getCustomPropertyMapFunc_().c_str());
     }
+    json->Put("enableClickSoundEffect", enableClickSoundEffect_);
 }
 
 void FrameNode::ToTreeJson(std::unique_ptr<JsonValue>& json, const InspectorConfig& config) const
