@@ -8057,7 +8057,7 @@ ChainInfo ViewAbstract::GetChainStyle(FrameNode* frameNode)
     CHECK_NULL_RETURN(frameNode, chainInfo);
     auto layoutProperty = frameNode->GetLayoutProperty();
     CHECK_NULL_RETURN(layoutProperty->GetFlexItemProperty(), chainInfo);
-    layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyle().value_or(chainInfo);
+    chainInfo = layoutProperty->GetFlexItemProperty()->GetHorizontalChainStyle().value_or(chainInfo);
     if (chainInfo.direction.has_value()) {
         return chainInfo;
     }
