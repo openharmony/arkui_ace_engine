@@ -3850,5 +3850,5 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/water_flow/ @arkuiscroll
 
 [Claude]
-.claude @arkui_architecture
+.claude/ @arkui_architecture
 CLAUDE.md @arkui_architecture
