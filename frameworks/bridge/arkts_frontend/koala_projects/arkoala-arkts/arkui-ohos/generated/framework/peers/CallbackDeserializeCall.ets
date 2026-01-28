@@ -2290,7 +2290,9 @@ export function deserializeAndCallDelayedDataLoadHandler(thisDeserializer: Deser
     resourceFinalizerRegister(continuationBufferClosure, continuationBufferBufResource)
     let continuationResult: ((value?: unifiedDataChannel.UnifiedData | null,error?: Array<string> | undefined) => void) = continuationBufferClosure
     const callResult = call(acceptableInfo)
-    continuationResult(callResult)
+    // instructive change start
+    // continuationResult(callResult)
+    // instructive change end
 }
 export function deserializeAndCallEditableTextOnChangeCallback(thisDeserializer: DeserializerBase): void {
     const resourceId: int32 = thisDeserializer.readInt32()
@@ -4596,5 +4598,7 @@ export function deserializeAndCallCallback(thisDeserializer: DeserializerBase): 
     throw new Error('Unknown callback kind')
 }
 export function registerArkuiApiHandler(): void {
-    registerApiEventHandler(API_KIND, deserializeAndCallCallback)
+    // instructive change start
+    registerApiEventHandler(10, deserializeAndCallCallback)
+    // instructive change end
 }

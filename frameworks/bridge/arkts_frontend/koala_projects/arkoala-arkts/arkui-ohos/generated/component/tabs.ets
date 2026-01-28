@@ -30,7 +30,9 @@ import { Length, Resource as arkui_component_units_Resource, ResourceColor, Dime
 import { Resource as global_resource_Resource } from 'global.resource'
 import { Curve, EdgeEffect, Color as arkui_component_enums_Color, PageFlipMode } from './enums'
 import { default as curves } from '@ohos.curves'
-import { extractors, AttributeModifier, hookTabsAttributeModifier, AttributeUpdater } from '#handwritten'
+// instructive change start
+import { extractors, AttributeModifier, hookTabsAttributeModifier, AttributeUpdater, hookTabsApplyAttributesFinish } from '#handwritten'
+// instructive change end
 import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
@@ -1028,6 +1030,9 @@ export class ArkTabsComponent extends ArkCommonMethodComponent implements TabsAt
     }
     public applyAttributesFinish(): void {
         // we call this function outside of class, so need to make it public
+        // instructive change start
+        hookTabsApplyAttributesFinish(this)
+        // instructive change end
         super.applyAttributesFinish()
     }
     public applyOptionsFinish(traceName: string): void {

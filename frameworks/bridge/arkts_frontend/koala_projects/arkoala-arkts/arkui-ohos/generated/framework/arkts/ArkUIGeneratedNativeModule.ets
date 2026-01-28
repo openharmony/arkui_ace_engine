@@ -5379,7 +5379,9 @@ export class ArkUIGeneratedNativeModule {
     native static _NavExtender_setUpdateStackCallback(peer: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
     @ani.unsafe.Direct
     native static _NavExtender_setNavDestinationBuilderCallback(navigation: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void
-    @ani.unsafe.Direct
+    // instructive change start
+    //@ani.unsafe.Direct
+    // instructive change end
     native static _NavExtender_syncStack(peer: KPointer): void
     @ani.unsafe.Direct
     native static _NavExtender_setNavDestinationId(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: KInt): void

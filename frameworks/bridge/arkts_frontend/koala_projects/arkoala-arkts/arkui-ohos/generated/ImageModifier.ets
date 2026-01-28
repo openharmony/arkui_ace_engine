@@ -32,7 +32,9 @@ import { ColorMetrics as arkui_Graphics_ColorMetrics } from 'arkui.Graphics'
 import { default as matrix4 } from '@ohos.matrix4'
 import { default as drawing } from '@ohos.graphics.drawing'
 import { ImageAnalyzerConfig } from './component/imageCommon'
-export class ImageModifier extends CommonMethodModifier implements ImageAttribute {
+// instructive change start
+export class ImageModifier extends CommonMethodModifier implements ImageAttribute,AttributeModifier<ImageAttribute> {
+// instructive change end
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState;
     _addr: ArrayBuffer = new ArrayBuffer(4096);
@@ -45,6 +47,13 @@ export class ImageModifier extends CommonMethodModifier implements ImageAttribut
         this._instanceId = instanceId
     }
     isUpdater: () => boolean = () => false
+    // instructive change start
+    applyNormalAttribute(instance: ImageAttribute): void { }
+    applyPressedAttribute(instance: ImageAttribute): void { }
+    applyFocusedAttribute(instance: ImageAttribute): void { }
+    applyDisabledAttribute(instance: ImageAttribute): void { }
+    applySelectedAttribute(instance: ImageAttribute): void { }
+    // instructive change end
     public _alt_0_0value?: string | global_resource_Resource | PixelMap | ImageAlt | undefined
     public _matchTextDirection_0_0value?: boolean | undefined
     public _fitOriginalSize_0_0value?: boolean | undefined

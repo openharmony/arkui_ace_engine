@@ -21,7 +21,9 @@ import { SerializerBase, DeserializerBase, CallbackResource, InteropNativeModule
 import { int32, int64, float32, unsafeCast } from '@koalaui/common'
 import { CallbackTransformer } from './../CallbackTransformer'
 import { extractors } from '#handwritten'
-import { Set_String_serializer, Set } from './stdlib'
+// instructive change begin
+import { Set_String_serializer } from './stdlib'
+// instructive change end
 export class unifiedDataChannel_ProgressInfo_serializer {
     public static write(buffer: SerializerBase, value: unifiedDataChannel.ProgressInfo): void {
         let valueSerializer: SerializerBase = buffer
@@ -131,8 +133,10 @@ export class unifiedDataChannel_DataLoadParams_serializer {
             } else {
                 loadHandlerTmpBufBufArgsSerializer.writeInt8(RuntimeType.UNDEFINED);
             }
-            let loadHandlerTmpBufBufContinuationValue: unifiedDataChannel.UnifiedData | null;
-            const loadHandlerTmpBufBufContinuationCallback: ((value: unifiedDataChannel.UnifiedData | null) => void) = (value?: unifiedDataChannel.UnifiedData | null):void => {
+            // instructive change start
+            let loadHandlerTmpBufBufContinuationValue: unifiedDataChannel.UnifiedData | null = null;
+            const loadHandlerTmpBufBufContinuationCallback: ((value: unifiedDataChannel.UnifiedData | null) => void) = (value: unifiedDataChannel.UnifiedData | null):void => {
+            // instructive change end
             loadHandlerTmpBufBufContinuationValue = value;
         }
             loadHandlerTmpBufBufArgsSerializer.holdAndWriteCallback(loadHandlerTmpBufBufContinuationCallback);
@@ -162,9 +166,12 @@ export class unifiedDataChannel_DataLoadParams_serializer {
                     delayedDataLoadHandlerTmpBufOptBufArgsSerializer.writeInt8(RuntimeType.UNDEFINED);
                 }
                 let delayedDataLoadHandlerTmpBufOptBufContinuationValue: Promise<unifiedDataChannel.UnifiedData | null> | undefined;
-                const delayedDataLoadHandlerTmpBufOptBufContinuationCallback: ((value?: unifiedDataChannel.UnifiedData | null,error?: Array<string> | undefined) => void) = (value: Promise<unifiedDataChannel.UnifiedData | null>):void => {
-                delayedDataLoadHandlerTmpBufOptBufContinuationValue = value;
-            }
+                // instructive change start
+                const delayedDataLoadHandlerTmpBufOptBufContinuationCallback: ((value?: unifiedDataChannel.UnifiedData | null,error?: Array<string> | undefined) => void) =
+                    (value?: unifiedDataChannel.UnifiedData | null,error?: Array<string> | undefined):void => {
+                    // TODO
+                }
+                // instructive change end
                 delayedDataLoadHandlerTmpBufOptBufArgsSerializer.holdAndWriteCallback(delayedDataLoadHandlerTmpBufOptBufContinuationCallback);
                 InteropNativeModule._CallCallbackSync(10, 1112484936, delayedDataLoadHandlerTmpBufOptBufArgsSerializer.asBuffer(), delayedDataLoadHandlerTmpBufOptBufArgsSerializer.length());
                 delayedDataLoadHandlerTmpBufOptBufArgsSerializer.release();

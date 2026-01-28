@@ -29,7 +29,9 @@ import { Resource as global_resource_Resource } from 'global.resource'
 import { FlexDirection, ScrollSource } from './enums'
 import { OnScrollFrameBeginCallback, Scroller, Scroller_serializer } from './scroll'
 import { ScrollState } from './list'
-import { AttributeModifier, initializers, extractors, WaterFlowSections, hookWaterFlowAttributeModifier, AttributeUpdater } from '#handwritten'
+// instructive change start
+import { AttributeModifier, initializers, extractors, WaterFlowSections, hookWaterFlowAttributeModifier, AttributeUpdater, hookWaterFlowOptionsImpl } from '#handwritten'
+// instructive change end
 import { CustomBuilder } from './builder'
 import { CallbackKind } from './../framework/peers/CallbackKind'
 import { CallbackTransformer } from './../CallbackTransformer'
@@ -337,7 +339,9 @@ export class ArkWaterFlowComponent extends ArkScrollableCommonMethodComponent im
     }
     public setWaterFlowOptions(options?: WaterFlowOptions): this {
         const options_casted = options as (WaterFlowOptions | undefined)
-        this.getPeer()?.setWaterFlowOptionsAttribute(options_casted)
+        // instructive change start
+        hookWaterFlowOptionsImpl(this, options);
+        // instructive change end
         this.applyOptionsFinish('WaterFlowAttribute');
         return this
     }

@@ -86,6 +86,11 @@ import { ImageModifier_serializer } from './../framework/ImageModifier'
 import { SymbolGlyphModifier_serializer } from './../framework/SymbolGlyphModifier'
 import { ohos_arkui_UIContext_UIContext_serializer } from './../framework/ohos.arkui.UIContext'
 import { OnScrollFrameBeginCallback } from './scroll'
+// instructive change start
+import { _animationStart, _animationStop } from "arkui/base/ArkAnimation"
+import { AnimationExtender } from '#generated';
+import { ArkUIAniModule } from "arkui.ani"
+// instructive change end
 export interface BaseEvent {
     target: EventTarget
     timestamp: int64
@@ -2228,15 +2233,17 @@ export class TransitionEffect implements MaterializedBase {
     private animation_serialize(value: AnimateParam): TransitionEffect {
         const thisSerializer: SerializerBase = SerializerBase.hold()
         AnimateParam_serializer.write(thisSerializer, value)
-        const retval = ArkUIGeneratedNativeModule._TransitionEffect_animation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
+        // instructive change start
+        ArkUIGeneratedNativeModule._TransitionEffect_animation(this.peer!.ptr, thisSerializer.asBuffer(), thisSerializer.length())
         thisSerializer.release()
-        const obj: TransitionEffect = TransitionEffectInternal.fromPtr(retval)
-        return obj
+        return this
+        // instructive change end
     }
     private combine_serialize(transitionEffect: TransitionEffect): TransitionEffect {
-        const retval = ArkUIGeneratedNativeModule._TransitionEffect_combine(this.peer!.ptr, toPeerPtr(transitionEffect))
-        const obj: TransitionEffect = TransitionEffectInternal.fromPtr(retval)
-        return obj
+        // instructive change start
+        ArkUIGeneratedNativeModule._TransitionEffect_combine(this.peer!.ptr, toPeerPtr(transitionEffect))
+        return this
+        // instructive change end
     }
 }
 export interface UICommonEvent {
@@ -7710,8 +7717,15 @@ export interface BackgroundOptions {
     align?: Alignment;
     ignoresLayoutSafeAreaEdges?: Array<LayoutSafeAreaEdge>;
 }
-export type CustomProperty = Object | undefined;
+// instructive change start
+export type CustomProperty = undefined | null | Object | Record<string, CustomProperty> | Array<CustomProperty>;
+// instructive change end
 export interface CommonMethod {
+    // instructive change start
+    __get__commonStyles__Internal(): Array<(instance: CommonMethod) => void> | undefined {
+        return undefined;
+    }
+    // instructive change end
     __is_CustomComponent__Internal(): boolean {
         return false;
     }
@@ -8471,6 +8485,18 @@ export interface CommonMethod {
         }
         throw new Error('Unimplemented method focusBox')
     }
+    // instructive change start
+    animationStart(value: AnimateParam | undefined): this {
+        throw new Error("Unimplemented method animationStart")
+    }
+    animationStop(value: AnimateParam | undefined): this {
+        throw new Error("Unimplemented method animationStop")
+    }
+    __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        throw new Error("Unimplemented method __createOrSetAnimatableProperty")
+    }
+    // instructive change end
     animation(value: AnimateParam | undefined): this {
         const commonStyle: Array<(instance: CommonMethod) => void> | undefined = this.__get__commonStyles__Internal();
         if (commonStyle) {
@@ -10864,11 +10890,40 @@ export class ArkCommonMethodComponent extends ComponentBase implements CommonMet
         this.getPeer()?.setFocusBoxAttribute(value_casted)
         return this
     }
-    public animation(value: AnimateParam | undefined): this {
-        const value_casted = value as (AnimateParam | undefined)
-        this.getPeer()?.setAnimationAttribute(value_casted)
+    // instructive change start
+    public animationStart(value: AnimateParam | undefined): this {
+        if (this.checkPriority("animationStart")) {
+            _animationStart(this.getPeer()?.getPeerPtr(), value, this.isFirstBuild);
+            return this
+        }
         return this
     }
+    public animationStop(value: AnimateParam | undefined): this {
+        if (this.checkPriority("animationStop")) {
+            _animationStop(this.getPeer()?.getPeerPtr(), value, this.isFirstBuild);
+            return this
+        }
+        return this
+    }
+    public __createOrSetAnimatableProperty<T>(functionName: string, value: number | AnimatableArithmetic<T>,
+        callback: (value: number | AnimatableArithmetic<T>) => void): void {
+        if (this.getPeer()) {
+            const peer = this.getPeer();
+            let isFirst = true;
+            const newCallback = (value: number | AnimatableArithmetic<T>): void => {
+                if (isFirst) {
+                    isFirst = false;
+                    callback(value);
+                    return;
+                }
+                this.setPeer(peer);
+                callback(value);
+                this.setPeer(undefined);
+            }
+            ArkUIAniModule._Animation_SetOrCreateAnimatableProperty(this.getPeer().getPeerPtr(), functionName, value, newCallback);
+        }
+    }
+    // instructive change end
     public transition(value: TransitionEffect | undefined): this {
         const value_casted = value as (TransitionEffect | undefined)
         this.getPeer()?.setTransition0Attribute(value_casted)
@@ -11896,7 +11951,9 @@ export function $rawfile(value: string): global_resource_Resource {
     return GlobalScope.$rawfile(value)
 }
 export function animateToImmediately(value: AnimateParam, processor: VoidCallback): void {
-    GlobalScope.animateToImmediately(value, processor)
+    // instructive change start
+    AnimationExtender.AnimateToImmediatelyImpl(value, processor, true)
+    // instructive change end
 }
 export class AccessibilityHoverEvent_serializer {
     public static write(buffer: SerializerBase, value: AccessibilityHoverEvent): void {
@@ -25673,7 +25730,9 @@ export class ClickEventInternal extends BaseEventInternal implements Materialize
         return new ClickEventInternal(MaterializedBaseTag.NOP, ptr)
     }
     public preventDefault(): void {
-        this.preventDefault_serialize()
+        // instructive change start
+        ArkUIAniModule._ClickEvent_preventDefault(this!.peer!.ptr);
+        // instructive change end
         return
     }
     private getDisplayX(): double {
@@ -26643,7 +26702,9 @@ export class TouchEventInternal extends BaseEventInternal implements Materialize
         return this.getHistoricalPoints_serialize()
     }
     public preventDefault(): void {
-        this.preventDefault_serialize()
+        // instructive change start
+        ArkUIAniModule._TouchEvent_preventDefault(this!.peer!.ptr);
+        // instructive change end
         return
     }
     private getType(): TouchType {

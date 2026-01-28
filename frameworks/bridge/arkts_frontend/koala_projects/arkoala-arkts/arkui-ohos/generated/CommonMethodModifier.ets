@@ -3161,8 +3161,9 @@ export class CommonMethodModifier implements CommonMethod {
         if (flagArray[165] != 0) {
             switch (flagArray[165]) {
                 case 1: {
-                    hookCustomPropertyImpl(peer, (this._customProperty_0_0value as string), (this._customProperty_0_1value as CustomProperty));
-                    flagArray[165] = 2;
+                    // instructive change start
+                    hookCustomPropertyImpl(peer, (this._customProperty_0_0value as string), (this._customProperty_0_1value as CustomProperty), this);
+                    // instructive change end
                     break;
                 }
                 case 3: {
@@ -6022,6 +6023,9 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
+                    // instructive change start
+                    this.backgroundImage(undefined as ResourceStr | PixelMap | undefined)
+                    // instructive change end
                 }
             }
         }
@@ -6033,6 +6037,9 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
+                    // instructive change start
+                    this.backgroundImage(undefined as ResourceStr | PixelMap | undefined)
+                    // instructive change end
                 }
             }
         }
@@ -6259,6 +6266,9 @@ export class CommonMethodModifier implements CommonMethod {
                     break;
                 }
                 default: {
+                    // instructive change start
+                    this.onDrop(modifier._onDrop_1_0value as OnDragEventCallback | undefined);
+                    // instructive change end
                 }
             }
         }

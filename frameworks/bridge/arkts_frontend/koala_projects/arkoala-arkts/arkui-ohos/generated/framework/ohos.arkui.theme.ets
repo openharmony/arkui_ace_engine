@@ -45,13 +45,17 @@ export class CustomTheme_serializer {
         const colorsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let colorsTmpBuf: ohos_arkui_theme_CustomColors | undefined = undefined
         if ((colorsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            colorsTmpBuf = (valueDeserializer.readObject() as object)
+            // instructive change start
+            colorsTmpBuf = (valueDeserializer.readObject() as ohos_arkui_theme_CustomColors | undefined)
+            // instructive change end
         }
         const colorsTmpResult: ohos_arkui_theme_CustomColors | undefined = colorsTmpBuf
         const darkColorsTmpBuf_runtimeType = valueDeserializer.readInt8()!.toInt()
         let darkColorsTmpBuf: CustomDarkColors | undefined = undefined
         if ((darkColorsTmpBuf_runtimeType) != (RuntimeType.UNDEFINED)) {
-            darkColorsTmpBuf = (valueDeserializer.readObject() as object)
+            // instructive change start
+            darkColorsTmpBuf = (valueDeserializer.readObject() as CustomDarkColors | undefined)
+            // instructive change end
         }
         const darkColorsTmpResult: CustomDarkColors | undefined = darkColorsTmpBuf
         let value: CustomTheme = ({colors: colorsTmpResult, darkColors: darkColorsTmpResult} as CustomTheme)

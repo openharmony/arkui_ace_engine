@@ -67,12 +67,16 @@ export class UIExtensionProxyInternal implements MaterializedBase,UIExtensionPro
     }
     public send(data: Record<string, RecordData>): void {
         const data_casted = data as (Record<string, RecordData>)
-        this.send_serialize(data_casted)
+        // instructive change start
+        ArkUIAniUiextensionProxyModal._Send_Data(this.peer!.ptr, data_casted)
+        // instructive change end
         return
     }
     public sendSync(data: Record<string, RecordData>): Record<string, RecordData> {
         const data_casted = data as (Record<string, RecordData>)
-        return this.sendSync_serialize(data_casted)
+        // instructive change start
+        return ArkUIAniUiextensionProxyModal._Send_Data_Sync(this.peer!.ptr, data_casted)
+        // instructive change end
     }
     public onAsyncReceiverRegister(callback_: ohos_base_Callback<UIExtensionProxy>): void {
         const callback__casted = callback_ as (ohos_base_Callback<UIExtensionProxy>)

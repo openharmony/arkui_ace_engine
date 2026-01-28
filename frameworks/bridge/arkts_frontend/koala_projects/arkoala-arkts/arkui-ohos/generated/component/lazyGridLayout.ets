@@ -32,12 +32,16 @@ import { ArkThemeScopeManager } from '#arktheme'
 import { CustomBuilder } from './builder'
 import { memo, memo_stable, memo_skip } from 'arkui.stateManagement.runtime'
 import { ComponentBuilder, Builder } from '@koalaui/builderLambda'
-import { LazyGridLayoutAttributeModifier } from './../LazyGridLayoutAttributeModifier'
+// instructive change start
+import { LazyGridLayoutModifier } from './../LazyGridLayoutModifier'
+// instructive change end
 import { NodeAttach, remember } from '@koalaui/runtime'
 import { ModifierStateManager } from './../CommonModifier'
 import { LazyVGridLayoutModifier } from './../LazyVGridLayoutModifier'
 export class ArkLazyGridLayoutAttributePeer extends ArkCommonMethodPeer {
-    attributeSet?: LazyGridLayoutAttributeModifier;
+// instructive change start
+    attributeSet?: LazyGridLayoutModifier;
+// instructive change end
     public constructor(peerPtr: KPointer, id: int32, name: string = '', flags: int32 = 0) {
         super(peerPtr, id, name, flags)
     }

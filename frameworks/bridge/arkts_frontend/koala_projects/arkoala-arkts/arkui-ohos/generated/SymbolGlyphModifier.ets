@@ -28,15 +28,25 @@ import { Resource as global_resource_Resource } from 'global.resource'
 import { ResourceColor, Resource as arkui_component_units_Resource } from './component/units'
 import { Color as arkui_component_enums_Color, FontWeight } from './component/enums'
 import { ShaderStyle } from './component/textCommon'
+// instructive change start
+import { RuntimeType, runtimeType } from "@koalaui/interop"
+// instructive change end
 export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolGlyphAttribute,AttributeModifier<SymbolGlyphAttribute> {
     _instanceId: number = -1;
     _state: ModifierState = new ModifierState;
     _addr: ArrayBuffer = new ArrayBuffer(4096);
     private _flagArray: Uint8Array = new Uint8Array(this._addr);
-    constructor() {
-        super();
+    // instructive change start
+    constructor(src?: global_resource_Resource) {
+        super()
         this._flagArray.fill(0);
+        let src_type: int32 = RuntimeType.UNDEFINED
+        src_type = runtimeType(src)
+        if (RuntimeType.UNDEFINED != src_type) {
+            this.setSymbolGlyphOptions(src)
+        }
     }
+    // instructive change end
     setInstanceId(instanceId: number): void {
         this._instanceId = instanceId
     }
@@ -46,6 +56,10 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
     applyFocusedAttribute(instance: SymbolGlyphAttribute): void { }
     applyDisabledAttribute(instance: SymbolGlyphAttribute): void { }
     applySelectedAttribute(instance: SymbolGlyphAttribute): void { }
+    // instructive change start
+    public _setSymbolGlyphOptions_flag:  AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
+    public _setSymbolGlyphOptions0_value?: global_resource_Resource | undefined
+    // instructive change end
     public _fontSize_0_0value?: double | string | global_resource_Resource | undefined
     public _fontColor_0_0value?: Array<ResourceColor> | undefined
     public _fontWeight_0_0value?: int32 | FontWeight | string | undefined
@@ -68,6 +82,25 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         this.applyModifierPatch0(peer, flagArray);
     }
     applyModifierPatch0(peer: ArkSymbolGlyphPeer, flagArray: Uint8Array): void {
+        // instructive change start
+        if (this._setSymbolGlyphOptions_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (this._setSymbolGlyphOptions_flag) {
+                case AttributeUpdaterFlag.UPDATE: {
+                    peer.setSymbolGlyphOptionsAttribute((this._setSymbolGlyphOptions0_value as global_resource_Resource | undefined))
+                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                case AttributeUpdaterFlag.SKIP: {
+                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.RESET
+                    break
+                }
+                default: {
+                    this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.INITIAL
+                    peer.setSymbolGlyphOptionsAttribute(undefined)
+                }
+            }
+        }
+        // instructive change end
         if (flagArray[0] != 0) {
             switch (flagArray[0]) {
                 case 1: {
@@ -280,6 +313,20 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
         this.mergeModifier0(modifier, flagArray);
     }
     mergeModifier0(modifier: SymbolGlyphModifier, flagArray: Uint8Array): void {
+        // instructive change start
+        if (modifier._setSymbolGlyphOptions_flag !== AttributeUpdaterFlag.INITIAL) {
+            switch (modifier._setSymbolGlyphOptions_flag) {
+                case AttributeUpdaterFlag.UPDATE:
+                case AttributeUpdaterFlag.SKIP: {
+                    this.setSymbolGlyphOptions(modifier._setSymbolGlyphOptions0_value)
+                    break
+                }
+                default: {
+                    this.setSymbolGlyphOptions(undefined)
+                }
+            }
+        }
+        // instructive change end
         if (flagArray[0] != 0) {
             switch (flagArray[0]) {
                 case 1:
@@ -425,6 +472,19 @@ export class SymbolGlyphModifier extends CommonMethodModifier implements SymbolG
             }
         }
     }
+    // instructive change start
+    setSymbolGlyphOptions(value: global_resource_Resource | undefined): this {
+        if (this._setSymbolGlyphOptions_flag === AttributeUpdaterFlag.INITIAL ||
+            this._setSymbolGlyphOptions0_value !== value || value != undefined) {
+            this._setSymbolGlyphOptions0_value = value
+            this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.UPDATE
+            this._state.fireChange()
+        } else {
+            this._setSymbolGlyphOptions_flag = AttributeUpdaterFlag.SKIP
+        }
+        return this
+    }
+    // instructive change end
     fontSize(value: double | string | global_resource_Resource | undefined): this {
         if (((this._flagArray[0]) == (0)) || (true)) {
             this._flagArray[0] = 1
