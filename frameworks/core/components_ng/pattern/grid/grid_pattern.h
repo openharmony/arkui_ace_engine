@@ -132,6 +132,11 @@ public:
         irregular_ = value;
     }
 
+    void SetUserDefined(bool userDefined)
+    {
+        userDefined_ = userDefined;
+    }
+
     void ResetPositionFlags()
     {
         info_.ResetPositionFlags();
@@ -332,6 +337,7 @@ private:
     bool preSpring_ = false; // true if during SyncLayoutBeforeSpring task.
     bool isSmoothScrolling_ = false;
     bool irregular_ = false; // true if LayoutOptions require running IrregularLayout
+    bool userDefined_ = false; // true if onGetStartIndex
 
     RefPtr<GridContentModifier> gridContentModifier_;
 

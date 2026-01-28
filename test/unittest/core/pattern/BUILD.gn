@@ -52,6 +52,7 @@ group("core_pattern_unittest") {
     "form_link:form_link_test",
     "gauge:gauge_test_ng",
     "grid:grid_static_test_ng",
+    "grid:grid_test_custom",
     "grid:grid_test_ng",
     "grid:grid_test_regular",
     "grid_col:grid_col_test_ng",

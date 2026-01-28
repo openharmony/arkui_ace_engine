@@ -15,12 +15,14 @@
 
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 
-#include "base/utils/system_properties.h"
 #include "base/log/dump_log.h"
 #include "base/perfmonitor/perf_constants.h"
 #include "base/perfmonitor/perf_monitor.h"
+#include "base/utils/system_properties.h"
 #include "core/components_ng/base/observer_handler.h"
+#include "core/components_ng/manager/scroll_adjust/scroll_adjust_manager.h"
 #include "core/components_ng/pattern/grid/grid_adaptive/grid_adaptive_layout_algorithm.h"
+#include "core/components_ng/pattern/grid/grid_custom/grid_custom_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_layout/grid_layout_algorithm.h"
 #include "core/components_ng/pattern/grid/grid_paint_method.h"
 #include "core/components_ng/pattern/grid/grid_scroll/grid_scroll_with_options_layout_algorithm.h"
@@ -47,7 +49,7 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     auto columnsTemplate = gridLayoutProperty->GetColumnsTemplate();
     auto itemFillPolicy = gridLayoutProperty->GetItemFillPolicy();
     bool setColumns = false;
-    if (itemFillPolicy.has_value() || columnsTemplate.has_value())  {
+    if (itemFillPolicy.has_value() || columnsTemplate.has_value()) {
         setColumns = true;
     }
     auto rowTemplate = gridLayoutProperty->GetRowsTemplate();
@@ -68,6 +70,11 @@ RefPtr<LayoutAlgorithm> GridPattern::CreateLayoutAlgorithm()
     const bool disableSkip = IsOutOfBoundary(true) || (ScrollablePattern::AnimateRunning() && !IsBackToTopRunning());
     const bool canOverScrollStart = CanOverScrollStart(GetScrollSource()) || preSpring_;
     const bool canOverScrollEnd = CanOverScrollEnd(GetScrollSource()) || preSpring_;
+    if (userDefined_) {
+        auto algo = MakeRefPtr<GridCustomLayoutAlgorithm>(
+            info_, canOverScrollStart, canOverScrollEnd && (info_.repeatDifference_ == 0));
+        return algo;
+    }
     if (UseIrregularLayout()) {
         auto algo = MakeRefPtr<GridIrregularLayoutAlgorithm>(
             info_, canOverScrollStart, canOverScrollEnd && (info_.repeatDifference_ == 0));
@@ -478,6 +485,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         auto userOffset = FireOnWillScroll(-offset);
         userOffset = FireObserverOnWillScroll(userOffset);
         info_.currentOffset_ -= userOffset;
+        info_.currentDelta_ -= userOffset;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
 
         if (GreatNotEqual(info_.currentOffset_, mainContentSize - itemsHeight - info_.contentEndOffset_)) {
@@ -497,6 +505,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
         auto userOffset = FireOnWillScroll(-offset);
         userOffset = FireObserverOnWillScroll(userOffset);
         info_.currentOffset_ -= userOffset;
+        info_.currentDelta_ -= userOffset;
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         if (LessNotEqual(info_.currentOffset_, info_.contentStartOffset_)) {
             info_.reachStart_ = false;
@@ -506,6 +515,7 @@ bool GridPattern::UpdateCurrentOffset(float offset, int32_t source)
     auto userOffset = FireOnWillScroll(-offset);
     userOffset = FireObserverOnWillScroll(userOffset);
     info_.currentOffset_ -= userOffset;
+    info_.currentDelta_ -= userOffset;
     host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
     ScrollablePattern::MarkScrollBarProxyDirty();
     return true;
@@ -583,6 +593,7 @@ bool GridPattern::OnDirtyLayoutWrapperSwap(const RefPtr<LayoutWrapper>& dirty, c
     CheckScrollable();
     MarkSelectedItems();
     ChangeCanStayOverScroll();
+    info_.currentDelta_ = 0;
 
     if (gridLayoutAlgorithm->MeasureInNextFrame()) {
         ACE_SCOPED_TRACE("Grid MeasureInNextFrame");
@@ -886,6 +897,9 @@ float GridPattern::EstimateHeight() const
     if (!isConfigScrollable_) {
         return 0.0f;
     }
+    if (userDefined_) {
+        return info_.totalOffset_;
+    }
     // During the scrolling animation, the exact current position is used. Other times use the estimated location
     if (isSmoothScrolling_) {
         const auto* infoPtr = UseIrregularLayout() ? &info_ : infoCopy_.get();
@@ -900,7 +914,7 @@ float GridPattern::EstimateHeight() const
     auto viewScopeSize = geometryNode->GetPaddingSize();
     auto layoutProperty = host->GetLayoutProperty<GridLayoutProperty>();
     auto mainGap = GridUtils::GetMainGap(layoutProperty, viewScopeSize, info.axis_);
-    if (UseIrregularLayout()) {
+    if (UseIrregularLayout() || userDefined_) {
         return info.GetIrregularOffset(mainGap);
     }
     if (!layoutProperty->GetLayoutOptions().has_value()) {
@@ -944,6 +958,9 @@ float GridPattern::GetAverageHeight() const
 
 float GridPattern::GetTotalHeight() const
 {
+    if (userDefined_ && scrollbarInfo_.second.has_value()) {
+        return scrollbarInfo_.second.value();
+    }
     auto host = GetHost();
     CHECK_NULL_RETURN(host, 0.0f);
     auto geometryNode = host->GetGeometryNode();
@@ -1486,6 +1503,7 @@ void GridPattern::ScrollToIndex(int32_t index, bool smooth, ScrollAlign align, s
             SetExtraOffset(extraOffset);
             targetIndex_ = index;
             scrollAlign_ = align;
+            info_.scrollAlign_ = align;
             host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
         } else {
             UpdateStartIndex(index, align);
@@ -1527,7 +1545,11 @@ bool GridPattern::AnimateToTargetImpl(ScrollAlign align, const RefPtr<LayoutAlgo
     CHECK_NULL_RETURN(host, false);
     auto&& extraOffset = GetExtraOffset();
     bool success = true;
-    if (UseIrregularLayout()) {
+    if (userDefined_) {
+        success = info_.targetPos_.has_value();
+        targetPos = info_.targetPos_.value_or(0.0f);
+        info_.targetPos_.reset();
+    } else if (UseIrregularLayout()) {
         auto host = GetHost();
         CHECK_NULL_RETURN(host, false);
         auto size = GridLayoutUtils::GetItemSize(&info_, RawPtr(host), *targetIndex_);
