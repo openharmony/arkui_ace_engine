@@ -3665,7 +3665,8 @@ bool ArkTSUtils::ConvertFromJSValueNG(
     } else if constexpr (std::is_same_v<T, NG::CalcLength>) {
         return ParseJsLengthVpNG(vm, jsValue, result, resObj);
     } else if constexpr (std::is_same_v<T, Color>) {
-        return ParseJsColor(vm, jsValue, result, resObj);
+        NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
+        return ParseJsSymbolColorAlpha(vm, jsValue, result, resObj, nodeInfo);
     }
     return false;
 }
@@ -3701,7 +3702,7 @@ bool ArkTSUtils::ConvertFromJSValue(
         return ParseJsDimensionVp(vm, jsValue, result, resObj);
     } else if constexpr (std::is_same_v<T, Color>) {
         NodeInfo nodeInfo = { "", ColorMode::COLOR_MODE_UNDEFINED };
-        return ParseJsColor(vm, jsValue, result, resObj, nodeInfo);
+        return ParseJsSymbolColorAlpha(vm, jsValue, result, resObj, nodeInfo);
     }
     return false;
 }
