@@ -85,7 +85,6 @@
 #include "core/components_ng/pattern/custom_frame_node/custom_pattern.h"
 #include "core/components_ng/pattern/divider/divider_model_ng.h"
 #include "core/components_ng/pattern/indexer/indexer_model_ng.h"
-#include "core/components_ng/pattern/search/search_model_ng.h"
 #include "core/components_ng/pattern/radio/radio_model_ng.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
 #include "core/components_ng/pattern/navigation/navigation_model_ng.h"
@@ -535,10 +534,11 @@ void* createArcAlphabetIndexerNode(ArkUI_Int32 nodeId)
 
 void* createSearchNode(ArkUI_Int32 nodeId)
 {
-    auto frameNode = SearchModelNG::CreateFrameNode(nodeId);
-    CHECK_NULL_RETURN(frameNode, nullptr);
-    frameNode->IncRefCount();
-    return AceType::RawPtr(frameNode);
+    auto nodeModifier = GetArkUINodeModifiers();
+    CHECK_NULL_RETURN(nodeModifier, nullptr);
+    auto searchModifier = nodeModifier->getSearchModifier();
+    CHECK_NULL_RETURN(searchModifier, nullptr);
+    return searchModifier->createSearchFrameNode(nodeId);
 }
 
 void* createGridRowNode(ArkUI_Int32 nodeId)

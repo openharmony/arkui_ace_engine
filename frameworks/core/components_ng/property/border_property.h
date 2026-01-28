@@ -117,7 +117,7 @@ struct ACE_FORCE_EXPORT BorderRadiusPropertyT<Dimension> {
     ACE_FORCE_EXPORT bool operator==(const BorderRadiusPropertyT<Dimension>& value) const;
     bool operator!=(const BorderRadiusPropertyT<Dimension>& value) const;
 
-    void SetRadius(const Dimension& borderRadius);
+    ACE_FORCE_EXPORT void SetRadius(const Dimension& borderRadius);
 
     bool UpdateWithCheck(const BorderRadiusPropertyT<Dimension>& value);
 
@@ -368,7 +368,7 @@ struct ACE_FORCE_EXPORT BorderWidthPropertyT<Dimension> {
     };
     std::unordered_map<std::string, resourceUpdater> resMap_;
 
-    void SetBorderWidth(const Dimension& borderWidth);
+    ACE_FORCE_EXPORT void SetBorderWidth(const Dimension& borderWidth);
 
     bool operator==(const BorderWidthPropertyT& value) const;
 
@@ -462,7 +462,7 @@ struct ACE_FORCE_EXPORT BorderStyleProperty {
     std::optional<BorderStyle> styleBottom;
     bool multiValued = false;
 
-    void SetBorderStyle(const BorderStyle& borderStyle);
+    ACE_FORCE_EXPORT void SetBorderStyle(const BorderStyle& borderStyle);
 
     bool operator==(const BorderStyleProperty& value) const;
 

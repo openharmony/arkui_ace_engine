@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMMON_IME_TEXT_INPUT_TYPE_H
 
 #include <cstdint>
+#include "base/utils/macros.h"
 
 namespace OHOS::Ace {
 
@@ -45,7 +46,7 @@ enum class TextInputType {
     END = JS_ONE_TIME_CODE,
 };
 
-TextInputType CastToTextInputType(int32_t value);
+ACE_FORCE_EXPORT TextInputType CastToTextInputType(int32_t value);
 
 } // namespace OHOS::Ace
 

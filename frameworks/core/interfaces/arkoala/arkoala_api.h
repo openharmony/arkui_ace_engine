@@ -6950,21 +6950,28 @@ struct ArkUISearchModifier {
     void (*setSearchCaretStyle)(ArkUINodeHandle node, const ArkUI_Float32 number, ArkUI_Int32 unit,
         ArkUI_Uint32 caretColor, void* widthRawPtr, void* colorRawPtr);
     void (*resetSearchCaretStyle)(ArkUINodeHandle node);
+    void (*resetSearchCaretColor)(const ArkUI_Float32 number, ArkUI_Int32 unit, void* widthRawPtr);
     void (*setSearchTextAlign)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSearchTextAlign)(ArkUINodeHandle node);
     void (*setSearchCancelButton)(ArkUINodeHandle node, ArkUI_Int32 style, const struct ArkUISizeType* size,
         ArkUI_Uint32 color, ArkUI_CharPtr src, ArkUIImageIconRes* imageIconRes);
+    void (*setJsSearchCancelButton)(ArkUI_Int32 style, const struct ArkUIIconOptionsStruct* value,
+        ArkUIImageIconRes* imageIconRes, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
+    void (*setJsSearchDefaultCancelButton)(ArkUI_Int32 style);
     void (*resetSearchCancelButton)(ArkUINodeHandle node);
     void (*setSearchEnableKeyboardOnFocus)(ArkUINodeHandle node, ArkUI_Uint32 value);
     void (*resetSearchEnableKeyboardOnFocus)(ArkUINodeHandle node);
-    void (*setSearchPlaceholderFont)(ArkUINodeHandle node, const struct ArkUIFontStruct* value, void* resRawPtr);
+    void (*setSearchPlaceholderFont)(
+        ArkUINodeHandle node, const struct ArkUIFontStruct* value, void* resRawPtr, bool isJsView);
     void (*resetSearchPlaceholderFont)(ArkUINodeHandle node);
     void (*setSearchSearchIcon)(
         ArkUINodeHandle node, const struct ArkUIIconOptionsStruct* value, ArkUIImageIconRes* imageIconRes);
+    void (*setJsSearchSearchIcon)(ArkUINodeHandle node, const struct ArkUIIconOptionsStruct* value,
+        ArkUIImageIconRes* imageIconRes, ArkUI_CharPtr bundleName, ArkUI_CharPtr moduleName);
+    void (*setSearchDefaultIcon)(ArkUINodeHandle node);
     void (*resetSearchSearchIcon)(ArkUINodeHandle node);
-    void (*setSearchSearchButton)(
-        ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value, ArkUIImageIconRes* imageIconRes,
-        bool isThemeColor);
+    void (*setSearchSearchButton)(ArkUINodeHandle node, const struct ArkUISearchButtonOptionsStruct* value,
+        ArkUIImageIconRes* imageIconRes, bool isThemeColor, bool isJsView);
     void (*resetSearchSearchButton)(ArkUINodeHandle node);
     void (*setSearchFontColor)(ArkUINodeHandle node, ArkUI_Uint32 value, void* resRawPtr);
     void (*resetSearchFontColor)(ArkUINodeHandle node);
@@ -7021,6 +7028,7 @@ struct ArkUISearchModifier {
     void (*resetSearchOnPaste)(ArkUINodeHandle node);
     void (*setSearchOnChange)(ArkUINodeHandle node, void* callback);
     void (*resetSearchOnChange)(ArkUINodeHandle node);
+    void (*setSearchOnChangeEvent)(void* callback);
     void (*setSearchOnTextSelectionChange)(ArkUINodeHandle node, void* callback);
     void (*resetSearchOnTextSelectionChange)(ArkUINodeHandle node);
     void (*setSearchOnContentScroll)(ArkUINodeHandle node, void* callback);
@@ -7081,6 +7089,20 @@ struct ArkUISearchModifier {
     void (*setSearchSelectedDragPreviewStyle)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
     void (*resetSearchSelectedDragPreviewStyle)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getSearchSelectedDragPreviewStyle)(ArkUINodeHandle node);
+    void (*setOnSearchSubmitExtraParam)(ArkUINodeHandle node, void* extraParam);
+    void (*setOnSearchChangeExtraParam)(ArkUINodeHandle node, void* extraParam);
+    void (*setOnSearchCopyExtraParam)(ArkUINodeHandle node, void* extraParam);
+    void (*setOnSearchCutExtraParam)(ArkUINodeHandle node, void* extraParam);
+    void (*setOnSearchPasteExtraParam)(ArkUINodeHandle node, void* extraParam);
+    ArkUINodeHandle (*createSearchFrameNode)(ArkUI_Uint32 nodeId);
+    void (*setSearchInputFilter)(ArkUI_CharPtr value, void* callback, void* resRawPtr);
+    void (*resetSearchInputFilter)();
+    void (*setSearchCustomKeyboardWithBuilder)(void* builder, ArkUI_Bool supportAvoidance);
+    void (*resetSearchCustomKeyboardWithBuilder)();
+    void (*setSearchBorderRadius)(ArkUINodeHandle node);
+    void (*setSearchBackgroundColor)(ArkUINodeHandle node, uint32_t color);
+    void (*resetSearchBackgroundColor)(ArkUINodeHandle node);
+    void (*setBackBorder)(ArkUINodeHandle node);
 };
 
 struct ArkUISearchControllerModifier {

@@ -1890,10 +1890,272 @@ class ScrollModifier extends ArkScrollComponent {
     ModifierUtils.applyAndMergeModifier(instance, this);
   }
 }
-class SearchModifier extends ArkSearchComponent {
+class LazyArkSearchComponent extends ArkComponent {
+  static module = undefined;
+  constructor(nativePtr, classType) {
+    super(nativePtr, classType);
+    if (LazyArkSearchComponent.module === undefined) {
+      LazyArkSearchComponent.module = globalThis.requireNapi('arkui.components.arksearch');
+    }
+    this.lazyComponent = LazyArkSearchComponent.module.createComponent(nativePtr, classType);
+  }
+  setMap() {
+    this.lazyComponent._modifiersWithKeys = this._modifiersWithKeys;
+  }
+  searchButton(value, option) {
+    this.lazyComponent.searchButton(value, option);
+    return this;
+  }
+  searchIcon(value) {
+    this.lazyComponent.searchIcon(value);
+    return this;
+  }
+  cancelButton(value) {
+    this.lazyComponent.cancelButton(value);
+    return this;
+  }
+  fontColor(value) {
+    this.lazyComponent.fontColor(value);
+    return this;
+  }
+  caretStyle(value) {
+    this.lazyComponent.caretStyle(value);
+    return this;
+  }
+  placeholderColor(value) {
+    this.lazyComponent.placeholderColor(value);
+    return this;
+  }
+  placeholderFont(value) {
+    this.lazyComponent.placeholderFont(value);
+    return this;
+  }
+  textFont(value) {
+    this.lazyComponent.textFont(value);
+    return this;
+  }
+  textAlign(value) {
+    this.lazyComponent.textAlign(value);
+    return this;
+  }
+  textDirection(direction) {
+    this.lazyComponent.textDirection(direction);
+    return this;
+  }
+  onSubmit(callback) {
+    this.lazyComponent.onSubmit(callback);
+    return this;
+  }
+  onChange(callback) {
+    this.lazyComponent.onChange(callback);
+    return this;
+  }
+  onTextSelectionChange(callback) {
+    this.lazyComponent.onTextSelectionChange(callback);
+    return this;
+  }
+  onContentScroll(callback) {
+    this.lazyComponent.onContentScroll(callback);
+    return this;
+  }
+  height(value) {
+    this.lazyComponent.height(value);
+    return this;
+  }
+  enableKeyboardOnFocus(value) {
+    this.lazyComponent.enableKeyboardOnFocus(value);
+    return this;
+  }
+  onCopy(callback) {
+    this.lazyComponent.onCopy(callback);
+    return this;
+  }
+  onCut(callback) {
+    this.lazyComponent.onCut(callback);
+    return this;
+  }
+  onPaste(callback) {
+    this.lazyComponent.onPaste(callback);
+    return this;
+  }
+  copyOption(value) {
+    this.lazyComponent.copyOption(value);
+    return this;
+  }
+  selectionMenuHidden(value) {
+    this.lazyComponent.selectionMenuHidden(value);
+    return this;
+  }
+  customKeyboard(value, options) {
+    this.lazyComponent.customKeyboard(value, options);
+    return this;
+  }
+  enterKeyType(value) {
+    this.lazyComponent.enterKeyType(value);
+    return this;
+  }
+  maxLength(value) {
+    this.lazyComponent.maxLength(value);
+    return this;
+  }
+  type(value) {
+    this.lazyComponent.type(value);
+    return this;
+  }
+  editMenuOptions(editMenu) {
+    this.lazyComponent.editMenuOptions(editMenu);
+    return this;
+  }
+  strokeWidth(width) {
+    this.lazyComponent.strokeWidth(width);
+    return this;
+  }
+  strokeColor(color) {
+    this.lazyComponent.strokeColor(color);
+    return this;
+  }
+  margin(value) {
+    this.lazyComponent.margin(value);
+    return this;
+  }
+  selectedDragPreviewStyle(value) {
+    this.lazyComponent.selectedDragPreviewStyle(value);
+    return this;
+  }
+  decoration(value) {
+    this.lazyComponent.decoration(value);
+    return this;
+  }
+  minFontSize(value) {
+    this.lazyComponent.minFontSize(value);
+    return this;
+  }
+  maxFontSize(value) {
+    this.lazyComponent.maxFontSize(value);
+    return this;
+  }
+  minFontScale(scale) {
+    this.lazyComponent.minFontScale(scale);
+    return this;
+  }
+  maxFontScale(scale) {
+    this.lazyComponent.maxFontScale(scale);
+    return this;
+  }
+  dividerColor(color) {
+    this.lazyComponent.dividerColor(color);
+    return this;
+  }
+  letterSpacing(value) {
+    this.lazyComponent.letterSpacing(value);
+    return this;
+  }
+  lineHeight(value) {
+    this.lazyComponent.lineHeight(value);
+    return this;
+  }
+  halfLeading(halfLeading) {
+    this.lazyComponent.halfLeading(halfLeading);
+    return this;
+  }
+  fontFeature(value) {
+    this.lazyComponent.fontFeature(value);
+    return this;
+  }
+  id(value) {
+    this.lazyComponent.id(value);
+    return this;
+  }
+  key(value) {
+    this.lazyComponent.key(value);
+    return this;
+  }
+  selectedBackgroundColor(value) {
+    this.lazyComponent.selectedBackgroundColor(value);
+    return this;
+  }
+  inputFilter(value, error) {
+    this.lazyComponent.inputFilter(value, error);
+    return this;
+  }
+  onEditChange(callback) {
+    this.lazyComponent.onEditChange(callback);
+    return this;
+  }
+  textIndent(value) {
+    this.lazyComponent.textIndent(value);
+    return this;
+  }
+  onWillInsert(callback) {
+    this.lazyComponent.onWillInsert(callback);
+    return this;
+  }
+  onDidInsert(callback) {
+    this.lazyComponent.onDidInsert(callback);
+    return this;
+  }
+  onWillDelete(callback) {
+    this.lazyComponent.onWillDelete(callback);
+    return this;
+  }
+  onDidDelete(callback) {
+    this.lazyComponent.onDidDelete(callback);
+    return this;
+  }
+  enablePreviewText(enable) {
+    this.lazyComponent.enablePreviewText(enable);
+    return this;
+  }
+  enableHapticFeedback(isEnabled) {
+    this.lazyComponent.enableHapticFeedback(isEnabled);
+    return this;
+  }
+  autoCapitalizationMode(mode) {
+    this.lazyComponent.autoCapitalizationMode(mode);
+    return this;
+  }
+  stopBackPress(isStopped) {
+    this.lazyComponent.stopBackPress(isStopped);
+    return this;
+  }
+  keyboardAppearance(appearance) {
+    this.lazyComponent.keyboardAppearance(appearance);
+    return this;
+  }
+  onWillChange(callback) {
+    this.lazyComponent.onWillChange(callback);
+    return this;
+  }
+  enableAutoSpacing(enabled) {
+    this.lazyComponent.enableAutoSpacing(enabled);
+    return this;
+  }
+  onWillAttachIME(callback) {
+    this.lazyComponent.onWillAttachIME(callback);
+    return this;
+  }
+  enableSelectedDataDetector(enable) {
+    this.lazyComponent.enableSelectedDataDetector(enable);
+    return this;
+  }
+  compressLeadingPunctuation(enabled) {
+    this.lazyComponent.compressLeadingPunctuation(enabled);
+    return this;
+  }
+  includeFontPadding(include) {
+    this.lazyComponent.includeFontPadding(include);
+    return this;
+  }
+  fallbackLineSpacing(enabled) {
+    this.lazyComponent.fallbackLineSpacing(enabled);
+    return this;
+  }
+}
+class SearchModifier extends LazyArkSearchComponent {
   constructor(nativePtr, classType) {
     super(nativePtr, classType);
     this._modifiersWithKeys = new ModifierMap();
+    this.setMap();
   }
   applyNormalAttribute(instance) {
     ModifierUtils.applySetOnChange(this);

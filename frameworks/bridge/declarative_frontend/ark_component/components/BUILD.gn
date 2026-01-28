@@ -48,6 +48,7 @@ arkui_modules = [
   "menuitem",
   "menuitemgroup",
   "marquee",
+  "search",
   "stepper",
   "stepperitem",
   "radio",

@@ -40,7 +40,7 @@ public:
 
     ~IconTheme() override = default;
 
-    std::string GetIconPath(const InternalResource::ResourceId& resourceId) const;
+    ACE_FORCE_EXPORT std::string GetIconPath(const InternalResource::ResourceId& resourceId) const;
 
 protected:
     IconTheme() = default;

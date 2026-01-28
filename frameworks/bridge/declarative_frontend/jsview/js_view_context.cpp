@@ -40,7 +40,6 @@
 #include "core/components_ng/base/view_stack_processor.h"
 #include "core/components_ng/pattern/view_context/view_context_model_ng.h"
 #include "core/components_ng/pattern/menu/wrapper/menu_wrapper_pattern.h"
-#include "bridge/declarative_frontend/jsview/js_search.h"
 #include "bridge/declarative_frontend/jsview/js_textfield.h"
 #include "core/components_ng/pattern/text_field/text_field_manager.h"
 
@@ -1401,7 +1400,7 @@ void JSViewContext::JSSetKeyboardAppearanceConfig(const JSCallbackInfo& info)
     if (nodeTag == V2::TEXTINPUT_ETS_TAG) {
         JSTextField::SetKeyboardAppearanceConfig(info);
     } else if (nodeTag == V2::SEARCH_ETS_TAG) {
-        JSSearch::SetKeyboardAppearanceConfig(info);
+        JSTextField::SetSearchKeyboardAppearanceConfig(info);
     }
 }
 

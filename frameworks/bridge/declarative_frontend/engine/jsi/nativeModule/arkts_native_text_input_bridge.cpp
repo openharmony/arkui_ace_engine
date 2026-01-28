@@ -3104,8 +3104,8 @@ IMEAttachCallback TextInputBridge::ParseAndCreateIMEAttachCallback(
     EcmaVM* vm, Local<JSValueRef> callbackArg, FrameNode* frameNode, bool isJsView)
 {
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    IMEAttachCallback callback = [vm, frameNode, isJsView,
-                                    func = panda::CopyableGlobal(vm, func)](IMEClient& imeClient) {
+    IMEAttachCallback callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func), isJsView](
+                                     IMEClient& imeClient) {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
         PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
