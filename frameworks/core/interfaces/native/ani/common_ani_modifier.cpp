@@ -330,14 +330,12 @@ ani_int CreateWindowFreeContainer(ani_env *env, std::shared_ptr<OHOS::AbilityRun
         &nativeContext, FrontendType::ARK_TS);
     CHECK_NULL_RETURN(container, -1);
     int32_t instanceId = container->GetInstanceId();
-    ContainerScope::Add(instanceId);
     return instanceId;
 }
 
 void DestroyWindowFreeContainer(ani_int id)
 {
     Platform::WindowFreeContainer::DestroyWindowFreeContainer();
-    ContainerScope::RemoveAndCheck(static_cast<int32_t>(id));
 }
 
 ani_boolean CheckIsUIThread(ArkUI_Int32 instanceId)

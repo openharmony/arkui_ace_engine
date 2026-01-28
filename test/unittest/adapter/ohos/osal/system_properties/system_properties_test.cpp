@@ -82,4 +82,18 @@ HWTEST_F(SystemPropertiesTest, SystemPropertiesTest003, TestSize.Level1)
      */
     EXPECT_EQ(SystemProperties::GetComponentLoadNumber(), 1);
 }
+
+/**
+ * @tc.name: SystemPropertiesTest004
+ * @tc.desc: Test GetTransformEnabled init
+ * @tc.type: FUNC
+ */
+HWTEST_F(SystemPropertiesTest, SystemPropertiesTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. call GetTransformEnabled
+     * @tc.expected: step1. getTransformEnabled param init success.
+     */
+    EXPECT_EQ(SystemProperties::GetTransformEnabled(), true);
+}
 }
