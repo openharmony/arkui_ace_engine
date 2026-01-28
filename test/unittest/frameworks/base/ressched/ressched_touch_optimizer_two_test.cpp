@@ -398,8 +398,8 @@ HWTEST_F(ResSchedTouchOptimizerTwoTest, NeedTpFlushVsync002, TestSize.Level1)
     TouchEvent touchEvent;
     touchEvent.sourceTool = SourceTool::FINGER;
     
-    // When slide is accepted, should return false
-    EXPECT_FALSE(optimizer_->NeedTpFlushVsync(touchEvent));
+    // When slide is accepted, should return true
+    EXPECT_TRUE(optimizer_->NeedTpFlushVsync(touchEvent));
     
     // Test transition to first frame after TP flush
     optimizer_->slideAccept_ = false;
@@ -448,12 +448,12 @@ HWTEST_F(ResSchedTouchOptimizerTwoTest, NeedTpFlushVsyncInner002, TestSize.Level
     TouchEvent touchEvent;
     touchEvent.sourceTool = SourceTool::FINGER;
     
-    // When slide is accepted, should return false
-    EXPECT_FALSE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
+    // When slide is accepted, should return true
+    EXPECT_TRUE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
     
     // Test when slide is not accepted
     optimizer_->slideAccept_ = false;
-    EXPECT_TRUE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
+    EXPECT_FALSE(optimizer_->NeedTpFlushVsyncInner(touchEvent));
 }
 
 /**

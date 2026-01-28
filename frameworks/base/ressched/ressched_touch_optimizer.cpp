@@ -155,12 +155,12 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsyncInner(const TouchEvent& touchEvent)
     if (touchEvent.sourceTool != SourceTool::FINGER) {
         return false;
     }
-    // If slide is accepted, no need to trigger TP flush
+    // If slide is accepted, TPflush first frame
     if (slideAccept_) {
-        TAG_LOGI(AceLogTag::ACE_UIEVENT, "No TpFlush needed, slide accepted");
-        ACE_SCOPED_TRACE("No TpFlush needed, slide accepted");
+        TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush first frame");
+        ACE_SCOPED_TRACE("TpFlush first frame");
         slideAccept_ = false;
-        return false;
+        return true;
     }
     // If last frame was TP triggered and current Vsync count differs,
     // trigger TP flush to avoid frame drop
@@ -176,10 +176,7 @@ bool ResSchedTouchOptimizer::NeedTpFlushVsyncInner(const TouchEvent& touchEvent)
         ACE_SCOPED_TRACE("TpFlush reversed");
         return true;
     }
-    // If none of the above conditions, trigger TP flush
-    TAG_LOGI(AceLogTag::ACE_UIEVENT, "TpFlush first frame");
-    ACE_SCOPED_TRACE("TpFlush first frame");
-    return true;
+    return false;
 }
 
 /*
