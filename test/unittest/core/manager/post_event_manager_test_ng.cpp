@@ -1145,4 +1145,876 @@ HWTEST_F(PostEventManagerTestNg, PostMouseEventTest002, TestSize.Level1)
     postEventManager_->PostMouseEvent(uiNode, std::move(mouseEventEx));
     EXPECT_FALSE(postEventManager_->passThroughResult_);
 }
+
+/**
+ * @tc.name: PostEventTest001
+ * @tc.desc: test PostEvent with null uiNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostEventTest001, TestSize.Level1)
+{
+    Init();
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    auto result = postEventManager_->PostEvent(nullptr, touchEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostEventTest002
+ * @tc.desc: test PostEvent with unknown touch type
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostEventTest002, TestSize.Level1)
+{
+    Init();
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::HOVER_ENTER;
+    auto result = postEventManager_->PostEvent(root_, touchEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostTouchEventTest003
+ * @tc.desc: test PostTouchEvent with null uiNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostTouchEventTest003, TestSize.Level1)
+{
+    Init();
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    auto result = postEventManager_->PostTouchEvent(nullptr, std::move(touchEvent));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostTouchEventTest004
+ * @tc.desc: test PostTouchEvent with non-FrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostTouchEventTest004, TestSize.Level1)
+{
+    Init();
+    RefPtr<UINode> uiNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto patternNode = AceType::MakeRefPtr<Pattern>();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, patternNode);
+    auto uiNode2 = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    auto result = postEventManager_->PostTouchEvent(uiNode2, std::move(touchEvent));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostTouchEventTest005
+ * @tc.desc: test PostTouchEvent with MOVE type
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostTouchEventTest005, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Add a DOWN event first
+    PostEventAction eventAction;
+    TouchEvent downEvent;
+    downEvent.type = TouchType::DOWN;
+    downEvent.id = 1;
+    eventAction.targetNode = uiNode;
+    eventAction.touchEvent = downEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::MOVE;
+    touchEvent.id = 1;
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(pipelineContext->eventManager_, nullptr);
+    pipelineContext->eventManager_->isDragCancelPending_ = false;
+    postEventManager_->PostTouchEvent(uiNode, std::move(touchEvent));
+}
+
+/**
+ * @tc.name: PostTouchEventTest006
+ * @tc.desc: test PostTouchEvent with UP type
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostTouchEventTest006, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Add a DOWN event first
+    PostEventAction eventAction;
+    TouchEvent downEvent;
+    downEvent.type = TouchType::DOWN;
+    downEvent.id = 1;
+    eventAction.targetNode = uiNode;
+    eventAction.touchEvent = downEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::UP;
+    touchEvent.id = 1;
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(pipelineContext->eventManager_, nullptr);
+    pipelineContext->eventManager_->isDragCancelPending_ = false;
+    postEventManager_->PostTouchEvent(uiNode, std::move(touchEvent));
+}
+
+/**
+ * @tc.name: PostTouchEventTest007
+ * @tc.desc: test PostTouchEvent with CANCEL type
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostTouchEventTest007, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Add a DOWN event first
+    PostEventAction eventAction;
+    TouchEvent downEvent;
+    downEvent.type = TouchType::DOWN;
+    downEvent.id = 1;
+    eventAction.targetNode = uiNode;
+    eventAction.touchEvent = downEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::CANCEL;
+    touchEvent.id = 1;
+    auto pipelineContext = PipelineContext::GetCurrentContextSafelyWithCheck();
+    ASSERT_NE(pipelineContext, nullptr);
+    pipelineContext->eventManager_ = AceType::MakeRefPtr<EventManager>();
+    ASSERT_NE(pipelineContext->eventManager_, nullptr);
+    pipelineContext->eventManager_->isDragCancelPending_ = false;
+    postEventManager_->PostTouchEvent(uiNode, std::move(touchEvent));
+}
+
+/**
+ * @tc.name: PostMouseEventTest003
+ * @tc.desc: test PostMouseEvent with null uiNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostMouseEventTest003, TestSize.Level1)
+{
+    Init();
+    MouseEvent mouseEvent;
+    auto result = postEventManager_->PostMouseEvent(nullptr, std::move(mouseEvent));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostMouseEventTest004
+ * @tc.desc: test PostMouseEvent with non-FrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostMouseEventTest004, TestSize.Level1)
+{
+    Init();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    MouseEvent mouseEvent;
+    auto result = postEventManager_->PostMouseEvent(uiNode, std::move(mouseEvent));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostAxisEventTest002
+ * @tc.desc: test PostAxisEvent with null uiNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostAxisEventTest002, TestSize.Level1)
+{
+    Init();
+    AxisEvent axisEvent;
+    auto result = postEventManager_->PostAxisEvent(nullptr, std::move(axisEvent));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostAxisEventTest003
+ * @tc.desc: test PostAxisEvent with non-FrameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostAxisEventTest003, TestSize.Level1)
+{
+    Init();
+    RefPtr<FrameNode> frameNode = FrameNode::CreateFrameNode(V2::IMAGE_ETS_TAG, 1, AceType::MakeRefPtr<Pattern>());
+    auto uiNode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    AxisEvent axisEvent;
+    auto result = postEventManager_->PostAxisEvent(uiNode, std::move(axisEvent));
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckTouchEventTest007
+ * @tc.desc: test CheckTouchEvent with null targetNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest007, TestSize.Level1)
+{
+    Init();
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    auto result = postEventManager_->CheckTouchEvent(nullptr, touchEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckTouchEventTest008
+ * @tc.desc: test CheckTouchEvent with DOWN after UP (hasUpOrCancel true)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest008, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Add UP event first
+    PostEventAction eventAction;
+    TouchEvent upEvent;
+    upEvent.type = TouchType::UP;
+    upEvent.id = 2;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = upEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+
+    TouchEvent downEvent;
+    downEvent.type = TouchType::DOWN;
+    downEvent.id = 2;
+    auto result = postEventManager_->CheckTouchEvent(UInode, downEvent);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckTouchEventTest009
+ * @tc.desc: test CheckTouchEvent with UP without DOWN
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest009, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    TouchEvent upEvent;
+    upEvent.type = TouchType::UP;
+    upEvent.id = 2;
+    auto result = postEventManager_->CheckTouchEvent(UInode, upEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckTouchEventTest010
+ * @tc.desc: test CheckTouchEvent with CANCEL without DOWN
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest010, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    TouchEvent cancelEvent;
+    cancelEvent.type = TouchType::CANCEL;
+    cancelEvent.id = 2;
+    auto result = postEventManager_->CheckTouchEvent(UInode, cancelEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckTouchEventTest011
+ * @tc.desc: test CheckTouchEvent with different targetNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest011, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Add DOWN event for one node
+    PostEventAction eventAction;
+    TouchEvent downEvent;
+    downEvent.type = TouchType::DOWN;
+    downEvent.id = 2;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = downEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+
+    // Check with different node
+    auto frameNode2 = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode2 = AceType::DynamicCast<NG::UINode>(frameNode2);
+
+    TouchEvent downEvent2;
+    downEvent2.type = TouchType::DOWN;
+    downEvent2.id = 2;
+    auto result = postEventManager_->CheckTouchEvent(UInode2, downEvent2);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckTouchEventTest012
+ * @tc.desc: test CheckTouchEvent with different id
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest012, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Add DOWN event with id 2
+    PostEventAction eventAction;
+    TouchEvent downEvent;
+    downEvent.type = TouchType::DOWN;
+    downEvent.id = 2;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = downEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+
+    // Check with different id (3)
+    TouchEvent downEvent2;
+    downEvent2.type = TouchType::DOWN;
+    downEvent2.id = 3;
+    auto result = postEventManager_->CheckTouchEvent(UInode, downEvent2);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckTouchEventTest013
+ * @tc.desc: test CheckTouchEvent clears actions when UP follows DOWN
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckTouchEventTest013, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Add DOWN event
+    PostEventAction eventAction;
+    TouchEvent downEvent;
+    downEvent.type = TouchType::DOWN;
+    downEvent.id = 2;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = downEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+
+    // Add UP event
+    PostEventAction eventAction2;
+    TouchEvent upEvent;
+    upEvent.type = TouchType::UP;
+    upEvent.id = 2;
+    eventAction2.targetNode = UInode;
+    eventAction2.touchEvent = upEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction2);
+
+    // Check DOWN again should clear old actions
+    TouchEvent downEvent2;
+    downEvent2.type = TouchType::DOWN;
+    downEvent2.id = 2;
+    auto result = postEventManager_->CheckTouchEvent(UInode, downEvent2);
+    EXPECT_TRUE(result);
+    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), 0);
+}
+
+/**
+ * @tc.name: PostDownEventTest002
+ * @tc.desc: test PostDownEvent with null targetNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostDownEventTest002, TestSize.Level1)
+{
+    Init();
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    auto result = postEventManager_->PostDownEvent(nullptr, touchEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostDownEventTest003
+ * @tc.desc: test PostDownEvent with duplicate DOWN (no lastEventMap entry)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostDownEventTest003, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.id = 5;
+
+    PostEventAction eventAction;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = touchEvent;
+    postEventManager_->postEventAction_.push_back(eventAction);
+
+    auto result = postEventManager_->PostDownEvent(UInode, touchEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostMoveEventTest001
+ * @tc.desc: test PostMoveEvent with null targetNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostMoveEventTest001, TestSize.Level1)
+{
+    Init();
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::MOVE;
+    auto result = postEventManager_->PostMoveEvent(nullptr, touchEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostMoveEventTest002
+ * @tc.desc: test PostMoveEvent without DOWN event
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostMoveEventTest002, TestSize.Level1)
+{
+    Init();
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::MOVE;
+    auto result = postEventManager_->PostMoveEvent(root_, touchEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostMoveEventTest003
+ * @tc.desc: test PostMoveEvent after UP event
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostMoveEventTest003, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Add DOWN and UP events
+    PostEventAction eventAction1;
+    TouchEvent downEvent;
+    downEvent.type = TouchType::DOWN;
+    downEvent.id = 3;
+    eventAction1.targetNode = UInode;
+    eventAction1.touchEvent = downEvent;
+    postEventManager_->postEventAction_.push_back(eventAction1);
+
+    PostEventAction eventAction2;
+    TouchEvent upEvent;
+    upEvent.type = TouchType::UP;
+    upEvent.id = 3;
+    eventAction2.targetNode = UInode;
+    eventAction2.touchEvent = upEvent;
+    postEventManager_->postEventAction_.push_back(eventAction2);
+
+    TouchEvent moveEvent;
+    moveEvent.type = TouchType::MOVE;
+    moveEvent.id = 3;
+    auto result = postEventManager_->PostMoveEvent(UInode, moveEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostUpEventTest001
+ * @tc.desc: test PostUpEvent with null targetNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostUpEventTest001, TestSize.Level1)
+{
+    Init();
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::UP;
+    auto result = postEventManager_->PostUpEvent(nullptr, touchEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostUpEventTest002
+ * @tc.desc: test PostUpEvent without DOWN event
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostUpEventTest002, TestSize.Level1)
+{
+    Init();
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::UP;
+    auto result = postEventManager_->PostUpEvent(root_, touchEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: PostUpEventTest003
+ * @tc.desc: test PostUpEvent after CANCEL event
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostUpEventTest003, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Add DOWN and CANCEL events
+    PostEventAction eventAction1;
+    TouchEvent downEvent;
+    downEvent.type = TouchType::DOWN;
+    downEvent.id = 3;
+    eventAction1.targetNode = UInode;
+    eventAction1.touchEvent = downEvent;
+    postEventManager_->postEventAction_.push_back(eventAction1);
+
+    PostEventAction eventAction2;
+    TouchEvent cancelEvent;
+    cancelEvent.type = TouchType::CANCEL;
+    cancelEvent.id = 3;
+    eventAction2.targetNode = UInode;
+    eventAction2.touchEvent = cancelEvent;
+    postEventManager_->postEventAction_.push_back(eventAction2);
+
+    TouchEvent upEvent;
+    upEvent.type = TouchType::UP;
+    upEvent.id = 3;
+    auto result = postEventManager_->PostUpEvent(UInode, upEvent);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HaveReceiveDownEventTest001
+ * @tc.desc: test HaveReceiveDownEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, HaveReceiveDownEventTest001, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Initially no DOWN event
+    auto result = postEventManager_->HaveReceiveDownEvent(UInode, 1);
+    EXPECT_FALSE(result);
+
+    // Add DOWN event
+    PostEventAction eventAction;
+    TouchEvent downEvent;
+    downEvent.type = TouchType::DOWN;
+    downEvent.id = 1;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = downEvent;
+    postEventManager_->postEventAction_.push_back(eventAction);
+
+    result = postEventManager_->HaveReceiveDownEvent(UInode, 1);
+    EXPECT_TRUE(result);
+
+    // Different id
+    result = postEventManager_->HaveReceiveDownEvent(UInode, 2);
+    EXPECT_FALSE(result);
+
+    // Different node
+    auto frameNode2 = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode2 = AceType::DynamicCast<NG::UINode>(frameNode2);
+    result = postEventManager_->HaveReceiveDownEvent(UInode2, 1);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: HaveReceiveUpOrCancelEventTest001
+ * @tc.desc: test HaveReceiveUpOrCancelEvent function
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, HaveReceiveUpOrCancelEventTest001, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Initially no UP event
+    auto result = postEventManager_->HaveReceiveUpOrCancelEvent(UInode, 1);
+    EXPECT_FALSE(result);
+
+    // Add UP event
+    PostEventAction eventAction;
+    TouchEvent upEvent;
+    upEvent.type = TouchType::UP;
+    upEvent.id = 1;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = upEvent;
+    postEventManager_->postEventAction_.push_back(eventAction);
+
+    result = postEventManager_->HaveReceiveUpOrCancelEvent(UInode, 1);
+    EXPECT_TRUE(result);
+
+    // Test with CANCEL
+    postEventManager_->postEventAction_.clear();
+    PostEventAction eventAction2;
+    TouchEvent cancelEvent;
+    cancelEvent.type = TouchType::CANCEL;
+    cancelEvent.id = 2;
+    eventAction2.targetNode = UInode;
+    eventAction2.touchEvent = cancelEvent;
+    postEventManager_->postEventAction_.push_back(eventAction2);
+
+    result = postEventManager_->HaveReceiveUpOrCancelEvent(UInode, 2);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckPointValidityTest001
+ * @tc.desc: test CheckPointValidity with duplicate time
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckPointValidityTest001, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Add an event
+    PostEventAction eventAction;
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.id = 1;
+    auto currentTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanoseconds(currentTime);
+    TimeStamp time(nanoseconds);
+    touchEvent.time = time;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = touchEvent;
+    postEventManager_->postEventAction_.push_back(eventAction);
+
+    // Check with same time and id
+    TouchEvent touchEvent2;
+    touchEvent2.type = TouchType::MOVE;
+    touchEvent2.id = 1;
+    touchEvent2.time = time;
+    auto result = postEventManager_->CheckPointValidity(touchEvent2);
+    EXPECT_FALSE(result);
+}
+
+/**
+ * @tc.name: CheckPointValidityTest002
+ * @tc.desc: test CheckPointValidity with different time
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckPointValidityTest002, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Add an event
+    PostEventAction eventAction;
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.id = 1;
+    auto currentTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanoseconds(currentTime);
+    TimeStamp time(nanoseconds);
+    touchEvent.time = time;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = touchEvent;
+    postEventManager_->postEventAction_.push_back(eventAction);
+
+    // Check with different time
+    TouchEvent touchEvent2;
+    touchEvent2.type = TouchType::MOVE;
+    touchEvent2.id = 1;
+    currentTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanoseconds2(currentTime);
+    TimeStamp time2(nanoseconds2);
+    touchEvent2.time = time2;
+    auto result = postEventManager_->CheckPointValidity(touchEvent2);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: CheckPointValidityTest003
+ * @tc.desc: test CheckPointValidity with different id
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, CheckPointValidityTest003, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Add an event
+    PostEventAction eventAction;
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.id = 1;
+    auto currentTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanoseconds(currentTime);
+    TimeStamp time(nanoseconds);
+    touchEvent.time = time;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = touchEvent;
+    postEventManager_->postEventAction_.push_back(eventAction);
+
+    // Check with different id
+    TouchEvent touchEvent2;
+    touchEvent2.type = TouchType::MOVE;
+    touchEvent2.id = 2;
+    touchEvent2.time = time;
+    auto result = postEventManager_->CheckPointValidity(touchEvent2);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: SetPassThroughResultTest001
+ * @tc.desc: test SetPassThroughResult and GetPostTargetNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, SetPassThroughResultTest001, TestSize.Level1)
+{
+    Init();
+    postEventManager_->SetPassThroughResult(true);
+    EXPECT_TRUE(postEventManager_->passThroughResult_);
+
+    postEventManager_->SetPassThroughResult(false);
+    EXPECT_FALSE(postEventManager_->passThroughResult_);
+
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    postEventManager_->targetNode_ = frameNode;
+    auto result = postEventManager_->GetPostTargetNode();
+    EXPECT_EQ(result, frameNode);
+}
+
+/**
+ * @tc.name: ClearPostInputActionsTest002
+ * @tc.desc: test ClearPostInputActions with multiple ids
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsTest002, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+
+    // Add multiple events with different ids
+    for (int32_t i = 0; i < 3; i++) {
+        PostEventAction eventAction;
+        TouchEvent touchEvent;
+        touchEvent.type = TouchType::DOWN;
+        touchEvent.id = i;
+        eventAction.targetNode = UInode;
+        eventAction.touchEvent = touchEvent;
+        postEventManager_->postInputEventAction_.push_back(eventAction);
+    }
+
+    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), 3);
+
+    // Clear only id 1
+    postEventManager_->ClearPostInputActions(UInode, 1);
+    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), 2);
+}
+
+/**
+ * @tc.name: ClearPostInputActionsTest003
+ * @tc.desc: test ClearPostInputActions with different targetNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, ClearPostInputActionsTest003, TestSize.Level1)
+{
+    Init();
+    auto frameNode = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode = AceType::DynamicCast<NG::UINode>(frameNode);
+    auto frameNode2 = AceType::MakeRefPtr<FrameNode>(ROOT_TAG, -1, AceType::MakeRefPtr<Pattern>(), true);
+    auto UInode2 = AceType::DynamicCast<NG::UINode>(frameNode2);
+
+    // Add events to both nodes
+    PostEventAction eventAction;
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.id = 1;
+    eventAction.targetNode = UInode;
+    eventAction.touchEvent = touchEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction);
+
+    PostEventAction eventAction2;
+    eventAction2.targetNode = UInode2;
+    eventAction2.touchEvent = touchEvent;
+    postEventManager_->postInputEventAction_.push_back(eventAction2);
+
+    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), 2);
+
+    // Clear only for first node
+    postEventManager_->ClearPostInputActions(UInode, 1);
+    EXPECT_EQ(postEventManager_->postInputEventAction_.size(), 1);
+}
+
+/**
+ * @tc.name: HandlePostEventTest002
+ * @tc.desc: test HandlePostEvent with MOVE type (should not add to eventTreeRecord)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, HandlePostEventTest002, TestSize.Level1)
+{
+    Init();
+    auto buttonNode =
+        FrameNode::GetOrCreateFrameNode(V2::BUTTON_ETS_TAG, 1, []() { return AceType::MakeRefPtr<Pattern>(); });
+
+    // Add DOWN event first
+    TouchEvent downEvent;
+    downEvent.type = TouchType::DOWN;
+    downEvent.id = 10;
+    postEventManager_->HandlePostEvent(buttonNode, downEvent);
+
+    // Add MOVE event - should not add to eventTreeRecord or call PostEventFlushTouchEventEnd
+    TouchEvent moveEvent;
+    moveEvent.type = TouchType::MOVE;
+    moveEvent.id = 10;
+    postEventManager_->HandlePostEvent(buttonNode, moveEvent);
+
+    // lastEventMap should still have the DOWN event
+    EXPECT_FALSE(postEventManager_->lastEventMap_.empty());
+}
+
+/**
+ * @tc.name: PostEventTest003
+ * @tc.desc: test PostEvent with same timestamp (duplicate event)
+ * @tc.type: FUNC
+ */
+HWTEST_F(PostEventManagerTestNg, PostEventTest003, TestSize.Level1)
+{
+    Init();
+    auto gestureEventHub = root_->GetOrCreateGestureEventHub();
+    gestureEventHub->SetHitTestMode(HitTestMode::HTMBLOCK);
+    auto gesture = AceType::MakeRefPtr<TapGesture>();
+    gestureEventHub->AddGesture(gesture);
+
+    TouchEvent touchEvent;
+    touchEvent.type = TouchType::DOWN;
+    touchEvent.x = 10;
+    touchEvent.y = 10;
+    auto currentTime = GetSysTimestamp();
+    std::chrono::nanoseconds nanoseconds(currentTime);
+    TimeStamp time(nanoseconds);
+    touchEvent.time = time;
+
+    // First call should succeed
+    auto result = postEventManager_->PostEvent(root_, touchEvent);
+    EXPECT_FALSE(result);
+
+    // Second call with same timestamp should return false
+    result = postEventManager_->PostEvent(root_, touchEvent);
+    EXPECT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG
