@@ -10709,7 +10709,7 @@ class ArkRichEditorComponent extends ArkComponent {
     return this;
   }
   bindSelectionMenu(spanType, content, responseType, options) {
-    throw new Error('Method not implemented.');
+     throw new BusinessError(100201, 'bindSelectionMenu function not supported in RichEditorModifier class');
   }
   customKeyboard(value, options) {
     let arkValue = new ArkCustomKeyboard();
