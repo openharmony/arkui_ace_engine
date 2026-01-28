@@ -555,6 +555,7 @@ private:
     WeakPtr<PipelineContext> initialContext_ = nullptr;
     // record the initial surfaceId_ in InitSurface, this variable should not be modified after the initial assignment
     std::string initialSurfaceId_;
+    int32_t foldDisplayCallbackId_ = -1;
 };
 } // namespace OHOS::Ace::NG
 
