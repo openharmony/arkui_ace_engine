@@ -752,6 +752,9 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel016, TestSize.Level0)
  */
 HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level0)
 {
+    /**
+     * @tc.steps: Create RichEditor node
+     */
     RichEditorModelNG richEditorModel;
     richEditorModel.Create(true);
     auto richEditorNode = AceType::Claim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
@@ -759,6 +762,9 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level0)
     auto richEditorController = richEditorModel.GetRichEditorController();
     EXPECT_NE(richEditorController, nullptr);
 
+    /**
+     * @tc.steps: Test SetCustomKeyboard function
+     */
     auto pattern = richEditorNode->GetPattern<RichEditorPattern>();
     ASSERT_NE(pattern, nullptr);
     auto func = []() {};
@@ -766,6 +772,9 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel017, TestSize.Level0)
     richEditorModel.SetCustomKeyboard(func, true);
     EXPECT_EQ(richEditorNode->GetPattern<RichEditorPattern>(), nullptr);
 
+    /**
+     * @tc.steps: Test BindSelectionMenu function
+     */
     std::function<void()> buildFunc = []() {};
     auto textSpanType = TextSpanType::TEXT;
     auto textResponseType = TextResponseType::LONG_PRESS;
