@@ -31,15 +31,15 @@
 #include "core/components_ng/pattern/tabs/tab_content_transition_proxy.h"
 #include "core/event/ace_events.h"
 #include "core/pipeline/pipeline_context.h"
- #include "ui/view/components/tabs/tabs_data.h" 
- #include "core/common/resource/resource_object.h"
+#include "ui/view/components/tabs/tabs_data.h" 
+#include "core/common/resource/resource_object.h"
 
 namespace OHOS::Ace {
 
-enum class TabsCacheMode {	 
-     CACHE_BOTH_SIDE = 0, 
-     CACHE_LATEST_SWITCHED 
- };
+enum class TabsCacheMode {
+    CACHE_BOTH_SIDE = 0,
+    CACHE_LATEST_SWITCHED
+};
 
 namespace {
 enum class TabJsResType {
