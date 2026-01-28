@@ -1054,13 +1054,13 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundEffectTestValidValues, TestS
 {
     ASSERT_NE(modifier_->setBarBackgroundEffect, nullptr);
     Ark_BackgroundEffectOptions inputValValid = {
-        .radius = Converter::ArkValue<Ark_Float64>(EFFECT_RADIUS),
+        .radius = Converter::ArkValue<Opt_Float64>(EFFECT_RADIUS),
         .saturation = Converter::ArkValue<Opt_Float64>(EFFECT_SATURATION),
         .brightness = Converter::ArkValue<Opt_Float64>(EFFECT_BRIGHTNESS),
         .color = Converter::ArkUnion<Opt_ResourceColor, Ark_Int32>(0x123123),
         .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
         .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
-            .grayscale = {Converter::ArkValue<Ark_Float64>(GRAY_SCALE0), Converter::ArkValue<Ark_Float64>(GRAY_SCALE1)}
+            .grayscale = Converter::ArkValue<Opt_Tuple_F64_F64>(Ark_Tuple_F64_F64{GRAY_SCALE0, GRAY_SCALE1}),
         }),
         .policy = Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE),
         .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(COLOR_GREEN),
@@ -1156,7 +1156,7 @@ HWTEST_F(TabsModifierTest, DISABLED_setBarBackgroundBlurStyle1TestValidValues, T
         .adaptiveColor = Converter::ArkValue<Opt_AdaptiveColor>(ARK_ADAPTIVE_COLOR_AVERAGE),
         .scale = Converter::ArkValue<Opt_Float64>(SCALE),
         .blurOptions = Converter::ArkValue<Opt_BlurOptions>(Ark_BlurOptions{
-            .grayscale = {Converter::ArkValue<Ark_Float64>(GRAY_SCALE0), Converter::ArkValue<Ark_Float64>(GRAY_SCALE1)}
+            .grayscale = Converter::ArkValue<Opt_Tuple_F64_F64>(Ark_Tuple_F64_F64{GRAY_SCALE0, GRAY_SCALE1}),
         }),
         .policy = Converter::ArkValue<Opt_BlurStyleActivePolicy>(ARK_BLUR_STYLE_ACTIVE_POLICY_ALWAYS_INACTIVE),
         .inactiveColor = Converter::ArkUnion<Opt_ResourceColor, Ark_String>(COLOR_GREEN),
