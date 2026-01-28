@@ -664,7 +664,6 @@ void WindowScene::OnActivation()
             CHECK_EQUAL_VOID(isRestart, true);
             surfaceNode->SetBufferAvailableCallback(self->callback_);
         } else if (self->snapshotWindow_) {
-            self->session_->SetEnableAddSnapshot(true);
             self->DisposeSnapshotAndBlankWindow();
             self->SetSubSessionVisible();
         }
@@ -863,7 +862,6 @@ void WindowScene::OnAddSnapshot()
         auto self = weakThis.Upgrade();
         CHECK_NULL_VOID(self);
         CHECK_NULL_VOID(self->session_);
-        CHECK_EQUAL_VOID(self->session_->GetEnableAddSnapshot(), false);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
         if (self->snapshotWindow_ || self->startingWindow_ || self->blankWindow_) {
