@@ -12154,19 +12154,6 @@ export class DismissSheetAction_serializer {
         return DismissSheetActionInternal.fromPtr(ptr)
     }
 }
-export class ForegroundEffectOptions_serializer {
-    public static write(buffer: SerializerBase, value: ForegroundEffectOptions): void {
-        let valueSerializer : SerializerBase = buffer
-        const valueHolderForRadius  = value.radius
-        valueSerializer.writeFloat64(valueHolderForRadius)
-    }
-    public static read(buffer: DeserializerBase): ForegroundEffectOptions {
-        let valueDeserializer : DeserializerBase = buffer
-        const radiusTmpResult : double = valueDeserializer.readFloat64()
-        let value : ForegroundEffectOptions = ({radius: radiusTmpResult} as ForegroundEffectOptions)
-        return value
-    }
-}
 export class InvertOptions_serializer {
     public static write(buffer: SerializerBase, value: InvertOptions): void {
         let valueSerializer : SerializerBase = buffer
