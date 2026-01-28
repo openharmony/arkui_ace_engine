@@ -4162,6 +4162,7 @@ void OverlayManager::CloseDialogInner(const RefPtr<FrameNode>& dialogNode)
         CloseDialogAnimation(dialogNode);
     }
     dialogCount_--;
+    dialogPattern->setMaskNodeId(overlayManager->GetMaskNodeIdWithDialogId(dialogNode->GetId()));
     overlayManager->RemoveMaskFromMap(dialogNode);
     // set close button enable
     if (dialogCount_ == 0) {
