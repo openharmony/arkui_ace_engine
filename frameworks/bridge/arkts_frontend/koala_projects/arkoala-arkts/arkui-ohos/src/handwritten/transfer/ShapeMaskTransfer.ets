@@ -84,7 +84,8 @@ export class ShapeMaskTransfer {
         }
 
         let nodeModule = ESValue.load('@ohos.arkui.node');
-        let shapeMaskModule = nodeModule.getProperty('ShapeMask');
+        let defaultModule = nodeModule.getProperty('default');
+        let shapeMaskModule = defaultModule.getProperty('ShapeMask');
         let ret = shapeMaskModule.instantiate();
         if (staticValue.rect !== null) {
             let staticRectValue = staticValue.rect as Rect;

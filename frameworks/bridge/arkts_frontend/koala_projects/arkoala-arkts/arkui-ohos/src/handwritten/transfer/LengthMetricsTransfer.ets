@@ -46,7 +46,8 @@ export class LengthMetricsTransfer {
             throw Error('Not a LengthMetrics object, convert fail.');
         }
         let nodeModule = ESValue.load('@ohos.arkui.node');
-        let lengthMetricsModule = nodeModule.getProperty('LengthMetrics');
+        let defaultModule = nodeModule.getProperty('default');
+        let lengthMetricsModule = defaultModule.getProperty('LengthMetrics');
         let dynamicValue = lengthMetricsModule.instantiate();
         dynamicValue.setProperty('unit', ESValue.wrap(staticValue.unit.valueOf()));
         dynamicValue.setProperty('value', ESValue.wrap(staticValue.value));
