@@ -204,8 +204,8 @@ void TextInputResponseArea::SetHoverRectForTV(RefPtr<FrameNode>& stackNode, Rect
     auto stackHoverPadding = (hoverRectHeight - stackRect.Height()) / HALF_SPACE;
     auto isRTL = layoutProperty->GetNonAutoLayoutDirection() == TextDirection::RTL;
     if (isRTL) {
-        rect = RectF(stackRect.GetX() + stackRect.Width() - imageRect.Width() - iconHoverPadding + iconOffsetPadding,
-            stackRect.GetY() - stackHoverPadding + iconOffsetPadding,
+        rect = RectF(stackRect.GetX() + stackRect.Width() - imageRect.Width() - iconHoverPadding - iconOffsetPadding,
+            stackRect.GetY() - stackHoverPadding - iconOffsetPadding,
             hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding,
             hoverRectHeight + DOUBLE_PADDING * iconOffsetPadding);
     } else {
