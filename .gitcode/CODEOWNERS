@@ -3201,6 +3201,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/Com
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/handwritten/component/common.ts @arkui_framework_xnode
 
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/arkts/ArkUIAniModule.ts @arkui_framework_xnode
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/arkts/ArkUIAniCustomNodeModule.ts @arkuilayout1
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/module.cpp @arkui_architecture
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/utils/ani_utils.cpp @arkui_framework_xnode
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/utils/ani_utils.h @arkui_framework_xnode
@@ -3214,6 +3215,7 @@ frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/drag_and_drop/ @ArkUI_Event
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/detached_free_root_node/detached_free_root_node.cpp @arkuieco3
 frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/detached_free_root_node/detached_free_root_node.h @arkuieco3
+frameworks/bridge/arkts_frontend/koala_projects/arkoala-arkts/arkui-ohos/src/ani/native/custom/ @arkuilayout1
 frameworks\bridge\arkts_frontend\koala_projects\arkoala-arkts\arkui-ohos\src\ani\native\keyboard_avoid_mode\keyboard_avoid_mode_module.h @arkuilayout1
 frameworks\bridge\arkts_frontend\koala_projects\arkoala-arkts\arkui-ohos\src\ani\native\keyboard_avoid_mode\keyboard_avoid_mode_module.cpp @arkuilayout1
 frameworks/bridge/arkts_frontend/koala_projects/arkoala/framework/native/src/resource_color_helper.cc @arkui_framework_resource
