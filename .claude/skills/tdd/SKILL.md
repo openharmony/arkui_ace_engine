@@ -1,3 +1,9 @@
+---
+name: tdd
+description: This skill should be used when writing unit tests, TDD test cases, test coverage analysis, or test-driven development for NG component Pattern methods (e.g., OnModifyDone, OnDirtyLayoutWrapperSwap). Covers test principles, templates, common pitfalls, branch coverage, API verification, state reset, and mandatory self-checklist for ace_engine testing.
+version: 1.0.0
+---
+
 # TDD Writing Guidelines for NG Component Pattern Methods
 
 When writing TDD tests for NG component Pattern methods (e.g., `OnModifyDone()`, `OnDirtyLayoutWrapperSwap()`), follow these guidelines to avoid common pitfalls.

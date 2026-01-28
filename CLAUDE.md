@@ -4,29 +4,37 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Knowledge Base
 
-This project maintains a comprehensive knowledge base for in-depth component analysis and development guidance:
+This project maintains a comprehensive knowledge base system for in-depth component analysis and development guidance.
 
-### Component Knowledge Base
+### docs/ Knowledge Base Directory
 
-- **[Menu Component Knowledge Base](docs/pattern/menu/Menu_Knowledge_Base.md)** - Complete guide for Menu component
-  - Legacy Menu vs NG Menu architecture comparison
-  - JS bridge integration (JsBindMenu, JsBindContextMenu)
-  - Pattern/Model/Property/Algorithm layer analysis
+The `docs/` directory contains organized knowledge base documentation covering:
+
+- **Component Knowledge** (`docs/pattern/*/`) - In-depth analysis for specific components (e.g., Menu, Grid, List)
+  - Component architecture and design patterns
+  - Pattern/Model/Property/Algorithm layer breakdown
   - Lifecycle management and event handling
   - Layout algorithms and paint methods
   - Test coverage and debugging guides
 
-**Usage**: When user asks about Menu-related functionality (menu creation, binding, events, layout, styling, testing), **automatically reference** the Menu Knowledge Base for comprehensive information.
+- **Architecture & Design** (`docs/architecture/`) - Framework architecture documentation
+  - System design patterns
+  - Component layering and separation of concerns
+  - Cross-component integration patterns
 
-### Skills & Guidelines
+- **Best Practices** (`docs/best_practices/`) - Development guidelines and solutions
+  - Common problem-solving approaches
+  - Performance optimization techniques
+  - Debugging and troubleshooting guides
 
-- **[TDD Writing Guidelines](.claude/skills/tdd/)** - Test-driven development best practices
-  - 7 core principles for TDD
-  - Test templates and examples
-  - Common pitfalls and solutions
-  - Mandatory self-checklist
+**Knowledge Base Index**: See [docs/knowledge_base_README.md](docs/knowledge_base_README.md) for the complete catalog of available knowledge base documents.
 
-**Usage**: When writing unit tests or TDD test cases, reference this guide for standardized testing practices.
+**Usage**: When answering questions or providing guidance:
+
+1. **Check for relevant knowledge base documents** in `docs/` before diving into code analysis
+2. **Search the knowledge base** using Grep tools to find component-specific information
+3. **Reference knowledge base content** to provide comprehensive, context-aware answers
+4. **Cross-reference with actual code** using the file paths and line numbers cited in knowledge base documents
 
 ## Core Working Principles
 
