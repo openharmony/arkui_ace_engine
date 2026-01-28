@@ -255,6 +255,7 @@ void JSList::SetCachedCount(const JSCallbackInfo& info)
 void JSList::SetScroller(RefPtr<JSScroller> scroller)
 {
     if (scroller) {
+        scroller->SetInstanceId(Container::CurrentId());
         RefPtr<ScrollControllerBase> listController = ListModel::GetInstance()->CreateScrollController();
         scroller->SetController(listController);
 
@@ -295,7 +296,6 @@ void JSList::Create(const JSCallbackInfo& args)
         if (scrollerValue->IsObject()) {
             void* scroller = JSRef<JSObject>::Cast(scrollerValue)->Unwrap<JSScroller>();
             RefPtr<JSScroller> jsScroller = Referenced::Claim(reinterpret_cast<JSScroller*>(scroller));
-            jsScroller->SetInstanceId(Container::CurrentId());
             SetScroller(jsScroller);
         }
     }
