@@ -1733,6 +1733,7 @@ public:
     void UpdateFoucsOffsetIfNeed(RoundRect& paintRect)
     {
         auto textFieldTheme = GetTheme();
+        CHECK_NULL_VOID(textFieldTheme);
         auto focusPaintPadding = textFieldTheme->GetIconFocusPadding().ConvertToPx();
         RectF rect = paintRect.GetRect();
         auto x = rect.GetX();
