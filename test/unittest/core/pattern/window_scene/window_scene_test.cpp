@@ -707,6 +707,10 @@ HWTEST_F(WindowSceneTest, IsMainSessionRecent, TestSize.Level0)
     EXPECT_EQ(ret, false);
 
     session->SetShowRecent(true);
+    auto snapshotWindowNode = FrameNode::CreateFrameNode(V2::WINDOW_SCENE_ETS_TAG,
+        ElementRegister::GetInstance()->MakeUniqueId(), windowScene);
+    windowScene->snapshotWindow_ = AceType::RawPtr(snapshotWindowNode);
+    ASSERT_NE(windowScene->snapshotWindow_, nullptr);
     ret = subWindowScene->IsMainSessionRecent();
     EXPECT_EQ(ret, true);
 
