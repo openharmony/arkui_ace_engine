@@ -291,6 +291,7 @@ export struct SubHeader {
         }
         event.stopPropagation();
       }
+      return false;
     })
     instance.onClick((event: ClickEvent) => {
       if ((this.operationType === OperationType.TEXT_ARROW || this.operationType === OperationType.BUTTON) &&

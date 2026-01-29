@@ -1771,6 +1771,7 @@ function setButtonProperties(this: ButtonAttribute, buttonOptions: ButtonOptions
       controller?.close();
       event.stopPropagation();
     }
+    return false;
   })
   this.onClick((event: ClickEvent) => {
     if (buttonOptions.action) {
