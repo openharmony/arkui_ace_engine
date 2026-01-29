@@ -171,9 +171,7 @@ public:
                 .resourceId = resourceId,
                 .reason = Converter::OptConvert<BindSheetDismissReason>(parameter.reason)
             };
-            auto helper = CallbackHelper(parameter.dismiss);
             checkNestedEvent->fired = true;
-            helper.Invoke();
         };
         auto arkDismissCallback =
             Converter::ArkValue<Callback_DismissContentCoverAction_Void>(dismissCallback, frameNode->GetId());
