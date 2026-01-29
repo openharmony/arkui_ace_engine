@@ -866,8 +866,16 @@ void WindowScene::OnAddSnapshot(std::function<void()>&& callback)
         CHECK_EQUAL_VOID(self->session_->GetEnableAddSnapshot(), false);
         auto host = self->GetHost();
         CHECK_NULL_VOID(host);
-        if (self->snapshotWindow_ || self->startingWindow_ || self->blankWindow_) {
-            TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "In snap/start/blank window id %{public}d host id %{public}d",
+        if (self->snapshotWindow_) {
+            TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "In snap window id %{public}d host id %{public}d",
+                self->session_->GetPersistentId(), host->GetId());
+            if (callback) {
+                callback();
+            }
+            return;
+        }
+        if (self->startingWindow_ || self->blankWindow_) {
+            TAG_LOGW(AceLogTag::ACE_WINDOW_SCENE, "In start/blank window id %{public}d host id %{public}d",
                 self->session_->GetPersistentId(), host->GetId());
             return;
         }
