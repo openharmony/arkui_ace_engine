@@ -1058,11 +1058,30 @@ abstract class PUV2ViewBase extends ViewBuildNodeBase {
       if (current === null || current === undefined) {
         return undefined;
       }
+      if (Array.isArray(current)) {
+        if (!/^\d+$/.test(path)) {
+          return undefined;
+        }
+        const index = Number(path);
+        if (index < 0 || index >= current.length) {
+          return undefined;
+        }
+        current = current[index];
+        continue;
+      }
       if ((typeof current !== 'object') || !Object.prototype.hasOwnProperty.call(current, path)) {
         return undefined;
       }
       current = current[path];
     }
-    return typeof current === 'string' ? current : JSON.stringify(current);
+    if (typeof current === 'string') {
+      return current;
+    }
+    try {
+      return JSON.stringify(current);
+    } catch (error) {
+      stateMgmtConsole.error('getStateMgmtInfo get path JSON.stringify failed', error);
+      return undefined;
+    }
   }
 } // class PUV2ViewBase
