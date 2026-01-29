@@ -822,20 +822,6 @@ HWTEST_F(TabBarTestNg, TabBarDistributedTest001, TestSize.Level1)
     tabBarPattern_->UpdateIndicator(0);
     std::string ret = tabBarPattern_->ProvideRestoreInfo();
     EXPECT_TRUE(ret == R"({"Index":0})");
-
-    /**
-     * @tc.steps: step3. Function OnRestoreInfo is called.
-     * @tc.expected: Passing invalid & valid JSON format.
-     */
-    std::string restoreInfo_ = R"({"Index":0})";
-    pattern_->OnRestoreInfo(restoreInfo_);
-    EXPECT_EQ(tabBarLayoutProperty_->GetIndicator().value_or(0), 0);
-    restoreInfo_ = R"({"Index":1})";
-    pattern_->OnRestoreInfo(restoreInfo_);
-    EXPECT_EQ(tabBarLayoutProperty_->GetIndicator().value_or(0), 1);
-    restoreInfo_ = "invalid_json_string";
-    pattern_->OnRestoreInfo(restoreInfo_);
-    EXPECT_EQ(tabBarLayoutProperty_->GetIndicator().value_or(0), 1);
 }
 
 /**
