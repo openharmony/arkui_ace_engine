@@ -146,9 +146,7 @@ public:
             checkNestedEvent = {
                 .resourceId = resourceId,
             };
-            auto helper = CallbackHelper(parameter.dismiss);
             checkNestedEvent->fired = true;
-            helper.Invoke();
         };
         auto arkDismissCallback =
             Converter::ArkValue<Callback_SheetDismiss_Void>(dismissCallback, frameNode->GetId());
