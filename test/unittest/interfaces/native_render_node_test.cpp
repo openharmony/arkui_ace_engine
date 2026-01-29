@@ -1629,4 +1629,244 @@ HWTEST_F(NativeRenderNodeTest, NativeRenderNodeAdopterTest010, TestSize.Level1)
     auto result = OH_ArkUI_RenderNodeUtils_GetRenderNode(rootCustomNode, &renderNode);
     ASSERT_EQ(result, ARKUI_ERROR_CODE_RENDER_NOT_ADOPTED_NODE);
 }
+
+/**
+ * @tc.name: NativeRenderNodeTest215
+ * @tc.desc: Test renderNode with null node handle parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest215, TestSize.Level1)
+{
+    ArkUI_RenderNodeHandle child = nullptr;
+    auto result = OH_ArkUI_RenderNodeUtils_AddChild(nullptr, child);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    result = OH_ArkUI_RenderNodeUtils_RemoveChild(nullptr, child);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    result = OH_ArkUI_RenderNodeUtils_ClearChildren(nullptr);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    int32_t count = 0;
+    result = OH_ArkUI_RenderNodeUtils_GetChildrenCount(nullptr, &count);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    result = OH_ArkUI_RenderNodeUtils_DisposeNode(nullptr);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest216
+ * @tc.desc: Test renderNode with null output parameters.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest216, TestSize.Level1)
+{
+    auto renderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(renderNode, nullptr);
+
+    auto result = OH_ArkUI_RenderNodeUtils_GetFirstChild(renderNode, nullptr);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    result = OH_ArkUI_RenderNodeUtils_GetNextSibling(renderNode, nullptr);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    result = OH_ArkUI_RenderNodeUtils_GetPreviousSibling(renderNode, nullptr);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    result = OH_ArkUI_RenderNodeUtils_GetChild(renderNode, 0, nullptr);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    result = OH_ArkUI_RenderNodeUtils_GetChildrenCount(renderNode, nullptr);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest217
+ * @tc.desc: Test renderNode complex tree operations.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest217, TestSize.Level1)
+{
+    auto root = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(root, nullptr);
+
+    auto level1 = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(level1, nullptr);
+    auto level2 = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(level2, nullptr);
+    auto level3 = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(level3, nullptr);
+
+    auto result = OH_ArkUI_RenderNodeUtils_AddChild(root, level1);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    result = OH_ArkUI_RenderNodeUtils_AddChild(level1, level2);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    result = OH_ArkUI_RenderNodeUtils_AddChild(level2, level3);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    int32_t count = 0;
+    result = OH_ArkUI_RenderNodeUtils_GetChildrenCount(root, &count);
+    ASSERT_EQ(count, 1);
+    result = OH_ArkUI_RenderNodeUtils_GetChildrenCount(level1, &count);
+    ASSERT_EQ(count, 1);
+    result = OH_ArkUI_RenderNodeUtils_GetChildrenCount(level2, &count);
+    ASSERT_EQ(count, 1);
+
+    OH_ArkUI_RenderNodeUtils_DisposeNode(root);
+    OH_ArkUI_RenderNodeUtils_DisposeNode(level1);
+    OH_ArkUI_RenderNodeUtils_DisposeNode(level2);
+    OH_ArkUI_RenderNodeUtils_DisposeNode(level3);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest218
+ * @tc.desc: Test renderNode InsertChildAfter with null sibling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest218, TestSize.Level1)
+{
+    auto parent = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(parent, nullptr);
+
+    auto child1 = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(child1, nullptr);
+    auto child2 = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(child2, nullptr);
+
+    auto result = OH_ArkUI_RenderNodeUtils_AddChild(parent, child1);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    result = OH_ArkUI_RenderNodeUtils_InsertChildAfter(parent, child2, nullptr);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    int32_t count = 0;
+    OH_ArkUI_RenderNodeUtils_GetChildrenCount(parent, &count);
+    ASSERT_EQ(count, 1);
+
+    OH_ArkUI_RenderNodeUtils_DisposeNode(parent);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest219
+ * @tc.desc: Test renderNode InsertChildAfter with non-existent sibling.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest219, TestSize.Level1)
+{
+    auto parent = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(parent, nullptr);
+
+    auto child1 = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(child1, nullptr);
+    auto child2 = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(child2, nullptr);
+    auto siblingNotInTree = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(siblingNotInTree, nullptr);
+
+    auto result = OH_ArkUI_RenderNodeUtils_AddChild(parent, child1);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    result = OH_ArkUI_RenderNodeUtils_InsertChildAfter(parent, child2, siblingNotInTree);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    int32_t count = 0;
+    OH_ArkUI_RenderNodeUtils_GetChildrenCount(parent, &count);
+    ASSERT_EQ(count, 2);
+
+    OH_ArkUI_RenderNodeUtils_DisposeNode(parent);
+    OH_ArkUI_RenderNodeUtils_DisposeNode(siblingNotInTree);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest220
+ * @tc.desc: Test renderNode GetChild with out of bounds index.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest220, TestSize.Level1)
+{
+    auto parent = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(parent, nullptr);
+
+    auto child1 = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(child1, nullptr);
+    auto child2 = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(child2, nullptr);
+
+    OH_ArkUI_RenderNodeUtils_AddChild(parent, child1);
+    OH_ArkUI_RenderNodeUtils_AddChild(parent, child2);
+
+    ArkUI_RenderNodeHandle resultChild;
+    auto result = OH_ArkUI_RenderNodeUtils_GetChild(parent, -1, &resultChild);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    result = OH_ArkUI_RenderNodeUtils_GetChild(parent, 10, &resultChild);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    OH_ArkUI_RenderNodeUtils_DisposeNode(parent);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest221
+ * @tc.desc: Test renderNode GetFirstChild on empty node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest221, TestSize.Level1)
+{
+    auto renderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(renderNode, nullptr);
+
+    ArkUI_RenderNodeHandle child;
+    auto result = OH_ArkUI_RenderNodeUtils_GetFirstChild(renderNode, &child);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest222
+ * @tc.desc: Test renderNode GetNextSibling and GetPreviousSibling on node without siblings.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest222, TestSize.Level1)
+{
+    auto parent = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(parent, nullptr);
+
+    auto onlyChild = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(onlyChild, nullptr);
+
+    OH_ArkUI_RenderNodeUtils_AddChild(parent, onlyChild);
+
+    ArkUI_RenderNodeHandle sibling;
+    auto result = OH_ArkUI_RenderNodeUtils_GetNextSibling(onlyChild, &sibling);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    result = OH_ArkUI_RenderNodeUtils_GetPreviousSibling(onlyChild, &sibling);
+    ASSERT_NE(result, ARKUI_ERROR_CODE_NO_ERROR);
+
+    OH_ArkUI_RenderNodeUtils_DisposeNode(parent);
+}
+
+/**
+ * @tc.name: NativeRenderNodeTest223
+ * @tc.desc: Test renderNode GetChildren with empty node.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NativeRenderNodeTest, NativeRenderNodeTest223, TestSize.Level1)
+{
+    auto renderNode = OH_ArkUI_RenderNodeUtils_CreateNode();
+    ASSERT_NE(renderNode, nullptr);
+
+    ArkUI_RenderNodeHandle* children = nullptr;
+    int32_t count = 0;
+    auto result = OH_ArkUI_RenderNodeUtils_GetChildren(renderNode, &children, &count);
+    ASSERT_EQ(result, ARKUI_ERROR_CODE_NO_ERROR);
+    ASSERT_EQ(count, 0);
+
+    OH_ArkUI_RenderNodeUtils_DisposeNode(renderNode);
+}
+
 } // namespace OHOS::Ace
