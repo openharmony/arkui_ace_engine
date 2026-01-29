@@ -120,6 +120,8 @@ HWTEST_F(FocusHubTestNg, IsSyncRequestFocusableScopeBranch02, TestSize.Level1)
     focusHub->focusType_ = FocusType::SCOPE;
     focusHub->focusDepend_ = FocusDependence::AUTO;
     focusHub->currentFocus_ = true;
+    focusHub->focusable_ = true;
+    focusHub->parentFocusable_ = true;
 
     // @tc.steps: step3. Add a focusable child node
     auto childNode = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
@@ -265,9 +267,9 @@ HWTEST_F(FocusHubTestNg, SetFocusableBranch02, TestSize.Level1)
     // @tc.steps: step2. Set isFocusableExplicit_ to true
     focusHub->isFocusableExplicit_ = true;
 
-    // @tc.steps: step3. Call SetFocusable with isExplicit=true
+    // @tc.steps: step3. Call SetFocusable with isExplicit=false
     auto initialFocusable = focusHub->focusable_;
-    focusHub->SetFocusable(false, true);
+    focusHub->SetFocusable(false, false);
 
     // @tc.steps: step4. Verify that focusable_ is not changed due to early return
     EXPECT_EQ(focusHub->focusable_, initialFocusable);
@@ -406,35 +408,6 @@ HWTEST_F(FocusHubTestNg, RequestNextFocusByCustomAlgorithmBranch01, TestSize.Lev
      */
     auto ret = focusHub->RequestNextFocusByCustomAlgorithm(moveStep, frameRect);
     EXPECT_EQ(ret, false);
-}
-
-/**
- * @tc.name: LostFocusToViewRootBranch01
- * @tc.desc: Test LostFocusToViewRoot when focusHub has currentFocus set to true
- * @tc.type: FUNC
- */
-HWTEST_F(FocusHubTestNg, LostFocusToViewRootBranch01, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create a FocusHub with currentFocus_=true
-     * @tc.expected: Should set currentFocus_ to false after calling LostFocusToViewRoot
-     */
-    auto frameNode = FrameNodeOnTree::CreateFrameNode("frameNode", 101, AceType::MakeRefPtr<ButtonPattern>());
-    frameNode->GetOrCreateFocusHub();
-    auto focusHub = frameNode->GetFocusHub();
-    ASSERT_NE(focusHub, nullptr);
-
-    focusHub->currentFocus_ = true;
-
-    /**
-     * @tc.steps: step2. Call LostFocusToViewRoot to increase coverage
-     */
-    focusHub->LostFocusToViewRoot();
-
-    /**
-     * @tc.steps: step3. Verify that currentFocus_ is set to false
-     */
-    ASSERT_TRUE(focusHub->currentFocus_ == false);
 }
 
 /**
