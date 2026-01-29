@@ -21,6 +21,7 @@
 #include "test/mock/base/mock_task_executor.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_theme.h"
 #include "core/components_ng/pattern/rich_editor/rich_editor_model_ng.h"
+#include "core/components_ng/pattern/rich_editor/rich_editor_undo_manager.h"
 
 using namespace testing;
 using namespace testing::ext;
@@ -223,6 +224,137 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnRedoAction001, TestSize.Level2)
 
 
 /**
+ * @tc.name: HandleOnRedoAction002
+ * @tc.desc: test HandleOnRedoAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUndoRedoTest, HandleOnRedoAction002, TestSize.Level2)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+
+    richEditorPattern->undoManager_ =
+        std::make_unique<StyledStringUndoManager>(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    ASSERT_NE(richEditorPattern->undoManager_, nullptr);
+    
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->InsertValue(INIT_VALUE_1);
+    richEditorPattern->HandleOnUndoAction();
+
+    richEditorPattern->HandleOnRedoAction();
+    EXPECT_TRUE(true);
+}
+
+/**
+ * @tc.name: HandleOnRedoAction003
+ * @tc.desc: test HandleOnRedoAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUndoRedoTest, HandleOnRedoAction003, TestSize.Level2)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto changeReason = TextChangeReason::UNKNOWN;
+    richEditorPattern->undoManager_.reset();
+    richEditorPattern->redoOperationRecords_.clear();
+
+    richEditorPattern->HandleOnRedoAction();
+    EXPECT_EQ(changeReason, TextChangeReason::UNKNOWN);
+}
+
+/**
+ * @tc.name: HandleOnRedoAction004
+ * @tc.desc: test HandleOnRedoAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUndoRedoTest, HandleOnRedoAction004, TestSize.Level2)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    
+    richEditorPattern->undoManager_.reset();
+    richEditorPattern->operationRecords_.clear();
+    richEditorPattern->redoOperationRecords_.clear();
+
+    RichEditorPattern::OperationRecord record;
+    record.addText = INIT_VALUE_1;
+    record.deleteText = std::nullopt;
+    record.deleteCaretPosition = 5;
+    record.beforeCaretPosition = 0;
+    record.afterCaretPosition = 5;
+    
+    richEditorPattern->redoOperationRecords_.push_back(record);
+    auto operationCountBefore = richEditorPattern->operationRecords_.size();
+    richEditorPattern->HandleOnRedoAction();
+
+    EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), operationCountBefore);
+}
+
+/**
+ * @tc.name: HandleOnRedoAction005
+ * @tc.desc: test HandleOnRedoAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUndoRedoTest, HandleOnRedoAction005, TestSize.Level2)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    
+    richEditorPattern->undoManager_.reset();
+    richEditorPattern->operationRecords_.clear();
+    richEditorPattern->redoOperationRecords_.clear();
+
+    RichEditorPattern::OperationRecord record;
+    record.addText = INIT_VALUE_2;
+    record.deleteText = std::nullopt;
+    record.deleteCaretPosition = -1;
+    record.beforeCaretPosition = 0;
+    record.afterCaretPosition = 0;
+    
+    richEditorPattern->redoOperationRecords_.push_back(record);
+    auto contentLengthBefore = richEditorPattern->GetTextContentLength();
+    auto operationCountBefore = richEditorPattern->operationRecords_.size();
+    richEditorPattern->HandleOnRedoAction();
+
+    EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), operationCountBefore + 1);
+    auto contentLengthAfter = richEditorPattern->GetTextContentLength();
+    EXPECT_NE(contentLengthBefore, contentLengthAfter);
+}
+
+/**
+ * @tc.name: HandleOnRedoAction006
+ * @tc.desc: test HandleOnRedoAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUndoRedoTest, HandleOnRedoAction006, TestSize.Level2)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    
+    richEditorPattern->undoManager_.reset();
+    richEditorPattern->operationRecords_.clear();
+    richEditorPattern->redoOperationRecords_.clear();
+
+    RichEditorPattern::OperationRecord record;
+    record.addText = std::nullopt;
+    record.deleteText = std::nullopt;
+    record.deleteCaretPosition = -1;
+    record.beforeCaretPosition = 0;
+    record.afterCaretPosition = 0;
+
+    richEditorPattern->redoOperationRecords_.push_back(record);
+    auto operationCountBefore = richEditorPattern->operationRecords_.size();
+    richEditorPattern->HandleOnRedoAction();
+
+    EXPECT_TRUE(richEditorPattern->redoOperationRecords_.empty());
+    EXPECT_FALSE(richEditorPattern->operationRecords_.empty());
+    EXPECT_EQ(richEditorPattern->operationRecords_.size(), operationCountBefore + 1);
+}
+
+
+/**
  * @tc.name: UndoDrag002
  * @tc.desc: test UndoDrag
  * @tc.type: FUNC
@@ -275,6 +407,113 @@ HWTEST_F(RichEditorUndoRedoTest, HandleOnUndoAction001, TestSize.Level2)
     EXPECT_EQ(changeReason, TextChangeReason::UNDO);
 }
 
+/**
+ * @tc.name: HandleOnUndoAction002
+ * @tc.desc: test HandleOnUndoAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUndoRedoTest, HandleOnUndoAction002, TestSize.Level2)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto eventHub = richEditorPattern->GetEventHub<RichEditorEventHub>();
+    ASSERT_NE(eventHub, nullptr);
+    auto changeReason = TextChangeReason::UNKNOWN;
+
+    auto onWillChange = [&changeReason](const RichEditorChangeValue& changeValue) {
+        changeReason = changeValue.changeReason_;
+        return true;
+    };
+    eventHub->SetOnWillChange(onWillChange);
+    richEditorPattern->undoManager_.reset();
+    richEditorPattern->operationRecords_.clear();
+    richEditorPattern->HandleOnUndoAction();
+    EXPECT_EQ(changeReason, TextChangeReason::UNKNOWN);
+}
+
+/**
+ * @tc.name: HandleOnUndoAction003
+ * @tc.desc: test HandleOnUndoAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUndoRedoTest, HandleOnUndoAction003, TestSize.Level2)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->undoManager_.reset();
+    richEditorPattern->operationRecords_.clear();
+    richEditorPattern->redoOperationRecords_.clear();
+
+    richEditorPattern->SetCaretPosition(0);
+    richEditorPattern->InsertValue(INIT_VALUE_1, true);
+
+    const size_t RECORD_MAX_LENGTH = 20;
+    for (size_t i = 0; i < RECORD_MAX_LENGTH + 1; ++i) {
+        RichEditorPattern::OperationRecord record;
+        record.addText = u"test";
+        record.beforeCaretPosition = static_cast<int32_t>(i);
+        record.afterCaretPosition = static_cast<int32_t>(i + 1);
+        record.deleteCaretPosition = 5;
+        richEditorPattern->redoOperationRecords_.push_back(record);
+        richEditorPattern->operationRecords_.push_back(record);
+    }
+    richEditorPattern->HandleOnUndoAction();
+    EXPECT_GT(richEditorPattern->redoOperationRecords_.size(), RECORD_MAX_LENGTH);
+}
+
+/**
+ * @tc.name: HandleOnUndoAction004
+ * @tc.desc: test HandleOnUndoAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUndoRedoTest, HandleOnUndoAction004, TestSize.Level2)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    
+    richEditorPattern->undoManager_.reset();
+    richEditorPattern->operationRecords_.clear();
+    richEditorPattern->redoOperationRecords_.clear();
+
+    RichEditorPattern::OperationRecord record;
+    record.addText = INIT_VALUE_1;
+    record.deleteCaretPosition = 5;
+    record.beforeCaretPosition = 0;
+    record.afterCaretPosition = 5;
+    richEditorPattern->operationRecords_.push_back(record);
+
+    richEditorPattern->HandleOnUndoAction();
+    EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
+    EXPECT_FALSE(richEditorPattern->redoOperationRecords_.empty());
+}
+
+/**
+ * @tc.name: HandleOnUndoAction005
+ * @tc.desc: test HandleOnUndoAction
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorUndoRedoTest, HandleOnUndoAction005, TestSize.Level2)
+{
+    auto richEditorPattern = GetRichEditorPattern();
+    ASSERT_NE(richEditorPattern, nullptr);
+    
+    richEditorPattern->undoManager_.reset();
+    richEditorPattern->operationRecords_.clear();
+    richEditorPattern->redoOperationRecords_.clear();
+
+    RichEditorPattern::OperationRecord record;
+    record.addText = std::nullopt;
+    record.deleteText = std::nullopt;
+    record.deleteCaretPosition = -1;
+    record.beforeCaretPosition = 0;
+    record.afterCaretPosition = 0;
+    
+    richEditorPattern->operationRecords_.push_back(record);
+    richEditorPattern->HandleOnUndoAction();
+
+    EXPECT_TRUE(richEditorPattern->operationRecords_.empty());
+    EXPECT_FALSE(richEditorPattern->redoOperationRecords_.empty());
+}
 
 /**
  * @tc.name: InsertValueOperation
