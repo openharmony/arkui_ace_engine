@@ -27,7 +27,6 @@ static const std::vector<OHOS::Ace::MarqueeUpdateStrategy> MARQUEE_UPDATE_STRATE
 namespace OHOS::Ace::NG {
 namespace {
 constexpr int32_t DEFAULT_MARQUEE_LOOP = -1;
-constexpr double DEFAULT_STEP = 6.0;
 
 bool IsJsView(const Local<JSValueRef>& jsVal, panda::ecmascript::EcmaVM* vm)
 {
@@ -82,13 +81,12 @@ bool GetNativeNode(ArkUINodeHandle& nativeNode, const Local<JSValueRef>& firstAr
     return false;
 }
 
-void ParseStartValue(panda::ecmascript::EcmaVM* vm, Local<panda::ObjectRef> paramObj, std::optional<bool>& start,
-    bool isJsView)
+void ParseStartValue(panda::ecmascript::EcmaVM* vm, Local<panda::ObjectRef> paramObj, std::optional<bool>& start)
 {
     auto startVal = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "start"));
     if (startVal->IsBoolean()) {
         start = std::optional<bool>(startVal->ToBoolean(vm)->Value());
-    } else if (!isJsView) {
+    } else {
         start = std::optional<bool>(false);
     }
 }
@@ -97,10 +95,10 @@ void ParseStepValue(panda::ecmascript::EcmaVM* vm, Local<panda::ObjectRef> param
     bool isJsView)
 {
     auto stepVal = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "step"));
-    if (stepVal->IsNumber() && stepVal->ToNumber(vm)->Value() > 0) {
-        step = std::optional<double>(Dimension(stepVal->ToNumber(vm)->Value(), DimensionUnit::VP).ConvertToPx());
-    } else if (!isJsView) {
-        step = std::optional<double>(Dimension(DEFAULT_STEP, DimensionUnit::VP).ConvertToPx());
+    if (stepVal->IsNumber()) {
+        if (GreatNotEqual(stepVal->ToNumber(vm)->Value(), 0.0)) {
+            step = std::optional<double>(Dimension(stepVal->ToNumber(vm)->Value(), DimensionUnit::VP).ConvertToPx());
+        }
     }
 }
 
@@ -109,12 +107,16 @@ void ParseLoopValue(panda::ecmascript::EcmaVM* vm, Local<panda::ObjectRef> param
 {
     auto loopVal = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "loop"));
     if (loopVal->IsNumber()) {
-        loop = std::optional<int32_t>(static_cast<int32_t>(loopVal->ToNumber(vm)->Value()));
-        if (loop.value() == std::numeric_limits<int32_t>::max() || loop < 0) {
-            loop = std::optional<int32_t>(-1);
+        bool isNumber = false;
+        auto loopDouble = loopVal->GetValueDouble(isNumber);
+        int32_t loopInt = DEFAULT_MARQUEE_LOOP;
+        if (GreatNotEqual(loopDouble, 0.0)) {
+            loopInt = static_cast<int32_t>(loopDouble);
+            if (loopInt == std::numeric_limits<int32_t>::max() || loopInt < 0) {
+                loopInt = DEFAULT_MARQUEE_LOOP;
+            }
         }
-    } else if (!isJsView) {
-        loop = std::optional<int32_t>(DEFAULT_MARQUEE_LOOP);
+        loop = std::optional<int32_t>(loopInt);
     }
 }
 
@@ -177,6 +179,53 @@ void MarqueeBridge::RegisterMarqueeAttributes(Local<panda::ObjectRef> object, Ec
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "marquee"), marquee);
 }
 
+void ParseMarqueeAttributes(ArkUINodeHandle& nativeNode, panda::ecmascript::EcmaVM* vm,
+    Local<panda::ObjectRef> paramObj, bool isJsView)
+{
+    std::optional<bool> start;
+    std::optional<double> step;
+    std::optional<int32_t> loop;
+    std::optional<bool> fromStart = std::optional<bool>(true);
+    std::optional<std::string> src;
+    if (!paramObj->IsUndefined()) {
+        ParseStartValue(vm, paramObj, start);
+        ParseStepValue(vm, paramObj, step, isJsView);
+        ParseLoopValue(vm, paramObj, loop, isJsView);
+        ParseFromStartValue(vm, paramObj, fromStart);
+        ParseSrcValue(vm, paramObj, src, isJsView);
+    }
+    if (isJsView) {
+        static MarqueeModelNG model;
+        model.Create();
+    }
+    if (start.has_value()) {
+        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueePlayerStatus(nativeNode, start.value());
+    } else {
+        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueePlayerStatus(nativeNode);
+    }
+    if (step.has_value()) {
+        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeScrollAmount(nativeNode, step.value());
+    } else {
+        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeScrollAmount(nativeNode);
+    }
+    if (loop.has_value()) {
+        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeLoop(nativeNode, loop.value());
+    } else {
+        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeLoop(nativeNode);
+    }
+    if (fromStart.has_value()) {
+        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeDirection(nativeNode, fromStart.value() ?
+            static_cast<int32_t>(MarqueeDirection::LEFT) : static_cast<int32_t>(MarqueeDirection::RIGHT));
+    } else {
+        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeDirection(nativeNode);
+    }
+    if (src.has_value()) {
+        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeSrcValue(nativeNode, src.value().c_str());
+    } else {
+        GetArkUINodeModifiers()->getMarqueeModifier()->resetMarqueeSrcValue(nativeNode);
+    }
+}
+
 ArkUINativeModuleValue MarqueeBridge::CreateMarquee(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
@@ -184,11 +233,6 @@ ArkUINativeModuleValue MarqueeBridge::CreateMarquee(ArkUIRuntimeCallInfo* runtim
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     Local<JSValueRef> secondArg = runtimeCallInfo->GetCallArgRef(1);
     bool isJSView = IsJsView(firstArg, vm);
-    std::optional<bool> start;
-    std::optional<double> step;
-    std::optional<int32_t> loop;
-    std::optional<bool> fromStart = std::optional<bool>(true);
-    std::optional<std::string> src;
     auto paramObj = firstArg->ToObject(vm);
     ArkUINodeHandle nativeNode = nullptr;
     if (firstArg->IsObject(vm)) {
@@ -201,31 +245,7 @@ ArkUINativeModuleValue MarqueeBridge::CreateMarquee(ArkUIRuntimeCallInfo* runtim
             }
         }
     }
-    if (!paramObj->IsUndefined()) {
-        ParseStartValue(vm, paramObj, start, isJSView);
-        ParseStepValue(vm, paramObj, step, isJSView);
-        ParseLoopValue(vm, paramObj, loop, isJSView);
-        ParseFromStartValue(vm, paramObj, fromStart);
-        ParseSrcValue(vm, paramObj, src, isJSView);
-    }
-    if (isJSView) {
-        static MarqueeModelNG model;
-        model.Create();
-        auto* frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-        MarqueeModelNG::SetPlayerStatus(frameNode, start);
-        MarqueeModelNG::SetScrollAmount(frameNode, step);
-        MarqueeModelNG::SetLoop(frameNode, loop);
-        MarqueeModelNG::SetDirection(frameNode,
-            std::optional<MarqueeDirection>(fromStart.value() ? MarqueeDirection::LEFT : MarqueeDirection::RIGHT));
-        MarqueeModelNG::SetValue(frameNode, std::optional<std::string>(src));
-    } else {
-        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueePlayerStatus(nativeNode, start.value());
-        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeScrollAmount(nativeNode, step.value());
-        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeLoop(nativeNode, loop.value());
-        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeDirection(nativeNode, fromStart.value() ?
-            static_cast<int32_t>(MarqueeDirection::LEFT) : static_cast<int32_t>(MarqueeDirection::RIGHT));
-        GetArkUINodeModifiers()->getMarqueeModifier()->setMarqueeSrcValue(nativeNode, src.value().c_str());
-    }
+    ParseMarqueeAttributes(nativeNode, vm, paramObj, isJSView);
     return panda::JSValueRef::Undefined(vm);
 }
 
