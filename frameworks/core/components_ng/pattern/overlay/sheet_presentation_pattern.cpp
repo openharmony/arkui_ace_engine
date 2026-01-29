@@ -3165,7 +3165,7 @@ bool SheetPresentationPattern::IsDoubleAvoid(bool forceAvoid)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto manager = pipelineContext->GetSafeAreaManager();
     return forceAvoid && (manager->GetKeyboardInset().Length() != 0);
