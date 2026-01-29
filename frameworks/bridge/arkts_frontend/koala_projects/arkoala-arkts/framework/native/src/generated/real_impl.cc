@@ -21874,7 +21874,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     };
     const GENERATED_ArkUIDismissContentCoverActionAccessor* GetDismissContentCoverActionAccessor()
     {
-        static const GENERATED_ArkUIDismissContentCoverActionAccessor DismissContentCoverActionAccessorImpl {
+        static const GENERATED_ArkUIDismissContentCoverActionAccessor dismissContentCoverActionAccessorImpl {
             DismissContentCoverActionAccessor::DestroyPeerImpl,
             DismissContentCoverActionAccessor::ConstructImpl,
             DismissContentCoverActionAccessor::GetFinalizerImpl,
@@ -21882,7 +21882,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DismissContentCoverActionAccessor::GetReasonImpl,
             DismissContentCoverActionAccessor::SetReasonImpl,
         };
-        return &DismissContentCoverActionAccessorImpl;
+        return &dismissContentCoverActionAccessorImpl;
     }
 
     struct DismissContentCoverActionPeer {
@@ -21922,7 +21922,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     };
     const GENERATED_ArkUIDismissSheetActionAccessor* GetDismissSheetActionAccessor()
     {
-        static const GENERATED_ArkUIDismissSheetActionAccessor DismissSheetActionAccessorImpl {
+        static const GENERATED_ArkUIDismissSheetActionAccessor dismissSheetActionAccessorImpl {
             DismissSheetActionAccessor::DestroyPeerImpl,
             DismissSheetActionAccessor::ConstructImpl,
             DismissSheetActionAccessor::GetFinalizerImpl,
@@ -21930,7 +21930,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             DismissSheetActionAccessor::GetReasonImpl,
             DismissSheetActionAccessor::SetReasonImpl,
         };
-        return &DismissSheetActionAccessorImpl;
+        return &dismissSheetActionAccessorImpl;
     }
 
     struct DismissSheetActionPeer {
@@ -23964,13 +23964,13 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     };
     const GENERATED_ArkUISheetDismissAccessor* GetSheetDismissAccessor()
     {
-        static const GENERATED_ArkUISheetDismissAccessor SheetDismissAccessorImpl {
+        static const GENERATED_ArkUISheetDismissAccessor sheetDismissAccessorImpl {
             SheetDismissAccessor::DestroyPeerImpl,
             SheetDismissAccessor::ConstructImpl,
             SheetDismissAccessor::GetFinalizerImpl,
             SheetDismissAccessor::DismissImpl,
         };
-        return &SheetDismissAccessorImpl;
+        return &sheetDismissAccessorImpl;
     }
 
     struct SheetDismissPeer {
