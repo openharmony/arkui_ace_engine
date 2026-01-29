@@ -173,7 +173,7 @@ public:
         auto dismissCallback = [](const Ark_Int32 resourceId, const Ark_DismissSheetAction parameter) {
             checkNestedEvent = {
                 .resourceId = resourceId,
-                .reason = Converter::OptConvert<BindSheetDismissReason>(parameter->reason),
+                .reason = Converter::OptConvert<BindSheetDismissReason>(parameter.reason),
             };
             checkNestedEvent->fired = true;
         };
