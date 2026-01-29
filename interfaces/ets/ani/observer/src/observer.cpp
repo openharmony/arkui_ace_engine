@@ -2840,10 +2840,26 @@ static ani_object CreateObserver([[maybe_unused]] ani_env* env, ani_int id)
     };
     NG::UIObserverHandler::GetInstance().SetWinSizeLayoutBreakpointChangeFuncAni(windowSizeBreakpointChangeCallback);
     NG::UIObserverHandler::GetInstance().SetHandleRouterPageChangeFuncForAni(routerPageInfoChangeCallback);
-    auto tabContentCallback = [observer, env](const NG::TabContentInfo& info) {
-        observer->HandleTabContentUpdate(env, info);
-    };
-    NG::UIObserverHandler::GetInstance().SetHandleTabContentUpdateFuncForAni(tabContentCallback);
+    do {
+        ani_vm* vm = nullptr;
+        ani_status status;
+        if ((status = env->GetVM(&vm)) != ANI_OK || !vm) {
+            LOGE("failed to get vm in CreateObserver for TabContentUpdate, status:%{public}d",
+                static_cast<int32_t>(status));
+            break;
+        }
+        auto tabContentCallback = [observer, vm](const NG::TabContentInfo& info) {
+            ani_env* env = nullptr;
+            ani_status status;
+            if ((status = vm->GetEnv(ANI_VERSION_1, &env)) != ANI_OK || !env) {
+                LOGE("failed to get ani env in CreateObserver for TabContentUpdate, status:%{public}d",
+                    static_cast<int32_t>(status));
+                return;
+            }
+            observer->HandleTabContentUpdate(env, info);
+        };
+        NG::UIObserverHandler::GetInstance().SetHandleTabContentUpdateFuncForAni(tabContentCallback);
+    } while (false);
     do {
         ani_vm* vm = nullptr;
         ani_status status;
