@@ -97,7 +97,7 @@ export default namespace matrix4 {
             let matrixObj = input as Matrix4TransitInner;
             if (matrixObj) {
                 let addr = matrixObj.matrix4Object;
-                let module = ESValue.load("@ohos.matrix4");
+                let module = ESValue.load("@ohos.matrix4").getProperty('default');
                 let initFunc = module.getProperty("__InitTransfer__")
                 if (initFunc) {
                     let initArr = initFunc.invoke(ESObject.wrap(addr));
