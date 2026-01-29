@@ -5298,8 +5298,9 @@ void NavigationPattern::SetRequestedOrientationIfNeeded()
          * Therefore, if the window size changes during the transition, the page size needs to be forcibly
          * refreshed upon the completion of the transition.
          */
-        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "reset Page Constraint");
+        TAG_LOGI(AceLogTag::ACE_NAVIGATION, "Reset Page Constraint");
         geometryNode->ResetParentLayoutConstraint();
+        pageNode->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
     };
     if (!windowMgr->IsSetOrientationNeeded(targetOrientation)) {
         restoreTask();
