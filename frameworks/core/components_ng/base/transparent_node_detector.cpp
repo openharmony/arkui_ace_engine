@@ -117,7 +117,6 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
         LOGW("transparent node detected");
         auto window = pipeline->GetWindow();
         CHECK_NULL_VOID(window);
-        TransparentNodeDetector::GetInstance().DumpNodeInfo(root, window);
         auto container = Container::GetContainer(currentId);
         std::string bundleName = container ? container->GetBundleName() : "";
         std::string moduleName = container ? container->GetModuleName() : "";
@@ -131,20 +130,6 @@ void TransparentNodeDetector::PostCheckNodeTransparentTask(const RefPtr<FrameNod
         }
     };
     executor->PostDelayedTask(std::move(task), TaskExecutor::TaskType::UI, DELAY_TIME, "ExtensionTransparentDetector");
-}
-
-void TransparentNodeDetector::DumpNodeInfo(const RefPtr<FrameNode>& node, Window* window)
-{
-    std::string path = AceApplicationInfo::GetInstance().GetDataFileDirPath() + "/dump_info.log";
-    std::unique_ptr<std::ofstream> out = std::make_unique<std::ofstream>(path);
-    if (out) {
-        DumpLog::GetInstance().Reset();
-        DumpLog::GetInstance().SetDumpFile(std::move(out));
-        DumpLog::GetInstance().Print(std::string("WindowId: ").append(std::to_string(window->GetWindowId())));
-        DumpLog::GetInstance().Print(std::string("WindowName: ").append(window->GetWindowName()));
-        node->DumpTree(0, true);
-        DumpLog::GetInstance().OutPutDefault();
-    }
 }
 } // namespace OHOS::Ace::NG
 
