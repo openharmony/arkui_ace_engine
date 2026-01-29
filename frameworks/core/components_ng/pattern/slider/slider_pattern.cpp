@@ -2440,7 +2440,7 @@ void SliderPattern::SetSliderValue(double value, int32_t mode)
 
 void SliderPattern::UpdateValue(float value)
 {
-    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider update value %{public}d %{public}f", panMoveFlag_, value_);
+    TAG_LOGD(AceLogTag::ACE_SELECT_COMPONENT, "slider update value %{public}d %{public}f", panMoveFlag_, value);
     if (!panMoveFlag_) {
         auto sliderPaintProperty = GetPaintProperty<SliderPaintProperty>();
         CHECK_NULL_VOID(sliderPaintProperty);
