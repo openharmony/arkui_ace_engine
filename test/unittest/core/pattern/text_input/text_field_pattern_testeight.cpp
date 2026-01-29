@@ -1922,6 +1922,26 @@ HWTEST_F(TextFieldPatternTestEight, ProcessCancelButton001, TestSize.Level0)
 }
 
 /**
+ * @tc.name: ProcessVoiceButton
+ * @tc.desc: test ProcessVoiceButton
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextFieldPatternTestEight, ProcessVoiceButton, TestSize.Level0)
+{
+    CreateTextField(DEFAULT_TEXT, "", [](TextFieldModelNG model) { model.SetType(TextInputType::VISIBLE_PASSWORD); });
+    GetFocus();
+
+    auto tmpHost = pattern_->GetHost();
+    ASSERT_NE(tmpHost, nullptr);
+    auto layoutProperty = tmpHost->GetLayoutProperty<TextFieldLayoutProperty>();
+    ASSERT_NE(layoutProperty, nullptr);
+    layoutProperty->UpdateMaxLines(10);
+    layoutProperty->UpdateIsShowVoiceButton(true);
+    pattern_->ProcessVoiceButton();
+    EXPECT_EQ(pattern_->voiceResponseArea_, nullptr);
+}
+
+/**
  * @tc.name: ProcessResponseArea001
  * @tc.desc: test ProcessResponseArea
  * @tc.type: FUNC

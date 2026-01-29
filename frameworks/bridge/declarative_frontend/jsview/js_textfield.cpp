@@ -1928,6 +1928,24 @@ void JSTextField::SetCancelButton(const JSCallbackInfo& info)
     SetCancelIconColorAndIconSrc(iconParam);
 }
 
+void JSTextField::SetVoiceButton(const JSCallbackInfo& info)
+{
+    if (info.Length() < 1) {
+        return;
+    }
+    auto arg = info[0];
+    if (!arg->IsObject()) {
+        return;
+    }
+    auto param = JSRef<JSObject>::Cast(arg);
+    auto enableProp = param->GetProperty("enabled");
+    if (enableProp->IsBoolean()) {
+        TextFieldModel::GetInstance()->SetIsShowVoiceButton(enableProp->ToBoolean());
+    } else {
+        TextFieldModel::GetInstance()->SetIsShowVoiceButton(false);
+    }
+}
+
 void JSTextField::SetCancelDefaultIcon()
 {
     auto theme = GetTheme<TextFieldTheme>();
