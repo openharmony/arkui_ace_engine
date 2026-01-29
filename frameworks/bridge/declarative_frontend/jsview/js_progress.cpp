@@ -517,9 +517,11 @@ void JSProgress::JsSetFont(const JSRef<JSObject>& textObject)
     }
 }
 
-void JSProgress::ParseGradientColor(NG::Gradient& gradient, RefPtr<ResourceObject>& colorResObj, int32_t& indx)
+void JSProgress::ParseGradientColor(
+    NG::Gradient& gradient, RefPtr<ResourceObject>& colorResObj, Color& color, int32_t& indx)
 {
     CHECK_NULL_VOID(colorResObj);
+    CompleteResourceObjectFromColor(colorResObj, color, true);
     auto&& updateFunc = [indx](const RefPtr<ResourceObject>& colorResObj, NG::Gradient& gradient) {
         std::vector<NG::GradientColor> colorVector = gradient.GetColors();
         int32_t colorLength = static_cast<int32_t>(colorVector.size());
@@ -591,7 +593,7 @@ bool JSProgress::ConvertGradientColor(const JsiRef<JsiValue>& param, NG::Gradien
             int32_t indx = static_cast<int32_t>(i);
             if (jsGradientResObj.at(i).first) {
                 ResourceParseUtils::ParseResColor(jsGradientResObj.at(i).first, color);
-                ParseGradientColor(gradient, jsGradientResObj.at(i).first, indx);
+                ParseGradientColor(gradient, jsGradientResObj.at(i).first, color, indx);
             }
             if (jsGradientResObj.at(i).second) {
                 ResourceParseUtils::ParseResDimensionVp(jsGradientResObj.at(i).second, offset);
