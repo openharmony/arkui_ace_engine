@@ -342,7 +342,8 @@ HWTEST_F(FocusHubTestNg, HandleFocusNavigationBranch01, TestSize.Level1)
     auto focusHub = frameNode->GetFocusHub();
     ASSERT_NE(focusHub, nullptr);
 
-    auto frameNode2 = AceType::MakeRefPtr<FrameNodeOnTree>(V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
+    auto frameNode2 = AceType::MakeRefPtr<FrameNodeOnTree>(
+        V2::BUTTON_ETS_TAG, -1, AceType::MakeRefPtr<ButtonPattern>());
     frameNode2->GetOrCreateFocusHub();
     auto focusHub2 = frameNode2->GetFocusHub();
     ASSERT_NE(focusHub2, nullptr);
