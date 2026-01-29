@@ -77,6 +77,13 @@ enum class ScrollToDirection {
     FORWARD,
     BACKWARD
 };
+enum class ScrollError {
+    SCROLL_NO_ERROR,
+    SCROLL_TOP_ERROR,
+    SCROLL_BOTTOM_ERROR,
+    SCROLL_NOT_SCROLLABLE_ERROR,
+    SCROLL_ERROR_OTHER
+};
 struct ScrollOffsetAbility {
     std::function<bool(float)> scrollFunc = nullptr;
     Axis axis = Axis::VERTICAL;
@@ -1064,7 +1071,8 @@ protected:
         return isBackToTopRunning_;
     }
 
-    std::string ParseCommand(const std::string& command);
+    std::string ParseCommand(const std::string& command, int& reportEventId, float& moveRatio, bool& isScrollByRatio);
+    void ReportScroll(bool isJump, ScrollError error, int32_t reportEventId);
 
 #ifdef SUPPORT_DIGITAL_CROWN
     void SetDigitalCrownEvent();

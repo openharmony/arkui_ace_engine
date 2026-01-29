@@ -29,6 +29,7 @@ public:
     MOCK_METHOD2(OnRouterChange, void(const std::string& path, const std::string& event));
     MOCK_METHOD0(GetSelectTextEventRegistered, bool());
     MOCK_METHOD2(ReportContentChangeEvent, void(ChangeType type, const std::string& simpleTree));
+    MOCK_METHOD0(GetComponentChangeEventRegistered, bool());
 };
 }
 #endif
