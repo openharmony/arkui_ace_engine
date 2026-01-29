@@ -59,6 +59,7 @@
 #include "bridge/declarative_frontend/engine/js_ref_ptr.h"
 #include "bridge/declarative_frontend/engine/js_types.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_common_bridge.h"
+#include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_frame_node_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/nativeModule/arkts_native_utils_bridge.h"
 #include "bridge/declarative_frontend/engine/jsi/js_ui_index.h"
 #include "bridge/declarative_frontend/engine/js_converter.h"
@@ -10941,22 +10942,33 @@ void JSViewAbstract::JsHoverEffect(const JSCallbackInfo& info)
 
 void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
 {
-    if (info[0]->IsUndefined() && IsDisableEventVersion()) {
+    JSRef<JSVal> arg = info[0];
+    if (arg->IsUndefined() && IsDisableEventVersion()) {
         ViewAbstractModel::GetInstance()->DisableOnMouse();
         return;
     }
-    if (!info[0]->IsFunction()) {
+    if (!arg->IsFunction()) {
         return;
     }
-
-    RefPtr<JsClickFunction> jsOnMouseFunc = AceType::MakeRefPtr<JsClickFunction>(JSRef<JSFunc>::Cast(info[0]));
-    WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
-    auto onMouse = [execCtx = info.GetExecutionContext(), func = std::move(jsOnMouseFunc), node = targetNode](
-                       MouseInfo& mouseInfo) {
+    EcmaVM* vm = info.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto jsOnMouseFunc = JSRef<JSFunc>::Cast(arg);
+    if (jsOnMouseFunc->IsEmpty()) {
+        return;
+    }
+    auto jsOnMouseFuncLocalHandle = jsOnMouseFunc->GetLocalHandle();
+    WeakPtr<NG::FrameNode> frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
+    auto onMouse = [vm, execCtx = info.GetExecutionContext(),
+                    func = panda::CopyableGlobal(vm, jsOnMouseFuncLocalHandle),
+                    node = frameNode](MouseInfo& mouseInfo) {
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onMouse");
         PipelineContext::SetCallBackNode(node);
-        func->Execute(mouseInfo);
+        auto infoPtr = std::make_shared<MouseInfo>(mouseInfo);
+        auto eventObj = NG::FrameNodeBridge::CreateMouseInfo(vm, infoPtr);
+        panda::Local<panda::JSValueRef> params[1] = { eventObj };
+        func->Call(vm, func.ToLocal(), params, 1);
+        mouseInfo.SetStopPropagation(infoPtr->IsStopPropagation());
     };
     ViewAbstractModel::GetInstance()->SetOnMouse(std::move(onMouse));
 }
@@ -10985,10 +10997,12 @@ void JSViewAbstract::JsOnAxisEvent(const JSCallbackInfo& args)
         JAVASCRIPT_EXECUTION_SCOPE_WITH_CHECK(execCtx);
         ACE_SCORING_EVENT("onAxis");
         PipelineContext::SetCallBackNode(node);
-        auto eventObj = NG::CommonBridge::CreateAxisEventInfo(vm, info);
+        auto infoPtr = std::make_shared<AxisInfo>(info);
+        auto eventObj = NG::CommonBridge::CreateAxisEventInfo(vm, infoPtr);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         ACE_BENCH_MARK_TRACE("OnAxisEvent_end type:%d", info.GetAction());
         func->Call(vm, func.ToLocal(), params, 1);
+        info.SetStopPropagation(infoPtr->IsStopPropagation());
     };
     ViewAbstractModel::GetInstance()->SetOnAxisEvent(std::move(onAxisEvent));
 }

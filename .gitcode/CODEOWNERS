@@ -1873,6 +1873,8 @@ frameworks/core/common/dynamic_component_renderer.h @ArkUI_ability_group
 frameworks/core/common/environment/ @arkui_statemgmt
 frameworks/core/common/event_dump.cpp @ArkUI_Event
 frameworks/core/common/event_dump.h @ArkUI_Event
+frameworks/core/common/event_info_manager.cpp @ArkUI_Event
+frameworks/core/common/event_info_manager.h @ArkUI_Event
 frameworks/core/common/event_manager.cpp @ArkUI_Event
 frameworks/core/common/event_manager.h @ArkUI_Event
 frameworks/core/common/focus_animation_manager.cpp @ArkUI_Event

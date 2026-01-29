@@ -647,6 +647,17 @@ public:
     }
 
     virtual void SetXComponentDisplayConstraintEnabled(bool isEnable) {};
+
+    // get PointerEvent ptr from ts
+    virtual const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromAxisEvent(napi_value event)
+    {
+        return nullptr;
+    }
+    virtual const std::shared_ptr<const OHOS::MMI::PointerEvent> GetPointerEventFromTouchEvent(napi_value event)
+    {
+        return nullptr;
+    }
+
 private:
     static std::atomic<bool> successFlag_;
     static std::mutex mtx_;

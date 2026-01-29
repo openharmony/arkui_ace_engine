@@ -21,7 +21,7 @@ namespace OHOS::Ace::Framework {
 
 RefPtr<OHOS::Ace::SingleChild> JSTouchHandler::CreateComponent(const JSCallbackInfo& args)
 {
-        auto touchComponent = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
+    auto touchComponent = ViewStackProcessor::GetInstance()->GetTouchListenerComponent();
 
     if (jsOnDownFunc_) {
         auto touchDownId = EventMarker(
@@ -32,7 +32,7 @@ RefPtr<OHOS::Ace::SingleChild> JSTouchHandler::CreateComponent(const JSCallbackI
                     LOGE("Error processing event. Not an instance of TouchEventInfo");
                     return;
                 }
-                func->Execute(*touchInfo);
+                func->Execute(execCtx.vm_, *touchInfo);
             },
             "touchDown", 0);
         touchComponent->SetOnTouchDownId(touchDownId);
@@ -47,7 +47,7 @@ RefPtr<OHOS::Ace::SingleChild> JSTouchHandler::CreateComponent(const JSCallbackI
                     LOGE("Error processing event. Not an instance of TouchEventInfo");
                     return;
                 }
-                func->Execute(*touchInfo);
+                func->Execute(execCtx.vm_, *touchInfo);
             },
             "touchUp", 0);
         touchComponent->SetOnTouchUpId(touchUpId);
@@ -62,7 +62,7 @@ RefPtr<OHOS::Ace::SingleChild> JSTouchHandler::CreateComponent(const JSCallbackI
                     LOGE("Error processing event. Not an instance of TouchEventInfo");
                     return;
                 }
-                func->Execute(*touchInfo);
+                func->Execute(execCtx.vm_, *touchInfo);
             },
             "touchMove", 0);
         touchComponent->SetOnTouchMoveId(touchMoveId);
@@ -77,7 +77,7 @@ RefPtr<OHOS::Ace::SingleChild> JSTouchHandler::CreateComponent(const JSCallbackI
                     LOGE("Error processing event. Not an instance of TouchEventInfo");
                     return;
                 }
-                func->Execute(*touchInfo);
+                func->Execute(execCtx.vm_, *touchInfo);
             },
             "touchCancel", 0);
         touchComponent->SetOnTouchCancel(touchCancelId);
