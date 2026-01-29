@@ -194,7 +194,7 @@ void ResetRichEditorCopyOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    CopyOptions defaultCopyOptions = CopyOptions::Distributed;
+    CopyOptions defaultCopyOptions = CopyOptions::Local;
     RichEditorModelNG::SetCopyOption(frameNode, defaultCopyOptions);
 }
 
@@ -634,9 +634,8 @@ void NodeModifier::SetRichEditorNapiEditMenuOptions(ArkUINodeHandle node, ArkUIE
     if (optionsParam->onPrepareMenu) {
         onPrepareMenuCallback = WrapOnPrepareMenuCallback(optionsParam);
     }
-    SetRichEditorEditMenuOptions(node, reinterpret_cast<void*>(&onCreateMenuCallback),
-        reinterpret_cast<void*>(&onMenuItemClickCallback),
-        reinterpret_cast<void*>(&onPrepareMenuCallback));
+    RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback),
+ 	    std::move(onMenuItemClickCallback), std::move(onPrepareMenuCallback));
 }
 
 void ResetRichEditorEditMenuOptions(ArkUINodeHandle node)
