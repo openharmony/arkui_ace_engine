@@ -27,7 +27,7 @@ import { CommonMethod, Bindable } from "./component/common"
 import { IndicatorComponentController } from "./component/indicatorcomponent"
 import { EdgeEffect, PageFlipMode } from "./component/enums"
 import { default as curves } from "@ohos.curves"
-import { Length } from "./component/units"
+import { Length, ItemFillPolicy } from "./component/units"
 import { Resource } from "global.resource"
 export class SwiperModifier extends CommonMethodModifier implements SwiperAttribute,AttributeModifier<SwiperAttribute> {
     _instanceId: number = -1;
@@ -101,7 +101,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
     _cachedCount_1_0value?: int32 | undefined
     _cachedCount_1_1value?: boolean | undefined
     _displayCount_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
-    _displayCount_0_0value?: int32 | string | SwiperAutoFill | undefined
+    _displayCount_0_0value?: int32 | string | SwiperAutoFill | ItemFillPolicy | undefined
     _displayCount_0_1value?: boolean | undefined
     _prevMargin_0_flag: AttributeUpdaterFlag = AttributeUpdaterFlag.INITIAL
     _prevMargin_0_0value?: Length | undefined
@@ -621,7 +621,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         {
             switch (this._displayCount_0_flag) {
                 case AttributeUpdaterFlag.UPDATE: {
-                    peer.setDisplayCountAttribute((this._displayCount_0_0value as int32 | string | SwiperAutoFill | undefined), (this._displayCount_0_1value as boolean | undefined | undefined));
+                    peer.setDisplayCountAttribute((this._displayCount_0_0value as int32 | string | SwiperAutoFill | ItemFillPolicy | undefined), (this._displayCount_0_1value as boolean | undefined | undefined));
                     this._displayCount_0_flag = AttributeUpdaterFlag.RESET;
                     break;
                 }
@@ -631,7 +631,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                 }
                 default: {
                     this._displayCount_0_flag = AttributeUpdaterFlag.INITIAL;
-                    peer.setDisplayCountAttribute((undefined as int32 | string | SwiperAutoFill | undefined), (undefined as boolean | undefined | undefined));
+                    peer.setDisplayCountAttribute((undefined as int32 | string | SwiperAutoFill | ItemFillPolicy | undefined), (undefined as boolean | undefined | undefined));
                 }
             }
         }
@@ -1048,7 +1048,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
                     break;
                 }
                 default: {
-                    this.displayCount((undefined as int32 | string | SwiperAutoFill | undefined), (undefined as boolean | undefined | undefined));
+                    this.displayCount((undefined as int32 | string | SwiperAutoFill | ItemFillPolicy | undefined), (undefined as boolean | undefined | undefined));
                 }
             }
         }
@@ -1418,7 +1418,7 @@ export class SwiperModifier extends CommonMethodModifier implements SwiperAttrib
         }
         return this
     }
-    displayCount(value: int32 | string | SwiperAutoFill | undefined, swipeByGroup?: boolean): this {
+    displayCount(value: int32 | string | SwiperAutoFill | ItemFillPolicy | undefined, swipeByGroup?: boolean): this {
         if (((this._displayCount_0_flag) == (AttributeUpdaterFlag.INITIAL)) || (true) || ((this._displayCount_0_1value) !== (swipeByGroup)))
         {
             this._displayCount_0_flag = AttributeUpdaterFlag.UPDATE
