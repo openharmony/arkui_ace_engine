@@ -116,7 +116,7 @@ HWTEST_F(AccessibilityPropertyTestThreeNg, AccessibilityPropertyTestThree001, Te
     std::string tag = V2::XCOMPONENT_ETS_TAG;
     AccessibilityProperty accessibilityProperty;
 
-    bool ret = accessibilityProperty.IsTagInSubTreeComponent(tag);
+    bool ret = accessibilityProperty.IsTagInSubTreeComponent(nullptr, tag);
     EXPECT_TRUE(ret);
 }
 
