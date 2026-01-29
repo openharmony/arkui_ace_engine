@@ -530,8 +530,8 @@ void ParsePopupCommonParam(const JSCallbackInfo& info, const JSRef<JSObject>& po
     JSRef<JSVal> onStateChangeVal = popupObj->GetProperty("onStateChange");
     if (onStateChangeVal->IsFunction()) {
         std::vector<std::string> keys = { "isVisible" };
-        RefPtr<JsFunction> jsFunc =
-            AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onStateChangeVal));
+        auto jsFunc =
+            AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onStateChangeVal));
         WeakPtr<NG::FrameNode> targetNode = nullptr;
         if (popupTargetNode) {
             targetNode = AceType::WeakClaim(AceType::RawPtr(popupTargetNode));
@@ -1924,8 +1924,8 @@ PopupOnWillDismiss JSViewAbstract::ParsePopupCallback(const JSCallbackInfo& info
     if (!onWillDismissFunc->IsFunction()) {
         return PopupOnWillDismiss();
     }
-    RefPtr<JsFunction> jsFunc =
-        AceType::MakeRefPtr<JsFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
+    auto jsFunc =
+        AceType::MakeRefPtr<JsWeakFunction>(JSRef<JSObject>(), JSRef<JSFunc>::Cast(onWillDismissFunc));
     auto frameNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onWillDismiss = [execCtx = info.GetExecutionContext(), func = std::move(jsFunc),
                           node = frameNode](int32_t reason) {
