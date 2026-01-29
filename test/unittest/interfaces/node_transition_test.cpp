@@ -1037,3 +1037,244 @@ HWTEST_F(NodeTransitionTest, NodeTransitionTest039, TestSize.Level1)
     OH_ArkUI_TransitionEffect_Dispose(option);
     option = nullptr;
 }
+
+/**
+ * @tc.name: NodeTransitionTest040
+ * @tc.desc: Test OH_ArkUI_CreateMovementTransitionEffect with TOP edge.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest040, TestSize.Level1)
+{
+    ArkUI_TransitionEffect* option =
+        OH_ArkUI_CreateMovementTransitionEffect(ArkUI_TransitionEdge::ARKUI_TRANSITION_EDGE_TOP);
+    ASSERT_NE(option, nullptr);
+    EXPECT_EQ(option->type, ArkUI_TransitionEffectType::ARKUI_TRANSITION_EFFECT_MOVE);
+    EXPECT_EQ(option->move, ArkUI_TransitionEdge::ARKUI_TRANSITION_EDGE_TOP);
+    EXPECT_EQ(option->translate, nullptr);
+    EXPECT_EQ(option->scale, nullptr);
+    EXPECT_EQ(option->rotate, nullptr);
+    EXPECT_EQ(option->appear, nullptr);
+    EXPECT_EQ(option->disappear, nullptr);
+    EXPECT_EQ(option->combine, nullptr);
+    EXPECT_EQ(option->animation, nullptr);
+
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest041
+ * @tc.desc: Test OH_ArkUI_CreateMovementTransitionEffect with BOTTOM edge.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest041, TestSize.Level1)
+{
+    ArkUI_TransitionEffect* option =
+        OH_ArkUI_CreateMovementTransitionEffect(ArkUI_TransitionEdge::ARKUI_TRANSITION_EDGE_BOTTOM);
+    ASSERT_NE(option, nullptr);
+    EXPECT_EQ(option->type, ArkUI_TransitionEffectType::ARKUI_TRANSITION_EFFECT_MOVE);
+    EXPECT_EQ(option->move, ArkUI_TransitionEdge::ARKUI_TRANSITION_EDGE_BOTTOM);
+    EXPECT_EQ(option->translate, nullptr);
+    EXPECT_EQ(option->scale, nullptr);
+    EXPECT_EQ(option->rotate, nullptr);
+    EXPECT_EQ(option->appear, nullptr);
+    EXPECT_EQ(option->disappear, nullptr);
+    EXPECT_EQ(option->combine, nullptr);
+    EXPECT_EQ(option->animation, nullptr);
+
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest042
+ * @tc.desc: Test OH_ArkUI_CreateMovementTransitionEffect with START edge.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest042, TestSize.Level1)
+{
+    ArkUI_TransitionEffect* option =
+        OH_ArkUI_CreateMovementTransitionEffect(ArkUI_TransitionEdge::ARKUI_TRANSITION_EDGE_START);
+    ASSERT_NE(option, nullptr);
+    EXPECT_EQ(option->type, ArkUI_TransitionEffectType::ARKUI_TRANSITION_EFFECT_MOVE);
+    EXPECT_EQ(option->move, ArkUI_TransitionEdge::ARKUI_TRANSITION_EDGE_START);
+    EXPECT_EQ(option->translate, nullptr);
+    EXPECT_EQ(option->scale, nullptr);
+    EXPECT_EQ(option->rotate, nullptr);
+    EXPECT_EQ(option->appear, nullptr);
+    EXPECT_EQ(option->disappear, nullptr);
+    EXPECT_EQ(option->combine, nullptr);
+    EXPECT_EQ(option->animation, nullptr);
+
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest043
+ * @tc.desc: Test OH_ArkUI_CreateMovementTransitionEffect with END edge.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest043, TestSize.Level1)
+{
+    ArkUI_TransitionEffect* option =
+        OH_ArkUI_CreateMovementTransitionEffect(ArkUI_TransitionEdge::ARKUI_TRANSITION_EDGE_END);
+    ASSERT_NE(option, nullptr);
+    EXPECT_EQ(option->type, ArkUI_TransitionEffectType::ARKUI_TRANSITION_EFFECT_MOVE);
+    EXPECT_EQ(option->move, ArkUI_TransitionEdge::ARKUI_TRANSITION_EDGE_END);
+    EXPECT_EQ(option->translate, nullptr);
+    EXPECT_EQ(option->scale, nullptr);
+    EXPECT_EQ(option->rotate, nullptr);
+    EXPECT_EQ(option->appear, nullptr);
+    EXPECT_EQ(option->disappear, nullptr);
+    EXPECT_EQ(option->combine, nullptr);
+    EXPECT_EQ(option->animation, nullptr);
+
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest044
+ * @tc.desc: Test OH_ArkUI_CreateMovementTransitionEffect with negative value (below TOP).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest044, TestSize.Level1)
+{
+    // Test branch: move < ARKUI_TRANSITION_EDGE_TOP
+    ArkUI_TransitionEffect* option =
+        OH_ArkUI_CreateMovementTransitionEffect(static_cast<ArkUI_TransitionEdge>(-1));
+    ASSERT_NE(option, nullptr);
+    EXPECT_EQ(option->type, ArkUI_TransitionEffectType::ARKUI_TRANSITION_EFFECT_MOVE);
+    // Should be corrected to START
+    EXPECT_EQ(option->move, ArkUI_TransitionEdge::ARKUI_TRANSITION_EDGE_START);
+    EXPECT_EQ(option->translate, nullptr);
+    EXPECT_EQ(option->scale, nullptr);
+    EXPECT_EQ(option->rotate, nullptr);
+    EXPECT_EQ(option->appear, nullptr);
+    EXPECT_EQ(option->disappear, nullptr);
+    EXPECT_EQ(option->combine, nullptr);
+    EXPECT_EQ(option->animation, nullptr);
+
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest045
+ * @tc.desc: Test OH_ArkUI_CreateMovementTransitionEffect with value above END.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest045, TestSize.Level1)
+{
+    // Test branch: move > ARKUI_TRANSITION_EDGE_END
+    ArkUI_TransitionEffect* option =
+        OH_ArkUI_CreateMovementTransitionEffect(static_cast<ArkUI_TransitionEdge>(4));
+    ASSERT_NE(option, nullptr);
+    EXPECT_EQ(option->type, ArkUI_TransitionEffectType::ARKUI_TRANSITION_EFFECT_MOVE);
+    // Should be corrected to START
+    EXPECT_EQ(option->move, ArkUI_TransitionEdge::ARKUI_TRANSITION_EDGE_START);
+    EXPECT_EQ(option->translate, nullptr);
+    EXPECT_EQ(option->scale, nullptr);
+    EXPECT_EQ(option->rotate, nullptr);
+    EXPECT_EQ(option->appear, nullptr);
+    EXPECT_EQ(option->disappear, nullptr);
+    EXPECT_EQ(option->combine, nullptr);
+    EXPECT_EQ(option->animation, nullptr);
+
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}
+/**
+ * @tc.name: NodeTransitionTest046
+ * @tc.desc: Test OH_ArkUI_CreateMovementTransitionEffect with large invalid value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest046, TestSize.Level1)
+{
+    // Test branch: move >> ARKUI_TRANSITION_EDGE_END
+    ArkUI_TransitionEffect* option =
+        OH_ArkUI_CreateMovementTransitionEffect(static_cast<ArkUI_TransitionEdge>(100));
+    ASSERT_NE(option, nullptr);
+    EXPECT_EQ(option->type, ArkUI_TransitionEffectType::ARKUI_TRANSITION_EFFECT_MOVE);
+    // Should be corrected to START
+    EXPECT_EQ(option->move, ArkUI_TransitionEdge::ARKUI_TRANSITION_EDGE_START);
+    EXPECT_EQ(option->translate, nullptr);
+    EXPECT_EQ(option->scale, nullptr);
+    EXPECT_EQ(option->rotate, nullptr);
+    EXPECT_EQ(option->appear, nullptr);
+    EXPECT_EQ(option->disappear, nullptr);
+    EXPECT_EQ(option->combine, nullptr);
+    EXPECT_EQ(option->animation, nullptr);
+
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest047
+ * @tc.desc: Test OH_ArkUI_CreateAsymmetricTransitionEffect with both nullptr (branch: !appear && !disappear).
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest047, TestSize.Level1)
+{
+    // Test branch: !appear && !disappear
+    ArkUI_TransitionEffect* option = OH_ArkUI_CreateAsymmetricTransitionEffect(nullptr, nullptr);
+    EXPECT_EQ(option, nullptr);
+}
+
+/**
+ * @tc.name: NodeTransitionTest048
+ * @tc.desc: Test OH_ArkUI_CreateAsymmetricTransitionEffect with appear only, disappear is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest048, TestSize.Level1)
+{
+    // Test branch: appear != nullptr, disappear == nullptr
+    ArkUI_TransitionEffect* appear = OH_ArkUI_CreateOpacityTransitionEffect(0.5f);
+    ASSERT_NE(appear, nullptr);
+
+    ArkUI_TransitionEffect* option = OH_ArkUI_CreateAsymmetricTransitionEffect(appear, nullptr);
+    ASSERT_NE(option, nullptr);
+    EXPECT_EQ(option->type, ArkUI_TransitionEffectType::ARKUI_TRANSITION_EFFECT_ASYMMETRIC);
+    EXPECT_EQ(option->appear, appear);
+    EXPECT_EQ(option->disappear, nullptr);
+    EXPECT_EQ(option->translate, nullptr);
+    EXPECT_EQ(option->scale, nullptr);
+    EXPECT_EQ(option->rotate, nullptr);
+    EXPECT_EQ(option->combine, nullptr);
+    EXPECT_EQ(option->animation, nullptr);
+
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+    OH_ArkUI_TransitionEffect_Dispose(appear);
+    appear = nullptr;
+}
+
+/**
+ * @tc.name: NodeTransitionTest049
+ * @tc.desc: Test OH_ArkUI_CreateAsymmetricTransitionEffect with disappear only, appear is nullptr.
+ * @tc.type: FUNC
+ */
+HWTEST_F(NodeTransitionTest, NodeTransitionTest049, TestSize.Level1)
+{
+    // Test branch: appear == nullptr, disappear != nullptr
+    ArkUI_TransitionEffect* disappear = OH_ArkUI_CreateOpacityTransitionEffect(0.8f);
+    ASSERT_NE(disappear, nullptr);
+
+    ArkUI_TransitionEffect* option = OH_ArkUI_CreateAsymmetricTransitionEffect(nullptr, disappear);
+    ASSERT_NE(option, nullptr);
+    EXPECT_EQ(option->type, ArkUI_TransitionEffectType::ARKUI_TRANSITION_EFFECT_ASYMMETRIC);
+    EXPECT_EQ(option->appear, nullptr);
+    EXPECT_EQ(option->disappear, disappear);
+    EXPECT_EQ(option->translate, nullptr);
+    EXPECT_EQ(option->scale, nullptr);
+    EXPECT_EQ(option->rotate, nullptr);
+    EXPECT_EQ(option->combine, nullptr);
+    EXPECT_EQ(option->animation, nullptr);
+
+    OH_ArkUI_TransitionEffect_Dispose(option);
+    option = nullptr;
+    OH_ArkUI_TransitionEffect_Dispose(disappear);
+    disappear = nullptr;
+}
