@@ -504,4 +504,34 @@ HWTEST_F(TextThirteenTestNg, RegisterVisibleAreaChangeCallback_else, TestSize.Le
     textNode->context_ = nullptr;
     EXPECT_FALSE(pattern->isRegisteredAreaCallback_);
 }
+
+/**
+ * @tc.name: CollectTextSpanNodes_onLongPress2
+ * @tc.desc: Test TextPattern CollectTextSpanNodes
+ * @tc.type: FUNC
+ */
+HWTEST_F(TextThirteenTestNg, CollectTextSpanNodes_onLongPress2, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create TextPattern and SpanNode.
+     */
+    auto textNode = FrameNode::CreateFrameNode(V2::TEXT_ETS_TAG, 0, AceType::MakeRefPtr<TextPattern>());
+    ASSERT_NE(textNode, nullptr);
+    auto pattern = textNode->GetPattern<TextPattern>();
+    ASSERT_NE(pattern, nullptr);
+    RefPtr<SpanNode> spanNode = AceType::MakeRefPtr<SpanNode>(3);
+    RefPtr<SpanItem> spanItem = AceType::MakeRefPtr<SpanItem>();
+    spanNode->SetSpanItem(spanItem);
+    std::u16string newContent = u"";
+    spanNode->UpdateContent(newContent);
+    bool isSpanHasClick = false;
+    bool isSpanHasLongPress = true;
+
+    /**
+     * @tc.steps: step2. Calling the CollectTextSpanNodes function
+     * @tc.expected: The isSpanHasLongPress from true to false.
+     */
+    pattern->CollectTextSpanNodes(spanNode, isSpanHasClick, isSpanHasLongPress);
+    EXPECT_TRUE(isSpanHasLongPress);
+}
 } // namespace OHOS::Ace::NG
