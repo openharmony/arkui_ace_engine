@@ -12,11 +12,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
-#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-
 #ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DISMISS_CONTENT_COVER_ACTION_PEER_H
 #define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DISMISS_CONTENT_COVER_ACTION_PEER_H
+
+#include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
 
 struct DismissContentCoverActionPeer {
     OHOS::Ace::NG::BindSheetDismissReason reason;

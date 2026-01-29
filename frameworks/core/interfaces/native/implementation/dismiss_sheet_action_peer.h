@@ -13,12 +13,12 @@
  * limitations under the License.
  */
 
+#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DISMISS_SHEET_ACTION_PEER_H
+#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DISMISS_SHEET_ACTION_PEER_H
+
 #include "base/memory/ace_type.h"
 #include "core/interfaces/native/utility/peer_utils.h"
 #include "core/components_ng/pattern/overlay/sheet_presentation_pattern.h"
-
-#ifndef FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DISMISS_SHEET_ACTION_PEER_H
-#define FOUNDATION_ARKUI_ACE_ENGINE_FRAMEWORKS_CORE_INTERFACES_NATIVE_IMPL_DISMISS_SHEET_ACTION_PEER_H
 
 struct DismissSheetActionPeer {
     OHOS::Ace::NG::BindSheetDismissReason reason;
