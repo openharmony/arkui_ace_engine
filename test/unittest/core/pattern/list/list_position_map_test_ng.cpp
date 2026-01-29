@@ -18,6 +18,7 @@
 
 #include "core/components_ng/pattern/list/list_item_group_pattern.h"
 #include "core/components_ng/pattern/list/list_layout_algorithm.h"
+#include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/list/list_position_map.h"
 #include "core/components_ng/syntax/lazy_for_each_model.h"
 #include "core/components_v2/inspector/inspector_constants.h"
@@ -401,5 +402,556 @@ HWTEST_F(ListPositionMapTestNg, UpdatePosMap001, TestSize.Level1)
     listPositionMap->UpdatePosMap(&layoutWrapper, 1, 1.0f, listChildrenMainSize);
     EXPECT_EQ(listPositionMap->curRowHeight_, 2.0f);
     EXPECT_EQ(listPositionMap->curIndex_, 0);
+}
+
+/**
+ * @tc.name: ListPositionMapUpdatePosWithCheck001
+ * @tc.desc: Test ListPositionMap UpdatePosWithCheck with smaller mainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapUpdatePosWithCheck001, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+
+    // Initialize with a larger size
+    ListPositionInfo posInfo = { 0.0f, 200.0f, false };
+    listPositionMap->UpdatePos(0, posInfo);
+
+    // Update with a smaller size - should not update
+    ListPositionInfo newPosInfo = { 0.0f, 100.0f, false };
+    listPositionMap->UpdatePosWithCheck(0, newPosInfo);
+
+    auto result = listPositionMap->GetPositionInfo(0);
+    EXPECT_EQ(result.mainSize, 200.0f); // Should keep the larger size
+}
+
+/**
+ * @tc.name: ListPositionMapUpdatePosWithCheck002
+ * @tc.desc: Test ListPositionMap UpdatePosWithCheck with larger mainSize
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapUpdatePosWithCheck002, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+
+    // Initialize with a smaller size
+    ListPositionInfo posInfo = { 0.0f, 100.0f, false };
+    listPositionMap->UpdatePos(0, posInfo);
+
+    // Update with a larger size - should update
+    ListPositionInfo newPosInfo = { 0.0f, 200.0f, false };
+    listPositionMap->UpdatePosWithCheck(0, newPosInfo);
+
+    auto result = listPositionMap->GetPositionInfo(0);
+    EXPECT_EQ(result.mainSize, 200.0f); // Should update to larger size
+}
+
+/**
+ * @tc.name: ListPositionMapUpdatePosWithCheck003
+ * @tc.desc: Test ListPositionMap UpdatePosWithCheck with new index
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapUpdatePosWithCheck003, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+
+    // Update a non-existent index
+    ListPositionInfo posInfo = { 0.0f, 100.0f, false };
+    listPositionMap->UpdatePosWithCheck(0, posInfo);
+
+    auto result = listPositionMap->GetPositionInfo(0);
+    EXPECT_EQ(result.mainSize, 100.0f);
+    EXPECT_FALSE(result.isGroup);
+}
+
+/**
+ * @tc.name: ListPositionMapUpdatePosWithCheck004
+ * @tc.desc: Test ListPositionMap UpdatePosWithCheck with isGroup update
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapUpdatePosWithCheck004, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+
+    // Initialize with isGroup = false
+    ListPositionInfo posInfo = { 0.0f, 100.0f, false };
+    listPositionMap->UpdatePos(0, posInfo);
+
+    // Update isGroup to true
+    ListPositionInfo newPosInfo = { 0.0f, 100.0f, true };
+    listPositionMap->UpdatePosWithCheck(0, newPosInfo);
+
+    auto result = listPositionMap->GetPositionInfo(0);
+    EXPECT_TRUE(result.isGroup);
+}
+
+/**
+ * @tc.name: ListPositionMapOptimizeBeforeMeasure001
+ * @tc.desc: Test ListPositionMap OptimizeBeforeMeasure with zero offset
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapOptimizeBeforeMeasure001, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+
+    ListPositionInfo posInfo = { 0.0f, 100.0f, false };
+    listPositionMap->UpdatePos(0, posInfo);
+    listPositionMap->totalItemCount_ = 1;
+    listPositionMap->totalHeight_ = 100.0f;
+
+    int32_t beginIndex = 0;
+    float beginPos = 0.0f;
+    float offset = 0.0f;
+    float contentSize = 100.0f;
+
+    listPositionMap->OptimizeBeforeMeasure(beginIndex, beginPos, offset, contentSize);
+
+    // Should not change
+    EXPECT_EQ(beginIndex, 0);
+    EXPECT_EQ(beginPos, 0.0f);
+}
+
+/**
+ * @tc.name: ListPositionMapOptimizeBeforeMeasure002
+ * @tc.desc: Test ListPositionMap OptimizeBeforeMeasure with contentSize >= totalHeight
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapOptimizeBeforeMeasure002, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+
+    ListPositionInfo posInfo = { 0.0f, 100.0f, false };
+    listPositionMap->UpdatePos(0, posInfo);
+    listPositionMap->totalItemCount_ = 1;
+    listPositionMap->totalHeight_ = 100.0f;
+
+    int32_t beginIndex = 0;
+    float beginPos = 0.0f;
+    float offset = 50.0f;
+    float contentSize = 200.0f; // Larger than totalHeight
+
+    listPositionMap->OptimizeBeforeMeasure(beginIndex, beginPos, offset, contentSize);
+
+    // Should not change
+    EXPECT_EQ(beginIndex, 0);
+    EXPECT_EQ(beginPos, 0.0f);
+}
+
+/**
+ * @tc.name: ListPositionMapUpdatePosMapStart001
+ * @tc.desc: Test ListPositionMap UpdatePosMapStart with groupAtStart false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapUpdatePosMapStart001, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+
+    ListPositionInfo posInfo1 = { 100.0f, 100.0f, false };
+    ListPositionInfo posInfo2 = { 210.0f, 100.0f, false };
+    listPositionMap->UpdatePos(0, posInfo1);
+    listPositionMap->UpdatePos(1, posInfo2);
+
+    double listCurrentPos = 0.0f;
+    float space = 10.0f;
+    int32_t startIndex = 1;
+    float startPos = 220.0f;
+    bool groupAtStart = false;
+
+    listPositionMap->UpdatePosMapStart(10.0f, listCurrentPos, space, startIndex, startPos, groupAtStart);
+
+    // Should not update listCurrentPos because prevPos < startPos
+    EXPECT_EQ(listCurrentPos, 0.0f);
+}
+
+/**
+ * @tc.name: ListPositionMapUpdatePosMapEnd001
+ * @tc.desc: Test ListPositionMap UpdatePosMapEnd with non-existent index
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapUpdatePosMapEnd001, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+
+    ListPositionInfo posInfo = { 0.0f, 100.0f, false };
+    listPositionMap->UpdatePos(0, posInfo);
+
+    float space = 10.0f;
+    int32_t prevEndIndex = 5; // Non-existent
+    bool groupAtEnd = true;
+
+    // Should not crash
+    listPositionMap->UpdatePosMapEnd(prevEndIndex, space, groupAtEnd);
+
+    auto result = listPositionMap->GetPositionInfo(0);
+    EXPECT_EQ(result.mainPos, 0.0f);
+}
+
+/**
+ * @tc.name: ListChildrenMainSizeGetChildSize001
+ * @tc.desc: Test ListChildrenMainSize GetChildSize with rounding mode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListChildrenMainSizeGetChildSize001, TestSize.Level1)
+{
+    std::vector<float> mainSize = { 100.5f, 200.3f, 150.7f };
+    RefPtr<ListChildrenMainSize> listChildrenMainSize =
+        AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, 100.0f);
+
+    listChildrenMainSize->SetIsRoundingMode();
+
+    auto size = listChildrenMainSize->GetChildSize(0);
+    EXPECT_NEAR(size, Round(100.5f), 0.001f);
+}
+
+/**
+ * @tc.name: ListChildrenMainSizeGetChildSize002
+ * @tc.desc: Test ListChildrenMainSize GetChildSize with invalid index
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListChildrenMainSizeGetChildSize002, TestSize.Level1)
+{
+    std::vector<float> mainSize = { 100.0f, 200.0f, 150.0f };
+    RefPtr<ListChildrenMainSize> listChildrenMainSize =
+        AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, 50.0f);
+
+    // Test with out-of-bounds index
+    auto size = listChildrenMainSize->GetChildSize(10);
+    EXPECT_EQ(size, 50.0f); // Should return default size
+}
+
+/**
+ * @tc.name: ListChildrenMainSizeGetChildSize003
+ * @tc.desc: Test ListChildrenMainSize GetChildSize with DEFAULT_SIZE value
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListChildrenMainSizeGetChildSize003, TestSize.Level1)
+{
+    std::vector<float> mainSize = { -1.0f, 200.0f, 150.0f };
+    float defaultSize = 80.0f;
+    RefPtr<ListChildrenMainSize> listChildrenMainSize =
+        AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, defaultSize);
+
+    // Test with DEFAULT_SIZE (-1.0f)
+    auto size = listChildrenMainSize->GetChildSize(0);
+    EXPECT_EQ(size, 80.0f); // Should return default size
+}
+
+/**
+ * @tc.name: ListChildrenMainSizeChangeData001
+ * @tc.desc: Test ListChildrenMainSize ChangeData with deleteCount -1
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListChildrenMainSizeChangeData001, TestSize.Level1)
+{
+    RefPtr<ListChildrenMainSize> listChildrenMainSize =
+        AceType::MakeRefPtr<ListChildrenMainSize>();
+    listChildrenMainSize->ResizeChildrenSize(5);
+
+    // Test resize with deleteCount -1
+    std::vector<float> newChildrenSize;
+    listChildrenMainSize->ChangeData(3, -1, newChildrenSize);
+
+    auto size = listChildrenMainSize->GetChildSize(0);
+    EXPECT_EQ(size, 0.0f); // Default size
+}
+
+/**
+ * @tc.name: ListChildrenMainSizeChangeData002
+ * @tc.desc: Test ListChildrenMainSize ChangeData with insert
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListChildrenMainSizeChangeData002, TestSize.Level1)
+{
+    std::vector<float> mainSize = { 100.0f, 200.0f, 150.0f };
+    RefPtr<ListChildrenMainSize> listChildrenMainSize =
+        AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, 50.0f);
+
+    // Insert new items
+    std::vector<float> newChildrenSize = { 120.0f, 130.0f };
+    listChildrenMainSize->ChangeData(1, 0, newChildrenSize);
+
+    auto size = listChildrenMainSize->GetChildSize(1);
+    EXPECT_EQ(size, 120.0f);
+}
+
+/**
+ * @tc.name: ListChildrenMainSizeChangeData003
+ * @tc.desc: Test ListChildrenMainSize ChangeData with delete more than insert
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListChildrenMainSizeChangeData003, TestSize.Level1)
+{
+    std::vector<float> mainSize = { 100.0f, 200.0f, 150.0f, 180.0f };
+    RefPtr<ListChildrenMainSize> listChildrenMainSize =
+        AceType::MakeRefPtr<ListChildrenMainSize>(mainSize, 50.0f);
+
+    // Delete 3 items, insert 1
+    std::vector<float> newChildrenSize = { 120.0f };
+    listChildrenMainSize->ChangeData(1, 3, newChildrenSize);
+
+    // Should have 2 items now
+    auto size0 = listChildrenMainSize->GetChildSize(0);
+    auto size1 = listChildrenMainSize->GetChildSize(1);
+    EXPECT_EQ(size0, 100.0f);
+    EXPECT_EQ(size1, 120.0f);
+}
+
+/**
+ * @tc.name: ListPatternHandleTargetIndex001
+ * @tc.desc: Test ListPattern HandleTargetIndex with isJump true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPatternHandleTargetIndex001, TestSize.Level1)
+{
+    auto listPattern = AceType::MakeRefPtr<ListPattern>();
+    listPattern->targetIndex_ = 5;
+
+    bool result = listPattern->HandleTargetIndex(true);
+
+    EXPECT_TRUE(result);
+    EXPECT_TRUE(listPattern->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: ListPatternHandleTargetIndex002
+ * @tc.desc: Test ListPattern HandleTargetIndex with non-existent target
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPatternHandleTargetIndex002, TestSize.Level1)
+{
+    auto listPattern = AceType::MakeRefPtr<ListPattern>();
+    listPattern->itemPosition_[0] = { 0, 0.0f, 100.0f, false };
+    listPattern->itemPosition_[1] = { 1, 110.0f, 100.0f, false };
+    listPattern->targetIndex_ = 5; // Non-existent
+
+    bool result = listPattern->HandleTargetIndex(false);
+
+    EXPECT_FALSE(result);
+    EXPECT_FALSE(listPattern->targetIndex_.has_value());
+}
+
+/**
+ * @tc.name: ListLayoutAlgorithmGetStartIndex001
+ * @tc.desc: Test ListLayoutAlgorithm GetStartIndex with empty position
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListLayoutAlgorithmGetStartIndex001, TestSize.Level1)
+{
+    ListLayoutAlgorithm listLayoutAlgorithm(0);
+
+    auto startIndex = listLayoutAlgorithm.GetStartIndex();
+
+    EXPECT_EQ(startIndex, -1);
+}
+
+/**
+ * @tc.name: ListLayoutAlgorithmGetEndIndex001
+ * @tc.desc: Test ListLayoutAlgorithm GetEndIndex with empty position
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListLayoutAlgorithmGetEndIndex001, TestSize.Level1)
+{
+    ListLayoutAlgorithm listLayoutAlgorithm(0);
+
+    auto endIndex = listLayoutAlgorithm.GetEndIndex();
+
+    EXPECT_EQ(endIndex, -1);
+}
+
+/**
+ * @tc.name: ListLayoutAlgorithmGetStartPosition001
+ * @tc.desc: Test ListLayoutAlgorithm GetStartPosition with empty position
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListLayoutAlgorithmGetStartPosition001, TestSize.Level1)
+{
+    ListLayoutAlgorithm listLayoutAlgorithm(0);
+
+    auto startPos = listLayoutAlgorithm.GetStartPosition();
+
+    EXPECT_EQ(startPos, 0.0f);
+}
+
+/**
+ * @tc.name: ListLayoutAlgorithmGetEndPosition001
+ * @tc.desc: Test ListLayoutAlgorithm GetEndPosition with empty position
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListLayoutAlgorithmGetEndPosition001, TestSize.Level1)
+{
+    ListLayoutAlgorithm listLayoutAlgorithm(0);
+
+    auto endPos = listLayoutAlgorithm.GetEndPosition();
+
+    EXPECT_EQ(endPos, 0.0f);
+}
+
+/**
+ * @tc.name: ListPositionMapGetRowStartIndex001
+ * @tc.desc: Test ListPositionMap GetRowStartIndex with single lane
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapGetRowStartIndex001, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+
+    ListPositionInfo posInfo1 = { 0.0f, 100.0f, false };
+    ListPositionInfo posInfo2 = { 110.0f, 100.0f, false };
+    ListPositionInfo posInfo3 = { 220.0f, 100.0f, false };
+    listPositionMap->UpdatePos(0, posInfo1);
+    listPositionMap->UpdatePos(1, posInfo2);
+    listPositionMap->UpdatePos(2, posInfo3);
+    listPositionMap->totalItemCount_ = 3;
+
+    auto startIndex = listPositionMap->GetRowStartIndex(1);
+
+    EXPECT_EQ(startIndex, 1);
+}
+
+/**
+ * @tc.name: ListPositionMapGetRowStartIndex002
+ * @tc.desc: Test ListPositionMap GetRowStartIndex with multi-lane
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapGetRowStartIndex002, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+
+    // Two items on same row (same position)
+    ListPositionInfo posInfo = { 0.0f, 100.0f, false };
+    listPositionMap->UpdatePos(0, posInfo);
+    listPositionMap->UpdatePos(1, posInfo);
+    listPositionMap->totalItemCount_ = 2;
+
+    auto startIndex = listPositionMap->GetRowStartIndex(1);
+
+    EXPECT_EQ(startIndex, 0);
+}
+
+/**
+ * @tc.name: ListPositionMapGetRowEndIndexAndHeight001
+ * @tc.desc: Test ListPositionMap GetRowEndIndexAndHeight for last item
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapGetRowEndIndexAndHeight001, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+
+    ListPositionInfo posInfo1 = { 0.0f, 100.0f, false };
+    ListPositionInfo posInfo2 = { 110.0f, 100.0f, false };
+    listPositionMap->UpdatePos(0, posInfo1);
+    listPositionMap->UpdatePos(1, posInfo2);
+    listPositionMap->totalItemCount_ = 2;
+    listPositionMap->totalHeight_ = 210.0f;
+    listPositionMap->space_ = 10.0f;
+    listPositionMap->footerSize_ = 0.0f;
+
+    auto [endIndex, height] = listPositionMap->GetRowEndIndexAndHeight(1);
+
+    EXPECT_EQ(endIndex, 1);
+    EXPECT_GT(height, 0.0f);
+}
+
+/**
+ * @tc.name: ListPositionMapGetRowEndIndexAndHeight002
+ * @tc.desc: Test ListPositionMap GetRowEndIndexAndHeight with footer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapGetRowEndIndexAndHeight002, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+
+    ListPositionInfo posInfo1 = { 0.0f, 100.0f, false };
+    listPositionMap->UpdatePos(0, posInfo1);
+    listPositionMap->totalItemCount_ = 1;
+    listPositionMap->totalHeight_ = 150.0f;
+    listPositionMap->footerSize_ = 50.0f;
+
+    auto [endIndex, height] = listPositionMap->GetRowEndIndexAndHeight(0);
+
+    EXPECT_EQ(endIndex, 0);
+    EXPECT_EQ(height, 100.0f); // totalHeight - pos - footer
+}
+
+/**
+ * @tc.name: ListPositionMapCheckPosMapUpdateRule001
+ * @tc.desc: Test ListPositionMap CheckPosMapUpdateRule with NO_CHANGE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapCheckPosMapUpdateRule001, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+    listPositionMap->ClearDirty();
+
+    auto result = listPositionMap->CheckPosMapUpdateRule();
+
+    EXPECT_EQ(result, ListPosMapUpdate::NO_CHANGE);
+}
+
+/**
+ * @tc.name: ListPositionMapCheckPosMapUpdateRule002
+ * @tc.desc: Test ListPositionMap CheckPosMapUpdateRule with UPDATE_ALL_SIZE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapCheckPosMapUpdateRule002, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+    listPositionMap->MarkDirty(LIST_UPDATE_DEFAULT_SIZE);
+
+    auto result = listPositionMap->CheckPosMapUpdateRule();
+
+    EXPECT_EQ(result, ListPosMapUpdate::UPDATE_ALL_SIZE);
+}
+
+/**
+ * @tc.name: ListPositionMapCheckPosMapUpdateRule003
+ * @tc.desc: Test ListPositionMap CheckPosMapUpdateRule with RE_CALCULATE
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapCheckPosMapUpdateRule003, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+    listPositionMap->MarkDirty(LIST_UPDATE_CHILD_SIZE);
+
+    auto result = listPositionMap->CheckPosMapUpdateRule();
+
+    EXPECT_EQ(result, ListPosMapUpdate::RE_CALCULATE);
+}
+
+/**
+ * @tc.name: ListPositionMapUpdateTotalCount001
+ * @tc.desc: Test ListPositionMap UpdateTotalCount
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapUpdateTotalCount001, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+
+    // Add some positions
+    ListPositionInfo posInfo = { 0.0f, 100.0f, false };
+    listPositionMap->UpdatePos(0, posInfo);
+    listPositionMap->UpdatePos(1, posInfo);
+    listPositionMap->UpdatePos(2, posInfo);
+    listPositionMap->totalItemCount_ = 3;
+
+    // Reduce total count
+    listPositionMap->UpdateTotalCount(2);
+
+    EXPECT_EQ(listPositionMap->totalItemCount_, 2);
+}
+
+/**
+ * @tc.name: ListPositionMapGetPositionInfo001
+ * @tc.desc: Test ListPositionMap GetPositionInfo with non-existent index
+ * @tc.type: FUNC
+ */
+HWTEST_F(ListPositionMapTestNg, ListPositionMapGetPositionInfo001, TestSize.Level1)
+{
+    RefPtr<ListPositionMap> listPositionMap = AceType::MakeRefPtr<ListPositionMap>();
+
+    auto result = listPositionMap->GetPositionInfo(5);
+
+    EXPECT_EQ(result.mainPos, -1.0f);
+    EXPECT_EQ(result.mainSize, -1.0f);
 }
 } // namespace OHOS::Ace::NG
