@@ -680,4 +680,7 @@ const char UNDEFINED_NODE_ETS_TAG[] = "";
 
 // UnionEffectContainer
 const char UNION_EFFECT_CONTAINER_ETS_TAG[] = "UnionEffectContainer";
+
+// Custom
+const char CUSTOM_ETS_TAG[] = "Custom";
 } // namespace OHOS::Ace::V2
