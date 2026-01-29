@@ -2025,6 +2025,40 @@ class ArkFontWeight {
   }
 }
 
+class ArkFontWeightConfigs {
+  enableVariableFontWeight: boolean | undefined;
+  enableDeviceFontWeightCategory: boolean | undefined;
+
+  constructor() {
+    this.enableVariableFontWeight = undefined;
+    this.enableDeviceFontWeightCategory = undefined;
+  }
+
+  isEqual(another: ArkFontWeightConfigs): boolean {
+    return (this.enableVariableFontWeight === another.enableVariableFontWeight &&
+      this.enableDeviceFontWeightCategory === another.enableDeviceFontWeightCategory);
+  }
+}
+
+class ArkSpanFontWeight {
+  value: number | FontWeight | ResourceStr;
+  fontWeightConfigs: ArkFontWeightConfigs;
+
+  constructor() {
+    this.value = undefined;
+    this.fontWeightConfigs = undefined;
+  }
+
+  isEqual(another: ArkSpanFontWeight): boolean {
+    return (this.value === another.value &&
+      this.fontWeightConfigs === another.fontWeightConfigs);
+  }
+
+  checkObjectDiff(another: ArkSpanFontWeight): boolean {
+    return !this.isEqual(another);
+  }
+}
+
 class ArkNavigationTitle {
   value: ResourceStr | CustomBuilder | NavigationCommonTitle | NavigationCustomTitle | undefined;
   navigationTitleOptions?: NavigationTitleOptions | undefined;

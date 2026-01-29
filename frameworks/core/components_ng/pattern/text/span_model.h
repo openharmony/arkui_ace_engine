@@ -46,6 +46,9 @@ public:
     virtual void SetItalicFontStyle(Ace::FontStyle value) = 0;
     virtual void ResetItalicFontStyle() = 0;
     virtual void SetFontWeight(FontWeight value) = 0;
+    virtual void SetVariableFontWeight(FontWeight value) = 0;
+    virtual void SetEnableVariableFontWeight(FontWeight value) = 0;
+    virtual void SetEnableDeviceFontWeightCategory(FontWeight value) = 0;
     virtual void ResetFontWeight() = 0;
     virtual void SetFontFamily(const std::vector<std::string>& value) = 0;
     virtual void ResetFontFamily() = 0;

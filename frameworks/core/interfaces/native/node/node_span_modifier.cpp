@@ -99,6 +99,19 @@ void SetSpanFontWeight(ArkUINodeHandle node, ArkUI_Int32 fontWeight, void* resRa
         uiNode, "fontWeight", static_cast<FontWeight>(fontWeight), resRawPtr);
 }
 
+void SetSpanFontWeightWithConfigs(ArkUINodeHandle node,
+    const struct ArkUIFontWeightWithConfigsStruct* fontWeightInfo, void* resRawPtr)
+{
+    auto* uiNode = reinterpret_cast<UINode*>(node);
+    CHECK_NULL_VOID(uiNode);
+    FontWeight fontWeight = Framework::ConvertStrToFontWeight(fontWeightInfo->weight);
+    SpanModelNG::SetFontWeight(uiNode, fontWeight);
+    SpanModelNG::SetVariableFontWeight(uiNode, fontWeightInfo->variableFontWeight);
+    SpanModelNG::SetEnableVariableFontWeight(uiNode, fontWeightInfo->enableVariableFontWeight);
+    SpanModelNG::SetEnableDeviceFontWeightCategory(uiNode, fontWeightInfo->enableDeviceFontWeightCategory);
+    NodeModifier::ProcessResourceObj<FontWeight>(uiNode, "fontWeight", fontWeight, resRawPtr);
+}
+
 int32_t GetSpanFontWeight(ArkUINodeHandle node)
 {
     int32_t defaultFontWeight = static_cast<int32_t>(DEFAULT_FONT_WEIGHT);
@@ -117,6 +130,9 @@ void ResetSpanFontWeight(ArkUINodeHandle node)
         CHECK_NULL_VOID(spanNode);
         spanNode->UnregisterResource("fontWeight");
     }
+    SpanModelNG::ResetVariableFontWeight(uiNode);
+    SpanModelNG::ResetEnableVariableFontWeight(uiNode);
+    SpanModelNG::ResetEnableDeviceFontWeightCategory(uiNode);
 }
 
 void SetSpanLineHeight(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* lineHeightRawPtr)
@@ -638,6 +654,7 @@ const ArkUISpanModifier* GetSpanModifier()
         .setSpanTextCase = SetSpanTextCase,
         .resetSpanTextCase = ResetSpanTextCase,
         .setSpanFontWeight = SetSpanFontWeight,
+        .setSpanFontWeightWithConfigs = SetSpanFontWeightWithConfigs,
         .resetSpanFontWeight = ResetSpanFontWeight,
         .setSpanLineHeight = SetSpanLineHeight,
         .resetSpanLineHeight = ResetSpanLineHeight,
@@ -697,6 +714,7 @@ const CJUISpanModifier* GetCJUISpanModifier()
         .setSpanTextCase = SetSpanTextCase,
         .resetSpanTextCase = ResetSpanTextCase,
         .setSpanFontWeight = SetSpanFontWeight,
+        .setSpanFontWeightWithConfigs = SetSpanFontWeightWithConfigs,
         .resetSpanFontWeight = ResetSpanFontWeight,
         .setSpanLineHeight = SetSpanLineHeight,
         .resetSpanLineHeight = ResetSpanLineHeight,

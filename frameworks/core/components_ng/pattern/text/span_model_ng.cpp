@@ -103,6 +103,21 @@ void SpanModelNG::SetFont(const Font& value)
     } else {
         ResetItalicFontStyle();
     }
+    if (value.variableFontWeight.has_value()) {
+        SetVariableFontWeight(value.variableFontWeight.value());
+    } else {
+        ResetVariableFontWeight();
+    }
+    if (value.enableVariableFontWeight.has_value()) {
+        SetEnableVariableFontWeight(value.enableVariableFontWeight.value());
+    } else {
+        ResetEnableVariableFontWeight();
+    }
+    if (value.enableDeviceFontWeightCategory.has_value()) {
+        SetEnableDeviceFontWeightCategory(value.enableDeviceFontWeightCategory.value());
+    } else {
+        ResetEnableDeviceFontWeightCategory();
+    }
 }
 
 void SpanModelNG::ResetFont()
@@ -153,6 +168,36 @@ void SpanModelNG::SetFontWeight(Ace::FontWeight value)
 void SpanModelNG::ResetFontWeight()
 {
     ACE_RESET_SPAN_PROPERTY(FontWeight);
+}
+
+void SpanModelNG::SetVariableFontWeight(int32_t value)
+{
+    ACE_UPDATE_SPAN_PROPERTY(VariableFontWeight, value);
+}
+
+void SpanModelNG::ResetVariableFontWeight()
+{
+    ACE_RESET_SPAN_PROPERTY(VariableFontWeight);
+}
+
+void SpanModelNG::SetEnableVariableFontWeight(bool value)
+{
+    ACE_UPDATE_SPAN_PROPERTY(EnableVariableFontWeight, value);
+}
+
+void SpanModelNG::ResetEnableVariableFontWeight()
+{
+    ACE_RESET_SPAN_PROPERTY(EnableVariableFontWeight);
+}
+
+void SpanModelNG::SetEnableDeviceFontWeightCategory(bool value)
+{
+    ACE_UPDATE_SPAN_PROPERTY(EnableDeviceFontWeightCategory, value);
+}
+
+void SpanModelNG::ResetEnableDeviceFontWeightCategory()
+{
+    ACE_RESET_SPAN_PROPERTY(EnableDeviceFontWeightCategory);
 }
 
 void SpanModelNG::SetFontFamily(const std::vector<std::string>& value)
@@ -363,6 +408,42 @@ void SpanModelNG::ResetFontWeight(UINode *uiNode)
     ACE_RESET_NODE_SPAN_PROPERTY(FontWeight, uiNode);
 }
 
+void SpanModelNG::SetVariableFontWeight(UINode* uiNode, int32_t value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateVariableFontWeight(value);
+}
+
+void SpanModelNG::ResetVariableFontWeight(UINode *uiNode)
+{
+    ACE_RESET_NODE_SPAN_PROPERTY(VariableFontWeight, uiNode);
+}
+
+void SpanModelNG::SetEnableVariableFontWeight(UINode* uiNode, bool value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateEnableVariableFontWeight(value);
+}
+
+void SpanModelNG::ResetEnableVariableFontWeight(UINode *uiNode)
+{
+    ACE_RESET_NODE_SPAN_PROPERTY(EnableVariableFontWeight, uiNode);
+}
+
+void SpanModelNG::SetEnableDeviceFontWeightCategory(UINode* uiNode, bool value)
+{
+    auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
+    CHECK_NULL_VOID(spanNode);
+    spanNode->UpdateEnableDeviceFontWeightCategory(value);
+}
+
+void SpanModelNG::ResetEnableDeviceFontWeightCategory(UINode *uiNode)
+{
+    ACE_RESET_NODE_SPAN_PROPERTY(EnableDeviceFontWeightCategory, uiNode);
+}
+
 void SpanModelNG::SetTextCase(UINode* uiNode, TextCase value)
 {
     auto spanNode = AceType::DynamicCast<SpanNode>(uiNode);
@@ -524,6 +605,13 @@ void SpanModelNG::SetFont(UINode* uiNode, const Font& value)
     } else {
         ResetItalicFontStyle(uiNode);
     }
+    if (value.variableFontWeight.has_value()) {
+        SetVariableFontWeight(uiNode, value.variableFontWeight.value());
+    } else {
+        ResetVariableFontWeight(uiNode);
+    }
+    SetEnableVariableFontWeight(uiNode, value.enableVariableFontWeight.value_or(false));
+    SetEnableDeviceFontWeightCategory(uiNode, value.enableDeviceFontWeightCategory.value_or(true));
 }
 
 void SpanModelNG::ResetFont(UINode *uiNode)
@@ -532,6 +620,9 @@ void SpanModelNG::ResetFont(UINode *uiNode)
     ResetFontWeight(uiNode);
     ResetFontFamily(uiNode);
     ResetItalicFontStyle(uiNode);
+    ResetVariableFontWeight(uiNode);
+    ResetEnableVariableFontWeight(uiNode);
+    ResetEnableDeviceFontWeightCategory(uiNode);
 }
 
 void SpanModelNG::CreateContainSpan()

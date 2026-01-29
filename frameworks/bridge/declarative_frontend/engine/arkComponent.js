@@ -12702,9 +12702,13 @@ class SpanFontWeightModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().span.resetFontWeight(node);
-    }
-    else {
-      getUINativeModule().span.setFontWeight(node, this.value);
+    } else if (!isObject(this.value)) {
+      getUINativeModule().span.resetFontWeight(node);
+    } else {
+      getUINativeModule().span.setFontWeight(node, this.value.value,
+        this.value.fontWeightConfigs?.enableVariableFontWeight,
+        this.value.fontWeightConfigs?.enableDeviceFontWeightCategory
+      );
     }
   }
 }
@@ -13265,11 +13269,17 @@ class ArkSpanComponent {
     modifierWithKey(this._modifiersWithKeys, SpanDecorationModifier.identity, SpanDecorationModifier, value);
     return this;
   }
-  font(value) {
+  font(value, fontConfigs) {
+    let arkFontWeightConfigs = new ArkFontWeightConfigs();
+    arkFontWeightConfigs.enableVariableFontWeight = fontConfigs?.fontWeightConfigs?.enableVariableFontWeight;
+    arkFontWeightConfigs.enableDeviceFontWeightCategory = fontConfigs?.fontWeightConfigs?.enableDeviceFontWeightCategory;
+    let arkSpanFontWeight = new ArkSpanFontWeight();
+    arkSpanFontWeight.value = (value === null || value === void 0 ? void 0 : value.weight);
+    arkSpanFontWeight.fontWeightConfigs = arkFontWeightConfigs;
     modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier,
       value === null || value === void 0 ? void 0 : value.size);
     modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier,
-      value === null || value === void 0 ? void 0 : value.weight);
+      arkSpanFontWeight);
     modifierWithKey(this._modifiersWithKeys, SpanFontFamilyModifier.identity, SpanFontFamilyModifier,
       value === null || value === void 0 ? void 0 : value.family);
     modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier,
@@ -13288,8 +13298,14 @@ class ArkSpanComponent {
     modifierWithKey(this._modifiersWithKeys, SpanFontColorModifier.identity, SpanFontColorModifier, value);
     return this;
   }
-  fontStyle(value) {
-    modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier, value);
+  fontStyle(value, fontWeightConfigs) {
+    let arkFontWeightConfigs = new ArkFontWeightConfigs();
+    arkFontWeightConfigs.enableVariableFontWeight = fontWeightConfigs?.enableVariableFontWeight;
+    arkFontWeightConfigs.enableDeviceFontWeightCategory = fontWeightConfigs?.enableDeviceFontWeightCategory;
+    let arkSpanFontWeight = new ArkSpanFontWeight();
+    arkSpanFontWeight.value = value;
+    arkSpanFontWeight.fontWeightConfigs = arkFontWeightConfigs;
+    modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier, arkSpanFontWeight);
     return this;
   }
   fontWeight(value) {
@@ -20865,6 +20881,34 @@ class ArkFontWeight {
       this.value === another.value &&
       this.enableVariableFontWeight === another.enableVariableFontWeight
     );
+  }
+
+  checkObjectDiff(another) {
+    return !this.isEqual(another);
+  }
+}
+
+class ArkFontWeightConfigs {
+  constructor() {
+    this.enableVariableFontWeight = undefined;
+    this.enableDeviceFontWeightCategory = undefined;
+  }
+
+  isEqual(another) {
+    return (this.enableVariableFontWeight === another.enableVariableFontWeight &&
+      this.enableDeviceFontWeightCategory === another.enableDeviceFontWeightCategory);
+  }
+}
+
+class ArkSpanFontWeight {
+  constructor() {
+    this.value = undefined;
+    this.fontWeightConfigs = undefined;
+  }
+
+  isEqual(another) {
+    return (this.value === another.value &&
+      this.fontWeightConfigs === another.fontWeightConfigs);
   }
 
   checkObjectDiff(another) {

@@ -34,10 +34,10 @@
 extern "C" {
 #endif
 
-#define ARKUI_FULL_API_VERSION 142
+#define ARKUI_FULL_API_VERSION 143
 // When changing ARKUI_BASIC_API_VERSION, ARKUI_FULL_API_VERSION must be
 // increased as well.
-#define ARKUI_NODE_API_VERSION 142
+#define ARKUI_NODE_API_VERSION 143
 
 #define ARKUI_BASIC_API_VERSION 8
 #define ARKUI_EXTENDED_API_VERSION 8
@@ -579,6 +579,13 @@ struct ArkUIFontWeightWithOptionsStruct {
     ArkUI_CharPtr weight;
     ArkUI_Int32 variableFontWeight;
     ArkUI_Bool enableVariableFontWeight;
+};
+
+struct ArkUIFontWeightWithConfigsStruct {
+    ArkUI_CharPtr weight;
+    ArkUI_Int32 variableFontWeight;
+    ArkUI_Bool enableVariableFontWeight;
+    ArkUI_Bool enableDeviceFontWeightCategory;
 };
 
 struct ArkUISearchButtonOptionsStruct {
@@ -7371,6 +7378,8 @@ struct ArkUISpanModifier {
     void (*setSpanTextCase)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSpanTextCase)(ArkUINodeHandle node);
     void (*setSpanFontWeight)(ArkUINodeHandle node, ArkUI_Int32 value, void* resourceRawPtr);
+    void (*setSpanFontWeightWithConfigs)(ArkUINodeHandle node,
+        const struct ArkUIFontWeightWithConfigsStruct* fontWeightInfo, void* resourceRawPtr);
     void (*resetSpanFontWeight)(ArkUINodeHandle node);
     void (*setSpanLineHeight)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* resourceRawPtr);
     void (*resetSpanLineHeight)(ArkUINodeHandle node);
