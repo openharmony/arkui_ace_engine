@@ -42,6 +42,12 @@ import { Size } from '@ohos.arkui.node'
         options: NavDestinationSwitchObserverOptions,
         callback?: Callback<NavDestinationInfo>
     ): void;
+
+    export native function onTabContentUpdate(callback: Callback<TabContentInfo>): void;
+    export native function offTabContentUpdate(callback?: Callback<TabContentInfo>): void;
+    export native function onTabContentUpdate(options: ObserverOptions, callback: Callback<TabContentInfo>): void;
+    export native function offTabContentUpdate(options: ObserverOptions, callback?: Callback<TabContentInfo>): void;
+
     export native function onNavDestinationSwitch(
         context: UIAbilityContext | UIContext,
         callback: Callback<NavDestinationSwitchInfo>
