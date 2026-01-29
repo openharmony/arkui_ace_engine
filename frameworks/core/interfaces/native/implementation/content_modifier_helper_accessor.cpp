@@ -134,6 +134,7 @@ void ContentModifierButtonImpl(Ark_NativePointer node,
         };
         auto triggerCallback = CallbackKeeper::Claim<ButtonTriggerClickCallback>(handler);
         arkConfig.triggerClick = triggerCallback.ArkValue();
+        arkConfig.triggerClick.resource.hold(arkConfig.triggerClick.resource.resourceId); // Creates memory leak!
         auto btnNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([btnNode](const RefPtr<UINode>& uiNode) mutable {
             btnNode->AddChild(uiNode);
@@ -466,6 +467,7 @@ void ContentModifierToggleImpl(Ark_NativePointer node,
         };
         auto triggerCallback = CallbackKeeper::Claim<Callback_Boolean_Void>(handler);
         arkConfig.triggerChange = triggerCallback.ArkValue();
+        arkConfig.triggerChange.resource.hold(arkConfig.triggerChange.resource.resourceId); // Creates memory leak!
         auto boxNode = CommonViewModelNG::CreateFrameNode(ElementRegister::GetInstance()->MakeUniqueId());
         arkBuilder.BuildAsync([boxNode](const RefPtr<UINode>& uiNode) mutable {
             boxNode->AddChild(uiNode);
