@@ -5491,7 +5491,13 @@ bool TextFieldPattern::RequestCustomKeyboard()
     if (inputMethod) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "TextField Request CustomKeyboard, Close keyboard Successfully.");
         auto systemWindowId = GetWindowIdFromPipeline();
-        inputMethod->RequestHideInput(systemWindowId);
+        auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+        if (!container) {
+            inputMethod->RequestHideInput(systemWindowId);
+        } else {
+            auto displayId = container->GetCurrentDisplayId();
+            inputMethod->RequestHideInput(systemWindowId, false, displayId);
+        }
         inputMethod->Close();
     }
 #else

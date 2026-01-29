@@ -168,7 +168,13 @@ void WindowSceneHelper::IsWindowSceneCloseKeyboard(const RefPtr<FrameNode>& fram
             CHECK_NULL_VOID(pipeline);
             auto systemWindowId = pipeline->GetFocusWindowId();
             ConvertSystemWindowId(frameNode, systemWindowId);
-            inputMethod->RequestHideInput(systemWindowId, true);
+            auto container = Container::Current();
+            if (!container) {
+                inputMethod->RequestHideInput(systemWindowId, true);
+            } else {
+                auto displayId = container->GetCurrentDisplayId();
+                inputMethod->RequestHideInput(systemWindowId, true, displayId);
+            }
             inputMethod->Close();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "scbSoftKeyboard Closes Successfully.");
         }
@@ -194,7 +200,13 @@ void WindowSceneHelper::IsCloseKeyboard(const RefPtr<FrameNode>& frameNode)
             CHECK_NULL_VOID(pipeline);
             auto systemWindowId = pipeline->GetFocusWindowId();
             ConvertSystemWindowId(frameNode, systemWindowId);
-            inputMethod->RequestHideInput(systemWindowId, true);
+            auto container = Container::Current();
+            if (!container) {
+                inputMethod->RequestHideInput(systemWindowId, true);
+            } else {
+                auto displayId = container->GetCurrentDisplayId();
+                inputMethod->RequestHideInput(systemWindowId, true, displayId);
+            }
             inputMethod->Close();
             TAG_LOGI(AceLogTag::ACE_KEYBOARD, "SoftKeyboard Closes Successfully.");
         }

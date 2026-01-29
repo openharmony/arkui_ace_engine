@@ -5926,7 +5926,13 @@ bool RichEditorPattern::RequestCustomKeyboard()
         auto pipeline = tmpHost->GetContext();
         CHECK_NULL_RETURN(pipeline, false);
         auto systemWindowId = pipeline->GetFocusWindowId();
-        inputMethod->RequestHideInput(systemWindowId);
+        auto container = AceType::DynamicCast<Platform::AceContainer>(Container::Current());
+        if (!container) {
+            inputMethod->RequestHideInput(systemWindowId);
+        } else {
+            auto displayId = container->GetCurrentDisplayId();
+            inputMethod->RequestHideInput(systemWindowId, false, displayId);
+        }
         inputMethod->Close();
     }
 #else
