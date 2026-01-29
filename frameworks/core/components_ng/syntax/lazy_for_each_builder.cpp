@@ -761,8 +761,7 @@ namespace OHOS::Ace::NG {
         }
     }
 
-    bool LazyForEachBuilder::PreBuild(std::list<RefPtr<UINode>>& removingNodes, int64_t deadline,
-        const std::optional<LayoutConstraintF>& itemConstraint,
+    bool LazyForEachBuilder::PreBuild(int64_t deadline, const std::optional<LayoutConstraintF>& itemConstraint,
         bool canRunLongPredictTask)
     {
         ACE_SYNTAX_SCOPED_TRACE("PreBuild expiringItem_ count:[%zu]", expiringItem_.size());
@@ -783,7 +782,6 @@ namespace OHOS::Ace::NG {
         result = ProcessPreBuildingIndex(cache, deadline, itemConstraint, canRunLongPredictTask, idleIndexes);
         if (!result) {
             expiringItem_.swap(cache);
-            RemovingExpiringItem(removingNodes, deadline, cache);
             return result;
         }
 
@@ -794,7 +792,6 @@ namespace OHOS::Ace::NG {
             }
         }
         expiringItem_.swap(cache);
-        RemovingExpiringItem(removingNodes, deadline, cache);
         return result;
     }
 
@@ -1241,38 +1238,4 @@ namespace OHOS::Ace::NG {
         }
     }
 
-    /*
-     * Removing nodes that should be released, and adopt an optimized release strategy.
-     * During each frame's idle time, determine whether to continue releasing based on the average
-     * time to release a single node and the remaining time of the current frame.
-    */
-    void LazyForEachBuilder::RemovingExpiringItem(std::list<RefPtr<UINode>>& removingNodes, int64_t deadline,
-        std::unordered_map<std::string, LazyForEachCacheChild>& cache)
-    {
-        // step 1: move nodes that should be released into list removingNodes
-        for (auto& [key, node]: cache) {
-            if (node.second) {
-                ElementRegister::GetInstance()->RemoveItem(node.second->GetId());
-                removingNodes.emplace_back(std::move(node.second));
-            }
-        }
-        if (removingNodes.empty()) {
-            return;
-        }
-        TAG_LOGD(AceLogTag::ACE_LAZY_FOREACH, "RemovingExpiringItem, size of removingNodes: %{public}d",
-            static_cast<int32_t>(removingNodes.size()));
-        // step 2: release nodes while enough time for average release
-        int64_t startTimeStamp = 0;
-        int64_t endTimeStamp = 0;
-        int64_t averageTime = 0;
-        int32_t count = 0;
-        ACE_SCOPED_TRACE("RemovingExpiringItem, removingNodes [%d]", static_cast<int32_t>(removingNodes.size()));
-        do {
-            startTimeStamp = GetSysTimestamp();
-            removingNodes.erase(removingNodes.begin());
-            endTimeStamp = GetSysTimestamp();
-            count++;
-            averageTime += ((endTimeStamp - startTimeStamp) / count);
-        } while (!removingNodes.empty() && deadline - endTimeStamp > averageTime);
-    }
 }
