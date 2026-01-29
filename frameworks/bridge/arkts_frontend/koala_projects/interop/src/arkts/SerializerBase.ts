@@ -44,7 +44,7 @@ export function registerCallback(value: object): int32 {
  * Value representing object type in serialized data.
  * Must be synced with "enum Tags" in C++.
  */
-export enum Tags {
+export enum Tags: byte {
     UNDEFINED = 101,
     INT32 = 102,
     FLOAT32 = 103,
