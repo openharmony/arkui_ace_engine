@@ -140,6 +140,7 @@ template("build_component_ng") {
             "//foundation/graphic/graphic_2d/frameworks/text/interface/export",
           ]
           configs += [
+            "//foundation/arkui/napi:ace_napi_config",
             "//foundation/appframework/ability/ability_runtime/cross_platform/frameworks/native/base/event_handler:event_handler_config",
             "//foundation/graphic/graphic_2d/rosen/modules/platform:ipc_core_config",
             "//foundation/graphic/graphic_2d/rosen/modules/render_service_client:render_service_client_config",
