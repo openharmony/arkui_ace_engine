@@ -3623,6 +3623,12 @@ void JsiDeclarativeEngineInstance::LoadJsXNodeForm(void* runtime, FormJsXNodeLoa
         return;
     }
     LocalScope scope(vm);
+    if ((currentMode_ == FormJsXNodeLoadMode::NONE) && localRuntime_) {
+        PreloadUIContent(localRuntime_);
+        PreloadArkComponent(localRuntime_);
+        std::shared_ptr<JsValue> global = localRuntime_->GetGlobal();
+        JsiTimerModule::GetInstance()->InitTimerModule(localRuntime_, global);
+    }
     switch (mode) {
         case FormJsXNodeLoadMode::NONE:
             return;
@@ -3634,11 +3640,6 @@ void JsiDeclarativeEngineInstance::LoadJsXNodeForm(void* runtime, FormJsXNodeLoa
             break;
         default:
             return;
-    }
-    if ((currentMode_ == FormJsXNodeLoadMode::NONE) && localRuntime_) {
-        PreloadUIContent(localRuntime_);
-        std::shared_ptr<JsValue> global = localRuntime_->GetGlobal();
-        JsiTimerModule::GetInstance()->InitTimerModule(localRuntime_, global);
     }
     currentMode_ = mode;
 }
