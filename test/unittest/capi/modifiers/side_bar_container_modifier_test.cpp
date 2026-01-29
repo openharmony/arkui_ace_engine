@@ -768,14 +768,14 @@ static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerStro
 
 // Valid values for attribute 'startMargin' of method 'setDivider'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerStartMarginValidValues = {
-    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), "-1234.00px"},
+    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), ATTRIBUTE_DIVIDER_START_MARGIN_DEFAULT_VALUE},
     {"0.00px", Converter::ArkValue<Opt_Length>("0.00px"), "0.00px"},
     {"1234.00px", Converter::ArkValue<Opt_Length>("1234.00px"), "1234.00px"},
 };
 
 // Valid values for attribute 'endMargin' of method 'setDivider'
 static std::vector<std::tuple<std::string, Opt_Length, std::string>> dividerEndMarginValidValues = {
-    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), "-1234.00px"},
+    {"-1234.00px", Converter::ArkValue<Opt_Length>("-1234.00px"), ATTRIBUTE_DIVIDER_END_MARGIN_DEFAULT_VALUE},
     {"0.00px", Converter::ArkValue<Opt_Length>("0.00px"), "0.00px"},
     {"1234.00px", Converter::ArkValue<Opt_Length>("1234.00px"), "1234.00px"},
 };
