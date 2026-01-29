@@ -50,6 +50,7 @@
 #include "core/components_v2/inspector/inspector.h"
 #include "core/interfaces/native/implementation/canvas_renderer_peer_impl.h"
 #include "core/interfaces/native/implementation/x_component_controller_peer_impl.h"
+#include "frameworks/bridge/declarative_frontend/engine/bindings_implementation.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_app_bar_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_container_modal_view_register.h"
 #include "frameworks/bridge/declarative_frontend/engine/jsi/jsi_image_generator_dialog_view_register.h"
@@ -2120,6 +2121,8 @@ void JsRegisterViews(BindingTarget globalObj, void* nativeEngine, bool isCustomE
         return;
     }
     auto vm = runtime->GetEcmaVm();
+    IFunctionBinding::runtime = nativeEngine;
+
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadDocument"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), JsLoadDocument));
     globalObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadEtsCard"),
