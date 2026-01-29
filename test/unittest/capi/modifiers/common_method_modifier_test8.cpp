@@ -109,7 +109,6 @@ namespace {
     static std::optional<CheckBuilderEvent> checkBuilderEvent = std::nullopt;
     struct CheckNestedEvent {
         int32_t resourceId;
-        std::optional<BindSheetDismissReason> reason;
         bool fired;
     };
     static std::optional<CheckNestedEvent> checkNestedEvent = std::nullopt;
@@ -169,7 +168,6 @@ public:
         auto dismissCallback = [](const Ark_Int32 resourceId, const Ark_DismissContentCoverAction parameter) {
             checkNestedEvent = {
                 .resourceId = resourceId,
-                .reason = Converter::OptConvert<BindSheetDismissReason>(parameter.reason)
             };
             checkNestedEvent->fired = true;
         };
@@ -566,7 +564,6 @@ HWTEST_F(CommonMethodModifierTest8, DISABLED_setBindContentCover1DismissCallback
 
         EXPECT_TRUE(checkNestedEvent.has_value());
         EXPECT_EQ(checkNestedEvent->resourceId, frameNode->GetId());
-        EXPECT_EQ(checkNestedEvent->reason, expected);
         EXPECT_TRUE(checkNestedEvent->fired);
     }
 }

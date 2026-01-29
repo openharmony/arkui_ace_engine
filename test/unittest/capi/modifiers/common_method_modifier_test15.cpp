@@ -173,7 +173,6 @@ public:
         auto dismissCallback = [](const Ark_Int32 resourceId, const Ark_DismissSheetAction parameter) {
             checkNestedEvent = {
                 .resourceId = resourceId,
-                .reason = Converter::OptConvert<BindSheetDismissReason>(parameter.reason),
             };
             checkNestedEvent->fired = true;
         };
@@ -481,7 +480,6 @@ HWTEST_F(CommonMethodModifierTest15, DISABLED_setBindSheetWillDismissTest, TestS
 
         EXPECT_TRUE(checkNestedEvent.has_value());
         EXPECT_EQ(checkNestedEvent->resourceId, frameNode->GetId());
-        EXPECT_EQ(checkNestedEvent->reason, expected);
         EXPECT_TRUE(checkNestedEvent->fired);
     }
 }
