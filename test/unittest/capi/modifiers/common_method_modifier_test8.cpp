@@ -109,6 +109,7 @@ namespace {
     static std::optional<CheckBuilderEvent> checkBuilderEvent = std::nullopt;
     struct CheckNestedEvent {
         int32_t resourceId;
+        std::optional<BindSheetDismissReason> reason;
         bool fired;
     };
     static std::optional<CheckNestedEvent> checkNestedEvent = std::nullopt;
