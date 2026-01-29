@@ -98,23 +98,28 @@ void NativeCustomComponent::CustomNodeSetBuildFunction(
         if (ANI_OK != vm->GetEnv(ANI_VERSION_1, &env)) {
             return nullptr;
         }
-
+        if (ANI_OK != env->CreateLocalScope(SPECIFIED_CAPACITY)) {
+            return nullptr;
+        }
         ani_boolean released;
         ani_ref localRef;
         if (ANI_OK != env->WeakReference_GetReference(*weakRef, &released, &localRef) || released) {
+            env->DestroyLocalScope();
             return nullptr;
         }
 
         ani_ref resRef;
         if (ANI_OK != env->FunctionalObject_Call(static_cast<ani_fn_object>(localRef), 0, nullptr, &resRef)) {
+            env->DestroyLocalScope();
             return nullptr;
         }
 
         ani_long ptr;
         if (ANI_OK != env->Object_CallMethodByName_Long(static_cast<ani_object>(resRef), "toLong", ":l", &ptr)) {
+            env->DestroyLocalScope();
             return nullptr;
         }
-
+        env->DestroyLocalScope();
         return AceType::Claim(reinterpret_cast<NG::UINode *>(ptr));
     });
 }

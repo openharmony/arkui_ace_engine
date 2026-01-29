@@ -61,7 +61,7 @@ export class ArkCustomComponentRootPeer extends PeerNode {
     private component?: IExtendableComponent;
     private childPeerPtr: KPointer = nullptr;
     private buildFunc?: () => Long;
-    customNodeBuilder: CustomNodeBuilder | undefined = undefined;
+    private customNodeBuilder: CustomNodeBuilder | undefined = undefined;
     private freezeRoot: Set<FreeRootNode>;
     protected constructor(peerPtr: KPointer, id: int32, name: string = "", flags: int32 = 0) {
         super(peerPtr, id, name, flags, RootPeerType)
