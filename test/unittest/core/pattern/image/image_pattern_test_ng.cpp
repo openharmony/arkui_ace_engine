@@ -1763,6 +1763,25 @@ HWTEST_F(ImagePatternTestNg, ConvertOrientationToString007, TestSize.Level1)
 }
 
 /**
+ * @tc.name: ConvertOrientationToString008
+ * @tc.desc: Test ConvertOrientationToString.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, ConvertOrientationToString008, TestSize.Level1)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ;
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->SetOrientation(ImageRotateOrientation::LEFT_MIRRORED);
+    imagePattern->DumpInfo();
+    auto res = imagePattern->GetOrientation();
+    ImageRotateOrientation msg = ImageRotateOrientation::LEFT_MIRRORED;
+    EXPECT_EQ(res, msg);
+}
+
+/**
  * @tc.name: OnDirtyLayoutWrapperSwap002
  * @tc.desc: Test OnDirtyLayoutWrapperSwap.
  * @tc.type: FUNC
@@ -3038,5 +3057,120 @@ HWTEST_F(ImagePatternTestNg, ImagePatternOnThemeScopeUpdate001, TestSize.Level0)
     auto result = imagePattern->OnThemeScopeUpdate(themeScopedId);
     ASSERT_FALSE(imagePattern->isFullyInitializedFromTheme_);
     EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: OnDetachFromFrameNode001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnDetachFromFrameNode001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    imagePattern->InitCopy();
+    ASSERT_NE(imagePattern->mouseEvent_, nullptr);
+    MouseInfo info;
+    info.SetButton(MouseButton::LEFT_BUTTON);
+    info.SetAction(MouseAction::PRESS);
+    imagePattern->mouseEvent_->GetOnMouseEventFunc()(info);
+    
+    imagePattern->OnDetachFromFrameNode(AceType::RawPtr(frameNode));
+    EXPECT_FALSE(imagePattern->isSelected_);
+}
+
+/**
+ * @tc.name: OnReuse001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, OnReuse001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    
+    imagePattern->OnReuse();
+    EXPECT_NE(imagePattern->loadingCtx_, nullptr);
+}
+
+/**
+ * @tc.name: CreateModifier001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, CreateModifier001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+    
+    imagePattern->CreateModifier();
+    EXPECT_NE(imagePattern->contentMod_, nullptr);
+    EXPECT_NE(imagePattern->overlayMod_, nullptr);
+    EXPECT_NE(imagePattern->imagePaintMethod_, nullptr);
+}
+
+/**
+ * @tc.name: CreateNodePaintMethod001
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, CreateNodePaintMethod001, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    auto paintMethod = imagePattern->CreateNodePaintMethod();
+    EXPECT_NE(paintMethod, nullptr);
+    EXPECT_EQ(paintMethod, imagePattern->imagePaintMethod_);
+}
+
+/**
+ * @tc.name: CreateNodePaintMethod002
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, CreateNodePaintMethod002, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    EXPECT_EQ(imagePattern->contentMod_, nullptr);
+    EXPECT_EQ(imagePattern->overlayMod_, nullptr);
+
+    imagePattern->CreateNodePaintMethod();
+    EXPECT_NE(imagePattern->contentMod_, nullptr);
+    EXPECT_NE(imagePattern->overlayMod_, nullptr);
+    EXPECT_NE(imagePattern->imagePaintMethod_, nullptr);
+}
+
+/**
+ * @tc.name: CreateNodePaintMethod003
+ * @tc.desc: Test function for ImagePattern.
+ * @tc.type: FUNC
+ */
+HWTEST_F(ImagePatternTestNg, CreateNodePaintMethod003, TestSize.Level0)
+{
+    auto frameNode = CreateImageNode("", "", nullptr);
+    ASSERT_NE(frameNode, nullptr);
+    auto imagePattern = frameNode->GetPattern<ImagePattern>();
+    ASSERT_NE(imagePattern, nullptr);
+
+    auto mockImage = AceType::MakeRefPtr<MockCanvasImage>();
+    imagePattern->image_ = mockImage;
+    imagePattern->loadFailed_ = false;
+
+    auto paintMethod = imagePattern->CreateNodePaintMethod();
+    EXPECT_NE(paintMethod, nullptr);
+    EXPECT_EQ(imagePattern->image_, mockImage);
 }
 } // namespace OHOS::Ace::NG
