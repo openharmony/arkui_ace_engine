@@ -11831,9 +11831,9 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
     auto caretIndex = info.insertOffset;
     auto originCaretIndex =
             TextRange { selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex() };
-    auto isIMEReason = info.reason == InputReason::IME || info.reason == InputReason::AI_WRITE ||
+    auto triggerEditCallbacks = info.reason == InputReason::IME || info.reason == InputReason::AI_WRITE ||
             info.reason == InputReason::COMMAND_INJECTION;
-    if (isIMEReason && !insertValue.empty()) {
+    if (triggerEditCallbacks && !insertValue.empty()) {
         auto isInsert = BeforeIMEInsertValue(insertValue, caretIndex - (end - start));
         CHECK_NULL_VOID(isInsert);
     }
@@ -11847,12 +11847,12 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
     auto isDelete = true;
     if (start != end) {
         auto deleteValue = contentController_->GetSelectedValue(start, end);
-        if (isIMEReason) {
+        if (triggerEditCallbacks) {
             isDelete = BeforeIMEDeleteValue(deleteValue, TextDeleteDirection::BACKWARD, end);
         }
         contentController_->erase(start, end - start);
         selectController_->UpdateCaretIndex(start);
-        if (isIMEReason && isDelete) {
+        if (triggerEditCallbacks && isDelete) {
             AfterIMEDeleteValue(deleteValue, TextDeleteDirection::BACKWARD);
         }
     }
@@ -11873,7 +11873,7 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
         }
         selectController_->UpdateCaretIndex(caretIndex);
         UpdateObscure(insertValue, hasInsertValue);
-        if (isIMEReason) {
+        if (triggerEditCallbacks) {
             AfterIMEInsertValue(contentController_->GetInsertValue());
         }
     }
