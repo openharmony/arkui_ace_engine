@@ -88,10 +88,11 @@ ArkUINativeModuleValue TabContentBridge::SetTabContentOnWillShow(ArkUIRuntimeCal
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void()> callback = [vm, frameWeakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
     GetArkUINodeModifiers()->getTabContentModifier()->setTabContentOnWillShow(
@@ -123,10 +124,11 @@ ArkUINativeModuleValue TabContentBridge::SetTabContentOnWillHide(ArkUIRuntimeCal
         return panda::JSValueRef::Undefined(vm);
     }
     panda::Local<panda::FunctionRef> func = callbackArg->ToObject(vm);
-    std::function<void()> callback = [vm, frameNode, func = panda::CopyableGlobal(vm, func)]() {
+    std::function<void()> callback = [vm, frameWeakNode = AceType::WeakClaim(frameNode),
+        func = panda::CopyableGlobal(vm, func)]() {
         panda::LocalScope pandaScope(vm);
         panda::TryCatch trycatch(vm);
-        PipelineContext::SetCallBackNode(AceType::WeakClaim(frameNode));
+        PipelineContext::SetCallBackNode(frameWeakNode);
         func->Call(vm, func.ToLocal(), nullptr, 0);
     };
     GetArkUINodeModifiers()->getTabContentModifier()->setTabContentOnWillHide(
