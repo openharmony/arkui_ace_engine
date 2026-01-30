@@ -18,6 +18,7 @@
 #include "base/log/log_wrapper.h"
 #include "base/network/download_manager.h"
 #include "base/subwindow/subwindow_manager.h"
+#include "base/utils/system_properties.h"
 #include "core/components_ng/image_provider/image_decoder.h"
 #include "core/components_ng/image_provider/drawing_image_data.h"
 #include "core/components_ng/image_provider/animated_image_object.h"
@@ -65,6 +66,18 @@ bool ImageProvider::PrepareImageData(const RefPtr<ImageObject>& imageObj)
     // data already loaded
     if (imageObj->GetData()) {
         return true;
+    }
+
+    // For network images, data should be prepared in MakeCanvasImageHelper before decoding
+    // If we reach here with a network image without data, it's an error
+    // Only enable this check for real device with recycle feature enabled
+    bool enableRecycleForNetwork = SystemProperties::GetDownloadByNetworkEnabled() &&
+                                   SystemProperties::GetRecycleImageEnabled();
+    if (enableRecycleForNetwork && imageObj->GetSourceInfo().GetSrcType() == SrcType::NETWORK) {
+        TAG_LOGW(AceLogTag::ACE_IMAGE,
+            "Network image should have data before PrepareImageData. %{public}s-[%{private}s]",
+            dfxConfig.ToStringWithoutSrc().c_str(), dfxConfig.GetImageSrc().c_str());
+        return false;
     }
 
     auto container = Container::Current();
@@ -291,7 +304,16 @@ bool ImageProvider::CancelTask(const std::string& key, const WeakPtr<ImageLoadin
 void ImageProvider::DownLoadSuccessCallback(
     const RefPtr<ImageObject>& imageObj, const std::string& key, bool sync, int32_t containerId)
 {
-    ImageProvider::CacheImageObject(imageObj);
+    // Clone before caching and clear data from clone
+    // Data is stored in DownloadManager cache, no need to duplicate in ImageCache
+    if (SystemProperties::GetRecycleImageEnabled()) {
+        auto cloneImageObj = imageObj->Clone();
+        CHECK_NULL_VOID(cloneImageObj);
+        cloneImageObj->ClearData();
+        ImageProvider::CacheImageObject(cloneImageObj);
+    } else {
+        ImageProvider::CacheImageObject(imageObj);
+    }
     auto ctxs = EndTask(key);
     auto notifyDownLoadSuccess = [ctxs, imageObj] {
         for (auto&& it : ctxs) {
@@ -499,14 +521,30 @@ RefPtr<ImageObject> ImageProvider::BuildImageObject(
     return imageObject;
 }
 
-void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPtr<ImageLoadingContext>& ctxWp,
-    const SizeF& size, const ImageDecoderOptions& imageDecoderOptions)
+void ImageProvider::ProcessNetworkImage(const RefPtr<ImageObject>& obj, const WeakPtr<ImageLoadingContext>& ctxWp,
+    const SizeF& size, const std::string& key, const ImageDecoderOptions& imageDecoderOptions)
 {
-    auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), size);
-    // check if same task is already executing
-    if (!RegisterTask(key, ctxWp)) {
-        return;
+    auto ctx = ctxWp.Upgrade();
+    CHECK_NULL_VOID(ctx);
+    if (imageDecoderOptions.sync) {
+        PrepareNetworkImageData(obj, size, key, imageDecoderOptions);
+    } else {
+        if (!taskMtx_.try_lock_for(std::chrono::milliseconds(MAX_WAITING_TIME_FOR_TASKS))) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE, "Lock timeout in ProcessNetworkImage.");
+            return;
+        }
+        std::scoped_lock lock(std::adopt_lock, taskMtx_);
+        CancelableCallback<void()> task;
+        task.Reset(
+            [key, obj, size, imageDecoderOptions] { PrepareNetworkImageData(obj, size, key, imageDecoderOptions); });
+        tasks_[key].bgTask_ = task;
+        ImageUtils::PostToBg(task, "ArkUIImageProviderPrepareNetworkData", ctx->GetContainerId());
     }
+}
+
+void ImageProvider::ProcessNormalImage(const RefPtr<ImageObject>& obj, const WeakPtr<ImageLoadingContext>& ctxWp,
+    const SizeF& size, const std::string& key, const ImageDecoderOptions& imageDecoderOptions)
+{
     if (imageDecoderOptions.sync) {
         MakeCanvasImageHelper(obj, size, key, imageDecoderOptions);
     } else {
@@ -525,6 +563,81 @@ void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPt
         CHECK_NULL_VOID(ctx);
         ImageUtils::PostToBg(task, "ArkUIImageProviderMakeCanvasImage", ctx->GetContainerId());
     }
+}
+
+void ImageProvider::MakeCanvasImage(const RefPtr<ImageObject>& obj, const WeakPtr<ImageLoadingContext>& ctxWp,
+    const SizeF& size, const ImageDecoderOptions& imageDecoderOptions)
+{
+    auto key = ImageUtils::GenerateImageKey(obj->GetSourceInfo(), size);
+    // check if same task is already executing
+    if (!RegisterTask(key, ctxWp)) {
+        return;
+    }
+
+    // Check if network data preparation is needed
+    bool enableRecycleForNetwork =
+        SystemProperties::GetDownloadByNetworkEnabled() && SystemProperties::GetRecycleImageEnabled();
+    bool needPrepareData =
+        enableRecycleForNetwork && obj->GetSourceInfo().GetSrcType() == SrcType::NETWORK && !obj->GetData();
+    if (needPrepareData) {
+        ProcessNetworkImage(obj, ctxWp, size, key, imageDecoderOptions);
+    } else {
+        ProcessNormalImage(obj, ctxWp, size, key, imageDecoderOptions);
+    }
+}
+
+void ImageProvider::PrepareNetworkImageData(const RefPtr<ImageObject>& obj, const SizeF& size, const std::string& key,
+    const ImageDecoderOptions& imageDecoderOptions)
+{
+    auto cachedData = QueryDataFromCache(obj->GetSourceInfo());
+    if (cachedData) {
+        obj->SetData(cachedData);
+        // Data ready, decode directly on current thread (no need to post task)
+        MakeCanvasImageHelper(obj, size, key, imageDecoderOptions);
+        return;
+    }
+
+    // Data not in cache, trigger download and continue decoding after download completes
+    TAG_LOGI(AceLogTag::ACE_IMAGE, "Network image data not ready, triggering download. %{private}s",
+        obj->GetSourceInfo().ToString().c_str());
+    const std::string& src = obj->GetSourceInfo().GetSrc();
+
+    // Register download callback to continue decoding after download completes
+    DownloadCallback downloadCallback;
+    downloadCallback.successCallback = [obj, size, key, imageDecoderOptions](
+                                           const std::string&& imageData, bool async, int32_t instanceId) {
+        ContainerScope scope(instanceId);
+        TAG_LOGI(AceLogTag::ACE_IMAGE, "Network image downloaded for MakeCanvasImage. %{private}s, [%zu]",
+            obj->GetSourceInfo().ToString().c_str(), imageData.size());
+        ImageErrorInfo errorInfo;
+        if (!GreatNotEqual(imageData.size(), 0)) {
+            FailCallback(key, "The length of imageData from netStack is not positive",
+                errorInfo, imageDecoderOptions.sync, obj->GetSourceInfo().GetContainerId());
+            return;
+        }
+        auto data = ImageData::MakeFromDataWithCopy(imageData.data(), imageData.size());
+        if (!data) {
+            TAG_LOGW(AceLogTag::ACE_IMAGE,
+                "Download data invalid, Create ImageData failed. src[%{private}s], dataSize=%{public}zu",
+                obj->GetSourceInfo().GetSrc().c_str(), imageData.size());
+            FailCallback(key, "After download successful, ImageData Create fail",
+                errorInfo, imageDecoderOptions.sync, obj->GetSourceInfo().GetContainerId());
+            return;
+        }
+        obj->SetData(data);
+        MakeCanvasImageHelper(obj, size, key, imageDecoderOptions);
+    };
+    downloadCallback.failCallback = [key, obj](std::string errorMessage, ImageErrorInfo errorInfo,
+                                           bool async, int32_t instanceId) {
+        ContainerScope scope(instanceId);
+        TAG_LOGE(AceLogTag::ACE_IMAGE, "Network image download failed for MakeCanvasImage. %{public}s",
+            obj->GetSourceInfo().ToString().c_str());
+        FailCallback(
+            key, errorMessage, errorInfo, false, obj->GetSourceInfo().GetContainerId());
+    };
+    downloadCallback.cancelCallback = downloadCallback.failCallback;
+
+    NetworkImageLoader::DownloadImage(std::move(downloadCallback), src, imageDecoderOptions.sync);
 }
 
 void ImageProvider::MakeCanvasImageHelper(const RefPtr<ImageObject>& obj, const SizeF& size, const std::string& key,
