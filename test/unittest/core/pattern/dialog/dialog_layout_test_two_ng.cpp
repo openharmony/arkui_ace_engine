@@ -782,7 +782,7 @@ HWTEST_F(DialogLayoutTwoTestNg, DialogLayoutAlgorithmMeasure, TestSize.Level1)
         ASSERT_NE(dialog, nullptr);
         auto contentNode = AceType::DynamicCast<FrameNode>(dialog->GetFirstChild());
         ASSERT_NE(contentNode, nullptr);
-        auto pipeline = contentNode->GetPipeline();
+        auto pipeline = PipelineBase::GetCurrentContext();
         ASSERT_NE(pipeline, nullptr);
         pipeline->SetIsCurrentInForceSplitMode(false);
         auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
