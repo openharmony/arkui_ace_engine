@@ -53,6 +53,7 @@ ohos_shared_library("arkoala_native_ani") {
   }
 
   sources = [
+    "//foundation/arkui/ace_engine/frameworks/base/utils/string_utils.cpp",
     "UINode/uinode_module_methods.cpp",
     "animation/animation_ani_impl.cpp",
     "canvas/canvas_module.cpp",

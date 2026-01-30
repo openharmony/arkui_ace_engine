@@ -52,6 +52,7 @@ ohos_shared_library("ace_ndk") {
   public_configs = [ ":ace_ndk_public_configs" ]
 
   sources = [
+    "//foundation/arkui/ace_engine/frameworks/base/utils/string_utils.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/accessibility/native_interface_accessibility_impl.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/accessibility/native_interface_accessibility_provider.cpp",
     "//foundation/arkui/ace_engine/frameworks/core/components/common/properties/color.cpp",

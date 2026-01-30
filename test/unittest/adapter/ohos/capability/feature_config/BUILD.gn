@@ -35,6 +35,7 @@ ohos_unittest("arkui_feature_param_manager_test") {
 
     # mock
     "$ace_root/adapter/ohos/osal/log_wrapper.cpp",
+    "$ace_root/frameworks/base/utils/string_utils.cpp",
     "$ace_root/test/mock/adapter/mock_log_wrapper.cpp",
     "$ace_root/test/mock/base/mock_system_properties.cpp",
   ]
