@@ -103,7 +103,7 @@ const GENERATED_ArkUIDataPanelContentModifier* GetDataPanelModifierWithCache()
         auto module = DynamicModuleHelper::GetInstance().GetDynamicModule("DataPanel");
         if (module != nullptr) {
             cachedModifier = reinterpret_cast<const GENERATED_ArkUIDataPanelContentModifier*>(
-                module->GetCustomModifier()
+                module->GetCustomModifier("contentModifier")
             );
         }
     });

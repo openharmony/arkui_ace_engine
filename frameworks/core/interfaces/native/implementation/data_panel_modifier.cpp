@@ -26,8 +26,7 @@ const GENERATED_ArkUIDataPanelModifier* GetDataPanelModifier()
     if (cachedModifier == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("DataPanel");
         CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const GENERATED_ArkUIDataPanelModifier*>(
-            module->GetCustomModifier("contentModifier"));
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIDataPanelModifier*>(module->GetStaticModifier());
     }
     return cachedModifier;
 }

@@ -36659,11 +36659,7 @@ if (globalThis.DataPanel === undefined) {
       getUINativeModule().loadNativeModule('DataPanel');
       let module = globalThis.requireNapi('arkui.components.arkdatapanel');
       module.exportView();
-      if (params !== undefined) {
-        getUINativeModule().dataPanel.create(params.values ?? 0, params.max ?? 100, params.type ?? 0);
-      } else {
-        getUINativeModule().dataPanel.create(0, 100, 0);
-      }
+      getUINativeModule().dataPanel.create(params);
     },
     name: 'JSDataPanel'
   }
