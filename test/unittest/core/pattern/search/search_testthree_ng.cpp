@@ -155,6 +155,9 @@ HWTEST_F(SearchTestThreeNg, OnInjectionEventTest001, TestSize.Level1)
     std::string command = R"()";
     auto ret = pattern->OnInjectionEvent(command);
     EXPECT_EQ(ret, RET_FAILED);
+    command = R"({)";
+    ret = pattern->OnInjectionEvent(command);
+    EXPECT_EQ(ret, RET_FAILED);
     command = R"({"cmd":"setText"})";
     ret = pattern->OnInjectionEvent(command);
     EXPECT_EQ(ret, RET_FAILED);
