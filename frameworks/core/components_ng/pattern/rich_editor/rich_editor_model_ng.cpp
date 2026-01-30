@@ -54,9 +54,8 @@ void RichEditorModelNG::InitRichEditorModel(bool isStyledStringMode, const RefPt
 {
     CHECK_NULL_VOID(frameNode);
     auto richEditorPattern = frameNode->GetPattern<RichEditorPattern>();
-    CHECK_NULL_VOID(richEditorPattern);
     auto richEditorLayoutProperty = frameNode->GetLayoutProperty<RichEditorLayoutProperty>();
-    CHECK_NULL_VOID(richEditorLayoutProperty);
+    CHECK_NULL_VOID(richEditorPattern && richEditorLayoutProperty);
     richEditorLayoutProperty->UpdateTextAlign(TextAlign::START);
     richEditorLayoutProperty->UpdateWordBreak(WordBreak::BREAK_WORD);
     richEditorLayoutProperty->UpdateAlignment(Alignment::TOP_LEFT);
