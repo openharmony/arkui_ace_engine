@@ -1286,7 +1286,7 @@ export class SliderOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForValueTmpValueForIdx0  = valueHolderForValueTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForValueTmpValueForIdx0)
-            } else if (valueHolderForValueTmpValue instanceof Bindable<double>) {
+            } else if (valueHolderForValueTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForValueTmpValueForIdx1  = valueHolderForValueTmpValue as Bindable<double>
                 Bindable_F64_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx1)

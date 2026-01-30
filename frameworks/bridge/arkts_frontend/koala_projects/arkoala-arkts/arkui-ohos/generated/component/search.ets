@@ -1994,7 +1994,7 @@ export class SearchOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForValueTmpValueForIdx0  = valueHolderForValueTmpValue as string
                 valueSerializer.writeString(valueHolderForValueTmpValueForIdx0)
-            } else if (valueHolderForValueTmpValue instanceof Bindable<string>) {
+            } else if (valueHolderForValueTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForValueTmpValueForIdx1  = valueHolderForValueTmpValue as Bindable<string>
                 Bindable_String_serializer.write(valueSerializer, valueHolderForValueTmpValueForIdx1)

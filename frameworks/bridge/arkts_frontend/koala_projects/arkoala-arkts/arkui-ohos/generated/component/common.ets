@@ -5838,7 +5838,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 thisSerializer.writeInt8((0).toByte())
                 const isShowTmpValueForIdx0  = isShowTmpValue as boolean
                 thisSerializer.writeBoolean(isShowTmpValueForIdx0)
-            } else if (isShowTmpValue instanceof Bindable<boolean>) {
+            } else if (isShowTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const isShowTmpValueForIdx1  = isShowTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)
@@ -5929,7 +5929,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 thisSerializer.writeInt8((0).toByte())
                 const isShownTmpValueForIdx0  = isShownTmpValue as boolean
                 thisSerializer.writeBoolean(isShownTmpValueForIdx0)
-            } else if (isShownTmpValue instanceof Bindable<boolean>) {
+            } else if (isShownTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const isShownTmpValueForIdx1  = isShownTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, isShownTmpValueForIdx1)
@@ -5963,7 +5963,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 thisSerializer.writeInt8((0).toByte())
                 const isShowTmpValueForIdx0  = isShowTmpValue as boolean
                 thisSerializer.writeBoolean(isShowTmpValueForIdx0)
-            } else if (isShowTmpValue instanceof Bindable<boolean>) {
+            } else if (isShowTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const isShowTmpValueForIdx1  = isShowTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)
@@ -5997,7 +5997,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 thisSerializer.writeInt8((0).toByte())
                 const isShowTmpValueForIdx0  = isShowTmpValue as boolean
                 thisSerializer.writeBoolean(isShowTmpValueForIdx0)
-            } else if (isShowTmpValue instanceof Bindable<boolean>) {
+            } else if (isShowTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const isShowTmpValueForIdx1  = isShowTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)
@@ -6031,7 +6031,7 @@ export class ArkCommonMethodPeer extends PeerNode {
                 thisSerializer.writeInt8((0).toByte())
                 const isShowTmpValueForIdx0  = isShowTmpValue as boolean
                 thisSerializer.writeBoolean(isShowTmpValueForIdx0)
-            } else if (isShowTmpValue instanceof Bindable<boolean>) {
+            } else if (isShowTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const isShowTmpValueForIdx1  = isShowTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(thisSerializer, isShowTmpValueForIdx1)

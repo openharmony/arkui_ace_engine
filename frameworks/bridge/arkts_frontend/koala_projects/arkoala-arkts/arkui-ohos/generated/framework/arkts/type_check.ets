@@ -7041,7 +7041,7 @@ export class TypeChecker {
             const array = value as Array<Object>
             if (array.length == 0) return true
             const e = array[0]
-            return e instanceof ParticlePropertyAnimation<double>
+            return e instanceof ParticlePropertyAnimation
         }
         return false
     }
@@ -7050,7 +7050,7 @@ export class TypeChecker {
             const array = value as Array<Object>
             if (array.length == 0) return true
             const e = array[0]
-            return e instanceof ParticlePropertyAnimation<ResourceColor>
+            return e instanceof ParticlePropertyAnimation
         }
         return false
     }

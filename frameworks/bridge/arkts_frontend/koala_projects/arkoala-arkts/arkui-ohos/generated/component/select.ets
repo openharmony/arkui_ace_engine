@@ -350,11 +350,11 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Resource
                 Resource_serializer.write(thisSerializer, valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Bindable<int32>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(thisSerializer, valueTmpValueForIdx2)
-            } else if (valueTmpValue instanceof Bindable<Resource>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((3).toByte())
                 const valueTmpValueForIdx3  = valueTmpValue as Bindable<Resource>
                 Bindable_Global_Resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx3)
@@ -382,11 +382,11 @@ export class ArkSelectPeer extends ArkCommonMethodPeer {
                     const valueTmpValueForIdx0ForIdx1  = valueTmpValueForIdx0 as Resource
                     Resource_serializer.write(thisSerializer, valueTmpValueForIdx0ForIdx1)
                 }
-            } else if (valueTmpValue instanceof Bindable<string>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const valueTmpValueForIdx1  = valueTmpValue as Bindable<string>
                 Bindable_String_serializer.write(thisSerializer, valueTmpValueForIdx1)
-            } else if (valueTmpValue instanceof Bindable<Resource>) {
+            } else if (valueTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((2).toByte())
                 const valueTmpValueForIdx2  = valueTmpValue as Bindable<Resource>
                 Bindable_Global_Resource_Resource_serializer.write(thisSerializer, valueTmpValueForIdx2)

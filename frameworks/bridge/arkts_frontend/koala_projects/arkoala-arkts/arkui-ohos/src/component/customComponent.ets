@@ -46,7 +46,7 @@ export class ReuseObject {
     private _isRecord: boolean = false;
     constructor(value: RecordData) {
         this._raw = value;
-        if (this._raw instanceof Record<string, RecordData>) {
+        if (this._raw instanceof Record) {
             this._recordValue = value as Record<string, RecordData>;
             this._isRecord = true;
         }
@@ -448,7 +448,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
         content?: () => void,
         initializers?: T_Options
     ): void {
-        if (this.instance instanceof OptionsCallback<T_Options>) {
+        if (this.instance instanceof OptionsCallback) {
             const optionsCallback = this.instance as OptionsCallback<T_Options>;
             optionsCallback.__initializeStruct(initializers, content);
         } else {
@@ -459,7 +459,7 @@ export class CustomDelegate<T extends ExtendableComponent, T_Options> extends
     public __updateStruct(
         initializers?: T_Options
     ): void {
-        if (this.instance instanceof OptionsCallback<T_Options>) {
+        if (this.instance instanceof OptionsCallback) {
             const optionsCallback = this.instance as OptionsCallback<T_Options>;
             optionsCallback.__updateStruct(initializers);
         } else {

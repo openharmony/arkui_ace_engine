@@ -334,7 +334,7 @@ export class ArcAlphabetIndexerExtender {
             thisSerializer.writeInt8((0).toByte())
             const selectedForIdx0  = selected as int32
             thisSerializer.writeInt32(selectedForIdx0)
-        } else if (selected instanceof Bindable<int32>) {
+        } else if (selected instanceof Bindable) {
             thisSerializer.writeInt8((1).toByte())
             const selectedForIdx1  = selected as Bindable<int32>
             Bindable_I32_serializer.write(thisSerializer, selectedForIdx1)
@@ -471,7 +471,7 @@ export class ArcAlphabetIndexerExtender {
                 thisSerializer.writeInt8((0).toByte())
                 const indexTmpValueForIdx0  = indexTmpValue as int32
                 thisSerializer.writeInt32(indexTmpValueForIdx0)
-            } else if (indexTmpValue instanceof Bindable<int32>) {
+            } else if (indexTmpValue instanceof Bindable) {
                 thisSerializer.writeInt8((1).toByte())
                 const indexTmpValueForIdx1  = indexTmpValue as Bindable<int32>
                 Bindable_I32_serializer.write(thisSerializer, indexTmpValueForIdx1)

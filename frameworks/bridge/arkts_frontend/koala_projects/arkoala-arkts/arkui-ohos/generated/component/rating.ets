@@ -319,7 +319,7 @@ export class RatingOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForRatingTmpValueForIdx0  = valueHolderForRatingTmpValue as double
                 valueSerializer.writeFloat64(valueHolderForRatingTmpValueForIdx0)
-            } else if (valueHolderForRatingTmpValue instanceof Bindable<double>) {
+            } else if (valueHolderForRatingTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForRatingTmpValueForIdx1  = valueHolderForRatingTmpValue as Bindable<double>
                 Bindable_F64_serializer.write(valueSerializer, valueHolderForRatingTmpValueForIdx1)
