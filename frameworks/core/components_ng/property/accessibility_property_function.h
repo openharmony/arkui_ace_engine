@@ -16,7 +16,9 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_ACCESSIBILITY_PROPERTY_FUNCTION_H
 #define FOUNDATION_ACE_FRAMEWORKS_COMPONENTS_NG_PROPERTIES_ACCESSIBILITY_PROPERTY_FUNCTION_H
 
+#include <optional>
 #include "base/memory/ace_type.h"
+#include "base/utils/type_definition.h"
 #include "core/accessibility/accessibility_utils.h"
 
 namespace OHOS::Accessibility {

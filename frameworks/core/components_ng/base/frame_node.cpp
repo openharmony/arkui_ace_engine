@@ -29,6 +29,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
+#include "ui/focus/focus_constants.h"
 #include "ui/view/frame_node.h"
 #include "ui/view/pattern.h"
 
@@ -585,6 +586,21 @@ void FrameNode::CreateEventHubInner()
     }
 }
 
+const RefPtr<FocusHub>& FrameNode::GetFocusHub() const
+{
+    return focusHub_;
+}
+
+FocusType FrameNode::GetFocusType() const
+{
+    FocusType type = FocusType::DISABLE;
+    auto focusHub = GetFocusHub();
+    if (focusHub) {
+        type = focusHub->GetFocusType();
+    }
+    return type;
+}
+    
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
 {

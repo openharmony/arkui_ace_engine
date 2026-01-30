@@ -22,6 +22,7 @@
 #include "core/components_ng/event/click_event.h"
 #include "core/components_ng/event/event_hub.h"
 #include "core/components_ng/event/long_press_event.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/gestures/gesture_group.h"
 #include "core/components_ng/gestures/recognizers/click_recognizer.h"
 #include "core/components_ng/gestures/recognizers/exclusive_recognizer.h"

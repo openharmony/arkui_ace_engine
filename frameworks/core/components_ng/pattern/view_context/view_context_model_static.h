@@ -17,6 +17,7 @@
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PATTERN_VIEW_CONTEXT_VIEW_CONTEXT_MODEL_STATIC_H
 
 #include "frameworks/core/components/common/properties/animation_option.h"
+#include <optional>
 
 namespace OHOS::Ace::NG {
 class FrameNode;

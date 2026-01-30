@@ -50,16 +50,9 @@ public:
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override;
 
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::SCOPE, true };
-    }
+    FocusPattern GetFocusPattern() const override;
 
-    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override
-    {
-        return ScopeFocusAlgorithm(ScopeFocusDirection::UNIVERSAL, false, true,
-            ScopeType::OTHERS);
-    }
+    ScopeFocusAlgorithm GetScopeFocusAlgorithm() override;
 
     void OnAttachToMainTree() override;
 

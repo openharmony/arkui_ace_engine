@@ -17,6 +17,7 @@
 
 #include "display_manager.h"
 #include "display_info.h"
+#include "base/log/log.h"
 
 namespace OHOS::Ace {
 constexpr uint64_t DEFAULT_DISPLAY_ID = 0;

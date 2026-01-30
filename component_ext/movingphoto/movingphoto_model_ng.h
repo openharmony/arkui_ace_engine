@@ -16,11 +16,14 @@
 #ifndef COMPONENT_EXT_MOVING_PHOTO_MOVING_PHOTO_MODEL_NG_H
 #define COMPONENT_EXT_MOVING_PHOTO_MOVING_PHOTO_MODEL_NG_H
 
+#include <mutex>
 #include "movingphoto_event_hub.h"
 #include "movingphoto_controller.h"
 #include "movingphoto_utils.h"
 #include "movingphoto_node.h"
 
+#include "base/image/pixel_map.h"
+#include "core/components/common/layout/constants.h"
 namespace OHOS::Ace::NG {
 
 class ACE_EXPORT MovingPhotoModelNG {

@@ -22,6 +22,7 @@
 #include "core/components_ng/event/overflow_scroll_event_hub.h"
 #include "core/components_ng/layout/vertical_overflow_handler.h"
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/event/focus_hub.h"
 
 struct ArkUI_AccessibilityProvider;
 

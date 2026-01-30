@@ -24,7 +24,7 @@
 #include "compatible/components/list_v2/list_component.h"
 
 namespace OHOS::Ace::NG {
-constexpr int32_t INVALID_IDX = -1;
+class DragDropProxy;
 class ListEventHub : public ScrollableEventHub {
     DECLARE_ACE_TYPE(ListEventHub, ScrollableEventHub);
 

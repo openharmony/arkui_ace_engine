@@ -19,6 +19,7 @@
 #include "gmock/gmock.h"
 
 #include "core/components_ng/pattern/pattern.h"
+#include "core/components_ng/event/focus_hub.h"
 
 namespace OHOS::Ace::NG {
 class MockPattern : public Pattern {

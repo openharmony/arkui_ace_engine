@@ -1038,6 +1038,7 @@
       virtual?thunk?to?OHOS::Ace::NG::UINode::*;
       virtual?thunk?to?OHOS::Ace::NG::FrameNode::*;
       virtual?thunk?to?OHOS::Ace::NG::LayoutProperty::*;
+      virtual?thunk?to?OHOS::Ace::NG::EventHub::*;
 
       vtable?for?OHOS::Ace::NG::AccessibilityProperty;
       vtable?for?OHOS::Ace::NG::BoxLayoutAlgorithm;

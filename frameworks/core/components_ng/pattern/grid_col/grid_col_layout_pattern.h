@@ -20,6 +20,7 @@
 
 #include "base/log/dump_log.h"
 #include "base/utils/macros.h"
+#include "core/components_ng/event/focus_hub.h"
 #include "core/components_ng/pattern/linear_layout/linear_layout_algorithm.h"
 #include "core/components_ng/pattern/pattern.h"
 

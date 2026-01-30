@@ -14,10 +14,16 @@
  */
 
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
+#include "core/components_ng/event/focus_hub.h"
 
 namespace OHOS::Ace::NG {
 void RenderNodePattern::OnModifyDone()
 {
     Pattern::OnModifyDone();
 }
+
+FocusPattern RenderNodePattern::GetFocusPattern() const
+{
+    return { FocusType::SCOPE, true };
 }
+} // namespace OHOS::Ace::NG
