@@ -134,6 +134,7 @@ void SelectOneTestNg::SetUpTestCase()
 
 void SelectOneTestNg::TearDownTestCase()
 {
+    MockPipelineContext::GetCurrent()->SetThemeManager(nullptr);
     MockPipelineContext::TearDown();
 }
 
