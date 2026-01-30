@@ -2416,6 +2416,7 @@ frameworks/core/components_ng/base/view_stack_model_ng.h @arkui_statemgmt
 frameworks/core/components_ng/base/view_stack_processor.cpp @arkui_statemgmt
 frameworks/core/components_ng/base/view_stack_processor.h @arkui_statemgmt
 frameworks/core/components_ng/base/transparent_node_detector.cpp @arkui_framework_xnode
+frameworks/core/components_ng/base/transparent_node_detector.h @arkui_framework_xnode
 frameworks/core/components_ng/common_napi_utils/BUILD.gn @arkui_framework_xnode
 frameworks/core/components_ng/common_napi_utils/common_napi_utils.cpp @arkui_framework_xnode
 frameworks/core/components_ng/common_napi_utils/common_napi_utils.h @arkui_framework_xnode
