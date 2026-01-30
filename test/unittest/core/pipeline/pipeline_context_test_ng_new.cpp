@@ -4089,12 +4089,44 @@ HWTEST_F(PipelineContextTestNg, OnDumpInfo001, TestSize.Level1)
      * @tc.expected: Test that the member window_ is empty.
      */
     ASSERT_NE(context_, nullptr);
+    bool onShow = context_->onShow_;
+    context_->onShow_ = true;
     std::vector<std::string> params;
     params.push_back("-simplify");
     params.push_back("-compname");
     params.push_back("test");
     auto ret = context_->OnDumpInfo(params);
     EXPECT_TRUE(ret);
+    context_->onShow_ = onShow;
+}
+
+/**
+ * @tc.name: OnDumpInfo002
+ * @tc.desc: Test OnDumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, OnDumpInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call the function OnDumpInfo of -simplify when window is background
+     * @tc.expected: dump result is false.
+     */
+    ASSERT_NE(context_, nullptr);
+    bool onShow = context_->onShow_;
+    context_->onShow_ = false;
+    std::vector<std::string> params;
+    params.push_back("-simplify");
+    auto ret = context_->OnDumpInfo(params);
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps2: Call the function OnDumpInfo of -simplify when window is foreground
+     * @tc.expected: dump result is true.
+     */
+    context_->onShow_ = true;
+    ret = context_->OnDumpInfo(params);
+    EXPECT_TRUE(ret);
+    context_->onShow_ = onShow;
 }
 
 /**
