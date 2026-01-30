@@ -162,7 +162,14 @@ class JSON2 {
     const result: any = {};
 
     Object.keys(value).forEach(key => {
-      const baseKey = key.replace(new RegExp('^' + V2_STATE_PREFIX), '');
+      let baseKey = key;
+      if (baseKey.startsWith(ComputedV2.COMPUTED_PREFIX)) {
+        return;
+      }
+      if (baseKey.startsWith(ObserveV2.OB_PREFIX)) {
+        baseKey = baseKey.substring(ObserveV2.OB_PREFIX.length)
+      }
+
       const options = meta?.[baseKey];
       if (options?.disabled) { return; }
       result[options?.alias || baseKey] = (value as Record<string, unknown>)[baseKey];
