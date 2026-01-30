@@ -1,0 +1,17 @@
+{
+  "src": [
+    "pages/Index",
+    "pages/PageEts",
+    "pages/PageModifier",
+    "pages/PageProperty",
+    "pages/PageUx",
+    "pages/Page11",
+    "pages/Page22",
+    "pages/PageBlender",
+    "pages/Page1",
+    "pages/Page2",
+    "pages/Page3",
+    "pages/PageTextInput",
+    "pages/PageDocs"
+  ]
+}
