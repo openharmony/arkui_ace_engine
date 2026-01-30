@@ -1985,12 +1985,6 @@ void PipelineContext::StartWindowSizeChangeAnimate(int32_t width, int32_t height
             PostKeyboardAvoidTask();
             break;
         }
-        case WindowSizeChangeReason::RESIZE_WITH_ANIMATION: {
-            FlushSafeArea(width, height, safeAvoidArea);
-            SetRootRect(width, height, 0.0);
-            FlushUITasks();
-            break;
-        }
         case WindowSizeChangeReason::SCENE_WITH_ANIMATION: {
             safeAreaManager_->UpdateKeyboardOffset(0.0);
             SetRootRect(width, height, 0.0);
