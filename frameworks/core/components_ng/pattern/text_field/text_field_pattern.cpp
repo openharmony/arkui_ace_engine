@@ -13360,6 +13360,22 @@ void TextFieldPattern::HandleButtonFocusEvent(const RefPtr<TextInputResponseArea
     needResetFocusColor_ = true;
 }
 
+void TextFieldPattern::UpdateFocusOffsetIfNeed(RoundRect& paintRect)
+{
+    auto textFieldTheme = GetTheme();
+    CHECK_NULL_VOID(textFieldTheme);
+    auto focusPaintPadding = textFieldTheme->GetIconFocusPadding().ConvertToPx();
+    RectF rect = paintRect.GetRect();
+    auto x = rect.GetX();
+    auto y = rect.GetY();
+    auto width = rect.Width();
+    auto height = rect.Height();
+    paintRect.SetRect({x - focusPaintPadding, y - focusPaintPadding,
+        width + 2 * focusPaintPadding, height + 2 * focusPaintPadding});
+    float cornerRadius = width / 2 + focusPaintPadding;
+    paintRect.SetCornerRadius(cornerRadius);
+}
+
 void TextFieldPattern::SetFocusStyleForTV()
 {
     if (IsInlineMode()) {
@@ -13689,14 +13705,14 @@ void TextFieldPattern::GetInnerFocusPaintRectForTV(RoundRect& paintRect)
         cleanNodeResponseArea_->CreateIconRect(paintRect, true);
         float cornerRadius = paintRect.GetRect().Width() / 2;
         paintRect.SetCornerRadius(cornerRadius);
-        UpdateFoucsOffsetIfNeed(paintRect);
+        UpdateFocusOffsetIfNeed(paintRect);
     } else if (focusIndex_ == FocuseIndex::VOICE) {
         CHECK_NULL_VOID(voiceResponseArea_);
         GetIconPaintRect(voiceResponseArea_, paintRect);
         voiceResponseArea_->CreateIconRect(paintRect, true);
         float cornerRadius = paintRect.GetRect().Width() / 2;
         paintRect.SetCornerRadius(cornerRadius);
-        UpdateFoucsOffsetIfNeed(paintRect);
+        UpdateFocusOffsetIfNeed(paintRect);
     } else if (focusIndex_ == FocuseIndex::UNIT) {
         if (IsShowPasswordIcon()) {
             CHECK_NULL_VOID(responseArea_);
@@ -13704,7 +13720,7 @@ void TextFieldPattern::GetInnerFocusPaintRectForTV(RoundRect& paintRect)
             responseArea_->CreateIconRect(paintRect, true);
             float cornerRadius = paintRect.GetRect().Width() / 2;
             paintRect.SetCornerRadius(cornerRadius);
-            UpdateFoucsOffsetIfNeed(paintRect);
+            UpdateFocusOffsetIfNeed(paintRect);
         }
         if (IsShowUnit()) {
             CHECK_NULL_VOID(responseArea_);
