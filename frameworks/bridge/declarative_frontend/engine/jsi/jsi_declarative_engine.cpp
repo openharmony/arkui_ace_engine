@@ -816,35 +816,51 @@ void JsiDeclarativeEngineInstance::PreloadAceModule(void* runtime)
     localRuntime_ = arkRuntime;
     cardRuntime_ = runtime;
     g_declarativeRuntime = runtime;
-    PreLoadArkuiModule(arkRuntime);
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+    PreLoadDynamicModule(arkRuntime);
+#endif
 }
 
-void JsiDeclarativeEngineInstance::PreLoadArkuiModule(const shared_ptr<JsRuntime>& runtime)
+#if !defined(PREVIEW) && !defined(ANDROID_PLATFORM) && !defined(IOS_PLATFORM)
+void JsiDeclarativeEngineInstance::PreLoadDynamicModule(const shared_ptr<JsRuntime>& runtime)
 {
-    static const std::unordered_map<std::string_view, std::string_view> soMap = {
-        { "Gauge", "gauge" },
-        { "TimePicker", "timepicker" },
-        { "TimePickerDialog", "timepicker" },
-        { "WaterFlow", "waterflow" },
-        { "FlowItem", "flowitem" },
-        { "CalendarPicker", "calendarpicker" },
-        { "CalendarPickerDialog", "calendarpicker" },
-        { "Hyperlink", "hyperlink" },
-        { "Marquee", "marquee" },
-        { "Stepper", "stepper" },
-        { "StepperItem", "stepperitem" },
+    static const std::vector<std::pair<std::string, std::string>> componentToAbcName = {
+        { "Checkbox", "arkui.components.arkcheckbox" },
+        { "CheckboxGroup", "arkui.components.arkcheckboxgroup" },
+        { "Gauge", "arkui.components.arkgauge" },
+        { "Rating", "arkui.components.arkrating" },
+        { "TimePicker", "arkui.components.arktimepicker" },
+        { "TimePickerDialog", "arkui.components.arktimepicker" },
+        { "WaterFlow", "arkui.components.arkwaterflow" },
+        { "FlowItem", "arkui.components.arkflowitem" },
+        { "CalendarPicker", "arkui.components.arkcalendarpicker" },
+        { "CalendarPickerDialog", "arkui.components.arkcalendarpicker" },
+        { "Hyperlink", "arkui.components.arkhyperlink" },
+        { "Marquee", "arkui.components.arkmarquee" },
+        { "Stepper", "arkui.components.arkstepper" },
+        { "StepperItem", "arkui.components.arkstepperitem" },
+        { "Radio", "arkui.components.arkradio" },
+        { "Slider", "arkui.components.arkslider" },
+        { "Indexer", "arkui.components.arkalphabetindexer" },
+        { "Sidebar", "arkui.components.arksidebarcontainer" },
+        { "ColumnSplit", "arkui.components.arkcolumnsplit" },
+        { "RowSplit", "arkui.components.arkrowsplit" },
+#ifndef ARKUI_WEARABLE
+        { "FolderStack", "arkui.components.arkfolderstack" },
+#endif
     };
     shared_ptr<JsValue> global = runtime->GetGlobal();
-    shared_ptr<JsValue> func = global->GetProperty(runtime, "_ArkUIPreload_");
+    shared_ptr<JsValue> func = global->GetProperty(runtime, "__ArkUI_PreloadDynamicModule__");
     if (!func || !func->IsFunction(runtime)) {
         return;
     }
-    for (const auto& pair : soMap) {
-        std::vector<shared_ptr<JsValue>> argv = { runtime->NewString(std::string(pair.first)),
-            runtime->NewString(std::string(pair.second)) };
+    for (const auto& pair : componentToAbcName) {
+        std::vector<shared_ptr<JsValue>> argv = { runtime->NewString(pair.first),
+            runtime->NewString(pair.second) };
         func->Call(runtime, global, argv, argv.size());
     }
 }
+#endif
 
 void JsiDeclarativeEngineInstance::PreloadAceModuleForCustomRuntime(void* runtime)
 {
