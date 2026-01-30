@@ -34262,13 +34262,7 @@ if (globalThis.WaterFlow === undefined) {
       getUINativeModule().loadNativeModule('WaterFlow');
       let module = globalThis.requireNapi('arkui.components.arkwaterflow');
       module.exportView();
-      getUINativeModule().waterFlow.setWaterFlowInitialize(true,
-        params === null || params === void 0 ? void 0 : params.scroller,
-        params === null || params === void 0 ? void 0 : params.sections,
-        params === null || params === void 0 ? void 0 : params.layoutMode,
-        params === null || params === void 0 ? void 0 : params.footerContent,
-        params === null || params === void 0 ? void 0 : params.footer,
-        (params !== null && typeof params === 'object') ? 'footerContent' in params : false);
+      getUINativeModule().waterFlow.create(params);
     }
   }
 }
