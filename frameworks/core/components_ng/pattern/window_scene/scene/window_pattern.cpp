@@ -134,11 +134,11 @@ public:
         windowPattern->OnRemoveBlank();
     }
 
-    void OnAddSnapshot() override
+    void OnAddSnapshot(std::function<void()>&& callback) override
     {
         auto windowPattern = windowPattern_.Upgrade();
         CHECK_NULL_VOID(windowPattern);
-        windowPattern->OnAddSnapshot();
+        windowPattern->OnAddSnapshot(std::move(callback));
     }
 
     void OnRemoveSnapshot() override
