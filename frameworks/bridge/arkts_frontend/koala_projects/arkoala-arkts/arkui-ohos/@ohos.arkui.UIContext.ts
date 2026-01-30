@@ -661,7 +661,7 @@ export class UIContext {
         throw Error("animateTo not implemented in UIContext!")
     }
 
-    public animateToImmediately(value: AnimateParam, event: Callback<void>): void {
+    public animateToImmediately(value: AnimateParam, event: () => void): void {
         throw Error("animateToImmediately not implemented in UIContext!")
     }
 
