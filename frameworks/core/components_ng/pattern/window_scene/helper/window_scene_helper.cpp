@@ -458,7 +458,7 @@ void WindowSceneHelper::ConvertSystemWindowId(const RefPtr<FrameNode>& frameNode
     CHECK_NULL_VOID(frameNode);
     auto focusSystemWindowId = WindowSceneHelper::GetFocusSystemWindowId(frameNode);
     if (focusSystemWindowId != 0) {
-        systemWindowId = focusSystemWindowId;
+        systemWindowId = static_cast<uint32_t>(focusSystemWindowId);
     }
 }
 } // namespace OHOS::Ace::NG
