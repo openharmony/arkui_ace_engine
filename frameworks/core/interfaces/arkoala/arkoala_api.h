@@ -7732,6 +7732,7 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorCopyOptions)(ArkUINodeHandle node, ArkUI_Int32 copyOptionsValue);
     ArkUI_Int32 (*getRichEditorCopyOptions)(ArkUINodeHandle node);
     void (*resetRichEditorCopyOptions)(ArkUINodeHandle node);
+    void (*resetRichEditorCAPICopyOptions)(ArkUINodeHandle node);
     void (*setRichEditorOnSelectionChange)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnSelectionChange)(ArkUINodeHandle node);
     void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);

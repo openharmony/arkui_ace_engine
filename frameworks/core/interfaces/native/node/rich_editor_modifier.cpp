@@ -194,6 +194,14 @@ void ResetRichEditorCopyOptions(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
+    CopyOptions defaultCopyOptions = CopyOptions::Distributed;
+    RichEditorModelNG::SetCopyOption(frameNode, defaultCopyOptions);
+}
+
+void ResetRichEditorCAPICopyOptions(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
     CopyOptions defaultCopyOptions = CopyOptions::Local;
     RichEditorModelNG::SetCopyOption(frameNode, defaultCopyOptions);
 }
@@ -1699,6 +1707,7 @@ const ArkUIRichEditorModifier* GetRichEditorModifier()
         .setRichEditorCopyOptions = SetRichEditorCopyOptions,
         .getRichEditorCopyOptions = GetRichEditorCopyOptions,
         .resetRichEditorCopyOptions = ResetRichEditorCopyOptions,
+        .resetRichEditorCAPICopyOptions = ResetRichEditorCAPICopyOptions,
         .setRichEditorOnSelectionChange = SetRichEditorOnSelectionChange,
         .resetRichEditorOnSelectionChange = ResetRichEditorOnSelectionChange,
         .setRichEditorCaretColor = SetRichEditorCaretColor,

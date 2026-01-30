@@ -10733,7 +10733,7 @@ void ResetTextCopyOption(ArkUI_NodeHandle node)
     if (node->type == ARKUI_NODE_TEXT) {
         fullImpl->getNodeModifiers()->getTextModifier()->resetTextCopyOption(node->uiNodeHandle);
     } else if (node->type == ARKUI_NODE_RICH_EDITOR) {
-        fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorCopyOptions(node->uiNodeHandle);
+        fullImpl->getNodeModifiers()->getRichEditorModifier()->resetRichEditorCAPICopyOptions(node->uiNodeHandle);
     }
 }
 
