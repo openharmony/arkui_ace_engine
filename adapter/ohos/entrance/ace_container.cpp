@@ -1584,11 +1584,13 @@ void AceContainer::DestroyContainer(int32_t instanceId, const std::function<void
     SubwindowManager::GetInstance()->CloseDialog(instanceId);
     auto container = AceEngine::Get().GetContainer(instanceId);
     CHECK_NULL_VOID(container);
+    auto taskExecutor = container->GetTaskExecutor();
+    CHECK_NULL_VOID(taskExecutor);
+    taskExecutor->PostSyncTask([] { LOGI("Wait UI thread before destroy..."); },
+        TaskExecutor::TaskType::UI, "ArkUIWaitLog");
     container->Destroy();
     // unregister watchdog before stop thread to avoid UI_BLOCK report
     AceEngine::Get().UnRegisterFromWatchDog(instanceId);
-    auto taskExecutor = container->GetTaskExecutor();
-    CHECK_NULL_VOID(taskExecutor);
 
     taskExecutor->PostSyncTask([] { LOGI("Wait UI thread..."); }, TaskExecutor::TaskType::UI, "ArkUIWaitLog");
     taskExecutor->PostSyncTask([] { LOGI("Wait JS thread..."); }, TaskExecutor::TaskType::JS, "ArkUIWaitLog");
