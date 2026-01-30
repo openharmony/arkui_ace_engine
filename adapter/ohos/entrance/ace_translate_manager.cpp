@@ -481,7 +481,7 @@ void UiTranslateManagerImpl::TravelFindPixelMap(RefPtr<NG::UINode> currentNode)
     for (const auto& item : currentNode->GetChildren(true)) {
         auto node = AceType::DynamicCast<NG::FrameNode>(item);
         if (node) {
-            if (!node->CheckVisibleAndActive()) {
+            if (!node->IsVisibleAndActive()) {
                 continue;
             }
             if (node->GetTag() == V2::IMAGE_ETS_TAG) {

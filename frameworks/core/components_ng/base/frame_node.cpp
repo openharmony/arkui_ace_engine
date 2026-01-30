@@ -1249,7 +1249,7 @@ void FrameNode::DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json)
     json->Put("OverlayOffset", (offsetX.ToString() + "," + offsetY.ToString()).c_str());
 }
 
-bool FrameNode::CheckVisibleAndActive() const
+bool FrameNode::IsVisibleAndActive() const
 {
     return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE && IsActive();
 }
@@ -4511,20 +4511,20 @@ RectF FrameNode::GetTransformRectRelativeToWindow(bool checkBoundary) const
 }
 
 // same as GetTransformRectRelativeToWindow only when the node is active and under visible parents
-// otherwise returns an empty rect
+// otherwise returns an invalid rect
 RectF FrameNode::GetTransformRectRelativeToWindowOnlyVisible(bool checkBoundary) const
 {
-    auto emptyRect = RectF(static_cast<float>(INT32_MAX), static_cast<float>(INT32_MAX), 0.0, 0.0);
+    auto invalidRect = RectF(static_cast<float>(INT32_MAX), static_cast<float>(INT32_MAX), 0.0, 0.0);
     if (!IsActive()) {
-        return emptyRect;
+        return invalidRect;
     }
     auto context = GetRenderContext();
-    CHECK_NULL_RETURN(context, emptyRect);
+    CHECK_NULL_RETURN(context, invalidRect);
     RectF rect = context->GetPaintRectWithTransform();
     auto parent = GetAncestorNodeOfFrame(true);
     while (parent) {
-        if (!parent->CheckVisibleAndActive()) {
-            return emptyRect;
+        if (!parent->IsVisibleAndActive()) {
+            return invalidRect;
         }
         if (checkBoundary && parent->IsWindowBoundary()) {
             break;

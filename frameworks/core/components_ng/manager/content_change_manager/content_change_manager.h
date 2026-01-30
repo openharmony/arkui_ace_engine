@@ -83,7 +83,7 @@ private:
     static constexpr int32_t DEFAULT_TEXT_MIN_REPORT_TIME = 100;
     float textContentRatio_ = 0.15f; // default text content ratio is 0.15
     uint64_t textContentInterval_ = 100 * NS_PER_MS; // minimum text content change interval is 100 ms.
-    uint32_t ignoreEventMask_;
+    uint32_t ignoreEventMask_ = NONE; // default ignore event mask is no event
     uint64_t lastTextReportTime_ = 0;
     bool textCollecting_ = false;
     std::set<std::pair<WeakPtr<FrameNode>, bool>> changedSwiperNodes_;
