@@ -15478,6 +15478,8 @@ typedef struct Ark_EventLocationInfo {
     Ark_Float64 windowY;
     Ark_Float64 displayX;
     Ark_Float64 displayY;
+    Opt_Float64 globalDisplayX;
+    Opt_Float64 globalDisplayY;
 } Ark_EventLocationInfo;
 typedef struct Opt_EventLocationInfo {
     Ark_Tag tag;

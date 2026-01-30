@@ -1150,7 +1150,7 @@ export class TypeChecker {
     static isEventHub(value: Object | string | number | undefined): boolean {
         return value instanceof EventHub
     }
-    static isEventLocationInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean): boolean {
+    static isEventLocationInfo(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean, arg5: boolean, arg6: boolean, arg7: boolean): boolean {
         return value instanceof EventLocationInfo
     }
     static isEventResult(value: Object | string | number | undefined): boolean {

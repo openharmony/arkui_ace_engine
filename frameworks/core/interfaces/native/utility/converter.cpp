@@ -2762,8 +2762,10 @@ EventLocationInfo Convert(const Ark_EventLocationInfo& src)
     dst.localLocation_.SetY(Converter::Convert<double>(src.y));
     dst.windowLocation_.SetX(Converter::Convert<double>(src.windowX));
     dst.windowLocation_.SetY(Converter::Convert<double>(src.windowY));
-    dst.globalDisplayLocation_.SetX(Converter::Convert<double>(src.displayX));
-    dst.globalDisplayLocation_.SetY(Converter::Convert<double>(src.displayY));
+    dst.displayLocation_.SetX(Converter::Convert<double>(src.displayX));
+    dst.displayLocation_.SetY(Converter::Convert<double>(src.displayY));
+    dst.globalDisplayLocation_.SetX(Converter::OptConvert<double>(src.globalDisplayX).value_or(0.0));
+    dst.globalDisplayLocation_.SetY(Converter::OptConvert<double>(src.globalDisplayY).value_or(0.0));
     return dst;
 }
 

@@ -249,6 +249,7 @@ using SwipeSpeedFuncType = OnSwipeSpeedFunc::FunctionType;
 struct EventLocationInfo {
     Offset localLocation_;
     Offset windowLocation_;
+    Offset displayLocation_;
     Offset globalDisplayLocation_;
 };
 } // namespace OHOS::Ace
