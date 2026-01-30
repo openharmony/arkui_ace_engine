@@ -86,6 +86,7 @@ template("ace_osal_ohos_source_set") {
       "modal_ui_extension_impl.cpp",
       "perf_interfaces.cpp",
       "ressched_report.cpp",
+      "screen_lock_manager_ohos.cpp",
       "socperf_client_impl.cpp",
       "statistic_event_adapter.cpp",
       "stylus_detector_callback.cpp",
@@ -148,6 +149,12 @@ template("ace_osal_ohos_source_set") {
         sources += [ "long_frame_report_impl.cpp" ]
         external_deps += [ "ffrt:libffrt" ]
         defines += [ "FFRT_CPUBOOST_EN" ]
+      }
+
+      if (defined(global_parts_info) &&
+          defined(global_parts_info.theme_screenlock_mgr)) {
+          external_deps += [ "screenlock_mgr:screenlock_client" ]
+          defines += [ "ENABLE_SCREEN_LOCK_MANAGER" ]
       }
 
       external_deps += [
