@@ -4752,7 +4752,7 @@ export struct TreeViewInner {
     if ((this.checkIsAllCN(res) && res.length > this.MAX_CN_LENGTH) ||
       (!this.checkIsAllCN(res) && res.length > this.MAX_EN_LENGTH)) {
       res = this.checkIsAllCN(res) ?
-        res.substr(0, this.MAX_CN_LENGTH) : res.substr(0, this.MAX_EN_LENGTH);
+        res.substr(0, this.MAX_CN_LENGTH.toInt()) : res.substr(0, this.MAX_EN_LENGTH.toInt());
       isLengthError = true;
       this.listNodeDataSource.setPopUpInfo(PopUpType.WARNINGS,
         InputError.LENGTH_ERROR, true, thisIndex);
