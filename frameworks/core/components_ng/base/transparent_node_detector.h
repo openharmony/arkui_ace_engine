@@ -37,8 +37,6 @@ private:
     TransparentNodeDetector(const TransparentNodeDetector& instance) = delete;
     const TransparentNodeDetector& operator = (const TransparentNodeDetector& instance) = delete;
 
-    void DumpNodeInfo(const RefPtr<FrameNode>& node, Window* window);
-
 private:
     bool CheckWindowTransparent(const RefPtr<FrameNode>& root, int32_t currentId, bool isUECWindow, bool isSubWindow,
         bool isDialogWindow, bool isNavigation);
