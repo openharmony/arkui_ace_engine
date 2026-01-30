@@ -111,7 +111,7 @@ bool IsDownloadByNetworkDisabled()
 
 bool IsRecycleImageEnabled()
 {
-    return system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "true") == "true";
+    return system::GetParameter(ENABLE_RECYCLE_IMAGE_KEY, "false") == "true";
 }
 
 bool IsSvgTraceEnabled()
