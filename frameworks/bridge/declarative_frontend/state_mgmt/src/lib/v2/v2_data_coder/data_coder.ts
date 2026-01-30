@@ -18,8 +18,12 @@ function nullOrUndef(value: unknown): boolean {
   return value === null || value === undefined;
 }
 
-function runNoThrow<T>(fn: () => T): T | void {
-  try { return fn(); } catch (e) { }
+function runNoThrow<T>(fn: () => T): T | undefined {
+  try {
+    return fn();
+  } catch {
+    return undefined;
+  }
 }
 
 class DataCoder {
