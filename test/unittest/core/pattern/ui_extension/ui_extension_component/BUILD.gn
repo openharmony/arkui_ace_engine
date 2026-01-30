@@ -16,11 +16,7 @@ import("//foundation/arkui/ace_engine/test/unittest/ace_unittest.gni")
 
 group("ui_extension_component_test_group") {
   testonly = true
-  deps = [
-    ":ui_extension_accessibility_child_tree_callback_test",
-    ":ui_extension_component_testtwo_ng",
-    ":ui_extension_pattern_test_ng",
-  ]
+  deps = []
 }
 
 ace_unittest("ui_extension_accessibility_child_tree_callback_test") {

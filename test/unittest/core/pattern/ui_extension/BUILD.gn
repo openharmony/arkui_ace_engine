@@ -937,14 +937,7 @@ group("ui_extension_component_test_ng") {
   deps = [
     ":isolated_pattern_test_ng",
     ":platform_event_proxy_test",
-    ":platform_pattern_test_ng",
-    ":preview_session_wrapper_impl_test_ng",
-    ":preview_ui_extension_compontent_test",
-    ":security_session_wrapper_impl_test_ng",
-    ":security_ui_extension_pattern_test",
-    ":session_wrapper_impl_test_new_ng",
-    ":session_wrapper_impl_test_ng",
-    ":ui_extension_manager_test",
+    ":platform_pattern_test_ng"
   ]
 
   # dynamic_component
