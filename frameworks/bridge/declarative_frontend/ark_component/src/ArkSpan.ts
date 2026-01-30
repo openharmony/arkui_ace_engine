@@ -242,8 +242,8 @@ class SpanDecorationModifier extends ModifierWithKey<{ type: TextDecorationType,
     }
   }
 }
-class SpanFontWeightModifier extends ModifierWithKey<ArkSpanFontWeight> {
-  constructor(value: ArkSpanFontWeight) {
+class SpanFontWeightModifier extends ModifierWithKey<ArkFontWeight> {
+  constructor(value: ArkFontWeight) {
     super(value);
   }
   static identity = Symbol('spanfontweight');
@@ -253,7 +253,7 @@ class SpanFontWeightModifier extends ModifierWithKey<ArkSpanFontWeight> {
     } else if (!isObject(this.value)) {
       getUINativeModule().span.resetFontWeight(node);
     } else {
-      getUINativeModule().span.setFontWeight(node, this.value.value, this.value.fontWeightConfigs?.enableVariableFontWeight, this.value.fontWeightConfigs?.enableDeviceFontWeightCategory);
+      getUINativeModule().span.setFontWeight(node, this.value.value, this.value?.enableVariableFontWeight, this.value?.enableDeviceFontWeightCategory);
     }
   }
 }
@@ -966,14 +966,12 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     return this;
   }
   font(value: Font, fontConfigs?: FontConfigs): SpanAttribute {
-    let arkFontWeightConfigs = new ArkFontWeightConfigs();
-    arkFontWeightConfigs.enableVariableFontWeight = fontConfigs?.fontWeightConfigs?.enableVariableFontWeight;
-    arkFontWeightConfigs.enableDeviceFontWeightCategory = fontConfigs?.fontWeightConfigs?.enableDeviceFontWeightCategory;
-    let arkSpanFontWeight = new ArkSpanFontWeight();
-    arkSpanFontWeight.value = value?.weight;
-    arkSpanFontWeight.fontWeightConfigs = arkFontWeightConfigs;
+    let arkFontWeight = new ArkFontWeight();
+    arkFontWeight.value = value?.weight;
+    arkFontWeight.enableVariableFontWeight = fontConfigs?.fontWeightConfigs?.enableVariableFontWeight;
+    arkFontWeight.enableDeviceFontWeightCategory = fontConfigs?.fontWeightConfigs?.enableDeviceFontWeightCategory;
     modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier, value?.size);
-    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, arkSpanFontWeight);
+    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, arkFontWeight);
     modifierWithKey(this._modifiersWithKeys, SpanFontFamilyModifier.identity, SpanFontFamilyModifier, value?.family);
     modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier, value?.style);
     return this;
@@ -995,13 +993,11 @@ class ArkSpanComponent implements CommonMethod<SpanAttribute> {
     return this;
   }
   fontWeight(value: number | FontWeight | string | Resource, fontWeightConfigs?: FontWeightConfigs): SpanAttribute {
-    let arkFontWeightConfigs = new ArkFontWeightConfigs();
-    arkFontWeightConfigs.enableVariableFontWeight = fontWeightConfigs?.enableVariableFontWeight;
-    arkFontWeightConfigs.enableDeviceFontWeightCategory = fontWeightConfigs?.enableDeviceFontWeightCategory;
-    let arkSpanFontWeight = new ArkSpanFontWeight();
-    arkSpanFontWeight.value = value;
-    arkSpanFontWeight.fontWeightConfigs = arkFontWeightConfigs;
-    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, arkSpanFontWeight);
+    let arkFontWeight = new ArkFontWeight();
+    arkFontWeight.value = value;
+    arkFontWeight.enableVariableFontWeight = fontWeightConfigs?.enableVariableFontWeight;
+    arkFontWeight.enableDeviceFontWeightCategory = fontWeightConfigs?.enableDeviceFontWeightCategory;
+    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, arkFontWeight);
     return this;
   }
   fontFamily(value: string | Resource): SpanAttribute {

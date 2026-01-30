@@ -47,6 +47,7 @@ public:
     static void ParseJsStrokeColor(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsSuperscript(const JSRef<JSObject>& obj, Font& font);
     static void ParseJsFontConfigs(const JSRef<JSObject>& obj, Font& font);
+    static void ParseFontWeightConfigs(const JSRef<JSObject>& fontConfigsObj, Font& font);
     static void GetStrokeColorFallback(const JSRef<JSObject>& obj, const RefPtr<TextTheme>& theme, Color& color,
         RefPtr<ResourceObject>& resObj, JSRef<JSVal>& colorObj);
     void GetFontColor(const JSCallbackInfo& info);

@@ -610,8 +610,16 @@ void SpanModelNG::SetFont(UINode* uiNode, const Font& value)
     } else {
         ResetVariableFontWeight(uiNode);
     }
-    SetEnableVariableFontWeight(uiNode, value.enableVariableFontWeight.value_or(false));
-    SetEnableDeviceFontWeightCategory(uiNode, value.enableDeviceFontWeightCategory.value_or(true));
+    if (value.enableVariableFontWeight.has_value()) {
+        SetEnableVariableFontWeight(uiNode, value.enableVariableFontWeight.value());
+    } else {
+        ResetEnableVariableFontWeight(uiNode);
+    }
+    if (value.enableDeviceFontWeightCategory.has_value()) {
+        SetEnableDeviceFontWeightCategory(uiNode, value.enableDeviceFontWeightCategory.value());
+    } else {
+        ResetEnableDeviceFontWeightCategory(uiNode);
+    }
 }
 
 void SpanModelNG::ResetFont(UINode *uiNode)

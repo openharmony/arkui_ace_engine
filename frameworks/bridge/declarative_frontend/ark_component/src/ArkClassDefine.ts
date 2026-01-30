@@ -2009,52 +2009,22 @@ class ArkLineSpacing {
 
 class ArkFontWeight {
   value: number | FontWeight | string;
-  enableVariableFontWeight: boolean;
-
-  constructor() {
-    this.value = undefined;
-    this.enableVariableFontWeight = undefined;
-  }
-
-  isEqual(another: ArkTextFont): boolean {
-    return (this.value === another.value && this.enableVariableFontWeight === another.enableVariableFontWeight);
-  }
-
-  checkObjectDiff(another: ArkTextFont): boolean {
-    return !this.isEqual(another);
-  }
-}
-
-class ArkFontWeightConfigs {
   enableVariableFontWeight: boolean | undefined;
   enableDeviceFontWeightCategory: boolean | undefined;
 
   constructor() {
+    this.value = undefined;
     this.enableVariableFontWeight = undefined;
     this.enableDeviceFontWeightCategory = undefined;
   }
 
-  isEqual(another: ArkFontWeightConfigs): boolean {
-    return (this.enableVariableFontWeight === another.enableVariableFontWeight &&
+  isEqual(another: ArkFontWeight): boolean {
+    return (this.value === another.value &&
+      this.enableVariableFontWeight === another.enableVariableFontWeight &&
       this.enableDeviceFontWeightCategory === another.enableDeviceFontWeightCategory);
   }
-}
 
-class ArkSpanFontWeight {
-  value: number | FontWeight | ResourceStr;
-  fontWeightConfigs: ArkFontWeightConfigs;
-
-  constructor() {
-    this.value = undefined;
-    this.fontWeightConfigs = undefined;
-  }
-
-  isEqual(another: ArkSpanFontWeight): boolean {
-    return (this.value === another.value &&
-      this.fontWeightConfigs === another.fontWeightConfigs);
-  }
-
-  checkObjectDiff(another: ArkSpanFontWeight): boolean {
+  checkObjectDiff(another: ArkFontWeight): boolean {
     return !this.isEqual(another);
   }
 }

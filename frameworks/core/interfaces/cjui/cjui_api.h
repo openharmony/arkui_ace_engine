@@ -3125,7 +3125,7 @@ struct CJUISpanModifier {
     void (*resetSpanTextCase)(ArkUINodeHandle node);
     void (*setSpanFontWeight)(ArkUINodeHandle node, ArkUI_Int32 value, void* resourceRawPtr);
     void (*setSpanFontWeightWithConfigs)(ArkUINodeHandle node,
-        const struct ArkUIFontWeightWithConfigsStruct* fontWeightInfo, void* resourceRawPtr);
+        const struct ArkUIFontWeightWithOptionsStruct* fontWeightInfo, void* resourceRawPtr);
     void (*resetSpanFontWeight)(ArkUINodeHandle node);
     void (*setSpanLineHeight)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* resourceRawPtr);
     void (*resetSpanLineHeight)(ArkUINodeHandle node);

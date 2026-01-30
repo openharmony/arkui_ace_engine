@@ -917,7 +917,7 @@ public:
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
         EnableVariableFontWeight, bool, false, TextStyleAttribute::FONT_VARIATIONS);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(
-        EnableDeviceFontWeightCategory, bool, false, TextStyleAttribute::FONT_VARIATIONS);
+        EnableDeviceFontWeightCategory, bool, true, TextStyleAttribute::FONT_VARIATIONS);
     ACE_DEFINE_TEXT_STYLE_WITH_DEFAULT_VALUE(TextColor, Color, Color::BLACK, TextStyleAttribute::FONT_COLOR);
     ACE_DEFINE_TEXT_DIMENSION_STYLE(WordSpacing, TextStyleAttribute::WORD_SPACING);
     ACE_DEFINE_TEXT_DIMENSION_STYLE_WITH_DEFAULT_VALUE(

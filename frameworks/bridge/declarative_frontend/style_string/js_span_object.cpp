@@ -194,7 +194,7 @@ void JSFontSpan::ParseJsFontWeight(const JSRef<JSObject>& obj, Font& font)
         if (weight != "") {
             font.fontWeight = ConvertStrToFontWeight(weight);
             int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
-            JSContainerBase::ParseJsInt3(fontWeight, variableFontWeight);
+            JSContainerBase::ParseJsInt32(fontWeight, variableFontWeight);
             font.variableFontWeight = static_cast<uint32_t>(variableFontWeight);
         } else {
             auto context = PipelineBase::GetCurrentContextSafelyWithCheck();
@@ -330,36 +330,47 @@ void JSFontSpan::ParseJsSuperscript(const JSRef<JSObject>& obj, Font& font)
     }
 }
 
-void JSFontSpan::ParseJsFontConfigs(const JSRef<JSObject>& obj, Font& font)
+void JSFontSpan::ParseFontWeightConfigs(const JSRef<JSObject>& fontConfigsObj, Font& font)
 {
-    if (obj->HasProperty("fontConfigs")) {
-        auto fontConfigsValue = obj->GetProperty("fontConfigs");
-        if (fontConfigsValue->IsNull() || !fontConfigsValue->IsObject()) {
-            return;
-        }
-        auto fontConfigsObj = JSRef<JSObject>::Cast(fontConfigsValue);
-        if (fontConfigsObj->HasProperty("fontWeightConfigs")) {
-            auto fontWeightConfigsValue = fontConfigsObj->GetProperty("fontWeightConfigs");
-            if (fontWeightConfigsValue->IsNull() || !fontWeightConfigsValue->IsObject()) {
-                return;
-            }
-            auto fontWeightConfigsObj = JSRef<JSObject>::Cast(fontWeightConfigsValue);
-            if (fontWeightConfigsObj->HasProperty("enableVariableFontWeight")) {
-                auto enableVariableFontWeight =
-                    fontWeightConfigsObj->GetProperty("enableVariableFontWeight");
-                if (!enableVariableFontWeight->IsNull() && enableVariableFontWeight->IsBoolean()) {
-                    font.enableVariableFontWeight = enableVariableFontWeight->ToBoolean();
-                }
-            }
-            if (fontWeightConfigsObj->HasProperty("enableDeviceFontWeightCategory")) {
-                auto enableDeviceFontWeightCategory =
-                    fontWeightConfigsObj->GetProperty("enableDeviceFontWeightCategory");
-                if (!enableDeviceFontWeightCategory->IsNull() && enableDeviceFontWeightCategory->IsBoolean()) {
-                    font.enableDeviceFontWeightCategory = enableDeviceFontWeightCategory->ToBoolean();
-                }
-            }
+    if (!fontConfigsObj->HasProperty("fontWeightConfigs")) {
+        return;
+    }
+    auto fontWeightConfigsValue = fontConfigsObj->GetProperty("fontWeightConfigs");
+    if (fontWeightConfigsValue->IsUndefined() || fontWeightConfigsValue->IsNull() ||
+            !fontWeightConfigsValue->IsObject()) {
+        return;
+    }
+    auto fontWeightConfigsObj = JSRef<JSObject>::Cast(fontWeightConfigsValue);
+
+    if (fontWeightConfigsObj->HasProperty("enableVariableFontWeight")) {
+        auto enableVariableFontWeight = fontWeightConfigsObj->GetProperty("enableVariableFontWeight");
+        if (!enableVariableFontWeight->IsNull() && !enableVariableFontWeight->IsUndefined() &&
+            enableVariableFontWeight->IsBoolean()) {
+            font.enableVariableFontWeight = enableVariableFontWeight->ToBoolean();
         }
     }
+
+    if (fontWeightConfigsObj->HasProperty("enableDeviceFontWeightCategory")) {
+        auto enableDeviceFontWeightCategory =
+            fontWeightConfigsObj->GetProperty("enableDeviceFontWeightCategory");
+        if (!enableDeviceFontWeightCategory->IsNull() && !enableDeviceFontWeightCategory->IsUndefined() &&
+            enableDeviceFontWeightCategory->IsBoolean()) {
+            font.enableDeviceFontWeightCategory = enableDeviceFontWeightCategory->ToBoolean();
+        }
+    }
+}
+
+void JSFontSpan::ParseJsFontConfigs(const JSRef<JSObject>& obj, Font& font)
+{
+    if (!obj->HasProperty("fontConfigs")) {
+        return;
+    }
+    auto fontConfigsValue = obj->GetProperty("fontConfigs");
+    if (fontConfigsValue->IsUndefined() || fontConfigsValue->IsNull() || !fontConfigsValue->IsObject()) {
+        return;
+    }
+    auto fontConfigsObj = JSRef<JSObject>::Cast(fontConfigsValue);
+    ParseFontWeightConfigs(fontConfigsObj, font);
 }
 
 void JSFontSpan::GetFontColor(const JSCallbackInfo& info)
@@ -480,8 +491,8 @@ void JSFontSpan::GetFontConfigs(const JSCallbackInfo& info)
         fontWeightConfigsObj->SetProperty<bool>(
             "enableDeviceFontWeightCategory", font.enableDeviceFontWeightCategory.value());
     }
-    fontWeightConfigsObj->SetPropertyObject("fontWeightConfigs", fontWeightConfigsObj);
-    info.SetReturnValue(fontWeightConfigsObj);
+    fontConfigsObj->SetPropertyObject("fontWeightConfigs", fontWeightConfigsObj);
+    info.SetReturnValue(fontConfigsObj);
 }
 
 void JSFontSpan::SetFontConfigs(const JSCallbackInfo& info) {}

@@ -12706,8 +12706,8 @@ class SpanFontWeightModifier extends ModifierWithKey {
       getUINativeModule().span.resetFontWeight(node);
     } else {
       getUINativeModule().span.setFontWeight(node, this.value.value,
-        this.value.fontWeightConfigs?.enableVariableFontWeight,
-        this.value.fontWeightConfigs?.enableDeviceFontWeightCategory
+        this.value?.enableVariableFontWeight,
+        this.value?.enableDeviceFontWeightCategory
       );
     }
   }
@@ -13270,16 +13270,14 @@ class ArkSpanComponent {
     return this;
   }
   font(value, fontConfigs) {
-    let arkFontWeightConfigs = new ArkFontWeightConfigs();
-    arkFontWeightConfigs.enableVariableFontWeight = fontConfigs?.fontWeightConfigs?.enableVariableFontWeight;
-    arkFontWeightConfigs.enableDeviceFontWeightCategory = fontConfigs?.fontWeightConfigs?.enableDeviceFontWeightCategory;
-    let arkSpanFontWeight = new ArkSpanFontWeight();
-    arkSpanFontWeight.value = (value === null || value === void 0 ? void 0 : value.weight);
-    arkSpanFontWeight.fontWeightConfigs = arkFontWeightConfigs;
+    let arkFontWeight = new ArkFontWeight();
+    arkFontWeight.value = (value === null || value === void 0 ? void 0 : value.weight);
+    arkFontWeight.enableVariableFontWeight = fontConfigs?.fontWeightConfigs?.enableVariableFontWeight;
+    arkFontWeight.enableDeviceFontWeightCategory = fontConfigs?.fontWeightConfigs?.enableDeviceFontWeightCategory;
     modifierWithKey(this._modifiersWithKeys, SpanFontSizeModifier.identity, SpanFontSizeModifier,
       value === null || value === void 0 ? void 0 : value.size);
     modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier,
-      arkSpanFontWeight);
+      arkFontWeight);
     modifierWithKey(this._modifiersWithKeys, SpanFontFamilyModifier.identity, SpanFontFamilyModifier,
       value === null || value === void 0 ? void 0 : value.family);
     modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier,
@@ -13298,18 +13296,16 @@ class ArkSpanComponent {
     modifierWithKey(this._modifiersWithKeys, SpanFontColorModifier.identity, SpanFontColorModifier, value);
     return this;
   }
-  fontStyle(value, fontWeightConfigs) {
-    let arkFontWeightConfigs = new ArkFontWeightConfigs();
-    arkFontWeightConfigs.enableVariableFontWeight = fontWeightConfigs?.enableVariableFontWeight;
-    arkFontWeightConfigs.enableDeviceFontWeightCategory = fontWeightConfigs?.enableDeviceFontWeightCategory;
-    let arkSpanFontWeight = new ArkSpanFontWeight();
-    arkSpanFontWeight.value = value;
-    arkSpanFontWeight.fontWeightConfigs = arkFontWeightConfigs;
-    modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier, arkSpanFontWeight);
+  fontStyle(value) {
+    modifierWithKey(this._modifiersWithKeys, SpanFontStyleModifier.identity, SpanFontStyleModifier, value);
     return this;
   }
-  fontWeight(value) {
-    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, value);
+  fontWeight(value, fontWeightConfigs) {
+    let arkFontWeight = new ArkFontWeight();
+    arkFontWeight.value = value;
+    arkFontWeight.enableVariableFontWeight = fontWeightConfigs?.enableVariableFontWeight;
+    arkFontWeight.enableDeviceFontWeightCategory = fontWeightConfigs?.enableDeviceFontWeightCategory;
+    modifierWithKey(this._modifiersWithKeys, SpanFontWeightModifier.identity, SpanFontWeightModifier, arkFontWeight);
     return this;
   }
   fontFamily(value) {
@@ -20874,41 +20870,15 @@ class ArkFontWeight {
   constructor() {
     this.value = undefined;
     this.enableVariableFontWeight = undefined;
+    this.enableDeviceFontWeightCategory = undefined;
   }
 
   isEqual(another) {
     return (
       this.value === another.value &&
-      this.enableVariableFontWeight === another.enableVariableFontWeight
+      this.enableVariableFontWeight === another.enableVariableFontWeight &&
+      this.enableDeviceFontWeightCategory === another.enableDeviceFontWeightCategory
     );
-  }
-
-  checkObjectDiff(another) {
-    return !this.isEqual(another);
-  }
-}
-
-class ArkFontWeightConfigs {
-  constructor() {
-    this.enableVariableFontWeight = undefined;
-    this.enableDeviceFontWeightCategory = undefined;
-  }
-
-  isEqual(another) {
-    return (this.enableVariableFontWeight === another.enableVariableFontWeight &&
-      this.enableDeviceFontWeightCategory === another.enableDeviceFontWeightCategory);
-  }
-}
-
-class ArkSpanFontWeight {
-  constructor() {
-    this.value = undefined;
-    this.fontWeightConfigs = undefined;
-  }
-
-  isEqual(another) {
-    return (this.value === another.value &&
-      this.fontWeightConfigs === another.fontWeightConfigs);
   }
 
   checkObjectDiff(another) {

@@ -826,7 +826,6 @@ void SpanItem::UpdateReLayoutTextStyle(
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextDecorationStyle, TextDecorationStyle);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, TextCase, TextCase);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, VariableFontWeight, VariableFontWeight);
-    UPDATE_SPAN_TEXT_STYLE(fontStyle, EnableVariableFontWeight, EnableVariableFontWeight);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, EnableDeviceFontWeightCategory, EnableDeviceFontWeightCategory);
     UPDATE_SPAN_TEXT_STYLE(fontStyle, LineThicknessScale, LineThicknessScale);
 
@@ -907,7 +906,7 @@ void SpanItem::UpdateSymbolSpanParagraph(
     if (fontStyle || textLineStyle) {
         UseSelfStyle(fontStyle, textLineStyle, symbolSpanStyle, true);
         if (fontStyle && fontStyle->HasFontWeight()) {
-            symbolSpanStyle.SetEnableVariableFontWeight(fontStyle->GetEnableVariableFontWeight().value_or(false));
+            symbolSpanStyle.SetEnableVariableFontWeight(false);
         }
         if (frameNode) {
             FontRegisterCallback(frameNode, symbolSpanStyle);
@@ -1313,11 +1312,11 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(fontStyle, TextShadow, TLV_SPAN_FONT_STYLE_TEXTSHADOW, TextShadows, TextShadows);
     WRITE_TLV_INHERIT(fontStyle, ItalicFontStyle, TLV_SPAN_FONT_STYLE_ITALICFONTSTYLE, FontStyle, FontStyle);
     WRITE_TLV_INHERIT(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight, FontWeight);
-    WRITE_TLV_INHERIT(fontStyle, VariableFontWeight, TLV_SPAN_FONT_STYLE_VARIABLEFONTWEIGHT, Int32, VariableFontWeight);
-    WRITE_TLV_INHERIT(fontStyle, EnableVariableFontWeight, TLV_SPAN_FONT_STYLE_ENABLEVARIABLEFONTWEIGHT,
-        Bool, EnableVariableFontWeight);
-    WRITE_TLV_INHERIT(fontStyle, EnableDeviceFontWeightCategory, TLV_SPAN_FONT_STYLE_ENABLEDEVICEFONTWEIGHTCATEGORY,
-        Bool, EnableDeviceFontWeightCategory);
+    
+    WRITE_TEXT_STYLE_TLV(fontStyle, VariableFontWeight, TLV_SPAN_TEXT_LINE_STYLE_MAXLENGTH, Int32);
+    WRITE_TEXT_STYLE_TLV(fontStyle, EnableVariableFontWeight, TLV_SPAN_FONT_STYLE_ENABLEVARIABLEFONTWEIGHT, Bool);
+    WRITE_TEXT_STYLE_TLV(
+        fontStyle, EnableDeviceFontWeightCategory, TLV_SPAN_FONT_STYLE_ENABLEDEVICEFONTWEIGHTCATEGORY, Bool);
     WRITE_TLV_INHERIT(fontStyle, FontFamily, TLV_SPAN_FONT_STYLE_FONTFAMILY, FontFamily, FontFamilies);
     WRITE_TLV_INHERIT(fontStyle, FontFeature, TLV_SPAN_FONT_STYLE_FONTFEATURE, FontFeature, FontFeatures);
     WRITE_TLV_INHERIT(fontStyle, Superscript, TLV_SPAN_FONT_STYLE_SUPERSCRIPT, SuperscriptStyle, Superscript);

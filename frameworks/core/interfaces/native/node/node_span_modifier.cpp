@@ -100,7 +100,7 @@ void SetSpanFontWeight(ArkUINodeHandle node, ArkUI_Int32 fontWeight, void* resRa
 }
 
 void SetSpanFontWeightWithConfigs(ArkUINodeHandle node,
-    const struct ArkUIFontWeightWithConfigsStruct* fontWeightInfo, void* resRawPtr)
+    const struct ArkUIFontWeightWithOptionsStruct* fontWeightInfo, void* resRawPtr)
 {
     auto* uiNode = reinterpret_cast<UINode*>(node);
     CHECK_NULL_VOID(uiNode);
