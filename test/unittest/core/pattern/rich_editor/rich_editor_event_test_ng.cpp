@@ -259,17 +259,11 @@ HWTEST_F(RichEditorEventTestNg, HandleFocusEvent001, TestSize.Level0)
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
 
-    /**
-     * @tc.step: step1. set previewLongPress_ true and false
-     */
     richEditorPattern->previewLongPress_ = true;
     richEditorPattern->HandleFocusEvent();
 
     richEditorPattern->previewLongPress_ = false;
 
-    /**
-     * @tc.step: step2. set usingMouseRightButton_ true and false
-     */
     richEditorPattern->usingMouseRightButton_ = true;
     richEditorPattern->isLongPress_ = true;
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
@@ -280,9 +274,6 @@ HWTEST_F(RichEditorEventTestNg, HandleFocusEvent001, TestSize.Level0)
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
     richEditorPattern->HandleFocusEvent();
 
-    /**
-     * @tc.step: step3. set isLongPress_ true and false
-     */
     richEditorPattern->usingMouseRightButton_ = true;
     richEditorPattern->isLongPress_ = false;
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
@@ -293,9 +284,6 @@ HWTEST_F(RichEditorEventTestNg, HandleFocusEvent001, TestSize.Level0)
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = true;
     richEditorPattern->HandleFocusEvent();
 
-    /**
-     * @tc.step: step4. set usingMouseRightButton_, isLongPress_ and hasClickedMenuOption_ true and false
-     */
     richEditorPattern->usingMouseRightButton_ = true;
     richEditorPattern->isLongPress_ = true;
     richEditorPattern->dataDetectorAdapter_->hasClickedMenuOption_ = false;
@@ -360,9 +348,15 @@ HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback001, TestSize.Level0)
  */
 HWTEST_F(RichEditorEventTestNg, GetThumbnailCallback002, TestSize.Level0)
 {
+    /**
+     * @tc.step: step1. Initialize richEditor pattern
+     */
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
 
+    /**
+     * @tc.step: step2. test InitDragDropEvent
+     */
     richEditorPattern->InitDragDropEvent();
     EXPECT_EQ(richEditorPattern->dragNode_, nullptr);
 }

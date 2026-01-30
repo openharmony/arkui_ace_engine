@@ -3900,21 +3900,16 @@ void RichEditorPattern::HandleBlurEvent()
     firstClickResetTask_.Cancel();
     firstClickAfterWindowFocus_ = false;
     StopTwinkling();
-    auto textFieldManager = GetTextFieldManager();
-    bool isKeyboardContinue = textFieldManager && textFieldManager->GetCustomKeyboardContinueFeature();
-    if (isKeyboardContinue) {
-        bool isCloseCustomKeyboard = reason == BlurReason::WINDOW_BLUR &&
-                                     ((customKeyboardNode_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
-        IF_TRUE(isCloseCustomKeyboard, CloseKeyboard(true));
+    bool isCloseCustomKeyboard =
+        reason == BlurReason::WINDOW_BLUR && ((customKeyboardNode_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
+    if (isCloseCustomKeyboard) {
+        CloseKeyboard(true);
     }
     // The pattern handles blurevent, Need to close the softkeyboard first.
     if ((customKeyboardBuilder_ && isCustomKeyboardAttached_) || reason == BlurReason::FRAME_DESTROY) {
         TAG_LOGI(AceLogTag::ACE_KEYBOARD, "RichEditor Blur, Close Keyboard.");
         CloseSelectOverlay();
         ResetSelection();
-        if (!isKeyboardContinue) {
-            CloseKeyboard(false);
-        }
     }
     if (magnifierController_) {
         magnifierController_->RemoveMagnifierFrameNode();
@@ -3943,11 +3938,7 @@ void RichEditorPattern::HandleBlurEvent()
 void RichEditorPattern::HandleFocusEvent(FocusReason focusReason)
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "HandleFocusEvent frameId:%{public}d reason:%{public}d", frameId_, focusReason);
-    auto textFieldManager = GetTextFieldManager();
-    bool isKeyboardContinue = textFieldManager && textFieldManager->GetCustomKeyboardContinueFeature();
-    if (isKeyboardContinue) {
-        OnFocusCustomKeyboardChange();
-    }
+    OnFocusCustomKeyboardChange();
     IF_TRUE(focusReason == FocusReason::WINDOW_FOCUS, ScheduleFirstClickResetAfterWindowFocus());
     blockKbInFloatingWindow_= false;
     UseHostToUpdateTextFieldManager();
