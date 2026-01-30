@@ -1702,7 +1702,7 @@ export namespace typeNode {
 
     // @ts-ignore
     export function getListEvent(node: FrameNode): UIListEvent | undefined {
-        if (node.getType() !== 'List') {
+        if (node.getNodeType() !== 'List') {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
@@ -1799,7 +1799,7 @@ export namespace typeNode {
 
     // @ts-ignore
     export function getScrollEvent(node: FrameNode): UIScrollEvent | undefined {
-        if (node.getType() !== 'Scroll') {
+        if (node.getNodeType() !== 'Scroll') {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
@@ -1850,7 +1850,7 @@ export namespace typeNode {
 
     // @ts-ignore
     export function getGridEvent(node: FrameNode): UIGridEvent | undefined {
-        if (node.getType() !== 'Grid') {
+        if (node.getNodeType() !== 'Grid') {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
@@ -1926,7 +1926,7 @@ export namespace typeNode {
 
     // @ts-ignore
     export function getWaterFlowEvent(node: FrameNode): UIWaterFlowEvent | undefined {
-        if (node.getType() !== 'WaterFlow') {
+        if (node.getNodeType() !== 'WaterFlow') {
             return undefined
         }
         const ptr = FrameNodeExtender.getFrameNodePtr(node);
