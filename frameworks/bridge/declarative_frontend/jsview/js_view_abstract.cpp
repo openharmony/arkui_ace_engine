@@ -10965,7 +10965,7 @@ void JSViewAbstract::JsOnMouse(const JSCallbackInfo& info)
         ACE_SCORING_EVENT("onMouse");
         PipelineContext::SetCallBackNode(node);
         auto infoPtr = std::make_shared<MouseInfo>(mouseInfo);
-        auto eventObj = NG::FrameNodeBridge::CreateMouseInfo(vm, infoPtr);
+        auto eventObj = NG::FrameNodeBridge::CreateMouseInfo(vm, infoPtr, node);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         func->Call(vm, func.ToLocal(), params, 1);
         mouseInfo.SetStopPropagation(infoPtr->IsStopPropagation());
@@ -10998,7 +10998,7 @@ void JSViewAbstract::JsOnAxisEvent(const JSCallbackInfo& args)
         ACE_SCORING_EVENT("onAxis");
         PipelineContext::SetCallBackNode(node);
         auto infoPtr = std::make_shared<AxisInfo>(info);
-        auto eventObj = NG::CommonBridge::CreateAxisEventInfo(vm, infoPtr);
+        auto eventObj = NG::CommonBridge::CreateAxisEventInfo(vm, infoPtr, node);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         ACE_BENCH_MARK_TRACE("OnAxisEvent_end type:%d", info.GetAction());
         func->Call(vm, func.ToLocal(), params, 1);
