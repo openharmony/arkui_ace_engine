@@ -689,6 +689,20 @@ void* CreateCustomNodeByNodeId(ArkUI_CharPtr tag, ArkUI_Int32 nodeId)
     return AceType::RawPtr(frameNode);
 }
 
+void* CreateCustomNodeWithParam(ArkUI_CharPtr tag, const ArkUIRenderContextParam param)
+{
+    RenderContext::ContextParam contextParam;
+    contextParam.type = static_cast<RenderContext::ContextType>(param.type);
+    if (param.surfaceName) {
+        contextParam.surfaceName = std::string(param.surfaceName);
+    }
+    contextParam.isSkipCheckInMultiInstance = param.isSkipCheckInMultiInstance;
+    auto frameNode = CustomNodeExtModelNG::CreateFrameNodeWithParam(std::string(tag), contextParam);
+    CHECK_NULL_RETURN(frameNode, nullptr);
+    frameNode->IncRefCount();
+    return AceType::RawPtr(frameNode);
+}
+
 using createArkUIFrameNode = void*(ArkUI_Int32 nodeId);
 
 static createArkUIFrameNode* createArkUIFrameNodes[] = {

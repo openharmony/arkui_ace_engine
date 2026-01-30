@@ -50,6 +50,14 @@ void CustomNodeExtModelNG::SetMeasureCallback(
     pattern->SetMeasureCallback(std::move(onMeasure));
 }
 
+RefPtr<FrameNode> CustomNodeExtModelNG::CreateFrameNodeWithParam(const std::string& tag,
+    const RenderContext::ContextParam& param)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode(tag, nodeId, AceType::MakeRefPtr<CustomNodeExtPattern>(param));
+    return frameNode;
+}
+
 void CustomNodeExtModelNG::SetLayoutCallback(FrameNode* frameNode, std::function<void(RectF rect)>&& onLayout)
 {
     CHECK_NULL_VOID(frameNode);
