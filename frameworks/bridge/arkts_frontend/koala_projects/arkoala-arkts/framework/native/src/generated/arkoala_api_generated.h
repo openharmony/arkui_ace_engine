@@ -5627,6 +5627,11 @@ typedef struct Opt_LayoutMode {
 typedef enum Ark_LayoutSafeAreaEdge {
     ARK_LAYOUT_SAFE_AREA_EDGE_TOP = 0,
     ARK_LAYOUT_SAFE_AREA_EDGE_BOTTOM = 1,
+    ARK_LAYOUT_SAFE_AREA_EDGE_START = 2,
+    ARK_LAYOUT_SAFE_AREA_EDGE_END = 3,
+    ARK_LAYOUT_SAFE_AREA_EDGE_VERTICAL = 4,
+    ARK_LAYOUT_SAFE_AREA_EDGE_HORIZONTAL = 5,
+    ARK_LAYOUT_SAFE_AREA_EDGE_ALL = 6,
 } Ark_LayoutSafeAreaEdge;
 typedef struct Opt_LayoutSafeAreaEdge {
     Ark_Tag tag;

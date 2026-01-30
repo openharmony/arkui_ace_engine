@@ -5465,20 +5465,48 @@ void SetBackgroundImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optAlign = Converter::OptConvertPtr<Alignment>(options);
-    
+    Alignment alignment = Alignment::CENTER;
+    uint32_t parsedEdges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    bool hasEdges = false;
+    if (options && options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto alignOpt = Converter::OptConvert<Alignment>(options->value.align);
+        if (alignOpt) {
+            alignment = alignOpt.value();
+        }
+        const auto& optEdges = options->value.ignoresLayoutSafeAreaEdges;
+        if (optEdges.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            auto edgeRawArray = Converter::Convert<std::vector<uint32_t>>(optEdges.value);
+            uint32_t mask = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+            for (auto edgeValue : edgeRawArray) {
+                mask |= edgeValue;
+            }
+            parsedEdges = mask;
+            hasEdges = true;
+        }
+    }
     Converter::VisitUnionPtr(content,
-        [frameNode, optAlign, node](const CustomNodeBuilder& builder) {
-            CallbackHelper(builder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
-                CHECK_NULL_VOID(uiNode);
-                auto builderFunc = [uiNode]() -> RefPtr<UINode> {
-                    return uiNode;
-                };
-                ViewAbstract::SetIsBuilderBackground(frameNode, true);
-                ViewAbstractModelStatic::BindBackground(frameNode, builderFunc, optAlign);
+        [frameNode, alignment, parsedEdges, hasEdges, node](const CustomNodeBuilder& builder) {
+            CallbackHelper(builder).BuildAsync(
+                [frameNode, alignment, parsedEdges, hasEdges](const RefPtr<UINode>& uiNode) {
+                    CHECK_NULL_VOID(uiNode);
+                    auto builderFunc = [uiNode]() -> RefPtr<UINode> {
+                        return uiNode;
+                    };
+                    uint32_t ignoreLayoutSafeAreaEdges = hasEdges ? parsedEdges : NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+                    ViewAbstract::SetIsBuilderBackground(frameNode, true);
+                    bool isTransitionBackground = !(ignoreLayoutSafeAreaEdges == NG::LAYOUT_SAFE_AREA_EDGE_NONE);
+                    ViewAbstract::SetIsTransitionBackground(frameNode, isTransitionBackground);
+                    ViewAbstract::SetBackgroundAlign(frameNode, alignment);
+                    ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, ignoreLayoutSafeAreaEdges);
+                    ViewAbstractModelStatic::BindBackground(frameNode, builderFunc, alignment);
                 }, node);
         },
-        [frameNode](const Ark_ResourceColor& resourceColor) {
+        [frameNode, alignment, parsedEdges, hasEdges](const Ark_ResourceColor& resourceColor) {
+            uint32_t ignoreLayoutSafeAreaEdges = hasEdges ? parsedEdges : NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+            ViewAbstract::SetIsBuilderBackground(frameNode, false);
+            ViewAbstract::SetIsTransitionBackground(frameNode, true);
+            ViewAbstract::SetBackgroundAlign(frameNode, alignment);
+            ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, ignoreLayoutSafeAreaEdges);
             auto colorValue = Converter::OptConvertPtr<Color>(&resourceColor);
             ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue.value_or(Color::TRANSPARENT));
         },
