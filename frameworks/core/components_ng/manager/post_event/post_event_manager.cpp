@@ -111,7 +111,7 @@ bool PostEventManager::PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEve
         mouseEvent.action == MouseAction::CANCEL) {
         postMouseEventAction_.push_back({ uiNode, mouseEvent });
     }
-    if (mouseEvent.action == MouseAction::CANCEL || mouseEvent.action == MouseAction::WINDOW_LEAVE) {
+    if (mouseEvent.action == MouseAction::WINDOW_ENTER || mouseEvent.action == MouseAction::WINDOW_LEAVE) {
         postMouseEventWindowAction_.push_back({ uiNode, mouseEvent });
     }
     if (!eventManager->IsDragCancelPending()) {
@@ -122,7 +122,7 @@ bool PostEventManager::PostMouseEvent(const RefPtr<NG::UINode>& uiNode, MouseEve
     if (mouseEvent.action == MouseAction::RELEASE || mouseEvent.action == MouseAction::CANCEL) {
         ClearPostInputActions(uiNode, mouseEvent.id, PostInputEventType::MOUSE);
     }
-    if (mouseEvent.action == MouseAction::WINDOW_LEAVE || mouseEvent.action == MouseAction::CANCEL) {
+    if (mouseEvent.action == MouseAction::WINDOW_LEAVE) {
         ClearMouseWindowAction(uiNode, mouseEvent.id);
     }
     return passThroughResult_;
@@ -175,7 +175,7 @@ bool PostEventManager::CheckTouchEvent(
     switch (touchEvent.type) {
         case TouchType::DOWN:
             if (hasDown && !hasUpOrCancel) {
-                TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
+                TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
                     "CheckTouchEvent: duplicate DOWN event detected for id=%{public}d, dropping this event",
                     touchEvent.id);
                 // todo, when get DOWN twice, falsifyCancel for touchEvent, return true.
@@ -287,7 +287,7 @@ bool PostEventManager::HandleMousePressEvent(
     const MouseEventState& state, const RefPtr<NG::UINode>& targetNode, int32_t id, const int32_t instanceId)
 {
     if (state.hasPress && !state.hasReleaseOrCancel) {
-        TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
             "CheckMouseEvent: duplicate PRESS event detected for id=%{public}d, dropping this event", id);
         // todo, when get PRESS twice, falsifyCancel for mouseEvent.
         std::stringstream oss;
@@ -305,7 +305,7 @@ bool PostEventManager::HandleMousePressEvent(
 bool PostEventManager::HandleMouseReleaseEvent(const MouseEventState& state, int32_t id)
 {
     if (!state.hasPress) {
-        TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
             "CheckMouseEvent: receive RELEASE/CANCEL event without receive PRESS event, id: %{public}d", id);
     }
     return state.hasPress && !state.hasReleaseOrCancel;
@@ -315,7 +315,7 @@ bool PostEventManager::HandleMouseWindowEnterEvent(
     const MouseEventState& state, const RefPtr<NG::UINode>& targetNode, int32_t id, const int32_t instanceId)
 {
     if (state.hasWindowEnter && !state.hasWindowLeaveOrCancel) {
-        TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
             "CheckMouseEvent: duplicate WindowEnter event detected for id=%{public}d, dropping this event", id);
         // todo, when get WINDOW_ENTER twice, falsifyCancel for mouseEvent.
         std::stringstream oss;
@@ -333,7 +333,7 @@ bool PostEventManager::HandleMouseWindowEnterEvent(
 bool PostEventManager::HandleMouseWindowLeaveEvent(const MouseEventState& state, int32_t id)
 {
     if (!state.hasWindowEnter) {
-        TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
+        TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
             "CheckMouseEvent: receive WindowLeave event without receive WindowEnter event, id: %{public}d", id);
     }
     return state.hasWindowEnter && !state.hasWindowLeaveOrCancel;
@@ -542,7 +542,7 @@ bool PostEventManager::CheckAxisEvent(
     switch (axisEvent.action) {
         case AxisAction::BEGIN:
             if (hasBegin && !hasEndOrCancel) {
-                TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
+                TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
                     "CheckAxisEvent: duplicate BEGIN event detected for id=%{public}d, dropping this event",
                     axisEvent.id);
                 // todo, when get BEGIN twice, falsifyCancel for axisEvent.
@@ -561,7 +561,7 @@ bool PostEventManager::CheckAxisEvent(
         case AxisAction::END:
         case AxisAction::CANCEL:
             if (!hasBegin) {
-                TAG_LOGD(AceLogTag::ACE_INPUTKEYFLOW,
+                TAG_LOGI(AceLogTag::ACE_INPUTKEYFLOW,
                     "CheckAxisEvent: receive END/CANCEL event without receive BEGIN event, axisId: %{public}d",
                     axisEvent.id);
             }
