@@ -1,0 +1,9 @@
+{
+  "name": "uipickercomponent",
+  "version": "1.0.0",
+  "description": "UIPickerComponent Demo Application",
+  "main": "",
+  "author": "",
+  "license": "Apache-2.0",
+  "dependencies": {}
+}
