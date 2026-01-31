@@ -20,6 +20,7 @@
 #include "test/mock/core/common/mock_theme_manager.h"
 #include "test/mock/core/pipeline/mock_pipeline_context.h"
 
+#include "core/common/statistic_event_reporter.h"
 #include "core/components/button/button_theme.h"
 #include "core/components/list/list_theme.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node.h"
@@ -40,6 +41,7 @@ void ListTestNg::SetUpTestSuite()
     MockAnimationManager::Enable(true);
     auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
     MockPipelineContext::GetCurrent()->SetThemeManager(themeManager);
+    MockPipelineContext::GetCurrent()->statisticEventReporter_ = std::make_shared<StatisticEventReporter>();
     auto buttonThemeConstants = CreateThemeConstants(THEME_PATTERN_BUTTON);
     auto buttonTheme = ButtonTheme::Builder().Build(buttonThemeConstants);
     EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(buttonTheme));
