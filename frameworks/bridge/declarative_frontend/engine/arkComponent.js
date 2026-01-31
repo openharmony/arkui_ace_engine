@@ -36404,7 +36404,8 @@ if (globalThis.CalendarPicker === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkcalendarpicker');
       module.exportView();
       getUINativeModule().calendarPicker.create(params);
-    }
+    },
+    name: 'JSCalendarPicker'
   }
 }
 
@@ -36416,7 +36417,8 @@ if (globalThis.CalendarPickerDialog === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkcalendarpicker');
       module.exportDialogView();
       getUINativeModule().calendarPickerDialog.show(params);
-    }
+    },
+    name: 'JSCalendarPickerDialog'
   }
 }
 

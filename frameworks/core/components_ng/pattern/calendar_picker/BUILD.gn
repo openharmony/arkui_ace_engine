@@ -17,8 +17,9 @@ import(
 build_component_ng("calendar_picker_pattern_ng") {
   is_component_model = true
 
+  sources = []
   if (!ace_engine_feature_wearable) {
-    sources = [
+    sources += [
       "calendar_dialog_layout_algorithm.cpp",
       "calendar_dialog_pattern.cpp",
       "calendar_dialog_view.cpp",
@@ -29,15 +30,18 @@ build_component_ng("calendar_picker_pattern_ng") {
     ]
   }
   
-  ark_sources = [
-    "bridge/arkts_native_calendar_picker_bridge.cpp",
-    "bridge/arkts_native_calendar_picker_dialog_bridge.cpp",
-    "bridge/calendar_picker_dialog_dynamic_modifier.cpp",
-    "bridge/calendar_picker_dynamic_modifier.cpp",
-    "bridge/calendar_picker_dynamic_module.cpp",
-    "bridge/calendar_picker_dialog_dynamic_module.cpp",
-    "bridge/calendar_picker_utils.cpp",
-  ]
+  ark_sources = []
+  if (!ace_engine_feature_wearable) {
+    ark_sources += [
+      "bridge/arkts_native_calendar_picker_bridge.cpp",
+      "bridge/arkts_native_calendar_picker_dialog_bridge.cpp",
+      "bridge/calendar_picker_dialog_dynamic_modifier.cpp",
+      "bridge/calendar_picker_dynamic_modifier.cpp",
+      "bridge/calendar_picker_dynamic_module.cpp",
+      "bridge/calendar_picker_dialog_dynamic_module.cpp",
+      "bridge/calendar_picker_utils.cpp",
+    ]
+  }
 
   if (!is_arkui_x) {
     if (!ace_engine_feature_wearable) {

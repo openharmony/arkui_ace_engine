@@ -500,11 +500,11 @@ ArkUINativeModuleValue ArkUINativeModule::LoadNativeModule(ArkUIRuntimeCallInfo*
         { "Slider" },
         { "TimePicker" },
         { "TimePickerDialog" },
-        { "CalendarPicker" },
-        { "CalendarPickerDialog" },
         { "DataPanel" },
 #ifndef ARKUI_WEARABLE
         { "FolderStack" },
+        { "CalendarPicker" },
+        { "CalendarPickerDialog" },
 #endif
         { "Hyperlink" },
     };
