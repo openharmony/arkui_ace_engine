@@ -22,7 +22,7 @@
 
 namespace OHOS::Ace::NG::GeneratedModifier {
 namespace {
-Ark_DirectionalEdgesT GenEdgesGlobalized(const NG::PaddingPropertyT<float>& edgeNative, TextDirection direction)
+Ark_DirectionalEdgesT GenEdgesGlobalized(const NG::PaddingPropertyF& edgeNative, TextDirection direction)
 {
     Ark_DirectionalEdgesT edges;
     auto pipeline = PipelineBase::GetCurrentContext();

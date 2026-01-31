@@ -385,6 +385,7 @@ ohos_source_set("ace_components_property") {
   subsystem_name = ace_engine_subsystem
   part_name = ace_engine_part
   sources = [
+    "$ace_root/frameworks/core/components_ng/property/layout_constraint.cpp",
     "$ace_root/frameworks/core/components_ng/property/accessibility_property.cpp",
     "$ace_root/frameworks/core/components_ng/property/accessibility_property_mutilthread.cpp",
     "$ace_root/frameworks/core/components_ng/property/border_property.cpp",
@@ -664,6 +665,7 @@ ohos_source_set("ace_core_extra") {
     "$ace_root/frameworks/core/components/common/layout/grid_column_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_container_info.cpp",
     "$ace_root/frameworks/core/components/common/layout/grid_system_manager.cpp",
+    "$ace_root/frameworks/core/components/common/layout/layout_constants_string_utils.cpp",
     "$ace_root/frameworks/core/components/common/layout/screen_system_manager.cpp",
     "$ace_root/frameworks/core/components/common/properties/alignment.cpp",
     "$ace_root/frameworks/core/components/common/properties/animatable_color.cpp",

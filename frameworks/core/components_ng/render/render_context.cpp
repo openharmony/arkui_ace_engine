@@ -16,6 +16,7 @@
 #include "core/components_ng/render/render_context.h"
 
 #include "base/utils/multi_thread.h"
+#include "core/components/common/layout/layout_constants_string_utils.h"
 #include "core/components/common/properties/ui_material.h"
 #include "core/pipeline_ng/pipeline_context.h"
 

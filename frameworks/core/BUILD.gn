@@ -855,6 +855,7 @@ template("ace_core_ng_source_set") {
       "components/common/layout/grid_column_info.cpp",
       "components/common/layout/grid_container_info.cpp",
       "components/common/layout/grid_system_manager.cpp",
+      "components/common/layout/layout_constants_string_utils.cpp",
       "components/common/layout/screen_system_manager.cpp",
 
       # v1 deps

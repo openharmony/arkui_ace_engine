@@ -488,6 +488,8 @@
       OHOS::Ace::ParseFontFeatureSettings*;
       OHOS::Ace::UnParseFontFeatureSetting*;
       OHOS::Ace::NG::ConvertToCalcPaddingProperty*;
+      OHOS::Ace::NG::PaddingPropertyT*;
+      OHOS::Ace::NG::PaddingPropertyF::*;
       OHOS::Ace::NG::CreateIdealSize*;
       OHOS::Ace::StorageProxy::*;
       OHOS::Ace::EnvironmentProxy::*;
@@ -649,6 +651,7 @@
       
       OHOS::Ace::NG::ConstrainIdealSizeByLayoutPolicy*;
       OHOS::Ace::NG::UpdateOptionSizeByCalcLayoutConstraint*;
+      OHOS::Ace::NG::LayoutConstraintT*;
       OHOS::Ace::NG::MinusPaddingToNonNegativeSize*;
       OHOS::Ace::NG::CheckNoChanged*;
       OHOS::Ace::NG::InputEventActuator::InputEventActuator*;

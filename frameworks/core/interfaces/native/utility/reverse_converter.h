@@ -30,6 +30,7 @@
 #include "base/geometry/ng/rect_t.h" // Using type
 #include "core/components_ng/pattern/slider/slider_model.h" // Inner types
 #include "core/components_ng/property/border_property.h" // Using type
+#include "core/components_ng/property/measure_property.h" // Using type
 #include "interfaces/native/ui_input_event.h" // Unscoped enum types
 
 #include "arkoala_api_generated.h"

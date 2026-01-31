@@ -69,6 +69,7 @@
 namespace OHOS::Ace::Kit {
 class UIContext;
 class UIContextImpl;
+using ArkUIObjectLifecycleCallback = std::function<void(void*)>;
 }
 
 namespace OHOS::Rosen {

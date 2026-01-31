@@ -16,14 +16,19 @@
 #ifndef FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_PROPERTIES_H
 #define FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_PROPERTIES_MEASURE_PROPERTIES_H
 
-#include <cstdint>
+#include <memory>
 #include <optional>
 #include <string>
 #include <utility>
 
 #include "ui/properties/ng/measure_property.h"
 
+namespace OHOS::Ace {
+class JsonValue;
+}
+
 namespace OHOS::Ace::NG {
+class InspectorFilter;
 
 enum class MeasureType {
     MATCH_PARENT,
@@ -45,20 +50,11 @@ public:
 
     bool IsValid() const;
 
-    bool IsDimensionUnitAuto() const
-    {
-        return IsWidthDimensionUnitAuto() || IsHeightDimensionUnitAuto();
-    }
+    bool IsDimensionUnitAuto() const;
 
-    bool IsWidthDimensionUnitAuto() const
-    {
-        return width_ && width_->GetDimension().Unit() == DimensionUnit::AUTO;
-    }
+    bool IsWidthDimensionUnitAuto() const;
 
-    bool IsHeightDimensionUnitAuto() const
-    {
-        return height_ && height_->GetDimension().Unit() == DimensionUnit::AUTO;
-    }
+    bool IsHeightDimensionUnitAuto() const;
 
     const std::optional<CalcLength>& Width() const
     {

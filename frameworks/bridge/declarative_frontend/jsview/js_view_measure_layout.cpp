@@ -127,7 +127,7 @@ JSRef<JSObject> GenEdgeWidths(const std::unique_ptr<NG::BorderWidthProperty>& ed
     return edgeWidths;
 }
 
-JSRef<JSObject> GenEdgesGlobalized(const NG::PaddingPropertyT<float>& edgeNative, TextDirection direction)
+JSRef<JSObject> GenEdgesGlobalized(const NG::PaddingPropertyF& edgeNative, TextDirection direction)
 {
     JSRef<JSObject> edges = JSRef<JSObject>::New();
     auto pipeline = PipelineBase::GetCurrentContext();
