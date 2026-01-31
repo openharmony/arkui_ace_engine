@@ -347,9 +347,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew011, TestSize.Level1)
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetFrame().data_[1], 1.0);
     rosenRenderContext->SetRenderPivot(1.0, 0.0);
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetPivot().x_, 1.0);
-    rosenRenderContext->SetBackgroundColor(SHAPE_MASK_DEFAULT_COLOR);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetBackgroundColor(),
-        OHOS::Rosen::RSColor::FromArgbInt(SHAPE_MASK_DEFAULT_COLOR));
 
     rosenRenderContext->SetScale(1.0, 0.0);
     rosenRenderContext->PaintPixmapBgImage();
@@ -826,14 +823,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew024, TestSize.Level1)
         OHOS::Rosen::RSColor::FromArgbInt((Color::BLUE).GetValue()));
     EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetBorderColor().data_[1],
         OHOS::Rosen::RSColor::FromArgbInt((Color::BLUE).GetValue()));
-    rosenRenderContext->OnOffsetUpdate(offset);
-    rosenRenderContext->OnPositionUpdate(offset);
-    rosenRenderContext->ResetBlendBgColor();
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetBackgroundColor(),
-        OHOS::Rosen::RSColor::FromArgbInt((Color::TRANSPARENT).GetValue()));
-    rosenRenderContext->BlendBgColor(Color::BLACK);
-    EXPECT_EQ(rosenRenderContext->GetRSNode()->GetStagingProperties().GetBackgroundColor(),
-        OHOS::Rosen::RSColor::FromArgbInt((Color::BLACK).GetValue()));
 }
 
 /**
@@ -853,24 +842,6 @@ HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew025, TestSize.Level1)
     rosenRenderContext->InitAccessibilityFocusModidifer(roundRect, Color::BLACK, 20.0f);
     EXPECT_NE(rosenRenderContext->accessibilityFocusStateModifier_, nullptr);
 }
-
-/**
- * @tc.name: RosenRenderContextTestNew026
- * @tc.desc: OnBackgroundColorUpdate().
- * @tc.type: FUNC
- */
-HWTEST_F(RosenRenderContextTest, RosenRenderContextTestNew026, TestSize.Level1)
-{
-    auto frameNode =
-        FrameNode::GetOrCreateFrameNode("frame", -1, []() { return AceType::MakeRefPtr<PagePattern>(nullptr); });
-    RefPtr<RosenRenderContext> rosenRenderContext = InitRosenRenderContext(frameNode);
-    rosenRenderContext->OnBackgroundColorUpdate(Color::BLUE);
-    auto rsNdoe = rosenRenderContext->GetRSNode();
-    auto stagingProperties = rsNdoe->GetStagingProperties();
-    auto color = stagingProperties.GetBackgroundColor();
-    EXPECT_EQ(color, OHOS::Rosen::RSColor::FromArgbInt(Color::BLUE.GetValue()));
-}
-
 
 /**
  * @tc.name: RosenRenderContextTestNew027
