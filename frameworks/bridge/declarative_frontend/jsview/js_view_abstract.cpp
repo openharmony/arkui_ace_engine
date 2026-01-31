@@ -9006,6 +9006,111 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
 
+void ParseJsKeyEvent(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
+{
+    if (jsObj->HasProperty("type")) {
+        auto type = jsObj->GetProperty("type");
+        if (type->IsNumber()) {
+            keyEvent.action = static_cast<OHOS::Ace::KeyAction>(type->ToNumber<int32_t>());
+        }
+    }
+
+    if (jsObj->HasProperty("keyCode")) {
+        auto keyCode = jsObj->GetProperty("keyCode");
+        if (keyCode->IsNumber()) {
+            keyEvent.code = static_cast<OHOS::Ace::KeyCode>(keyCode->ToNumber<int32_t>());
+        }
+    }
+
+    if (jsObj->HasProperty("keyText")) {
+        auto jsValue = jsObj->GetProperty("keyText");
+        if (jsValue->IsString()) {
+            keyEvent.key.assign(jsValue->ToString());
+        }
+    }
+
+    if (jsObj->HasProperty("keySource")) {
+        auto keySource = jsObj->GetProperty("keySource");
+        if (keySource->IsNumber()) {
+            keyEvent.sourceType = static_cast<OHOS::Ace::SourceType>(keySource->ToNumber<int32_t>());
+        }
+    }
+
+    if (jsObj->HasProperty("deviceId")) {
+        auto deviceId = jsObj->GetProperty("deviceId");
+        if (deviceId->IsNumber()) {
+            keyEvent.deviceId = deviceId->ToNumber<int32_t>();
+        }
+    }
+
+    if (jsObj->HasProperty("metaKey")) {
+        auto metaKey = jsObj->GetProperty("metaKey");
+        if (metaKey->IsNumber()) {
+            keyEvent.metaKey = metaKey->ToNumber<int32_t>();
+        }
+    }
+
+    if (jsObj->HasProperty("unicode")) {
+        auto unicode = jsObj->GetProperty("unicode");
+        if (unicode->IsNumber()) {
+            keyEvent.unicode = unicode->ToNumber<int32_t>();
+        }
+    }
+
+    if (jsObj->HasProperty("timestamp")) {
+        auto jsValue = jsObj->GetProperty("timestamp");
+        if (jsValue->IsNumber()) {
+            auto timeStamp = static_cast<int64_t>(jsValue->ToNumber<int64_t>());
+            keyEvent.timeStamp = TimeStamp(std::chrono::milliseconds(timeStamp));
+        }
+    }
+
+    if (jsObj->HasProperty("intentionCode")) {
+        auto intentionCode = jsObj->GetProperty("intentionCode");
+        if (intentionCode->IsNumber()) {
+            keyEvent.keyIntention = static_cast<KeyIntention>(intentionCode->ToNumber<int32_t>());
+        }
+    }
+
+    if (jsObj->HasProperty("pressedCodes")) {
+        auto jsValue = jsObj->GetProperty("pressedCodes");
+        if (jsValue->IsArray()) {
+            JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsValue);
+            for (size_t i = 0; i < jsArray->Length(); ++i) {
+                auto element = jsArray->GetValueAt(i);
+                if (element->IsNumber()) {
+                    keyEvent.pressedCodes.push_back(
+                        static_cast<OHOS::Ace::KeyCode>(element->ToNumber<int32_t>()));
+                }
+            }
+        }
+    }
+
+    if (jsObj->HasProperty("numLock")) {
+        auto jsValue = jsObj->GetProperty("numLock");
+        if (jsValue->IsBoolean()) {
+            keyEvent.numLock = jsValue->ToBoolean();
+        }
+    }
+
+    if (jsObj->HasProperty("scrollLock")) {
+        auto jsValue = jsObj->GetProperty("scrollLock");
+        if (jsValue->IsBoolean()) {
+            keyEvent.scrollLock = jsValue->ToBoolean();
+        }
+    }
+
+    if (jsObj->HasProperty("enableCapsLock") || jsObj->HasProperty("capsLock")) {
+        auto jsValue = jsObj->GetProperty("enableCapsLock");
+        if (jsValue->IsUndefined()) {
+            jsValue = jsObj->GetProperty("capsLock");
+        }
+        if (jsValue->IsBoolean()) {
+            keyEvent.enableCapsLock = jsValue->ToBoolean();
+        }
+    }
+}
+
 void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
 {
     JSRef<JSVal> arg = args[0];
@@ -9032,13 +9137,16 @@ void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
     }
     JSRef<JSObject> jsObject = JSRef<JSObject>::Cast(args[1]);
     auto eventInfoPtr = jsObject->Unwrap<KeyEventInfo>();
-    CHECK_NULL_VOID(eventInfoPtr);
     KeyEvent keyEvent;
-    eventInfoPtr->ParseKeyEvent(keyEvent);
+    if (eventInfoPtr == NULL) {
+        ParseJsKeyEvent(jsObject, keyEvent);
+    } else {
+        eventInfoPtr->ParseKeyEvent(keyEvent);
+    }
+
     auto result = focusHub->HandleEvent(keyEvent);
     args.SetReturnValue(JSRef<JSVal>::Make(ToJSValue(result)));
 }
-
 void JSViewAbstract::JsOnCrownEvent(const JSCallbackInfo& args)
 {
 #ifdef SUPPORT_DIGITAL_CROWN
