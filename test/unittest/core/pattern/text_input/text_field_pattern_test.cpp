@@ -2816,6 +2816,9 @@ HWTEST_F(TextFieldPatternTest, OnDirectionConfigurationUpdate001, TestSize.Level
  */
 HWTEST_F(TextFieldPatternTest, HandleOnCopy001, TestSize.Level0)
 {
+    /**
+     * @tc.steps: step1. create textFieldNode.
+     */
     auto textFieldNode = FrameNode::GetOrCreateFrameNode(V2::TEXTINPUT_ETS_TAG,
         ElementRegister::GetInstance()->MakeUniqueId(), []() { return AceType::MakeRefPtr<TextFieldPattern>(); });
     ASSERT_NE(textFieldNode, nullptr);
@@ -2843,7 +2846,9 @@ HWTEST_F(TextFieldPatternTest, HandleOnCopy001, TestSize.Level0)
     eventHub->SetOnCopy([&calledOnCopy](const std::u16string& value) {
         calledOnCopy = true;
     });
-
+    /**
+     * @tc.steps: step2. set mouse state using.
+     */
     ASSERT_NE(pattern->selectOverlay_, nullptr);
     pattern->selectOverlay_->SetUsingMouse(true);
     pattern->HandleOnCopy(false);
