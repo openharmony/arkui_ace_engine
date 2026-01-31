@@ -1061,12 +1061,12 @@ void ScrollablePattern::RegisterTouchpadInteractionCallback()
     inputEventHub->AddTouchpadInteractionListenerInner([weak = WeakClaim(this)]() {
         auto pattern = weak.Upgrade();
         CHECK_NULL_VOID(pattern);
-        pattern->StopScrollAnimation();
         if (pattern->GetNestedScrolling() && !NearZero(pattern->GetNestedScrollVelocity())) {
             auto child = pattern->GetScrollOriginChild();
             CHECK_NULL_VOID(child);
             child->StopScrollAnimation();
         }
+        pattern->StopAnimate();
     });
 }
 
