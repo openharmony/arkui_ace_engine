@@ -6330,7 +6330,7 @@ typedef enum {
      * .value[0].i32: whether to enable haptic feedback in RichEditor, default value true.\n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .value[0].i32: whether haptic feedbac is enabled.\n
+     * .value[0].i32: whether haptic feedback is enabled.\n
      *
      * @since 24
      */
@@ -6353,11 +6353,11 @@ typedef enum {
     * @brief Set the keyboard style of RichEditor
     *
     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-    * .value[0].i32：keyboard style，the parameter type is {@link ArkUI_KeyboardAppearance}.
+    * .value[0].i32: keyboard style，the parameter type is {@link ArkUI_KeyboardAppearance}.
     * The default value is <b>ARKUI_KEYBOARD_APPEARANCE_NONE_IMMERSIVE</b>\n
     * \n
     * Format of the return value {@link ArkUI_AttributeItem}:\n
-    * .value[0].i32：keyboard style，the parameter type is {@link ArkUI_KeyboardAppearance}.\n
+    * .value[0].i32: keyboard style，the parameter type is {@link ArkUI_KeyboardAppearance}.\n
     *
     * @since 24
     */
@@ -6410,7 +6410,7 @@ typedef enum {
      * @brief Bind the selection menu for RichEditor.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .object: the selection selection menu of RichEditor.
+     * .object: the selection menu of RichEditor.
      *     The parameter type is {@link ArkUI_RichEditorSelectionMenuOptions}.\n
      *
      * @since 24
@@ -6463,13 +6463,13 @@ typedef enum {
      * @brief Sets the selected drag preview style. \n
      * This attribute can be set, reset, and obtained as required through APIs.
      *
-     * Format of the {@link Arkui_AttributeItem} parameter for setting the attribute: \n
+     * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute: \n
      * .object: selected drag preview style configuration. \n
-     * The parameter type is {@link Arkui_SelectedDragPreviewStyle}. \n
+     * The parameter type is {@link ArkUI_SelectedDragPreviewStyle}. \n
      * \n
-     * Format of the return value {@link Arkui_AttributeItem}: \n
+     * Format of the return value {@link ArkUI_AttributeItem}: \n
      * .object: selected drag preview style configuration. \n
-     * The parameter type is {@link Arkui_SelectedDragPreviewStyle}. \n
+     * The parameter type is {@link ArkUI_SelectedDragPreviewStyle}. \n
      * 
      * @since 24
      */

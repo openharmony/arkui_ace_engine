@@ -9520,7 +9520,7 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_GetMenuType(ArkUI_RichEd
  * @param userData user data.
  * @param start The start offset of the selected content.
  * @param end The end offset of the selected content.
- * @param userData callback user data.
+ * @param callbackUserData  callback user data.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
@@ -9528,7 +9528,7 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_GetMenuType(ArkUI_RichEd
  */
 ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuShowCallback(
     ArkUI_RichEditorSelectionMenuOptions* options, void* userData,
-    void (*callback)(int32_t start, int32_t end, void* userData));
+    void (*callback)(int32_t start, int32_t end, void* callbackUserData ));
  
 /**
  * @brief Sets the event to be called when selection menu hides.
@@ -9537,7 +9537,7 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuShowCallba
  * @param userData user data.
  * @param start The start offset of the selected content.
  * @param end The end offset of the selected content.
- * @param userData callback user data.
+ * @param callbackUserData  callback user data.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
@@ -9545,7 +9545,7 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuShowCallba
  */
 ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuHideCallback(
     ArkUI_RichEditorSelectionMenuOptions* options, void* userData,
-    void (*callback)(int32_t start, int32_t end, void* userData));
+    void (*callback)(int32_t start, int32_t end, void* callbackUserData ));
  
 /**
  * @brief Sets the event to be called when selection menu appears.
@@ -9554,7 +9554,7 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuHideCallba
  * @param userData user data.
  * @param start The start offset of the selected content.
  * @param end The end offset of the selected content.
- * @param userData callback user data.
+ * @param callbackUserData  callback user data.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
@@ -9562,21 +9562,21 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuHideCallba
  */
 ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuAppearCallback(
     ArkUI_RichEditorSelectionMenuOptions* options, void* userData,
-    void (*callback)(int32_t start, int32_t end, void* userData));
+    void (*callback)(int32_t start, int32_t end, void* callbackUserData ));
  
 /**
  * @brief Sets the event to be called when selection menu disappears.
  *
  * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
  * @param userData user data.
- * @param userData callback user data.
+ * @param callbackUserData  callback user data.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
  * @since 24
  */
 ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuDisappearCallback(
-    ArkUI_RichEditorSelectionMenuOptions* options, void* userData, void (*callback)(void* userData));
+    ArkUI_RichEditorSelectionMenuOptions* options, void* userData, void (*callback)(void* callbackUserData ));
  
 /**
  * @brief Sets the haptic feedback mode of selection menu in RichEditor.
