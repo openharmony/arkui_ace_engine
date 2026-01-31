@@ -714,6 +714,35 @@ HWTEST_F(RichEditorBaseTestNg, RichEditorModel015, TestSize.Level0)
 }
 
 /**
+ * @tc.name: IsInterceptInput001
+ * @tc.desc: test IsInterceptInput
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorBaseTestNg, IsInterceptInput001, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->isEditing_ = false;
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(false, OperationType::IME));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(false, OperationType::STYLUS));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::DEFAULT));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::DRAG));
+    EXPECT_TRUE(richEditorPattern->IsInterceptInput(true, OperationType::IME));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::FINISH_PREVIEW));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::PASTE));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::ACCESSIBILITY));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::AI_WRITE));
+    EXPECT_TRUE(richEditorPattern->IsInterceptInput(true, OperationType::STYLUS));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::SAFE_PASTE));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::AUTO_FILL));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::UNDO));
+    richEditorPattern->isEditing_ = true;
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::IME));
+    EXPECT_FALSE(richEditorPattern->IsInterceptInput(true, OperationType::STYLUS));
+}
+
+/**
  * @tc.name: RichEditorModel016
  * @tc.desc: test paragraph style linebreakstrategy attribute
  * @tc.type: FUNC

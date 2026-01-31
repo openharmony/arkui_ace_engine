@@ -6365,7 +6365,9 @@ bool RichEditorPattern::IsIMEOperation(OperationType operationType)
 {
     return operationType == OperationType::IME
         || operationType == OperationType::FINISH_PREVIEW
-        || operationType == OperationType::STYLUS;
+        || operationType == OperationType::STYLUS
+        || operationType == OperationType::AUTO_FILL
+        || operationType == OperationType::SAFE_PASTE;
 }
 
 void RichEditorPattern::InsertValue(const std::string& insertValue, bool isIME)
@@ -6479,8 +6481,7 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
         insertValue.length(), isIME, shouldCommitInput, isSpanStringMode_);
     SEC_TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "insertValue=%{public}s",
         StringUtils::RestoreEscape(UtfUtils::Str16ToStr8(insertValue)).c_str());
-
-    if (isIME && shouldCommitInput && (!isEditing_ || IsDragging()) && operationType != OperationType::FINISH_PREVIEW) {
+    if (IsInterceptInput(shouldCommitInput, operationType)) {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NOT allow input, isEditing=%{public}d, isDragging=%{public}d",
             isEditing_, IsDragging());
         return;
@@ -6518,6 +6519,12 @@ void RichEditorPattern::ProcessInsertValue(const std::u16string& insertValue, Op
         return;
     }
     ProcessInsertValueMore(text, record, operationType, changeValue, preRecord, shouldCommitInput);
+}
+
+bool RichEditorPattern::IsInterceptInput(const bool shouldCommitInput, const OperationType operationType)
+{
+    return shouldCommitInput && (!isEditing_ || IsDragging()) &&
+        (operationType == OperationType::IME || operationType == OperationType::STYLUS);
 }
 
 void RichEditorPattern::DeleteSelectionOrPreviewText(
@@ -9191,10 +9198,11 @@ void RichEditorPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWr
 {
     TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "NotifyFillRequestSuccess, autoFillType:%{public}d, triggerType:%{public}d",
         static_cast<int32_t>(autoFillType), static_cast<int32_t>(triggerType));
-    bool isPasteByAutoFill = triggerType == AceAutoFillTriggerType::PASTE_REQUEST ||
+    bool isInsertValue = triggerType == AceAutoFillTriggerType::PASTE_REQUEST ||
         triggerType == AceAutoFillTriggerType::MANUAL_REQUEST;
-    CHECK_NULL_VOID(GetHost() && viewDataWrap && nodeWrap && isPasteByAutoFill);
-    PasteStr(nodeWrap->GetValue());
+    CHECK_NULL_VOID(GetHost() && viewDataWrap && nodeWrap && isInsertValue);
+    InsertValueByOperationType(UtfUtils::Str8ToStr16(nodeWrap->GetValue()),
+        triggerType == AceAutoFillTriggerType::MANUAL_REQUEST ? OperationType::AUTO_FILL : OperationType::SAFE_PASTE);
 }
 
 void RichEditorPattern::DumpViewDataPageNode(RefPtr<ViewDataWrap> viewDataWrap, bool needsRecordData)
@@ -9332,7 +9340,6 @@ std::function<void(std::vector<std::vector<uint8_t>>&, const std::string&, bool&
             "isFromStyledString : [%{public}d], isFromAutoFill : [%{public}d]",
             isMulitiTypeRecord, isSpanStringMode, isFromStyledString, isFromAutoFill);
         if (isFromAutoFill) {
-            richEditor->ProcessAutoFillOnPaste();
             return;
         }
         if (spanStrings.empty() || (!isSpanStringMode && !isFromStyledString)) {
