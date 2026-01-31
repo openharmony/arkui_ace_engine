@@ -9562,7 +9562,7 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuHideCallba
  */
 ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuAppearCallback(
     ArkUI_RichEditorSelectionMenuOptions* options, void* userData,
-    void (*callback)(int32_t start, int32_t end, void* callbackUserData ));
+    void (*callback)(int32_t start, int32_t end, void* callbackUserData));
  
 /**
  * @brief Sets the event to be called when selection menu disappears.
@@ -9576,7 +9576,7 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuAppearCall
  * @since 24
  */
 ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuDisappearCallback(
-    ArkUI_RichEditorSelectionMenuOptions* options, void* userData, void (*callback)(void* callbackUserData ));
+    ArkUI_RichEditorSelectionMenuOptions* options, void* userData, void (*callback)(void* callbackUserData));
  
 /**
  * @brief Sets the haptic feedback mode of selection menu in RichEditor.
