@@ -157,22 +157,21 @@ declare interface LazyLayoutInfo {
 }
 
 class ColumnLayoutAlgorithm {
-  itemArr: Array<ItemPos> = new Array<ItemPos>();
-  itemArrStartIndex: number = -1;
-  estimateItemHeight: number = -1;
-  totalHeight: number = 0;
-  childCnt:number = 0;
-  startIndex: number = -1;
-  endIndex: number = -1;
+  private itemArr: ItemPos[] = [];
+  private itemArrStartIndex: number = -1;
+  private estimateItemHeight: number = -1;
+  private totalHeight: number = 0;
+  private childCnt:number = 0;
+  private startIndex: number = -1;
+  private endIndex: number = -1;
 
   onMeasure(self: RecycleAdapter, constraint: LayoutConstraint, viewPos: LazyLayoutInfo): Size {
     constraint.maxSize.height = constraint.percentReference.height;
     this.childCnt = self.getCount();
-    let SizeRes: SizeResult = { width: constraint.maxSize.width, height: 0 };
     if (this.childCnt == 0) {
       this.itemArr.length = 0;
       this.totalHeight = 0;
-      return SizeRes;
+      return { width: constraint.maxSize.width, height: 0 };
     }
     if (viewPos.viewStart > this.totalHeight || viewPos.viewEnd < 0) {
       this.startIndex = -1;
@@ -188,7 +187,7 @@ class ColumnLayoutAlgorithm {
     }
     let startIndex = currIndex;
     let startPos = currPos;
-    let tmpItemArr: Array<ItemPos> = new Array<ItemPos>();
+    let tmpItemArr: ItemPos[] = [];
     let tmpItemArrStartIndex: number = Number.MAX_SAFE_INTEGER;
     for (; currIndex < this.childCnt; currIndex++) {
       let child = self.getChild(currIndex);
@@ -261,7 +260,7 @@ class ColumnLayoutAlgorithm {
     return { width: constraint.maxSize.width, height: this.totalHeight };
   }
 
-  onLayout(self: RecycleAdapter) {
+  onLayout(self: RecycleAdapter): void {
     if (this.childCnt == 0) {
       return;
     }
@@ -275,7 +274,7 @@ class ColumnLayoutAlgorithm {
   // 将增量数据更新到startIndex和itemArr中，deltaStartIndex表示deltaItemArr起始索引号
   // 更新完成后，确保itemArr中前一项数据的end和后一项数据的start相同。
   // 如果增量元素和已有元素有空隙，则生成大小为estimateSize的元素填充。
-  merge(deltaStartIndex: number, deltaItemArr: Array<ItemPos>) {
+  merge(deltaStartIndex: number, deltaItemArr: ItemPos[]): void {
     // 如果没有增量数据，直接返回
     if (!deltaItemArr || deltaItemArr.length === 0) {
       return;
@@ -325,7 +324,7 @@ class ColumnLayoutAlgorithm {
         // 填充空隙
         const firstItem = this.itemArr[0];
         let currentStart = firstItem.start;
-        const fillItems: Array<ItemPos> = [];
+        const fillItems: ItemPos[] = [];
         for (let i = gapIndex - 1; i >= 0; i--) {
           currentStart -= this.estimateItemHeight;
           fillItems.unshift({ start: currentStart, end: currentStart + this.estimateItemHeight });
@@ -359,7 +358,7 @@ class ColumnLayoutAlgorithm {
         const gapCount = Math.round(gapSize / this.estimateItemHeight);
         if (gapCount > 0) {
           let currentEnd = prevItem.end;
-          const fillItems: Array<ItemPos> = [];
+          const fillItems: ItemPos[] = [];
           for (let i = 0; i < gapCount; i++) {
             fillItems.push({ start: currentEnd, end: currentEnd + this.estimateItemHeight });
             currentEnd += this.estimateItemHeight;
@@ -393,7 +392,7 @@ class ColumnLayoutAlgorithm {
         const gapCount = Math.round(gapSize / this.estimateItemHeight);
         if (gapCount > 0) {
           let currentEnd = lastDeltaItem.end;
-          const fillItems: Array<ItemPos> = [];
+          const fillItems: ItemPos[] = [];
           for (let i = 0; i < gapCount; i++) {
             fillItems.push({ start: currentEnd, end: currentEnd + this.estimateItemHeight });
             currentEnd += this.estimateItemHeight;
