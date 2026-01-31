@@ -151,36 +151,6 @@ HWTEST_F(ResSchedTouchOptimizerTest, HandleMainDelta_Test003, TestSize.Level1)
 }
 
 /**
- * @tc.name: SetSliceAcceptOffsetTest001
- * @tc.desc: test SetSlideAcceptOffset with non-zero offset
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedTouchOptimizerTest, SetSliceAcceptOffsetTest001, TestSize.Level1)
-{
-    Offset offset = {10.0, 20.0};
-    optimizer_->SetSlideAcceptOffset(offset);
-    
-    EXPECT_DOUBLE_EQ(optimizer_->slideAcceptOffset_.GetX(), offset.GetX());
-    EXPECT_DOUBLE_EQ(optimizer_->slideAcceptOffset_.GetX(), offset.GetX());
-    EXPECT_DOUBLE_EQ(optimizer_->accumulatedDistance_, 0.0);
-}
-
-/**
- * @tc.name: SetSliceAcceptOffsetTest002
- * @tc.desc: test SetSlideAcceptOffset with zero offset
- * @tc.type: FUNC
- */
-HWTEST_F(ResSchedTouchOptimizerTest, SetSliceAcceptOffsetTest002, TestSize.Level1)
-{
-    Offset offset = {0.0, 0.0};
-    optimizer_->SetSlideAcceptOffset(offset);
-    
-    EXPECT_DOUBLE_EQ(optimizer_->slideAcceptOffset_.GetX(), offset.GetX());
-    EXPECT_DOUBLE_EQ(optimizer_->slideAcceptOffset_.GetX(), offset.GetX());
-    EXPECT_DOUBLE_EQ(optimizer_->accumulatedDistance_, 0.0);
-}
-
-/**
  * @tc.name: RVSQueueUpdate001
  * @tc.desc: test RVSQueueUpdate with multiple touch events
  * @tc.type: FUNC

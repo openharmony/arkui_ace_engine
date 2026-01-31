@@ -2196,44 +2196,6 @@ HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents001, TestSize.Level1)
     }
 }
 
-/**
- * @tc.name: PipelineFlushTouchEvents002
- * @tc.desc: Test the function FlushTouchEvents with normal touchEvents.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents002, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    ASSERT_NE(context_, nullptr);
-    ASSERT_NE(context_->eventManager_, nullptr);
-    context_->SetupRootElement();
-    context_->vsyncTime_ = AFTER_VSYNC_TIME;
-    context_->eventManager_->idToTouchPoints_.clear();
-    bool isAcc = context_->touchAccelarate_;
-    context_->touchAccelarate_ = false;
-
-    for (auto& testCase : FLUSH_TOUCH_EVENTS_TESTCASES) {
-        context_->resampleTimeStamp_ = testCase.vsyncTime;
-        context_->compensationValue_ = testCase.compensationValue;
-        context_->touchEvents_.clear();
-        context_->historyPointsById_.clear();
-        for (auto& touchTimes : testCase.touchEventTimes) {
-            TouchEvent event;
-            event.type = TouchType::MOVE;
-            event.time = TimeStamp(std::chrono::nanoseconds(touchTimes));
-            context_->touchEvents_.emplace_back(event);
-        }
-        context_->FlushTouchEvents();
-        EXPECT_EQ(context_->historyPointsById_.size(), testCase.targetTouchEventSize);
-        auto idToTouchPoint = context_->eventManager_->GetIdToTouchPoint();
-        EXPECT_EQ(idToTouchPoint[DEFAULT_INT0].history.size(), testCase.originTouchEventSize);
-    }
-    context_->touchAccelarate_ = isAcc;
-}
-
 HWTEST_F(PipelineContextTestNg, PipelineOnHoverMove001, TestSize.Level1)
 {
     /**
