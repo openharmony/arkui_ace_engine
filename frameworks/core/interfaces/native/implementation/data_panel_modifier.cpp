@@ -37,7 +37,8 @@ const GENERATED_ArkUIDataPanelExtenderAccessor* GetDataPanelExtenderAccessor()
     if (cachedModifier == nullptr) {
         auto* module = DynamicModuleHelper::GetInstance().GetDynamicModule("DataPanel");
         CHECK_NULL_RETURN(module, nullptr);
-        cachedModifier = reinterpret_cast<const GENERATED_ArkUIDataPanelExtenderAccessor*>(module->GetStaticModifier());
+        cachedModifier = reinterpret_cast<const GENERATED_ArkUIDataPanelExtenderAccessor*>(
+            module->GetCustomModifier("dataPanelExtenderAccessor"));
     }
     return cachedModifier;
 }
