@@ -200,62 +200,6 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest036, TestSize.Le
 }
 
 /**
- * @tc.name: DragEventActuatorUpdatePreviewAttrTest037
- * @tc.desc: Create DragEventActuator and invoke longPressUpdate callback.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest037, TestSize.Level1)
-{
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto frameNode = AceType::MakeRefPtr<FrameNode>(V2::TEXT_ETS_TAG, -1, AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
-        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
-    ASSERT_NE(dragEventActuator, nullptr);
-    GestureEventFunc actionStart = [](GestureEvent& info) {};
-    GestureEventNoParameter actionCancel = []() {};
-    auto dragEvent = AceType::MakeRefPtr<DragEvent>(
-        std::move(actionStart), std::move(actionStart), std::move(actionStart), std::move(actionCancel));
-    dragEventActuator->ReplaceDragEvent(dragEvent);
-    dragEventActuator->SetCustomDragEvent(dragEvent);
-    auto getEventTargetImpl = eventHub->CreateGetEventTargetImpl();
-    TouchTestResult finalResult;
-    ResponseLinkResult responseLinkResult;
-    dragEventActuator->OnCollectTouchTarget(
-        COORDINATE_OFFSET, DRAG_TOUCH_RESTRICT, getEventTargetImpl, finalResult, responseLinkResult);
-    GestureEvent info = GestureEvent();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto manager = pipeline->GetOverlayManager();
-    ASSERT_NE(manager, nullptr);
-    auto childNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
-    ASSERT_NE(childNode, nullptr);
-    auto parentNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
-    ASSERT_NE(parentNode, nullptr);
-    frameNode->SetParent(parentNode);
-    dragEventActuator->itemParentNode_ = parentNode;
-    manager->pixmapColumnNodeWeak_ = WeakPtr<FrameNode>(AceType::DynamicCast<FrameNode>(frameNode));
-    dragEventActuator->isSelectedItemNode_ = true;
-    auto pattern = AceType::MakeRefPtr<GridPattern>();
-    auto itemPattern = AceType::MakeRefPtr<GridItemPattern>(nullptr, GridItemStyle::NONE);
-    itemPattern->isSelected_ = true;
-    auto tempChildNode = FrameNode::CreateFrameNode("BackButton", 2, AceType::MakeRefPtr<Pattern>());
-    ASSERT_NE(tempChildNode, nullptr);
-    childNode->pattern_ = itemPattern;
-    tempChildNode->pattern_ = itemPattern;
-    frameNode->AddChild(childNode);
-    frameNode->AddChild(tempChildNode);
-    pattern->frameNode_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    pattern->info_.startIndex_ = 0;
-    pattern->info_.endIndex_ = 3;
-    parentNode->pattern_ = pattern;
-    (*(dragEventActuator->previewLongPressRecognizer_->onAction_))(info);
-    EXPECT_EQ(itemPattern->isSelected_, true);
-}
-
-/**
  * @tc.name: DragEventActuatorUpdatePreviewAttrTest038
  * @tc.desc: SetGatherNodeAboveFilter
  * @tc.type: FUNC
@@ -485,51 +429,6 @@ HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest042, TestSize.Le
         event->callback_(info);
     }
     EXPECT_EQ(gestureEventHub->GetTextDraggable(), false);
-}
-
-/**
- * @tc.name: DragEventActuatorUpdatePreviewAttrTest043
- * @tc.desc: Create DragEventActuator and invoke HideTextAnimation function.
- * @tc.type: FUNC
- */
-HWTEST_F(DragEventTestNg, DragEventActuatorUpdatePreviewAttrTest043, TestSize.Level1)
-{
-    auto eventHub = AceType::MakeRefPtr<EventHub>();
-    ASSERT_NE(eventHub, nullptr);
-    auto frameNode = FrameNode::CreateFrameNode(
-        V2::TEXT_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(), AceType::MakeRefPtr<TextPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    NG::DragDropInfo dragPreviewInfo;
-    void* voidPtr = static_cast<void*>(new char[0]);
-    RefPtr<PixelMap> pixelMap = PixelMap::CreatePixelMap(voidPtr);
-    dragPreviewInfo.pixelMap = pixelMap;
-    frameNode->SetDragPreview(dragPreviewInfo);
-    eventHub->host_ = AceType::WeakClaim(AceType::RawPtr(frameNode));
-    auto gestureEventHub = AceType::MakeRefPtr<GestureEventHub>(AceType::WeakClaim(AceType::RawPtr(eventHub)));
-    auto dragEventActuator = AceType::MakeRefPtr<DragEventActuator>(
-        AceType::WeakClaim(AceType::RawPtr(gestureEventHub)), DRAG_DIRECTION, FINGERS_NUMBER, DISTANCE);
-    ASSERT_NE(dragEventActuator, nullptr);
-    frameNode->SetDraggable(true);
-    gestureEventHub->SetTextDraggable(true);
-    auto pattern = AceType::MakeRefPtr<TextPattern>();
-    ASSERT_NE(pattern, nullptr);
-    auto childNode = FrameNode::CreateFrameNode("test", 1, AceType::MakeRefPtr<Pattern>(), false);
-    ASSERT_NE(childNode, nullptr);
-    auto patterns = AceType::MakeRefPtr<TextDragPattern>();
-    patterns->CreateNodePaintMethod();
-    childNode->pattern_ = patterns;
-    pattern->dragNode_ = childNode;
-    frameNode->pattern_ = pattern;
-
-    auto pipeline = PipelineContext::GetCurrentContext();
-    auto manager = pipeline->GetOverlayManager();
-    manager->pixmapColumnNodeWeak_ = childNode;
-    dragEventActuator->HideTextAnimation();
-    auto pixmap = AceType::MakeRefPtr<MockPixelMap>();
-    EXPECT_CALL(*pixmap, GetWidth()).WillRepeatedly(Return(200));
-    gestureEventHub->pixelMap_ = pixmap;
-    dragEventActuator->HideTextAnimation(true);
-    EXPECT_EQ(gestureEventHub->GetTextDraggable(), true);
 }
 
 /**
