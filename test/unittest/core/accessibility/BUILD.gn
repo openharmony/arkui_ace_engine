@@ -248,7 +248,6 @@ group("core_accessibility_unittest_linux") {
 group("core_accessibility_unittest") {
   testonly = true
   deps = [
-    ":accessibility_adapter_test_ng",
     ":accessibility_test_ng",
     ":js_inspector_test",
   ]
