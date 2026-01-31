@@ -56,7 +56,10 @@ void DatePickerColumnLayoutAlgorithm::Measure(LayoutWrapper* layoutWrapper)
     SizeF frameSize = { -1.0f, -1.0f };
 
     uint32_t showCount = pickerTheme->GetShowCountPortrait() + BUFFER_NODE_NUMBER;
-    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE) {
+    auto container = Container::Current();
+    CHECK_NULL_VOID(container);
+    auto isFloatingWindow = container->IsFloatingWindow();
+    if (SystemProperties::GetDeviceOrientation() == DeviceOrientation::LANDSCAPE && !isFloatingWindow) {
         showCount = pickerTheme->GetShowCountLandscape() + BUFFER_NODE_NUMBER;
     }
 
