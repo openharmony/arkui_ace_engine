@@ -177,16 +177,21 @@ bool DragDropGlobalController::GetEnableDropDisallowedBadge() const
     return enableDropDisallowedBadge_;
 }
 
-bool DragDropGlobalController::RequestDragEndCallback(int32_t requestId,
-    DragRet dragResult, std::function<void(const DragRet&)> stopDragCallback)
+bool DragDropGlobalController::RequestDragEndCallback(int32_t requestId, DragRet dragResult,
+    DragBehavior suggestedDropOperation, bool disableDropAnimation,
+    std::function<void(const DragRet&, const DragBehavior&, const bool&)> stopDragCallback)
 {
     std::unique_lock<std::shared_mutex> lock(mutex_);
-    if (requestId == -1 || stopDragCallback == nullptr || !isOnOnDropPhase_) {
+    if (requestId == -1 || stopDragCallback == nullptr || !isOnOnDropPhase_ ||
+        (suggestedDropOperation != DragBehavior::UNKNOWN && suggestedDropOperation != DragBehavior::COPY &&
+            suggestedDropOperation != DragBehavior::MOVE)) {
         return false;
     }
     requestId_ = requestId;
     stopDragCallback_ = stopDragCallback;
     dragResult_ = dragResult;
+    suggestedDropOperation_ = suggestedDropOperation;
+    disableDropAnimation_ = disableDropAnimation;
     return true;
 }
 
@@ -197,6 +202,26 @@ int32_t DragDropGlobalController::NotifyDragResult(int32_t requestId, int32_t re
         return -1;
     }
     dragResult_ = static_cast<DragRet>(result);
+    return 0;
+}
+
+int32_t DragDropGlobalController::NotifySuggestedDropOperation(int32_t requestId, int32_t operation)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    if (requestId_ != requestId) {
+        return -1;
+    }
+    suggestedDropOperation_ = static_cast<DragBehavior>(operation);
+    return 0;
+}
+
+int32_t DragDropGlobalController::NotifyDisableDropAnimation(int32_t requestId, bool disable)
+{
+    std::unique_lock<std::shared_mutex> lock(mutex_);
+    if (requestId_ != requestId) {
+        return -1;
+    }
+    disableDropAnimation_ = disable;
     return 0;
 }
 
@@ -211,10 +236,12 @@ int32_t DragDropGlobalController::NotifyDragEndPendingDone(int32_t requestId)
         isOnOnDropPhase_ = false;
     }
     if (stopDragCallback_) {
-        stopDragCallback_(dragResult_);
+        stopDragCallback_(dragResult_, suggestedDropOperation_, disableDropAnimation_);
     }
     stopDragCallback_ = nullptr;
     dragResult_ = DragRet::DRAG_FAIL;
+    suggestedDropOperation_ = DragBehavior::UNKNOWN;
+    disableDropAnimation_ = false;
     return 0;
 }
 
