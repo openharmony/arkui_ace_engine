@@ -30474,11 +30474,20 @@ Ark_NativePointer impl_CanvasRenderer_createConicGradient(Ark_NativePointer this
         return GetAccessors()->getCanvasRendererAccessor()->createConicGradient(self, startAngle, x, y);
 }
 KOALA_INTEROP_4(CanvasRenderer_createConicGradient, Ark_NativePointer, Ark_NativePointer, KDouble, KDouble, KDouble)
-Ark_NativePointer impl_CanvasRenderer_getPixelMap(Ark_NativePointer thisPtr, KDouble sx, KDouble sy, KDouble sw, KDouble sh) {
+KInteropReturnBuffer impl_CanvasRenderer_getPixelMap(Ark_NativePointer thisPtr, KDouble sx, KDouble sy, KDouble sw, KDouble sh) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
-        return GetAccessors()->getCanvasRendererAccessor()->getPixelMap(self, sx, sy, sw, sh);
+        const auto &retValue = GetAccessors()->getCanvasRendererAccessor()->getPixelMap(self, sx, sy, sw, sh);
+        SerializerBase _retSerializer {};
+        if (runtimeType(retValue) != INTEROP_RUNTIME_UNDEFINED) {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_OBJECT);
+            const auto retValueTmpValue = retValue.value;
+            image_PixelMap_serializer::write(_retSerializer, retValueTmpValue);
+        } else {
+            _retSerializer.writeInt8(INTEROP_RUNTIME_UNDEFINED);
+        }
+        return _retSerializer.toReturnBuffer();
 }
-KOALA_INTEROP_5(CanvasRenderer_getPixelMap, Ark_NativePointer, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble)
+KOALA_INTEROP_5(CanvasRenderer_getPixelMap, KInteropReturnBuffer, Ark_NativePointer, KDouble, KDouble, KDouble, KDouble)
 KInteropReturnBuffer impl_CanvasRenderer_getLineDash(Ark_NativePointer thisPtr) {
         Ark_CanvasRenderer self = reinterpret_cast<Ark_CanvasRenderer>(thisPtr);
         const auto &retValue = GetAccessors()->getCanvasRendererAccessor()->getLineDash(self);
