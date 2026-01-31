@@ -42,6 +42,7 @@ struct InnerModalUIExtensionConfig {
     bool isDensityFollowHost = false;
     bool isWindowModeFollowHost = false;
     bool isModalRequestFocus = true;
+    bool isModalFixFocus = false;
 };
 
 struct UIExtensionConfig {

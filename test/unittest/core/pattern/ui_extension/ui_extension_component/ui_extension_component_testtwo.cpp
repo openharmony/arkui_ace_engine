@@ -1582,4 +1582,27 @@ HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentTouchTest001, TestSi
         parentRevertPoint, touchRestrict, result, touchId, responseLinkResult, isDispatch);
     EXPECT_EQ(res, HitTestResult::BUBBLING);
 }
+
+/**
+ * @tc.name: UIExtensionComponentIsModalFixFocusTest001
+ * @tc.desc: Test UIExtension IsModalFixFocus
+ * @tc.type: FUNC
+ */
+HWTEST_F(UIExtensionComponentTestTwoNg, UIExtensionComponentIsModalFixFocusTest001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. construct UIExtensionNode and get pattern
+    */
+    auto uiextensionNode = UIExtensionNode::GetOrCreateUIExtensionNode(V2::UI_EXTENSION_COMPONENT_ETS_TAG, 1,
+        []() { return AceType::MakeRefPtr<UIExtensionPattern>(); });
+    ASSERT_NE(uiextensionNode, nullptr);
+    auto pattern = uiextensionNode->GetPattern<UIExtensionPattern>();
+    ASSERT_NE(pattern, nullptr);
+    /**
+    * @tc.steps: step2. Test UIExtension pattern SetIsModalFixFocus and GetIsModalFixFocus
+    */
+    EXPECT_FALSE(pattern->GetIsModalFixFocus());
+    pattern->SetIsModalFixFocus(true);
+    EXPECT_TRUE(pattern->GetIsModalFixFocus());
+}
 } // namespace OHOS::Ace::NG
