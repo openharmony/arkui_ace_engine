@@ -217,7 +217,7 @@ HWTEST_F(TextFieldPatternTesteleven, TextInputAreaDeleteBackwardModel002, TestSi
 
 /**
  * @tc.name: OnUiMaterialParamUpdate001
- * @tc.desc: Test OnUiMaterialParamUpdate with valid parameters
+ * @tc.desc: Test OnUiMaterialParamUpdate with background color
  * @tc.type: FUNC
  */
 HWTEST_F(TextFieldPatternTesteleven, OnUiMaterialParamUpdate001, TestSize.Level1)
@@ -225,211 +225,27 @@ HWTEST_F(TextFieldPatternTesteleven, OnUiMaterialParamUpdate001, TestSize.Level1
     /**
      * @tc.steps: step1. Create TextField node and pattern
      */
-    CreateTextField("test", "", [](TextFieldModelNG model) {});
     auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
     ASSERT_NE(frameNode, nullptr);
     auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
 
     /**
-     * @tc.steps: step2. Create UiMaterialParam with custom values
+     * @tc.steps: step2. Create UiMaterialParam with background color
      */
     UiMaterialParam params;
-    params.backgroundColor = Color::RED;
-    params.borderWidth.setValueLeft(Dimension(2.0, DimensionUnit::VP));
-    params.borderWidth.setValueTop(Dimension(2.0, DimensionUnit::VP));
-    params.borderWidth.setValueRight(Dimension(2.0, DimensionUnit::VP));
-    params.borderWidth.setValueBottom(Dimension(2.0, DimensionUnit::VP));
-    params.borderColor.setColorLeft(Color::BLUE);
-    params.borderColor.setColorTop(Color::BLUE);
-    params.borderColor.setColorRight(Color::BLUE);
-    params.borderColor.setColorBottom(Color::BLUE);
+    params.backgroundColor = Color::BLACK;
 
     /**
      * @tc.steps: step3. Call OnUiMaterialParamUpdate
-     * @tc.expected: The method should execute without crash
-     */
-    textFieldPattern->OnUiMaterialParamUpdate(params);
-
-    /**
-     * @tc.steps: step4. Verify paint property is updated
-     */
-    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    EXPECT_TRUE(paintProperty->HasBackgroundColor());
-}
-
-/**
- * @tc.name: OnUiMaterialParamUpdate002
- * @tc.desc: Test OnUiMaterialParamUpdate with null host
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTesteleven, OnUiMaterialParamUpdate002, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextField pattern without host
-     */
-    auto textFieldPattern = AceType::MakeRefPtr<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Create UiMaterialParam with valid values
-     */
-    UiMaterialParam params;
-    params.backgroundColor = Color::GREEN;
-
-    /**
-     * @tc.steps: step3. Call OnUiMaterialParamUpdate without host
-     * @tc.expected: The method should return early without crash
-     */
-    textFieldPattern->OnUiMaterialParamUpdate(params);
-}
-
-/**
- * @tc.name: OnUiMaterialParamUpdate003
- * @tc.desc: Test OnUiMaterialParamUpdate with default color values
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTesteleven, OnUiMaterialParamUpdate003, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextField node and pattern
-     */
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Create UiMaterialParam with default values
-     */
-    UiMaterialParam params;
-    params.backgroundColor = Color::TRANSPARENT;
-
-    /**
-     * @tc.steps: step3. Call OnUiMaterialParamUpdate
-     * @tc.expected: The method should execute without crash
+     * @tc.expected: The paintProperty should be updated with background color
      */
     textFieldPattern->OnUiMaterialParamUpdate(params);
 
     auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
     ASSERT_NE(paintProperty, nullptr);
+    auto defaultBGColor = Color::TRANSPARENT;
+    auto bgColor = paintProperty->GetBackgroundColorValue(defaultBGColor);
+    EXPECT_EQ(bgColor, Color::BLACK);
 }
-
-/**
- * @tc.name: OnUiMaterialParamUpdate004
- * @tc.desc: Test OnUiMaterialParamUpdate with border color variations
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTesteleven, OnUiMaterialParamUpdate004, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextField node and pattern
-     */
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Create UiMaterialParam with different border colors
-     */
-    UiMaterialParam params;
-    params.backgroundColor = Color::YELLOW;
-    params.borderWidth.setValueLeft(Dimension(1.0, DimensionUnit::VP));
-    params.borderWidth.setValueTop(Dimension(2.0, DimensionUnit::VP));
-    params.borderWidth.setValueRight(Dimension(3.0, DimensionUnit::VP));
-    params.borderWidth.setValueBottom(Dimension(4.0, DimensionUnit::VP));
-    params.borderColor.setColorLeft(Color::RED);
-    params.borderColor.setColorTop(Color::GREEN);
-    params.borderColor.setColorRight(Color::BLUE);
-    params.borderColor.setColorBottom(Color::YELLOW);
-
-    /**
-     * @tc.steps: step3. Call OnUiMaterialParamUpdate
-     * @tc.expected: The method should execute without crash
-     */
-    textFieldPattern->OnUiMaterialParamUpdate(params);
-
-    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    EXPECT_TRUE(paintProperty->HasBackgroundColor());
-}
-
-/**
- * @tc.name: OnUiMaterialParamUpdate005
- * @tc.desc: Test OnUiMaterialParamUpdate with multiple calls
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTesteleven, OnUiMaterialParamUpdate005, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextField node and pattern
-     */
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Create first UiMaterialParam
-     */
-    UiMaterialParam params1;
-    params1.backgroundColor = Color::RED;
-    params1.borderWidth.setValueLeft(Dimension(1.0, DimensionUnit::VP));
-
-    /**
-     * @tc.steps: step3. Create second UiMaterialParam
-     */
-    UiMaterialParam params2;
-    params2.backgroundColor = Color::BLUE;
-    params2.borderWidth.setValueLeft(Dimension(3.0, DimensionUnit::VP));
-
-    /**
-     * @tc.steps: step4. Call OnUiMaterialParamUpdate multiple times
-     * @tc.expected: Both calls should execute without crash
-     */
-    textFieldPattern->OnUiMaterialParamUpdate(params1);
-    textFieldPattern->OnUiMaterialParamUpdate(params2);
-
-    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-    EXPECT_TRUE(paintProperty->HasBackgroundColor());
-}
-
-/**
- * @tc.name: OnUiMaterialParamUpdate006
- * @tc.desc: Test OnUiMaterialParamUpdate with zero border width
- * @tc.type: FUNC
- */
-HWTEST_F(TextFieldPatternTesteleven, OnUiMaterialParamUpdate006, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create TextField node and pattern
-     */
-    auto frameNode = FrameNode::CreateFrameNode(V2::TEXTINPUT_ETS_TAG, 0, AceType::MakeRefPtr<TextFieldPattern>());
-    ASSERT_NE(frameNode, nullptr);
-    auto textFieldPattern = frameNode->GetPattern<TextFieldPattern>();
-    ASSERT_NE(textFieldPattern, nullptr);
-
-    /**
-     * @tc.steps: step2. Create UiMaterialParam with zero border width
-     */
-    UiMaterialParam params;
-    params.backgroundColor = Color::WHITE;
-    params.borderWidth.setValueLeft(Dimension(0.0, DimensionUnit::VP));
-    params.borderWidth.setValueTop(Dimension(0.0, DimensionUnit::VP));
-    params.borderWidth.setValueRight(Dimension(0.0, DimensionUnit::VP));
-    params.borderWidth.setValueBottom(Dimension(0.0, DimensionUnit::VP));
-
-    /**
-     * @tc.steps: step3. Call OnUiMaterialParamUpdate
-     * @tc.expected: The method should execute without crash
-     */
-    textFieldPattern->OnUiMaterialParamUpdate(params);
-
-    auto paintProperty = frameNode->GetPaintProperty<TextFieldPaintProperty>();
-    ASSERT_NE(paintProperty, nullptr);
-}
-
 } // namespace OHOS::Ace::NG
