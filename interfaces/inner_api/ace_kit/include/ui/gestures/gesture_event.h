@@ -346,6 +346,14 @@ public:
     {
         return passThrough_;
     }
+    void SetIsFalsifyCancel(bool isFalsifyCancel)
+    {
+        isFalsifyCancel_ = isFalsifyCancel;
+    }
+    bool GetIsFalsifyCancel() const
+    {
+        return isFalsifyCancel_;
+    }
 #ifdef SECURITY_COMPONENT_ENABLE
     void SetDisplayX(double displayX)
     {
@@ -422,6 +430,7 @@ private:
     GestureTypeName gestureType_ = GestureTypeName::UNKNOWN;
     std::optional<int32_t> lastAction_;
     bool passThrough_ = false;
+    bool isFalsifyCancel_ = false;
 };
 
 using GestureEventFunc = std::function<void(GestureEvent& info)>;

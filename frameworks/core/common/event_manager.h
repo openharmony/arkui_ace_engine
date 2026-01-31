@@ -559,6 +559,7 @@ private:
     TouchEvent lastTouchEvent_;
     // used to pseudo hover out event.
     MouseEvent lastMouseEvent_;
+    AxisEvent lastAxisEvent_;
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::unordered_map<int32_t, int32_t> deviceIdChecker_;

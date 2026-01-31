@@ -65,6 +65,7 @@ struct ACE_FORCE_EXPORT AxisEvent final : public PointerEvent {
 
     int32_t scrollStep = 0;
     uint32_t axes = 0;
+    bool isFalsifyCancel = false;
 
     AxisEvent()
     {
