@@ -9491,7 +9491,7 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_GetResponseType(ArkUI_Ri
  * @brief Sets the type of selection menu in RichEditor.
  *
  * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
- * @param responseType menu type.
+ * @param menuType menu type.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
@@ -9504,7 +9504,7 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_SetMenuType(ArkUI_RichEd
  * @brief Gets the type of selection menu in RichEditor.
  *
  * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
- * @param responseType menu type.
+ * @param menuType menu type.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
@@ -9516,10 +9516,11 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_GetMenuType(ArkUI_RichEd
 /**
  * @brief Sets the event to be called when selection menu shows.
  *
- * @param selectionMenuOptions Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param userData user data.
  * @param start The start offset of the selected content.
  * @param end The end offset of the selected content.
- * @param userData user data.
+ * @param userData callback user data.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
@@ -9532,10 +9533,11 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuShowCallba
 /**
  * @brief Sets the event to be called when selection menu hides.
  *
- * @param selectionMenuOptions Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param userData user data.
  * @param start The start offset of the selected content.
  * @param end The end offset of the selected content.
- * @param userData user data.
+ * @param userData callback user data.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
@@ -9548,10 +9550,11 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuHideCallba
 /**
  * @brief Sets the event to be called when selection menu appears.
  *
- * @param selectionMenuOptions Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param userData user data.
  * @param start The start offset of the selected content.
  * @param end The end offset of the selected content.
- * @param userData user data.
+ * @param userData callback user data.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
@@ -9564,8 +9567,9 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuAppearCall
 /**
  * @brief Sets the event to be called when selection menu disappears.
  *
- * @param selectionMenuOptions Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
  * @param userData user data.
+ * @param userData callback user data.
  * @return Returns the result code.
  *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
  *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.

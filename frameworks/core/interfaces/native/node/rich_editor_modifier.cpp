@@ -643,7 +643,7 @@ void NodeModifier::SetRichEditorNapiEditMenuOptions(ArkUINodeHandle node, ArkUIE
         onPrepareMenuCallback = WrapOnPrepareMenuCallback(optionsParam);
     }
     RichEditorModelNG::SetSelectionMenuOptions(frameNode, std::move(onCreateMenuCallback),
- 	    std::move(onMenuItemClickCallback), std::move(onPrepareMenuCallback));
+        std::move(onMenuItemClickCallback), std::move(onPrepareMenuCallback));
 }
 
 void ResetRichEditorEditMenuOptions(ArkUINodeHandle node)

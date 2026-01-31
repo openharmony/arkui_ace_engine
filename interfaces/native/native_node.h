@@ -6270,10 +6270,10 @@ typedef enum {
      * This attribute can be set, reset, and obtained as required through APIs.
      *
      * Format of the {@link ArkUI_AttributeItem} parameter for setting the attribute:\n
-     * .data[0].u32: background color of the selected content, in 0xARGB format. \n
+     * .value[0].u32: background color of the selected content, in 0xARGB format. \n
      * \n
      * Format of the return value {@link ArkUI_AttributeItem}:\n
-     * .data[0].u32: background color of the selected content, in 0xARGB format. \n
+     * .value[0].u32: background color of the selected content, in 0xARGB format. \n
      *
      * @since 24
      */
