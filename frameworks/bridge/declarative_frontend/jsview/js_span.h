@@ -51,6 +51,11 @@ public:
     template<typename T>
     static void RegisterSpanResource(const std::string& key, const RefPtr<ResourceObject>& resObj, T value);
     static void UnregisterSpanResource(const std::string& key);
+
+private:
+    static void ResetFontWeightConfigs();
+    static void ProcessVariableFontWeight(const JSCallbackInfo& info);
+    static void ProcessFontWeightConfigs(const JSCallbackInfo& info);
 };
 
 } // namespace OHOS::Ace::Framework

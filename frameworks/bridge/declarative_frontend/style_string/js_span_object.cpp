@@ -341,7 +341,6 @@ void JSFontSpan::ParseFontWeightConfigs(const JSRef<JSObject>& fontConfigsObj, F
         return;
     }
     auto fontWeightConfigsObj = JSRef<JSObject>::Cast(fontWeightConfigsValue);
-
     if (fontWeightConfigsObj->HasProperty("enableVariableFontWeight")) {
         auto enableVariableFontWeight = fontWeightConfigsObj->GetProperty("enableVariableFontWeight");
         if (!enableVariableFontWeight->IsNull() && !enableVariableFontWeight->IsUndefined() &&
@@ -349,7 +348,6 @@ void JSFontSpan::ParseFontWeightConfigs(const JSRef<JSObject>& fontConfigsObj, F
             font.enableVariableFontWeight = enableVariableFontWeight->ToBoolean();
         }
     }
-
     if (fontWeightConfigsObj->HasProperty("enableDeviceFontWeightCategory")) {
         auto enableDeviceFontWeightCategory =
             fontWeightConfigsObj->GetProperty("enableDeviceFontWeightCategory");
