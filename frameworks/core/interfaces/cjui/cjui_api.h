@@ -2795,6 +2795,7 @@ struct CJUICalendarPickerModifier {
 struct CJUICalendarPickerDialogModifier {
     void (*jsRemoveResObj)(ArkUI_CharPtr key);
     void (*show)(const CalendarPickerDialogOption* option);
+    ArkUI_Bool (*checkOrientationChange)();
 };
 struct CJUIRatingModifier {
     void (*setStars)(ArkUINodeHandle node, ArkUI_Int32 value);

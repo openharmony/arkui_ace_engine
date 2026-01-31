@@ -74,6 +74,10 @@ void JSRemoveResObj(ArkUI_CharPtr key)
     pattern->RemoveResObj(key);
 }
 
+ArkUI_Bool CheckOrientationChange()
+{
+    return CalendarDialogView::CheckOrientationChange();
+}
 
 const ArkUICalendarPickerDialogModifier* GetCalendarPickerDialogDynamicModifier()
 {
@@ -81,6 +85,7 @@ const ArkUICalendarPickerDialogModifier* GetCalendarPickerDialogDynamicModifier(
     static const ArkUICalendarPickerDialogModifier modifier = {
         .show = ShowCalendarPickerDialog,
         .jsRemoveResObj = JSRemoveResObj,
+        .checkOrientationChange = CheckOrientationChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
@@ -93,6 +98,7 @@ const CJUICalendarPickerDialogModifier* GetCJUICalendarPickerDialogModifier()
     static const CJUICalendarPickerDialogModifier modifier = {
         .show = ShowCalendarPickerDialog,
         .jsRemoveResObj = JSRemoveResObj,
+        .checkOrientationChange = CheckOrientationChange,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
 
