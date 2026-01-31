@@ -1414,11 +1414,14 @@ void DragDropFuncWrapper::GetThumbnailPixelMapForCustomNode(
     auto frameNode = gestureHub->GetFrameNode();
     CHECK_NULL_VOID(frameNode);
     auto dragPreviewInfo = frameNode->GetDragPreview();
-    auto pipeline = PipelineContext::GetCurrentContext();
-    CHECK_NULL_VOID(pipeline);
-    auto callback = [id = Container::CurrentId(), pipeline, gestureHub, pixelMapCallback](
+    // Use weak reference to avoid RefPtr destruction in non-UI thread
+    auto callback = [id = Container::CurrentId(),
+                        weakGestureHub = AceType::WeakClaim(AceType::RawPtr(gestureHub)),
+                        pixelMapCallback](
                         std::shared_ptr<Media::PixelMap> pixelMap, int32_t arg, std::function<void()> finishCallback) {
         ContainerScope scope(id);
+        // Get pipeline from container by id to avoid RefPtr destruction in non-UI thread
+        auto pipeline = PipelineContext::GetContextByContainerId(id);
         CHECK_NULL_VOID(pipeline);
         auto taskScheduler = pipeline->GetTaskExecutor();
         CHECK_NULL_VOID(taskScheduler);
@@ -1432,7 +1435,8 @@ void DragDropFuncWrapper::GetThumbnailPixelMapForCustomNode(
         if (pixelMap != nullptr) {
             auto customPixelMap = PixelMap::CreatePixelMap(reinterpret_cast<void*>(&pixelMap));
             taskScheduler->PostTask(
-                [gestureHub, customPixelMap, pixelMapCallback]() {
+                [weakGestureHub, customPixelMap, pixelMapCallback]() {
+                    auto gestureHub = weakGestureHub.Upgrade();
                     CHECK_NULL_VOID(gestureHub);
                     gestureHub->SetPixelMap(customPixelMap);
                     gestureHub->SetDragPreviewPixelMap(customPixelMap);
