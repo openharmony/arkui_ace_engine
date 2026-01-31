@@ -251,6 +251,10 @@ export abstract class ExtendableComponent implements LifeCycle, IVariableOwner {
         return this.parent_?.__findProvide__Internal<T>(providedPropName);
     }
 
+    getownedStateVariables(): Array<DecoratedVariableBase> | undefined {
+        return this.ownedStateVariables_;
+    }
+
     getUIContext(): UIContext {
         return this.delegate_!.getUIContext();
     }
