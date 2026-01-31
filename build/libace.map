@@ -429,7 +429,6 @@
       vtable?for?OHOS::Ace::NG::DividerPattern;
       virtual?thunk?to?OHOS::Ace::NG::DividerPattern::*;
       VTT?for?OHOS::Ace::NG::DividerPattern;
-      OHOS::Ace::NG::DatePickerDialogView*;
       OHOS::Ace::Framework::ViewStackProcessor*;
       OHOS::Ace::PickerTimeComponent*;
       OHOS::Ace::NG::BorderWidthPropertyT*;

@@ -36634,11 +36634,12 @@ if (globalThis.FolderStack === undefined) {
 if (globalThis.TimePicker === undefined) {
   globalThis.TimePicker = {
     create: function(params) {
-      getUINativeModule().loadNativeModule("TimePicker");
+      getUINativeModule().loadNativeModule('TimePicker');
       const module = globalThis.requireNapi('arkui.components.arktimepicker');
       module.exportView();
       getUINativeModule().timePicker.create(params);
-    }
+    },
+ 	  name: 'JSTimePicker'
   }
 }
 
@@ -36646,11 +36647,12 @@ if (globalThis.TimePicker === undefined) {
 if (globalThis.TimePickerDialog === undefined) {
   globalThis.TimePickerDialog = {
     show: function(params) {
-      getUINativeModule().loadNativeModule("TimePickerDialog");
+      getUINativeModule().loadNativeModule('TimePickerDialog');
       const module = globalThis.requireNapi('arkui.components.arktimepicker');
       module.exportViewDialog();
       getUINativeModule().timePickerDialog.show(params);
-    }
+    },
+ 	  name: 'JSTimePickerDialog'
   }
 }
 

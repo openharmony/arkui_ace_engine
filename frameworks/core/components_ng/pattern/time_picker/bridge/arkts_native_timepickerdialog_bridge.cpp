@@ -39,33 +39,8 @@ const char TIMEPICKER_OPTIONS_HOUR[] = "hour";
 const char TIMEPICKER_OPTIONS_MINUTE[] = "minute";
 const std::string TIMEPICKER_OPTIONS_NUMERIC_VAL = "numeric";
 const std::string TIMEPICKER_OPTIONS_TWO_DIGIT_VAL = "2-digit";
-constexpr int PARAM_ARR_LENGTH_1 = 1;
 const std::vector<HoverModeAreaType> HOVER_MODE_AREA_TYPE = { HoverModeAreaType::TOP_SCREEN,
     HoverModeAreaType::BOTTOM_SCREEN };
-
-panda::Local<panda::ObjectRef> CreateTimePickerDialogOnChange(EcmaVM* vm, const std::string& info)
-{
-    auto jsonValue = JsonUtil::Create(true);
-    std::unique_ptr<JsonValue> argsPtr = JsonUtil::ParseJsonString(info);
-    if (!argsPtr) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
-    for (auto iter = keys.begin(); iter != keys.end(); iter++) {
-        const std::string key = *iter;
-        const auto value = argsPtr->GetValue(key);
-        if (!value || value->ToString().empty()) {
-            continue;
-        }
-        jsonValue->Put(key.c_str(), value->ToString().c_str());
-    }
-    Local<JSValueRef> jsValue =
-        panda::JSON::Parse(vm, panda::StringRef::NewFromUtf8(vm, jsonValue->ToString().c_str()));
-    if (jsValue->IsUndefined()) {
-        return panda::JSValueRef::Undefined(vm);
-    }
-    return jsValue->ToObject(vm);
-}
 
 PickerTime ParseTime(
     const EcmaVM* vm, const Local<JSValueRef>& timeVal, PickerTime defaultTime, bool startEndCheckValue)
@@ -577,6 +552,35 @@ void ParseDatePickerEffectOption(const EcmaVM* vm, PickerDialogInfo& pickerDialo
     }
 }
 
+void ExecuteInternal(const EcmaVM* vm, const std::unique_ptr<JsonValue>& value, const std::string& key,
+    const Local<panda::ObjectRef>& eventInfo)
+{
+    auto pandaKey = panda::StringRef::NewFromUtf8(vm, key.c_str());
+    if (value->IsString()) {
+        eventInfo->Set(vm, pandaKey, ArkTSUtils::ToJSValueWithVM(vm, value->GetString()));
+    } else if (value->IsNumber()) {
+        eventInfo->Set(vm, pandaKey, ArkTSUtils::ToJSValueWithVM(vm, value->GetDouble()));
+    } else if (value->IsBool()) {
+        eventInfo->Set(vm, pandaKey, ArkTSUtils::ToJSValueWithVM(vm, value->GetBool()));
+    } else if (value->IsObject()) {
+        auto valueRef = ArkTSUtils::ToJSValueWithVM<std::string>(vm, value->ToString().c_str());
+        if (valueRef->IsString(vm)) {
+            eventInfo->Set(vm, pandaKey, panda::JSON::Parse(vm, valueRef));
+        }
+    } else if (value->IsArray()) {
+        auto valueArray = panda::ArrayRef::New(vm);
+        for (auto index = 0; index < value->GetArraySize(); index++) {
+            auto item = value->GetArrayItem(index);
+            if (item && item->IsString()) {
+                panda::ArrayRef::SetValueAt(vm, valueArray, index, ArkTSUtils::ToJSValueWithVM(vm, item->GetString()));
+            }
+            if (item && item->IsNumber()) {
+                panda::ArrayRef::SetValueAt(vm, valueArray, index, ArkTSUtils::ToJSValueWithVM(vm, item->GetInt()));
+            }
+        }
+        eventInfo->Set(vm, pandaKey, valueArray);
+    }
+}
 } // namespace
 
 void TimePickerDialogBridge::RegisterTimePickerDialogAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
@@ -612,43 +616,85 @@ ArkUINativeModuleValue TimePickerDialogBridge::JSShow(ArkUIRuntimeCallInfo* runt
     WeakPtr<NG::FrameNode> targetNode = AceType::WeakClaim(NG::ViewStackProcessor::GetInstance()->GetMainFrameNode());
     auto onChange = ArkTSUtils::GetProperty(vm, paramObject, "onChange");
     if (!onChange->IsUndefined() && onChange->IsFunction(vm)) {
-        panda::Local<panda::FunctionRef> jsFunc = onChange;
+        panda::Local<panda::FunctionRef> jsFunc = onChange->ToObject(vm);
         changeEvent = [vm, func = panda::CopyableGlobal(vm, jsFunc), targetNode](const std::string& info) {
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
+            ACE_SCORING_EVENT("DatePickerDialog.onChange");
             PipelineContext::SetCallBackNode(targetNode);
-            auto dateObj = CreateTimePickerDialogOnChange(vm, info);
-            panda::Local<panda::JSValueRef> params[] = { dateObj };
-            auto result = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+            std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
+            auto argsPtr = JsonUtil::ParseJsonString(info);
+            if (!argsPtr) {
+                return;
+            }
+            Local<panda::ObjectRef> eventInfo = panda::ObjectRef::New(vm);
+            for (auto key : keys) {
+                const auto value = argsPtr->GetValue(key);
+                if (!value) {
+                    LOGD("key[%{public}s] not exist.", key.c_str());
+                    continue;
+                }
+                ExecuteInternal(vm, value, key, eventInfo);
+            }
+            panda::Local<panda::JSValueRef> params[] = { eventInfo };
+            auto result = func->Call(vm, func.ToLocal(), params, 1);
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
         };
     }
     auto onEnterSelectedArea = ArkTSUtils::GetProperty(vm, paramObject, "onEnterSelectedArea");
     if (!onEnterSelectedArea->IsUndefined() && onEnterSelectedArea->IsFunction(vm)) {
-        panda::Local<panda::FunctionRef> jsFunc = onEnterSelectedArea;
+        panda::Local<panda::FunctionRef> jsFunc = onEnterSelectedArea->ToObject(vm);
         enterEvent = [vm, func = panda::CopyableGlobal(vm, jsFunc), targetNode](const std::string& info) {
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
+            ACE_SCORING_EVENT("DatePickerDialog.onEnterSelectedArea");
             PipelineContext::SetCallBackNode(targetNode);
-            auto dateObj = CreateTimePickerDialogOnChange(vm, info);
-            panda::Local<panda::JSValueRef> params[] = { dateObj };
-            auto result = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+            std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
+            auto argsPtr = JsonUtil::ParseJsonString(info);
+            if (!argsPtr) {
+                return;
+            }
+            Local<panda::ObjectRef> eventInfo = panda::ObjectRef::New(vm);
+            for (auto key : keys) {
+                const auto value = argsPtr->GetValue(key);
+                if (!value) {
+                    LOGD("key[%{public}s] not exist.", key.c_str());
+                    continue;
+                }
+                ExecuteInternal(vm, value, key, eventInfo);
+            }
+            panda::Local<panda::JSValueRef> params[] = { eventInfo };
+            auto result = func->Call(vm, func.ToLocal(), params, 1);
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
         };
     }
     auto onAccept = ArkTSUtils::GetProperty(vm, paramObject, "onAccept");
     if (!onAccept->IsUndefined() && onAccept->IsFunction(vm)) {
-        panda::Local<panda::FunctionRef> jsFunc = onAccept;
+        panda::Local<panda::FunctionRef> jsFunc = onAccept->ToObject(vm);
         acceptEvent = [vm, func = panda::CopyableGlobal(vm, jsFunc), targetNode](const std::string& info) {
             CHECK_EQUAL_VOID(ArkTSUtils::CheckJavaScriptScope(vm), false);
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
+            ACE_SCORING_EVENT("DatePickerDialog.onAccept");
             PipelineContext::SetCallBackNode(targetNode);
-            auto dateObj = CreateTimePickerDialogOnChange(vm, info);
-            panda::Local<panda::JSValueRef> params[] = { dateObj };
-            auto result = func->Call(vm, func.ToLocal(), params, PARAM_ARR_LENGTH_1);
+            std::vector<std::string> keys = { "year", "month", "day", "hour", "minute", "second" };
+            auto argsPtr = JsonUtil::ParseJsonString(info);
+            if (!argsPtr) {
+                return;
+            }
+            Local<panda::ObjectRef> eventInfo = panda::ObjectRef::New(vm);
+            for (auto key : keys) {
+                const auto value = argsPtr->GetValue(key);
+                if (!value) {
+                    LOGD("key[%{public}s] not exist.", key.c_str());
+                    continue;
+                }
+                ExecuteInternal(vm, value, key, eventInfo);
+            }
+            panda::Local<panda::JSValueRef> params[] = { eventInfo };
+            auto result = func->Call(vm, func.ToLocal(), params, 1);
             ArkTSUtils::HandleCallbackJobs(vm, trycatch, result);
         };
     }
