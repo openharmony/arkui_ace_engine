@@ -1999,20 +1999,24 @@ void NavigationPattern::ProcessPageShowEvent()
     }
 }
 
-bool NavigationPattern::ReplaceAnimation(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
-    const RefPtr<NavDestinationGroupNode>& newTopNavDestination)
+bool NavigationPattern::ReplaceTransition(const RefPtr<NavDestinationGroupNode>& preTopNavDestination,
+    const RefPtr<NavDestinationGroupNode>& newTopNavDestination, bool isAnimated)
 {
     auto navigationNode = AceType::DynamicCast<NavigationGroupNode>(GetHost());
     CHECK_NULL_RETURN(navigationNode, false);
     auto navBarOrHomeDestNode =
         AceType::DynamicCast<NavDestinationNodeBase>(navigationNode->GetNavBarOrHomeDestinationNode());
     CHECK_NULL_RETURN(navBarOrHomeDestNode, false);
-    bool preUseCustomTransition = TriggerNavDestinationTransition(
-        (preTopNavDestination ? preTopNavDestination :
-        AceType::DynamicCast<NavDestinationGroupNode>(navBarOrHomeDestNode)),
-        NavigationOperation::REPLACE, false) != INVALID_ANIMATION_ID;
-    bool newUseCustomTransition = TriggerNavDestinationTransition(
-        newTopNavDestination, NavigationOperation::REPLACE, true) != INVALID_ANIMATION_ID;
+    bool preUseCustomTransition = false;
+    bool newUseCustomTransition = false;
+    if (isAnimated) {
+        preUseCustomTransition = TriggerNavDestinationTransition(
+            (preTopNavDestination ? preTopNavDestination :
+            AceType::DynamicCast<NavDestinationGroupNode>(navBarOrHomeDestNode)),
+            NavigationOperation::REPLACE, false) != INVALID_ANIMATION_ID;
+        newUseCustomTransition = TriggerNavDestinationTransition(
+            newTopNavDestination, NavigationOperation::REPLACE, true) != INVALID_ANIMATION_ID;
+    }
     if (newTopNavDestination && preTopNavDestination && !preUseCustomTransition) {
         navigationNode->DealNavigationExit(preTopNavDestination, false, false);
     } else if (newTopNavDestination && navigationMode_ == NavigationMode::STACK) {
@@ -2049,7 +2053,7 @@ void NavigationPattern::TransitionWithOutAnimation(RefPtr<NavDestinationGroupNod
     // replace
     auto replaceVal = navigationStack_->GetReplaceValue();
     if (replaceVal != 0) {
-        ReplaceAnimation(preTopNavDestination, newTopNavDestination);
+        ReplaceTransition(preTopNavDestination, newTopNavDestination, false);
         return;
     }
 
@@ -4541,7 +4545,7 @@ void NavigationPattern::TransitionWithDialogAnimation(const RefPtr<NavDestinatio
     }
     auto replaceVal = navigationStack_->GetReplaceValue();
     if (replaceVal != 0) {
-        if (!ReplaceAnimation(preTopNavDestination, newTopNavDestination)) {
+        if (!ReplaceTransition(preTopNavDestination, newTopNavDestination)) {
             ContentChangeReport(newTopNavDestination);
         }
         return;

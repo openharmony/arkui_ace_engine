@@ -277,9 +277,6 @@ void NavDestinationGroupNode::ToJsonValue(std::unique_ptr<JsonValue>& json, cons
 
 void NavDestinationGroupNode::SystemTransitionPushStart(bool transitionIn)
 {
-    if (destType_ == NavDestinationType::HOME) {
-        return;
-    }
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     float isRTL = GetLanguageDirection();
     bool needContentAnimation = IsNeedContentTransition();
@@ -321,9 +318,6 @@ void NavDestinationGroupNode::SystemTransitionPushStart(bool transitionIn)
 
 void NavDestinationGroupNode::InitSoftTransitionPush(bool transitionIn)
 {
-    if (destType_ == NavDestinationType::HOME) {
-        return;
-    }
     bool needContentAnimation = IsNeedContentTransition();
     auto renderContext = GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -353,9 +347,6 @@ void NavDestinationGroupNode::InitSoftTransitionPush(bool transitionIn)
 
 void NavDestinationGroupNode::StartSoftTransitionPush(bool transitionIn)
 {
-    if (destType_ == NavDestinationType::HOME) {
-        return;
-    }
     auto geometryNode = GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
@@ -377,9 +368,6 @@ void NavDestinationGroupNode::StartSoftTransitionPush(bool transitionIn)
 
 void NavDestinationGroupNode::InitSoftTransitionPop(bool isTransitionIn)
 {
-    if (destType_ == NavDestinationType::HOME) {
-        return;
-    }
     auto geometryNode = GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSizeWithSafeArea = geometryNode->GetFrameSize(true);
@@ -405,9 +393,6 @@ void NavDestinationGroupNode::InitSoftTransitionPop(bool isTransitionIn)
 
 void NavDestinationGroupNode::StartSoftTransitionPop(bool transitionIn)
 {
-    if (destType_ == NavDestinationType::HOME) {
-        return;
-    }
     bool needContentAnimation = IsNeedContentTransition();
     auto renderContext = GetRenderContext();
     CHECK_NULL_VOID(renderContext);
@@ -429,9 +414,6 @@ void NavDestinationGroupNode::StartSoftTransitionPop(bool transitionIn)
 
 void NavDestinationGroupNode::SystemTransitionPushEnd(bool transitionIn)
 {
-    if (destType_ == NavDestinationType::HOME) {
-        return;
-    }
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     auto geometryNode = GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
@@ -466,9 +448,6 @@ void NavDestinationGroupNode::SystemTransitionPushEnd(bool transitionIn)
 
 void NavDestinationGroupNode::SystemTransitionPushFinish(bool transitionIn, int32_t animationId)
 {
-    if (destType_ == NavDestinationType::HOME) {
-        return;
-    }
     if (animationId != animationId_) {
         TAG_LOGI(AceLogTag::ACE_NAVIGATION, "push animation invalid,curId: %{public}d, targetId: %{public}d",
             animationId_, animationId);
@@ -504,9 +483,6 @@ void NavDestinationGroupNode::SystemTransitionPushFinish(bool transitionIn, int3
 
 void NavDestinationGroupNode::SystemTransitionPopStart(bool transitionIn)
 {
-    if (destType_ == NavDestinationType::HOME) {
-        return;
-    }
     auto geometryNode = GetGeometryNode();
     CHECK_NULL_VOID(geometryNode);
     auto frameSize = geometryNode->GetFrameSize();
@@ -546,9 +522,6 @@ void NavDestinationGroupNode::SystemTransitionPopStart(bool transitionIn)
 
 void NavDestinationGroupNode::SystemTransitionPopEnd(bool transitionIn)
 {
-    if (destType_ == NavDestinationType::HOME) {
-        return;
-    }
     auto titleBarNode = AceType::DynamicCast<FrameNode>(GetTitleBarNode());
     bool needContentAnimation = IsNeedContentTransition();
     bool needTitleAnimation = IsNeedTitleTransition();
@@ -598,9 +571,6 @@ bool NavDestinationGroupNode::CheckTransitionPop(const int32_t animationId)
 
 bool NavDestinationGroupNode::SystemTransitionPopFinish(int32_t animationId, bool isNeedCleanContent)
 {
-    if (destType_ == NavDestinationType::HOME) {
-        return true;
-    }
     if (animationId_ != animationId) {
         TAG_LOGW(AceLogTag::ACE_NAVIGATION,
             "animation id is invalid, curId: %{public}d, targetId: %{public}d",
@@ -641,9 +611,6 @@ bool NavDestinationGroupNode::SystemTransitionPopFinish(int32_t animationId, boo
 
 void NavDestinationGroupNode::InitDialogTransition(bool isZeroY)
 {
-    if (destType_ == NavDestinationType::HOME) {
-        return;
-    }
     if (systemTransitionType_ == NavigationSystemTransitionType::NONE
         || systemTransitionType_ == NavigationSystemTransitionType::TITLE) {
         return;
@@ -665,9 +632,6 @@ void NavDestinationGroupNode::InitDialogTransition(bool isZeroY)
 
 std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::TitleOpacityAnimation(bool isTransitionIn)
 {
-    if (destType_ == NavDestinationType::HOME) {
-        return nullptr;
-    }
     if (!IsNeedTitleTransition()) {
         return nullptr;
     }
@@ -705,9 +669,6 @@ std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::TitleOpacity
 
 std::shared_ptr<AnimationUtils::Animation> NavDestinationGroupNode::BackButtonAnimation(bool isTransitionIn)
 {
-    if (destType_ == NavDestinationType::HOME) {
-        return nullptr;
-    }
     if (!IsNeedTitleTransition()) {
         return nullptr;
     }
@@ -860,13 +821,16 @@ bool NavDestinationGroupNode::IsNodeInvisible(const RefPtr<FrameNode>& node)
 {
     auto navigation = DynamicCast<NavigationGroupNode>(node);
     CHECK_NULL_RETURN(navigation, false);
+    auto navPattern = navigation->GetPattern<NavigationPattern>();
+    CHECK_NULL_RETURN(navPattern, false);
+    if (destType_ == NavDestinationType::HOME && navPattern->IsForceSplitSuccess()) {
+        return false;
+    }
     int32_t lastStandardIndex = navigation->GetLastStandardIndex();
     bool isInvisible = index_ < lastStandardIndex;
     if (!isHomeDestination_) {
         return isInvisible;
     }
-    auto navPattern = navigation->GetPattern<NavigationPattern>();
-    CHECK_NULL_RETURN(navPattern, isInvisible);
     auto mode = navPattern->GetNavigationMode();
     if (mode == NavigationMode::STACK) {
         return isInvisible;
@@ -921,9 +885,6 @@ std::string NavDestinationGroupNode::ToDumpString()
 
 int32_t NavDestinationGroupNode::DoTransition(NavigationOperation operation, bool isEnter)
 {
-    if (destType_ == NavDestinationType::HOME) {
-        return INVALID_ANIMATION_ID;
-    }
     if (navDestinationTransitionDelegate_) {
         return DoCustomTransition(operation, isEnter);
     }

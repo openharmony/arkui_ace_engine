@@ -1807,4 +1807,33 @@ HWTEST_F(NavDestinationGroupNodeTestNg, IsNeedHandleElapsedTimeTest001, TestSize
     navDestination->titleAnimationElapsedTime_ = 150;
     ASSERT_TRUE(navDestination->IsNeedHandleElapsedTime());
 }
+
+/**
+ * @tc.name: IsNodeInvisible001
+ * @tc.desc: Branch: destType_ == HOME && IsForceSplitSuccess() == true
+ *           Expect: return false (visible)
+ * @tc.type: FUNC
+ */
+HWTEST_F(NavDestinationGroupNodeTestNg, IsNodeInvisible001, TestSize.Level1)
+{
+    auto stack = AceType::MakeRefPtr<MockNavigationStack>();
+    auto navigation = CreateNavigationNode(stack);
+    ASSERT_NE(navigation, nullptr);
+
+    auto navDestination = NavDestinationGroupNode::GetOrCreateGroupNode(
+        V2::NAVDESTINATION_VIEW_ETS_TAG, ElementRegister::GetInstance()->MakeUniqueId(),
+        []() { return AceType::MakeRefPtr<NavDestinationPattern>(); });
+    ASSERT_NE(navDestination, nullptr);
+
+    SetNavigationToNavDestination(navDestination, navigation);
+    navDestination->destType_ = NavDestinationType::HOME;
+    navDestination->index_ = 0;
+
+    auto navPattern = navigation->GetPattern<NavigationPattern>();
+    ASSERT_NE(navPattern, nullptr);
+    navPattern->forceSplitSuccess_ = true;
+
+    bool result = navDestination->IsNodeInvisible(navigation);
+    ASSERT_FALSE(result);
+}
 } // namespace OHOS::Ace::NG
