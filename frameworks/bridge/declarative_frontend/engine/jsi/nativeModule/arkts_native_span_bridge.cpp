@@ -166,10 +166,10 @@ ArkUINativeModuleValue SpanBridge::SetFontWeight(ArkUIRuntimeCallInfo *runtimeCa
     }
     weightInfo.weight = weight.c_str();
     weightInfo.variableFontWeight = variableFontWeight;
-    if (thirdArg->IsBoolean()) {
+    if (!thirdArg->IsNull() && thirdArg->IsBoolean()) {
         weightInfo.enableVariableFontWeight = static_cast<int32_t>(thirdArg->BooleaValue(vm));
     }
-    if (fourthArg->IsBoolean()) {
+    if (!fourthArg->IsNull() && fourthArg->IsBoolean()) {
         weightInfo.enableDeviceFontWeightCategory = static_cast<int32_t>(fourthArg->BooleaValue(vm));
     } else {
         weightInfo.enableDeviceFontWeightCategory = true;

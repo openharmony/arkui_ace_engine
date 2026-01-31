@@ -1641,9 +1641,12 @@ void VerifySpanWithVariableWeight(std::list<RefPtr<OHOS::Ace::NG::SpanItem>>::it
     const std::string& content, int32_t start, int32_t end, const VariableFontWeightOptions& options)
 {
     VerifySpanContentAndInterval(it, content, start, end);
-    EXPECT_EQ((*it)->fontStyle->GetVariableFontWeight().value_or(0), options.variableWeight.value_or(0));
-    EXPECT_EQ((*it)->fontStyle->GetEnableVariableFontWeight().value_or(false), options.enableVariable.value_or(false));
-    EXPECT_EQ((*it)->fontStyle->GetEnableDeviceFontWeightCategory().value_or(true), options.enableDevice.value_or(true));
+    auto actualWeight = (*it)->fontStyle->GetVariableFontWeight().value_or(0);
+    EXPECT_EQ(actualWeight, options.variableWeight.value_or(0));
+    auto actualEnable = (*it)->fontStyle->GetEnableVariableFontWeight().value_or(false);
+    EXPECT_EQ(actualEnable, options.enableVariable.value_or(false));
+    auto actualDevice = (*it)->fontStyle->GetEnableDeviceFontWeightCategory().value_or(true);
+    EXPECT_EQ(actualDevice, options.enableDevice.value_or(true));
 }
 
 void VerifyFullSpan(std::list<RefPtr<OHOS::Ace::NG::SpanItem>>::iterator& it,
@@ -1654,9 +1657,12 @@ void VerifyFullSpan(std::list<RefPtr<OHOS::Ace::NG::SpanItem>>::iterator& it,
     EXPECT_EQ((*it)->fontStyle->GetTextColor().value(), options.color);
     EXPECT_EQ((*it)->fontStyle->GetItalicFontStyle().value(), options.style);
     EXPECT_EQ((*it)->fontStyle->GetFontWeight().value(), options.weight);
-    EXPECT_EQ((*it)->fontStyle->GetVariableFontWeight().value_or(0), options.variableWeight);
-    EXPECT_EQ((*it)->fontStyle->GetEnableVariableFontWeight().value_or(false), options.enableVariable);
-    EXPECT_EQ((*it)->fontStyle->GetEnableDeviceFontWeightCategory().value_or(true), options.enableDevice);
+    auto actualWeight = (*it)->fontStyle->GetVariableFontWeight().value_or(0);
+    EXPECT_EQ(actualWeight, options.variableWeight);
+    auto actualEnable = (*it)->fontStyle->GetEnableVariableFontWeight().value_or(false);
+    EXPECT_EQ(actualEnable, options.enableVariable);
+    auto actualDevice = (*it)->fontStyle->GetEnableDeviceFontWeightCategory().value_or(true);
+    EXPECT_EQ(actualDevice, options.enableDevice);
 }
 
 /**
