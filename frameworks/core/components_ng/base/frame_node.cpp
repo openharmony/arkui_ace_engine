@@ -811,6 +811,7 @@ RefPtr<AccessibilityProperty>& FrameNode::GetOrCreateAccessibilityProperty()
     if (isAccessibilityPropertyInitialized_) {
         return accessibilityProperty_;
     }
+    CHECK_NULL_RETURN(pattern_, accessibilityProperty_);
     accessibilityProperty_ = pattern_->CreateAccessibilityProperty();
     accessibilityProperty_->SetHost(WeakClaim(this));
     isAccessibilityPropertyInitialized_ = true;

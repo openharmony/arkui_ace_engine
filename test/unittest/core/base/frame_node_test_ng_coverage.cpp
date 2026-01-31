@@ -634,7 +634,7 @@ HWTEST_F(FrameNodeTestNg, FrameNodeToTreeJson03, TestSize.Level1)
     auto pattern = frameNode->pattern_;
     frameNode->pattern_ = nullptr;
     frameNode->paintProperty_ = nullptr;
-    frameNode->GetOrCreateAccessibilityProperty()->accessibilityText_ = "test";
+    EXPECT_EQ(frameNode->GetOrCreateAccessibilityProperty(), nullptr);
     frameNode->layoutProperty_ = nullptr;
 
     InspectorConfig testConfig;
