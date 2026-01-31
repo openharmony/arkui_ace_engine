@@ -116,6 +116,16 @@ StatisticEventInfo StatisticEventReporter::ConvertToEvent(StatisticEventType eve
             return { "CANVAS", "NINE_PARAM_DRAWIMAGE" };
         case StatisticEventType::CANVAS_GLOBAL_ALPHA_MINUS_ONE:
             return { "CANVAS", "GLOBAL_ALPHA_MINUS_ONE" };
+        case StatisticEventType::WEB_LIKE_FRONTEND:
+            return { "FRAMEWORK", "WEB_LIKE_FRONTEND" };
+        case StatisticEventType::JS_CARD_FRONTEND:
+            return { "FRAMEWORK", "JS_CARD_FRONTEND" };
+        case StatisticEventType::FOCUSBOXSTYLE_MARGIN_STROKEWIDTH_MODIFIER:
+            return { "FRAMEWORK", "FOCUSBOXSTYLE_MARGIN_STROKEWIDTH_MODIFIER" };
+        case StatisticEventType::GESTURE_TWO_FINGER_LONGPRESS_TRIGGER_INFO:
+            return { "FRAMEWORK", "GESTURE_TWO_FINGER_LONGPRESS_TRIGGER_INFO" };
+        case StatisticEventType::FA_AND_DECLARATIVE_APP_START:
+            return { "FRAMEWORK", "FA_AND_DECLARATIVE_APP_START" };
         case StatisticEventType::CALL_SET_CACHE_RANGE:
             return { "List", "CALL_SET_CACHE_RANGE" };
         case StatisticEventType::SEARCH_ONDIDINSERT:
