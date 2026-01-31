@@ -3905,8 +3905,8 @@ void RichEditorPattern::HandleBlurEvent()
     firstClickResetTask_.Cancel();
     firstClickAfterWindowFocus_ = false;
     StopTwinkling();
-    bool isCloseCustomKeyboard =
-        reason == BlurReason::WINDOW_BLUR && ((customKeyboardNode_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
+    bool isCloseCustomKeyboard = (reason == BlurReason::WINDOW_BLUR || reason == BlurReason::VIEW_SWITCH) &&
+                                 ((customKeyboardNode_ || customKeyboardBuilder_) && isCustomKeyboardAttached_);
     if (isCloseCustomKeyboard) {
         CloseKeyboard(true);
     }
