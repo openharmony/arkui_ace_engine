@@ -19,14 +19,14 @@ import {
     SymbolGlyph, Text, FontWeight, TextOverflow, TextAlign, FlexAlign, Placement, Color, SymbolEffect, Image, ImageFit,
     PX, FP, LPX, VP, GeometryInfo, Measurable, ConstraintSizeOptions, SizeResult, MeasureResult, Tabs, Visibility,
     Divider, Row, ForEach, BlurStyle, MenuOptions, Position, ColorMetrics, Rect, ShadowStyle, LocalizedPadding,
-    Margin, Padding, SymbolGlyphModifier, ButtonOptions, ClickEvent, CommonMethod, MenuElement, CustomDialog,
-    CustomLayout, Layoutable, ClassCastError
+    Margin, Padding, ButtonOptions, ClickEvent, CommonMethod, MenuElement, CustomDialog,
+    CustomLayout, Layoutable
   } from '@ohos.arkui.component'
   import {
     State, Observed, PropRef, StorageLink, ObjectLink, StoragePropRef, Watch, Link
   } from '@ohos.arkui.stateManagement';
   import { LengthUnit, LengthMetrics, } from '@ohos.arkui.node';
-  import { DividerModifier } from '@ohos.arkui.modifier';
+  import { DividerModifier, SymbolGlyphModifier } from '@ohos.arkui.modifier';
   import { UIContext } from '@ohos.arkui.UIContext';
   import { Theme } from '@ohos.arkui.theme';
   import common from '@ohos.app.ability.common';

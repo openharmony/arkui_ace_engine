@@ -20,9 +20,11 @@ import {
   GeometryInfo, Layoutable, ConstraintSizeOptions, Measurable, SizeResult, ForEach, Color, CommonMethod, StateStyles,
   BorderStyle, TouchEvent, TouchType, KeyEvent, KeyType, Button, ButtonType, SymbolGlyph, SymbolEffectStrategy,
   SymbolEffect, Resource, Image, Stack, Alignment, ImageFit, Circle, Direction, ShadowStyle, $r, Margin,
-  Padding, ButtonOptions, SymbolGlyphModifier, HoverEvent, ClickEvent, TapGestureHandler, PanGestureHandler,
-  GestureEvent, applyStyles, CustomDialog, CustomDialogControllerOptions, CustomLayout, Callback, ClassCastError
+  Padding, ButtonOptions, HoverEvent, ClickEvent, TapGestureHandler, PanGestureHandler,
+  GestureEvent, applyStyles, CustomDialog, CustomDialogControllerOptions, CustomLayout, Callback
 } from '@ohos.arkui.component';
+import { SymbolGlyphModifier } from '@ohos.arkui.modifier'
+
 import display from '@ohos.display'
 import hilog from '@ohos.hilog';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';

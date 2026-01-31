@@ -16,9 +16,10 @@
 import {
     AccessibilityRoleType, Builder, Button, ButtonType, Column, Component, Dimension, Direction, Flex, FlexAlign,
     ItemAlign, Image, Margin, Padding, ResourceStr, Resource, Row, SymbolGlyph, SymbolEffectStrategy, SymbolEffect,
-    Text, TextOverflow, TextAlign, TransitionEffect, Visibility, $r, Position, ButtonOptions, ICurve, ClickEvent,
-    SymbolGlyphModifier
+    Text, TextOverflow, TextAlign, TransitionEffect, Visibility, $r, Position, ButtonOptions, ICurve, ClickEvent
   } from '@ohos.arkui.component'
+  import { SymbolGlyphModifier } from '@ohos.arkui.modifier'
+
   import { State, Observed, PropRef } from '@ohos.arkui.stateManagement'
   import curves from '@ohos.curves';
   import common from '@ohos.app.ability.common';

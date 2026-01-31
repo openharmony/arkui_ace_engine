@@ -23,7 +23,7 @@ import {
     HorizontalAlign, ButtonAttribute, LocalizedMargin, LoadingProgress, LocalizedPadding, CommonMethod, ButtonStyleMode,
     RelativeContainer, BaseGestureEvent, ThemeColorMode, NestedScrollMode, GestureRecognizer, GestureJudgeResult,
     ConstraintSizeOptions, CustomPopupOptions, TextHeightAdaptivePolicy, PopupStateChangeParam, LocalizedAlignRuleOptions,
-    PromptActionDialogController, ClassCastError, CustomLayout
+    PromptActionDialogController, CustomLayout
   } from '@ohos.arkui.component';
   import {
     Local, Once, Trace, Event, Param, Require, Monitor, PropRef, Provider, IMonitor, Consumer, Computed, ObservedV2,

@@ -29,7 +29,6 @@ import {
   FontWeight,
   ICurve,
   LocalizedMargin,
-  PathShape,
   Progress,
   ProgressType,
   Resource,
@@ -45,6 +44,7 @@ import {
   SizeOptions,
   $r
 } from '@ohos.arkui.component';
+import { PathShape } from '@ohos.arkui.shape';
 import { ObservedV2, Monitor, IMonitor, Require, Trace, Param, Local } from '@ohos.arkui.stateManagement';
 
 export enum ArcButtonPosition {

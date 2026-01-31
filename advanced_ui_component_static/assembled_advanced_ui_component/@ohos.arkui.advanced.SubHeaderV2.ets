@@ -16,9 +16,9 @@ import {
   ComponentV2, ResourceStr, Builder, SelectOption, ResourceColor, Alignment, $r, TextAttribute, FlexDirection, Resource,
   TextOverflow, AttributeModifier, RowAttribute, BuilderParam, LocalizedMargin, KeyType, CommonMethod, ItemAlign, Image,
   Text, LocalizedPadding, applyStyles, Length, Flex, FontWeight, Select, Margin, Column, HorizontalAlign, KeyEvent, Row,
-  ClickEvent, Array, TouchType, GeometryInfo, SymbolGlyph, Measurable, ConstraintSizeOptions, SizeResult, Button, Stack,
+  ClickEvent, TouchType, GeometryInfo, SymbolGlyph, Measurable, ConstraintSizeOptions, SizeResult, Button, Stack,
   ButtonType, ButtonOptions, VerticalAlign, TouchEvent, FlexAlign, ForEach, HoverEffect, LoadingProgress, Padding,
-  Rectangle, Layoutable, Component, MeasureResult, CustomLayout, ClassCastError, AccessibilityRoleType
+  Rectangle, Layoutable, Component, MeasureResult, CustomLayout, AccessibilityRoleType
 } from '@ohos.arkui.component';
 import {
   ObservedV2, Trace, Param, Local, Provider, Monitor, IMonitor, IMonitorValue, Require, Event, Consumer

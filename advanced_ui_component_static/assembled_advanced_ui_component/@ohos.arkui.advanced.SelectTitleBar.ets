@@ -19,7 +19,7 @@ import {
   KeyType, TouchType, Placement, GeometryInfo, Layoutable, ConstraintSizeOptions, Builder, focusControl, SymbolEffect,
   Image, TextAlign, BlurStyle, ShadowStyle, ButtonOptions, BorderOptions, HoverEvent, Padding, KeyEvent,
   TouchEvent, ClickEvent, CustomPopupOptions, BadgeParamWithNumber, CommonMethod, CustomDialog,
-  CustomDialogControllerOptions, PopupStateChangeParam, ClassCastError
+  CustomDialogControllerOptions, PopupStateChangeParam
 } from '@ohos.arkui.component';
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
 import window from '@ohos.window';

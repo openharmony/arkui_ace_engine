@@ -18,13 +18,13 @@ import {
   ColumnAttribute, Builder, Button, ButtonType, Column, SymbolGlyph, Text, FontWeight, TextOverflow, TextAlign,
   FlexAlign, Placement, Color, SymbolEffect, Image, ImageFit, PX, FP, LPX, VP, GeometryInfo, Measurable, SizeResult,
   ConstraintSizeOptions, MeasureResult, Divider, Row, ForEach, BlurStyle, ColorMetrics, ShadowStyle, $r,
-  LocalizedPadding, Margin, Padding, SymbolGlyphModifier, ButtonOptions, ClickEvent, CommonMethod, MenuElement,
-  ComponentV2, CustomLayout, MenuOptions, Position, Layoutable, ClassCastError
+  LocalizedPadding, Margin, Padding, ButtonOptions, ClickEvent, CommonMethod, MenuElement,
+  ComponentV2, CustomLayout, MenuOptions, Position, Layoutable
 } from '@ohos.arkui.component'
 import { ObservedV2, Trace, Computed, Require, Param, Local, Monitor, IMonitor } from '@ohos.arkui.stateManagement';
 import { Theme } from '@ohos.arkui.theme';
 import { LengthMetrics, LengthUnit, ColorMetrics } from '@ohos.arkui.node';
-import { DividerModifier } from '@ohos.arkui.modifier';
+import { DividerModifier, SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import hilog from '@ohos.hilog';
 import window from '@ohos.window';
 import common from '@ohos.app.ability.common';

@@ -22,7 +22,7 @@ import {
   AnimateParam, ButtonOptions, LengthMetrics, FlexDirection, VerticalAlign, BlendApplyType, 
   LocalizedMargin, HorizontalAlign, TransitionEffect, LocalizedPadding, OnScrollCallback, 
   ReplaceSymbolEffect, AccessibilityRoleType, RenderingContextSettings, CanvasRenderingContext2D, 
-  VisibleAreaChangeCallback, ClassCastError
+  VisibleAreaChangeCallback
 } from '@ohos.arkui.component';
 import { ObjectLink, Observed, State, PropRef, Watch } from '@ohos.arkui.stateManagement';
 import EnvironmentCallback from '@ohos.app.ability.EnvironmentCallback';

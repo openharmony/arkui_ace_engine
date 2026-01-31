@@ -14,7 +14,7 @@
  */
 
 import {
-  Column, Row, Component, Button, Text, CustomDialog, Array, $r, Flex, List, HoverEvent, ImageLoadResult,
+  Column, Row, Component, Button, Text, CustomDialog, $r, Flex, List, HoverEvent, ImageLoadResult,
   Canvas, BlendMode, Scroller, ForEach,AttributeModifier, GestureModifier, ListItem, BuilderParam,
   ResourceStr, UIGestureEvent, LongPressGestureHandler, PopupOptions,PopupStateChangeParam, CustomPopupOptions,
   CustomDialogController,ScrollOptions, ScrollAnimationOptions, SwiperController, ResourceColor, Area,
@@ -23,9 +23,11 @@ import {
   Color ,ButtonType, SymbolGlyph, BorderStyle, TouchType, KeyType, Placement ,GeometryInfo, Layoutable,
   ConstraintSizeOptions, focusControl, BorderOptions ,HitTestMode, SymbolEffect, ImageCompleteEvent, Resource,
   Image, Callback ,ImageFit, VerticalAlign, TextOverflow, TextAlign, ShadowStyle, BlurStyle,Margin, Padding,
-  CommonMethod, ButtonOptions, ImageError, ImageOnCompleteCallback, ImageErrorCallback, SymbolGlyphModifier,
-  ClassCastError, ClickEvent, LocalizedPadding, LengthMetrics, BusinessError
+  CommonMethod, ButtonOptions, ImageError, ImageOnCompleteCallback, ImageErrorCallback,
+  ClickEvent, LocalizedPadding, LengthMetrics
 } from "@ohos.arkui.component";
+import { BusinessError } from '@ohos.base';
+import { SymbolGlyphModifier } from '@ohos.arkui.modifier';
 import { State, Observed, PropRef, StorageLink, StoragePropRef, Watch } from '@ohos.arkui.stateManagement';
 import { Context, UIContext, MeasureUtils } from "@ohos.arkui.UIContext";
 import { KeyCode } from '@ohos.multimodalInput.keyCode';
