@@ -108,7 +108,7 @@ void MenuItemGroupPattern::AddHeader(const RefPtr<NG::UINode>& header)
     CHECK_NULL_VOID(host);
     if (headerIndex_ < 0) {
         headerIndex_ = itemStartIndex_;
-        host->AddChild(header);
+        host->AddChild(header, headerIndex_);
         itemStartIndex_++;
     } else {
         host->ReplaceChild(host->GetChildAtIndex(headerIndex_), header);
@@ -135,7 +135,7 @@ void MenuItemGroupPattern::AddFooter(const RefPtr<NG::UINode>& footer)
     CHECK_NULL_VOID(host);
     if (footerIndex_ < 0) {
         footerIndex_ = itemStartIndex_;
-        host->AddChild(footer);
+        host->AddChild(footer, footerIndex_);
         itemStartIndex_++;
     } else {
         host->ReplaceChild(host->GetChildAtIndex(footerIndex_), footer);
