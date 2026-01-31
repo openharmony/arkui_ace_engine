@@ -20,6 +20,7 @@
 #include "core/interfaces/native/implementation/frame_node_peer_impl.h"
 #include "core/interfaces/native/implementation/gesture_event_peer.h"
 #include "core/interfaces/native/implementation/gesture_recognizer_peer_impl.h"
+#include "core/interfaces/native/implementation/gesture_trigger_info_peer.h"
 #include "core/interfaces/native/implementation/pan_recognizer_peer.h"
 #include "arkoala_api_generated.h"
 #include "core/components_ng/base/observer_handler.h"
@@ -199,6 +200,53 @@ Ark_Int32 SetOnDidTapImpl(Ark_Int32 instanceId, const UIObserver_GestureEventLis
         static_cast<int32_t>(instanceId), resourceId, std::move(handleFunc));
     return resourceId;
 }
+Ark_Int32 AddGlobalGestureListenerImpl(Ark_GestureListenerType type,
+                                       const Ark_InnerGestureObserverConfigs* option,
+                                       const UIObserver_GestureListenerCallback* callback)
+{
+    if (!callback) {
+        return 0;
+    }
+
+    // Create a GlobalGestureListenerCallback that receives GestureTriggerInfo directly
+    auto handleFunc = [event = CallbackHelper(*callback)](const GestureTriggerInfo& triggerInfo) {
+        // Convert GestureTriggerInfo to Ark_InnerGestureTriggerInfo
+        const auto arkTriggerInfo = Converter::ArkValue<Ark_InnerGestureTriggerInfo>(triggerInfo);
+        // Convert FrameNode to Opt_FrameNode
+        Ark_FrameNode arkFrameNode =
+            FrameNodePeer::Create(triggerInfo.node ? OHOS::Ace::AceType::RawPtr(triggerInfo.node) : nullptr);
+        auto optFrameNode = Converter::ArkValue<Opt_FrameNode>(arkFrameNode);
+        event.InvokeSync(arkTriggerInfo, optFrameNode);
+    };
+
+    int32_t resourceId = static_cast<int32_t>((*callback).resource.resourceId);
+
+    // Parse option to get action phases
+    std::unordered_set<Ark_GestureActionPhase> phases;
+    if (option && option->actionPhases.array && option->actionPhases.length > 0) {
+        // Parse actionPhases array to extract phase values
+        auto phaseArray = option->actionPhases;
+        for (int32_t i = 0; i < phaseArray.length; ++i) {
+            auto phase = phaseArray.array[i];
+            phases.insert(phase);
+        }
+    } else {
+        // Default phase if not specified: WILL_END
+        phases.insert(ARK_GESTURE_ACTION_PHASE_WILL_END);
+    }
+
+    // Register the callback for each phase
+    for (const auto& phase : phases) {
+        NG::UIObserverHandler::AddGlobalGestureListenerCallback(
+            static_cast<NG::GestureListenerType>(type),
+            static_cast<NG::GestureActionPhase>(phase),
+            resourceId,
+            GlobalGestureListenerCallback(handleFunc)  // Copy the callback for each phase
+        );
+    }
+
+    return resourceId;
+}
 } // UIObserverGestureEventOpsAccessor
 const GENERATED_ArkUIUIObserverGestureEventOpsAccessor* GetUIObserverGestureEventOpsAccessor()
 {
@@ -211,6 +259,7 @@ const GENERATED_ArkUIUIObserverGestureEventOpsAccessor* GetUIObserverGestureEven
         UIObserverGestureEventOpsAccessor::SetOnDidClickImpl,
         UIObserverGestureEventOpsAccessor::SetOnWillTapImpl,
         UIObserverGestureEventOpsAccessor::SetOnDidTapImpl,
+        UIObserverGestureEventOpsAccessor::AddGlobalGestureListenerImpl,
     };
     return &UIObserverGestureEventOpsAccessorImpl;
 }

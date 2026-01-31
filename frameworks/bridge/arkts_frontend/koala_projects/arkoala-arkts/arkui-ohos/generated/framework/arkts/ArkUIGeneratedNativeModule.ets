@@ -6743,6 +6743,8 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _UIObserverGestureEventOps_setOnDidTap(instanceId: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
     @ani.unsafe.Direct
+    native static _UIObserverGestureEventOps_addGlobalGestureListener(type: KInt, thisArray: KSerializerBuffer, thisLength: int32): int32
+    @ani.unsafe.Direct
     native static _UIScrollableCommonEvent_construct(ptr: KPointer): KPointer
     @ani.unsafe.Direct
     native static _UIScrollableCommonEvent_getFinalizer(): KPointer

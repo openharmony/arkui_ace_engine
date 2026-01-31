@@ -42835,6 +42835,14 @@ Ark_Int32 impl_UIObserverGestureEventOps_setOnDidTap(Ark_Int32 instanceId, KSeri
         return GetAccessors()->getUIObserverGestureEventOpsAccessor()->setOnDidTap(instanceId, static_cast<UIObserver_GestureEventListenerCallback*>(&callbackValueTemp));
 }
 KOALA_INTEROP_DIRECT_3(UIObserverGestureEventOps_setOnDidTap, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
+Ark_Int32 impl_UIObserverGestureEventOps_addGlobalGestureListener(Ark_Int32 type, KSerializerBuffer thisArray, int32_t thisLength)
+{
+        DeserializerBase thisDeserializer(thisArray, thisLength);
+        Ark_InnerGestureObserverConfigs optionValueTemp = InnerGestureObserverConfigs_serializer::read(thisDeserializer);;
+        UIObserver_GestureListenerCallback callbackValueTemp = {thisDeserializer.readCallbackResource(), reinterpret_cast<void(*)(const Ark_Int32 resourceId, const Ark_InnerGestureTriggerInfo info, const Opt_FrameNode frameNode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCaller(Kind_UIObserver_GestureListenerCallback)))), reinterpret_cast<void(*)(Ark_VMContext vmContext, const Ark_Int32 resourceId, const Ark_InnerGestureTriggerInfo info, const Opt_FrameNode frameNode)>(thisDeserializer.readPointerOrDefault(reinterpret_cast<Ark_NativePointer>(getManagedCallbackCallerSync(Kind_UIObserver_GestureListenerCallback))))};;
+        return GetAccessors()->getUIObserverGestureEventOpsAccessor()->addGlobalGestureListener(static_cast<Ark_GestureListenerType>(type), static_cast<Ark_InnerGestureObserverConfigs*>(&optionValueTemp), static_cast<UIObserver_GestureListenerCallback*>(&callbackValueTemp));
+}
+KOALA_INTEROP_DIRECT_3(UIObserverGestureEventOps_addGlobalGestureListener, Ark_Int32, Ark_Int32, KSerializerBuffer, int32_t)
 Ark_NativePointer impl_UIScrollableCommonEvent_construct(Ark_NativePointer thisPtr) {
         return GetAccessors()->getUIScrollableCommonEventAccessor()->construct(thisPtr);
 }

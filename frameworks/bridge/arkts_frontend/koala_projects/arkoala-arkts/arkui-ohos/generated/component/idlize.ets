@@ -56,7 +56,7 @@ import { FrameNode, UIStatesChangeHandler, LayoutConstraint, InteractionEventBin
 import { Size, Frame, LengthMetrics, ColorMetrics, Vector2, Vector3, Matrix4, Circle, RoundRect, CommandPath } from "arkui.Graphics"
 import { RenderNode } from "arkui.RenderNode"
 import { default as common2D } from "@ohos.graphics.common2D"
-import { PanDirection, SwipeDirection, GestureMode, GestureEvent, GestureEventInternal, GestureMask, GestureRecognizer, GestureRecognizerInternal } from "./gesture"
+import { PanDirection, SwipeDirection, GestureMode, GestureEvent, GestureEventInternal, GestureMask, GestureRecognizer, GestureRecognizerInternal, GestureEvent_serializer, GestureRecognizer_serializer } from "./gesture"
 import { default as image } from "@ohos.multimedia.image"
 import { font_FontOptions_serializer, font_FontInfo_serializer } from "./../framework/ohos.font"
 import { font_UIFontConfig_serializer } from "./../framework/ohos.font.custom"
@@ -69,7 +69,7 @@ import { Scroller, ScrollerInternal } from "./scroll"
 import { CustomBuilder } from "./builder"
 import { NavigationOptions_serializer, NavPathStack, NavPathStackInternal, NavPathInfo, NavPathInfoInternal, NavigationOptions } from "./navigation"
 import { TargetInfo_serializer } from "./../framework/ohos.arkui.UIContext"
-import { TargetInfo, CustomKeyboardContinueFeature } from "@ohos.arkui.UIContext"
+import { TargetInfo, CustomKeyboardContinueFeature, GestureListenerType, GestureActionPhase } from "@ohos.arkui.UIContext"
 import { uiObserver_NavigationInfo_serializer } from "./../framework/ohos.arkui.observer"
 import { default as uiObserver } from "@ohos.arkui.observer"
 import { ComponentBase } from "./../ComponentBase"
@@ -5973,6 +5973,14 @@ export class UIObserverGestureEventOps {
         thisSerializer.release()
         return retval
     }
+    static addGlobalGestureListener_serialize(type: GestureListenerType, option: InnerGestureObserverConfigs, callback: ((info: InnerGestureTriggerInfo,frameNode?: FrameNode) => void)): int32 {
+        const thisSerializer : SerializerBase = SerializerBase.hold()
+        InnerGestureObserverConfigs_serializer.write(thisSerializer, option)
+        thisSerializer.holdAndWriteCallback(callback)
+        const retval  = ArkUIGeneratedNativeModule._UIObserverGestureEventOps_addGlobalGestureListener(type.valueOf(), thisSerializer.asBuffer(), thisSerializer.length())
+        thisSerializer.release()
+        return retval
+    }
     public static setOnBeforePanStart(instanceId: int32, callback: ((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void)): int32 {
         const instanceId_casted = instanceId as (int32)
         const callback_casted = callback as (((event: GestureEvent,current: GestureRecognizer,node?: FrameNode) => void))
@@ -6012,6 +6020,12 @@ export class UIObserverGestureEventOps {
         const instanceId_casted = instanceId as (int32)
         const callback_casted = callback as (((event: GestureEvent,node?: FrameNode) => void))
         return UIObserverGestureEventOps.setOnDidTap_serialize(instanceId_casted, callback_casted)
+    }
+    public static addGlobalGestureListener(type: GestureListenerType, option: InnerGestureObserverConfigs, callback: ((info: InnerGestureTriggerInfo,frameNode?: FrameNode) => void)): int32 {
+        const type_casted = type as (GestureListenerType)
+        const option_casted = option as (InnerGestureObserverConfigs)
+        const callback_casted = callback as (((info: InnerGestureTriggerInfo,frameNode?: FrameNode) => void))
+        return UIObserverGestureEventOps.addGlobalGestureListener_serialize(type_casted, option_casted, callback_casted)
     }
 }
 export class ArkRootPeer extends PeerNode {
@@ -6335,6 +6349,14 @@ export interface IndicatorStyle {
     bottom?: Length;
     size?: Length;
     mask?: boolean;
+}
+export interface InnerGestureTriggerInfo {
+    event: GestureEvent;
+    current: GestureRecognizer;
+    currentPhase: GestureActionPhase;
+}
+export interface InnerGestureObserverConfigs {
+    actionPhases: Array<GestureActionPhase>;
 }
 export type CustomNodeBuilder = (parentNode: KPointer) => KPointer;
 export type CustomBuilderT_Arkui_Component_Enums_ResponseType = (t: ResponseType, parentNode: KPointer) => KPointer;
@@ -7356,6 +7378,28 @@ export class FieldRegionInner_serializer {
         return value
     }
 }
+export class InnerGestureObserverConfigs_serializer {
+    public static write(buffer: SerializerBase, value: InnerGestureObserverConfigs): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForActionPhases  = value.actionPhases
+        valueSerializer.writeInt32((valueHolderForActionPhases.length).toInt())
+        for (let valueHolderForActionPhasesCounterI = 0; valueHolderForActionPhasesCounterI < valueHolderForActionPhases.length; valueHolderForActionPhasesCounterI++) {
+            const valueHolderForActionPhasesTmpElement : GestureActionPhase = valueHolderForActionPhases[valueHolderForActionPhasesCounterI]
+            valueSerializer.writeInt32(valueHolderForActionPhasesTmpElement.valueOf())
+        }
+    }
+    public static read(buffer: DeserializerBase): InnerGestureObserverConfigs {
+        let valueDeserializer : DeserializerBase = buffer
+        const actionPhasesTmpBufLength : int32 = valueDeserializer.readInt32()
+        let actionPhasesTmpBuf : Array<GestureActionPhase> = new Array<GestureActionPhase>(actionPhasesTmpBufLength)
+        for (let actionPhasesTmpBufBufCounterI = 0; actionPhasesTmpBufBufCounterI < actionPhasesTmpBufLength; actionPhasesTmpBufBufCounterI++) {
+            actionPhasesTmpBuf[actionPhasesTmpBufBufCounterI] = GestureActionPhase.fromValue(valueDeserializer.readInt32())
+        }
+        const actionPhasesTmpResult : Array<GestureActionPhase> = actionPhasesTmpBuf
+        let value : InnerGestureObserverConfigs = ({actionPhases: actionPhasesTmpResult} as InnerGestureObserverConfigs)
+        return value
+    }
+}
 export class LengthMetricsCustom_serializer {
     public static write(buffer: SerializerBase, value: LengthMetricsCustom): void {
         let valueSerializer : SerializerBase = buffer
@@ -7369,6 +7413,25 @@ export class LengthMetricsCustom_serializer {
         const unitTmpResult : number = (valueDeserializer.readNumber() as number)
         const valueTmpResult : number = (valueDeserializer.readNumber() as number)
         let value : LengthMetricsCustom = ({unit: unitTmpResult, value: valueTmpResult} as LengthMetricsCustom)
+        return value
+    }
+}
+export class InnerGestureTriggerInfo_serializer {
+    public static write(buffer: SerializerBase, value: InnerGestureTriggerInfo): void {
+        let valueSerializer : SerializerBase = buffer
+        const valueHolderForEvent  = value.event
+        GestureEvent_serializer.write(valueSerializer, valueHolderForEvent)
+        const valueHolderForCurrent  = value.current
+        GestureRecognizer_serializer.write(valueSerializer, valueHolderForCurrent)
+        const valueHolderForCurrentPhase  = value.currentPhase
+        valueSerializer.writeInt32(valueHolderForCurrentPhase.valueOf())
+    }
+    public static read(buffer: DeserializerBase): InnerGestureTriggerInfo {
+        let valueDeserializer : DeserializerBase = buffer
+        const eventTmpResult : GestureEvent = (GestureEvent_serializer.read(valueDeserializer) as GestureEvent)
+        const currentTmpResult : GestureRecognizer = (GestureRecognizer_serializer.read(valueDeserializer) as GestureRecognizer)
+        const currentPhaseTmpResult : GestureActionPhase = GestureActionPhase.fromValue(valueDeserializer.readInt32())
+        let value : InnerGestureTriggerInfo = ({event: eventTmpResult, current: currentTmpResult, currentPhase: currentPhaseTmpResult} as InnerGestureTriggerInfo)
         return value
     }
 }

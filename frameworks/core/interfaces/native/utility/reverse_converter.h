@@ -140,6 +140,12 @@ namespace NG {
 class NavDestinationContext;
 class NavigationTransitionProxy;
 class PanRecognizer;
+class PinchRecognizer;
+class SwipeRecognizer;
+class RotationRecognizer;
+class ClickRecognizer;
+class LongPressRecognizer;
+class NGGestureRecognizer;
 enum class DialogDismissReason;
 enum class NavigationMode;
 enum class NavigationOperation;
@@ -151,6 +157,9 @@ struct KeyboardOptions;
 struct LeadingMargin;
 struct LeadingMarginSpanOptions;
 struct MenuItemParam;
+
+// Forward declaration for GestureTriggerInfo (defined in gesture_trigger_info_peer.h)
+struct GestureTriggerInfo;
 
 namespace Converter {
 enum class ConsoleMessageSource;
@@ -325,6 +334,7 @@ namespace OHOS::Ace::NG::Converter {
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Float64& dst, const Dimension& src);
     void AssignArkValue(Ark_Float64& dst, const LeadingMargin& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Float64& dst, const double& src);
+    void AssignArkValue(Ark_InnerGestureTriggerInfo& dst, const GestureTriggerInfo& src);
     ACE_FORCE_EXPORT void AssignArkValue(Ark_FoldStatus& dst, const FoldStatus& src);
     void AssignArkValue(Ark_FontStyle& dst, const OHOS::Ace::FontStyle& src);
     void AssignArkValue(Ark_FontWeight& dst, OHOS::Ace::FontWeight src);
@@ -393,6 +403,20 @@ namespace OHOS::Ace::NG::Converter {
     ACE_FORCE_EXPORT void AssignArkValue(Ark_Padding& dst, const PaddingProperty& src, ConvContext *ctx);
     void AssignArkValue(Ark_PanDirection& dst, const PanDirection& src);
     void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src, ConvContext *ctx);
+    void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src, ConvContext *ctx);
+    void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src, ConvContext *ctx);
+    void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src, ConvContext *ctx);
+    void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src, ConvContext *ctx);
+    void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src, ConvContext *ctx);
+    void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src, ConvContext *ctx);
+    // Two-parameter versions for gesture recognizers
+    void AssignArkValue(Ark_GestureRecognizer &dst, const RefPtr<NG::NGGestureRecognizer>& src);
+    void AssignArkValue(Ark_TapRecognizer &dst, const RefPtr<NG::ClickRecognizer>& src);
+    void AssignArkValue(Ark_LongPressRecognizer &dst, const RefPtr<NG::LongPressRecognizer>& src);
+    void AssignArkValue(Ark_PanRecognizer &dst, const RefPtr<NG::PanRecognizer>& src);
+    void AssignArkValue(Ark_PinchRecognizer &dst, const RefPtr<NG::PinchRecognizer>& src);
+    void AssignArkValue(Ark_SwipeRecognizer &dst, const RefPtr<NG::SwipeRecognizer>& src);
+    void AssignArkValue(Ark_RotationRecognizer &dst, const RefPtr<NG::RotationRecognizer>& src);
     void AssignArkValue(Ark_PasteButtonOnClickResult& dst, const SecurityComponentHandleResult& src);
     void AssignArkValue(Ark_Position& dst, const OffsetF& src, ConvContext *ctx);
     void AssignArkValue(Ark_PreviewText& dst, const PreviewText& src, ConvContext *ctx);

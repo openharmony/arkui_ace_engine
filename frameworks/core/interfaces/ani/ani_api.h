@@ -875,6 +875,8 @@ struct ArkUIAniGestureEventUIObserverModifier {
         const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
     void (*removeTapListenerCallback)(
         const std::string& tag, ani_int instanceId, ani_int resourceId, bool isRemoveAll);
+    void (*removeGlobalGestureListenerCallback)(
+        ani_int type, ani_int resourceId, bool isRemoveAll);
 };
 
 struct ArkUIAniModifiers {

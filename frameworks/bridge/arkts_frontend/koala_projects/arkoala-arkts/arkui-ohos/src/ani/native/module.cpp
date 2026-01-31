@@ -1707,6 +1707,16 @@ ANI_EXPORT ani_status ANI_Constructor(ani_vm* vm, uint32_t* result)
             reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveTapListenerCallback)
         },
         ani_native_function {
+            "_GestureEventUIObserver_AddGlobalGestureListener",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::AddGlobalGestureListener)
+        },
+        ani_native_function {
+            "_GestureEventUIObserver_RemoveGlobalGestureListener",
+            nullptr,
+            reinterpret_cast<void*>(OHOS::Ace::Ani::RemoveGlobalGestureListener)
+        },
+        ani_native_function {
             "_SetCustomCallbackWithCheck",
             "lC{arkui.FrameNode.FrameNode}:",
             reinterpret_cast<void*>(OHOS::Ace::Ani::SetCustomCallbackWithCheck)

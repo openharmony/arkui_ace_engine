@@ -59,6 +59,32 @@ import { KPointer } from '@koalaui/interop';
 import { TabsController } from 'arkui/component/tabs';
 import { Scroller } from 'arkui/component/scroll';
 import { TextLayoutOptions, Paragraph, StyledString } from 'arkui/framework';
+import { InnerGestureObserverConfigs, InnerGestureTriggerInfo } from 'arkui/component/idlize';
+
+export const enum GestureActionPhase {
+    WILL_START = 0,
+    WILL_END = 1
+}
+
+export const enum  GestureListenerType {
+    TAP = 0,
+    LONG_PRESS = 1,
+    PAN = 2,
+    PINCH = 3,
+    SWIPE = 4,
+    ROTATION = 5
+}
+
+export interface GestureTriggerInfo {
+    event: GestureEvent;
+    current: GestureRecognizer;
+    currentPhase: GestureActionPhase;
+    node?: FrameNode;
+}
+
+export interface GestureObserverConfigs {
+    actionPhases: Array<GestureActionPhase>;
+}
 
 export class UIInspector {
     public createComponentObserver(id: string | int): inspector.ComponentObserver {
@@ -858,6 +884,9 @@ export declare type PanListenerCallback = (event: GestureEvent, current: Gesture
 export declare type ClickEventListenerCallback = (event: ClickEvent, node?: FrameNode) => void;
 export declare type GestureEventListenerCallback = (event: GestureEvent, node?: FrameNode) => void;
 
+// Global gesture listener callback type
+export declare type GestureListenerCallback = (triggerInfo: GestureTriggerInfo) => void;
+
 export class UIObserver {
     private instanceId_: number = 100000;
     private observerImpl: uiObserver.UIObserver | null = null;
@@ -1216,6 +1245,28 @@ export class UIObserver {
 
     public offDidTap(callback?: GestureEventListenerCallback): void {
         ArkUIAniModule._GestureEventUIObserver_RemoveTapListenerCallback(this.instanceId_ as int, 'didTap', callback);
+    }
+
+    public addGlobalGestureListener(type: GestureListenerType, option: GestureObserverConfigs, callback: GestureListenerCallback): void
+    {
+        let observer_callback = (info: InnerGestureTriggerInfo,frameNode?: FrameNode) => {
+            let triggerInfo : GestureTriggerInfo = {
+                event: info.event,
+                current: info.current,
+                currentPhase: info.currentPhase,
+                node: frameNode
+            }
+            callback(triggerInfo)
+        }
+        let innerConfig : InnerGestureObserverConfigs = {
+            actionPhases: option.actionPhases
+        }
+        let resourceId = UIObserverGestureEventOps.addGlobalGestureListener(type, innerConfig, observer_callback);
+        ArkUIAniModule._GestureEventUIObserver_AddGlobalGestureListener(resourceId, type, callback);
+    }
+
+    public removeGlobalGestureListener(type: GestureListenerType, callback?: GestureListenerCallback): void {
+        ArkUIAniModule._GestureEventUIObserver_RemoveGlobalGestureListener(type.valueOf(), callback);
     }
 }
 export interface PageInfo {
