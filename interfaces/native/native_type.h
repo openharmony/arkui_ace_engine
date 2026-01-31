@@ -9528,7 +9528,7 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_GetMenuType(ArkUI_RichEd
  */
 ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuShowCallback(
     ArkUI_RichEditorSelectionMenuOptions* options, void* userData,
-    void (*callback)(int32_t start, int32_t end, void* callbackUserData ));
+    void (*callback)(int32_t start, int32_t end, void* callbackUserData));
  
 /**
  * @brief Sets the event to be called when selection menu hides.
@@ -9545,7 +9545,7 @@ ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuShowCallba
  */
 ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuHideCallback(
     ArkUI_RichEditorSelectionMenuOptions* options, void* userData,
-    void (*callback)(int32_t start, int32_t end, void* callbackUserData ));
+    void (*callback)(int32_t start, int32_t end, void* callbackUserData));
  
 /**
  * @brief Sets the event to be called when selection menu appears.
