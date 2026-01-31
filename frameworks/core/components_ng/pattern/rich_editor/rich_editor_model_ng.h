@@ -106,6 +106,7 @@ public:
     static void SetAboutToDelete(FrameNode* frameNode, std::function<bool(const RichEditorDeleteValue&)>&& func);
     static void SetOnDidIMEInput(FrameNode* frameNode, std::function<void(const TextRange&)>&& callback);
     static void SetCopyOption(FrameNode* frameNode, CopyOptions& copyOptions);
+    static CopyOptions GetCopyOption(FrameNode* frameNode);
     static void SetOnSelectionChange(FrameNode* frameNode, std::function<void(const BaseEventInfo*)>&& callback);
     static void SetCaretColor(FrameNode* frameNode, const Color& color);
     static Color GetCaretColor(FrameNode* frameNode);
@@ -116,8 +117,11 @@ public:
         FrameNode* frameNode, const std::function<void()>&& buildFunc, bool supportAvoidance = false);
     static void SetCustomKeyboardWithNode(
         FrameNode* frameNode, FrameNode* customKeyboard, bool supportAvoidance = false);
+    static RefPtr<UINode> GetCustomKeyboardNode(FrameNode* frameNode);
+    static bool GetCustomKeyboardOption(FrameNode* frameNode);
     static void SetOnEditingChange(FrameNode* frameNode, std::function<void(const bool&)>&& callback);
     static void SetSelectedBackgroundColor(FrameNode* frameNode, const Color& selectedColor);
+    static Color GetSelectedBackgroundColor(FrameNode* frameNode);
     static void SetOnPaste(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCut(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
     static void SetOnCopy(FrameNode* frameNode, std::function<void(NG::TextCommonEvent&)>&& func);
@@ -139,6 +143,7 @@ public:
     static std::optional<struct UpdateSpanStyle> GetTypingStyle(FrameNode* frameNode);
     static void SetAboutToIMEInput(FrameNode* frameNode, std::function<bool(const RichEditorInsertValue&)>&& callback);
     static void SetRequestKeyboardOnFocus(FrameNode* frameNode, bool needToRequest);
+    static bool GetRequestKeyboardOnFocus(FrameNode* frameNode);
     static void SetSupportPreviewText(FrameNode* frameNode, bool value);
     static bool IsSupportPreviewText(FrameNode* frameNode);
     static void SetSelectionMenuOptions(FrameNode* frameNode,
@@ -149,15 +154,25 @@ public:
     static void SetBarState(FrameNode* frameNode, DisplayMode mode);
     static OHOS::Ace::DisplayMode GetBarState(FrameNode* frameNode);
     static void SetMaxLength(FrameNode* frameNode, std::optional<int32_t> value);
+    static int32_t GetMaxLength(FrameNode* frameNode);
     static void SetMaxLines(FrameNode* frameNode, uint32_t value);
+    static int32_t GetMaxLines(FrameNode* frameNode);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
+    static bool IsEnableAutoSpacing(FrameNode* frameNode);
     static void SetCompressLeadingPunctuation(FrameNode* frameNode, bool enabled);
+    static bool IsCompressLeadingPunctuation(FrameNode* frameNode);
     static void SetIncludeFontPadding(FrameNode* frameNode, bool enabled);
+    static bool IsIncludeFontPadding(FrameNode* frameNode);
     static void SetFallbackLineSpacing(FrameNode* frameNode, bool enabled);
+    static bool IsFallbackLineSpacing(FrameNode* frameNode);
     static void SetStopBackPress(FrameNode* frameNode, bool isStopBackPress);
+    static bool IsStopBackPress(FrameNode* frameNode);
     static void SetKeyboardAppearance(FrameNode* frameNode, KeyboardAppearance value);
+    static KeyboardAppearance GetKeyboardAppearance(FrameNode* frameNode);
     static void SetEnableHapticFeedback(FrameNode* frameNode, bool isEnabled);
+    static bool GetEnableHapticFeedback(FrameNode* frameNode);
     static void SetSupportStyledUndo(FrameNode* frameNode, bool enabled);
+    static bool IsSupportStyledUndo(FrameNode* frameNode);
     static void SetScrollBarColor(FrameNode* frameNode, std::optional<Color> value);
     static Color GetScrollBarColor(FrameNode* frameNode);
     static Color GetSelectedDragPreviewStyle(FrameNode* frameNode);
@@ -166,6 +181,9 @@ public:
     static void SetSingleLine(FrameNode* frameNode, bool enabled);
     static void ResetSingleLine(FrameNode* frameNode);
     static bool GetSingleLine(FrameNode* frameNode);
+    static void BindSelectionMenu(FrameNode* frameNode, TextSpanType& spanType,
+        TextResponseType& responseType, std::function<void()>& buildFunc, const SelectMenuParam& menuParam);
+    static void ResetBindSelectionMenu(FrameNode* frameNode);
 
 private:
     void SetDraggable(bool draggable);

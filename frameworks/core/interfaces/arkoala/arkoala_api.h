@@ -7691,6 +7691,22 @@ struct ArkUIColumnSplitModifier {
     void (*setColumnSplitClipShape)(ArkUINodeHandle node, void* clipShape);
 };
 
+struct ArkUIRichEditorBindMenuParam {
+    ArkUI_Int32 richEditorSpanType;
+    ArkUI_Int32 responseType;
+    ArkUI_Int32 menuType;
+    ArkUI_Int32 hapticFeedbackMode;
+    ArkUINodeHandle contentNode;
+    void* onMenuShow;
+    void* onMenuShowUserData;
+    void* onMenuHide;
+    void* onMenuHideUserData;
+    void* onMenuAppear;
+    void* onMenuAppearUserData;
+    void* onMenuDisappear;
+    void* onMenuDisappearUserData;
+};
+
 struct ArkUIRichEditorModifier {
     void (*setRichEditorEnableDataDetector)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
     void (*resetRichEditorEnableDataDetector)(ArkUINodeHandle node);
@@ -7700,10 +7716,15 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorNapiDataDetectorConfigWithEvent)(
         ArkUINodeHandle node, const struct ArkUITextDetectConfigStruct* arkUITextDetectConfig);
     void (*resetRichEditorDataDetectorConfigWithEvent)(ArkUINodeHandle node);
+    void (*setSelectDetectorEnable)(ArkUINodeHandle node, ArkUI_Uint32 enableDataDetector);
+    void (*resetSelectDetectorEnable)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getSelectDetectorEnable)(ArkUINodeHandle node);
     void (*setRichEditorOnIMEInputComplete)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnIMEInputComplete)(ArkUINodeHandle node);
     void (*setRichEditorCopyOptions)(ArkUINodeHandle node, ArkUI_Int32 copyOptionsValue);
+    ArkUI_Int32 (*getRichEditorCopyOptions)(ArkUINodeHandle node);
     void (*resetRichEditorCopyOptions)(ArkUINodeHandle node);
+    void (*resetRichEditorCAPICopyOptions)(ArkUINodeHandle node);
     void (*setRichEditorOnSelectionChange)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnSelectionChange)(ArkUINodeHandle node);
     void (*setRichEditorCaretColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
@@ -7725,6 +7746,7 @@ struct ArkUIRichEditorModifier {
     void (*setRichEditorNapiOnEditingChange)(ArkUINodeHandle node, void* callback);
     void (*resetOnEditingChange)(ArkUINodeHandle node);
     void (*setRichEditorSelectedBackgroundColor)(ArkUINodeHandle node, ArkUI_Uint32 color, void* resRawPtr);
+    ArkUI_Uint32 (*getRichEditorSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*resetRichEditorSelectedBackgroundColor)(ArkUINodeHandle node);
     void (*setRichEditorOnPaste)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnPaste)(ArkUINodeHandle node);
@@ -7738,6 +7760,7 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorEnterKeyType)(ArkUINodeHandle node);
     ArkUI_Int32 (*getRichEditorEnterKeyType)(ArkUINodeHandle node);
     void (*setRichEditorEnableKeyboardOnFocus)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getRichEditorEnableKeyboardOnFocus)(ArkUINodeHandle node);
     void (*resetRichEditorEnableKeyboardOnFocus)(ArkUINodeHandle node);
     void (*setRichEditorEnablePreviewText)(ArkUINodeHandle node, ArkUI_Bool value);
     void (*resetRichEditorEnablePreviewText)(ArkUINodeHandle node);
@@ -7761,30 +7784,42 @@ struct ArkUIRichEditorModifier {
     void (*resetRichEditorBarState)(ArkUINodeHandle node);
     ArkUI_Int32 (*getRichEditorBarState)(ArkUINodeHandle node);
     void (*setRichEditorMaxLength)(ArkUINodeHandle node, ArkUI_Uint32 maxLength);
+    ArkUI_Int32 (*getRichEditorMaxLength)(ArkUINodeHandle node);
     void (*resetRichEditorMaxLength)(ArkUINodeHandle node);
     void (*setRichEditorMaxLines)(ArkUINodeHandle node, ArkUI_Uint32 maxLine);
+    ArkUI_Int32 (*getRichEditorMaxLines)(ArkUINodeHandle node);
     void (*resetRichEditorMaxLines)(ArkUINodeHandle node);
     void (*setRichEditorStopBackPress)(ArkUINodeHandle node, ArkUI_Uint32 isStopBackPress);
+    ArkUI_Int32 (*getRichEditorStopBackPress)(ArkUINodeHandle node);
     void (*resetRichEditorStopBackPress)(ArkUINodeHandle node);
     void (*setRichEditorKeyboardAppearance)(ArkUINodeHandle node, ArkUI_Uint32 keyboardAppearance);
+    ArkUI_Int32 (*getRichEditorKeyboardAppearance)(ArkUINodeHandle node);
     void (*resetRichEditorKeyboardAppearance)(ArkUINodeHandle node);
     void (*setRichEditorCustomKeyboard)(ArkUINodeHandle node, ArkUINodeHandle contentNode, ArkUI_Bool supportAvoidance);
+    ArkUINodeHandle (*getRichEditorCustomKeyboard)(ArkUINodeHandle node);
+    ArkUI_Int32 (*getRichEditorCustomKeyboardOption)(ArkUINodeHandle node);
     void (*resetRichEditorCustomKeyboard)(ArkUINodeHandle node);
     void (*setRichEditorOnDidIMEInput)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnDidIMEInput)(ArkUINodeHandle node);
     void (*setRichEditorOnWillAttachIME)(ArkUINodeHandle node, void* callback);
     void (*resetRichEditorOnWillAttachIME)(ArkUINodeHandle node);
     void (*setRichEditorEnableHapticFeedback)(ArkUINodeHandle node, ArkUI_Uint32 value);
+    ArkUI_Int32 (*getRichEditorEnableHapticFeedback)(ArkUINodeHandle node);
     void (*resetRichEditorEnableHapticFeedback)(ArkUINodeHandle node);
     void (*setRichEditorEnableAutoSpacing)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getRichEditorEnableAutoSpacing)(ArkUINodeHandle node);
     void (*resetRichEditorEnableAutoSpacing)(ArkUINodeHandle node);
     void (*setRichEditorCompressLeadingPunctuation)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getRichEditorCompressLeadingPunctuation)(ArkUINodeHandle node);
     void (*resetRichEditorCompressLeadingPunctuation)(ArkUINodeHandle node);
     void (*setRichEditorIncludeFontPadding)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getRichEditorIncludeFontPadding)(ArkUINodeHandle node);
     void (*resetRichEditorIncludeFontPadding)(ArkUINodeHandle node);
     void (*setRichEditorFallbackLineSpacing)(ArkUINodeHandle node, ArkUI_Bool value);
+    ArkUI_Int32 (*getRichEditorFallbackLineSpacing)(ArkUINodeHandle node);
     void (*resetRichEditorFallbackLineSpacing)(ArkUINodeHandle node);
     void (*setRichEditorUndoStyle)(ArkUINodeHandle node, ArkUI_Int32 undoStyleValue);
+    ArkUI_Int32 (*getRichEditorUndoStyle)(ArkUINodeHandle node);
     void (*resetRichEditorUndoStyle)(ArkUINodeHandle node);
     void (*setRichEditorScrollBarColor)(ArkUINodeHandle node, ArkUI_Int32 color, void* resRawPtr);
     void (*resetRichEditorScrollBarColor)(ArkUINodeHandle node);
@@ -7815,6 +7850,8 @@ struct ArkUIRichEditorModifier {
     void (*setTypingParagraphStyle)(ArkUINodeHandle node, const ArkUIRichEditorParagraphStyle& paragraphStyle);
     void (*setRichEditorTypingStyle)(ArkUINodeHandle node, const ArkUIRichEditorTextStyle& style);
     ArkUIRichEditorTextStyle (*getRichEditorTypingStyle)(ArkUINodeHandle node);
+    void (*setRichEditorBindSelectionMenu)(ArkUINodeHandle node, ArkUIRichEditorBindMenuParam* menuParam);
+    void (*resetRichEditorBindSelectionMenu)(ArkUINodeHandle node);
 };
 
 struct ArkUIRichEditorControllerModifier {
