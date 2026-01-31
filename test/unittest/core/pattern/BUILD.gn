@@ -117,6 +117,7 @@ group("core_pattern_unittest") {
     "text_input:text_input_pattern_test",
     "text_input:text_field_test_ng",
     "text_input:text_emoji_test",
+    "text_input:text_input_listener_test",
     "text_picker:text_picker_test_ng",
     "text_timer:text_timer_test_ng",
     "time_picker:time_picker_test_ng",

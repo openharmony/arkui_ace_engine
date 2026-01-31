@@ -32,4 +32,9 @@ std::shared_ptr<MMI::PointerEvent> InputManager::CreatePointerEvent(
 {
     return nullptr;
 }
+
+bool InputManager::IsKeyboardConnected()
+{
+    return true;
+}
 } // namespace OHOS::Ace
