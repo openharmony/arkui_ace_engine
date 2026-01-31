@@ -21,6 +21,7 @@
 
 #include "view/frame_node_impl.h"
 
+#include "core/components_ng/event/touch_event.h"
 #include "core/components_ng/pattern/grid/grid_pattern.h"
 #include "core/components_ng/pattern/list/list_pattern.h"
 #include "core/components_ng/pattern/scroll/scroll_pattern.h"
@@ -34,6 +35,9 @@ ScrollerImpl::ScrollerImpl(const RefPtr<ScrollerData>& scrollerData) : scrollerD
 void ScrollerImpl::AddObserver(const Observer& observer, int32_t id)
 {
     ScrollerObserver scrollerObserver;
+    if (observer.onTouchEvent) {
+        scrollerObserver.onTouchEvent = AceType::MakeRefPtr<NG::TouchEventImpl>(observer.onTouchEvent);
+    }
     scrollerObserver.onReachStartEvent = observer.onReachStartEvent;
     scrollerObserver.onReachEndEvent = observer.onReachEndEvent;
     scrollerObserver.onScrollStartEvent = observer.onScrollStartEvent;
