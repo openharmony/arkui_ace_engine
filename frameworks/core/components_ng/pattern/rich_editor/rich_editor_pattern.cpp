@@ -5776,7 +5776,7 @@ bool RichEditorPattern::OnThemeScopeUpdate(int32_t themeScopeId)
 
 void RichEditorPattern::OnCommonColorChange()
 {
-    auto host = GetHost();
+    auto host = GetContentHost();
     auto theme = GetTheme<RichEditorTheme>();
     auto layoutProperty = GetLayoutProperty<RichEditorLayoutProperty>();
     CHECK_NULL_VOID(host && theme && layoutProperty);
