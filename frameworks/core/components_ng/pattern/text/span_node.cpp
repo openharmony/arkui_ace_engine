@@ -1312,8 +1312,8 @@ void SpanItem::EncodeFontStyleTlv(std::vector<uint8_t>& buff) const
     WRITE_TLV_INHERIT(fontStyle, TextShadow, TLV_SPAN_FONT_STYLE_TEXTSHADOW, TextShadows, TextShadows);
     WRITE_TLV_INHERIT(fontStyle, ItalicFontStyle, TLV_SPAN_FONT_STYLE_ITALICFONTSTYLE, FontStyle, FontStyle);
     WRITE_TLV_INHERIT(fontStyle, FontWeight, TLV_SPAN_FONT_STYLE_FONTWEIGHT, FontWeight, FontWeight);
-    
-    WRITE_TEXT_STYLE_TLV(fontStyle, VariableFontWeight, TLV_SPAN_TEXT_LINE_STYLE_MAXLENGTH, Int32);
+
+    WRITE_TEXT_STYLE_TLV(fontStyle, VariableFontWeight, TLV_SPAN_FONT_STYLE_VARIABLEFONTWEIGHT, Int32);
     WRITE_TEXT_STYLE_TLV(fontStyle, EnableVariableFontWeight, TLV_SPAN_FONT_STYLE_ENABLEVARIABLEFONTWEIGHT, Bool);
     WRITE_TEXT_STYLE_TLV(
         fontStyle, EnableDeviceFontWeightCategory, TLV_SPAN_FONT_STYLE_ENABLEDEVICEFONTWEIGHTCATEGORY, Bool);
