@@ -85,25 +85,19 @@ public:
     NG::SafeAreaInsets cutoutArea =
         NG::SafeAreaInsets({ CUTOUT_LEFT_START, CUTOUT_LEFT_END }, { CUTOUT_TOP_START, CUTOUT_TOP_END },
             { CUTOUT_RIGHT_START, CUTOUT_RIGHT_END }, { CUTOUT_BOTTOM_START, CUTOUT_BOTTOM_END });
-    
     NG::SafeAreaInsets systemArea =
         NG::SafeAreaInsets({ SYSTEM_LEFT_START, SYSTEM_LEFT_END }, { SYSTEM_TOP_START, SYSTEM_TOP_END },
             { SYSTEM_RIGHT_START, SYSTEM_RIGHT_END }, { SYSTEM_BOTTOM_START, SYSTEM_BOTTOM_END });
-    
     NG::SafeAreaInsets navArea = NG::SafeAreaInsets({ NAV_LEFT_START, NAV_LEFT_END }, { NAV_TOP_START, NAV_TOP_END },
         { NAV_RIGHT_START, NAV_RIGHT_END }, { NAV_BOTTOM_START, NAV_BOTTOM_END });
-
     NG::SafeAreaInsets cutoutAreaNotValid =
         NG::SafeAreaInsets({ CUTOUT_LEFT_END, CUTOUT_LEFT_START }, { CUTOUT_TOP_END, CUTOUT_TOP_START },
             { CUTOUT_RIGHT_END, CUTOUT_RIGHT_START }, { CUTOUT_BOTTOM_END, CUTOUT_BOTTOM_START });
-    
     NG::SafeAreaInsets systemAreaNotValid =
         NG::SafeAreaInsets({ SYSTEM_LEFT_END, SYSTEM_LEFT_START }, { SYSTEM_TOP_END, SYSTEM_TOP_START },
             { SYSTEM_RIGHT_END, SYSTEM_RIGHT_START }, { SYSTEM_BOTTOM_END, SYSTEM_BOTTOM_START });
-    
     NG::SafeAreaInsets navAreaNotValid = NG::SafeAreaInsets({ NAV_LEFT_END, NAV_LEFT_START },
         { NAV_TOP_END, NAV_TOP_START }, { NAV_RIGHT_END, NAV_RIGHT_START }, { NAV_BOTTOM_END, NAV_BOTTOM_START });
-    
     NG::SafeAreaInsets cutoutAreaWithRoot =
         NG::SafeAreaInsets({ CUTOUT_WITH_ROOT_LEFT_START, CUTOUT_WITH_ROOT_LEFT_END }, { CUTOUT_WITH_ROOT_TOP_START,
             CUTOUT_WITH_ROOT_TOP_END }, { CUTOUT_WITH_ROOT_RIGHT_START, CUTOUT_WITH_ROOT_RIGHT_END },
@@ -150,6 +144,7 @@ HWTEST_F(SafeAreaManagerTest, IsSafeAreaValidTest, TestSize.Level1)
     EXPECT_EQ(safeAreaManager_->IsFullScreen(), false);
     EXPECT_EQ(safeAreaManager_->IsNeedAvoidWindow(), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), false);
+
     auto res = safeAreaManager_->GetCutoutSafeArea();
     CommonExpectEQ(
         Rect { res.left_.start, res.right_.end, res.top_.start, res.bottom_.end }, Rect { 0.0f, 0.0f, 0.0f, 0.0f });
@@ -162,22 +157,27 @@ HWTEST_F(SafeAreaManagerTest, IsSafeAreaValidTest, TestSize.Level1)
     res = safeAreaManager_->GetCombinedSafeArea(SafeAreaExpandOpts());
     CommonExpectEQ(
         Rect { res.left_.start, res.right_.end, res.top_.start, res.bottom_.end }, Rect { 0.0f, 0.0f, 0.0f, 0.0f });
+    
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(true), true);
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(true), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), false);
+    
     EXPECT_EQ(safeAreaManager_->SetIgnoreSafeArea(false), true);
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
+
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(false), true);
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), false);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
+
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(false), true);
     EXPECT_EQ(safeAreaManager_->SetIsFullScreen(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsNeedAvoidWindow(true), true);
     EXPECT_EQ(safeAreaManager_->IsSafeAreaValid(), true);
     EXPECT_EQ(safeAreaManager_->IsAtomicService(), false);
+    
     EXPECT_EQ(safeAreaManager_->SetIsAtomicService(true), true);
     EXPECT_EQ(safeAreaManager_->SetIsAtomicService(true), false);
     EXPECT_EQ(safeAreaManager_->IsAtomicService(), true);
