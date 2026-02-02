@@ -58,6 +58,7 @@
 #include "core/common/ime/text_selection.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/common/screen_lock/screen_lock_manager.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
@@ -2187,7 +2188,9 @@ bool TextFieldPattern::IsShowAutoFill()
     if (container && container->IsSceneBoardWindow()) {
         return false;
     }
-
+    if (ScreenLockManager::IsScreenLocked()) {
+        return false;
+    }
     return SystemProperties::IsAutoFillSupport();
 }
 
