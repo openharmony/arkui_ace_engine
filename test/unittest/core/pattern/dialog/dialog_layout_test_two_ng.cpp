@@ -760,4 +760,51 @@ HWTEST_F(DialogLayoutTwoTestNg, DialogPatternTest019, TestSize.Level1)
     EXPECT_EQ(layoutWrapper->GetTotalChildCount(), 1);
     EXPECT_EQ(dialog->GetGeometryNode()->GetFrameSize().Height(), param.height.value().ConvertToPx());
 }
+
+/**
+ * @tc.name: DialogLayoutAlgorithmMeasure
+ * @tc.desc: Test DialogLayoutAlgorithm::Measure function
+ * @tc.type: FUNC
+ */
+HWTEST_F(DialogLayoutTwoTestNg, DialogLayoutAlgorithmMeasure, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create DialogLayoutAlgorithm instance.
+     */
+    SetDialogTheme();
+    DialogLayoutAlgorithm dialogLayoutAlgorithm;
+    for (auto& props : propsVectors) {
+        /**
+         * @tc.steps: step2. create dialog node and layoutWrapper.
+         * @tc.expected: the dialog node created successfully.
+         */
+        auto dialog = DialogView::CreateDialogNode(props, nullptr);
+        ASSERT_NE(dialog, nullptr);
+        auto contentNode = AceType::DynamicCast<FrameNode>(dialog->GetFirstChild());
+        ASSERT_NE(contentNode, nullptr);
+        auto pipeline = contentNode->GetPipeline();
+        ASSERT_NE(pipeline, nullptr);
+        pipeline->SetIsCurrentInForceSplitMode(false);
+        auto childLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+            contentNode, contentNode->GetGeometryNode(), contentNode->GetLayoutProperty());
+        for (auto& node : contentNode->GetChildren()) {
+            auto frameNode = AceType::DynamicCast<FrameNode>(node);
+            auto grandsonLayoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+                frameNode, frameNode->GetGeometryNode(), frameNode->GetLayoutProperty());
+            childLayoutWrapper->AppendChild(grandsonLayoutWrapper);
+        }
+
+        auto layoutWrapper = AceType::MakeRefPtr<LayoutWrapperNode>(
+            dialog, dialog->GetGeometryNode(), dialog->GetLayoutProperty());
+        layoutWrapper->AppendChild(childLayoutWrapper);
+        /**
+         * @tc.steps: step3. test DialogLayoutAlgorithm's Measure function.
+         * @tc.expected: dialogLayoutAlgorithm.alignment_ equal to DialogAlignment::DEFAULT.
+         */
+        dialogLayoutAlgorithm.Measure(layoutWrapper.rawPtr_);
+        dialogLayoutAlgorithm.Layout(layoutWrapper.rawPtr_);
+        EXPECT_EQ(dialogLayoutAlgorithm.alignment_, DialogAlignment::DEFAULT);
+    }
+}
+
 } // namespace OHOS::Ace::NG
