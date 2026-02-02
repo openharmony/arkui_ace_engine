@@ -960,8 +960,8 @@ void TextModelNG::SetClipEdge(bool clip)
 {
     auto frameNode = ViewStackProcessor::GetInstance()->GetMainFrameNode();
     CHECK_NULL_VOID(frameNode);
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TextLayoutProperty, ClipEdge, clip, frameNode);
     frameNode->GetRenderContext()->SetClipToFrame(clip);
-    frameNode->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
 
 void TextModelNG::SetFontFeature(const FONT_FEATURES_LIST& value)
