@@ -25,7 +25,6 @@
 #include "bridge/declarative_frontend/engine/functions/js_function.h"
 #include "bridge/declarative_frontend/jsview/js_interactable_view.h"
 #include "bridge/declarative_frontend/jsview/js_popups.h"
-#include "bridge/declarative_frontend/jsview/js_utils.h"
 #include "bridge/declarative_frontend/jsview/js_view_common_def.h"
 #include "bridge/declarative_frontend/jsview/js_symbol_modifier.h"
 #include "bridge/declarative_frontend/jsview/models/select_model_impl.h"
@@ -162,7 +161,6 @@ void JSSelect::JSBind(BindingTarget globalObj)
     JSClass<JSSelect>::StaticMethod("showDefaultSelectedIcon", &JSSelect::SetShowDefaultSelectedIcon);
     JSClass<JSSelect>::StaticMethod("keyboardAvoidMode", &JSSelect::SetKeyboardAvoidMode);
     JSClass<JSSelect>::StaticMethod("minKeyboardAvoidDistance", &JSSelect::SetMinKeyboardAvoidDistance);
-    JSClass<JSSelect>::StaticMethod("menuSystemMaterial", &JSSelect::SetMenuSystemMaterial);
 
     JSClass<JSSelect>::StaticMethod("onClick", &JSInteractableView::JsOnClick);
     JSClass<JSSelect>::StaticMethod("onTouch", &JSInteractableView::JsOnTouch);
@@ -1185,18 +1183,5 @@ void JSSelect::SetMinKeyboardAvoidDistance(const JSCallbackInfo& info)
         distance = value;
     }
     SelectModel::GetInstance()->SetMinKeyboardAvoidDistance(distance);
-}
-
-void JSSelect::SetMenuSystemMaterial(const JSCallbackInfo& info)
-{
-    if (info.Length() < 1) {
-        return;
-    }
-    if (!info[0]->IsObject()) {
-        SelectModel::GetInstance()->SetMenuSystemMaterial(nullptr);
-        return;
-    }
-    const auto* menuSystemMaterial = CreateUiMaterialFromNapiValue(info[0]);
-    SelectModel::GetInstance()->SetMenuSystemMaterial(menuSystemMaterial->Copy());
 }
 } // namespace OHOS::Ace::Framework

@@ -207,16 +207,6 @@ public:
         return isHover_;
     }
 
-    void SetMenuSystemMaterial(RefPtr<UiMaterial> menuSystemMaterial)
-    {
-        menuSystemMaterial_ = menuSystemMaterial;
-    }
-
-    RefPtr<UiMaterial> GetMenuSystemMaterial() const
-    {
-        return menuSystemMaterial_;
-    }
-
     void SetShowInSubWindow(bool isShowInSubWindow);
     void ResetShowInSubWindow();
     void SetShowDefaultSelectedIcon(bool show);
@@ -410,7 +400,6 @@ private:
     OptionFont optionFont_;
     std::optional<Color> optionBgColor_;
     std::optional<Color> fontColor_;
-    RefPtr<UiMaterial> menuSystemMaterial_ = nullptr;
 
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
     void ToJsonSelectedOptionFontAndColor(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const;

@@ -7513,8 +7513,6 @@ struct ArkUISelectModifier {
     void (*resetMenuKeyboardAvoidMode)(ArkUINodeHandle node);
     void (*setMinKeyboardAvoidDistance)(ArkUINodeHandle node, ArkUI_Float32 value, ArkUI_Int32 unit);
     void (*resetMinKeyboardAvoidDistance)(ArkUINodeHandle node);
-    void (*setMenuSystemMaterial)(ArkUINodeHandle node, void* menuSystemMaterial);
-    void (*resetMenuSystemMaterial)(ArkUINodeHandle node);
 };
 
 /** Common for all API variants.*/

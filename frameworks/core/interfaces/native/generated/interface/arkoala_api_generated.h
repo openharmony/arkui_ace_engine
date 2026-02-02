@@ -26318,8 +26318,6 @@ typedef struct GENERATED_ArkUISelectModifier {
                                  const Opt_MenuKeyboardAvoidMode* value);
     void (*setMinKeyboardAvoidDistance)(Ark_NativePointer node,
                                         const Opt_LengthMetrics* value);
-    void (*setMenuSystemMaterial)(Ark_NativePointer node,
-                              const Opt_uiMaterial_Material* value);
     void (*setMenuAlign)(Ark_NativePointer node,
                          const Opt_MenuAlignType* alignType,
                          const Opt_Offset* offset);

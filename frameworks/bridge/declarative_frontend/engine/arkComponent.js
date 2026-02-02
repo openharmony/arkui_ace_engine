@@ -23136,11 +23136,6 @@ class ArkSelectComponent extends ArkComponent {
       this._modifiersWithKeys, MinKeyboardAvoidDistanceModifier.identity, MinKeyboardAvoidDistanceModifier, distance);
     return this;
   }
-  menuSystemMaterial(menuSystemMaterial) {
-    modifierWithKey(
-      this._modifiersWithKeys, MenuSystemMaterialModifier.identity, MenuSystemMaterialModifier, menuSystemMaterial);
-    return this;
-  }
 }
 
 class SelectOptionsModifier extends ModifierWithKey {
@@ -23763,23 +23758,6 @@ class MinKeyboardAvoidDistanceModifier extends ModifierWithKey {
   }
 }
 MinKeyboardAvoidDistanceModifier.identity = Symbol('minKeyboardAvoidDistance');
-class MenuSystemMaterialModifier extends ModifierWithKey {
-  constructor(value) {
-    super(value);
-  }
-  applyPeer(node, reset) {
-    if (reset || !this.value) {
-      getUINativeModule().select.resetMenuSystemMaterial(node);
-    } else {
-      getUINativeModule().select.setMenuSystemMaterial(node, this.value);
-    }
-  }
-
-  checkObjectDiff() {
-    return !isBaseOrResourceEqual(this.stageValue, this.value);
-  }
-}
-MenuSystemMaterialModifier.identity = Symbol('menuSystemMaterial');
 class SelectOnSelectModifier extends ModifierWithKey {
   constructor(value) {
     super(value);

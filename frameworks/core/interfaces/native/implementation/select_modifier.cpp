@@ -627,13 +627,6 @@ void SetMinKeyboardAvoidDistanceImpl(Ark_NativePointer node, const Opt_LengthMet
     Validator::ValidateNonNegative(convValue);
     SelectModelNG::SetMinKeyboardAvoidDistance(frameNode, convValue);
 }
-void SetMenuSystemMaterialImpl(Ark_NativePointer node, const Opt_uiMaterial_Material* value)
-{
-    auto frameNode = reinterpret_cast<FrameNode *>(node);
-    CHECK_NULL_VOID(frameNode);
-    auto ptrOpt = Converter::OptConvertPtr<UiMaterial*>(value).value_or(nullptr);
-    SelectModelNG::SetMenuSystemMaterial(frameNode, ptrOpt ? ptrOpt->Copy() : nullptr);
-}
 void SetMenuAlignImpl(Ark_NativePointer node,
                       const Opt_MenuAlignType* alignType,
                       const Opt_Offset* offset)
@@ -687,7 +680,6 @@ const GENERATED_ArkUISelectModifier* GetSelectModifier()
         SelectAttributeModifier::SetBackgroundColorImpl,
         SelectAttributeModifier::SetKeyboardAvoidModeImpl,
         SelectAttributeModifier::SetMinKeyboardAvoidDistanceImpl,
-        SelectAttributeModifier::SetMenuSystemMaterialImpl,
         SelectAttributeModifier::SetMenuAlignImpl,
     };
     return &ArkUISelectModifierImpl;

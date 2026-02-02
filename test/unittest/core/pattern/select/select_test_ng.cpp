@@ -31,7 +31,6 @@
 #include "core/common/ace_engine.h"
 #include "core/common/multi_thread_build_manager.h"
 #include "core/components/common/layout/constants.h"
-#include "core/components/common/properties/ui_material.h"
 #include "core/components/scroll/scroll_bar_theme.h"
 #include "core/components/select/select_theme.h"
 #include "core/components/text/text_theme.h"
@@ -1430,40 +1429,5 @@ HWTEST_F(SelectTestNg, SelectKeyboardAvoidMode002, TestSize.Level1)
     selectModelInstance.SetKeyboardAvoidMode(MenuKeyboardAvoidMode::NONE);
     selectPattern->ToJsonMenuAvoidKeyboard(json, filter);
     EXPECT_TRUE(json->Contains("keyboardAvoidMode"));
-}
-
-/**
- * @tc.name: SelectMaterial001
- * @tc.desc: Test Select Material
- * @tc.type: FUNC
- */
-HWTEST_F(SelectTestNg, SelectMaterial001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. Create selectModelInstance.
-     */
-    SelectModelNG selectModelInstance;
-    std::vector<SelectParam> params = { { OPTION_TEXT, FILE_SOURCE } };
-    selectModelInstance.Create(params);
-
-    /**
-     * @tc.steps: step2. Get Select Node.
-     * @tc.expected: Select node will set success.
-     */
-    auto select = ViewStackProcessor::GetInstance()->GetMainFrameNode();
-    ASSERT_NE(select, nullptr);
-    auto selectPattern = select->GetPattern<SelectPattern>();
-    ASSERT_NE(selectPattern, nullptr);
-    
-    /**
-     * @tc.steps: step2. Set Material.
-     * @tc.expected: Material will set success.
-     */
-    auto material = AceType::MakeRefPtr<UiMaterial>();
-    auto type = static_cast<int32_t>(MaterialType::SEMI_TRANSPARENT);
-    material->SetType(type);
-    selectModelInstance.SetMenuSystemMaterial(material);
-    ASSERT_NE(selectPattern->GetMenuSystemMaterial(), nullptr);
-    EXPECT_EQ(selectPattern->GetMenuSystemMaterial()->GetType(), type);
 }
 } // namespace OHOS::Ace::NG
