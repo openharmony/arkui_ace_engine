@@ -15733,6 +15733,22 @@ namespace OHOS::Ace::NG::GeneratedModifier {
     {
         return {};
     }
+    Opt_PositionWithAffinity GetCharacterPositionAtCoordinateImpl(Ark_LayoutManager peer,
+                                                                  Ark_Float64 x,
+                                                                  Ark_Float64 y)
+    {
+        return {};
+    }
+    Opt_Array_TextRange GetGlyphRangeForCharacterRangeImpl(Ark_LayoutManager peer,
+                                                           const Ark_TextRange* charRange)
+    {
+        return {};
+    }
+    Opt_Array_TextRange GetCharacterRangeForGlyphRangeImpl(Ark_LayoutManager peer,
+                                                           const Ark_TextRange* glyphRange)
+    {
+        return {};
+    }
     Opt_text_LineMetrics GetLineMetricsImpl(Ark_LayoutManager peer,
                                             Ark_Int32 lineNumber)
     {
@@ -22786,6 +22802,9 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             LayoutManagerAccessor::GetFinalizerImpl,
             LayoutManagerAccessor::GetLineCountImpl,
             LayoutManagerAccessor::GetGlyphPositionAtCoordinateImpl,
+            LayoutManagerAccessor::GetCharacterPositionAtCoordinateImpl,
+            LayoutManagerAccessor::GetGlyphRangeForCharacterRangeImpl,
+            LayoutManagerAccessor::GetCharacterRangeForGlyphRangeImpl,
             LayoutManagerAccessor::GetLineMetricsImpl,
             LayoutManagerAccessor::GetRectsForRangeImpl,
         };

@@ -1188,6 +1188,8 @@ typedef struct Array_TextMenuItem Array_TextMenuItem;
 typedef struct Opt_Array_TextMenuItem Opt_Array_TextMenuItem;
 typedef struct Array_TextPickerRangeContent Array_TextPickerRangeContent;
 typedef struct Opt_Array_TextPickerRangeContent Opt_Array_TextPickerRangeContent;
+typedef struct Array_TextRange Array_TextRange;
+typedef struct Opt_Array_TextRange Opt_Array_TextRange;
 typedef struct Array_ToolbarItem Array_ToolbarItem;
 typedef struct Opt_Array_ToolbarItem Opt_Array_ToolbarItem;
 typedef struct Array_TouchObject Array_TouchObject;
@@ -10842,6 +10844,15 @@ typedef struct Opt_Array_TextPickerRangeContent {
     Ark_Tag tag;
     Array_TextPickerRangeContent value;
 } Opt_Array_TextPickerRangeContent;
+typedef struct Array_TextRange {
+    /* kind: ContainerType */
+    Ark_TextRange* array;
+    Ark_Int32 length;
+} Array_TextRange;
+typedef struct Opt_Array_TextRange {
+    Ark_Tag tag;
+    Array_TextRange value;
+} Opt_Array_TextRange;
 typedef struct Array_ToolbarItem {
     /* kind: ContainerType */
     Ark_ToolbarItem* array;
@@ -29799,6 +29810,13 @@ typedef struct GENERATED_ArkUILayoutManagerAccessor {
     Opt_PositionWithAffinity (*getGlyphPositionAtCoordinate)(Ark_LayoutManager peer,
                                                              Ark_Float64 x,
                                                              Ark_Float64 y);
+    Opt_PositionWithAffinity (*getCharacterPositionAtCoordinate)(Ark_LayoutManager peer,
+                                                                 Ark_Float64 x,
+                                                                 Ark_Float64 y);
+    Opt_Array_TextRange (*getGlyphRangeForCharacterRange)(Ark_LayoutManager peer,
+                                                          const Ark_TextRange* charRange);
+    Opt_Array_TextRange (*getCharacterRangeForGlyphRange)(Ark_LayoutManager peer,
+                                                          const Ark_TextRange* glyphRange);
     Opt_text_LineMetrics (*getLineMetrics)(Ark_LayoutManager peer,
                                            Ark_Int32 lineNumber);
     Opt_Array_text_TextBox (*getRectsForRange)(Ark_LayoutManager peer,

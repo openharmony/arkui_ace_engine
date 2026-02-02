@@ -777,6 +777,9 @@ public:
     std::vector<ParagraphManager::TextBox> GetRectsForRange(int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle) override;
     PositionWithAffinity GetGlyphPositionAtCoordinate(int32_t x, int32_t y) override;
+    PositionWithAffinity GetCharacterPositionAtCoordinate(int32_t x, int32_t y) override;
+    std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(int32_t start, int32_t end) override;
+    std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(int32_t start, int32_t end) override;
 
     void OnSelectionMenuOptionsUpdate(const NG::OnCreateMenuCallback&& onCreateMenuCallback,
         const NG::OnMenuItemClickCallback&& onMenuItemClick, const NG::OnPrepareMenuCallback&& onPrepareMenuCallback);

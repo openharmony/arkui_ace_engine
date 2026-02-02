@@ -1703,6 +1703,32 @@ PositionWithAffinity TextModelNG::GetGlyphPositionAtCoordinate(FrameNode* frameN
     return textPattern->GetGlyphPositionAtCoordinate(dx, dy);
 }
 
+PositionWithAffinity TextModelNG::GetCharacterPositionAtCoordinate(FrameNode* frameNode, double dx, double dy)
+{
+    CHECK_NULL_RETURN(frameNode, PositionWithAffinity(0, TextAffinity::UPSTREAM));
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, PositionWithAffinity(0, TextAffinity::UPSTREAM));
+    return textPattern->GetCharacterPositionAtCoordinate(dx, dy);
+}
+
+std::pair<TextRange, TextRange> TextModelNG::GetGlyphRangeForCharacterRange(
+    FrameNode* frameNode, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(frameNode, (std::pair<TextRange, TextRange>()));
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, (std::pair<TextRange, TextRange>()));
+    return textPattern->GetGlyphRangeForCharacterRange(start, end);
+}
+
+std::pair<TextRange, TextRange> TextModelNG::GetCharacterRangeForGlyphRange(
+    FrameNode* frameNode, int32_t start, int32_t end)
+{
+    CHECK_NULL_RETURN(frameNode, (std::pair<TextRange, TextRange>()));
+    auto textPattern = frameNode->GetPattern<TextPattern>();
+    CHECK_NULL_RETURN(textPattern, (std::pair<TextRange, TextRange>()));
+    return textPattern->GetCharacterRangeForGlyphRange(start, end);
+}
+
 TextLineMetrics TextModelNG::GetLineMetrics(FrameNode* frameNode, int32_t lineNumber)
 {
     CHECK_NULL_RETURN(frameNode, TextLineMetrics());

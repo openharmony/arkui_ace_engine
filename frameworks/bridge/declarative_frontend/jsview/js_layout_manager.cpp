@@ -257,12 +257,113 @@ void JSLayoutManager::GetGlyphPositionAtCoordinate(const JSCallbackInfo& args)
     args.SetReturnValue(JsiRef<JsiObject>(JsiObject(positionWithAffinityObj)));
 }
 
+void JSLayoutManager::GetCharacterPositionAtCoordinate(const JSCallbackInfo& args)
+{
+    if (args.Length() < 2) { // 2:At least two parameters
+        TAG_LOGE(AceLogTag::ACE_RICH_TEXT, "Info length error.");
+        return;
+    }
+    auto layoutInfoInterface = layoutInfoInterface_.Upgrade();
+    CHECK_NULL_VOID(layoutInfoInterface);
+    int32_t coordinateX = 0;
+    int32_t coordinateY = 0;
+    JSContainerBase::ParseJsInt32(args[0], coordinateX);
+    JSContainerBase::ParseJsInt32(args[1], coordinateY);
+    auto value = layoutInfoInterface->GetCharacterPositionAtCoordinate(coordinateX, coordinateY);
+
+    auto vm = args.GetVm();
+    CHECK_NULL_VOID(vm);
+    auto positionObj = panda::NumberRef::New(vm, static_cast<int32_t>(value.position_));
+    auto affinityObj = panda::NumberRef::New(vm, static_cast<int32_t>(value.affinity_));
+
+    auto positionWithAffinityObj = panda::ObjectRef::New(vm);
+    positionWithAffinityObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "position"), positionObj);
+    positionWithAffinityObj->Set(vm, panda::StringRef::NewFromUtf8(vm, "affinity"), affinityObj);
+    args.SetReturnValue(JsiRef<JsiObject>(JsiObject(positionWithAffinityObj)));
+}
+
+void JSLayoutManager::GetGlyphRangeForCharacterRange(const JSCallbackInfo& args)
+{
+    auto textRangeVal = args[0];
+    if (!textRangeVal->IsObject() || textRangeVal->IsNull() || textRangeVal->IsUndefined()) {
+        return;
+    }
+    int32_t start = -1;
+    int32_t end = -1;
+    JSRef<JSObject> rangeObj = JSRef<JSObject>::Cast(textRangeVal);
+    JSRef<JSVal> startVal = rangeObj->GetProperty("start");
+    JSRef<JSVal> endVal = rangeObj->GetProperty("end");
+    if (startVal->IsNumber()) {
+        start = startVal->ToNumber<int32_t>();
+    }
+    if (endVal->IsNumber()) {
+        end = endVal->ToNumber<int32_t>();
+    }
+
+    auto layoutInfoInterface = layoutInfoInterface_.Upgrade();
+    CHECK_NULL_VOID(layoutInfoInterface);
+    std::pair<TextRange, TextRange> textRanges = layoutInfoInterface->GetGlyphRangeForCharacterRange(start, end);
+
+    JSRef<JSArray> textRangeArray = JSRef<JSArray>::New();
+    JSRef<JSObject> glyphRangeObj = JSRef<JSObject>::New();
+    glyphRangeObj->SetProperty<int32_t>("start", textRanges.first.start);
+    glyphRangeObj->SetProperty<int32_t>("end", textRanges.first.end);
+    textRangeArray->SetValueAt(0, glyphRangeObj);
+
+    JSRef<JSObject> actualCharRangeObj = JSRef<JSObject>::New();
+    actualCharRangeObj->SetProperty<int32_t>("start", textRanges.second.start);
+    actualCharRangeObj->SetProperty<int32_t>("end", textRanges.second.end);
+    textRangeArray->SetValueAt(1, actualCharRangeObj);
+    args.SetReturnValue(JSRef<JSVal>::Cast(textRangeArray));
+}
+
+void JSLayoutManager::GetCharacterRangeForGlyphRange(const JSCallbackInfo& args)
+{
+    auto textRangeVal = args[0];
+    if (!textRangeVal->IsObject() || textRangeVal->IsNull() || textRangeVal->IsUndefined()) {
+        return;
+    }
+    int32_t start = -1;
+    int32_t end = -1;
+    JSRef<JSObject> rangeObj = JSRef<JSObject>::Cast(textRangeVal);
+    JSRef<JSVal> startVal = rangeObj->GetProperty("start");
+    JSRef<JSVal> endVal = rangeObj->GetProperty("end");
+    if (startVal->IsNumber()) {
+        start = startVal->ToNumber<int32_t>();
+    }
+    if (endVal->IsNumber()) {
+        end = endVal->ToNumber<int32_t>();
+    }
+
+    auto layoutInfoInterface = layoutInfoInterface_.Upgrade();
+    CHECK_NULL_VOID(layoutInfoInterface);
+    std::pair<TextRange, TextRange> textRanges = layoutInfoInterface->GetCharacterRangeForGlyphRange(start, end);
+
+    JSRef<JSArray> textRangeArray = JSRef<JSArray>::New();
+    JSRef<JSObject> charRangeObj = JSRef<JSObject>::New();
+    charRangeObj->SetProperty<int32_t>("start", textRanges.first.start);
+    charRangeObj->SetProperty<int32_t>("end", textRanges.first.end);
+    textRangeArray->SetValueAt(0, charRangeObj);
+
+    JSRef<JSObject> actualGlyphRangeObj = JSRef<JSObject>::New();
+    actualGlyphRangeObj->SetProperty<int32_t>("start", textRanges.second.start);
+    actualGlyphRangeObj->SetProperty<int32_t>("end", textRanges.second.end);
+    textRangeArray->SetValueAt(1, actualGlyphRangeObj);
+    args.SetReturnValue(JSRef<JSVal>::Cast(textRangeArray));
+}
+
 void JSLayoutManager::JSBind(BindingTarget globalObj)
 {
     JSClass<JSLayoutManager>::Declare("LayoutManager");
     JSClass<JSLayoutManager>::CustomMethod("getLineCount", &JSLayoutManager::GetLineCount);
     JSClass<JSLayoutManager>::CustomMethod(
         "getGlyphPositionAtCoordinate", &JSLayoutManager::GetGlyphPositionAtCoordinate);
+    JSClass<JSLayoutManager>::CustomMethod(
+        "getCharacterPositionAtCoordinate", &JSLayoutManager::GetCharacterPositionAtCoordinate);
+    JSClass<JSLayoutManager>::CustomMethod(
+        "getGlyphRangeForCharacterRange", &JSLayoutManager::GetGlyphRangeForCharacterRange);
+    JSClass<JSLayoutManager>::CustomMethod(
+        "getCharacterRangeForGlyphRange", &JSLayoutManager::GetCharacterRangeForGlyphRange);
     JSClass<JSLayoutManager>::CustomMethod("getLineMetrics", &JSLayoutManager::GetLineMetrics);
     JSClass<JSLayoutManager>::CustomMethod("getRectsForRange", &JSLayoutManager::GetRectsForRange);
     JSClass<JSLayoutManager>::CustomMethod("didExceedMaxLines", &JSLayoutManager::DidExceedMaxLines);

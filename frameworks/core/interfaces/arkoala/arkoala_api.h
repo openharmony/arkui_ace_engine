@@ -2723,6 +2723,13 @@ struct ArkUIMenuFontOptions {
     ArkUI_VoidPtr familyRawPtr;
 };
 
+struct GlyphCharacterRange {
+    ArkUI_Int32 charStart;
+    ArkUI_Int32 charEnd;
+    ArkUI_Int32 glyphStart;
+    ArkUI_Int32 glyphEnd;
+};
+
 struct ArkUICommonModifier {
     ArkUI_Int32 (*setOnTouchTestDoneCallback)(ArkUINodeHandle node, void* userData,
         void (*touchTestDone)(
@@ -3706,6 +3713,11 @@ struct ArkUITextModifier {
     void (*resetTextSelectedDragPreviewStyle)(ArkUINodeHandle node);
     ArkUI_Uint32 (*getTextSelectedDragPreviewStyle)(ArkUINodeHandle node);
     void (*setFontColorWithPlaceholder)(ArkUINodeHandle node, ArkUI_Uint32 color, ArkUI_Uint32 colorPlaceholder);
+    void* (*getCharacterPositionAtCoordinate)(ArkUINodeHandle node, ArkUI_Float64 dx, ArkUI_Float64 dy);
+    void (*getGlyphRangeForCharacterRange)(
+        ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range);
+    void (*getCharacterRangeForGlyphRange)(
+        ArkUINodeHandle node, ArkUI_Int32 start, ArkUI_Int32 end, GlyphCharacterRange* range);
 };
 
 struct ArkUIButtonModifier {

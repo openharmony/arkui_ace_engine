@@ -249,6 +249,11 @@ public:
     static std::vector<ParagraphManager::TextBox> GetRectsForRange(FrameNode* frameNode, int32_t start, int32_t end,
         RectHeightStyle heightStyle, RectWidthStyle widthStyle);
     static PositionWithAffinity GetGlyphPositionAtCoordinate(FrameNode* frameNode, double dx, double dy);
+    static PositionWithAffinity GetCharacterPositionAtCoordinate(FrameNode* frameNode, double dx, double dy);
+    static std::pair<TextRange, TextRange> GetGlyphRangeForCharacterRange(
+        FrameNode* frameNode, int32_t start, int32_t end);
+    static std::pair<TextRange, TextRange> GetCharacterRangeForGlyphRange(
+        FrameNode* frameNode, int32_t start, int32_t end);
     static TextLineMetrics GetLineMetrics(FrameNode* frameNode, int32_t lineNumber);
     static void SetEnableAutoSpacing(FrameNode* frameNode, bool enabled);
     static bool GetEnableAutoSpacing(FrameNode* frameNode);
