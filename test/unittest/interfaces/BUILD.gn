@@ -870,12 +870,10 @@ ohos_unittest("native_render_node_test") {
     "$ace_root/interfaces/native/node/node_node_relative_container.cpp",
     "$ace_root/interfaces/native/node/node_transition.cpp",
     "$ace_root/interfaces/native/node/node_utils.cpp",
-    "$ace_root/interfaces/native/node/node_visual_effect.cpp",
     "$ace_root/interfaces/native/node/progress_option.cpp",
     "$ace_root/interfaces/native/node/render_node.cpp",
     "$ace_root/interfaces/native/node/style_modifier.cpp",
     "native_render_node_test.cpp",
-    "node_visual_effect_test.cpp",
   ]
 
   configs = [

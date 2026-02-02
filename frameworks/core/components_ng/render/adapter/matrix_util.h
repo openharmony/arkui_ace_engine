@@ -21,10 +21,8 @@
 namespace OHOS::Ace::NG {
 class ACE_FORCE_EXPORT MatrixUtil final {
 public:
-    [[deprecated]] static Matrix4 SetMatrixPolyToPoly(const Matrix4& matrix,
+    static Matrix4 SetMatrixPolyToPoly(const Matrix4& matrix,
         const std::vector<OHOS::Ace::NG::PointT<int32_t>>& totalPoint);
-    static Matrix4 SetMatrixPolyToPolyFloat(const Matrix4& matrix,
-        const std::vector<OHOS::Ace::NG::PointT<float>>& totalPoint);
 };
 } // namespace OHOS::Ace::NG
 #endif // FOUNDATION_ACE_FRAMEWORKS_CORE_COMPONENTS_NG_RENDER_ADAPTER_MatrixUtil_H

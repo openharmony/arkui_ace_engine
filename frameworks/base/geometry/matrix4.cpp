@@ -343,20 +343,6 @@ Point Matrix4::operator*(const Point& point)
         matrix4x4_[0][1] * x + matrix4x4_[1][1] * y + matrix4x4_[3][1]);
 }
 
-Point Matrix4::TransformPoint(const Point& point)
-{
-    double x = point.GetX();
-    double y = point.GetY();
-    auto w = matrix4x4_[0][3] * x + matrix4x4_[1][3] * y + matrix4x4_[3][3];
-    constexpr double epsilon = 1e-10;
-    if (std::abs(w - 1.0) > epsilon && std::abs(w) > epsilon) {
-        return Point((matrix4x4_[0][0] * x + matrix4x4_[1][0] * y + matrix4x4_[3][0]) / w,
-            (matrix4x4_[0][1] * x + matrix4x4_[1][1] * y + matrix4x4_[3][1]) / w);
-    }
-    return Point(matrix4x4_[0][0] * x + matrix4x4_[1][0] * y + matrix4x4_[3][0],
-        matrix4x4_[0][1] * x + matrix4x4_[1][1] * y + matrix4x4_[3][1]);
-}
-
 Matrix4& Matrix4::operator=(const Matrix4& matrix)
 {
     if (this == &matrix) {

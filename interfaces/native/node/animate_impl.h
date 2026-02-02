@@ -27,10 +27,6 @@
 extern "C" {
 #endif
 
-struct ArkUI_Matrix4 {
-    ArkUIMatrix4Handle matrix = nullptr;
-};
-
 struct ArkUI_AnimateOption {
     uint32_t duration;
     float tempo;
