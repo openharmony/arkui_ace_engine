@@ -19,6 +19,13 @@
 
 namespace OHOS::Ace::NG {
 
+EventHub::EventHub() = default;
+
+EventHub::~EventHub()
+{
+    keyboardShortcut_.clear();
+}
+
 void EventHub::AttachHost(const WeakPtr<FrameNode>& host)
 {
     host_ = host;
@@ -714,6 +721,11 @@ const RefPtr<GestureEventHub>& EventHub::GetOrCreateGestureEventHub()
         gestureEventHub_ = CreateGestureEventHub();
     }
     return gestureEventHub_;
+}
+
+RefPtr<GestureEventHub> EventHub::CreateGestureEventHub()
+{
+    return MakeRefPtr<GestureEventHub>(WeakClaim(this));
 }
 
 const RefPtr<GestureEventHub>& EventHub::GetGestureEventHub() const

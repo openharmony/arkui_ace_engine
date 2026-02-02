@@ -1870,7 +1870,7 @@ class ArkTextInputComponent extends ArkComponent implements CommonMethod<TextInp
     return this;
   }
   showUnit(event: () => void): TextInputAttribute {
-    throw new BusinessError(100201, 'showUnit function not supported in TextinputModifier class.');
+    throw new BusinessError(100201, 'showUnit function not supported in attributeModifier scenario.');
   }
   showUnderline(value: boolean): TextInputAttribute {
     modifierWithKey(this._modifiersWithKeys, TextInputShowUnderlineModifier.identity,

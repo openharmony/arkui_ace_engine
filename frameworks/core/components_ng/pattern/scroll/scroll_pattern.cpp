@@ -18,6 +18,7 @@
 #include "base/log/dump_log.h"
 #include "core/components_ng/pattern/scrollable/scrollable_animation_consts.h"
 #include "core/components_ng/property/measure_utils.h"
+#include "interfaces/inner_api/ui_session/ui_session_manager.h"
 
 namespace OHOS::Ace::NG {
 
@@ -563,6 +564,7 @@ void ScrollPattern::FireOnReachStart(const OnReachEvent& onReachStart, const OnR
     CHECK_NULL_VOID(host);
     if (ReachStart(!isInitialized_)) {
         FireObserverOnReachStart();
+        ReportOnItemScrollEvent("onReachStart");
         CHECK_NULL_VOID(onReachStart || onJSFrameNodeReachStart);
         ACE_SCOPED_TRACE("OnReachStart, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
         if (onReachStart) {
@@ -584,6 +586,7 @@ void ScrollPattern::FireOnReachEnd(const OnReachEvent& onReachEnd, const OnReach
     CHECK_NULL_VOID(host);
     if (ReachEnd(false)) {
         FireObserverOnReachEnd();
+        ReportOnItemScrollEvent("OnReachEnd");
         CHECK_NULL_VOID(onReachEnd || onJSFrameNodeReachEnd);
         ACE_SCOPED_TRACE("OnReachEnd, id:%d, tag:Scroll", static_cast<int32_t>(host->GetAccessibilityId()));
         if (onReachEnd) {
@@ -1677,6 +1680,15 @@ void ScrollPattern::DumpAdvanceInfo(std::unique_ptr<JsonValue>& json)
     json->Put("scrollMeasureInfos", infochildren);
 }
 
+void ScrollPattern::DumpSimplifyInfo(std::shared_ptr<JsonValue>& json)
+{
+    json->Put(
+        "isScrollable", (!LessOrEqual(scrollableDistance_, 0.0))
+                            ? (IsAtTop() ? "scrollBackward" : (IsAtBottom() ? "scrollForward" : "scrollBidirectional"))
+                            : "false");
+    json->Put("scrollDirection", (GetAxis() == Axis::VERTICAL) ? "vertical" : "horizontal");
+}
+
 void ScrollPattern::ProcessZoomScale()
 {
     if (childScale_ != zoomScale_) {
@@ -1923,5 +1935,79 @@ bool ScrollPattern::FreeScrollBy(const OffsetF& delta, bool canOverScroll)
     freeScroll_->UpdateOffset(delta, canOverScroll);
     const OffsetF newPos = freeScroll_->GetOffset() + delta;
     return NearEqual(freeScroll_->ClampPosition(newPos), newPos);
+}
+
+void ScrollPattern::ReportOnItemScrollEvent(const std::string& event)
+{
+    if (!UiSessionManager::GetInstance()->GetComponentChangeEventRegistered()) {
+        return;
+    }
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+
+    auto nodeId = host->GetId();
+    auto params = JsonUtil::Create();
+    CHECK_NULL_VOID(params);
+    auto scrollEvent = std::string("Scroll.") + event;
+    params->Put("name", scrollEvent.c_str());
+    params->Put("nodeId", nodeId);
+
+    auto result = JsonUtil::Create();
+    CHECK_NULL_VOID(result);
+    result->Put("result", params);
+    UiSessionManager::GetInstance()->ReportComponentChangeEvent(
+        "result", result->ToString(), ComponentEventType::COMPONENT_EVENT_SCROLL);
+}
+
+int32_t ScrollPattern::OnInjectionEvent(const std::string& command)
+{
+    int reportEventId = 0;
+    float ratio = 0.0f;
+    bool isScrollByRatio = false;
+    std::string ret = ParseCommand(command, reportEventId, ratio, isScrollByRatio);
+    if (LessNotEqual(ratio, 0.0f) || GreatNotEqual(ratio, 1.0f) || !isScrollByRatio) {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
+    if (ret == "scrollForward") {
+        ScrollPageByRatio(true, ratio, reportEventId);
+    } else if (ret == "scrollBackward") {
+        ScrollPageByRatio(false, ratio, reportEventId);
+    } else {
+        ReportScroll(false, ScrollError::SCROLL_ERROR_OTHER, reportEventId);
+        return RET_FAILED;
+    }
+    return RET_SUCCESS;
+}
+
+void ScrollPattern::ScrollPageByRatio(bool reverse, float ratio, int32_t reportEventId)
+{
+    auto height = GetMainContentSize();
+    float distance = reverse ? height : -height;
+    distance = distance * ratio;
+    SetIsOverScroll(false);
+    ScrollHandle(distance, reportEventId);
+    ScrollBy(distance, distance, false);
+}
+
+void ScrollPattern::ScrollHandle(float distance, int32_t reportEventId)
+{
+    if (LessOrEqual(scrollableDistance_, 0.0)) {
+        ReportScroll(true, ScrollError::SCROLL_NOT_SCROLLABLE_ERROR, reportEventId);
+        return;
+    }
+
+    if (HandleEdgeEffect(distance, SCROLL_FROM_JUMP, viewSize_)) {
+        ReportScroll(true, ScrollError::SCROLL_NO_ERROR, reportEventId);
+        return;
+    }
+
+    ScrollError error = ScrollError::SCROLL_ERROR_OTHER;
+    if (IsAtTop()) {
+        error = ScrollError::SCROLL_TOP_ERROR;
+    } else if (IsAtBottom()) {
+        error = ScrollError::SCROLL_BOTTOM_ERROR;
+    }
+    ReportScroll(false, error, reportEventId);
 }
 } // namespace OHOS::Ace::NG

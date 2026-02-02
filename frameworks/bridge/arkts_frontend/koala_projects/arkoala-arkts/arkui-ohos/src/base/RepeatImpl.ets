@@ -29,6 +29,8 @@ import { ArkUIAniModule } from '../ani/arkts/ArkUIAniModule'
 import { SyntaxItemPeer, ForEachNodePeer, NodeHolder } from './SyntaxNodeBase'
 import { ObserveSingleton } from '../stateManagement/base/observeSingleton'
 import { ExtendableComponent } from '../component/extendableComponent'
+import { IMutableStateMeta } from '../stateManagement/decorator'
+import { FactoryInternal } from '../stateManagement/base/iFactoryInternal'
 
 /** @memo:intrinsic */
 export function RepeatImplForOptions<T>(
@@ -60,28 +62,24 @@ export function RepeatImplForOptions<T>(
 }
 
 class RepeatItemImpl<T> implements RepeatItem<T> {
-    arr_: RepeatArray<T>;
-    index_: int32;
+    private item_: T
+    private index_: int32;
+    private version: IMutableStateMeta;
 
-    constructor(arr: RepeatArray<T>, initialIndex: int32) {
-        this.arr_ = arr;
-        this.index_ = initialIndex;
+    constructor(item: T, index: int32) {
+        this.item_ = item;
+        this.index_ = index;
+        this.version = FactoryInternal.mkMutableStateMeta('__backing_repeat_item_version');
     }
 
     get item(): T {
-        return this.arr_[this.index_];
-    }
-
-    get arr(): RepeatArray<T> {
-        return this.arr_;
+        this.version;
+        return this.item_;
     }
 
     get index(): int32 {
+        this.version;
         return this.index_;
-    }
-
-    public updateIndex(newIndex: int32): void {
-        this.index_ = newIndex;
     }
 }
 
@@ -269,7 +267,7 @@ function virtualRender<T>(
 
     /** @memo */
     const itemGen = (item: T, index: int32): void => {
-        const ri = new RepeatItemImpl<T>(arr, index);
+        const ri = new RepeatItemImpl<T>(item, index);
         let _type: string = attributes.ttypeGenFunc_(item, index);
         if (!attributes.itemGenFuncs_.has(_type)) {
             _type = REPEAT_EACH_FUNC_TYPE;
@@ -320,7 +318,7 @@ function nonVirtualRender<T>(
     const itemGen = (ele: T, i: int32) => {
         /** @memo */
         const itemGenerator = attributes.itemGenFuncs_.get(REPEAT_EACH_FUNC_TYPE)!;
-        const ri = new RepeatItemImpl<T>(arr, i);
+        const ri = new RepeatItemImpl<T>(ele, i);
         const env = getCurrentEnv();
         NodeAttach(() => SyntaxItemPeer.create(), (node: SyntaxItemPeer) => {
             wrapBuilder(env, () => { itemGenerator(ri); })

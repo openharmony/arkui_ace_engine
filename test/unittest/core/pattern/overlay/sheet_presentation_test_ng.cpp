@@ -372,6 +372,25 @@ HWTEST_F(SheetPresentationTestNg, OnAttachToFrameNode001, TestSize.Level1)
 }
 
 /**
+ * @tc.name: OnAttachToMainTree001
+ * @tc.desc: Increase the coverage of SheetPresentationPattern::OnAttachToMainTree function.
+ * @tc.type: FUNC
+ */
+HWTEST_F(SheetPresentationTestNg, OnAttachToMainTree001, TestSize.Level1)
+{
+    SheetPresentationTestNg::SetUpTestCase();
+    auto callback = [](const std::string&) {};
+    auto sheetNode = FrameNode::CreateFrameNode("Sheet", 101,
+        AceType::MakeRefPtr<SheetPresentationPattern>(201, "SheetPresentation", std::move(callback)));
+    auto sheetPattern = sheetNode->GetPattern<SheetPresentationPattern>();
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto size = context->onWindowSizeChangeCallbacks_.size();
+    sheetPattern->OnAttachToMainTree();
+    EXPECT_EQ(size, context->onWindowSizeChangeCallbacks_.size());
+}
+
+/**
  * @tc.name: InitPanEvent001
  * @tc.desc: Increase the coverage of SheetPresentationPattern::InitPanEvent function.
  * @tc.type: FUNC

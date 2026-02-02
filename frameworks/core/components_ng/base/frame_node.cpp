@@ -29,6 +29,7 @@
 #include "interfaces/inner_api/ui_session/ui_session_manager.h"
 #include "core/components_ng/pattern/web/web_pattern.h"
 #endif
+#include "ui/focus/focus_constants.h"
 #include "ui/view/frame_node.h"
 #include "ui/view/pattern.h"
 
@@ -585,6 +586,21 @@ void FrameNode::CreateEventHubInner()
     }
 }
 
+const RefPtr<FocusHub>& FrameNode::GetFocusHub() const
+{
+    return focusHub_;
+}
+
+FocusType FrameNode::GetFocusType() const
+{
+    FocusType type = FocusType::DISABLE;
+    auto focusHub = GetFocusHub();
+    if (focusHub) {
+        type = focusHub->GetFocusType();
+    }
+    return type;
+}
+    
 RefPtr<FrameNode> FrameNode::CreateFrameNodeWithTree(
     const std::string& tag, int32_t nodeId, const RefPtr<Pattern>& pattern)
 {
@@ -795,6 +811,7 @@ RefPtr<AccessibilityProperty>& FrameNode::GetOrCreateAccessibilityProperty()
     if (isAccessibilityPropertyInitialized_) {
         return accessibilityProperty_;
     }
+    CHECK_NULL_RETURN(pattern_, accessibilityProperty_);
     accessibilityProperty_ = pattern_->CreateAccessibilityProperty();
     accessibilityProperty_->SetHost(WeakClaim(this));
     isAccessibilityPropertyInitialized_ = true;
@@ -1233,7 +1250,7 @@ void FrameNode::DumpSimplifyOverlayInfo(std::unique_ptr<JsonValue>& json)
     json->Put("OverlayOffset", (offsetX.ToString() + "," + offsetY.ToString()).c_str());
 }
 
-bool FrameNode::CheckVisibleAndActive() const
+bool FrameNode::IsVisibleAndActive() const
 {
     return layoutProperty_->GetVisibility().value_or(VisibleType::VISIBLE) == VisibleType::VISIBLE && IsActive();
 }
@@ -3772,7 +3789,7 @@ std::vector<RectF> FrameNode::GetResponseRegionList(const RectF& rect, int32_t s
         responseRegionResult.emplace_back(rect);
         return responseRegionResult;
     }
-    
+
     auto toolType = it->second;
     if (responseRegionMap.find(toolType) != responseRegionMap.end()) {
         for (const auto& region : responseRegionMap[toolType]) {
@@ -4495,20 +4512,20 @@ RectF FrameNode::GetTransformRectRelativeToWindow(bool checkBoundary) const
 }
 
 // same as GetTransformRectRelativeToWindow only when the node is active and under visible parents
-// otherwise returns an empty rect
+// otherwise returns an invalid rect
 RectF FrameNode::GetTransformRectRelativeToWindowOnlyVisible(bool checkBoundary) const
 {
-    auto emptyRect = RectF(static_cast<float>(INT32_MAX), static_cast<float>(INT32_MAX), 0.0, 0.0);
+    auto invalidRect = RectF(static_cast<float>(INT32_MAX), static_cast<float>(INT32_MAX), 0.0, 0.0);
     if (!IsActive()) {
-        return emptyRect;
+        return invalidRect;
     }
     auto context = GetRenderContext();
-    CHECK_NULL_RETURN(context, emptyRect);
+    CHECK_NULL_RETURN(context, invalidRect);
     RectF rect = context->GetPaintRectWithTransform();
     auto parent = GetAncestorNodeOfFrame(true);
     while (parent) {
-        if (!parent->CheckVisibleAndActive()) {
-            return emptyRect;
+        if (!parent->IsVisibleAndActive()) {
+            return invalidRect;
         }
         if (checkBoundary && parent->IsWindowBoundary()) {
             break;
@@ -7995,6 +8012,10 @@ void FrameNode::CleanupPipelineResources()
         pipeline->RemoveChangedFrameNode(nodeId_);
         pipeline->RemoveFrameNodeChangeListener(nodeId_);
         pipeline->GetNodeRenderStatusMonitor()->NotifyFrameNodeRelease(this);
+        auto eventManager = pipeline->GetEventManager();
+        if (eventManager) {
+            eventManager->UnregisterTouchpadInteractionListenerInner(GetId());
+        }
     }
 }
 

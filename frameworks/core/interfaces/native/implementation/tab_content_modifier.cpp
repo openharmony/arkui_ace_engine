@@ -19,6 +19,7 @@
 #include "core/interfaces/native/utility/converter.h"
 #include "core/interfaces/native/utility/validators.h"
 #include "core/interfaces/native/utility/callback_helper.h"
+#include "core/components_ng/pattern/image/image_model.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -62,6 +63,77 @@ void SetTabBarCustomBuilder(FrameNode* frameNode, const CustomNodeBuilder& arkBu
         arkNode);
 }
 } // namespace
+
+ImageType ConvertToImageType(DrawableType type)
+{
+    switch (type) {
+        case DrawableType::BASE:
+            return ImageType::DRAWABLE;
+        case DrawableType::LAYERED:
+            return ImageType::LAYERED_DRAWABLE;
+        case DrawableType::ANIMATED:
+            return ImageType::ANIMATED_DRAWABLE;
+        case DrawableType::PIXELMAP:
+            return ImageType::PIXELMAP_DRAWABLE;
+        default:
+            return ImageType::BASE;
+    }
+}
+
+bool ParseImageInfoConfig(const Ark_DrawableTabBarIndicator& src, ImageInfoConfig& config)
+{
+    if (src.drawable.tag == INTEROP_TAG_UNDEFINED) {
+        return false;
+    }
+    auto desc = Converter::Convert<DrawableDescriptor*>(src.drawable.value);
+    auto drawableType = desc->GetDrawableType();
+    config.type = ConvertToImageType(drawableType);
+    if (config.type == ImageType::ANIMATED_DRAWABLE) {
+        config.drawable = Referenced::Claim<DrawableDescriptor>(desc);
+        return true;
+    } else if (config.type == ImageType::PIXELMAP_DRAWABLE || config.type == ImageType::DRAWABLE ||
+               config.type == ImageType::LAYERED_DRAWABLE) {
+        config.pixelMap = desc->GetPixelMap();
+        return true;
+    }
+    return false;
+}
+
+void ParseIndicatorStyle(const Ark_DrawableTabBarIndicator& src, IndicatorStyle& indicatorStyle)
+{
+    auto pipeline = PipelineBase::GetCurrentContextSafelyWithCheck();
+    CHECK_NULL_VOID(pipeline);
+    auto tabTheme = pipeline->GetTheme<TabTheme>();
+    if (tabTheme) {
+        indicatorStyle.color = tabTheme->GetActiveIndicatorColor();
+        indicatorStyle.height = tabTheme->GetActiveIndicatorWidth();
+        indicatorStyle.marginTop = tabTheme->GetSubTabIndicatorGap();
+    }
+    std::optional<Dimension> height = Converter::OptConvert<Dimension>(src.height);
+    Validator::ValidateNonNegative(height);
+    Validator::ValidateNonPercent(height);
+    if (height) {
+        indicatorStyle.height = height.value();
+    }
+    std::optional<Dimension> width = Converter::OptConvert<Dimension>(src.width);
+    Validator::ValidateNonNegative(width);
+    Validator::ValidateNonPercent(width);
+    if (width) {
+        indicatorStyle.width = width.value();
+    }
+    std::optional<Dimension> borderRadius = Converter::OptConvert<Dimension>(src.borderRadius);
+    Validator::ValidateNonNegative(borderRadius);
+    Validator::ValidateNonPercent(borderRadius);
+    if (borderRadius) {
+        indicatorStyle.borderRadius = borderRadius.value();
+    }
+    std::optional<Dimension> marginTop = Converter::OptConvert<Dimension>(src.marginTop);
+    Validator::ValidateNonNegative(marginTop);
+    Validator::ValidateNonPercent(marginTop);
+    if (marginTop) {
+        indicatorStyle.marginTop = marginTop.value();
+    }
+}
 
 namespace Validator {
 void ValidatePaddingProperty(std::optional<PaddingProperty>& opt)
@@ -117,9 +189,23 @@ auto g_setSubTabBarStyle = [](FrameNode* frameNode, const Ark_SubTabBarStyle& st
         },
         []() {}
     );
-
-    // indicator
-    TabContentModelStatic::SetIndicator(frameNode, Converter::OptConvert<IndicatorStyle>(style._indicator));
+    bool isDrawableIndicator = false;
+    if (style._indicator.value.selector == 0) {
+        // indicator
+        TabContentModelStatic::SetIndicator(
+            frameNode, Converter::OptConvert<IndicatorStyle>(style._indicator.value.value0));
+    } else {
+        ImageInfoConfig config;
+        IndicatorStyle indicatorStyle;
+        isDrawableIndicator = ParseImageInfoConfig(style._indicator.value.value1, config);
+        ParseIndicatorStyle(style._indicator.value.value1, indicatorStyle);
+        if (isDrawableIndicator) {
+            TabContentModelStatic::SetDrawableIndicatorConfig(frameNode, config);
+        }
+        TabContentModelStatic::SetIndicatorColorByUser(frameNode, false);
+        TabContentModelStatic::SetIndicator(frameNode, indicatorStyle);
+    }
+    TabContentModelStatic::SetDrawableIndicatorFlag(frameNode, isDrawableIndicator);
     // selectedMode
     TabContentModelStatic::SetSelectedMode(frameNode, Converter::OptConvert<SelectedMode>(style._selectedMode));
     // board

@@ -277,4 +277,217 @@ HWTEST_F(SimplifiedInspectorTestNg, SimplifiedInspectorTestNg007, TestSize.Level
     auto ret = inspector->GetImagePixelMap(imgNode);
     ASSERT_EQ(ret, nullptr);
 }
+
+/**
+* @tc.name: SimplifiedInspectorTestNg008
+* @tc.desc: Test GetInspector web lang branch
+* @tc.type: FUNC
+*/
+HWTEST_F(SimplifiedInspectorTestNg, SimplifiedInspectorTestNg008, TestSize.Level1)
+{
+    TreeParams params;
+    params.infoType = InspectorInfoType::WEB_LANG;
+    auto inspector = std::make_shared<SimplifiedInspector>(0, params);
+    auto result = inspector->GetInspector();
+    EXPECT_EQ(result, "");
+}
+
+/**
+* @tc.name: SimplifiedInspectorTestNg009
+* @tc.desc: Test GetInspectorStep1 stage manager null
+* @tc.type: FUNC
+*/
+HWTEST_F(SimplifiedInspectorTestNg, SimplifiedInspectorTestNg009, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto backupStageManager = context->stageManager_;
+    context->stageManager_ = nullptr;
+    TreeParams params;
+    auto inspector = std::make_shared<SimplifiedInspector>(context->GetInstanceId(), params);
+    auto jsonRoot = JsonUtil::Create(true);
+    RefPtr<FrameNode> pageRootNode;
+    auto ret = inspector->GetInspectorStep1(jsonRoot, pageRootNode);
+    EXPECT_FALSE(ret);
+    EXPECT_EQ(pageRootNode, nullptr);
+    context->stageManager_ = backupStageManager;
+}
+
+/**
+* @tc.name: SimplifiedInspectorTestNg010
+* @tc.desc: Test FillInspectorAttrs branches
+* @tc.type: FUNC
+*/
+HWTEST_F(SimplifiedInspectorTestNg, SimplifiedInspectorTestNg010, TestSize.Level1)
+{
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode("dummy", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+    frameNode->UpdateInspectorId("dummy_id");
+
+    TreeParams newParams;
+    newParams.isNewVersion = true;
+    newParams.isContentOnly = true;
+    auto newInspector = std::make_shared<SimplifiedInspector>(0, newParams);
+    auto newJsonNode = JsonUtil::Create(true);
+    newInspector->FillInspectorAttrs(frameNode, newJsonNode);
+    auto newAttrs = newJsonNode->GetValue("$attrs");
+    ASSERT_NE(newAttrs, nullptr);
+    EXPECT_EQ(newAttrs->GetInt64("accessilityId"), frameNode->GetAccessibilityId());
+
+    TreeParams oldParams;
+    oldParams.isNewVersion = false;
+    oldParams.enableFullAttrs = false;
+    auto oldInspector = std::make_shared<SimplifiedInspector>(0, oldParams);
+    auto oldJsonNode = JsonUtil::Create(true);
+    oldInspector->FillInspectorAttrs(frameNode, oldJsonNode);
+    EXPECT_EQ(oldJsonNode->GetString("id"), "dummy_id");
+    auto oldAttrs = oldJsonNode->GetValue("$attrs");
+    ASSERT_NE(oldAttrs, nullptr);
+    EXPECT_TRUE(oldAttrs->Contains("enabled"));
+    EXPECT_TRUE(oldAttrs->Contains("opacity"));
+    EXPECT_TRUE(oldAttrs->Contains("zindex"));
+    EXPECT_TRUE(oldAttrs->Contains("visibility"));
+
+    TreeParams fullParams;
+    fullParams.isNewVersion = false;
+    fullParams.enableFullAttrs = true;
+    auto fullInspector = std::make_shared<SimplifiedInspector>(0, fullParams);
+    auto fullJsonNode = JsonUtil::Create(true);
+    fullInspector->FillInspectorAttrs(frameNode, fullJsonNode);
+    auto fullAttrs = fullJsonNode->GetValue("$attrs");
+    ASSERT_NE(fullAttrs, nullptr);
+    EXPECT_EQ(fullAttrs->GetString("id"), "dummy_id");
+}
+
+/**
+* @tc.name: SimplifiedInspectorTestNg011
+* @tc.desc: Test CheckNodeRect branch paths
+* @tc.type: FUNC
+*/
+HWTEST_F(SimplifiedInspectorTestNg, SimplifiedInspectorTestNg011, TestSize.Level1)
+{
+    TreeParams params;
+    auto inspector = std::make_shared<SimplifiedInspector>(0, params);
+    auto nodeId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto frameNode = FrameNode::CreateFrameNode("node", nodeId, AceType::MakeRefPtr<Pattern>(), true);
+
+    RectF rect;
+    frameNode->renderContext_ = nullptr;
+    EXPECT_FALSE(inspector->CheckNodeRect(frameNode, rect, false));
+
+    auto renderContext = AceType::MakeRefPtr<MockRenderContext>();
+    renderContext->SetHostNode(frameNode);
+    renderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 0.0f, 0.0f));
+    renderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 0.0f, 0.0f));
+    frameNode->renderContext_ = renderContext;
+    EXPECT_FALSE(inspector->CheckNodeRect(frameNode, rect, false));
+
+    renderContext->UpdatePaintRect(RectF(0.0f, 0.0f, 10.0f, 10.0f));
+    renderContext->SetPaintRectWithTransform(RectF(1000.0f, 1000.0f, 10.0f, 10.0f));
+    inspector->deviceRect_.SetRect(0.0f, 0.0f, 10.0f, 10.0f);
+    EXPECT_FALSE(inspector->CheckNodeRect(frameNode, rect, true));
+
+    renderContext->SetPaintRectWithTransform(RectF(0.0f, 0.0f, 10.0f, 10.0f));
+    EXPECT_TRUE(inspector->CheckNodeRect(frameNode, rect, false));
+}
+
+/**
+* @tc.name: SimplifiedInspectorTestNg012
+* @tc.desc: Test GetFrameNodeChildren background and internal paths
+* @tc.type: FUNC
+*/
+HWTEST_F(SimplifiedInspectorTestNg, SimplifiedInspectorTestNg012, TestSize.Level1)
+{
+    TreeParams params;
+    auto inspector = std::make_shared<SimplifiedInspector>(0, params);
+    auto collector = std::make_shared<Recorder::InspectorTreeCollector>(
+        [](const std::shared_ptr<std::string> result) {}, false);
+    inspector->collector_ = collector;
+    inspector->isBackground_ = true;
+    inspector->pageId_ = 100;
+
+    auto pageId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = FrameNode::CreateFrameNode("page", pageId, AceType::MakeRefPtr<Pattern>(), true);
+    pageNode->SetHostPageId(200);
+    std::list<RefPtr<UINode>> children;
+    inspector->GetFrameNodeChildren(pageNode, children);
+    EXPECT_TRUE(children.empty());
+    EXPECT_EQ(collector->cacheNodes_.size(), 1);
+
+    auto internalId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto internalNode = FrameNode::CreateFrameNode("row", internalId, AceType::MakeRefPtr<Pattern>(), true);
+    internalNode->SetInternal();
+    auto childId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto childNode = FrameNode::CreateFrameNode("child", childId, AceType::MakeRefPtr<Pattern>(), true);
+    internalNode->AddChild(childNode);
+    children.clear();
+    inspector->isBackground_ = false;
+    inspector->GetFrameNodeChildren(internalNode, children);
+    ASSERT_EQ(children.size(), 1);
+    EXPECT_EQ(children.front(), childNode);
+}
+
+/**
+* @tc.name: SimplifiedInspectorTestNg013
+* @tc.desc: Test ExecuteUICommand invalid and not found paths
+* @tc.type: FUNC
+*/
+HWTEST_F(SimplifiedInspectorTestNg, SimplifiedInspectorTestNg013, TestSize.Level1)
+{
+    auto context = PipelineContext::GetCurrentContext();
+    ASSERT_NE(context, nullptr);
+    auto backupStageManager = context->stageManager_;
+    auto stageId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto stageNode = FrameNode::CreateFrameNode("stage", stageId, AceType::MakeRefPtr<Pattern>(), true);
+    auto pageId = ElementRegister::GetInstance()->MakeUniqueId();
+    auto pageNode = FrameNode::CreateFrameNode("page", pageId, AceType::MakeRefPtr<Pattern>(), true);
+    stageNode->AddChild(pageNode);
+    context->stageManager_ = AceType::MakeRefPtr<StageManager>(stageNode);
+
+    std::string invalidResult;
+    UICommandParams invalidParams { "invalid" };
+    auto invalidCollector = std::make_shared<Recorder::InspectorTreeCollector>(
+        [&invalidResult](const std::shared_ptr<std::string> result) {
+            if (result) {
+                invalidResult = *result;
+            }
+        }, false);
+    auto invalidInspector = std::make_shared<SimplifiedInspector>(0, invalidParams);
+    invalidInspector->ExecuteUICommand(invalidCollector);
+    auto invalidJson = JsonUtil::ParseJsonString(invalidResult);
+    ASSERT_NE(invalidJson, nullptr);
+    EXPECT_EQ(invalidJson->GetInt("code"), 101);
+
+    std::string nodeResult;
+    UICommandParams nodeParams { "{\"action\":\"scroll\",\"targetType\":1,\"targetId\":12345,"
+        "\"scrollOffset\":1.0,\"scrollAlign\":0}" };
+    auto nodeCollector = std::make_shared<Recorder::InspectorTreeCollector>(
+        [&nodeResult](const std::shared_ptr<std::string> result) {
+            if (result) {
+                nodeResult = *result;
+            }
+        }, false);
+    auto nodeInspector = std::make_shared<SimplifiedInspector>(0, nodeParams);
+    nodeInspector->ExecuteUICommand(nodeCollector);
+    auto nodeJson = JsonUtil::ParseJsonString(nodeResult);
+    ASSERT_NE(nodeJson, nullptr);
+    EXPECT_EQ(nodeJson->GetInt("code"), 102);
+
+    std::string webResult;
+    UICommandParams webParams { "{\"action\":\"scroll\",\"targetType\":2,\"targetId\":12345,"
+        "\"scrollOffset\":1.0,\"scrollAlign\":0,\"webContentJs\":\"js\"}" };
+    auto webCollector = std::make_shared<Recorder::InspectorTreeCollector>(
+        [&webResult](const std::shared_ptr<std::string> result) {
+            if (result) {
+                webResult = *result;
+            }
+        }, false);
+    auto webInspector = std::make_shared<SimplifiedInspector>(0, webParams);
+    webInspector->ExecuteUICommand(webCollector);
+    auto webJson = JsonUtil::ParseJsonString(webResult);
+    ASSERT_NE(webJson, nullptr);
+    EXPECT_EQ(webJson->GetInt("code"), 102);
+
+    context->stageManager_ = backupStageManager;
+}
 } // namespace OHOS::Ace::NG

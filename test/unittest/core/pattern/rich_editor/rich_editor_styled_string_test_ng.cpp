@@ -1508,4 +1508,26 @@ HWTEST_F(RichEditorStyledStringTestNg, HandleStyledStringInsertion001, TestSize.
     ASSERT_EQ(richEditorPattern->textSelector_.SelectNothing(), true);
 }
 
+/**
+ * @tc.name: HandleStyledStringInsertion002
+ * @tc.desc: test HandleStyledStringInsertion
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyledStringTestNg, HandleStyledStringInsertion002, TestSize.Level0)
+{
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"");
+    richEditorPattern->styledString_->SetSpanWatcher(AceType::WeakClaim(AceType::RawPtr(richEditorPattern)));
+    richEditorPattern->textSelector_.Update(0, 0);
+
+    RefPtr<SpanString> spanString = nullptr;
+    UndoRedoRecord record;
+    record.rangeBefore = TextRange { 0, 0 };
+    std::u16string subValue = u"test\ntest\ntest";
+    richEditorPattern->HandleStyledStringInsertion(spanString, record, subValue, false, false);
+    ASSERT_EQ(richEditorPattern->spans_.size(), 3);
+}
+
 } // namespace OHOS::Ace::NG

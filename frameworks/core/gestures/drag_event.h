@@ -25,6 +25,7 @@
 #include "core/common/udmf/unified_data.h"
 #include "core/event/ace_events.h"
 #include "core/gestures/gesture_info.h"
+#include "core/gestures/drag_constants.h"
 #include "core/gestures/velocity.h"
 #include "core/components_ng/manager/drag_drop/drag_drop_related_configuration.h"
 
@@ -74,17 +75,6 @@ enum class DragRet {
     DRAG_CANCEL,
     ENABLE_DROP,
     DISABLE_DROP,
-};
-
-enum class PreDragStatus {
-    ACTION_DETECTING_STATUS = 0,
-    READY_TO_TRIGGER_DRAG_ACTION,
-    PREVIEW_LIFT_STARTED,
-    PREVIEW_LIFT_FINISHED,
-    PREVIEW_LANDING_STARTED,
-    PREVIEW_LANDING_FINISHED,
-    ACTION_CANCELED_BEFORE_DRAG,
-    PREPARING_FOR_DRAG_DETECTION,
 };
 
 enum class DragStartRequestStatus : int32_t {

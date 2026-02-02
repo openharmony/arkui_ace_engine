@@ -413,10 +413,7 @@ public:
 
     void CreateEventHubInner();
 
-    const RefPtr<FocusHub>& GetFocusHub() const
-    {
-        return focusHub_;
-    }
+    const RefPtr<FocusHub>& GetFocusHub() const;
 
     bool HasVirtualNodeAccessibilityProperty() override
     {
@@ -426,15 +423,7 @@ public:
         return false;
     }
 
-    FocusType GetFocusType() const
-    {
-        FocusType type = FocusType::DISABLE;
-        auto focusHub = GetFocusHub();
-        if (focusHub) {
-            type = focusHub->GetFocusType();
-        }
-        return type;
-    }
+    FocusType GetFocusType() const;
 
     void PostIdleTask(std::function<void(int64_t deadline, bool canUseLongPredictTask)>&& task);
 
@@ -1030,33 +1019,6 @@ public:
     void ForceSyncGeometryNode();
     bool IsGeometrySizeChange() const;
 
-    template<typename T>
-    RefPtr<T> FindFocusChildNodeOfClass()
-    {
-        const auto& children = GetChildren();
-        for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
-            auto& child = *iter;
-            auto target = DynamicCast<FrameNode>(child->FindChildNodeOfClass<T>());
-            if (target && target->eventHub_) {
-                auto focusEvent = target->eventHub_->GetFocusHub();
-                if (focusEvent && focusEvent->IsCurrentFocus()) {
-                    return AceType::DynamicCast<T>(target);
-                }
-            }
-        }
-
-        if (AceType::InstanceOf<T>(this)) {
-            auto target = DynamicCast<FrameNode>(this);
-            if (target && target->eventHub_) {
-                auto focusEvent = target->eventHub_->GetFocusHub();
-                if (focusEvent && focusEvent->IsCurrentFocus()) {
-                    return Claim(AceType::DynamicCast<T>(this));
-                }
-            }
-        }
-        return nullptr;
-    }
-
     void ParseRegionAndAdd(const CalcDimensionRect& region, const ScaleProperty& scaleProperty,
         const RectF& rect, std::vector<RectF>& responseRegionResult);
     virtual std::vector<RectF> GetResponseRegionList(const RectF& rect, int32_t sourceType, int32_t sourceTool);
@@ -1440,7 +1402,7 @@ public:
         return GetTag() == V2::SCREEN_ETS_TAG;
     }
 
-    bool CheckVisibleAndActive() const override;
+    bool IsVisibleAndActive() const override;
 
     void SetPaintNode(const RefPtr<FrameNode>& paintNode)
     {

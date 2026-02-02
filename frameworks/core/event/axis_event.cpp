@@ -170,6 +170,7 @@ AxisInfo::AxisInfo(const AxisEvent& event, const Offset& localLocation, const Ev
     rotateAxisAngle_ = static_cast<float>(event.rotateAxisAngle);
     isRotationEvent_ = event.isRotationEvent;
     globalLocation_ = event.GetOffset();
+    pointerEvent_ = event.pointerEvent;
     localLocation_ = localLocation;
     screenLocation_ = Offset();
     SetPressedKeyCodes(event.pressedCodes);
@@ -307,6 +308,11 @@ AxisEvent AxisInfo::ConvertToAxisEvent() const
     axisEvent.modifierKeyState = CalculateModifierKeyState(GetPressedKeyCodes());
     axisEvent.targetDisplayId = GetTargetDisplayId();
     return axisEvent;
+}
+
+const std::shared_ptr<const MMI::PointerEvent>& AxisInfo::GetPointerEvent() const
+{
+    return pointerEvent_;
 }
 
 void AxisEventTarget::SetOnAxisCallback(const OnAxisEventFunc& onAxisCallback)

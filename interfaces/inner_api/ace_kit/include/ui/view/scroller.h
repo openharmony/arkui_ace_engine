@@ -18,6 +18,7 @@
 
 #include "ui/animation/curve.h"
 #include "ui/base/ace_type.h"
+#include "ui/event/touch_event.h"
 #include "ui/base/geometry/dimension.h"
 #include "ui/properties/scrollable_properties.h"
 #include "ui/view/frame_node.h"
@@ -36,6 +37,7 @@ public:
     using TwoDimensionOnWillScrollEvent = std::function<void(ScrollFrameResult&,
         ScrollFrameResult&, ScrollState, ScrollSource)>;
     struct Observer {
+        TouchEventFunc onTouchEvent;
         OnReachEvent onReachStartEvent;
         OnReachEvent onReachEndEvent;
         OnScrollStartEvent onScrollStartEvent;

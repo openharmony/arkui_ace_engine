@@ -1060,6 +1060,7 @@ void SetCalendarPickerOnChangeExtraParam(ArkUINodeHandle node, void* extraParam)
     CalendarPickerModelNG::SetOnChangeWithNode(frameNode, std::move(onEvent));
 }
 
+#ifndef CROSS_PLATFORM
 void SetJSBorderColorImpl(ArkUINodeHandle node, const uint32_t value)
 {
     GetViewAbstractModelImpl()->SetBorderColor(Color(value));
@@ -1271,11 +1272,13 @@ void ClearJSHeightImpl(ArkUINodeHandle node)
 {
     GetCalendarPickerImpl()->ClearHeight();
 }
+#endif
 
 const ArkUICalendarPickerModifier* GetCalendarPickerDynamicModifier()
 {
     static bool isCurrentUseNewPipeline = Container::IsCurrentUseNewPipeline();
     if (!isCurrentUseNewPipeline) {
+#ifndef CROSS_PLATFORM
         CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         static const ArkUICalendarPickerModifier modifier = {
             .setHintRadius = nullptr,
@@ -1352,6 +1355,7 @@ const ArkUICalendarPickerModifier* GetCalendarPickerDynamicModifier()
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
+#endif
     } else {
         CHECK_INITIALIZED_FIELDS_BEGIN(); // don't move this line
         static const ArkUICalendarPickerModifier modifier = {

@@ -15,16 +15,12 @@
 #include "calendar_utils.h"
 #include "core/pipeline_ng/pipeline_context.h"
 #include "frameworks/base/utils/system_properties.h"
+#include "core/interfaces/native/node/calendar_picker_dialog_modifier.h"
 namespace OHOS::Ace::NG {
-namespace {
-constexpr double DEVICE_HEIGHT_LIMIT = 640.0;
-}
 bool CalendarUtils::CheckOrientationChange()
 {
-    auto pipeline = PipelineContext::GetCurrentContextSafelyWithCheck();
-    CHECK_NULL_RETURN(pipeline, true);
-    return (!(SystemProperties::GetDeviceOrientation() == DeviceOrientation::PORTRAIT)
-                ? Dimension(pipeline->GetRootWidth()).ConvertToVp() < DEVICE_HEIGHT_LIMIT
-                : Dimension(pipeline->GetRootHeight()).ConvertToVp() < DEVICE_HEIGHT_LIMIT);
+    auto modifier = NodeModifier::GetCalendarPickerDialogModifier();
+    CHECK_NULL_RETURN(modifier, true);
+    return modifier->checkOrientationChange();
 };
 }

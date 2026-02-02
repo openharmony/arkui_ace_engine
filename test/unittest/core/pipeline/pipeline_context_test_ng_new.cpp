@@ -2196,44 +2196,6 @@ HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents001, TestSize.Level1)
     }
 }
 
-/**
- * @tc.name: PipelineFlushTouchEvents002
- * @tc.desc: Test the function FlushTouchEvents with normal touchEvents.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineFlushTouchEvents002, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters.
-     * @tc.expected: All pointer is non-null.
-     */
-    ASSERT_NE(context_, nullptr);
-    ASSERT_NE(context_->eventManager_, nullptr);
-    context_->SetupRootElement();
-    context_->vsyncTime_ = AFTER_VSYNC_TIME;
-    context_->eventManager_->idToTouchPoints_.clear();
-    bool isAcc = context_->touchAccelarate_;
-    context_->touchAccelarate_ = false;
-
-    for (auto& testCase : FLUSH_TOUCH_EVENTS_TESTCASES) {
-        context_->resampleTimeStamp_ = testCase.vsyncTime;
-        context_->compensationValue_ = testCase.compensationValue;
-        context_->touchEvents_.clear();
-        context_->historyPointsById_.clear();
-        for (auto& touchTimes : testCase.touchEventTimes) {
-            TouchEvent event;
-            event.type = TouchType::MOVE;
-            event.time = TimeStamp(std::chrono::nanoseconds(touchTimes));
-            context_->touchEvents_.emplace_back(event);
-        }
-        context_->FlushTouchEvents();
-        EXPECT_EQ(context_->historyPointsById_.size(), testCase.targetTouchEventSize);
-        auto idToTouchPoint = context_->eventManager_->GetIdToTouchPoint();
-        EXPECT_EQ(idToTouchPoint[DEFAULT_INT0].history.size(), testCase.originTouchEventSize);
-    }
-    context_->touchAccelarate_ = isAcc;
-}
-
 HWTEST_F(PipelineContextTestNg, PipelineOnHoverMove001, TestSize.Level1)
 {
     /**
@@ -4089,12 +4051,44 @@ HWTEST_F(PipelineContextTestNg, OnDumpInfo001, TestSize.Level1)
      * @tc.expected: Test that the member window_ is empty.
      */
     ASSERT_NE(context_, nullptr);
+    bool onShow = context_->onShow_;
+    context_->onShow_ = true;
     std::vector<std::string> params;
     params.push_back("-simplify");
     params.push_back("-compname");
     params.push_back("test");
     auto ret = context_->OnDumpInfo(params);
     EXPECT_TRUE(ret);
+    context_->onShow_ = onShow;
+}
+
+/**
+ * @tc.name: OnDumpInfo002
+ * @tc.desc: Test OnDumpInfo.
+ * @tc.type: FUNC
+ */
+HWTEST_F(PipelineContextTestNg, OnDumpInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps1: Call the function OnDumpInfo of -simplify when window is background
+     * @tc.expected: dump result is false.
+     */
+    ASSERT_NE(context_, nullptr);
+    bool onShow = context_->onShow_;
+    context_->onShow_ = false;
+    std::vector<std::string> params;
+    params.push_back("-simplify");
+    auto ret = context_->OnDumpInfo(params);
+    EXPECT_FALSE(ret);
+
+    /**
+     * @tc.steps2: Call the function OnDumpInfo of -simplify when window is foreground
+     * @tc.expected: dump result is true.
+     */
+    context_->onShow_ = true;
+    ret = context_->OnDumpInfo(params);
+    EXPECT_TRUE(ret);
+    context_->onShow_ = onShow;
 }
 
 /**
@@ -4457,11 +4451,11 @@ HWTEST_F(PipelineContextTestNg, GetCurrentPageName006, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes001
+ * @tc.name: PipelineBaseTest001
  * @tc.desc: Test AddDirtyPropertyNode.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes001, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest001, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4484,13 +4478,12 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes001, TestSize.Level1)
     context_->AddDirtyPropertyNode(frameNode_);
     EXPECT_GE(context_->dirtyPropertyNodes_.size(), 1);
 }
-
-/**
- * @tc.name: PipelineBaseTes002
+/*
+ * @tc.name: PipelineBaseTest002
  * @tc.desc: Test AddDirtyCustomNode.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes002, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest002, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4515,11 +4508,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes002, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes003
+ * @tc.name: PipelineBaseTest003
  * @tc.desc: Test AddDirtyLayoutNode.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes003, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest003, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4542,11 +4535,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes003, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes004
+ * @tc.name: PipelineBaseTest004
  * @tc.desc: Test AddDirtyRenderNode.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes004, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest004, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4569,11 +4562,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes004, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes005
+ * @tc.name: PipelineBaseTest005
  * @tc.desc: Test AddDirtyFreezeNode and FlushFreezeNode.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes005, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest005, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4598,11 +4591,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes005, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes006
+ * @tc.name: PipelineBaseTest006
  * @tc.desc: Test AddPendingDeleteCustomNode and FlushPendingDeleteCustomNode.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes006, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest006, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4626,11 +4619,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes006, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes007
+ * @tc.name: PipelineBaseTest007
  * @tc.desc: Test FlushDirtyPropertyNodes.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes007, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest007, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4650,11 +4643,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes007, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes008
+ * @tc.name: PipelineBaseTest008
  * @tc.desc: Test FlushDirtyNodeUpdate.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes008, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest008, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4674,53 +4667,13 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes008, TestSize.Level1)
     EXPECT_GE(context_->dirtyNodes_.size(), 0);
 }
 
-/**
- * @tc.name: PipelineBaseTes009
- * @tc.desc: Test FlushTSUpdates and SetFlushTSUpdates.
- * @tc.type: FUNC
- */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes009, TestSize.Level1)
-{
-    /**
-     * @tc.steps1: initialize parameters and make sure pointers are not null.
-     */
-    ASSERT_NE(context_, nullptr);
-
-    /**
-     * @tc.steps2: set flushTSUpdates callback and call FlushTSUpdates.
-     * @tc.expect: callback is executed.
-     */
-    bool callbackCalled = false;
-    auto callback = [&callbackCalled](int32_t id) -> bool {
-        callbackCalled = true;
-        return false;
-    };
-
-    context_->SetFlushTSUpdates(std::move(callback));
-    context_->FlushTSUpdates();
-    EXPECT_TRUE(callbackCalled);
-
-    /**
-     * @tc.steps3: set callback that returns true to request frame.
-     * @tc.expect: frame is requested.
-     */
-    callbackCalled = false;
-    auto callbackRequestFrame = [&callbackCalled](int32_t id) -> bool {
-        callbackCalled = true;
-        return true;
-    };
-
-    context_->SetFlushTSUpdates(std::move(callbackRequestFrame));
-    context_->FlushTSUpdates();
-    EXPECT_TRUE(callbackCalled);
-}
 
 /**
- * @tc.name: PipelineBaseTes010
+ * @tc.name: PipelineBaseTest010
  * @tc.desc: Test AddScheduleTask and RemoveScheduleTask.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes010, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest010, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4744,11 +4697,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes010, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes011
+ * @tc.name: PipelineBaseTest011
  * @tc.desc: Test FlushOnceVsyncTask.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes011, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest011, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4769,11 +4722,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes011, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes013
+ * @tc.name: PipelineBaseTest013
  * @tc.desc: Test UpdateDrawLayoutChildObserver with uniqueId.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes013, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest013, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4792,11 +4745,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes013, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes014
+ * @tc.name: PipelineBaseTest014
  * @tc.desc: Test UpdateDrawLayoutChildObserver with inspectorKey.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes014, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest014, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4815,11 +4768,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes014, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes015
+ * @tc.name: PipelineBaseTest015
  * @tc.desc: Test FlushMouseEventVoluntarily.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes015, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest015, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4844,11 +4797,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes015, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes016
+ * @tc.name: PipelineBaseTest016
  * @tc.desc: Test FlushAnimation.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes016, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest016, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4872,11 +4825,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes016, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes017
+ * @tc.name: PipelineBaseTest017
  * @tc.desc: Test FlushModifier.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes017, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest017, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4891,11 +4844,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes017, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes018
+ * @tc.name: PipelineBaseTest018
  * @tc.desc: Test HandleSpecialContainerNode.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes018, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest018, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4910,11 +4863,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes018, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes019
+ * @tc.name: PipelineBaseTest019
  * @tc.desc: Test UpdateOcclusionCullingStatus.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes019, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest019, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4933,11 +4886,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes019, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes021
+ * @tc.name: PipelineBaseTest021
  * @tc.desc: Test FlushMessages without callback.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes021, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest021, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4952,11 +4905,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes021, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes023
+ * @tc.name: PipelineBaseTest023
  * @tc.desc: Test FlushUITaskWithSingleDirtyNode.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes023, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest023, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4978,11 +4931,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes023, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes024
+ * @tc.name: PipelineBaseTest024
  * @tc.desc: Test FlushFocus.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes024, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest024, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -4997,11 +4950,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes024, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes025
+ * @tc.name: PipelineBaseTest025
  * @tc.desc: Test FlushFocusScroll.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes025, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest025, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5016,11 +4969,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes025, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes027
+ * @tc.name: PipelineBaseTest027
  * @tc.desc: Test FlushPipelineWithoutAnimation.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes02, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest02, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5035,11 +4988,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes02, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes028
+ * @tc.name: PipelineBaseTest028
  * @tc.desc: Test FlushFrameRate.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes028, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest028, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5054,11 +5007,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes028, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes029
+ * @tc.name: PipelineBaseTest029
  * @tc.desc: Test FlushDragWindowVisibleCallback.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes029, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest029, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5078,11 +5031,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes029, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes030
+ * @tc.name: PipelineBaseTest030
  * @tc.desc: Test FlushBuild.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes030, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest030, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5098,11 +5051,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes030, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes034
+ * @tc.name: PipelineBaseTest034
  * @tc.desc: Test GetCurrentRootWidth and GetCurrentRootHeight.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes034, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest034, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5121,11 +5074,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes034, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes035
+ * @tc.name: PipelineBaseTest035
  * @tc.desc: Test GetContextByContainerId.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes035, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest035, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5141,11 +5094,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes035, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes036
+ * @tc.name: PipelineBaseTest036
  * @tc.desc: Test OnLayoutCompleted.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes036, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest036, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5161,11 +5114,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes036, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes037
+ * @tc.name: PipelineBaseTest037
  * @tc.desc: Test OnDrawCompleted.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes037, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest037, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5181,11 +5134,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes037, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes038
+ * @tc.name: PipelineBaseTest038
  * @tc.desc: Test OnSurfaceChanged.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes038, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest038, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5207,11 +5160,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes038, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes039
+ * @tc.name: PipelineBaseTest039
  * @tc.desc: Test UpdateHalfFoldHoverProperty.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes039, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest039, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5228,11 +5181,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes039, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes040
+ * @tc.name: PipelineBaseTest040
  * @tc.desc: Test FlushAfterLayoutCallbackInImplicitAnimationTask.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes040, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest040, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5247,11 +5200,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes040, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes041
+ * @tc.name: PipelineBaseTest041
  * @tc.desc: Test RebuildFontNode.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes041, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest041, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5266,11 +5219,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes041, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes042
+ * @tc.name: PipelineBaseTest042
  * @tc.desc: Test AddLayoutNode.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes042, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest042, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5286,11 +5239,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes042, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes043
+ * @tc.name: PipelineBaseTest043
  * @tc.desc: Test AddIgnoreLayoutSafeAreaBundle.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes043, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest043, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5308,11 +5261,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes043, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes044
+ * @tc.name: PipelineBaseTest044
  * @tc.desc: Test FlushVsync with various conditions.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes044, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest044, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5335,11 +5288,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes044, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes045
+ * @tc.name: PipelineBaseTest045
  * @tc.desc: Test DispatchDisplaySync.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes045, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest045, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5355,11 +5308,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes045, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes046
+ * @tc.name: PipelineBaseTest046
  * @tc.desc: Test FlushFocusWithNode.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes046, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest046, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5376,11 +5329,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes046, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes047
+ * @tc.name: PipelineBaseTest047
  * @tc.desc: Test FlushRequestFocus.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes047, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest047, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.
@@ -5395,11 +5348,11 @@ HWTEST_F(PipelineContextTestNg, PipelineBaseTes047, TestSize.Level1)
 }
 
 /**
- * @tc.name: PipelineBaseTes048
+ * @tc.name: PipelineBaseTest048
  * @tc.desc: Test FlushFocusView.
  * @tc.type: FUNC
  */
-HWTEST_F(PipelineContextTestNg, PipelineBaseTes048, TestSize.Level1)
+HWTEST_F(PipelineContextTestNg, PipelineBaseTest048, TestSize.Level1)
 {
     /**
      * @tc.steps1: initialize parameters and make sure pointers are not null.

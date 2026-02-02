@@ -6676,3 +6676,9 @@ function __setCustomProperty__(nodeId: number, key: string, value: Object): bool
     return __removeCustomProperty__(nodeId, key);
   }
 }
+
+function __ArkUI_PreloadDynamicModule__(componentName: string, abcName: string): void {
+    getUINativeModule().loadNativeModule(componentName);
+    let module = globalThis.requireNapi(abcName);
+    module.exportView();
+}

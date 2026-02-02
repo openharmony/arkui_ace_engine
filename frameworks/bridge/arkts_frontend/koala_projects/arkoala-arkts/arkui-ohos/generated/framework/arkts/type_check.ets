@@ -94,7 +94,7 @@ import { IndicatorComponentController } from "./../../component/indicatorcompone
 import { IntentionCode } from "@ohos.multimodalInput.intentionCode"
 import { ItemState } from "./../../component/stepperItem"
 import { default as text } from "@ohos.graphics.text"
-import { LayoutMode, SelectedMode, TabBarSymbol, TabBarIconStyle, TabBarOptions, BoardStyle, SubTabBarIndicatorStyle, TabBarLabelStyle, BottomTabBarStyle, SubTabBarStyle } from "./../../component/tabContent"
+import { LayoutMode, SelectedMode, TabBarSymbol, TabBarIconStyle, TabBarOptions, BoardStyle, DrawableTabBarIndicator, SubTabBarIndicatorStyle, TabBarLabelStyle, BottomTabBarStyle, SubTabBarStyle } from "./../../component/tabContent"
 import { LinearIndicatorController, LinearIndicatorStartOptions, LinearIndicatorStyle } from "./../../component/linearindicator"
 import { ListItemGroupStyle, ListItemGroupOptions } from "./../../component/listItemGroup"
 import { ListItemStyle, ListItemSwipeActionDirection, ListItemSwipeActionManager, SwipeActionState, SwipeEdgeEffect, ListItemOptions, SwipeActionItem, SwipeActionOptions } from "./../../component/listItem"
@@ -1020,6 +1020,9 @@ export class TypeChecker {
     }
     static isDrawableDescriptor(value: Object | string | number | undefined): boolean {
         return value instanceof DrawableDescriptor
+    }
+    static isDrawableTabBarIndicator(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean, arg3: boolean, arg4: boolean): boolean {
+        return value instanceof DrawableTabBarIndicator
     }
     static isDrawContext(value: Object | string | number | undefined, arg0: boolean, arg1: boolean, arg2: boolean): boolean {
         return value instanceof DrawContext
@@ -7041,7 +7044,7 @@ export class TypeChecker {
             const array = value as Array<Object>
             if (array.length == 0) return true
             const e = array[0]
-            return e instanceof ParticlePropertyAnimation<double>
+            return e instanceof ParticlePropertyAnimation
         }
         return false
     }
@@ -7050,7 +7053,7 @@ export class TypeChecker {
             const array = value as Array<Object>
             if (array.length == 0) return true
             const e = array[0]
-            return e instanceof ParticlePropertyAnimation<ResourceColor>
+            return e instanceof ParticlePropertyAnimation
         }
         return false
     }

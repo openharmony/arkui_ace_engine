@@ -7225,6 +7225,7 @@ void TextPattern::OnTextGestureSelectionEnd(const TouchLocationInfo& locationInf
         oldSelectedType_ = selectedType_.value_or(TextSpanType::NONE);
         ShowSelectOverlay({ .animation = true });
     }
+    ReportSelectedText();
 }
 
 void TextPattern::ChangeHandleHeight(const GestureEvent& event, bool isFirst, bool isOverlayMode)

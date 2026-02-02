@@ -23,6 +23,7 @@ ace_unittest("painter_test") {
     "ellipse_painter_test_ng.cpp",
     "image_painter_test_ng.cpp",
     "line_painter_test_ng.cpp",
+    "overlay_modifier_test_ng.cpp",
     "polygon_painter_test_ng.cpp",
     "render_context_test_ng.cpp",
     "render_property_test_ng.cpp",

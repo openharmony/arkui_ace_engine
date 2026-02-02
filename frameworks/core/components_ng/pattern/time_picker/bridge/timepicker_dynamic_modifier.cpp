@@ -723,7 +723,6 @@ void HasUserDefinedSelectedFontFamily(ArkUI_Bool isHas)
 
 void SetBackgroundColorWithResourceObj(ArkUI_Uint32 color, void* ojb)
 {
-    CHECK_NULL_VOID(ojb);
     ViewAbstractModel::GetInstance()->SetBackgroundColorWithResourceObj(
         Color(color), AceType::Claim((reinterpret_cast<ResourceObject*>(ojb))));
 }

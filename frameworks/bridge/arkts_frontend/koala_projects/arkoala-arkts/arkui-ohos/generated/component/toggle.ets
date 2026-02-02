@@ -553,7 +553,7 @@ export class ToggleOptions_serializer {
                 valueSerializer.writeInt8((0).toByte())
                 const valueHolderForIsOnTmpValueForIdx0  = valueHolderForIsOnTmpValue as boolean
                 valueSerializer.writeBoolean(valueHolderForIsOnTmpValueForIdx0)
-            } else if (valueHolderForIsOnTmpValue instanceof Bindable<boolean>) {
+            } else if (valueHolderForIsOnTmpValue instanceof Bindable) {
                 valueSerializer.writeInt8((1).toByte())
                 const valueHolderForIsOnTmpValueForIdx1  = valueHolderForIsOnTmpValue as Bindable<boolean>
                 Bindable_Boolean_serializer.write(valueSerializer, valueHolderForIsOnTmpValueForIdx1)

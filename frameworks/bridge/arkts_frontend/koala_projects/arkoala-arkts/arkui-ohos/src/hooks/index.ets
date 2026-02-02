@@ -516,10 +516,10 @@ export function hookGetConfigInRouteMap(info: NavDestinationContextInternal): Ro
 const DIFF: number = 1e-10
 const int_MAX: number = 2147483647
 const PIXEL_SIZE: int = 4
-export function hookGetCanvas(peerPtr: CanvasRenderingContext2D): FrameNode {
+export function hookGetCanvas(peerPtr: CanvasRenderingContext2D): FrameNode | null {
     const context: UIContextImpl = UIContextUtil.getOrCreateCurrentUIContext() as UIContextImpl
     const nodeId: number = ArkUIAniModule._CanvasRenderingContext_GetCanvasId(peerPtr.peer!.ptr) as number
-    return context.getFrameNodeByNodeId(nodeId) as FrameNode
+    return context.getFrameNodeByNodeId(nodeId)
 }
 export function getCanvasDensity(peerPtr: CanvasRenderer): number {
     return ArkUIAniModule._CanvasRenderer_GetCanvasDensity(peerPtr.peer!.ptr)
@@ -611,18 +611,22 @@ export function parseImageData(value: number | string, density: number): number 
 export function hookPutImageData(peerPtr: CanvasRenderer,
     imagedata: ImageData, dx: number | string, dy: number | string): void {
     const density = getCanvasDensity(peerPtr)
-    ArkUIAniModule._CanvasRenderer_PutImageData0(peerPtr.peer!.ptr, imagedata.data,
+    if (imagedata.data != undefined) {
+      ArkUIAniModule._CanvasRenderer_PutImageData0(peerPtr.peer!.ptr, imagedata.data as Uint8ClampedArray,
         parseImageData(dx, density), parseImageData(dy, density), imagedata.width as int, imagedata.height as int)
+    }
 }
 export function hookPutImageData(peerPtr: CanvasRenderer, imagedata: ImageData,
     dx: number | string, dy: number | string, dirtyX: number | string, dirtyY: number | string,
     dirtyWidth: number | string, dirtyHeight: number | string): void {
     const density = getCanvasDensity(peerPtr)
-    ArkUIAniModule._CanvasRenderer_PutImageData1(peerPtr.peer!.ptr, imagedata.data,
+    if (imagedata.data != undefined) {
+      ArkUIAniModule._CanvasRenderer_PutImageData1(peerPtr.peer!.ptr, imagedata.data as Uint8ClampedArray,
         parseImageData(dx, density), parseImageData(dy, density),
         imagedata.width as int, imagedata.height as int,
         parseImageData(dirtyX, density), parseImageData(dirtyY, density),
         parseImageData(dirtyWidth, density), parseImageData(dirtyHeight, density))
+    }
 }
 export function hookGetContext(
   peerPtr: OffscreenCanvas,

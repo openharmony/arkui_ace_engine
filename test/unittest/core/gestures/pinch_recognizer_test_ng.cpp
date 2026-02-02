@@ -1036,33 +1036,6 @@ HWTEST_F(PinchRecognizerTestNg, PinchRecognizerHandleTouchMoveEventTest002, Test
 }
 
 /**
- * @tc.name: GetGestureInfoString001
- * @tc.desc: Test pinchRecognizer function: GetGestureInfoString
- * @tc.type: FUNC
- */
-HWTEST_F(PinchRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
-{
-    /**
-     * @tc.steps: step1. create PinchRecognizer.
-     */
-    RefPtr<PinchRecognizer> pinchRecognizer =
-        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
-
-    pinchRecognizer->initialDev_ = 1.5;
-    pinchRecognizer->currentDev_ = 2.5;
-    pinchRecognizer->isFlushTouchEventsEnd_ = true;
-    pinchRecognizer->isPinchEnd_ = true;
-    pinchRecognizer->isLastPinchFinished_ = false;
-
-    std::string result = pinchRecognizer->GetGestureInfoString();
-    EXPECT_THAT(result, HasSubstr("IND:1.5"));
-    EXPECT_THAT(result, HasSubstr("CUD:2.5"));
-    EXPECT_THAT(result, HasSubstr("FTE:1"));
-    EXPECT_THAT(result, HasSubstr("PE:1"));
-    EXPECT_THAT(result, HasSubstr("LPF:0"));
-}
-
-/**
  * @tc.name: PinchRecognizerHandleTouchCancelEventTest001
  * @tc.desc: Test PinchRecognizer function: HandleTouchCancelEvent
  * @tc.type: FUNC
@@ -2426,5 +2399,32 @@ HWTEST_F(PinchRecognizerTestNg, GetGestureEventInfoTest001, TestSize.Level1)
     pinchRecognizerPtr->SetTargetComponent(targetComponent);
     pinchRecognizerPtr->TriggerGestureJudgeCallback();
     EXPECT_EQ(resultPinchScale, axisEvent.pinchAxisScale);
+}
+
+/**
+* @tc.name: GetGestureInfoString001
+* @tc.desc: Test pinchRecognizer function: GetGestureInfoString
+* @tc.type: FUNC
+*/
+HWTEST_F(PinchRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
+{
+    /**
+    * @tc.steps: step1. create PinchRecognizer.
+    */
+    RefPtr<PinchRecognizer> pinchRecognizer =
+        AceType::MakeRefPtr<PinchRecognizer>(SINGLE_FINGER_NUMBER, PINCH_GESTURE_DISTANCE);
+
+    pinchRecognizer->initialDev_ = 1.5;
+    pinchRecognizer->currentDev_ = 2.5;
+    pinchRecognizer->isFlushTouchEventsEnd_ = true;
+    pinchRecognizer->isPinchEnd_ = true;
+    pinchRecognizer->isLastPinchFinished_ = false;
+
+    std::string result = pinchRecognizer->GetGestureInfoString();
+    EXPECT_THAT(result, HasSubstr("IND:1.5"));
+    EXPECT_THAT(result, HasSubstr("CUD:2.5"));
+    EXPECT_THAT(result, HasSubstr("FTE:1"));
+    EXPECT_THAT(result, HasSubstr("PE:1"));
+    EXPECT_THAT(result, HasSubstr("LPF:0"));
 }
 } // namespace OHOS::Ace::NG

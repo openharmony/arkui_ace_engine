@@ -16,11 +16,13 @@
 #ifndef FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SYMBOL_GLYPH_MODIFIER_H
 #define FRAMEWORKS_INTERFACE_INNER_API_NATIVE_NODE_SYMBOL_GLYPH_MODIFIER_H
 
+#include "core/components_ng/pattern/symbol/bridge/symbol_glyph_custom_modifier.h"
 #include "core/interfaces/native/node/node_api.h"
 
 namespace OHOS::Ace::NG::NodeModifier {
 const ArkUISymbolGlyphModifier* GetSymbolGlyphModifier();
 const CJUISymbolGlyphModifier* GetCJUISymbolGlyphModifier();
+const ArkUISymbolGlyphCustomModifier* GetSymbolGlyphCustomModifier();
 
 template<typename T>
 void ProcessResourceObj(FrameNode* frameNode, std::string key, T value, void* objRawPtr);

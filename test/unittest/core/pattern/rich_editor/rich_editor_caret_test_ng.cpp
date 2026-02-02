@@ -212,9 +212,15 @@ HWTEST_F(RichEditorCaretTestNg, SetCaretPosition001, TestSize.Level0)
     ASSERT_NE(richEditorNode_, nullptr);
     auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
     ASSERT_NE(richEditorPattern, nullptr);
+    /**
+     * @tc.steps: step1. set ss mode false
+     */
     richEditorPattern->isSpanStringMode_ = true;
     richEditorPattern->styledString_ = AceType::MakeRefPtr<MutableSpanString>(u"SetCaretPosition");
     richEditorPattern->caretChangeListener_ = [](int32_t x) {};
+    /**
+     * @tc.steps: step2. test SetCaretPosition
+     */
     EXPECT_TRUE(richEditorPattern->SetCaretPosition(2, false));
 }
 

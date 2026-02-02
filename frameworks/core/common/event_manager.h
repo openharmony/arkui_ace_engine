@@ -39,6 +39,7 @@
 #include "core/event/resample_algo.h"
 
 namespace OHOS::Ace {
+class EventInfoManager;
 namespace NG {
 class FrameNode;
 class SelectOverlayManager;
@@ -213,6 +214,8 @@ public:
         }
         return refereeNG_;
     }
+
+    const RefPtr<EventInfoManager>& GetEventInfoManager() const;
 
     RefPtr<MouseStyleManager> GetMouseStyleManager() const
     {
@@ -441,7 +444,7 @@ public:
     void FalsifyCancelEventWithDifferentDeviceId(const AxisEvent& axisEvent, int32_t deviceId, bool sendOnTouch = true);
     bool HandleAxisEventWithDifferentDeviceId(const AxisEvent& event, const RefPtr<NG::FrameNode>& frameNode);
     void NotifyAxisEvent(const AxisEvent& event, const RefPtr<NG::FrameNode>& node = nullptr) const;
-    bool OnTouchpadInteractionBegin() const;
+    bool OnTouchpadInteractionBegin();
     void NotifyCoastingAxisEventStop() const;
     std::string GetLastHitTestNodeInfosForTouch(bool isTopMost);
     void AddHitTestInfoRecord(const RefPtr<NG::FrameNode>& frameNode);
@@ -533,6 +536,7 @@ private:
     RefPtr<GestureReferee> referee_;
     RefPtr<NG::GestureReferee> refereeNG_;
     RefPtr<NG::GestureReferee> postEventRefereeNG_;
+    RefPtr<EventInfoManager> eventInfoManager_;
     RefPtr<MouseStyleManager> mouseStyleManager_;
     RefPtr<CoastingAxisEventGenerator> coastingAxisEventGenerator_;
     NG::EventTreeRecord eventTree_;
@@ -555,6 +559,7 @@ private:
     TouchEvent lastTouchEvent_;
     // used to pseudo hover out event.
     MouseEvent lastMouseEvent_;
+    AxisEvent lastAxisEvent_;
     std::unordered_map<int32_t, TouchEvent> idToTouchPoints_;
     std::unordered_map<int32_t, uint64_t> lastDispatchTime_;
     std::unordered_map<int32_t, int32_t> deviceIdChecker_;

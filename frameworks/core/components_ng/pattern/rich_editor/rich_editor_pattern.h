@@ -124,7 +124,20 @@ enum class SelectorAdjustPolicy { INCLUDE = 0, EXCLUDE };
 enum class HandleType { FIRST = 0, SECOND };
 enum class SelectType { SELECT_FORWARD = 0, SELECT_BACKWARD, SELECT_NOTHING };
 enum class CaretAffinityPolicy { DEFAULT = 0, UPSTREAM_FIRST, DOWNSTREAM_FIRST };
-enum class OperationType { DEFAULT = 0, DRAG, IME, FINISH_PREVIEW, PASTE, ACCESSIBILITY, AI_WRITE, STYLUS, UNDO };
+enum class OperationType {
+    DEFAULT = 0,
+    DRAG,
+    IME,
+    FINISH_PREVIEW,
+    PASTE,
+    ACCESSIBILITY,
+    AI_WRITE,
+    STYLUS,
+    SAFE_PASTE,
+    AUTO_FILL,
+    UNDO
+};
+
 const std::unordered_map<OperationType, TextChangeReason> OPERATION_REASON_MAP = {
     { OperationType::DEFAULT, TextChangeReason::INPUT },
     { OperationType::DRAG, TextChangeReason::DRAG },
@@ -134,6 +147,8 @@ const std::unordered_map<OperationType, TextChangeReason> OPERATION_REASON_MAP =
     { OperationType::ACCESSIBILITY, TextChangeReason::ACCESSIBILITY },
     { OperationType::AI_WRITE, TextChangeReason::AI_WRITE },
     { OperationType::STYLUS, TextChangeReason::STYLUS },
+    { OperationType::SAFE_PASTE, TextChangeReason::INPUT },
+    { OperationType::AUTO_FILL, TextChangeReason::AUTO_FILL },
 };
 const std::map<std::pair<HandleType, SelectorAdjustPolicy>, MoveDirection> SELECTOR_ADJUST_DIR_MAP = {
     {{ HandleType::FIRST, SelectorAdjustPolicy::INCLUDE }, MoveDirection::BACKWARD },
@@ -431,16 +446,19 @@ public:
 
     RefPtr<EventHub> CreateEventHub() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<RichEditorEventHub>();
     }
 
     RefPtr<LayoutProperty> CreateLayoutProperty() override
     {
+        ACE_UINODE_TRACE(GetHost());
         return MakeRefPtr<RichEditorLayoutProperty>();
     }
 
     RefPtr<LayoutAlgorithm> CreateLayoutAlgorithm() override
     {
+        ACE_UINODE_TRACE(GetHost());
         HandleSysScaleChanged();
         return MakeRefPtr<RichEditorLayoutAlgorithm>(Claim(this));
     }
@@ -547,12 +565,22 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetEnableAutoSpacing: [%{public}d]", isEnableAutoSpacing_);
     }
 
+    bool IsEnableAutoSpacing()
+    {
+        return isEnableAutoSpacing_;
+    }
+
     void SetCompressLeadingPunctuation(bool enabled)
     {
         CHECK_NULL_VOID(isCompressLeadingPunctuation_ != enabled);
         isCompressLeadingPunctuation_ = enabled;
         paragraphCache_.Clear();
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetCompressLeadingPunctuation: %{public}d", isCompressLeadingPunctuation_);
+    }
+
+    bool IsCompressLeadingPunctuation()
+    {
+        return isCompressLeadingPunctuation_;
     }
 
     void OnAttachToMainTree() override;
@@ -938,6 +966,19 @@ public:
     bool IsHandlesShow() override;
     bool IsHandleMoving();
     void SetPreKeyboardNode();
+
+    void SetCustomKeyboardNode(const RefPtr<UINode>& customKeyboardNode);
+ 
+    RefPtr<UINode> GetCustomKeyboardNode()
+    {
+        return customKeyboardNode_;
+    }
+ 
+    bool GetCustomKeyboardOption()
+    {
+        return keyboardAvoidance_;
+    }
+
     void ProcessCloseKeyboard(const RefPtr<FrameNode>& currentNode);
     void CopySelectionMenuParams(SelectOverlayInfo& selectInfo, TextResponseType responseType);
     std::function<void(Offset)> GetThumbnailCallback() override;
@@ -1239,6 +1280,11 @@ public:
         isEnableHapticFeedback_ = isEnabled;
     }
 
+    bool GetEnableHapticFeedback()
+    {
+        return isEnableHapticFeedback_;
+    }
+
     bool InsertOrDeleteSpace(int32_t index) override;
 
     void DeleteRange(int32_t start, int32_t end, bool isIME = true) override;
@@ -1251,6 +1297,11 @@ public:
     {
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetRequestKeyboardOnFocus=%{public}d", needToRequest);
         needToRequestKeyboardOnFocus_ = needToRequest;
+    }
+
+    bool GetRequestKeyboardOnFocus()
+    {
+        return needToRequestKeyboardOnFocus_;
     }
 
     bool IsTextEditableForStylus() const override;
@@ -1347,6 +1398,11 @@ public:
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetIncludeFontPadding: [%{public}d]", isIncludeFontPadding_);
     }
 
+    bool IsIncludeFontPadding()
+    {
+        return isIncludeFontPadding_;
+    }
+
     void SetFallbackLineSpacing(bool isFallbackLineSpacing)
     {
         CHECK_NULL_VOID(isFallbackLineSpacing_ != isFallbackLineSpacing);
@@ -1356,6 +1412,11 @@ public:
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
         paragraphCache_.Clear();
         TAG_LOGI(AceLogTag::ACE_RICH_TEXT, "SetFallbackLineSpacing: [%{public}d]", isFallbackLineSpacing_);
+    }
+
+    bool IsFallbackLineSpacing()
+    {
+        return isFallbackLineSpacing_;
     }
 
     void SetKeyboardAppearance(KeyboardAppearance value)
@@ -1467,6 +1528,7 @@ public:
     void MarkContentNodeForRender() override;
     void CreateRichEditorOverlayModifier();
     RefPtr<TextOverlayModifier> GetOverlayModifier() const { return overlayMod_; };
+    RefPtr<AIWriteAdapter> GetAIWriteAdapter();
     void NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWrap,
         RefPtr<PageNodeInfoWrap> nodeWrap, AceAutoFillType autoFillType,
         AceAutoFillTriggerType triggerType = AceAutoFillTriggerType::AUTO_REQUEST) override;
@@ -1475,7 +1537,7 @@ public:
     void ProcessAutoFillOnPaste();
     void HandleOnPasswordVault();
     bool IsShowAutoFill();
-    RefPtr<AIWriteAdapter> GetAIWriteAdapter();
+    bool IsInterceptInput(const bool shouldCommitInput, const OperationType operationType);
 
 protected:
     RefPtr<TextSelectOverlay> GetSelectOverlay() override

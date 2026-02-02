@@ -498,4 +498,9 @@ void GaugePattern::OnColorConfigurationUpdate()
     }
     host->MarkDirtyNode(PROPERTY_UPDATE_RENDER);
 }
+
+FocusPattern GaugePattern::GetFocusPattern() const
+{
+    return { FocusType::NODE, false, FocusStyleType::OUTER_BORDER };
+}
 } // namespace OHOS::Ace::NG

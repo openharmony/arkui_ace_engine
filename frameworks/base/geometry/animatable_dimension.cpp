@@ -18,6 +18,7 @@
 #include "core/animation/animator.h"
 #include "core/animation/curve_animation.h"
 #include "core/event/ace_event_helper.h"
+#include "core/pipeline/pipeline_base.h"
 
 namespace OHOS::Ace {
 
@@ -44,6 +45,21 @@ AnimatableDimension::AnimatableDimension(const CalcDimension& dimension, const A
 AnimatableDimension::AnimatableDimension(const AnimatableDimension& other)
     : CalcDimension(other.Value(), other.Unit())
 {}
+
+void AnimatableDimension::SetContextAndCallback(
+    const WeakPtr<PipelineBase>& context, const RenderNodeAnimationCallback& callback)
+{
+    context_ = context;
+    animationCallback_ = callback;
+}
+
+void AnimatableDimension::SetContextAndCallbackAfterFirstAssign(
+    const WeakPtr<PipelineBase>& context, const RenderNodeAnimationCallback& callback)
+{
+    context_ = context;
+    animationCallback_ = callback;
+    isFirstAssign_ = false;
+}
 
 AnimatableDimension& AnimatableDimension::operator=(const Dimension& newDimension)
 {

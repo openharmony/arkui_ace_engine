@@ -898,7 +898,7 @@ void TextFieldSelectOverlay::OnHandleMarkInfoChange(
 
 void TextFieldSelectOverlay::RefreshPasteButton()
 {
-    CheckHasPasteData([weak = WeakClaim(this)](bool hasData) {
+    CheckHasPasteData([weak = WeakClaim(this)](bool hasData, bool isAutoFill) {
         auto overlay = weak.Upgrade();
         CHECK_NULL_VOID(overlay);
         overlay->SetShowPaste(hasData);

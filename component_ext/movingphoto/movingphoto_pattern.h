@@ -102,10 +102,7 @@ public:
 
     void RepeatPlay(bool isRepeatPlay);
 
-    FocusPattern GetFocusPattern() const override
-    {
-        return { FocusType::NODE, false };
-    }
+    FocusPattern GetFocusPattern() const override;
 
     void UpdateCurrentDateModified(int64_t currentDateModified)
     {

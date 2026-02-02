@@ -192,11 +192,7 @@ RatingOptionsModifier.identity = Symbol( 'ratingOptions' );
 
 class JSRating extends JSViewAbstract {
     static create(params) {
-      if (params !== undefined && params !== null) {
-        getUINativeModule().rating.create(true, params);
-      } else {
-        getUINativeModule().rating.create(0, false);
-      }
+      getUINativeModule().rating.create(params);
     }
 
     static stars(stars) {

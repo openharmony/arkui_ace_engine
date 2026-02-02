@@ -6735,6 +6735,13 @@ typedef struct ArkUI_DecorationStyleOptions ArkUI_DecorationStyleOptions;
 typedef struct ArkUI_TextDataDetectorConfig ArkUI_TextDataDetectorConfig;
 
 /**
+ * @brief Defines the selection menu option of rich editor.
+ *
+ * @since 24
+ */
+typedef struct ArkUI_RichEditorSelectionMenuOptions ArkUI_RichEditorSelectionMenuOptions;
+
+/**
  * @brief Enumerates the text span type.
  *
  * @since 22
@@ -6787,6 +6794,26 @@ typedef enum {
     /** Defines automatically haptic feedback. */
     ARKUI_HAPTIC_FEEDBACK_MODE_AUTO = 2,
 } ArkUI_HapticFeedbackMode;
+
+typedef enum {
+    ARKUI_RICH_EDITOR_SPAN_TYPE_TEXT = 0,
+    ARKUI_RICH_EDITOR_SPAN_TYPE_IMAGE = 1,
+    ARKUI_RICH_EDITOR_SPAN_TYPE_MIXED = 2,
+    ARKUI_RICH_EDITOR_SPAN_TYPE_BUILDER = 3,
+    ARKUI_RICH_EDITOR_SPAN_TYPE_DEFAULT = 4
+} ArkUI_RichEditorSpanType;
+ 
+typedef enum {
+    ARKUI_RICH_EDITOR_RESPONSE_TYPE_RIGHT_CLICK = 0,
+    ARKUI_RICH_EDITOR_RESPONSE_TYPE_LONG_PRESS = 1,
+    ARKUI_RICH_EDITOR_RESPONSE_TYPE_SELECT = 2,
+    ARKUI_RICH_EDITOR_RESPONSE_TYPE_DEFAULT = 3,
+} ArkUI_RichEditorResponseType;
+ 
+typedef enum {
+    SELECTION_MENU = 0,
+    PREVIEW_MENU = 1,
+} ArkUI_TextMenuType;
 
 /**
  * @brief Create an object of the text selection menu options.
@@ -9365,6 +9392,217 @@ ArkUI_ErrorCode OH_ArkUI_Matrix4_SetPolyToPoly(ArkUI_Matrix4* matrix, const ArkU
  * @since 24
  */
 ArkUI_ErrorCode OH_ArkUI_Matrix4_GetElements(const ArkUI_Matrix4* matrix, float* result);
+
+/**
+ * @brief Create an object of the richEditor selection menu options.
+ *
+ * @return A pointer to the ArkUI_RichEditorSelectionMenuOptions.
+ * @since 24
+ */
+ArkUI_RichEditorSelectionMenuOptions* OH_ArkUI_RichEditorSelectionMenuOptions_Create();
+ 
+/**
+ * @brief Dispose an object of the richEditor selection menu options.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object to be disposed.
+ * @since 24
+ */
+void OH_ArkUI_RichEditorSelectionMenuOptions_Dispose(ArkUI_RichEditorSelectionMenuOptions* options);
+ 
+/**
+ * @brief Sets the span type of selection menu in RichEditor.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param richEditorSpanType span type.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_SetSpanType(
+    ArkUI_RichEditorSelectionMenuOptions* options, ArkUI_RichEditorSpanType richEditorSpanType);
+ 
+/**
+ * @brief Gets the span type of selection menu in RichEditor.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param richEditorSpanType span type.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_GetSpanType(
+    ArkUI_RichEditorSelectionMenuOptions* options, ArkUI_RichEditorSpanType* richEditorSpanType);
+ 
+/**
+ * @brief Sets the content of selection menu in RichEditor.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param node content node.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_SetContentNode(ArkUI_RichEditorSelectionMenuOptions* options,
+    ArkUI_NodeHandle node);
+ 
+/**
+ * @brief Gets the content node of selection menu in RichEditor.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param node content node.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_GetContentNode(ArkUI_RichEditorSelectionMenuOptions* options,
+    ArkUI_NodeHandle* node);
+ 
+/**
+ * @brief Sets the response type of selection menu in RichEditor.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param responseType response type.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_SetResponseType(ArkUI_RichEditorSelectionMenuOptions* options,
+    ArkUI_RichEditorResponseType responseType);
+ 
+/**
+ * @brief Gets the response type of selection menu in RichEditor.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param responseType response type.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_GetResponseType(ArkUI_RichEditorSelectionMenuOptions* options,
+    ArkUI_RichEditorResponseType* responseType);
+ 
+/**
+ * @brief Sets the type of selection menu in RichEditor.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param menuType menu type.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_SetMenuType(ArkUI_RichEditorSelectionMenuOptions* options,
+    ArkUI_TextMenuType menuType);
+ 
+/**
+ * @brief Gets the type of selection menu in RichEditor.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param menuType menu type.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_GetMenuType(ArkUI_RichEditorSelectionMenuOptions* options,
+    ArkUI_TextMenuType* menuType);
+ 
+/**
+ * @brief Sets the event to be called when selection menu shows.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param userData user data.
+ * @param start The start offset of the selected content.
+ * @param end The end offset of the selected content.
+ * @param callbackUserData  callback user data.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuShowCallback(
+    ArkUI_RichEditorSelectionMenuOptions* options, void* userData,
+    void (*callback)(int32_t start, int32_t end, void* callbackUserData));
+ 
+/**
+ * @brief Sets the event to be called when selection menu hides.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param userData user data.
+ * @param start The start offset of the selected content.
+ * @param end The end offset of the selected content.
+ * @param callbackUserData  callback user data.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuHideCallback(
+    ArkUI_RichEditorSelectionMenuOptions* options, void* userData,
+    void (*callback)(int32_t start, int32_t end, void* callbackUserData));
+ 
+/**
+ * @brief Sets the event to be called when selection menu appears.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param userData user data.
+ * @param start The start offset of the selected content.
+ * @param end The end offset of the selected content.
+ * @param callbackUserData  callback user data.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuAppearCallback(
+    ArkUI_RichEditorSelectionMenuOptions* options, void* userData,
+    void (*callback)(int32_t start, int32_t end, void* callbackUserData));
+ 
+/**
+ * @brief Sets the event to be called when selection menu disappears.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param userData user data.
+ * @param callbackUserData  callback user data.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuDisappearCallback(
+    ArkUI_RichEditorSelectionMenuOptions* options, void* userData, void (*callback)(void* callbackUserData));
+ 
+/**
+ * @brief Sets the haptic feedback mode of selection menu in RichEditor.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param mode haptic feedback mode.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_SetHapticFeedbackMode(
+    ArkUI_RichEditorSelectionMenuOptions* options, ArkUI_HapticFeedbackMode mode);
+ 
+/**
+ * @brief Gets the haptic feedback mode of selection menu in RichEditor.
+ *
+ * @param options Pointer to the ArkUI_RichEditorSelectionMenuOptions object.
+ * @param mode haptic feedback mode.
+ * @return Returns the result code.
+ *         Returns {@link ARKUI_ERROR_CODE_NO_ERROR} if the operation is successful.
+ *         Returns {@link ARKUI_ERROR_CODE_PARAM_INVALID} if a parameter exception occurs.
+ * @since 24
+ */
+ArkUI_ErrorCode OH_ArkUI_RichEditorSelectionMenuOptions_GetHapticFeedbackMode(
+    ArkUI_RichEditorSelectionMenuOptions* options, ArkUI_HapticFeedbackMode* mode);
 #ifdef __cplusplus
 };
 #endif

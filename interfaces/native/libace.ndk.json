@@ -2916,6 +2916,14 @@
         "name": "OH_ArkUI_NotifyDragResult"
     },
     {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_NotifySuggestedDropOperation"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_NotifyDisableDefaultDropAnimation"
+    },
+    {
         "first_introduced": "19",
         "name": "OH_ArkUI_NotifyDragEndPendingDone"
     },
@@ -5458,5 +5466,69 @@
     {
         "first_introduced": "24",
         "name": "OH_ArkUI_Swiper_ShowNext"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_Create"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_Dispose"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_SetSpanType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_GetSpanType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_SetContentNode"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_GetContentNode"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_SetResponseType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_GetResponseType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_SetMenuType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_GetMenuType"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuShowCallback"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuHideCallback"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuAppearCallback"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_RegisterOnMenuDisappearCallback"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_SetHapticFeedbackMode"
+    },
+    {
+        "first_introduced": "24",
+        "name": "OH_ArkUI_RichEditorSelectionMenuOptions_GetHapticFeedbackMode"
     }
 ]

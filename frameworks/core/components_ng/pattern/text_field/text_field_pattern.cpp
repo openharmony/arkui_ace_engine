@@ -58,6 +58,7 @@
 #include "core/common/ime/text_selection.h"
 #include "core/common/recorder/event_recorder.h"
 #include "core/common/recorder/node_data_cache.h"
+#include "core/common/screen_lock/screen_lock_manager.h"
 #include "core/common/stylus/stylus_detector_mgr.h"
 #include "core/common/vibrator/vibrator_utils.h"
 #include "core/components/common/layout/constants.h"
@@ -2127,6 +2128,13 @@ void TextFieldPattern::HandleOnPasteCommon(const std::string& data)
     AddInsertCommand(pasteData, InputReason::PASTE);
 }
 
+void TextFieldPattern::HandleOnAutoFillSecurePaste(const std::string& data)
+{
+    const std::u16string pasteData = UtfUtils::Str8DebugToStr16(data);
+    TAG_LOGI(AceLogTag::ACE_TEXT_FIELD, "HandleOnAutoFillSecurePaste len:%{public}d", static_cast<int32_t>(pasteData.length()));
+    AddInsertCommand(pasteData, InputReason::AUTO_FILL);
+}
+
 void TextFieldPattern::HandleOnPaste()
 {
     auto pasteCallback = [weak = WeakClaim(this)](const std::string& data, bool isFromAutoFill) {
@@ -2180,7 +2188,9 @@ bool TextFieldPattern::IsShowAutoFill()
     if (container && container->IsSceneBoardWindow()) {
         return false;
     }
-
+    if (ScreenLockManager::IsScreenLocked()) {
+        return false;
+    }
     return SystemProperties::IsAutoFillSupport();
 }
 
@@ -5747,7 +5757,7 @@ int32_t TextFieldPattern::InsertValueByController(const std::u16string& insertVa
 void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
 {
     auto insertValue = info.insertValue;
-    auto isIME = (info.reason == InputReason::IME);
+    auto isIMEOrAutoFill = (info.reason == InputReason::IME) || (info.reason == InputReason::AUTO_FILL);
     auto layoutProperty = GetLayoutProperty<TextFieldLayoutProperty>();
     CHECK_NULL_VOID(layoutProperty);
 #if defined(CROSS_PLATFORM)
@@ -5770,9 +5780,14 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
     }
     bool isSelected = IsSelected() || needAutoFillOnSelected;
     auto caretStart = isSelected ? start : selectController_->GetCaretIndex();
-    if (isIME) {
-        auto isInsert = BeforeIMEInsertValue(insertValue, caretStart);
-        CHECK_NULL_VOID(isInsert);
+    if (isIMEOrAutoFill && !BeforeIMEInsertValue(insertValue, caretStart)) {
+        if (info.reason == InputReason::AUTO_FILL) {
+            CloseSelectOverlay(true);
+            selectController_->ResetHandles();
+            StartTwinkling();
+            suppressAccessibilityEvent_ = true;
+        }
+        return;
     }
     int32_t caretMoveLength = 0;
     bool hasInsertValue = false;
@@ -5783,7 +5798,7 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
     if (isSelected) {
         auto value = contentController_->GetSelectedValue(start, end);
         auto isDelete = true;
-        if (isIME) {
+        if (isIMEOrAutoFill) {
             isDelete = BeforeIMEDeleteValue(value, TextDeleteDirection::BACKWARD, end);
         }
         end = isDelete ? end : start;
@@ -5795,7 +5810,7 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
             RecoverTextValueAndCaret(oldContent, originCaretIndex);
             return;
         }
-        if (isIME && isDelete) {
+        if (isIMEOrAutoFill && isDelete) {
             selectController_->UpdateCaretIndex(start);
             AfterIMEDeleteValue(value, TextDeleteDirection::BACKWARD);
         }
@@ -5816,7 +5831,7 @@ void TextFieldPattern::ExecuteInsertValueCommand(const InsertCommandInfo& info)
     selectController_->UpdateCaretIndex(caretStart + caretMoveLength);
     UpdateObscure(insertValue, hasInsertValue);
     UpdateEditingValueToRecord();
-    if (isIME) {
+    if (isIMEOrAutoFill) {
         AfterIMEInsertValue(contentController_->GetInsertValue());
     }
 }
@@ -9143,7 +9158,7 @@ void TextFieldPattern::NotifyFillRequestSuccess(RefPtr<ViewDataWrap> viewDataWra
     CHECK_NULL_VOID(viewDataWrap);
     CHECK_NULL_VOID(nodeWrap);
     if (triggerType == AceAutoFillTriggerType::PASTE_REQUEST) {
-        HandleOnPasteCommon(nodeWrap->GetValue());
+        HandleOnAutoFillSecurePaste(nodeWrap->GetValue());
         return;
     }
     if (triggerType == AceAutoFillTriggerType::MANUAL_REQUEST) {
@@ -11831,9 +11846,9 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
     auto caretIndex = info.insertOffset;
     auto originCaretIndex =
             TextRange { selectController_->GetFirstHandleIndex(), selectController_->GetSecondHandleIndex() };
-    auto isIMEReason = info.reason == InputReason::IME || info.reason == InputReason::AI_WRITE ||
+    auto triggerEditCallbacks = info.reason == InputReason::IME || info.reason == InputReason::AI_WRITE ||
             info.reason == InputReason::COMMAND_INJECTION;
-    if (isIMEReason && !insertValue.empty()) {
+    if (triggerEditCallbacks && !insertValue.empty()) {
         auto isInsert = BeforeIMEInsertValue(insertValue, caretIndex - (end - start));
         CHECK_NULL_VOID(isInsert);
     }
@@ -11847,12 +11862,12 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
     auto isDelete = true;
     if (start != end) {
         auto deleteValue = contentController_->GetSelectedValue(start, end);
-        if (isIMEReason) {
+        if (triggerEditCallbacks) {
             isDelete = BeforeIMEDeleteValue(deleteValue, TextDeleteDirection::BACKWARD, end);
         }
         contentController_->erase(start, end - start);
         selectController_->UpdateCaretIndex(start);
-        if (isIMEReason && isDelete) {
+        if (triggerEditCallbacks && isDelete) {
             AfterIMEDeleteValue(deleteValue, TextDeleteDirection::BACKWARD);
         }
     }
@@ -11873,7 +11888,7 @@ void TextFieldPattern::ExecuteInputCommand(const InputCommandInfo& info)
         }
         selectController_->UpdateCaretIndex(caretIndex);
         UpdateObscure(insertValue, hasInsertValue);
-        if (isIMEReason) {
+        if (triggerEditCallbacks) {
             AfterIMEInsertValue(contentController_->GetInsertValue());
         }
     }

@@ -53,7 +53,7 @@ protected:
     void OnLayoutFinished() override;
     void OnDrawingCompleted() override;
     void OnRemoveBlank() override;
-    void OnAddSnapshot() override;
+    void OnAddSnapshot(std::function<void()>&& callback = nullptr) override;
     void OnRemoveSnapshot() override;
     void OnAppRemoveStartingWindow() override;
     void OnUpdateSnapshotWindow() override;

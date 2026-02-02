@@ -30,7 +30,7 @@
 namespace OHOS::Ace::NG {
 class DateTimeAnimationController;
 class DatePickerPattern;
-class ACE_FORCE_EXPORT DatePickerDialogView {
+class DatePickerDialogView {
 public:
     static RefPtr<FrameNode> Show(const DialogProperties& dialogProps, const DatePickerSettingData& settingData,
         const std::vector<ButtonInfo>& buttonInfos, std::map<std::string, NG::DialogEvent> dialogEvent,
@@ -135,7 +135,7 @@ private:
     static void UpdateButtonDefaultFocus(const std::vector<ButtonInfo>& buttonInfos,
         const RefPtr<FrameNode>& buttonNode, bool isConfirm);
     static RefPtr<FrameNode> CreateNextPrevButtonNode(
-        std::function<void()> & switchEvent,
+        std::function<void()>& switchEvent,
         const RefPtr<FrameNode>& dateNode, const std::vector<ButtonInfo> &buttonInfos,
         const RefPtr<FrameNode>& contentRow);
     static void BuildDialogAcceptAndCancelButtonForAging(

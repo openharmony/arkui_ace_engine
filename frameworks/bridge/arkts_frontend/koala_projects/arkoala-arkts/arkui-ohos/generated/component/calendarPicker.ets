@@ -301,8 +301,6 @@ export class ArkCalendarPickerComponent extends ArkCommonMethodComponent impleme
 export function CalendarPickerImpl(
     @memo
     style: ((attributes: CalendarPickerAttribute) => void) | undefined,
-    @memo
-    content_?: () => void,
 ): void {
     const receiver = remember<ArkCalendarPickerComponent>((): ArkCalendarPickerComponent => {
         return new ArkCalendarPickerComponent()
@@ -311,7 +309,6 @@ export function CalendarPickerImpl(
         receiver.setPeer(peer)
         style?.(receiver)
         receiver.setPeer(undefined)
-        content_?.()
     })
 }
 

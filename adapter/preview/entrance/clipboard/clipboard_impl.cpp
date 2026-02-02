@@ -83,7 +83,7 @@ void ClipboardImpl::GetData(const std::function<void(const std::string&, bool)>&
         TaskExecutor::TaskType::UI, "ArkUIClipboardGetData");
 }
 
-void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
+void ClipboardImpl::HasData(const std::function<void(bool hasData, bool isAutoFill)>& callback)
 {
     if (!taskExecutor_ || !callback) {
         return;
@@ -92,14 +92,14 @@ void ClipboardImpl::HasData(const std::function<void(bool hasData)>& callback)
         [callback] {
             auto getClipboardData = AcePreviewHelper::GetInstance()->GetCallbackOfGetClipboardData();
             if (callback && getClipboardData) {
-                callback(!getClipboardData().empty());
+                callback(!getClipboardData().empty(), false);
             }
         },
         TaskExecutor::TaskType::UI, "ArkUIClipboardHasData");
 }
 
-void ClipboardImpl::HasDataType(
-    const std::function<void(bool hasData)>& callback, const std::vector<std::string>& mimeTypes)
+void ClipboardImpl::HasDataType(const std::function<void(bool hasData, bool isAutoFill)>& callback,
+    const std::vector<std::string>& mimeTypes)
 {
     HasData(callback);
 }

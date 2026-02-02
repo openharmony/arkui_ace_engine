@@ -52,8 +52,9 @@ bool ParseJsFolderStackUpperId(
     if (upperId->IsUndefined() || upperId->IsNull() || !upperId->IsArray(vm)) {
         return false;
     }
-    Local<panda::ArrayRef> upperIdParams = static_cast<Local<panda::ArrayRef>>(upperId);
-    for (size_t i = 0; i < upperIdParams->Length(vm); i++) {
+    panda::Local<panda::ArrayRef> upperIdParams = panda::Local<panda::ArrayRef>(upperId);
+    size_t length = ArkTSUtils::GetArrayLength(vm, upperIdParams);
+    for (size_t i = 0; i < length; i++) {
         auto upperItem = panda::ArrayRef::GetValueAt(vm, upperIdParams, i);
         if (upperItem->IsString(vm)) {
             result.emplace_back(upperItem->ToString(vm)->ToString(vm));

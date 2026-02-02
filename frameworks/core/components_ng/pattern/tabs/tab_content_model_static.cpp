@@ -63,6 +63,27 @@ void TabContentModelStatic::SetIndicator(FrameNode* frameNode, const std::option
     }
 }
 
+void TabContentModelStatic::SetDrawableIndicatorConfig(FrameNode* frameNode, const ImageInfoConfig& config)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto frameNodePattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetDrawableIndicatorConfig(config);
+}
+
+void TabContentModelStatic::SetIndicatorColorByUser(FrameNode* frameNode, bool isByUser)
+{
+    ACE_UPDATE_NODE_LAYOUT_PROPERTY(TabContentLayoutProperty, IndicatorColorSetByUser, isByUser, frameNode);
+}
+
+void TabContentModelStatic::SetDrawableIndicatorFlag(FrameNode* frameNode, bool isDrawableIndicator)
+{
+    CHECK_NULL_VOID(frameNode);
+    auto frameNodePattern = frameNode->GetPattern<TabContentPattern>();
+    CHECK_NULL_VOID(frameNodePattern);
+    frameNodePattern->SetDrawableIndicatorFlag(isDrawableIndicator);
+}
+
 void TabContentModelStatic::SetLabelStyle(FrameNode* frameNode,
     const std::optional<LabelStyle>& labelStyleOpt, bool isSubTabStyle)
 {

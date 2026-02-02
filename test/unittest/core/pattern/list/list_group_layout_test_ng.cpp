@@ -1855,9 +1855,13 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle002, TestSize.Level1)
     ListModelNG::SetCachedCount(AceType::RawPtr(frameNode_), 3);
 
     /**
-     * @tc.steps: step3. set TextDirection to RTL and set ListDirection to HORIZONTAL.
+     * @tc.steps: step3. set TextDirection to RTL.
      */
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+
+    /**
+     * @tc.steps: step4. set ListDirection to HORIZONTAL.
+     */
     auto horizontal = 1;
     ListModelNG::SetListDirection(AceType::RawPtr(frameNode_), horizontal);
     
@@ -1891,14 +1895,18 @@ HWTEST_F(ListItemGroupAlgorithmTestNg, CheckRecycle003, TestSize.Level1)
     CreateDone();
 
     /**
-     * @tc.steps: step2. set TextDirection to RTL and set ListDirection to HORIZONTAL.
+     * @tc.steps: step2. set TextDirection to RTL.
      */
     layoutProperty_->UpdateLayoutDirection(TextDirection::RTL);
+
+    /**
+     * @tc.steps: step3. set ListDirection to HORIZONTAL.
+     */
     auto horizontal = 1;
     ListModelNG::SetListDirection(AceType::RawPtr(frameNode_), horizontal);
     
     /**
-     * @tc.steps: step3. FlushUITasks
+     * @tc.steps: step4. FlushUITasks
      * @tc.expected: The size of cachedItemPosition is 0.
      */
     FlushUITasks();

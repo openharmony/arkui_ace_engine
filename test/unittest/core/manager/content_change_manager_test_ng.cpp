@@ -1192,4 +1192,432 @@ HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerDumpTest001, TestSize.L
     EXPECT_TRUE(str.find("UNREGISTERED") != std::string::npos);
     EXPECT_TRUE(str.find("REGISTER") != std::string::npos);
 }
+
+/**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest001
+ * @tc.desc: Test GetIgnoreEventMask with empty string
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetIgnoreEventMask with empty string.
+     * @tc.expected: returns 0 (NONE).
+     */
+    uint32_t mask = contentChangeMgr->GetIgnoreEventMask("");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+}
+
+/**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest002
+ * @tc.desc: Test GetIgnoreEventMask with invalid JSON string
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetIgnoreEventMask with invalid JSON.
+     * @tc.expected: returns 0 (NONE).
+     */
+    uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{invalid json");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    mask = contentChangeMgr->GetIgnoreEventMask("not a json");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"unclosed\": ");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+}
+
+/**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest003
+ * @tc.desc: Test GetIgnoreEventMask with JSON that is not an object
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetIgnoreEventMask with array JSON.
+     * @tc.expected: returns 0 (NONE).
+     */
+    uint32_t mask = contentChangeMgr->GetIgnoreEventMask("[\"scrollTo\"]");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    /**
+     * @tc.steps: step3. call GetIgnoreEventMask with string JSON.
+     * @tc.expected: returns 0 (NONE).
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("\"scrollTo\"");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    /**
+     * @tc.steps: step4. call GetIgnoreEventMask with number JSON.
+     * @tc.expected: returns 0 (NONE).
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("123");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+}
+
+/**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest004
+ * @tc.desc: Test GetIgnoreEventMask with JSON object without SCROLL field
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest004, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetIgnoreEventMask with empty object.
+     * @tc.expected: returns 0 (NONE).
+     */
+    uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    /**
+     * @tc.steps: step3. call GetIgnoreEventMask with other field.
+     * @tc.expected: returns 0 (NONE).
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"OTHER\": [\"scrollTo\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+}
+
+/**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest005
+ * @tc.desc: Test GetIgnoreEventMask with SCROLL field that is not an array
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest005, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetIgnoreEventMask with SCROLL as string.
+     * @tc.expected: returns 0 (NONE).
+     */
+    uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": \"scrollTo\"}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    /**
+     * @tc.steps: step3. call GetIgnoreEventMask with SCROLL as object.
+     * @tc.expected: returns 0 (NONE).
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": {\"event\": \"scrollTo\"}}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    /**
+     * @tc.steps: step4. call GetIgnoreEventMask with SCROLL as number.
+     * @tc.expected: returns 0 (NONE).
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": 123}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+}
+
+/**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest006
+ * @tc.desc: Test GetIgnoreEventMask with empty SCROLL array
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest006, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetIgnoreEventMask with empty SCROLL array.
+     * @tc.expected: returns 0 (NONE).
+     */
+    uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": []}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+}
+
+/**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest007
+ * @tc.desc: Test GetIgnoreEventMask with valid single event in SCROLL array
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest007, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetIgnoreEventMask with "scrollTo" event.
+     * @tc.expected: returns SCROLL_TO mask.
+     */
+    uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollTo\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+}
+
+/**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest008
+ * @tc.desc: Test GetIgnoreEventMask with multiple valid events in SCROLL array
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest008, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetIgnoreEventMask with duplicate "scrollTo" events.
+     * @tc.expected: returns SCROLL_TO mask (OR operation with same value).
+     */
+    uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"scrollTo\", \"scrollTo\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+}
+
+/**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest009
+ * @tc.desc: Test GetIgnoreEventMask with invalid event strings in SCROLL array
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest009, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetIgnoreEventMask with unknown event.
+     * @tc.expected: returns 0 (NONE) - unknown events are ignored.
+     */
+    uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"unknownEvent\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    /**
+     * @tc.steps: step3. call GetIgnoreEventMask with invalid case.
+     * @tc.expected: returns 0 (NONE) - case sensitive.
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"ScrollTo\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"SCROLLTO\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+}
+
+/**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest010
+ * @tc.desc: Test GetIgnoreEventMask with mixed valid and invalid events
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest010, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetIgnoreEventMask with valid and invalid events.
+     * @tc.expected: returns SCROLL_TO mask - only valid events are processed.
+     */
+    uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"unknown1\", \"scrollTo\", \"unknown2\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+
+    /**
+     * @tc.steps: step3. call GetIgnoreEventMask with more complex mix.
+     * @tc.expected: returns SCROLL_TO mask.
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [\"\", \"scrollTo\", null, \"unknown\"]}");
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+}
+
+/**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest011
+ * @tc.desc: Test GetIgnoreEventMask with non-string elements in SCROLL array
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest011, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetIgnoreEventMask with number in array.
+     * @tc.expected: returns 0 (NONE) - non-string elements are ignored.
+     */
+    uint32_t mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [123]}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    /**
+     * @tc.steps: step3. call GetIgnoreEventMask with null in array.
+     * @tc.expected: returns 0 (NONE).
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [null]}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    /**
+     * @tc.steps: step4. call GetIgnoreEventMask with boolean in array.
+     * @tc.expected: returns 0 (NONE).
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [true]}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+
+    /**
+     * @tc.steps: step5. call GetIgnoreEventMask with object in array.
+     * @tc.expected: returns 0 (NONE).
+     */
+    mask = contentChangeMgr->GetIgnoreEventMask("{\"SCROLL\": [{\"event\": \"scrollTo\"}]}");
+    EXPECT_EQ(mask, ContentChangeManager::NONE);
+}
+
+/**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest012
+ * @tc.desc: Test ConvertEventStringToEnum function
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest012, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. test ConvertEventStringToEnum with "scrollTo".
+     * @tc.expected: returns SCROLL_TO.
+     */
+    uint32_t eventType = contentChangeMgr->ConvertEventStringToEnum("scrollTo");
+    EXPECT_EQ(eventType, ContentChangeManager::SCROLL_TO);
+
+    /**
+     * @tc.steps: step3. test ConvertEventStringToEnum with unknown string.
+     * @tc.expected: returns NONE (0).
+     */
+    eventType = contentChangeMgr->ConvertEventStringToEnum("unknownEvent");
+    EXPECT_EQ(eventType, ContentChangeManager::NONE);
+
+    /**
+     * @tc.steps: step4. test ConvertEventStringToEnum with empty string.
+     * @tc.expected: returns NONE (0).
+     */
+    eventType = contentChangeMgr->ConvertEventStringToEnum("");
+    EXPECT_EQ(eventType, ContentChangeManager::NONE);
+
+    /**
+     * @tc.steps: step5. test ConvertEventStringToEnum case sensitivity.
+     * @tc.expected: returns NONE (0) - case sensitive.
+     */
+    eventType = contentChangeMgr->ConvertEventStringToEnum("ScrollTo");
+    EXPECT_EQ(eventType, ContentChangeManager::NONE);
+
+    eventType = contentChangeMgr->ConvertEventStringToEnum("SCROLLTO");
+    EXPECT_EQ(eventType, ContentChangeManager::NONE);
+}
+
+/**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest013
+ * @tc.desc: Test GetIgnoreEventMask enum values
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest013, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. verify enum values.
+     * @tc.expected: enum values are correctly defined.
+     */
+    EXPECT_EQ(ContentChangeManager::NONE, 0);
+    EXPECT_EQ(ContentChangeManager::SCROLL_TO, 1 << 0);
+
+    /**
+     * @tc.steps: step2. verify bit operations.
+     * @tc.expected: bit operations work correctly.
+     */
+    uint32_t mask = 0;
+    mask |= ContentChangeManager::SCROLL_TO;
+    EXPECT_EQ(mask, 1);
+
+    mask |= ContentChangeManager::SCROLL_TO;
+    EXPECT_EQ(mask, 1); // OR with same value should not change
+}
+
+/**
+ * @tc.name: ContentChangeManagerGetIgnoreEventMaskTest014
+ * @tc.desc: Test GetIgnoreEventMask with complex valid JSON
+ * @tc.type: FUNC
+ */
+HWTEST_F(ContentChangeManagerTestNg, ContentChangeManagerGetIgnoreEventMaskTest014, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. get content change manager.
+     * @tc.expected: contentChangeMgr is not nullptr.
+     */
+    auto contentChangeMgr = GetContentChangeManager();
+    ASSERT_NE(contentChangeMgr, nullptr);
+
+    /**
+     * @tc.steps: step2. call GetIgnoreEventMask with complex JSON.
+     * @tc.expected: correctly parses SCROLL array.
+     */
+    std::string jsonStr = R"({"otherField": "value", "SCROLL": ["scrollTo"], "anotherField": 123})";
+    uint32_t mask = contentChangeMgr->GetIgnoreEventMask(jsonStr);
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+
+    /**
+     * @tc.steps: step3. call GetIgnoreEventMask with formatted JSON.
+     * @tc.expected: correctly parses SCROLL array.
+     */
+    jsonStr = R"({
+        "SCROLL": [
+            "scrollTo"
+        ]
+    })";
+    mask = contentChangeMgr->GetIgnoreEventMask(jsonStr);
+    EXPECT_EQ(mask, ContentChangeManager::SCROLL_TO);
+}
 } // namespace OHOS::Ace::NG

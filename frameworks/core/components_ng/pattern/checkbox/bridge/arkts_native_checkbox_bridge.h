@@ -48,10 +48,9 @@ public:
     static ArkUINativeModuleValue SetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue ResetMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static void RegisterCheckboxAttributes(Local<panda::ObjectRef> object, EcmaVM* vm);
-    static ArkUINativeModuleValue CreateCheckbox(ArkUIRuntimeCallInfo* runtimeCallInfo);
+    static ArkUINativeModuleValue Create(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue JsMark(ArkUIRuntimeCallInfo* runtimeCallInfo);
     static ArkUINativeModuleValue JsPadding(ArkUIRuntimeCallInfo* runtimeCallInfo);
-    static ArkUINativeModuleValue JsMargin(ArkUIRuntimeCallInfo* runtimeCallInfo);
 };
 } // namespace OHOS::Ace::NG
 

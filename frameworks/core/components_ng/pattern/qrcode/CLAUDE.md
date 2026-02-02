@@ -288,7 +288,7 @@ void QRCodePattern::UpdateColor(const Color& color, bool isFristLoad)
 ```
 
 **Update Flow**:
-1. Check if it's system color change or first load
+1. Check if it's system color change or the flag is true
 2. Update color in PaintProperty
 3. Update foreground color in RenderContext
 4. Mark node as dirty to trigger redraw
@@ -433,7 +433,7 @@ public:
     // Property reset
     void Reset() override;
 
-    // JSON serialization (for Devtools)
+    // JSON serialization (for ArkUI Inspector)
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     // Property definitions

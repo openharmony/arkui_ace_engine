@@ -17,6 +17,8 @@
 #include <variant>
 #include "arkoala_api_generated.h"
 
+#include "ui/focus/focus_constants.h"
+
 #include "base/geometry/response_region.h"
 #include "base/utils/system_properties.h"
 #include "base/utils/time_util.h"
@@ -34,6 +36,8 @@
 #include "core/components_ng/property/safe_area_insets.h"
 #include "core/components_ng/pattern/blank/blank_model_ng.h"
 #include "core/components_ng/pattern/button/toggle_button_model_ng.h"
+#include "core/components_ng/pattern/checkbox/checkbox_pattern.h"
+#include "core/components_ng/pattern/radio/radio_pattern.h"
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/base/view_abstract_model_ng.h"
 #include "core/components_ng/base/view_abstract_model_static.h"
@@ -2433,6 +2437,15 @@ void SetResponseRegionImpl(Ark_NativePointer node,
     CHECK_NULL_VOID(frameNode);
     if (auto convArray = Converter::OptConvertPtr<std::vector<DimensionRect>>(value); convArray) {
         ViewAbstract::SetResponseRegion(frameNode, *convArray);
+        if (frameNode->GetTag() == V2::RADIO_ETS_TAG) {
+            auto pattern = frameNode->GetPattern<RadioPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsUserSetResponseRegion(true);
+        } else if (frameNode->GetTag() == V2::CHECK_BOX_ETS_TAG) {
+            auto pattern = frameNode->GetPattern<CheckBoxPattern>();
+            CHECK_NULL_VOID(pattern);
+            pattern->SetIsUserSetResponseRegion(true);
+        }
     } else {
         ViewAbstract::SetResponseRegion(frameNode, { DimensionRect() });
     }
@@ -5463,20 +5476,48 @@ void SetBackgroundImpl(Ark_NativePointer node,
 {
     auto frameNode = reinterpret_cast<FrameNode *>(node);
     CHECK_NULL_VOID(frameNode);
-    auto optAlign = Converter::OptConvertPtr<Alignment>(options);
-    
+    Alignment alignment = Alignment::CENTER;
+    uint32_t parsedEdges = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+    bool hasEdges = false;
+    if (options && options->tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+        auto alignOpt = Converter::OptConvert<Alignment>(options->value.align);
+        if (alignOpt) {
+            alignment = alignOpt.value();
+        }
+        const auto& optEdges = options->value.ignoresLayoutSafeAreaEdges;
+        if (optEdges.tag != InteropTag::INTEROP_TAG_UNDEFINED) {
+            auto edgeRawArray = Converter::Convert<std::vector<uint32_t>>(optEdges.value);
+            uint32_t mask = NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+            for (auto edgeValue : edgeRawArray) {
+                mask |= edgeValue;
+            }
+            parsedEdges = mask;
+            hasEdges = true;
+        }
+    }
     Converter::VisitUnionPtr(content,
-        [frameNode, optAlign, node](const CustomNodeBuilder& builder) {
-            CallbackHelper(builder).BuildAsync([frameNode, optAlign](const RefPtr<UINode>& uiNode) {
-                CHECK_NULL_VOID(uiNode);
-                auto builderFunc = [uiNode]() -> RefPtr<UINode> {
-                    return uiNode;
-                };
-                ViewAbstract::SetIsBuilderBackground(frameNode, true);
-                ViewAbstractModelStatic::BindBackground(frameNode, builderFunc, optAlign);
+        [frameNode, alignment, parsedEdges, hasEdges, node](const CustomNodeBuilder& builder) {
+            CallbackHelper(builder).BuildAsync(
+                [frameNode, alignment, parsedEdges, hasEdges](const RefPtr<UINode>& uiNode) {
+                    CHECK_NULL_VOID(uiNode);
+                    auto builderFunc = [uiNode]() -> RefPtr<UINode> {
+                        return uiNode;
+                    };
+                    uint32_t ignoreLayoutSafeAreaEdges = hasEdges ? parsedEdges : NG::LAYOUT_SAFE_AREA_EDGE_NONE;
+                    ViewAbstract::SetIsBuilderBackground(frameNode, true);
+                    bool isTransitionBackground = !(ignoreLayoutSafeAreaEdges == NG::LAYOUT_SAFE_AREA_EDGE_NONE);
+                    ViewAbstract::SetIsTransitionBackground(frameNode, isTransitionBackground);
+                    ViewAbstract::SetBackgroundAlign(frameNode, alignment);
+                    ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, ignoreLayoutSafeAreaEdges);
+                    ViewAbstractModelStatic::BindBackground(frameNode, builderFunc, alignment);
                 }, node);
         },
-        [frameNode](const Ark_ResourceColor& resourceColor) {
+        [frameNode, alignment, parsedEdges, hasEdges](const Ark_ResourceColor& resourceColor) {
+            uint32_t ignoreLayoutSafeAreaEdges = hasEdges ? parsedEdges : NG::LAYOUT_SAFE_AREA_EDGE_ALL;
+            ViewAbstract::SetIsBuilderBackground(frameNode, false);
+            ViewAbstract::SetIsTransitionBackground(frameNode, true);
+            ViewAbstract::SetBackgroundAlign(frameNode, alignment);
+            ViewAbstract::SetBackgroundIgnoresLayoutSafeAreaEdges(frameNode, ignoreLayoutSafeAreaEdges);
             auto colorValue = Converter::OptConvertPtr<Color>(&resourceColor);
             ViewAbstractModelStatic::SetBackgroundColor(frameNode, colorValue.value_or(Color::TRANSPARENT));
         },

@@ -2436,4 +2436,70 @@ HWTEST_F(WaterFlowSWTest, WaterFlowSWNaNTest002, TestSize.Level1)
     EXPECT_EQ(GetChildHeight(frameNode_, 6), 100.0f);  // Even index
     EXPECT_EQ(GetChildHeight(frameNode_, 7), 200.0f);  // Odd index
 }
+
+/**
+ * @tc.name: DeleteSection0LastItem001
+ * @tc.desc: Test deleting the last item of section 0 and verify section 1 layout position
+ * @tc.type: FUNC
+ */
+HWTEST_F(WaterFlowSWTest, DeleteSection0LastItem001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create WaterFlow with 2 sections
+     * @tc.expected: Section 0 has 3 items, Section 1 has 2 items
+     */
+    CreateWaterFlow();
+    ViewAbstract::SetWidth(CalcLength(400.0f));
+    ViewAbstract::SetHeight(CalcLength(600.f));
+
+    CreateItemWithHeight(100.0f);  // idx 0
+    CreateItemWithHeight(200.0f);  // idx 1
+    CreateItemWithHeight(150.0f);  // idx 2
+    CreateItemWithHeight(100.0f);  // idx 3
+    CreateItemWithHeight(100.0f);  // idx 4
+
+    auto secObj = pattern_->GetOrCreateWaterFlowSections();
+    std::vector<WaterFlowSections::Section> sections = {
+        WaterFlowSections::Section { .itemsCount = 3, .crossCount = 2 },
+        WaterFlowSections::Section { .itemsCount = 2, .crossCount = 2 }
+    };
+    secObj->ChangeData(0, 0, sections);
+    CreateDone();
+
+    /**
+     * @tc.steps: step2. Verify initial layout
+     * @tc.expected: Section 0 ends at 250, Section 1 starts at 250
+     */
+    EXPECT_EQ(info_->lanes_.size(), 2);
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 0.000000 EndPos: 250.000000 Items [0 2 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: 0.000000 EndPos: 200.000000 Items [1 ] }");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 250.000000 EndPos: 350.000000 Items [3 ] }");
+    EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 250.000000 EndPos: 350.000000 Items [4 ] }");
+
+    /**
+     * @tc.steps: step3. Delete last item of section 0 (idx 2)
+     * @tc.expected: Section configuration updated correctly
+     */
+    frameNode_->RemoveChildAtIndex(2);
+    frameNode_->ChildrenUpdatedFrom(2);
+    info_->NotifyDataChange(2, -1);
+
+    std::vector<WaterFlowSections::Section> newSections = {
+        WaterFlowSections::Section { .itemsCount = 2, .crossCount = 2 },
+        WaterFlowSections::Section { .itemsCount = 2, .crossCount = 2 }
+    };
+    secObj->ChangeData(0, 2, newSections);
+
+    frameNode_->MarkDirtyNode(PROPERTY_UPDATE_MEASURE_SELF);
+    FlushUITasks();
+
+    /**
+     * @tc.steps: step4. Verify layout after deletion
+     * @tc.expected: Section 0 ends at 200, Section 1 starts at 200 (not 250)
+     */
+    EXPECT_EQ(info_->lanes_[0][0].ToString(), "{StartPos: 0.000000 EndPos: 100.000000 Items [0 ] }");
+    EXPECT_EQ(info_->lanes_[0][1].ToString(), "{StartPos: 0.000000 EndPos: 200.000000 Items [1 ] }");
+    EXPECT_EQ(info_->lanes_[1][0].ToString(), "{StartPos: 200.000000 EndPos: 300.000000 Items [2 ] }");
+    EXPECT_EQ(info_->lanes_[1][1].ToString(), "{StartPos: 200.000000 EndPos: 300.000000 Items [3 ] }");
+}
 } // namespace OHOS::Ace::NG

@@ -122,6 +122,15 @@ bool GetOldPadding(const EcmaVM* vm, const Local<JSValueRef>& jsValue, ArkUIPadd
     padding.end.value = length.ConvertToPx();
     return true;
 }
+
+void ClampPaddingToNonNegative(
+    ArkUIPaddingType& padding, CalcDimension& top, CalcDimension& bottom, CalcDimension& start, CalcDimension& end)
+{
+    padding.top.value = top.IsNonNegative() ? top.Value() : 0;
+    padding.bottom.value = bottom.IsNonNegative() ? bottom.Value() : 0;
+    padding.start.value = start.IsNonNegative() ? start.Value() : 0;
+    padding.end.value = end.IsNonNegative() ? end.Value() : 0;
+}
 } // namespace
 
 panda::Local<panda::JSValueRef> JsCheckboxChangeCallback(panda::JsiRuntimeCallInfo* runtimeCallInfo)
@@ -194,12 +203,14 @@ ArkUINativeModuleValue CheckboxBridge::SetSelect(ArkUIRuntimeCallInfo* runtimeCa
     Local<JSValueRef> changeEventArg = panda::JSValueRef::Undefined(vm);
     bool select = DEFAULT_SELECTED;
     bool isJsView = IsJsView(nodeArg, vm);
-    if (selectedArg->IsObject(vm)) {
-        auto jsObj = selectedArg->ToObject(vm);
-        selectedArg = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
-        changeEventArg = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "$value"));
-    } else if (isJsView) {
-        changeEventArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+    if (isJsView) {
+        if (selectedArg->IsObject(vm)) {
+            auto jsObj = selectedArg->ToObject(vm);
+            selectedArg = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "value"));
+            changeEventArg = jsObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "$value"));
+        } else {
+            changeEventArg = runtimeCallInfo->GetCallArgRef(NUM_2);
+        }
     }
     if (selectedArg->IsBoolean()) {
         select = selectedArg->ToBoolean(vm)->Value();
@@ -637,7 +648,8 @@ ArkUINativeModuleValue CheckboxBridge::SetMargin(ArkUIRuntimeCallInfo* runtimeCa
     CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
     if (IsJsView(firstArg, vm)) {
-        return JsMargin(runtimeCallInfo);
+        GetArkUINodeModifiers()->getCheckboxModifier()->setIsUserSetMargin(nullptr, true);
+        return panda::JSValueRef::Undefined(vm);
     }
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     CommonBridge::SetMargin(runtimeCallInfo);
@@ -669,7 +681,7 @@ void CheckboxBridge::RegisterCheckboxAttributes(Local<panda::ObjectRef> object, 
         "resetMargin", "setContentModifierBuilder" };
 
     Local<JSValueRef> funcValues[] = {
-        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxBridge::CreateCheckbox),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxBridge::Create),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxBridge::SetMark),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxBridge::ResetMark),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), CheckboxBridge::SetUnSelectedColor),
@@ -702,14 +714,14 @@ void CheckboxBridge::RegisterCheckboxAttributes(Local<panda::ObjectRef> object, 
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "checkbox"), checkbox);
 }
 
-ArkUINativeModuleValue CheckboxBridge::CreateCheckbox(ArkUIRuntimeCallInfo* runtimeCallInfo)
+ArkUINativeModuleValue CheckboxBridge::Create(ArkUIRuntimeCallInfo* runtimeCallInfo)
 {
     EcmaVM* vm = runtimeCallInfo->GetVM();
     CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
     Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(NUM_0);
     std::string nameStr = "";
     std::string groupStr = "";
-    Local<JSValueRef> bilderObject = JSValueRef::Undefined(vm);
+    Local<JSValueRef> builderObject = JSValueRef::Undefined(vm);
     if (firstArg->IsObject(vm)) {
         auto paramObj = firstArg->ToObject(vm);
         auto nameVal = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "name"));
@@ -720,12 +732,12 @@ ArkUINativeModuleValue CheckboxBridge::CreateCheckbox(ArkUIRuntimeCallInfo* runt
         if (groupVal->IsString(vm)) {
             groupStr = groupVal->ToString(vm)->ToString(vm);
         }
-        bilderObject = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "indicatorBuilder"));
+        builderObject = paramObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "indicatorBuilder"));
     }
     GetArkUINodeModifiers()->getCheckboxModifier()->createCheckbox(nameStr.c_str(), groupStr.c_str());
-    if (!bilderObject->IsUndefined() && !bilderObject->IsNull() && bilderObject->IsFunction(vm)) {
+    if (!builderObject->IsUndefined() && !builderObject->IsNull() && builderObject->IsFunction(vm)) {
         auto targetNode = AceType::WeakClaim(ViewStackProcessor::GetInstance()->GetMainFrameNode());
-        panda::Local<panda::FunctionRef> func = bilderObject->ToObject(vm);
+        panda::Local<panda::FunctionRef> func = builderObject->ToObject(vm);
         std::function<void()> custionBuilder = [vm, node = targetNode, func = panda::CopyableGlobal(vm, func)]() {
             panda::LocalScope pandaScope(vm);
             panda::TryCatch trycatch(vm);
@@ -771,20 +783,25 @@ ArkUINativeModuleValue CheckboxBridge::JsMark(ArkUIRuntimeCallInfo* runtimeCallI
     }
     auto sizeValue = markObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "size"));
     CalcDimension size;
-    if (!((ArkTSUtils::ParseJsDimensionVp(vm, sizeValue, size, false)) && (size.Unit() != DimensionUnit::PERCENT) &&
-            (size.ConvertToVp() >= 0))) {
-        size = defaultSize;
+    if ((ArkTSUtils::ParseJsDimensionVp(vm, sizeValue, size, false)) && (size.Unit() != DimensionUnit::PERCENT) &&
+        (size.ConvertToVp() >= 0)) {
+        GetArkUINodeModifiers()->getCheckboxModifier()->setCheckMarkSize(
+            nullptr, size.Value(), static_cast<int>(size.Unit()));
+    } else {
+        GetArkUINodeModifiers()->getCheckboxModifier()->setCheckMarkSize(
+            nullptr, defaultSize.Value(), static_cast<int>(defaultSize.Unit()));
     }
-    GetArkUINodeModifiers()->getCheckboxModifier()->setCheckMarkSize(
-        nullptr, size.Value(), static_cast<int>(size.Unit()));
     auto strokeWidthValue = markObj->Get(vm, panda::StringRef::NewFromUtf8(vm, "strokeWidth"));
     CalcDimension strokeWidth;
-    if (!((ArkTSUtils::ParseJsDimensionVp(vm, strokeWidthValue, strokeWidth, false)) &&
-            (strokeWidth.Unit() != DimensionUnit::PERCENT) && (strokeWidth.ConvertToVp() >= 0))) {
-        strokeWidth = defaultStroke;
+    if ((ArkTSUtils::ParseJsDimensionVp(vm, strokeWidthValue, strokeWidth, false)) &&
+            (strokeWidth.Unit() != DimensionUnit::PERCENT) && (strokeWidth.ConvertToVp() >= 0)) {
+        GetArkUINodeModifiers()->getCheckboxModifier()->setCheckMarkWidth(
+            nullptr, strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
+    } else {
+        GetArkUINodeModifiers()->getCheckboxModifier()->setCheckMarkWidth(
+            nullptr, defaultStroke.Value(), static_cast<int>(defaultStroke.Unit()));
     }
-    GetArkUINodeModifiers()->getCheckboxModifier()->setCheckMarkWidth(
-        nullptr, strokeWidth.Value(), static_cast<int>(strokeWidth.Unit()));
+
     return panda::JSValueRef::Undefined(vm);
 }
 
@@ -814,70 +831,24 @@ ArkUINativeModuleValue CheckboxBridge::JsPadding(ArkUIRuntimeCallInfo* runtimeCa
             ArkTSUtils::ParsePadding(vm, GetProperty(vm, jsObj, "right"), endDimen, newPaddings.end);
         }
         if (newPaddings.start.isSet || newPaddings.end.isSet || newPaddings.top.isSet || newPaddings.bottom.isSet) {
+            ClampPaddingToNonNegative(newPaddings, topDimen, bottomDimen, startDimen, endDimen);
             GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxJsPadding(&oldPaddings, &newPaddings, flag);
             return panda::JSValueRef::Undefined(vm);
         }
     }
-    newPaddings.top = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, true };
-    newPaddings.bottom = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, true };
-    newPaddings.start = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, true };
-    newPaddings.end = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, true };
-    ArkTSUtils::ParsePadding(vm, paddingArg, topDimen, newPaddings.top);
-    ArkTSUtils::ParsePadding(vm, paddingArg, bottomDimen, newPaddings.bottom);
-    ArkTSUtils::ParsePadding(vm, paddingArg, startDimen, newPaddings.start);
-    ArkTSUtils::ParsePadding(vm, paddingArg, endDimen, newPaddings.end);
+    CalcDimension length;
+    if (!ArkTSUtils::ParseJsDimensionVp(vm, paddingArg, length)) {
+        length.Reset();
+    }
+    if (!length.IsNonNegative()) {
+        length = CalcDimension();
+    }
+    newPaddings.top = { length.Value(), static_cast<int8_t>(length.Unit()), nullptr, true };
+    newPaddings.bottom = { length.Value(), static_cast<int8_t>(length.Unit()), nullptr, true };
+    newPaddings.start = { length.Value(), static_cast<int8_t>(length.Unit()), nullptr, true };
+    newPaddings.end = { length.Value(), static_cast<int8_t>(length.Unit()), nullptr, true };
+    ClampPaddingToNonNegative(newPaddings, length, length, length, length);
     GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxJsPadding(&oldPaddings, &newPaddings, flag);
-    return panda::JSValueRef::Undefined(vm);
-}
-
-ArkUINativeModuleValue CheckboxBridge::JsMargin(ArkUIRuntimeCallInfo* runtimeCallInfo)
-{
-    EcmaVM* vm = runtimeCallInfo->GetVM();
-    CHECK_NULL_RETURN(vm, panda::NativePointerRef::New(vm, nullptr));
-    auto marginArg = runtimeCallInfo->GetCallArgRef(NUM_1);
-    if (!marginArg->IsNumber() && !marginArg->IsObject(vm) && !marginArg->IsString(vm)) {
-        GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxJsMargin(nullptr, false, nullptr, false);
-        return panda::JSValueRef::Undefined(vm);
-    }
-    ArkUIPaddingType margins;
-    CalcDimension topDimen(0, DimensionUnit::VP);
-    CalcDimension bottomDimen(0, DimensionUnit::VP);
-    CalcDimension startDimen(0, DimensionUnit::VP);
-    CalcDimension endDimen(0, DimensionUnit::VP);
-    std::vector<RefPtr<ResourceObject>> resObjs;
-    if (marginArg->IsObject(vm)) {
-        bool useLengthMetrics = false;
-        auto jsObj = marginArg->ToObject(vm);
-        if (ArkTSUtils::CheckLengthMetrics(vm, jsObj)) {
-            ArkTSUtils::ParseLocalizedMargin(vm, GetProperty(vm, jsObj, "top"), topDimen, margins.top);
-            ArkTSUtils::ParseLocalizedMargin(vm, GetProperty(vm, jsObj, "bottom"), bottomDimen, margins.bottom);
-            ArkTSUtils::ParseLocalizedMargin(vm, GetProperty(vm, jsObj, "start"), startDimen, margins.start);
-            ArkTSUtils::ParseLocalizedMargin(vm, GetProperty(vm, jsObj, "end"), endDimen, margins.end);
-            useLengthMetrics = true;
-        } else {
-            ArkTSUtils::ParseMargin(vm, GetProperty(vm, jsObj, "top"), topDimen, margins.top, resObjs);
-            ArkTSUtils::ParseMargin(vm, GetProperty(vm, jsObj, "bottom"), bottomDimen, margins.bottom, resObjs);
-            ArkTSUtils::ParseMargin(vm, GetProperty(vm, jsObj, "left"), startDimen, margins.start, resObjs);
-            ArkTSUtils::ParseMargin(vm, GetProperty(vm, jsObj, "right"), endDimen, margins.end, resObjs);
-        }
-        if (margins.start.isSet || margins.end.isSet || margins.top.isSet || margins.bottom.isSet) {
-            auto rawPtr = useLengthMetrics ? nullptr : static_cast<void*>(&resObjs);
-            GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxJsMargin(
-                &margins, useLengthMetrics, rawPtr, true);
-            return panda::JSValueRef::Undefined(vm);
-        }
-    }
-    resObjs.clear();
-    margins.top = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, false };
-    margins.bottom = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, false };
-    margins.start = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, false };
-    margins.end = { 0.0, static_cast<int8_t>(DimensionUnit::PX), nullptr, false };
-    ArkTSUtils::ParseMargin(vm, marginArg, topDimen, margins.top, resObjs);
-    ArkTSUtils::ParseMargin(vm, marginArg, bottomDimen, margins.bottom, resObjs);
-    ArkTSUtils::ParseMargin(vm, marginArg, startDimen, margins.start, resObjs);
-    ArkTSUtils::ParseMargin(vm, marginArg, endDimen, margins.end, resObjs);
-    auto rawPtr = static_cast<void*>(&resObjs);
-    GetArkUINodeModifiers()->getCheckboxModifier()->setCheckboxJsMargin(&margins, false, rawPtr, true);
     return panda::JSValueRef::Undefined(vm);
 }
 } // namespace OHOS::Ace::NG

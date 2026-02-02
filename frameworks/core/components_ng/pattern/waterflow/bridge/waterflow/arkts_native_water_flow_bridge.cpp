@@ -293,9 +293,10 @@ void UpdateSections(EcmaVM* vm, const Local<JSValueRef>& sections, RefPtr<WaterF
         CHECK_NULL_VOID(node);
         auto context = node->GetContext();
         CHECK_NULL_VOID(context);
-        context->AddBuildFinishCallBack([start, deleteCount, change = newSections, weak, all = allSections]() {
-            auto nodeSection = weak.Upgrade();
-            CHECK_NULL_VOID(nodeSection);
+        context->AddBuildFinishCallBack([start, deleteCount, change = newSections, weakNode, all = allSections]() {
+            auto node = weakNode.Upgrade();
+            CHECK_NULL_VOID(node);
+            auto nodeSection = NG::WaterFlowModelNG::GetOrCreateWaterFlowSections(node.GetRawPtr());
             nodeSection->ChangeData(start, deleteCount, change);
             if (nodeSection->GetSectionInfo().size() != all.size()) {
                 nodeSection->ChangeData(0, nodeSection->GetSectionInfo().size(), all);

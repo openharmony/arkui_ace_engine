@@ -704,6 +704,7 @@ ohos_unittest("web_pattern_static_unit_test_ohos") {
     "../mock_web_delegate.cpp",
     "richtext_model_static_test.cpp",
     "web_model_static_test.cpp",
+    "$ace_root/test/mock/core/modifier/mock_symbol_glyph_modifier.cpp",
   ]
 
   deps = [

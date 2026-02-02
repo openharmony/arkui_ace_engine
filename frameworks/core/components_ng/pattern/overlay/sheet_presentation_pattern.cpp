@@ -315,6 +315,25 @@ bool SheetPresentationPattern::IsScrollable() const
     return Positive(scrollPattern->GetScrollableDistance());
 }
 
+void SheetPresentationPattern::OnAttachToMainTree()
+{
+    auto host = GetHost();
+    CHECK_NULL_VOID(host);
+    auto targetNode = FrameNode::GetFrameNode(targetTag_, targetId_);
+    CHECK_NULL_VOID(targetNode);
+    auto targetNodeContext = targetNode->GetContext();
+    CHECK_NULL_VOID(targetNodeContext);
+    if (IsShowInSubWindow()) {
+        targetNodeContext->AddWindowSizeChangeCallback(host->GetId());
+        targetNodeContext->AddOnAreaChangeNode(targetNode->GetId());
+    } else {
+        auto currentPipeline = host->GetContext();
+        CHECK_NULL_VOID(currentPipeline);
+        currentPipeline->AddWindowSizeChangeCallback(host->GetId());
+        currentPipeline->AddOnAreaChangeNode(targetNode->GetId());
+    }
+}
+
 void SheetPresentationPattern::OnAttachToFrameNode()
 {
     auto host = GetHost();
@@ -330,15 +349,6 @@ void SheetPresentationPattern::OnAttachToFrameNode()
     CHECK_NULL_VOID(sheetTheme);
     sheetThemeType_ = sheetTheme->GetSheetType();
     scale_ = targetNodeContext->GetFontScale();
-    if (IsShowInSubWindow()) {
-        targetNodeContext->AddWindowSizeChangeCallback(host->GetId());
-        targetNodeContext->AddOnAreaChangeNode(targetNode->GetId());
-    } else {
-        auto currentPipeline = host->GetContext();
-        CHECK_NULL_VOID(currentPipeline);
-        currentPipeline->AddWindowSizeChangeCallback(host->GetId());
-        currentPipeline->AddOnAreaChangeNode(targetNode->GetId());
-    }
     OnAreaChangedFunc onAreaChangedFunc = [sheetNodeWk = WeakPtr<FrameNode>(host)](const RectF& /* oldRect */,
                                               const OffsetF& /* oldOrigin */, const RectF& /* rect */,
                                               const OffsetF& /* origin */) {
@@ -3165,7 +3175,7 @@ bool SheetPresentationPattern::IsDoubleAvoid(bool forceAvoid)
 {
     auto host = GetHost();
     CHECK_NULL_RETURN(host, false);
-    auto pipelineContext = PipelineContext::GetCurrentContext();
+    auto pipelineContext = host->GetContext();
     CHECK_NULL_RETURN(pipelineContext, false);
     auto manager = pipelineContext->GetSafeAreaManager();
     return forceAvoid && (manager->GetKeyboardInset().Length() != 0);

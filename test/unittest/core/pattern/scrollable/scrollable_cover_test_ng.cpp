@@ -1873,4 +1873,73 @@ HWTEST_F(ScrollableCoverTestNg, InitCurveOffsetPropertyTest001, TestSize.Level1)
     EXPECT_NEAR(actualValue, 100.0f, 1.0f);
     EXPECT_TRUE(scrollPn->isAnimationStop_);
 }
+
+/**
+ * @tc.name: TouchpadInteractionTest001
+ * @tc.desc: Test ScrollablePattern::RegisterTouchpadInteractionCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, TouchpadInteractionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init EventManager and Scrollable.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto eventManager = pipeline->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto geometryNode = scroll_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(720.0f, 1280.0f));
+    auto pattern = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->locationInfo_ = Offset(1000.0f, 200.0f);
+    auto scrollable = pattern->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->frictionOffsetProperty_ = AceType::MakeRefPtr<NodeAnimatablePropertyFloat>(0.0f, [](float) {});
+
+    /**
+     * @tc.steps: step2. Call StartScrollAnimation and verify StopSpringAnimation is called.
+     */
+    scrollable->StartScrollAnimation(100.0f, 400.0f);
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::FRICTION);
+    pattern->locationInfo_ = Offset(100.0f, 200.0f);
+    eventManager->NotifyTouchpadInteraction();
+    EXPECT_EQ(scrollable->state_, Scrollable::AnimationState::IDLE);
+}
+
+/**
+ * @tc.name: TouchpadInteractionTest002
+ * @tc.desc: Test ScrollablePattern::RegisterTouchpadInteractionCallback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ScrollableCoverTestNg, TouchpadInteractionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Init EventManager and Scrollable.
+     */
+    auto pipeline = MockPipelineContext::GetCurrent();
+    ASSERT_NE(pipeline, nullptr);
+    auto eventManager = pipeline->GetEventManager();
+    ASSERT_NE(eventManager, nullptr);
+
+    auto geometryNode = scroll_->GetGeometryNode();
+    ASSERT_NE(geometryNode, nullptr);
+    geometryNode->SetFrameSize(SizeF(720.0f, 1280.0f));
+    auto pattern = scroll_->GetPattern<PartiallyMockedScrollable>();
+    ASSERT_NE(pattern, nullptr);
+    pattern->locationInfo_ = Offset(100.0f, 200.0f);
+    auto scrollable = pattern->GetScrollable();
+    ASSERT_NE(scrollable, nullptr);
+    scrollable->nestedScrolling_ = true;
+    pattern->nestedScrollVelocity_ = 400.0f;
+    pattern->nestedScrollTimestamp_ = static_cast<uint64_t>(GetSysTimestamp());
+
+    /**
+     * @tc.steps: step2. Call StartScrollAnimation and verify StopSpringAnimation is called.
+     */
+    eventManager->NotifyTouchpadInteraction();
+    EXPECT_TRUE(scrollable->IsStopped());
+}
 } // namespace OHOS::Ace::NG

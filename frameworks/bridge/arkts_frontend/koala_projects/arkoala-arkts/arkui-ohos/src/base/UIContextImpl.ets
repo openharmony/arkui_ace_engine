@@ -1261,7 +1261,7 @@ export interface DetachedRootEntry {
 }
 
 export class DetachedRootEntryImpl<T extends IncrementalNode> implements DetachedRootEntry {
-    entry?: ComputableState<T>;
+    private entry?: ComputableState<T>;
     constructor(entry: ComputableState<T>) {
         this.entry = entry
     }
@@ -1769,10 +1769,10 @@ export class UIContextImpl extends UIContext {
         ArkUIAniModule._Common_Restore_InstanceId();
     }
 
-    public animateToImmediately(value: AnimateParam, event: Callback<void>): void {
+    public animateToImmediately(value: AnimateParam, event: () => void): void {
         ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
         AnimationExtender.AnimateToImmediatelyImpl(value, () => {
-            event(undefined);
+            event();
         }, true);
         ArkUIAniModule._Common_Restore_InstanceId();
     }

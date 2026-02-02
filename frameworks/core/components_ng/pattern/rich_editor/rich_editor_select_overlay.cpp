@@ -421,7 +421,7 @@ void RichEditorSelectOverlay::OnMenuItemAction(OptionMenuActionId id, OptionMenu
             pattern->HandleOnCut();
             break;
         case OptionMenuActionId::PASTE:
-            pattern->HandleOnPaste();
+            IsAutoFillPaste() ? pattern->ProcessAutoFillOnPaste() : pattern->HandleOnPaste();
             CloseOverlay(true, CloseReason::CLOSE_REASON_PASTE);
             break;
         case OptionMenuActionId::SELECT_ALL:

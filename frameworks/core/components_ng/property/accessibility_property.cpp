@@ -15,6 +15,7 @@
 
 #include "accessibility_property.h"
 
+#include "base/json/json_util.h"
 #include "core/accessibility/accessibility_constants.h"
 #include "core/components_ng/base/frame_node.h"
 #include "core/pipeline_ng/pipeline_context.h"
@@ -1498,5 +1499,16 @@ AccessibilityActionOptions AccessibilityProperty::GetAccessibilityActionOptions(
 void AccessibilityProperty::ResetAccessibilityActionOptions()
 {
     accessibilityActionOptions_.reset();
+}
+
+void AccessibilityProperty::ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const
+{
+    json->PutFixedAttr("scrollable", IsScrollable(), filter, FIXED_ATTR_SCROLLABLE);
+    json->PutExtAttr("accessibilityLevel", GetAccessibilityLevel().c_str(), filter);
+    json->PutExtAttr("accessibilityGroup", IsAccessibilityGroup(), filter);
+    json->PutExtAttr("accessibilityVirtualNode", HasAccessibilityVirtualNode(), filter);
+    json->PutExtAttr("accessibilityText", GetAccessibilityText().c_str(), filter);
+    json->PutExtAttr("accessibilityTextHint", GetTextType().c_str(), filter);
+    json->PutExtAttr("accessibilityDescription", GetAccessibilityDescription().c_str(), filter);
 }
 } // namespace OHOS::Ace::NG

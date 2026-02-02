@@ -478,4 +478,30 @@ HWTEST_F(RichEditorStyleManagerTest, UpdatePropertyTest001, TestSize.Level0) {
     EXPECT_EQ(placeholderTextColor.value(), color);
 }
 
+/**
+ * @tc.name: OnColorConfigurationUpdate001
+ * @tc.desc: test OnColorConfigurationUpdate
+ * @tc.type: FUNC
+ */
+HWTEST_F(RichEditorStyleManagerTest, OnColorConfigurationUpdate001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. init pattern and theme
+     */
+    ASSERT_NE(richEditorNode_, nullptr);
+    auto richEditorPattern = richEditorNode_->GetPattern<RichEditorPattern>();
+    ASSERT_NE(richEditorPattern, nullptr);
+    auto themeManager = AceType::MakeRefPtr<MockThemeManager>();
+    ASSERT_NE(themeManager, nullptr);
+    PipelineBase::GetCurrentContext()->themeManager_ = themeManager;
+    auto theme = AceType::MakeRefPtr<RichEditorTheme>();
+    EXPECT_CALL(*themeManager, GetTheme(_)).WillRepeatedly(Return(theme));
+    EXPECT_CALL(*themeManager, GetTheme(_, _)).WillRepeatedly(Return(theme));
+
+    /**
+     * @tc.steps: step2. call OnColorConfigurationUpdate
+     */
+    richEditorPattern->OnColorConfigurationUpdate();
+    EXPECT_TRUE(richEditorPattern->magnifierController_->colorModeChange_);
+}
 }

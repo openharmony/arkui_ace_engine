@@ -719,6 +719,33 @@ std::optional<bool> ResourceConverter::ToBoolean()
 }
 
 template<>
+void AssignCast(std::optional<SymbolData>& dst, const Ark_Resource& src)
+{
+    constexpr int32_t SYSTEM_SYMBOL_BOUNDARY = 0XFFFFF;
+    const std::string DEFAULT_SYMBOL_FONTFAMILY = "HM Symbol";
+    const std::string CUSTOM_SYMBOL_SUFFIX = "_CustomSymbol";
+    ResourceConverter converter(src);
+    if (!dst) {
+        dst = SymbolData();
+    }
+    dst->symbol = converter.ToSymbol();
+    if (!dst->symbol.has_value()) {
+        return;
+    }
+    if (dst->symbol.value() > SYSTEM_SYMBOL_BOUNDARY) {
+        std::string bundleName = converter.BundleName();
+        std::string moduleName = converter.ModuleName();
+        auto customSymbolFamilyName = bundleName + "_" + moduleName + CUSTOM_SYMBOL_SUFFIX;
+        std::replace(customSymbolFamilyName.begin(), customSymbolFamilyName.end(), '.', '_');
+        dst->symbolType = SymbolType::CUSTOM;
+        dst->symbolFamilyName.push_back(customSymbolFamilyName);
+    } else {
+        dst->symbolType = SymbolType::SYSTEM;
+        dst->symbolFamilyName.push_back(DEFAULT_SYMBOL_FONTFAMILY);
+    }
+}
+
+template<>
 void AssignCast(std::optional<CalcDimension>& dst, const Ark_Resource& src)
 {
     ResourceConverter converter(src);
@@ -2497,7 +2524,8 @@ std::optional<Dimension> OptConvertFromArkNumStrRes(const T& src, DimensionUnit 
 
     return dimension;
 }
-template std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Union_F64_String_Resource, Ark_Float64>(
+template ACE_FORCE_EXPORT std::optional<Dimension>
+    OptConvertFromArkNumStrRes<Ark_Union_F64_String_Resource, Ark_Float64>(
     const Ark_Union_F64_String_Resource&, DimensionUnit);
 template ACE_FORCE_EXPORT std::optional<Dimension> OptConvertFromArkNumStrRes<Ark_Dimension, Ark_Number>(
     const Ark_Dimension&, DimensionUnit);
@@ -3870,7 +3898,7 @@ OverflowMode Convert(const Ark_MaxLinesOptions& src)
 }
 
 template<>
-SymbolShadow Convert(const Ark_ShadowOptions& src)
+ACE_FORCE_EXPORT SymbolShadow Convert(const Ark_ShadowOptions& src)
 {
     SymbolShadow dst;
     dst.color = Converter::OptConvert<Color>(src.color).value_or(Color::BLACK);

@@ -288,7 +288,7 @@ void QRCodePattern::UpdateColor(const Color& color, bool isFristLoad)
 ```
 
 **更新流程**:
-1. 检查是否为系统颜色变化或首次加载
+1. 检查是否为系统颜色变化或标志位是否为true
 2. 更新 PaintProperty 中的颜色
 3. 更新 RenderContext 中的前景色
 4. 标记节点为脏节点触发重绘
@@ -433,7 +433,7 @@ public:
     // 属性重置
     void Reset() override;
 
-    // JSON 序列化（用于 Devtools）
+    // JSON 序列化（用于 ArkUI Inspector）
     void ToJsonValue(std::unique_ptr<JsonValue>& json, const InspectorFilter& filter) const override;
 
     // 属性定义

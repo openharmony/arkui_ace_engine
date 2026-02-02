@@ -77,10 +77,15 @@ HWTEST_F(SystemPropertiesTest, SystemPropertiesTest002, TestSize.Level1)
 HWTEST_F(SystemPropertiesTest, SystemPropertiesTest003, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. call GetComponentLoadNumber
-     * @tc.expected: step1. componentLoadNumber param init success.
+     * @tc.steps: step1. call get methods.
+     * @tc.expected: step1. check default value is right.
      */
     EXPECT_EQ(SystemProperties::GetComponentLoadNumber(), 1);
+    EXPECT_FALSE(SystemProperties::GetRecycleImageEnabled());
+    EXPECT_TRUE(NearEqual(SystemProperties::GetAnimationScale(), 1.0f));
+    EXPECT_TRUE(SystemProperties::GetContainerDeleteFlag());
+    EXPECT_FALSE(SystemProperties::GetMultiInstanceEnabled());
+    EXPECT_FALSE(SystemProperties::GetAllowWindowOpenMethodEnabled());
 }
 
 /**

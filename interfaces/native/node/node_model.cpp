@@ -705,15 +705,18 @@ void TriggerNodeEvent(ArkUI_NodeEvent* event, std::set<void (*)(ArkUI_NodeEvent*
     if (!eventListenersSet) {
         return;
     }
-    if (eventListenersSet->size() == 1) {
-        auto eventListener = eventListenersSet->begin();
-        (*eventListener)(event);
-    } else if (eventListenersSet->size() > 1) {
-        for (const auto& eventListener : *eventListenersSet) {
-            (*eventListener)(event);
-            if (!IsValidArkUINode(event->node)) {
-                break;
-            }
+    // Copy listeners to a local vector to avoid UAF when user callbacks modify the original set
+    std::vector<void (*)(ArkUI_NodeEvent*)> listenersCopy;
+    listenersCopy.reserve(eventListenersSet->size());
+    for (const auto& listener : *eventListenersSet) {
+        listenersCopy.push_back(listener);
+    }
+
+    // Use the copy for iteration and callbacks
+    for (const auto& eventListener : listenersCopy) {
+        eventListener(event);
+        if (!IsValidArkUINode(event->node)) {
+            break;
         }
     }
 }

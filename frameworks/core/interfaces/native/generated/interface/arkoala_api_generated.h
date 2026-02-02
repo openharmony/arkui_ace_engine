@@ -3262,6 +3262,8 @@ typedef struct Ark_DividerStyle Ark_DividerStyle;
 typedef struct Opt_DividerStyle Opt_DividerStyle;
 typedef struct Ark_DoubleLengthDetents Ark_DoubleLengthDetents;
 typedef struct Opt_DoubleLengthDetents Opt_DoubleLengthDetents;
+typedef struct Ark_DrawableTabBarIndicator Ark_DrawableTabBarIndicator;
+typedef struct Opt_DrawableTabBarIndicator Opt_DrawableTabBarIndicator;
 typedef struct DragController_SpringLoadingContextPeer DragController_SpringLoadingContextPeer;
 typedef struct DragController_SpringLoadingContextPeer* Ark_dragController_SpringLoadingContext;
 typedef struct Opt_dragController_SpringLoadingContext Opt_dragController_SpringLoadingContext;
@@ -3472,6 +3474,8 @@ typedef struct Ark_Union_SizeOptions_ImageSize Ark_Union_SizeOptions_ImageSize;
 typedef struct Opt_Union_SizeOptions_ImageSize Opt_Union_SizeOptions_ImageSize;
 typedef struct Ark_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource Ark_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource;
 typedef struct Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource;
+typedef struct Ark_Union_SubTabBarIndicatorStyle_DrawableTabBarIndicator Ark_Union_SubTabBarIndicatorStyle_DrawableTabBarIndicator;
+typedef struct Opt_Union_SubTabBarIndicatorStyle_DrawableTabBarIndicator Opt_Union_SubTabBarIndicatorStyle_DrawableTabBarIndicator;
 typedef struct Ark_Union_UIAbilityContext_UIContext Ark_Union_UIAbilityContext_UIContext;
 typedef struct Opt_Union_UIAbilityContext_UIContext Opt_Union_UIAbilityContext_UIContext;
 typedef struct Ark_Union_Union_Padding_Dimension_LocalizedPadding Ark_Union_Union_Padding_Dimension_LocalizedPadding;
@@ -5628,6 +5632,11 @@ typedef struct Opt_LayoutMode {
 typedef enum Ark_LayoutSafeAreaEdge {
     ARK_LAYOUT_SAFE_AREA_EDGE_TOP = 0,
     ARK_LAYOUT_SAFE_AREA_EDGE_BOTTOM = 1,
+    ARK_LAYOUT_SAFE_AREA_EDGE_START = 2,
+    ARK_LAYOUT_SAFE_AREA_EDGE_END = 3,
+    ARK_LAYOUT_SAFE_AREA_EDGE_VERTICAL = 4,
+    ARK_LAYOUT_SAFE_AREA_EDGE_HORIZONTAL = 5,
+    ARK_LAYOUT_SAFE_AREA_EDGE_ALL = 6,
 } Ark_LayoutSafeAreaEdge;
 typedef struct Opt_LayoutSafeAreaEdge {
     Ark_Tag tag;
@@ -20990,6 +20999,18 @@ typedef struct Opt_dragController_SpringLoadingContext {
     Ark_Tag tag;
     Ark_dragController_SpringLoadingContext value;
 } Opt_dragController_SpringLoadingContext;
+typedef struct Ark_DrawableTabBarIndicator {
+    /* kind: Interface */
+    Opt_DrawableDescriptor drawable;
+    Opt_Length width;
+    Opt_Length height;
+    Opt_Length borderRadius;
+    Opt_Length marginTop;
+} Ark_DrawableTabBarIndicator;
+typedef struct Opt_DrawableTabBarIndicator {
+    Ark_Tag tag;
+    Ark_DrawableTabBarIndicator value;
+} Opt_DrawableTabBarIndicator;
 typedef struct Ark_EdgeOutlineWidths {
     /* kind: Interface */
     Opt_Dimension top;
@@ -22128,6 +22149,18 @@ typedef struct Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDesti
     Ark_Tag tag;
     Ark_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource value;
 } Opt_Union_String_CustomBuilder_NavDestinationCommonTitle_NavDestinationCustomTitle_Resource;
+typedef struct Ark_Union_SubTabBarIndicatorStyle_DrawableTabBarIndicator {
+    /* kind: UnionType */
+    Ark_Int32 selector;
+    union {
+        Ark_SubTabBarIndicatorStyle value0;
+        Ark_DrawableTabBarIndicator value1;
+    };
+} Ark_Union_SubTabBarIndicatorStyle_DrawableTabBarIndicator;
+typedef struct Opt_Union_SubTabBarIndicatorStyle_DrawableTabBarIndicator {
+    Ark_Tag tag;
+    Ark_Union_SubTabBarIndicatorStyle_DrawableTabBarIndicator value;
+} Opt_Union_SubTabBarIndicatorStyle_DrawableTabBarIndicator;
 typedef struct Ark_Union_UIAbilityContext_UIContext {
     /* kind: UnionType */
     Ark_Int32 selector;
@@ -23589,7 +23622,7 @@ typedef struct Opt_StyleOptions {
 typedef struct Ark_SubTabBarStyle {
     /* kind: Interface */
     Opt_Union_String_Resource_ComponentContentBase _content;
-    Opt_SubTabBarIndicatorStyle _indicator;
+    Opt_Union_SubTabBarIndicatorStyle_DrawableTabBarIndicator _indicator;
     Opt_SelectedMode _selectedMode;
     Opt_BoardStyle _board;
     Opt_TabBarLabelStyle _labelStyle;
@@ -28280,7 +28313,7 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
                                               Ark_Float64 startAngle,
                                               Ark_Float64 x,
                                               Ark_Float64 y);
-    Ark_image_PixelMap (*getPixelMap)(Ark_CanvasRenderer peer,
+    Opt_image_PixelMap (*getPixelMap)(Ark_CanvasRenderer peer,
                                       Ark_Float64 sx,
                                       Ark_Float64 sy,
                                       Ark_Float64 sw,

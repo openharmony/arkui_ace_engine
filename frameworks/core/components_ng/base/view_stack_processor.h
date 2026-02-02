@@ -249,23 +249,9 @@ public:
         return frameNode->GetOrCreateInputEventHub();
     }
 
-    RefPtr<FocusHub> GetOrCreateMainFrameNodeFocusHub() const
-    {
-        auto frameNode = GetMainFrameNode();
-        if (!frameNode) {
-            return nullptr;
-        }
-        return frameNode->GetOrCreateFocusHub();
-    }
+    RefPtr<FocusHub> GetOrCreateMainFrameNodeFocusHub() const;
 
-    RefPtr<FocusHub> GetMainFrameNodeFocusHub() const
-    {
-        auto frameNode = GetMainFrameNode();
-        if (!frameNode) {
-            return nullptr;
-        }
-        return frameNode->GetFocusHub();
-    }
+    RefPtr<FocusHub> GetMainFrameNodeFocusHub() const;
     
     ACE_FORCE_EXPORT FrameNode* GetMainFrameNode() const;
 
