@@ -9004,7 +9004,7 @@ ArkUINativeModuleValue CommonBridge::SetOnTouch(ArkUIRuntimeCallInfo* runtimeCal
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
         auto infoPtr = std::make_shared<TouchEventInfo>(info);
-        auto eventObj = FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr);
+        auto eventObj = FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr, node);
         panda::Local<panda::JSValueRef> params[1] = { eventObj };
         function->Call(vm, function.ToLocal(), params, 1);
         info.SetStopPropagation(infoPtr->IsStopPropagation());
@@ -9614,7 +9614,7 @@ ArkUINativeModuleValue CommonBridge::SetOnMouse(ArkUIRuntimeCallInfo* runtimeCal
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
         auto infoPtr = std::make_shared<MouseInfo>(info);
-        auto obj = FrameNodeBridge::CreateMouseInfo(vm, infoPtr);
+        auto obj = FrameNodeBridge::CreateMouseInfo(vm, infoPtr, node);
         panda::Local<panda::JSValueRef> params[1] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
         info.SetStopPropagation(infoPtr->IsStopPropagation());
@@ -10940,7 +10940,8 @@ ArkUINativeModuleValue CommonBridge::RegisterFrameNodeDestructorCallback(ArkUIRu
     return panda::JSValueRef::Undefined(vm);
 }
 
-Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, std::shared_ptr<AxisInfo> infoPtr)
+Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(
+    EcmaVM* vm, std::shared_ptr<AxisInfo> infoPtr, const WeakPtr<FrameNode>& node)
 {
     CHECK_NULL_RETURN(infoPtr, panda::ObjectRef::New(vm));
     const Offset& globalOffset = infoPtr->GetGlobalLocation();
@@ -10981,7 +10982,7 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, std::share
         panda::NumberRef::New(vm, infoPtr->GetTargetDisplayId()),
         panda::FunctionRef::New(vm, ArkTSUtils::JsHasAxis) };
     auto obj = panda::ObjectRef::NewWithNamedProperties(vm, ArraySize(keys), keys, values);
-    auto eventInfoManager = FrameNodeBridge::GetEventInfoManager();
+    auto eventInfoManager = FrameNodeBridge::GetEventInfoManager(node);
     if (eventInfoManager == nullptr) {
         obj->SetNativePointerFieldCount(vm, 1);
         obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr.get()));
@@ -10989,8 +10990,11 @@ Local<panda::ObjectRef> CommonBridge::CreateAxisEventInfo(EcmaVM* vm, std::share
     }
     auto eventId = eventInfoManager->AddAxisInfo(infoPtr);
     TAG_LOGI(AceLogTag::ACE_UIEVENT, "Add AxisEventInfo: %{public}d", eventId);
+    auto nativeEventInfo = AceType::MakeRefPtr<ArkUINativeEventInfo>(NATIVE_PTR_TAG_AXIS_INFO, node);
+    nativeEventInfo->IncRefCount();
     obj->SetNativePointerFieldCount(vm, 1);
-    obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr.get()), FrameNodeBridge::ReleaseNativePtrFunc, (void*)NATIVE_PTR_TAG_AXIS_INFO);
+    obj->SetNativePointerField(vm, 0, static_cast<void*>(infoPtr.get()), FrameNodeBridge::ReleaseNativePtrFunc,
+        static_cast<void*>(nativeEventInfo.GetRawPtr()));
     return obj;
 }
 
@@ -11016,7 +11020,7 @@ ArkUINativeModuleValue CommonBridge::SetOnAxisEvent(ArkUIRuntimeCallInfo* runtim
         CHECK_NULL_VOID(function->IsFunction(vm));
         PipelineContext::SetCallBackNode(node);
         auto infoPtr = std::make_shared<AxisInfo>(info);
-        auto obj = CreateAxisEventInfo(vm, infoPtr);
+        auto obj = CreateAxisEventInfo(vm, infoPtr, node);
         panda::Local<panda::JSValueRef> params[] = { obj };
         function->Call(vm, function.ToLocal(), params, 1);
         info.SetStopPropagation(infoPtr->IsStopPropagation());
@@ -11466,7 +11470,7 @@ ArkUINativeModuleValue CommonBridge::SetOnTouchIntercept(ArkUIRuntimeCallInfo* r
         CHECK_EQUAL_RETURN(function->IsFunction(vm), false, HitTestMode::HTMDEFAULT);
         PipelineContext::SetCallBackNode(node);
         auto infoPtr = std::make_shared<TouchEventInfo>(info);
-        auto touchEventObj = FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr);
+        auto touchEventObj = FrameNodeBridge::CreateTouchEventInfo(vm, infoPtr, node);
         HitTestMode hitTestMode = NG::HitTestMode::HTMDEFAULT;
         auto hitTestModeValue = ConvertHitTestMode(vm, hitTestMode);
         panda::Local<panda::JSValueRef> params[NUM_2] = { touchEventObj, hitTestModeValue };
