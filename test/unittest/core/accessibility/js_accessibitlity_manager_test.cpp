@@ -1341,6 +1341,7 @@ HWTEST_F(JsAccessibilityManagerTest, FrameNodeAccessibilityVisible02, TestSize.L
     auto nextChildAccessibilityId = nextChildNode->GetAccessibilityId();
     AccessibilitySystemAbilityClient::SetSplicElementIdTreeId(1, nextChildAccessibilityId);
     //@tc.steps: step4. add parent and child node to the pipeline context.
+    MockPipelineContext::SetUp();
     auto context = NG::PipelineContext::GetCurrentContext();
     context->GetRootElement()->AddChild(frameNode);
     frameNode->AddChild(childNode);
