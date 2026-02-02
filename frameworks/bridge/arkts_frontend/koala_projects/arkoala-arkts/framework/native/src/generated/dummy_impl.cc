@@ -15894,18 +15894,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         out.append(") \n");
         appendGroupedLog(1, out);
     }
-    void SetNestedScrollImpl(Ark_NativePointer node,
-                             const Opt_TabsNestedScrollMode* value)
-    {
-        if (!needGroupedLog(1))
-        {
-            return;
-        }
-        string out("setNestedScroll(");
-        WriteToString(&out, value);
-        out.append(") \n");
-        appendGroupedLog(1, out);
-    }
     void SetOnAnimationStartImpl(Ark_NativePointer node,
                                  const Opt_OnSwiperAnimationStartCallback* value)
     {
@@ -24846,7 +24834,6 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             TabsAttributeModifier::SetOnSelectedImpl,
             TabsAttributeModifier::SetOnTabBarClickImpl,
             TabsAttributeModifier::SetOnUnselectedImpl,
-            TabsAttributeModifier::SetNestedScrollImpl,
             TabsAttributeModifier::SetOnAnimationStartImpl,
             TabsAttributeModifier::SetOnAnimationEndImpl,
             TabsAttributeModifier::SetOnGestureSwipeImpl,

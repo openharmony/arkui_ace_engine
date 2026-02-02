@@ -2389,8 +2389,6 @@ export class ArkUIGeneratedNativeModule {
     @ani.unsafe.Direct
     native static _TabsAttribute_setOnUnselected(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
-    native static _TabsAttribute_setNestedScroll(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
-    @ani.unsafe.Direct
     native static _TabsAttribute_setOnAnimationStart(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
     @ani.unsafe.Direct
     native static _TabsAttribute_setOnAnimationEnd(ptr: KPointer, thisArray: KSerializerBuffer, thisLength: int32): void
