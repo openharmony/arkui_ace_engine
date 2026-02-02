@@ -1127,6 +1127,7 @@ protected:
     void OnDetachFromFrameNode(FrameNode* sheetNode) override;
 
 private:
+    void OnAttachToMainTree() override;
     void OnModifyDone() override;
     void OnAttachToFrameNode() override;
     void OnColorConfigurationUpdate() override;
