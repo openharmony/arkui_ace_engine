@@ -163,8 +163,8 @@ ArkUINativeModuleValue SpanBridge::SetFontWeight(ArkUIRuntimeCallInfo *runtimeCa
             variableFontWeight = StringUtils::StringToInt(weight);
         }
     }
-    GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeight(nativeNode,	 
-         static_cast<ArkUI_Int32>(Framework::ConvertStrToFontWeight(weight)), AceType::RawPtr(resObj));
+    GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeight(nativeNode,
+        static_cast<ArkUI_Int32>(Framework::ConvertStrToFontWeight(weight)), AceType::RawPtr(resObj));
     GetArkUINodeModifiers()->getSpanModifier()->setSpanVariableFontWeight(nativeNode,
         variableFontWeight, AceType::RawPtr(resObj));
     if (!thirdArg->IsNull() && thirdArg->IsBoolean()) {
