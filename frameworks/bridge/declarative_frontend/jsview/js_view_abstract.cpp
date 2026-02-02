@@ -9006,7 +9006,7 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
 
-void ParseJsKeyEventBasic(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
+void ParseKeyIdentifier(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
 {
     if (jsObj->HasProperty("type")) {
         auto type = jsObj->GetProperty("type");
@@ -9042,7 +9042,10 @@ void ParseJsKeyEventBasic(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
             keyEvent.deviceId = deviceId->ToNumber<int32_t>();
         }
     }
+}
 
+void ParseKeyModifiers(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
+{
     if (jsObj->HasProperty("metaKey")) {
         auto metaKey = jsObj->GetProperty("metaKey");
         if (metaKey->IsNumber()) {
@@ -9073,22 +9076,25 @@ void ParseJsKeyEventBasic(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
     }
 }
 
-void ParseJsKeyEventExtended(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
+void ParsePressedCodes(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
 {
-    if (jsObj->HasProperty("pressedCodes")) {
-        auto jsValue = jsObj->GetProperty("pressedCodes");
-        if (jsValue->IsArray()) {
-            JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsValue);
-            for (size_t i = 0; i < jsArray->Length(); ++i) {
-                auto element = jsArray->GetValueAt(i);
-                if (element->IsNumber()) {
-                    keyEvent.pressedCodes.push_back(
-                        static_cast<OHOS::Ace::KeyCode>(element->ToNumber<int32_t>()));
-                }
-            }
-        }
+    auto jsValue = jsObj->GetProperty("pressedCodes");
+    if (!jsValue->IsArray()) {
+        return;
     }
 
+    JSRef<JSArray> jsArray = JSRef<JSArray>::Cast(jsValue);
+    for (size_t i = 0; i < jsArray->Length(); ++i) {
+        auto element = jsArray->GetValueAt(i);
+        if (element->IsNumber()) {
+            keyEvent.pressedCodes.push_back(
+                static_cast<OHOS::Ace::KeyCode>(element->ToNumber<int32_t>()));
+        }
+    }
+}
+
+void ParseKeyLockStates(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
+{
     if (jsObj->HasProperty("numLock")) {
         auto jsValue = jsObj->GetProperty("numLock");
         if (jsValue->IsBoolean()) {
@@ -9116,8 +9122,10 @@ void ParseJsKeyEventExtended(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
 
 void ParseJsKeyEvent(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
 {
-    ParseJsKeyEventBasic(jsObj, keyEvent);
-    ParseJsKeyEventExtended(jsObj, keyEvent);
+    ParseKeyIdentifier(jsObj, keyEvent);
+    ParseKeyModifiers(jsObj, keyEvent);
+    ParsePressedCodes(jsObj, keyEvent);
+    ParseKeyLockStates(jsObj, keyEvent);
 }
 
 void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
