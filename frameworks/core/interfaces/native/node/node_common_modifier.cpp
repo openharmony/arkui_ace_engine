@@ -9390,7 +9390,7 @@ void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
     CHECK_NULL_VOID(frameNode);
-    auto onChange = [node = AceType::WeakClaim(frameNode), eventReceiver](const bool isOn) {
+    std::function<void(const bool)> onChange = [node = AceType::WeakClaim(frameNode), eventReceiver](const bool isOn) {
         auto frameNode = node.Upgrade();
         CHECK_NULL_VOID(frameNode);
         auto nodeHandle = reinterpret_cast<ArkUINodeHandle>(AceType::RawPtr(frameNode));
@@ -9403,9 +9403,9 @@ void SetOnChangeExt(ArkUINodeHandle node, void (*eventReceiver)(ArkUINodeHandle 
         CHECK_NULL_VOID(checkboxModifier);
         return checkboxModifier->setCheckboxOnChange(node, reinterpret_cast<void*>(&onChange));
     } else {
-        auto* radioModifier = GetArkUINodeModifiers()->getRadioModifier();
+        auto radioModifier = GetArkUINodeModifiers()->getRadioModifier();
         CHECK_NULL_VOID(radioModifier);
-        radioModifier->setRadioOnChange(reinterpret_cast<ArkUINodeHandle>(node), reinterpret_cast<void*>(&onChange));
+        radioModifier->setRadioOnChange(node, reinterpret_cast<void*>(&onChange));
     }
 }
 
