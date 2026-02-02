@@ -24,5 +24,6 @@ ace_unittest("container_picker_test") {
     "container_picker_pattern_test.cpp",
     "container_picker_pattern_test_two.cpp",
     "container_picker_resource_test.cpp",
+    "container_picker_model_test.cpp",
   ]
 }
