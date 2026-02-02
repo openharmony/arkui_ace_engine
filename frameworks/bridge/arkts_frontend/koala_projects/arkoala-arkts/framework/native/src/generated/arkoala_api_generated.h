@@ -28298,7 +28298,7 @@ typedef struct GENERATED_ArkUICanvasRendererAccessor {
                                               Ark_Float64 startAngle,
                                               Ark_Float64 x,
                                               Ark_Float64 y);
-    Ark_image_PixelMap (*getPixelMap)(Ark_CanvasRenderer peer,
+    Opt_image_PixelMap (*getPixelMap)(Ark_CanvasRenderer peer,
                                       Ark_Float64 sx,
                                       Ark_Float64 sy,
                                       Ark_Float64 sw,
