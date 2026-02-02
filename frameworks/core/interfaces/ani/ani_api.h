@@ -432,6 +432,13 @@ struct ArkUIWaterFlowSectionGap {
     float value = 0.0f;
 };
 
+struct ArkUIWaterFlowResourceParam {
+    int32_t resId = 0;
+    int32_t resType = 0;
+    const char* bundleName = nullptr;
+    const char* moduleName = nullptr;
+};
+
 struct ArkUIWaterFlowSectionPadding {
     ArkUIWaterFlowSectionGap top;
     ArkUIWaterFlowSectionGap right;
@@ -661,6 +668,7 @@ struct ArkUIAniWaterFlowModifier {
     void (*resetWaterFlowFooter)(ArkUINodeHandle node);
     void (*setWaterFlowScroller)(ArkUINodeHandle node, void* scroller);
     void (*setWaterFlowLayoutMode)(ArkUINodeHandle node, int32_t mode);
+    bool (*parseWaterFlowSectionResourceGap)(const ArkUIWaterFlowResourceParam* param, ArkUIWaterFlowSectionGap* out);
 };
 struct ArkUIAniListModifier {
     bool (*updateDefaultSizeAndGetNeedSync)(ArkUINodeHandle node, double defaultSize);
