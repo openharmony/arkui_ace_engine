@@ -1205,23 +1205,56 @@ void WebPattern::RegisterMenuLifeCycleCallback()
 
 void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "Web contextMenu NotifyMenuLifeCycleEvent:%{public}d.",
-        static_cast<int>(menuLifeCycleEvent));
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web contextMenu NotifyMenuLifeCycleEvent:%{public}d selectPopupMenuShowing_:%{public}d.",
+        static_cast<int>(menuLifeCycleEvent), selectPopupMenuShowing_);
+    if (selectPopupMenuShowing_) {
+        return;
+    }
     if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_APPEAR) {
         isMenuShownFromWeb_ = true;
         isLastEventMenuClose_ = false;
         isMenuShownFromWebBeforeStartClose_ = true;
-    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR) {
+    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_APPEAR) {
+        auto host = GetHost();
+        CHECK_NULL_VOID(host);
+        auto pipelineContext = host->GetContextRefPtr();
+        CHECK_NULL_VOID(pipelineContext);
+        auto overlayManager = pipelineContext->GetOverlayManager();
+        CHECK_NULL_VOID(overlayManager);
+        auto menuNode = overlayManager->GetMenuNode(host->GetId());
+        if (!menuNode) {
+            auto subWindow = SubwindowManager::GetInstance()->GetSubwindow(pipelineContext->GetInstanceId());
+            CHECK_NULL_VOID(subWindow);
+            auto subOverlayManager = subWindow->GetOverlayManager();
+            CHECK_NULL_VOID(subOverlayManager);
+            menuNode = subOverlayManager->GetMenuNode(host->GetId());
+        }
+        if (menuNode) {
+            auto menuDestroyCallback = [weak = WeakClaim(this)]() {
+                auto pattern = weak.Upgrade();
+                CHECK_NULL_VOID(pattern);
+                pattern->MenuNodeDestroyCallback();
+            };
+            menuNode->PushDestroyCallbackWithTag(menuDestroyCallback, std::to_string(host->GetId()));
+        } else {
+            TAG_LOGI(AceLogTag::ACE_WEB, "Web contextMenu NotifyMenuLifeCycleEvent can not get menuNode.");
+        }
+    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR && isMenuShownFromWebBeforeStartClose_) {
        isMenuShownFromWebBeforeStartClose_ = false;
        isLastEventMenuClose_ = true;
-       lastMenuCloseTimestamp_ = GetCurrentTimestamp();
-    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_DISAPPEAR) {
-        isMenuShownFromWeb_ = false;
-        if (!isFocus_) {
-            CHECK_NULL_VOID(delegate_);
-            delegate_->SetBlurReason(OHOS::NWeb::BlurReason::VIEW_SWITCH);
-            delegate_->OnBlur();
-        }
+       lastMenuCloseTimestamp_ = GetCurrentTimestamp();.
+    } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_DISAPPEAR && isMenuShownFromWeb_) {
+       isMenuShownFromWeb_ = false;
+    }
+}
+
+void WebPattern::MenuNodeDestroyCallback()
+{
+    TAG_LOGI(AceLogTag::ACE_WEB, "WebPattern::MenuNodeDestroyCallback isFocus_:%{public}d.", isFocus_);
+    if (!isFocus_) {
+        CHECK_NULL_VOID(delegate_);
+        delegate_->SetBlurReason(OHOS::NWeb::BlurReason::VIEW_SWITCH);
+        delegate_->OnBlur();
     }
 }
 
