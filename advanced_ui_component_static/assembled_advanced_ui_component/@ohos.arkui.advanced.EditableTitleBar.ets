@@ -1027,17 +1027,6 @@ struct EditableTitleBarDialog {
   }
 }
 
-const densityPixels: number = ((): number => {
-  try {
-    let densityPixels: number = display.getDefaultDisplaySync().densityPixels;
-    return densityPixels;
-  } catch (error) {
-    let code = (error as ClassCastError)?.code;
-    let message = (error as ClassCastError)?.message;
-    return 1;
-  }
-})();
-
 /**
  * get resource size
  *
@@ -1045,19 +1034,7 @@ const densityPixels: number = ((): number => {
  * @return resource size
  */
 function getNumberByResource(resourceId: number, defaultNumber: number): number {
-  try {
-    let resourceNumber: number = resourceManager.getSysResourceManager().getDouble(resourceId as Long);
-    if (resourceNumber === 0) {
-      return defaultNumber;
-    } else {
-      return resourceNumber / densityPixels;
-    }
-  } catch (error) {
-    let code: int = (error as ClassCastError).code;
-    let message: string = (error as ClassCastError).message;
-    hilog.error(0x3900, 'Ace', `EditableTitleBar getNumberByResource error, code: ${code},message:${message}`);
-    return 0;
-  }
+  return defaultNumber
 }
 
 class Util {
