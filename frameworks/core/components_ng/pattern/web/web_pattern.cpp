@@ -1205,7 +1205,7 @@ void WebPattern::RegisterMenuLifeCycleCallback()
 
 void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
 {
-    TAG_LOGI(AceLogTag::ACE_WEB, "Web contextMenu NotifyMenuLifeCycleEvent:%{public}d selectPopupMenuShowing_:%{public}d.",
+    TAG_LOGI(AceLogTag::ACE_WEB, "Web NotifyMenuLifeCycleEvent:%{public}d selectPopupMenuShowing_:%{public}d.",
         static_cast<int>(menuLifeCycleEvent), selectPopupMenuShowing_);
     if (selectPopupMenuShowing_) {
         return;
@@ -1237,14 +1237,14 @@ void WebPattern::NotifyMenuLifeCycleEvent(MenuLifeCycleEvent menuLifeCycleEvent)
             };
             menuNode->PushDestroyCallbackWithTag(menuDestroyCallback, std::to_string(host->GetId()));
         } else {
-            TAG_LOGI(AceLogTag::ACE_WEB, "Web contextMenu NotifyMenuLifeCycleEvent can not get menuNode.");
+            TAG_LOGI(AceLogTag::ACE_WEB, "Web NotifyMenuLifeCycleEvent can not get menuNode.");
         }
     } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ABOUT_TO_DISAPPEAR && isMenuShownFromWebBeforeStartClose_) {
-       isMenuShownFromWebBeforeStartClose_ = false;
-       isLastEventMenuClose_ = true;
-       lastMenuCloseTimestamp_ = GetCurrentTimestamp();.
+        isMenuShownFromWebBeforeStartClose_ = false;
+        isLastEventMenuClose_ = true;
+        lastMenuCloseTimestamp_ = GetCurrentTimestamp();
     } else if (menuLifeCycleEvent == MenuLifeCycleEvent::ON_DID_DISAPPEAR && isMenuShownFromWeb_) {
-       isMenuShownFromWeb_ = false;
+        isMenuShownFromWeb_ = false;
     }
 }
 
