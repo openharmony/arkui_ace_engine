@@ -122,6 +122,8 @@ void ReturnPromise(const JSCallbackInfo& info, int32_t errCode)
 
 static std::atomic<int32_t> gestureStyleStoreIndex_;
 static std::atomic<int32_t> spanStringStoreIndex_;
+static std::atomic<int32_t> customSpanStoreIndex_;
+const std::string CUSTOM_STORE_KEY = "STYLED_STRING_CUSTOM_STORE_";
 };
 
 const std::unordered_set<SpanType> types = { SpanType::Font, SpanType::Gesture, SpanType::BaselineOffset,
@@ -618,6 +620,13 @@ RefPtr<SpanBase> JSSpanString::ParseJsCustomSpan(int32_t start, int32_t length, 
     if (!typeObj->IsString() || typeObj->ToString() != "CustomSpan") {
         return nullptr;
     }
+
+    // store custom spanobj in spanstring
+    auto thisObj = args.This();
+    auto newIndex = customSpanStoreIndex_.fetch_add(1);
+    std::string key = CUSTOM_STORE_KEY + std::to_string(newIndex);
+    thisObj->SetPropertyObject(key.c_str(), styleStringValue);
+
     auto spanBase = AceType::MakeRefPtr<JSCustomSpan>(JSRef<JSObject>(styleStringValue), args);
     spanBase->UpdateStartIndex(start);
     spanBase->UpdateEndIndex(start + length);
@@ -736,6 +745,11 @@ ImageSpanOptions JSSpanString::ParseJsImageAttachment(const JSRef<JSObject>& inf
 
 RefPtr<CustomSpan> JSSpanString::ParseJsCustomSpan(const JSCallbackInfo& args)
 {
+    // store custom spanobj in spanstring
+    auto thisObj = args.This();
+    auto newIndex = customSpanStoreIndex_.fetch_add(1);
+    std::string key = CUSTOM_STORE_KEY + std::to_string(newIndex);
+    thisObj->SetPropertyObject(key.c_str(), args[0]);
     return AceType::MakeRefPtr<JSCustomSpan>(args[0], args);
 }
 
