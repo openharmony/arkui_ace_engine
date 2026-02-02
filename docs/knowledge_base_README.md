@@ -10,6 +10,8 @@ knowledge_base/
 └── pattern/               # 组件模式知识库
     └── menu/
         └── Menu_Knowledge_Base.md  # Menu 组件知识库
+    └── qrcode/
+        └── QRCode_Knowledge_Base.md  # QRCode 组件知识库
 ```
 
 ## 现有文档
@@ -30,6 +32,25 @@ knowledge_base/
 - 测试覆盖和调试指南
 
 **适用场景**：Menu 组件开发、测试、问题排查时参考
+
+### QRCode Component Knowledge Base
+
+**位置**: `pattern/qrcode/QRCode_Knowledge_Base.md`
+
+**完整指南** - QRCode 组件的开发、测试和调试参考文档
+
+**包含内容**：
+
+- 组件概述和核心功能
+- 目录结构和架构设计
+- Pattern/Model/Property/Modifier 四层架构详解
+- 生命周期管理（OnAttachToFrameNode、OnModifyDone、OnDirtyLayoutWrapperSwap、OnColorConfigurationUpdate）
+- 布局算法（正方形布局约束、API 11 差异处理）
+- 绘制流程（qrcodegen 库集成、位图生成、Canvas 绘制）
+- Bridge 层集成（动态加载、NAPI 接口）
+- 测试覆盖和常见问题
+
+**适用场景**：QRCode 组件开发、测试、问题排查时参考
 
 ## 文档分类
 
