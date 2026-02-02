@@ -1816,6 +1816,14 @@ void SetTouchEventPreventDefault(ani_env* env, [[maybe_unused]] ani_object obj, 
             env, "Component does not support prevent function.", ERROR_CODE_COMPONENT_NOT_SUPPORTED_PREVENT_FUNCTION);
     }
 }
+
+ani_long GetPageRootNode(ani_env* env, [[maybe_unused]] ani_object obj)
+{
+    const auto* modifier = GetNodeAniModifier();
+    CHECK_NULL_RETURN(modifier, 0);
+    return modifier->getCommonAniModifier()->getPageRootNode();
+}
+
 ani_int GetCallingScopeUIContext(ani_env* env, [[maybe_unused]] ani_object obj)
 {
     const auto* modifier = GetNodeAniModifier();

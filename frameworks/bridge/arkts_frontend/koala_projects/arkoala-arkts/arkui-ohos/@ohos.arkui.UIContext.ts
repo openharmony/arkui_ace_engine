@@ -822,6 +822,10 @@ export class UIContext {
         throw Error("getPageInfoByUniqueId(number) not implemented in UIContext!")
     }
 
+    public getPageRootNode(): FrameNode | null {
+        throw Error('getPageRootNode not implemented in UIContext!')
+    }
+
     public getFilteredInspectorTree(filters?: Array<string>): string {
         throw Error("getFilteredInspectorTree not implemented in UIContext!")
     }

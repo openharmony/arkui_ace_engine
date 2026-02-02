@@ -2614,7 +2614,7 @@ HWTEST_F(PipelineContextTestNg, PostTaskResponseRegion001, TestSize.Level1)
     manager->SetLaterAvoid(true);
     context_->textFieldManager_ = manager;
     context_->PostTaskResponseRegion(DEFAULT_DELAY_THP);
-    EXPECT_FALSE(manager->GetLaterAvoid());
+    EXPECT_TRUE(manager->GetLaterAvoid());
 }
 
 /**

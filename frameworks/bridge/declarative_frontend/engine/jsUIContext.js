@@ -1010,6 +1010,26 @@ class UIContext {
         Context.setCustomKeyboardContinueFeature(feature);
         __JSScopeUtil__.restoreInstanceId();
     }
+
+    getPageRootNode() {
+        if (!this.isAvailable()) {
+            throw new BusinessError(120007, 'The UIContext is not available');
+        }
+        __JSScopeUtil__.syncInstanceId(this.instanceId_);
+        try {
+            let nodePtr = getUINativeModule().getPageRootNode(this.instanceId_);
+            let xNode = globalThis.__getArkUINode__();
+            let node = xNode.FrameNodeUtils.searchNodeInRegisterProxy(nodePtr);
+            if (!node) {
+                node = xNode.FrameNodeUtils.createFrameNode(this, nodePtr);
+            }
+            __JSScopeUtil__.restoreInstanceId();
+            return node;
+        } catch (e) {
+            __JSScopeUtil__.restoreInstanceId();
+            throw e;
+        }
+    }
 }
 
 class ResolvedUIContext extends UIContext {

@@ -78,7 +78,7 @@ import { Router as RouterExt } from 'arkui/base';
 import { PromptActionExtender, FrameNodeExtender, AlertDialog, ActionSheet, AnimationExtender,
     DialogExtender, IUIContext, ContextMenu } from '../framework';
 import { EntryPoint, NavInterface } from "../component/customComponent"
-import { AsyncCallback as routerAsyncCallback } from "@ohos.base"
+import { AsyncCallback as routerAsyncCallback, BusinessError } from "@ohos.base"
 import { IUIContext, SystemOps, UIObserverGestureEventOps } from 'arkui/component/idlize';
 import { default as uiObserver } from '@ohos/arkui/observer';
 import { TabsController } from 'arkui/component/tabs';
@@ -1607,6 +1607,32 @@ export class UIContextImpl extends UIContext {
         }
         return pageInfo;
     }
+
+    public getPageRootNode(): FrameNode | null {
+        if (!this.isAvailable()) {
+            throw new BusinessError(120007, 'The UIContext is not available');
+        }
+        ArkUIAniModule._Common_Sync_InstanceId(this.instanceId_);
+        let node: FrameNode | null = null;
+        try {
+            const retval = ArkUIAniModule._GetPageRootNode();
+            if (retval !== nullptr && retval !== 0) {
+                const peer = FrameNodeExtender.createByRawPtr(retval as KPointer);
+                if (!peer) {
+                    return null;
+                }
+                node = FrameNodeUtils.searchNodeInRegisterProxy(peer);
+                if (!node) {
+                    node = FrameNodeUtils.createFrameNode(this, peer);
+                }
+            }
+            return node;
+        } catch (e) {
+            ArkUIAniModule._Common_Restore_InstanceId();
+            throw e;
+        }
+    }
+
     getHostContext(): Context | undefined {
         return ArkUIAniModule._Common_GetHostContext(this.instanceId_);
     }

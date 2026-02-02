@@ -614,6 +614,7 @@ struct ArkUIAniCommonModifier {
     void(*getLastForegroundUIContext)(int32_t& instance);
     void(*getAllInstanceIds)(std::vector<int32_t>& instance);
     void(*resolveUIContext)(std::vector<int32_t>& instance);
+    ani_long (*getPageRootNode)();
 };
 struct  ArkUICustomNodeInfo {
     std::function<void()> onPageShowFunc;

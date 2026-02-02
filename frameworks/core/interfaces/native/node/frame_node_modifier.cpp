@@ -1163,6 +1163,20 @@ ArkUI_AccessibilityProvider* GetAccessibilityProvider(ArkUINodeHandle node)
     CHECK_NULL_RETURN(pattern, nullptr);
     return pattern->GetNativeAccessibilityProvider();
 }
+
+ArkUINodeHandle GetPageRootNode(int32_t instanceId)
+{
+    ContainerScope scope(instanceId);
+    auto pipelinecontext = NG::PipelineContext::GetCurrentContextSafely();
+    if (!pipelinecontext) {
+        LOGD("Fail to get PageRootNode for pipelinecontext is null");
+        return nullptr;
+    }
+    auto node = pipelinecontext->GetPageRootNode();
+    CHECK_NULL_RETURN(node, nullptr);
+    return reinterpret_cast<ArkUINodeHandle>(OHOS::Ace::AceType::RawPtr(node));
+}
+
 namespace NodeModifier {
 const ArkUIFrameNodeModifier* GetFrameNodeModifier()
 {
@@ -1257,6 +1271,7 @@ const ArkUIFrameNodeModifier* GetFrameNodeModifier()
         .convertPositionToWindow = ConvertPositionToWindow,
         .convertPositionFromWindow = ConvertPositionFromWindow,
         .getAccessibilityProvider = GetAccessibilityProvider,
+        .getPageRootNode = GetPageRootNode,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;

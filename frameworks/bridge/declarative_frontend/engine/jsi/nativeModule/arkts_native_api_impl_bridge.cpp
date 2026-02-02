@@ -5529,6 +5529,18 @@ void ArkUINativeModule::RegisterArkUINativeModuleFormFull(
     frameNode->Set(vm, panda::StringRef::NewFromUtf8(vm, "createTypedFrameNode"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), FrameNodeBridge::CreateTypedFrameNodeFormFullSet));
 }
+
+ArkUINativeModuleValue ArkUINativeModule::GetPageRootNode(ArkUIRuntimeCallInfo* runtimeCallInfo)
+{
+    EcmaVM* vm = runtimeCallInfo->GetVM();
+    CHECK_NULL_RETURN(vm, panda::JSValueRef::Undefined(vm));
+    Local<JSValueRef> firstArg = runtimeCallInfo->GetCallArgRef(0);
+    auto instanceId = firstArg->ToNumber(vm)->Value();
+    auto nodePtr = GetArkUINodeModifiers()->getFrameNodeModifier()->getPageRootNode(instanceId);
+    CHECK_NULL_RETURN(nodePtr, panda::JSValueRef::Undefined(vm));
+    return panda::NativePointerRef::New(vm, nodePtr);
+}
+
 void ArkUINativeModule::RegisterGlobalMethods(Local<panda::ObjectRef> object, EcmaVM* vm)
 {
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getFrameNodeById"),
@@ -5555,6 +5567,8 @@ void ArkUINativeModule::RegisterGlobalMethods(Local<panda::ObjectRef> object, Ec
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), SetMarqueeFrameRateRange));
     object->Set(vm, panda::StringRef::NewFromUtf8(vm, "loadNativeModule"),
         panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), LoadNativeModule));
+    object->Set(vm, panda::StringRef::NewFromUtf8(vm, "getPageRootNode"),
+        panda::FunctionRef::New(const_cast<panda::EcmaVM*>(vm), GetPageRootNode));
 }
 
 void ArkUINativeModule::RegisterCommonAttributes(Local<panda::ObjectRef> object, EcmaVM* vm)
