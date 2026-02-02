@@ -941,7 +941,7 @@ class ImageMenuItem extends ViewPU {
                 } catch (paramError) {
                     let code = paramError?.code;
                     let message = paramError?.message;
-                    hilog.error(0x3900, 'EditableTitleBar', `environmentCallback error: ${code}, ${message}`);
+                    hilog.error(0x3900, 'EditableTitleBar', `EnvironmentCallback error: ${code}, ${message}`);
                 }
             },
             onMemoryLevel: (level) => {
