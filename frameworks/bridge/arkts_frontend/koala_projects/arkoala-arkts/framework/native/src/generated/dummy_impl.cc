@@ -49118,6 +49118,25 @@ namespace OHOS::Ace::NG::GeneratedModifier {
         appendGroupedLog(1, out);
         return 0;
     }
+    Ark_Int32 AddGlobalGestureListenerImpl(Ark_GestureListenerType type,
+                                           const Ark_InnerGestureObserverConfigs* option,
+                                           const UIObserver_GestureListenerCallback* callback)
+    {
+        if (!needGroupedLog(1))
+        {
+            return 0;
+        }
+        string out("addGlobalGestureListener(");
+        WriteToString(&out, type);
+        out.append(", ");
+        WriteToString(&out, option);
+        out.append(", ");
+        WriteToString(&out, callback);
+        out.append(") \n");
+        out.append("[return 0] \n");
+        appendGroupedLog(1, out);
+        return 0;
+    }
     } // UIObserverGestureEventOpsAccessor
     namespace UIScrollableCommonEventAccessor {
     void DestroyPeerImpl(Ark_UIScrollableCommonEvent peer)
@@ -54617,6 +54636,7 @@ namespace OHOS::Ace::NG::GeneratedModifier {
             UIObserverGestureEventOpsAccessor::SetOnDidClickImpl,
             UIObserverGestureEventOpsAccessor::SetOnWillTapImpl,
             UIObserverGestureEventOpsAccessor::SetOnDidTapImpl,
+            UIObserverGestureEventOpsAccessor::AddGlobalGestureListenerImpl,
         };
         return &UIObserverGestureEventOpsAccessorImpl;
     }

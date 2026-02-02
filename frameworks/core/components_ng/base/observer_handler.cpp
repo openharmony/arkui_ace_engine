@@ -19,6 +19,7 @@
 #include "core/components_ng/pattern/navigation/navigation_stack.h"
 #include "core/components_ng/pattern/navrouter/navdestination_pattern.h"
 #include "core/components_ng/pattern/scrollable/scrollable_pattern.h"
+#include "core/interfaces/native/implementation/gesture_trigger_info_peer.h"
 
 namespace OHOS::Ace::NG {
 namespace {
@@ -48,6 +49,8 @@ std::unordered_map<int32_t, std::map<int32_t, GestureListenerCallback>> UIObserv
 std::unordered_map<int32_t, std::map<int32_t, GestureListenerCallback>> UIObserverHandler::didClickCallbackMap_;
 std::unordered_map<int32_t, std::map<int32_t, GestureListenerCallback>> UIObserverHandler::willTapCallbackMap_;
 std::unordered_map<int32_t, std::map<int32_t, GestureListenerCallback>> UIObserverHandler::didTapCallbackMap_;
+GlobalGestureListenerStorage::StorageMap UIObserverHandler::globalGestureListenerMap_;
+std::mutex UIObserverHandler::globalGestureMutex_;
 
 UIObserverHandler& UIObserverHandler::GetInstance()
 {
@@ -306,9 +309,22 @@ void UIObserverHandler::NotifyGestureStateChange(NG::GestureListenerType gesture
 {
     CHECK_NULL_VOID(current);
     CHECK_NULL_VOID(frameNode);
-    CHECK_NULL_VOID(gestureHandleFunc_);
 
-    gestureHandleFunc_(gestureListenerType, gestureEventInfo, current, frameNode, phase);
+    if (gestureHandleFunc_) {
+        gestureHandleFunc_(gestureListenerType, gestureEventInfo, current, frameNode, phase);
+    }
+
+    // Create GestureTriggerInfo and trigger global gesture listeners
+    GestureTriggerInfo triggerInfo;
+    triggerInfo.event = gestureEventInfo;
+    triggerInfo.current = current ? OHOS::Ace::AceType::RawPtr(current) : nullptr;
+    triggerInfo.currentPhase = static_cast<int32_t>(phase);
+    triggerInfo.node = frameNode;
+
+    TriggerGlobalGestureListener(
+        gestureListenerType,
+        phase,
+        triggerInfo);
 }
 
 void UIObserverHandler::NotifyTabContentStateUpdate(const TabContentInfo& info)
@@ -1119,6 +1135,80 @@ void UIObserverHandler::RemoveDidTapListenerCallback(int32_t instanceId, int32_t
     auto iter = didTapCallbackMap_.find(instanceId);
     if (iter != didTapCallbackMap_.end()) {
         iter->second.erase(resourceId);
+    }
+}
+
+void UIObserverHandler::AddGlobalGestureListenerCallback(
+    GestureListenerType gestureType,
+    GestureActionPhase phase,
+    int32_t resourceId,
+    GlobalGestureListenerCallback&& callback)
+{
+    CHECK_NULL_VOID(callback);
+    std::lock_guard<std::mutex> lock(globalGestureMutex_);
+
+    // Combine gestureType and phase into unique key using bitwise operation
+    uint64_t combinedKey = GlobalGestureListenerStorage::CombineKey(gestureType, phase);
+
+    // Store or replace callback with resourceId for this combined key
+    GlobalGestureListenerStorage::CallbackInfo callbackInfo;
+    callbackInfo.resourceId = resourceId;
+    callbackInfo.callback = std::move(callback);
+    globalGestureListenerMap_[combinedKey] = std::move(callbackInfo);
+}
+
+void UIObserverHandler::RemoveGlobalGestureListenerCallback(
+    GestureListenerType gestureType,
+    int32_t resourceId)
+{
+    std::lock_guard<std::mutex> lock(globalGestureMutex_);
+
+    // Remove callbacks matching the gestureType and resourceId
+    for (auto iter = globalGestureListenerMap_.begin(); iter != globalGestureListenerMap_.end();) {
+        uint64_t combinedKey = iter->first;
+        GestureListenerType keyType = static_cast<GestureListenerType>(
+            combinedKey >> GlobalGestureListenerStorage::GESTURE_TYPE_SHIFT_BITS);
+
+        if (keyType == gestureType && iter->second.resourceId == resourceId) {
+            iter = globalGestureListenerMap_.erase(iter);
+        } else {
+            ++iter;
+        }
+    }
+}
+
+void UIObserverHandler::RemoveGlobalGestureListenerCallback(
+    GestureListenerType gestureType,
+    GestureActionPhase phase)
+{
+    std::lock_guard<std::mutex> lock(globalGestureMutex_);
+
+    // Combine gestureType and phase into unique key
+    uint64_t combinedKey = GlobalGestureListenerStorage::CombineKey(gestureType, phase);
+
+    // Remove the callback for this specific gestureType+phase combination
+    globalGestureListenerMap_.erase(combinedKey);
+}
+
+void UIObserverHandler::TriggerGlobalGestureListener(
+    GestureListenerType gestureType,
+    GestureActionPhase phase,
+    const GestureTriggerInfo& triggerInfo)
+{
+    std::lock_guard<std::mutex> lock(globalGestureMutex_);
+
+    // Combine gestureType and phase into unique key
+    uint64_t combinedKey = GlobalGestureListenerStorage::CombineKey(gestureType, phase);
+
+    auto iter = globalGestureListenerMap_.find(combinedKey);
+    if (iter == globalGestureListenerMap_.end()) {
+        return;
+    }
+
+    // Trigger the single callback for this (gestureType, phase) combination
+    const auto& callbackInfo = iter->second;
+    if (callbackInfo.callback) {
+        callbackInfo.callback(triggerInfo);
     }
 }
 

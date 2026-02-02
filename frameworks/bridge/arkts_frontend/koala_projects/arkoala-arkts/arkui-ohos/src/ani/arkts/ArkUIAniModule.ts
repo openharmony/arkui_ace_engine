@@ -31,7 +31,7 @@ import { XComponentOptionsInternal } from '#generated';
 import { HookDragInfo } from 'arkui/handwritten';
 import { dragController } from '@ohos/arkui/dragController';
 import { componentSnapshot } from '@ohos/arkui/componentSnapshot';
-import { KeyboardAvoidMode, PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback } from '@ohos/arkui/UIContext';
+import { KeyboardAvoidMode, PanListenerCallback, ClickEventListenerCallback, GestureEventListenerCallback, GestureListenerCallback, GestureListenerType, GestureActionPhase } from '@ohos.arkui.UIContext';
 import { DrawableDescriptor } from '@ohos.arkui.drawableDescriptor';
 import { default as uiObserver }  from '@ohos/arkui/observer';
 import { SymbolGlyphModifier } from 'arkui.SymbolGlyphModifier';
@@ -81,7 +81,7 @@ export class ArkUIAniModule {
     native static _Image_ColorFilter_TransferDynamic(ptr: KPointer): KPointer
     native static _Image_ResizableOptions(ptr: KPointer, value: drawing.Lattice): void
     native static _Image_Consturct_PixelMap(ptr: KPointer, value: image.PixelMap): void
-    native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: int): void
+    native static _Image_Consturct_DrawableDescriptor(ptr: KPointer, value: DrawableDescriptor, type: KInt): void
     native static _Image_DrawingColorFilter(ptr: KPointer, value: drawing.ColorFilter): void
     native static _Image_SetOnErrorCallback(ptr: KPointer, value: ImageErrorCallback | undefined): void
     native static _ConvertUtils_ConvertFromPixelMapAni(pixelmap: image.PixelMap): KPointer
@@ -472,4 +472,6 @@ export class ArkUIAniModule {
     native static _GestureEventUIObserver_RemoveClickListenerCallback(instanceId: KInt, tag: string, callback?: ClickEventListenerCallback): void
     native static _GestureEventUIObserver_SetTapListenerCallback(instanceId: KInt, resourceId: KInt, tag: string, callback: GestureEventListenerCallback): void
     native static _GestureEventUIObserver_RemoveTapListenerCallback(instanceId: KInt, tag: string, callback?: GestureEventListenerCallback): void
+    native static _GestureEventUIObserver_AddGlobalGestureListener(resourceId: KInt, type: KInt, callback: GestureListenerCallback): void
+    native static _GestureEventUIObserver_RemoveGlobalGestureListener(type: KInt, callback?: GestureListenerCallback): void
 }

@@ -59,12 +59,35 @@ void RemoveTapListenerCallback(const std::string& tag, ani_int instanceId, ani_i
     }
 }
 
+void RemoveGlobalGestureListenerCallback(ani_int type, ani_int resourceId, bool isRemoveAll)
+{
+    if (isRemoveAll) {
+        // Remove all callbacks for this gestureType across all phases
+        // Note: This is equivalent to removing by gestureType only
+        GestureActionPhase phases[] = {
+            GestureActionPhase::WILL_START,
+            GestureActionPhase::WILL_END
+        };
+        for (const auto& phase : phases) {
+            UIObserverHandler::RemoveGlobalGestureListenerCallback(
+                static_cast<GestureListenerType>(type),
+                phase);
+        }
+    } else {
+        // Remove callbacks matching the gestureType and resourceId
+        UIObserverHandler::RemoveGlobalGestureListenerCallback(
+            static_cast<GestureListenerType>(type),
+            static_cast<int32_t>(resourceId));
+    }
+}
+
 const ArkUIAniGestureEventUIObserverModifier* GetArkUIAniGestureEventUIObserverModifier()
 {
     static const ArkUIAniGestureEventUIObserverModifier impl = {
         .removePanListenerCallback = OHOS::Ace::NG::RemovePanListenerCallback,
         .removeClickListenerCallback = OHOS::Ace::NG::RemoveClickListenerCallback,
         .removeTapListenerCallback = OHOS::Ace::NG::RemoveTapListenerCallback,
+        .removeGlobalGestureListenerCallback = OHOS::Ace::NG::RemoveGlobalGestureListenerCallback,
     };
     return &impl;
 }

@@ -237,6 +237,34 @@ using PanListenerCallback =
 using GestureListenerCallback =
     std::function<void(const GestureEvent&, const RefPtr<NG::FrameNode>&)>;
 
+// Forward declaration
+struct GestureTriggerInfo;
+
+// Callback type for global gesture listener that receives GestureTriggerInfo
+using GlobalGestureListenerCallback = std::function<void(const GestureTriggerInfo&)>;
+
+// Storage structure for global gesture listeners
+// Uses bitwise combined key: (gestureType << 32 | phase) as unique identifier
+// Each combined key maps to a single callback with its resourceId (new callback overwrites old one)
+struct GlobalGestureListenerStorage {
+    static constexpr uint32_t GESTURE_TYPE_SHIFT_BITS = 32;
+
+    // Combine gesture type and phase into single 64-bit key using bitwise operation
+    static uint64_t CombineKey(GestureListenerType gestureType, GestureActionPhase phase)
+    {
+        return (static_cast<uint64_t>(gestureType) << GESTURE_TYPE_SHIFT_BITS) | static_cast<uint64_t>(phase);
+    }
+
+    // Store callback along with its resourceId
+    struct CallbackInfo {
+        int32_t resourceId;
+        GlobalGestureListenerCallback callback;
+    };
+
+    // Map: combined_key -> CallbackInfo (one callback per gestureType+phase combination)
+    using StorageMap = std::unordered_map<uint64_t, CallbackInfo>;
+};
+
 class ACE_FORCE_EXPORT UIObserverHandler {
 public:
     UIObserverHandler() = default;
@@ -407,6 +435,25 @@ public:
     void TriggerWillTap(const GestureEvent& gestureEvent, const RefPtr<FrameNode>& frameNode);
     void TriggerDidTap(const GestureEvent& gestureEvent, const RefPtr<FrameNode>& frameNode);
 
+    // Global gesture listener with GestureTriggerInfo callback
+    // Uses bitwise combined key: (gestureType << 32 | phase) -> CallbackInfo
+    // Each gestureType+phase combination maintains only one callback (new overwrites old)
+    static void AddGlobalGestureListenerCallback(
+        GestureListenerType gestureType,
+        GestureActionPhase phase,
+        int32_t resourceId,
+        GlobalGestureListenerCallback&& callback);
+    static void RemoveGlobalGestureListenerCallback(
+        GestureListenerType gestureType,
+        int32_t resourceId);
+    static void RemoveGlobalGestureListenerCallback(
+        GestureListenerType gestureType,
+        GestureActionPhase phase);
+    static void TriggerGlobalGestureListener(
+        GestureListenerType gestureType,
+        GestureActionPhase phase,
+        const GestureTriggerInfo& triggerInfo);
+
 private:
     NavigationHandleFunc navigationHandleFunc_ = nullptr;
     NavigationHandleFuncForAni navigationHandleFuncForAni_ = nullptr;
@@ -467,6 +514,12 @@ private:
  	    willTapCallbackMap_;
     static std::unordered_map<int32_t, std::map<int32_t, GestureListenerCallback>>
  	    didTapCallbackMap_;
+
+    // Global gesture listener storage
+    // Structure: combined_key -> (resourceId -> callback)
+    // where combined_key = (gestureType << 32 | phase)
+    static GlobalGestureListenerStorage::StorageMap globalGestureListenerMap_;
+    static std::mutex globalGestureMutex_;  // Mutex for thread-safe access
 
     napi_value GetUIContextValue();
 };
