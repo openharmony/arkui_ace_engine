@@ -28,7 +28,6 @@ npm_run_op("npm_build_x_node") {
   out_dir = "dist"
   out_file = "jsXNode.js"
   deps = [
-    "$ace_root/frameworks/bridge/declarative_frontend:run_state_mgmt_build",
     # the host_toolchain is needed to avoid file corruption caused by parallel operations.
     ":npm_install_x_node($host_toolchain)"
   ]

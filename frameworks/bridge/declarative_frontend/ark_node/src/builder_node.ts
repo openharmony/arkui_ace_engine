@@ -12,8 +12,8 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-/// <reference path="../../state_mgmt/src/lib/common/ifelse_native.d.ts" />
-/// <reference path="../../state_mgmt/src/lib/puv2_common/puv2_viewstack_processor.d.ts" />
+/// <reference path="../types/if_else.d.ts" />
+/// <reference path="../types/puv2_viewstack_processor.d.ts" />
 class BuilderNodeCommonBase {
   protected _JSBuilderNode: JSBuilderNode | ReactiveBuilderNodeBase;
   // the name of "nodePtr_" is used in ace_engine/interfaces/native/node/native_node_napi.cpp.

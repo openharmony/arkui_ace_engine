@@ -12,9 +12,9 @@
 # limitations under the License.
 
 ark_x_node_files_to_watch = [
+    # Configuration file
     "tsconfig.json",
-    "src/index.d.ts",
-    "src/for_each.d.ts",
+    # Source files
     "src/base_node.ts",
     "src/builder_node.ts",
     "src/node_adapter.ts",
@@ -28,4 +28,11 @@ ark_x_node_files_to_watch = [
     "src/component_content.ts",
     "src/node_content.ts",
     "src/common.ts",
+    # Type definition files
+    "types/ace_console.native.d.ts",
+    "types/for_each.d.ts",
+    "types/if_else.d.ts",
+    "types/index.d.ts",
+    "types/puv2_viewstack_processor.d.ts",
+    "types/state_mgmt.d.ts",
 ]
