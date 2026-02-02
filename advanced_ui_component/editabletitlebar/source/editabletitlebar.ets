@@ -468,7 +468,7 @@ struct ImageMenuItem {
       let code = (paramError as BusinessError)?.code;
       let message = (paramError as BusinessError)?.message;
       hilog.error(0x3900, 'EditableTitleBar',
-        `Faild to get environment param error: ${code}, ${message}`);
+        `Failed to get environment param error: ${code}, ${message}`);
     }
     this.fontSize = this.decideFontScale();
     this.buttonGestureModifier.fontSize = this.fontSize;
@@ -477,7 +477,7 @@ struct ImageMenuItem {
   aboutToDisappear(): void {
     if (this.callbackId) {
       this.getUIContext()?.getHostContext()?.getApplicationContext()?.off('environment', this.callbackId);
-      this.callbackId = void (0);
+      this.callbackId = null;
     }
   }
 
@@ -513,7 +513,7 @@ struct ImageMenuItem {
     } catch (exception) {
       let code: number = (exception as BusinessError)?.code;
       let message: string = (exception as BusinessError)?.message;
-      hilog.error(0x3900, 'EditableTitleBar', `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+      hilog.error(0x3900, 'EditableTitleBar', `Failed to decideFontScale,cause, code: ${code}, message: ${message}`);
       return 1;
     }
   }

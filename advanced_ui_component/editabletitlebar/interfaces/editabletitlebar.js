@@ -941,7 +941,7 @@ class ImageMenuItem extends ViewPU {
                 } catch (paramError) {
                     let code = paramError?.code;
                     let message = paramError?.message;
-                    hilog.error(0x3900, 'EditableTitleBar', `EnvironmentCallback error: ${code}, ${message}`);
+                    hilog.error(0x3900, 'EditableTitleBar', `environmentCallback error: ${code}, ${message}`);
                 }
             },
             onMemoryLevel: (level) => {
@@ -1113,7 +1113,7 @@ class ImageMenuItem extends ViewPU {
         } catch (paramError) {
             let code = paramError?.code;
             let message = paramError?.message;
-            hilog.error(0x3900, 'EditableTitleBar', `Faild to get environment param error: ${code}, ${message}`);
+            hilog.error(0x3900, 'EditableTitleBar', `Failed to get environment param error: ${code}, ${message}`);
         }
         this.fontSize = this.decideFontScale();
         this.buttonGestureModifier.fontSize = this.fontSize;
@@ -1122,7 +1122,7 @@ class ImageMenuItem extends ViewPU {
     aboutToDisappear() {
         if (this.callbackId) {
             this.getUIContext()?.getHostContext()?.getApplicationContext()?.off('environment', this.callbackId);
-            this.callbackId = void (0);
+            this.callbackId = null;
         }
     }
 
@@ -1138,7 +1138,7 @@ class ImageMenuItem extends ViewPU {
             let code = exception?.code;
             let message = exception?.message;
             hilog.error(0x3900, 'EditableTitleBar',
-                `Faild to decideFontScale,cause, code: ${code}, message: ${message}`);
+                `Failed to decideFontScale,cause, code: ${code}, message: ${message}`);
             return 1;
         }
     }
