@@ -259,7 +259,7 @@ advanced_ui_component_static/arcslider/ @arkuipopupwindow_all
 advanced_ui_component_static/popup/ @arkuipopupwindow_all
 
 [Advanced UI Components Static]
-advanced_ui_component_static/assembled_advanced_ui_component/ @wangrunsen
+advanced_ui_component_static/assembled_advanced_ui_component/ @arkuiadvancedcomponent
 
 [Extend UI Components]
 component_ext/arc_swiper/
