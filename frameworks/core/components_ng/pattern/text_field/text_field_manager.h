@@ -203,6 +203,8 @@ public:
         return onFocusTextFieldId_;
     }
 
+    void TriggerCaretInfoUpdateOnScaleChange();
+
     bool GetLaterAvoid() const
     {
         return laterAvoidInfo_.laterAvoid;
