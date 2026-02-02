@@ -342,4 +342,504 @@ HWTEST_F(EventConfigTest, IsCategoryEnable002, TestSize.Level1)
     delete config;
 }
 
+/**
+ * @tc.name: IsCategoryEnable003
+ * @tc.desc: Test IsCategoryEnable with valid indices.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, IsCategoryEnable003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Create EventConfig and set specific switches.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    // Set switches[0] = true, switches[1] = false
+    config->switches_[0] = true;
+    config->switches_[1] = false;
+
+    /**
+     * @tc.steps: step2. Test IsCategoryEnable with index 0.
+     * @tc.expected: Should return true.
+     */
+    EXPECT_TRUE(config->IsCategoryEnable(0));
+
+    /**
+     * @tc.steps: step3. Test IsCategoryEnable with index 1.
+     * @tc.expected: Should return false.
+     */
+    EXPECT_FALSE(config->IsCategoryEnable(1));
+    delete config;
+}
+
+/**
+ * @tc.name: InitWithInvalidJson001
+ * @tc.desc: Test Init with invalid JSON string.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, InitWithInvalidJson001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare invalid JSON string.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string invalidJson = "{invalid json}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config with invalid JSON.
+     * @tc.expected: Config should not crash, enable should be false.
+     */
+    config->Init(invalidJson);
+    EXPECT_FALSE(config->IsEnable());
+    delete config;
+}
+
+/**
+ * @tc.name: InitWithInvalidJson002
+ * @tc.desc: Test Init with empty string.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, InitWithInvalidJson002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare empty JSON string.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string emptyJson = "";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config with empty string.
+     * @tc.expected: Config should not crash, enable should be false.
+     */
+    config->Init(emptyJson);
+    EXPECT_FALSE(config->IsEnable());
+    delete config;
+}
+
+/**
+ * @tc.name: InitWithNonObjectJson
+ * @tc.desc: Test Init with valid JSON but non-object type (array).
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, InitWithNonObjectJson, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare JSON array instead of object.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string arrayJson = "[1, 2, 3]";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config with array JSON.
+     * @tc.expected: Config should not crash, enable should be false.
+     */
+    config->Init(arrayJson);
+    EXPECT_FALSE(config->IsEnable());
+    delete config;
+}
+
+/**
+ * @tc.name: InitWithoutConfigField
+ * @tc.desc: Test Init with valid JSON but no config field.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, InitWithoutConfigField, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare JSON without config field.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string noConfigJson = "{\"enable\":true,\"switch\":{\"page\":true}}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config without config field.
+     * @tc.expected: Enable should be true, but config map should be empty.
+     */
+    config->Init(noConfigJson);
+    EXPECT_TRUE(config->IsEnable());
+    auto cfg = config->GetConfig();
+    EXPECT_TRUE(cfg->empty());
+    delete config;
+}
+
+/**
+ * @tc.name: InitWithInvalidConfigType
+ * @tc.desc: Test Init when config field is not an array.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, InitWithInvalidConfigType, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare JSON with config as string instead of array.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string invalidConfigJson = "{\"enable\":true,\"config\":\"not an array\"}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config with invalid config type.
+     * @tc.expected: Enable should be true, but config map should be empty.
+     */
+    config->Init(invalidConfigJson);
+    EXPECT_TRUE(config->IsEnable());
+    auto cfg = config->GetConfig();
+    EXPECT_TRUE(cfg->empty());
+    delete config;
+}
+
+/**
+ * @tc.name: ParseShareNodeWithNonString
+ * @tc.desc: Test ParseShareNode with non-string array items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, ParseShareNodeWithNonString, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare config with non-string shareNode items.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string nonStringShareNode = "{\"enable\":true,\"config\":[{\"pageUrl\":\"pages/Test\","
+        "\"shareNode\":[\"validNode\",123,{\"obj\":\"node\"},null]}]}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config with non-string shareNode items.
+     * @tc.expected: Only string nodes should be parsed, non-strings skipped.
+     */
+    config->Init(nonStringShareNode);
+    auto cfg = config->GetConfig();
+    ASSERT_EQ(cfg->size(), 1u);
+    auto pageCfg = cfg->at("pages/Test");
+    EXPECT_EQ(pageCfg.shareNodes.size(), 1u);
+    if (!pageCfg.shareNodes.empty()) {
+        EXPECT_EQ(pageCfg.shareNodes.front(), "validNode");
+    }
+    delete config;
+}
+
+/**
+ * @tc.name: ParseShareNodeWithEmptyId
+ * @tc.desc: Test ParseShareNode with empty string id.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, ParseShareNodeWithEmptyId, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare config with empty string in shareNode array.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string emptyIdShareNode = "{\"enable\":true,\"config\":[{\"pageUrl\":\"pages/Test\","
+        "\"shareNode\":[\"node1\",\"\",\"node2\"]}]}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config with empty id.
+     * @tc.expected: Empty string should be filtered out.
+     */
+    config->Init(emptyIdShareNode);
+    auto cfg = config->GetConfig();
+    ASSERT_EQ(cfg->size(), 1u);
+    auto pageCfg = cfg->at("pages/Test");
+    EXPECT_EQ(pageCfg.shareNodes.size(), 2u);
+    delete config;
+}
+
+/**
+ * @tc.name: ParseExposureCfgWithNonObject
+ * @tc.desc: Test ParseExposureCfg with non-object array items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, ParseExposureCfgWithNonObject, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare config with non-object exposureCfg items.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string nonObjectExposure = "{\"enable\":true,\"config\":[{\"pageUrl\":\"pages/Test\","
+        "\"exposureCfg\":[{\"id\":\"node1\",\"ratio\":0.5,\"duration\":1000},"
+        "\"string\",123,null]}]}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config with non-object exposure items.
+     * @tc.expected: Only valid exposure objects should be parsed.
+     */
+    config->Init(nonObjectExposure);
+    auto cfg = config->GetConfig();
+    ASSERT_EQ(cfg->size(), 1u);
+    auto pageCfg = cfg->at("pages/Test");
+    EXPECT_EQ(pageCfg.exposureCfgs.size(), 1u);
+    delete config;
+}
+
+/**
+ * @tc.name: ParseExposureCfgWithZeroRatio
+ * @tc.desc: Test ParseExposureCfg with zero ratio value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, ParseExposureCfgWithZeroRatio, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare config with zero ratio.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string zeroRatioJson = "{\"enable\":true,\"config\":[{\"pageUrl\":\"pages/Test\","
+        "\"exposureCfg\":[{\"id\":\"node1\",\"ratio\":0.0,\"duration\":1000}]}]}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config with zero ratio.
+     * @tc.expected: Zero ratio should be accepted (only duration > 0 is checked).
+     */
+    config->Init(zeroRatioJson);
+    auto cfg = config->GetConfig();
+    ASSERT_EQ(cfg->size(), 1u);
+    auto pageCfg = cfg->at("pages/Test");
+    ASSERT_EQ(pageCfg.exposureCfgs.size(), 1u);
+    auto exposureCfg = pageCfg.exposureCfgs.front();
+    EXPECT_EQ(exposureCfg.id, "node1");
+    EXPECT_DOUBLE_EQ(exposureCfg.ratio, 0.0);
+    EXPECT_EQ(exposureCfg.duration, 1000);
+    delete config;
+}
+
+/**
+ * @tc.name: ParseExposureCfgWithNegativeRatio
+ * @tc.desc: Test ParseExposureCfg with negative ratio value.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, ParseExposureCfgWithNegativeRatio, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare config with negative ratio.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string negativeRatioJson = "{\"enable\":true,\"config\":[{\"pageUrl\":\"pages/Test\","
+        "\"exposureCfg\":[{\"id\":\"node1\",\"ratio\":-0.5,\"duration\":1000}]}]}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config with negative ratio.
+     * @tc.expected: Negative ratio should be accepted (only duration > 0 is checked).
+     */
+    config->Init(negativeRatioJson);
+    auto cfg = config->GetConfig();
+    ASSERT_EQ(cfg->size(), 1u);
+    auto pageCfg = cfg->at("pages/Test");
+    ASSERT_EQ(pageCfg.exposureCfgs.size(), 1u);
+    auto exposureCfg = pageCfg.exposureCfgs.front();
+    EXPECT_EQ(exposureCfg.id, "node1");
+    EXPECT_DOUBLE_EQ(exposureCfg.ratio, -0.5);
+    delete config;
+}
+
+/**
+ * @tc.name: InitWithEmptyPageUrl
+ * @tc.desc: Test Init with empty pageUrl in config array.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, InitWithEmptyPageUrl, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare config with empty pageUrl.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string emptyPageUrlJson = "{\"enable\":true,\"config\":[{\"pageUrl\":\"\","
+        "\"shareNode\":[\"node1\"]},{\"pageUrl\":\"pages/Test\",\"shareNode\":[\"node2\"]}]}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config with empty pageUrl.
+     * @tc.expected: Config with empty pageUrl should be skipped.
+     */
+    config->Init(emptyPageUrlJson);
+    auto cfg = config->GetConfig();
+    EXPECT_EQ(cfg->size(), 1u);
+    EXPECT_TRUE(cfg->find("") == cfg->end());
+    EXPECT_TRUE(cfg->find("pages/Test") != cfg->end());
+    delete config;
+}
+
+/**
+ * @tc.name: InitWithNonObjectConfigItem
+ * @tc.desc: Test Init when config array contains non-object items.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, InitWithNonObjectConfigItem, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare config with non-object items in config array.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string nonObjectItemJson = "{\"enable\":true,\"config\":["
+        "\"string\",123,null,"
+        "{\"pageUrl\":\"pages/Test\",\"shareNode\":[\"node1\"]}]}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config with non-object items.
+     * @tc.expected: Non-object items should be skipped.
+     */
+    config->Init(nonObjectItemJson);
+    auto cfg = config->GetConfig();
+    EXPECT_EQ(cfg->size(), 1u);
+    EXPECT_TRUE(cfg->find("pages/Test") != cfg->end());
+    delete config;
+}
+
+/**
+ * @tc.name: InitWithEmptyConfigArray
+ * @tc.desc: Test Init with empty config array.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, InitWithEmptyConfigArray, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare config with empty config array.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string emptyArrayJson = "{\"enable\":true,\"config\":[]}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config with empty config array.
+     * @tc.expected: Config map should be empty.
+     */
+    config->Init(emptyArrayJson);
+    auto cfg = config->GetConfig();
+    EXPECT_TRUE(cfg->empty());
+    delete config;
+}
+
+/**
+ * @tc.name: GetWebInfo001
+ * @tc.desc: Test getting web-related configuration.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, GetWebInfo001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare config with web-related fields.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string webInfoJson = "{\"enable\":true,\"webCategory\":\"testCategory\","
+        "\"webIdentifier\":\"testId\",\"webActionJs\":\"testJsCode\"}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config and get web info.
+     * @tc.expected: Web info should match the configured values.
+     */
+    config->Init(webInfoJson);
+    EXPECT_EQ(config->GetWebCategory(), "testCategory");
+    EXPECT_EQ(config->GetWebIdentifier(), "testId");
+    EXPECT_EQ(config->GetWebJsCode(), "testJsCode");
+    delete config;
+}
+
+/**
+ * @tc.name: GetWebInfo002
+ * @tc.desc: Test getting web-related configuration when fields are missing.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, GetWebInfo002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Prepare config without web-related fields.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string noWebInfoJson = "{\"enable\":true}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Initialize config and get web info.
+     * @tc.expected: Web info should be empty strings.
+     */
+    config->Init(noWebInfoJson);
+    EXPECT_TRUE(config->GetWebCategory().empty());
+    EXPECT_TRUE(config->GetWebIdentifier().empty());
+    EXPECT_TRUE(config->GetWebJsCode().empty());
+    delete config;
+}
+
+/**
+ * @tc.name: IsEnable001
+ * @tc.desc: Test IsEnable method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, IsEnable001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Test with enable=false.
+     * @tc.expected: IsEnable should return false.
+     */
+    std::string disabledJson = "{\"enable\":false}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+    config->Init(disabledJson);
+    EXPECT_FALSE(config->IsEnable());
+
+    /**
+     * @tc.steps: step2. Test with enable=true.
+     * @tc.expected: IsEnable should return true.
+     */
+    std::string enabledJson = "{\"enable\":true}";
+    config->Init(enabledJson);
+    EXPECT_TRUE(config->IsEnable());
+    delete config;
+}
+
+/**
+ * @tc.name: GetConfig001
+ * @tc.desc: Test GetConfig method.
+ * @tc.type: FUNC
+ */
+HWTEST_F(EventConfigTest, GetConfig001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. Initialize config with valid data.
+     * @tc.expected: EventConfig object is created successfully.
+     */
+    std::string validConfig = "{\"enable\":true,\"config\":[{\"pageUrl\":\"pages/Test\","
+        "\"shareNode\":[\"node1\"],\"exposureCfg\":[{\"id\":\"exp1\",\"ratio\":0.8,\"duration\":2000}]}]}";
+    Recorder::EventConfig* config = new Recorder::EventConfig();
+    ASSERT_TRUE(config);
+
+    /**
+     * @tc.steps: step2. Get config and verify contents.
+     * @tc.expected: Config should contain expected page configuration.
+     */
+    config->Init(validConfig);
+    auto cfg = config->GetConfig();
+    ASSERT_NE(cfg, nullptr);
+    EXPECT_EQ(cfg->size(), 1u);
+    EXPECT_TRUE(cfg->find("pages/Test") != cfg->end());
+
+    auto pageCfg = cfg->at("pages/Test");
+    EXPECT_EQ(pageCfg.shareNodes.size(), 1u);
+    EXPECT_EQ(pageCfg.exposureCfgs.size(), 1u);
+    delete config;
+}
+
 } // namespace OHOS::Ace
