@@ -1917,6 +1917,8 @@ HWTEST_F(SearchTestNg, Pattern013, TestSize.Level1)
     ASSERT_NE(textFieldFrameNode, nullptr);
     auto textFieldPattern = textFieldFrameNode->GetPattern<TextFieldPattern>();
     ASSERT_NE(textFieldPattern, nullptr);
+    auto textFieldManager = AceType::MakeRefPtr<TextFieldManagerNG>();
+    MockPipelineContext::GetCurrent()->SetTextFieldManager(textFieldManager);
     /**
      * @tc.step: step2. call onFocusInternal_().
      */
