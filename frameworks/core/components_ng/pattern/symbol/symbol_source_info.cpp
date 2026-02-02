@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023 Huawei Device Co., Ltd.
+ * Copyright (c) 2023-2026 Huawei Device Co., Ltd.
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
@@ -13,13 +13,19 @@
  * limitations under the License.
  */
 
-#include "symbol_source_info.h"
+#include "core/components_ng/pattern/symbol/symbol_source_info.h"
 
 namespace OHOS::Ace::NG {
 
-SymbolSourceInfo::SymbolSourceInfo(std::uint32_t codeId)
+SymbolSourceInfo::SymbolSourceInfo() = default;
+
+SymbolSourceInfo::~SymbolSourceInfo() = default;
+
+SymbolSourceInfo::SymbolSourceInfo(std::uint32_t codeId) : unicode(codeId) {}
+
+std::uint32_t SymbolSourceInfo::GetUnicode() const
 {
-    unicode = codeId;
+    return unicode;
 }
 
 bool SymbolSourceInfo::operator==(const SymbolSourceInfo& info) const
