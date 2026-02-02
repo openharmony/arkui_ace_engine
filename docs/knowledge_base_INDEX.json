@@ -224,6 +224,44 @@
       "last_updated": "2026-02-03"
     },
     {
+      "name": "Grid",
+      "name_cn": "网格布局组件",
+      "category": "container",
+      "type": "component",
+      "keywords": [
+        "网格",
+        "grid",
+        "网格布局",
+        "行列布局",
+        "columnsTemplate",
+        "rowsTemplate",
+        "不规则布局",
+        "跨行列",
+        "自适应布局",
+        "可滚动网格",
+        "layoutOptions",
+        "虚拟滚动",
+        "GridItem"
+      ],
+      "aliases": [
+        "Grid组件",
+        "网格布局",
+        "网格容器"
+      ],
+      "file_path": "pattern/grid/Grid_Knowledge_Base.md",
+      "source_paths": {
+        "pattern": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_pattern.cpp",
+        "model": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_model_ng.cpp",
+        "layout_info": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_layout_info.cpp",
+        "property": "OpenHarmony/foundation/arkui/ace_engine/frameworks/core/components_ng/pattern/grid/grid_layout_property.cpp"
+      },
+      "api_paths": {
+        "static": "OpenHarmony/interface/sdk-js/api/arkui/component/grid.static.d.ets",
+        "modifier": "OpenHarmony/interface/sdk-js/api/arkui/GridModifier.d.ts"
+      },
+      "last_updated": "2026-02-07"
+    },
+    {
       "name": "Badge",
       "name_cn": "徽标组件",
       "category": "data_display",
@@ -759,6 +797,7 @@
       "description": "用于组织和布局其他组件的容器",
       "components": [
         "Flex",
+        "Grid",
         "Scroll",
         "LazyGrid",
         "WaterFlow"
