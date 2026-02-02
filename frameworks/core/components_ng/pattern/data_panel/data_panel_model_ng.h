@@ -44,7 +44,7 @@ class DataPanelConfiguration : public CommonConfiguration {
 };
 using DataPanelMakeCallback =
     std::function<RefPtr<FrameNode>(const DataPanelConfiguration& dataPanelConfiguration)>;
-class ACE_EXPORT DataPanelModelNG : public OHOS::Ace::DataPanelModel {
+class ACE_FORCE_EXPORT DataPanelModelNG : public OHOS::Ace::DataPanelModel {
 public:
     void Create(const std::vector<double>& values, double max, int32_t dataPanelType) override;
     void SetEffect(bool isCloseEffect) override;
@@ -68,8 +68,8 @@ public:
     static void SetShadowOption(FrameNode* frameNode, const DataPanelShadow& shadowOption);
     static void SetValueColors(FrameNode* frameNode, const std::vector<Gradient>& valueColors);
     static void SetBuilderFunc(FrameNode* frameNode, NG::DataPanelMakeCallback&& jsMake);
-    static void CreateWithResourceObj(
-        FrameNode* frameNode, DataPanelResourceType colorType, const RefPtr<ResourceObject>& resObj);
+    static void CreateWithResourceObj(FrameNode* frameNode, DataPanelResourceType colorType,
+        const RefPtr<ResourceObject>& resObj);
     static void SetValueColorsSetByUser(FrameNode* frameNode, bool value);
     static void SetTrackBackgroundSetByUser(FrameNode* frameNode, bool value);
     static void SetStrokeWidthSetByUser(FrameNode* frameNode, bool value);
