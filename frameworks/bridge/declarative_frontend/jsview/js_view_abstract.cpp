@@ -9006,7 +9006,7 @@ void JSViewAbstract::JsOnKeyEvent(const JSCallbackInfo& args)
     ViewAbstractModel::GetInstance()->SetOnKeyEvent(std::move(onKeyEvent));
 }
 
-void ParseJsKeyEvent(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
+void ParseJsKeyEventBasic(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
 {
     if (jsObj->HasProperty("type")) {
         auto type = jsObj->GetProperty("type");
@@ -9071,7 +9071,10 @@ void ParseJsKeyEvent(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
             keyEvent.keyIntention = static_cast<KeyIntention>(intentionCode->ToNumber<int32_t>());
         }
     }
+}
 
+void ParseJsKeyEventExtended(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
+{
     if (jsObj->HasProperty("pressedCodes")) {
         auto jsValue = jsObj->GetProperty("pressedCodes");
         if (jsValue->IsArray()) {
@@ -9111,6 +9114,12 @@ void ParseJsKeyEvent(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
     }
 }
 
+void ParseJsKeyEvent(const JSRef<JSObject>& jsObj, KeyEvent& keyEvent)
+{
+    ParseJsKeyEventBasic(jsObj, keyEvent);
+    ParseJsKeyEventExtended(jsObj, keyEvent);
+}
+
 void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
 {
     JSRef<JSVal> arg = args[0];
@@ -9138,7 +9147,7 @@ void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
     JSRef<JSObject> jsObject = JSRef<JSObject>::Cast(args[1]);
     auto eventInfoPtr = jsObject->Unwrap<KeyEventInfo>();
     KeyEvent keyEvent;
-    if (eventInfoPtr == NULL) {
+    if (!eventInfoPtr) {
         ParseJsKeyEvent(jsObject, keyEvent);
     } else {
         eventInfoPtr->ParseKeyEvent(keyEvent);
