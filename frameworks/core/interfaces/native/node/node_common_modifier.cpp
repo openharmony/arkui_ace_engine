@@ -12031,6 +12031,44 @@ void SetOnChildTouchTest(ArkUINodeHandle node, void* extraParam)
     ViewAbstract::SetOnTouchTestFunc(frameNode, std::move(onChildTouchTest));
 }
 
+#ifdef SUPPORT_DIGITAL_CROWN
+ArkUI_CrownAction ToArkUICrownAction(CrownAction action)
+{
+    switch (action) {
+        case CrownAction::UPDATE:
+            return ArkUI_CrownAction::UPDATE;
+        case CrownAction::END:
+            return ArkUI_CrownAction::END;
+        case CrownAction::UNKNOWN:
+        default:
+            return ArkUI_CrownAction::UNKNOWN;
+    }
+}
+
+void SetOnDigitalCrownEvent(ArkUINodeHandle node, void* extraParam)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    int32_t nodeId = frameNode->GetId();
+    auto onCrownEvent = [node = AceType::WeakClaim(frameNode), nodeId, extraParam](CrownEventInfo& info) {
+        CHECK_EQUAL_VOID(info.GetAction(), CrownAction::BEGIN);
+        ArkUINodeEvent event;
+        event.kind = ArkUIEventCategory::DIGITAL_CROWN_EVENT;
+        event.nodeId = nodeId;
+        event.extraParam = reinterpret_cast<intptr_t>(extraParam);
+        event.crownEvent.subKind = ArkUIEventSubKind::ON_DIGITAL_CROWN;
+        event.crownEvent.action = ToArkUICrownAction(info.GetAction());
+        event.crownEvent.timeStamp = static_cast<int64_t>(info.GetTimeStamp().time_since_epoch().count());
+        event.crownEvent.degree = info.GetDegree();
+        event.crownEvent.angularVelocity = info.GetAngularVelocity();
+        PipelineContext::SetCallBackNode(node);
+        SendArkUISyncEvent(&event);
+        info.SetStopPropagation(event.crownEvent.stopPropagation);
+    };
+    ViewAbstract::SetOnCrownEvent(frameNode, std::move(onCrownEvent));
+}
+#endif
+
 void ResetOnKeyEvent(ArkUINodeHandle node)
 {
     auto* frameNode = reinterpret_cast<FrameNode*>(node);
@@ -12837,6 +12875,15 @@ void ResetOnChildTouchTest(ArkUINodeHandle node)
     CHECK_NULL_VOID(frameNode);
     ViewAbstract::SetOnTouchTestFunc(frameNode, nullptr);
 }
+
+#ifdef SUPPORT_DIGITAL_CROWN
+void ResetOnDigitalCrownEvent(ArkUINodeHandle node)
+{
+    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    CHECK_NULL_VOID(frameNode);
+    ViewAbstract::DisableOnCrownEvent(frameNode);
+}
+#endif
 
 void ResetOnCustomOverflowScroll(ArkUINodeHandle node)
 {

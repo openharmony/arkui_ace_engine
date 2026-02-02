@@ -483,6 +483,11 @@ const ComponentAsyncEventHandler commonNodeAsyncEventHandlers[] = {
     NodeModifier::SetOnSizeChange,
     NodeModifier::SetOnCoastingAxisEvent,
     NodeModifier::SetOnChildTouchTest,
+#ifdef SUPPORT_DIGITAL_CROWN
+    NodeModifier::SetOnDigitalCrownEvent,
+#else
+    nullptr,
+#endif
     NodeModifier::SetOnCustomOverflowScroll,
     NodeModifier::SetOnStackOverflowScroll,
     NodeModifier::SetOnNeedSoftkeyboard,
@@ -720,6 +725,11 @@ const ResetComponentAsyncEventHandler COMMON_NODE_RESET_ASYNC_EVENT_HANDLERS[] =
     NodeModifier::ResetOnSizeChange,
     NodeModifier::ResetOnCoastingAxisEvent,
     NodeModifier::ResetOnChildTouchTest,
+#ifdef SUPPORT_DIGITAL_CROWN
+    NodeModifier::ResetOnDigitalCrownEvent,
+#else
+    nullptr,
+#endif
     NodeModifier::ResetOnCustomOverflowScroll,
     NodeModifier::ResetOnStackOverflowScroll,
     NodeModifier::ResetOnNeedSoftkeyboard,
