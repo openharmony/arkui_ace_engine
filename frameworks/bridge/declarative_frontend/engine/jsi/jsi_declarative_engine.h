@@ -380,8 +380,6 @@ public:
 
     void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) override;
 
-    bool OnMonitorForCrownEvents(const std::string& callbackId, const std::string& args) override;
-
     void JsCallback(const std::string& callbackId, const std::string& args) override;
 
     void RunGarbageCollection() override;
