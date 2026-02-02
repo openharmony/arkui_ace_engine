@@ -2014,6 +2014,14 @@ HWTEST_F(TextFieldPatternTest, UpdateShowMagnifierTest001, TestSize.Level0)
     controller->isShowMagnifier_ = true;
     auto result = controller->GetShowMagnifier();
     EXPECT_EQ(result, true);
+
+
+    /**
+     * @tc.steps: step3. GetMagnifierController
+     *
+     */
+    result = controller->GetShowMagnifier();
+    EXPECT_EQ(result, true);
 }
 
 /**
