@@ -7372,9 +7372,15 @@ struct ArkUISpanModifier {
     void (*setSpanTextCase)(ArkUINodeHandle node, ArkUI_Int32 value);
     void (*resetSpanTextCase)(ArkUINodeHandle node);
     void (*setSpanFontWeight)(ArkUINodeHandle node, ArkUI_Int32 value, void* resourceRawPtr);
-    void (*setSpanFontWeightWithConfigs)(ArkUINodeHandle node,
-        const struct ArkUIFontWeightWithOptionsStruct* fontWeightInfo, void* resourceRawPtr);
     void (*resetSpanFontWeight)(ArkUINodeHandle node);
+    void (*setSpanVariableFontWeight)(ArkUINodeHandle node, ArkUI_Int32 variableFontWeight, void* resRawPtr);
+    void (*resetSpanVariableFontWeight)(ArkUINodeHandle node);
+    void (*setSpanEnableVariableFontWeight)(ArkUINodeHandle node,
+        ArkUI_Bool enableVariableFontWeight, void* resRawPtr);
+    void (*resetSpanEnableVariableFontWeight)(ArkUINodeHandle node);
+    void (*setSpanEnableDeviceFontWeightCategory)(ArkUINodeHandle node,
+        ArkUI_Bool enableDeviceFontWeightCategory, void* resRawPtr);
+    void (*resetSpanEnableDeviceFontWeightCategory)(ArkUINodeHandle node);
     void (*setSpanLineHeight)(ArkUINodeHandle node, ArkUI_Float32 number, ArkUI_Int32 unit, void* resourceRawPtr);
     void (*resetSpanLineHeight)(ArkUINodeHandle node);
     void (*setSpanFontStyle)(ArkUINodeHandle node, ArkUI_Int32 fontStyle);

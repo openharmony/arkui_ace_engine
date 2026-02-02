@@ -12702,8 +12702,6 @@ class SpanFontWeightModifier extends ModifierWithKey {
   applyPeer(node, reset) {
     if (reset) {
       getUINativeModule().span.resetFontWeight(node);
-    } else if (!isObject(this.value)) {
-      getUINativeModule().span.resetFontWeight(node);
     } else {
       getUINativeModule().span.setFontWeight(node, this.value.value,
         this.value?.enableVariableFontWeight,

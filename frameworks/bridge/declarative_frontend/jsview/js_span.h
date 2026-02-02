@@ -55,7 +55,8 @@ public:
 private:
     static void ResetFontWeightConfigs();
     static void ProcessVariableFontWeight(const JSCallbackInfo& info);
-    static void ProcessFontWeightConfigs(const JSCallbackInfo& info);
+    static void ProcessFontConfigs(const JSCallbackInfo& info);
+    static void ProcessFontWeightConfigObject(const JSRef<JSObject>& paramObject);
 };
 
 } // namespace OHOS::Ace::Framework

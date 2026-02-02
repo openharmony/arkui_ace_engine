@@ -149,7 +149,6 @@ ArkUINativeModuleValue SpanBridge::SetFontWeight(ArkUIRuntimeCallInfo *runtimeCa
     CHECK_NULL_RETURN(firstArg->IsNativePointer(vm), panda::JSValueRef::Undefined(vm));
     auto nativeNode = nodePtr(firstArg->ToNativePointer(vm)->Value());
 
-    ArkUIFontWeightWithOptionsStruct weightInfo;
     std::string weight = DEFAULT_FONT_WEIGHT;
     int32_t variableFontWeight = DEFAULT_VARIABLE_FONT_WEIGHT;
     RefPtr<ResourceObject> resObj;
@@ -164,19 +163,22 @@ ArkUINativeModuleValue SpanBridge::SetFontWeight(ArkUIRuntimeCallInfo *runtimeCa
             variableFontWeight = StringUtils::StringToInt(weight);
         }
     }
-    weightInfo.weight = weight.c_str();
-    weightInfo.variableFontWeight = variableFontWeight;
+    GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeight(nativeNode,	 
+         static_cast<ArkUI_Int32>(Framework::ConvertStrToFontWeight(weight)), AceType::RawPtr(resObj));
+    GetArkUINodeModifiers()->getSpanModifier()->setSpanVariableFontWeight(nativeNode,
+        variableFontWeight, AceType::RawPtr(resObj));
     if (!thirdArg->IsNull() && thirdArg->IsBoolean()) {
-        weightInfo.enableVariableFontWeight = static_cast<int32_t>(thirdArg->BooleaValue(vm));
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanEnableVariableFontWeight(nativeNode,
+            thirdArg->BooleaValue(vm), AceType::RawPtr(resObj));
+    } else {
+        GetArkUINodeModifiers()->getSpanModifier()->resetSpanEnableVariableFontWeight(nativeNode);
     }
     if (!fourthArg->IsNull() && fourthArg->IsBoolean()) {
-        weightInfo.enableDeviceFontWeightCategory = static_cast<int32_t>(fourthArg->BooleaValue(vm));
+        GetArkUINodeModifiers()->getSpanModifier()->setSpanEnableDeviceFontWeightCategory(nativeNode,
+            fourthArg->BooleaValue(vm), AceType::RawPtr(resObj));
     } else {
-        weightInfo.enableDeviceFontWeightCategory = true;
+        GetArkUINodeModifiers()->getSpanModifier()->resetSpanEnableDeviceFontWeightCategory(nativeNode);
     }
-
-    GetArkUINodeModifiers()->getSpanModifier()->setSpanFontWeightWithConfigs(nativeNode,
-        &weightInfo, AceType::RawPtr(resObj));
     return panda::JSValueRef::Undefined(vm);
 }
 

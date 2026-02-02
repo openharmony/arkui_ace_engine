@@ -250,8 +250,6 @@ class SpanFontWeightModifier extends ModifierWithKey<ArkFontWeight> {
   applyPeer(node: KNode, reset: boolean): void {
     if (reset) {
       getUINativeModule().span.resetFontWeight(node);
-    } else if (!isObject(this.value)) {
-      getUINativeModule().span.resetFontWeight(node);
     } else {
       getUINativeModule().span.setFontWeight(node, this.value.value, this.value?.enableVariableFontWeight, this.value?.enableDeviceFontWeightCategory);
     }
