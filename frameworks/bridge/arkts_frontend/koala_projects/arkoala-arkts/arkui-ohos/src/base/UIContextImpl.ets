@@ -25,6 +25,7 @@ import { nullptr, KPointer, KSerializerBuffer, toPeerPtr, RuntimeType,
 import { _animateTo } from 'arkui/base/ArkAnimation';
 import { AnimateParam, KeyframeAnimateParam, KeyframeState } from 'arkui/framework'
 import { AnimatorResult , AnimatorOptions, Animator, SimpleAnimatorOptions } from '@ohos/animator';
+import { MarqueeDynamicSyncScene, MarqueeDynamicSyncSceneType } from '@ohos/arkui/UIContext';
 import { UIContext, MeasureUtils, TextMenuController, Font, FocusController, ContextMenuController, ComponentUtils,
     FrameCallback, UIInspector, UIObserver, OverlayManager, PromptAction, AtomicServiceBar, Router, CursorController,
     MediaQuery, ComponentSnapshot, NodeIdentity, OverlayManagerOptions, DragController, TargetInfo, CustomBuilderWithId,
@@ -2091,6 +2092,12 @@ export class UIContextImpl extends UIContext {
                 [new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.GESTURE, nodePtr),
                 new SwiperDynamicSyncScene(SwiperDynamicSyncSceneType.ANIMATION, nodePtr)];
             let result: Array<DynamicSyncScene> = [ret[0], ret[1]];
+            ArkUIAniModule._Common_Restore_InstanceId();
+            return result;
+        } else if (tag === 'Marquee') {
+            let ret: MarqueeDynamicSyncScene[] = [
+                new MarqueeDynamicSyncScene(MarqueeDynamicSyncSceneType.ANIMATION, nodePtr)];
+            let result: DynamicSyncScene[] = [ret[0]];
             ArkUIAniModule._Common_Restore_InstanceId();
             return result;
         }

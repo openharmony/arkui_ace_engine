@@ -1319,6 +1319,25 @@ export class SwiperDynamicSyncScene extends DynamicSyncScene {
     }
 }
 
+export const enum MarqueeDynamicSyncSceneType {
+  ANIMATION = 1
+}
+
+export class MarqueeDynamicSyncScene extends DynamicSyncScene {
+    readonly type: MarqueeDynamicSyncSceneType;
+    nodePtr: KPointer;
+    constructor(type: MarqueeDynamicSyncSceneType, nodePtr: KPointer) {
+        super({ min: 0, max: 120, expected: 120 } as ExpectedFrameRateRange);
+        this.type = type;
+        this.nodePtr = nodePtr;
+    }
+
+    setFrameRateRange(range: ExpectedFrameRateRange): void {
+        super.setFrameRateRange(range);
+        ArkUIAniModule._Common_SetFrameRateRange(this.nodePtr, range, this.type);
+    }
+}
+
 export const enum CustomKeyboardContinueFeature {
     ENABLED = 0,
     DISABLED = 1,

@@ -32,6 +32,8 @@
 #include "core/components_ng/base/view_abstract.h"
 #include "core/components_ng/pattern/render_node/render_node_pattern.h"
 #include "core/components_ng/pattern/custom_frame_node/custom_frame_node_pattern.h"
+#include "core/components_ng/pattern/marquee/marquee_model_ng.h"
+#include "core/interfaces/native/node/marquee_modifier.h"
 #include "core/components_ng/pattern/stack/stack_pattern.h"
 #include "core/components_ng/property/layout_constraint.h"
 #include "core/event/touch_event.h"
@@ -119,8 +121,6 @@ void SetFrameRateRange(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_I
 {
     NG::FrameNode* peer = reinterpret_cast<NG::FrameNode*>(peerPtr);
     CHECK_NULL_VOID(peer);
-    auto swiperPattern = peer->GetPattern();
-    CHECK_NULL_VOID(swiperPattern);
     ani_double min;
     ani_double max;
     ani_double expect;
@@ -137,8 +137,18 @@ void SetFrameRateRange(ani_env* env, ani_long peerPtr, ani_object value, ArkUI_I
         return;
     }
     auto frameRateRange = AceType::MakeRefPtr<FrameRateRange>(min, max, expect);
-    auto sceneType = static_cast<SwiperDynamicSyncSceneType>(type);
-    swiperPattern->SetFrameRateRange(frameRateRange, sceneType);
+
+    if (peer->GetTag() == V2::MARQUEE_ETS_TAG) {
+        auto sceneType = static_cast<MarqueeDynamicSyncSceneType>(type);
+        auto customModifier = NodeModifier::GetMarqueeCustomModifier();
+        CHECK_NULL_VOID(customModifier);
+        customModifier->setMarqueeFrameRateRange(peer, frameRateRange, sceneType);
+    } else {
+        auto swiperPattern = peer->GetPattern();
+        CHECK_NULL_VOID(swiperPattern);
+        auto sceneType = static_cast<SwiperDynamicSyncSceneType>(type);
+        swiperPattern->SetFrameRateRange(frameRateRange, sceneType);
+    }
 }
 
 void SyncInstanceId(ArkUI_Int32 instanceId)
