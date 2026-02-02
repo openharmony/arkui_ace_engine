@@ -150,9 +150,9 @@ public:
         const std::string& udKey, int32_t count = 0);
     void OnDragDrop(RefPtr<OHOS::Ace::DragEvent>& event, const RefPtr<FrameNode>& dragFrameNode,
         const OHOS::Ace::DragPointerEvent& pointerEvent);
-    std::function<void(const DragRet&, const DragBehavior&, const bool&)> GetStopDragCallBack(
-        const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent,
-        const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
+    std::function<void(const DragRet&)> GetStopDragCallBack(const RefPtr<FrameNode>& dragFrameNode,
+        const DragPointerEvent& pointerEvent, const RefPtr<OHOS::Ace::DragEvent>& event,
+        const std::string& extraParams);
     bool PostStopDrag(const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent,
         const RefPtr<OHOS::Ace::DragEvent>& event, const std::string& extraParams);
     void HandleStopDrag(const RefPtr<FrameNode>& dragFrameNode, const DragPointerEvent& pointerEvent,

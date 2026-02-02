@@ -53,12 +53,9 @@ public:
     bool IsDragFilterShowing() const;
     bool IsOnOnDropPhase();
     void SetIsOnOnDropPhase(bool isOnOnDropPhase);
-    bool RequestDragEndCallback(int32_t requestId, DragRet dragResult, DragBehavior suggestedDropOperation,
-        bool disableDropAnimation,
-        std::function<void(const DragRet&, const DragBehavior&, const bool&)> stopDragCallback);
+    bool RequestDragEndCallback(int32_t requestId, DragRet dragResult,
+        std::function<void(const DragRet&)> stopDragCallback);
     int32_t NotifyDragResult(int32_t requestId, int32_t result);
-    int32_t NotifySuggestedDropOperation(int32_t requestId, int32_t operation);
-    int32_t NotifyDisableDropAnimation(int32_t requestId, bool disable);
     int32_t NotifyDragEndPendingDone(int32_t requestId);
 
     void SetDragStartRequestStatus(DragStartRequestStatus dragStartRequestStatus);
@@ -99,10 +96,8 @@ private:
     // use for async on drop
     bool isOnOnDropPhase_ = false;
     int32_t requestId_ = -1;
-    std::function<void(const DragRet&, const DragBehavior&, const bool&)> stopDragCallback_ = nullptr;
+    std::function<void(const DragRet&)> stopDragCallback_ = nullptr;
     DragRet dragResult_ = DragRet::DRAG_FAIL;
-    DragBehavior suggestedDropOperation_ = DragBehavior::UNKNOWN;
-    bool disableDropAnimation_ = false;
 
     // app global drag
     bool isAppGlobalDragEnabled_ = false;
