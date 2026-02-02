@@ -355,23 +355,27 @@ HWTEST_F(ScrollBarOverlayTestNg, SetOpacity001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create modifier and set full opacity
-     * @tc.expected: Opacity should be set
+     * @tc.expected: Opacity should be set to default value (UINT8_MAX)
      */
     ScrollBarOverlayModifier modifier;
-    modifier.SetOpacity(UINT8_MAX);
-    // Note: SetOpacity may not directly return the set value due to animation
+    // Initial opacity is UINT8_MAX from constructor
+    EXPECT_EQ(modifier.GetOpacity(), UINT8_MAX);
 
     /**
      * @tc.steps: step2. Set half opacity
-     * @tc.expected: Opacity should be updated
+     * @tc.expected: SetOpacity should execute without errors
+     * Note: SetOpacity uses AnimationUtils::ExecuteWithoutAnimation,
+     * the value may not be immediately reflected in GetOpacity()
      */
     modifier.SetOpacity(UINT8_MAX / 2);
 
     /**
      * @tc.steps: step3. Set zero opacity (fully transparent)
-     * @tc.expected: Opacity should be updated
+     * @tc.expected: SetOpacity should execute without errors
      */
     modifier.SetOpacity(0);
+    // Verify that the method can be called without crashes
+    SUCCEED();
 }
 
 /**
@@ -421,18 +425,28 @@ HWTEST_F(ScrollBarOverlayTestNg, SetPositionMode001, TestSize.Level1)
      */
     ScrollBarOverlayModifier modifier;
     modifier.SetPositionMode(PositionMode::RIGHT);
+    Size size(100.0, 200.0);
+    modifier.SetMainModeSize(size);
+    // RIGHT mode should affect barHeight (cross mode for horizontal scrollbar)
+    EXPECT_FLOAT_EQ(modifier.barHeight_->Get(), size.Height());
 
     /**
      * @tc.steps: step2. Test BOTTOM position mode
      * @tc.expected: Position mode should change to BOTTOM
      */
     modifier.SetPositionMode(PositionMode::BOTTOM);
+    modifier.SetMainModeSize(size);
+    // BOTTOM mode should affect barWidth (main mode for horizontal scrollbar)
+    EXPECT_FLOAT_EQ(modifier.barWidth_->Get(), size.Width());
 
     /**
      * @tc.steps: step3. Test LEFT position mode
      * @tc.expected: Position mode should change to LEFT
      */
     modifier.SetPositionMode(PositionMode::LEFT);
+    modifier.SetMainModeSize(size);
+    // LEFT mode should affect barHeight (main mode for vertical scrollbar)
+    EXPECT_FLOAT_EQ(modifier.barHeight_->Get(), size.Height());
 }
 
 /**
@@ -443,11 +457,12 @@ HWTEST_F(ScrollBarOverlayTestNg, SetPositionMode001, TestSize.Level1)
 HWTEST_F(ScrollBarOverlayTestNg, StopHoverAnimation001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create modifier and set hover animation type
+     * @tc.steps: step1. Create modifier and start hover animation
      * @tc.expected: Hover animation type should be GROW
      */
     ScrollBarOverlayModifier modifier;
-    modifier.SetHoverAnimatingType(HoverAnimationType::GROW);
+    Rect barRect(0, 0, 100, 200);
+    modifier.StartHoverAnimation(barRect, HoverAnimationType::GROW);
     EXPECT_EQ(modifier.GetHoverAnimatingType(), HoverAnimationType::GROW);
 
     /**
@@ -455,7 +470,9 @@ HWTEST_F(ScrollBarOverlayTestNg, StopHoverAnimation001, TestSize.Level1)
      * @tc.expected: Hover animation should be stopped
      */
     modifier.StopHoverAnimation();
-    // Note: Animation type may not reset immediately after stop
+    // After stopping, a new animation can be started without issues
+    modifier.StartHoverAnimation(barRect, HoverAnimationType::SHRINK);
+    EXPECT_EQ(modifier.GetHoverAnimatingType(), HoverAnimationType::SHRINK);
 }
 
 /**
@@ -466,19 +483,24 @@ HWTEST_F(ScrollBarOverlayTestNg, StopHoverAnimation001, TestSize.Level1)
 HWTEST_F(ScrollBarOverlayTestNg, StopOpacityAnimation001, TestSize.Level1)
 {
     /**
-     * @tc.steps: step1. Create modifier and set opacity animation type
+     * @tc.steps: step1. Create modifier and start opacity animation
      * @tc.expected: Opacity animation type should be APPEAR
      */
     ScrollBarOverlayModifier modifier;
-    modifier.SetOpacityAnimatingType(OpacityAnimationType::APPEAR);
-    EXPECT_EQ(modifier.GetOpacityAnimatingType(), OpacityAnimationType::APPEAR);
+    modifier.StartOpacityAnimation(OpacityAnimationType::APPEAR);
+    EXPECT_NE(modifier.GetOpacityAnimatingType(), OpacityAnimationType::NONE);
 
     /**
      * @tc.steps: step2. Stop opacity animation
-     * @tc.expected: Opacity animation should be stopped
+     * @tc.expected: New animation can be started after stopping
      */
     modifier.StopOpacityAnimation();
-    // Note: Animation type may not reset immediately after stop
+    // After stopping, a new animation can be started
+    modifier.StartOpacityAnimation(OpacityAnimationType::DISAPPEAR);
+    // Animation type may have changed due to the stop and new start
+    auto animType = modifier.GetOpacityAnimatingType();
+    EXPECT_TRUE(animType == OpacityAnimationType::DISAPPEAR ||
+                animType == OpacityAnimationType::NONE); // May be NONE if isNavDestinationShow_ is false
 }
 
 /**
@@ -595,11 +617,13 @@ HWTEST_F(ScrollBarOverlayTestNg, StartAdaptAnimation001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create modifier and start adapt animation
-     * @tc.expected: Adapt animation should start
+     * @tc.expected: Adapt animation should start, isAdaptAnimationStop_ should be false
      */
     ScrollBarOverlayModifier modifier;
     Rect barRect(0, 0, 60, 160);
     modifier.StartAdaptAnimation(barRect, true);
+    // When needAdaptAnimation is true, isAdaptAnimationStop_ should be set to false
+    EXPECT_FALSE(modifier.isAdaptAnimationStop_);
 }
 
 /**
@@ -611,11 +635,13 @@ HWTEST_F(ScrollBarOverlayTestNg, StartAdaptAnimation002, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create modifier and test without adapt animation
-     * @tc.expected: Adapt animation should not start
+     * @tc.expected: Adapt animation should not start, isAdaptAnimationStop_ should remain true
      */
     ScrollBarOverlayModifier modifier;
     Rect barRect(10, 10, 70, 170);
     modifier.StartAdaptAnimation(barRect, false);
+    // When needAdaptAnimation is false (CHECK_NULL_VOID returns early), isAdaptAnimationStop_ remains true
+    EXPECT_TRUE(modifier.isAdaptAnimationStop_);
 }
 
 /**
@@ -642,10 +668,15 @@ HWTEST_F(ScrollBarOverlayTestNg, AnimationStateTransition001, TestSize.Level1)
     EXPECT_EQ(modifier.GetHoverAnimatingType(), HoverAnimationType::SHRINK);
 
     /**
-     * @tc.steps: step3. Stop animation
-     * @tc.expected: Hover animation should be stopped
+     * @tc.steps: step3. Stop animation and start NONE animation
+     * @tc.expected: NONE animation doesn't change hoverAnimatingType_
+     * Note: StartHoverAnimation with NONE type returns early without updating
+     * hoverAnimatingType_, so the type remains SHRINK
      */
     modifier.StopHoverAnimation();
+    modifier.StartHoverAnimation(barRect, HoverAnimationType::NONE);
+    // NONE type doesn't update hoverAnimatingType_, it stays at SHRINK
+    EXPECT_EQ(modifier.GetHoverAnimatingType(), HoverAnimationType::SHRINK);
 }
 
 /**
@@ -665,16 +696,20 @@ HWTEST_F(ScrollBarOverlayTestNg, AnimationStateTransition002, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Transition to DISAPPEAR animation
-     * @tc.expected: Opacity animation should change to DISAPPEAR
+     * @tc.expected: Opacity animation should change to DISAPPEAR or NONE based on isNavDestinationShow_
      */
     modifier.StartOpacityAnimation(OpacityAnimationType::DISAPPEAR);
-    EXPECT_NE(modifier.GetOpacityAnimatingType(), OpacityAnimationType::NONE);
+    auto animType = modifier.GetOpacityAnimatingType();
+    EXPECT_TRUE(animType == OpacityAnimationType::DISAPPEAR ||
+                animType == OpacityAnimationType::NONE);
 
     /**
-     * @tc.steps: step3. Stop animation
-     * @tc.expected: Opacity animation should be stopped
+     * @tc.steps: step3. Stop animation and start APPEAR_WITHOUT_ANIMATION
+     * @tc.expected: Opacity animation should be NONE
      */
     modifier.StopOpacityAnimation();
+    modifier.StartOpacityAnimation(OpacityAnimationType::APPEAR_WITHOUT_ANIMATION);
+    EXPECT_EQ(modifier.GetOpacityAnimatingType(), OpacityAnimationType::NONE);
 }
 
 /**
@@ -691,6 +726,8 @@ HWTEST_F(ScrollBarOverlayTestNg, SetOffset001, TestSize.Level1)
     ScrollBarOverlayModifier modifier;
     OffsetF offset1(50.0f, 100.0f);
     modifier.SetOffset(offset1);
+    EXPECT_FLOAT_EQ(modifier.barX_->Get(), offset1.GetX());
+    EXPECT_FLOAT_EQ(modifier.barY_->Get(), offset1.GetY());
 
     /**
      * @tc.steps: step2. Set zero offset
@@ -698,6 +735,8 @@ HWTEST_F(ScrollBarOverlayTestNg, SetOffset001, TestSize.Level1)
      */
     OffsetF offset2(0.0f, 0.0f);
     modifier.SetOffset(offset2);
+    EXPECT_FLOAT_EQ(modifier.barX_->Get(), offset2.GetX());
+    EXPECT_FLOAT_EQ(modifier.barY_->Get(), offset2.GetY());
 
     /**
      * @tc.steps: step3. Set negative offset
@@ -705,6 +744,8 @@ HWTEST_F(ScrollBarOverlayTestNg, SetOffset001, TestSize.Level1)
      */
     OffsetF offset3(-10.0f, -20.0f);
     modifier.SetOffset(offset3);
+    EXPECT_FLOAT_EQ(modifier.barX_->Get(), offset3.GetX());
+    EXPECT_FLOAT_EQ(modifier.barY_->Get(), offset3.GetY());
 }
 
 /**
@@ -721,6 +762,8 @@ HWTEST_F(ScrollBarOverlayTestNg, SetSize001, TestSize.Level1)
     ScrollBarOverlayModifier modifier;
     SizeF size1(10.0f, 200.0f);
     modifier.SetSize(size1);
+    EXPECT_FLOAT_EQ(modifier.barWidth_->Get(), size1.Width());
+    EXPECT_FLOAT_EQ(modifier.barHeight_->Get(), size1.Height());
 
     /**
      * @tc.steps: step2. Set minimum size
@@ -728,6 +771,8 @@ HWTEST_F(ScrollBarOverlayTestNg, SetSize001, TestSize.Level1)
      */
     SizeF size2(1.0f, 1.0f);
     modifier.SetSize(size2);
+    EXPECT_FLOAT_EQ(modifier.barWidth_->Get(), size2.Width());
+    EXPECT_FLOAT_EQ(modifier.barHeight_->Get(), size2.Height());
 
     /**
      * @tc.steps: step3. Set large size
@@ -735,6 +780,8 @@ HWTEST_F(ScrollBarOverlayTestNg, SetSize001, TestSize.Level1)
      */
     SizeF size3(100.0f, 1000.0f);
     modifier.SetSize(size3);
+    EXPECT_FLOAT_EQ(modifier.barWidth_->Get(), size3.Width());
+    EXPECT_FLOAT_EQ(modifier.barHeight_->Get(), size3.Height());
 }
 
 /**
@@ -746,11 +793,15 @@ HWTEST_F(ScrollBarOverlayTestNg, SetRect001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create modifier and set rectangle
-     * @tc.expected: Rectangle should be applied
+     * @tc.expected: Rectangle should be applied to both offset and size
      */
     ScrollBarOverlayModifier modifier;
     Rect rect1(10, 10, 100, 200);
     modifier.SetRect(rect1);
+    EXPECT_FLOAT_EQ(modifier.barX_->Get(), rect1.Left());
+    EXPECT_FLOAT_EQ(modifier.barY_->Get(), rect1.Top());
+    EXPECT_FLOAT_EQ(modifier.barWidth_->Get(), rect1.Width());
+    EXPECT_FLOAT_EQ(modifier.barHeight_->Get(), rect1.Height());
 
     /**
      * @tc.steps: step2. Set rectangle with zero dimensions
@@ -758,6 +809,10 @@ HWTEST_F(ScrollBarOverlayTestNg, SetRect001, TestSize.Level1)
      */
     Rect rect2(0, 0, 0, 0);
     modifier.SetRect(rect2);
+    EXPECT_FLOAT_EQ(modifier.barX_->Get(), rect2.Left());
+    EXPECT_FLOAT_EQ(modifier.barY_->Get(), rect2.Top());
+    EXPECT_FLOAT_EQ(modifier.barWidth_->Get(), rect2.Width());
+    EXPECT_FLOAT_EQ(modifier.barHeight_->Get(), rect2.Height());
 
     /**
      * @tc.steps: step3. Set rectangle with large dimensions
@@ -765,6 +820,10 @@ HWTEST_F(ScrollBarOverlayTestNg, SetRect001, TestSize.Level1)
      */
     Rect rect3(1000, 1000, 500, 500);
     modifier.SetRect(rect3);
+    EXPECT_FLOAT_EQ(modifier.barX_->Get(), rect3.Left());
+    EXPECT_FLOAT_EQ(modifier.barY_->Get(), rect3.Top());
+    EXPECT_FLOAT_EQ(modifier.barWidth_->Get(), rect3.Width());
+    EXPECT_FLOAT_EQ(modifier.barHeight_->Get(), rect3.Height());
 }
 
 /**
@@ -812,10 +871,13 @@ HWTEST_F(ScrollBarOverlayTestNg, MultipleAnimations001, TestSize.Level1)
 
     /**
      * @tc.steps: step2. Stop all animations
-     * @tc.expected: All animations should be stopped
+     * @tc.expected: New animations can be started after stopping
      */
     modifier.StopHoverAnimation();
     modifier.StopOpacityAnimation();
+    // Verify that new animations can be started after stopping
+    modifier.StartBarAnimation(HoverAnimationType::SHRINK, OpacityAnimationType::DISAPPEAR, false, barRect);
+    EXPECT_EQ(modifier.GetHoverAnimatingType(), HoverAnimationType::SHRINK);
 }
 
 /**
@@ -852,9 +914,13 @@ HWTEST_F(ScrollBarOverlayTestNg, EdgeCaseLargeOffset001, TestSize.Level1)
     ScrollBarOverlayModifier modifier;
     OffsetF largeOffset(10000.0f, 20000.0f);
     modifier.SetOffset(largeOffset);
+    EXPECT_FLOAT_EQ(modifier.barX_->Get(), largeOffset.GetX());
+    EXPECT_FLOAT_EQ(modifier.barY_->Get(), largeOffset.GetY());
 
     SizeF normalSize(10.0f, 200.0f);
     modifier.SetSize(normalSize);
+    EXPECT_FLOAT_EQ(modifier.barWidth_->Get(), normalSize.Width());
+    EXPECT_FLOAT_EQ(modifier.barHeight_->Get(), normalSize.Height());
 }
 
 /**
@@ -954,26 +1020,29 @@ HWTEST_F(ScrollBarOverlayTestNg, PositionModeWithSize001, TestSize.Level1)
 {
     /**
      * @tc.steps: step1. Create modifier and test BOTTOM mode
-     * @tc.expected: Should handle BOTTOM position mode
+     * @tc.expected: Should handle BOTTOM position mode, setting barWidth for main mode
      */
     ScrollBarOverlayModifier modifier;
     Size size(100.0, 200.0);
     modifier.SetPositionMode(PositionMode::BOTTOM);
     modifier.SetMainModeSize(size);
+    EXPECT_FLOAT_EQ(modifier.barWidth_->Get(), size.Width());
 
     /**
      * @tc.steps: step2. Test RIGHT mode
-     * @tc.expected: Should handle RIGHT position mode
+     * @tc.expected: Should handle RIGHT position mode, setting barHeight for main mode
      */
     modifier.SetPositionMode(PositionMode::RIGHT);
     modifier.SetMainModeSize(size);
+    EXPECT_FLOAT_EQ(modifier.barHeight_->Get(), size.Height());
 
     /**
      * @tc.steps: step3. Test LEFT mode
-     * @tc.expected: Should handle LEFT position mode
+     * @tc.expected: Should handle LEFT position mode, setting barWidth for cross mode
      */
     modifier.SetPositionMode(PositionMode::LEFT);
     modifier.SetCrossModeSize(size);
+    EXPECT_FLOAT_EQ(modifier.barWidth_->Get(), size.Width());
 }
 
 /**
@@ -991,11 +1060,17 @@ HWTEST_F(ScrollBarOverlayTestNg, OnDrawWithDifferentModes001, TestSize.Level1)
     modifier.SetPositionMode(PositionMode::RIGHT);
     modifier.SetOpacity(AceType::MakeRefPtr<AnimatablePropertyUint8>(UINT8_MAX));
     modifier.SetBarColor(Color::BLUE);
+    // Set valid size so that onDraw will actually draw something
+    // (onDraw only calls DrawRoundRect when both barWidth and barHeight are non-zero)
+    SizeF barSize(10.0f, 200.0f);
+    modifier.SetSize(barSize);
 
     Testing::MockCanvas canvas;
     EXPECT_CALL(canvas, AttachBrush).WillRepeatedly(ReturnRef(canvas));
     EXPECT_CALL(canvas, DetachBrush).WillRepeatedly(ReturnRef(canvas));
     DrawingContext drawingContext = { canvas, WIDTH, HEIGHT };
+    // onDraw should complete without errors; verify by expecting DrawRoundRect call
+    EXPECT_CALL(canvas, DrawRoundRect(_)).Times(1);
     modifier.onDraw(drawingContext);
 }
 
