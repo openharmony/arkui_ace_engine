@@ -42,6 +42,28 @@ using namespace testing;
 using namespace testing::ext;
 namespace OHOS::Ace::NG {
 
+void FolderStackTestNg::SetUpTestSuite()
+{
+    MockContainer::SetUp();
+    MockPipelineContext::SetUp();
+    // Clean up ViewStackProcessor to avoid state leakage between test cases
+    auto viewStack = ViewStackProcessor::GetInstance();
+    if (viewStack) {
+        viewStack->ClearStack();
+    }
+}
+
+void FolderStackTestNg::TearDownTestSuite()
+{
+    // Clean up ViewStackProcessor to avoid state leakage to subsequent test suites
+    auto viewStack = ViewStackProcessor::GetInstance();
+    if (viewStack) {
+        viewStack->ClearStack();
+    }
+    MockContainer::TearDown();
+    MockPipelineContext::TearDown();
+}
+
 PaddingProperty FolderStackTestNg::CreatePadding(float left, float top, float right, float bottom)
 {
     PaddingProperty padding;
