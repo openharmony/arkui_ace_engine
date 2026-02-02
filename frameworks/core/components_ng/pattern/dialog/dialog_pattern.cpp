@@ -1792,12 +1792,17 @@ void DialogPattern::CheckScrollHeightIsNegative(
 void DialogPattern::UpdateDeviceOrientation(const DeviceOrientation& deviceOrientation)
 {
     if (deviceOrientation_ != deviceOrientation) {
+        deviceOrientation_ = deviceOrientation;
         CHECK_NULL_VOID(buttonContainer_);
-        OnFontConfigurationUpdate();
         auto host = GetHost();
         CHECK_NULL_VOID(host);
+        auto container = AceEngine::Get().GetContainer(host->GetInstanceId());
+        CHECK_NULL_VOID(container);
+        container->IsFloatingWindowStatus();
+        // The floating window does not require remeasure.
+        CHECK_NULL_VOID(!container->IsFloatingWindowStatus());
+        OnFontConfigurationUpdate();
         host->MarkDirtyNode(PROPERTY_UPDATE_MEASURE);
-        deviceOrientation_ = deviceOrientation;
     }
 }
 
