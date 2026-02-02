@@ -2351,6 +2351,9 @@ void RenderTextField::HandleOnRevoke()
     }
     inverseOperationRecords_.push_back(GetEditingValue());
     operationRecords_.pop_back();
+    if (operationRecords_.empty()) {
+        return;
+    }
     auto value = operationRecords_.back();
     operationRecords_.pop_back();
     isValueFromRemote_ = false;
