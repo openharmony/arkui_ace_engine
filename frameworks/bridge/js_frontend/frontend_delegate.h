@@ -247,11 +247,6 @@ public:
     // ----------------
     virtual void RequestAnimationFrame(const std::string& callbackId) = 0;
     virtual void CancelAnimationFrame(const std::string& callbackId) = 0;
-    // ----------------
-    // system.digitalCrown
-    // ----------------
-    virtual void SetMonitorForCrownEvents(const std::string& callbackId) = 0;
-    virtual void ClearMonitorForCrownEvents() = 0;
 
     virtual void GetSnapshot(const std::string& componentId,
         std::function<void(std::shared_ptr<Media::PixelMap>, int32_t, std::function<void()>)>&& callback,

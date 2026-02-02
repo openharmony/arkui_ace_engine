@@ -47,8 +47,6 @@ public:
     ACE_FORCE_EXPORT RefPtr<FrontendDelegate> GetFrontendDelegate() const;
     bool FireJsEvent(const std::string& eventStr);
     void CallJs(const std::string& callbackId, const std::string& args, bool keepAlive = false, bool isGlobal = false);
-    bool CallJsWithReturnBool(
-        const std::string& callbackId, const std::string& args, bool keepAlive, bool isGlobal = false);
     shared_ptr<JsRuntime> GetJsRuntime() const;
     bool InitJsEnv(bool debugger_mode, const std::unordered_map<std::string, void*>& extraNativeObject);
     // add Console object to worker
@@ -142,8 +140,6 @@ public:
     void MediaQueryCallback(const std::string& callbackId, const std::string& args) override;
 
     void RequestAnimationCallback(const std::string& callbackId, uint64_t timeStamp) override;
-
-    bool OnMonitorForCrownEvents(const std::string& callbackId, const std::string& args) override;
 
     void JsCallback(const std::string& callbackId, const std::string& args) override;
 

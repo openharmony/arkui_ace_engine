@@ -356,12 +356,6 @@ public:
 
     bool RequestFocus(const RefPtr<Element>& targetElement);
     bool RequestFocus(const std::string& targetNodeId, bool isSyncRequest = false) override;
-    void RequestCrownEventMonitor(std::function<bool(const std::string& args)>&& crownCallback)
-    {
-        crownEventMonitorCallback_ = std::move(crownCallback);
-    }
-    bool OnMonitorForCrownEvents(const CrownEvent &crownEvent);
-
     bool RequestDefaultFocus();
 
     bool NeedSoftKeyboard() override
@@ -1040,7 +1034,6 @@ private:
     std::vector<RectCallback> rectCallbackList_;
     std::list<TouchEvent> touchEvents_;
     std::function<void()> vsyncListener_;
-    std::function<bool(const std::string& args)> crownEventMonitorCallback_;
 
     ACE_DISALLOW_COPY_AND_MOVE(PipelineContext);
 };

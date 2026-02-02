@@ -115,10 +115,6 @@ const char APP_SET_IMAGE_FILE_CACHE_SIZE[] = "setImageFileCacheSize";
 const char ANIMATION_REQUEST_ANIMATION_FRAME[] = "requestAnimationFrame";
 const char ANIMATION_CANCEL_ANIMATION_FRAME[] = "cancelAnimationFrame";
 
-//for digitalcrown
-const char DIGITAL_CROWN_SET_MONITOR_FOR_CROWN_EVENT[] = "setMonitorForCrownEvents";
-const char DIGITAL_CROWN_CLEAR_MONITOR_FOR_CROWN_EVENT[] = "clearMonitorForCrownEvents";
-
 // for animator
 const char ANIMATOR_CREATE_ANIMATOR[] = "createAnimator";
 const char ANIMATOR_CREATE[] = "create";
