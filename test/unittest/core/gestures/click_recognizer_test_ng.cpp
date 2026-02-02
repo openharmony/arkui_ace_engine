@@ -2316,4 +2316,420 @@ HWTEST_F(ClickRecognizerTestNg, GetGestureInfoString001, TestSize.Level1)
     EXPECT_THAT(result, HasSubstr("UCM:0"));
     EXPECT_THAT(result, HasSubstr("CTPN:1"));
 }
+
+/**
+ * @tc.name: ClickRecognizerIsPointInRegionTest001
+ * @tc.desc: Test ClickRecognizer IsPointInRegion with infinity distance threshold
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerIsPointInRegionTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer with infinity distance threshold.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->responseRegionBuffer_.emplace_back(RectF(0, 0, 200, 200));
+    clickRecognizer->SetDistanceThreshold(std::numeric_limits<double>::infinity());
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+
+    /**
+     * @tc.steps: step2. call IsPointInRegion to test infinity distance threshold path.
+     */
+    auto result = clickRecognizer->IsPointInRegion(touchEvent);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ClickRecognizerIsPointInRegionTest002
+ * @tc.desc: Test ClickRecognizer IsPointInRegion with invalid frameNode
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerIsPointInRegionTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer with infinity distance threshold.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->responseRegionBuffer_.clear();
+    clickRecognizer->SetDistanceThreshold(std::numeric_limits<double>::infinity());
+    TouchEvent touchEvent;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+
+    /**
+     * @tc.steps: step2. call IsPointInRegion with invalid frameNode.
+     */
+    auto result = clickRecognizer->IsPointInRegion(touchEvent);
+    EXPECT_TRUE(result);
+}
+
+/**
+ * @tc.name: ClickRecognizerOnAcceptedTest001
+ * @tc.desc: Test ClickRecognizer OnAccepted with backupTouchPointsForSucceedBlock
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerOnAcceptedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    std::map<int32_t, TouchEvent> backupPoints;
+    backupPoints[touchEvent.id] = touchEvent;
+    clickRecognizer->backupTouchPointsForSucceedBlock_ = backupPoints;
+    clickRecognizer->refereeState_ = RefereeState::SUCCEED_BLOCKED;
+    clickRecognizer->lastRefereeState_ = RefereeState::SUCCEED_BLOCKED;
+
+    /**
+     * @tc.steps: step2. call OnAccepted with backupTouchPointsForSucceedBlock set.
+     */
+    clickRecognizer->OnAccepted();
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: ClickRecognizerOnAcceptedTest002
+ * @tc.desc: Test ClickRecognizer OnAccepted without onClick callback
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerOnAcceptedTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer without onClick callback.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    clickRecognizer->onClick_ = nullptr;
+    clickRecognizer->onAccessibilityEventFunc_ = [](AccessibilityEventType) {};
+
+    /**
+     * @tc.steps: step2. call OnAccepted without onClick callback to test accessibility path.
+     */
+    clickRecognizer->OnAccepted();
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: ClickRecognizerTriggerClickAcceptedTest001
+ * @tc.desc: Test ClickRecognizer TriggerClickAccepted with useCatchMode true
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTriggerClickAcceptedTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer with useCatchMode true.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    clickRecognizer->useCatchMode_ = true;
+    clickRecognizer->equalsToFingers_ = true;
+    clickRecognizer->currentTouchPointsNum_ = 0;
+    clickRecognizer->fingersId_.insert(touchEvent.id);
+
+    /**
+     * @tc.steps: step2. call TriggerClickAccepted with useCatchMode true.
+     */
+    clickRecognizer->TriggerClickAccepted(touchEvent);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::SUCCEED);
+}
+
+/**
+ * @tc.name: ClickRecognizerHandleTouchUpEventTest003
+ * @tc.desc: Test ClickRecognizer HandleTouchUpEvent when IsPointInRegion returns false
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerHandleTouchUpEventTest003, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+    clickRecognizer->responseRegionBuffer_.clear();
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.x = 1000.0f;
+    touchEvent.y = 1000.0f;
+    clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    clickRecognizer->equalsToFingers_ = true;
+    clickRecognizer->currentTouchPointsNum_ = 1;
+    clickRecognizer->useCatchMode_ = false;
+    clickRecognizer->fingersId_.insert(touchEvent.id);
+
+    /**
+     * @tc.steps: step2. call HandleTouchUpEvent when IsPointInRegion returns false.
+     */
+    clickRecognizer->HandleTouchUpEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::FAIL);
+}
+
+/**
+ * @tc.name: ClickRecognizerSetDistanceThresholdTest001
+ * @tc.desc: Test ClickRecognizer SetDistanceThreshold with appTheme
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerSetDistanceThresholdTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call SetDistanceThreshold with negative value (should use appTheme).
+     */
+    clickRecognizer->SetDistanceThreshold(-1.0);
+    EXPECT_GT(clickRecognizer->GetDistanceThreshold(), 0.0);
+}
+
+/**
+ * @tc.name: ClickRecognizerSetDistanceThresholdTest002
+ * @tc.desc: Test ClickRecognizer SetDistanceThreshold(Dimension) with appTheme
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerSetDistanceThresholdTest002, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. call SetDistanceThreshold with negative Dimension value.
+     */
+    clickRecognizer->SetDistanceThreshold(Dimension(-1.0, DimensionUnit::VP));
+    EXPECT_GT(clickRecognizer->GetDistanceThreshold(), 0.0);
+}
+
+/**
+ * @tc.name: ClickRecognizerCleanRecognizerStateTest001
+ * @tc.desc: Test ClickRecognizer CleanRecognizerState with various referee states
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerCleanRecognizerStateTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+
+    /**
+     * @tc.steps: step2. test CleanRecognizerState with SUCCEED state and 0 fingers.
+     */
+    clickRecognizer->refereeState_ = RefereeState::SUCCEED;
+    clickRecognizer->currentFingers_ = 0;
+    clickRecognizer->CleanRecognizerState();
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::READY);
+    EXPECT_EQ(clickRecognizer->tappedCount_, 0);
+
+    /**
+     * @tc.steps: step3. test CleanRecognizerState with FAIL state and 0 fingers.
+     */
+    clickRecognizer->refereeState_ = RefereeState::FAIL;
+    clickRecognizer->tappedCount_ = 1;
+    clickRecognizer->CleanRecognizerState();
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::READY);
+
+    /**
+     * @tc.steps: step4. test CleanRecognizerState with DETECTING state and 0 fingers.
+     */
+    clickRecognizer->refereeState_ = RefereeState::DETECTING;
+    clickRecognizer->CleanRecognizerState();
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::READY);
+}
+
+/**
+ * @tc.name: ClickRecognizerTriggerGestureJudgeCallbackTest001
+ * @tc.desc: Test ClickRecognizer TriggerGestureJudgeCallback with null targetComponent
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTriggerGestureJudgeCallbackTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    clickRecognizer->time_ = touchEvent.time;
+
+    /**
+     * @tc.steps: step2. call TriggerGestureJudgeCallback with null targetComponent.
+     */
+    auto result = clickRecognizer->TriggerGestureJudgeCallback();
+    EXPECT_EQ(result, GestureJudgeResult::CONTINUE);
+}
+
+/**
+ * @tc.name: ClickRecognizerAboutToAddToPendingRecognizersTest001
+ * @tc.desc: Test ClickRecognizer AboutToAddToPendingRecognizers with MOUSE sourceType
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerAboutToAddToPendingRecognizersTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+    touchEvent.sourceType = SourceType::MOUSE;
+    clickRecognizer->refereeState_ = RefereeState::PENDING;
+
+    /**
+     * @tc.steps: step2. call AboutToAddToPendingRecognizers with MOUSE sourceType.
+     */
+    clickRecognizer->AboutToAddToPendingRecognizers(touchEvent);
+    EXPECT_EQ(clickRecognizer->refereeState_, RefereeState::PENDING);
+}
+
+/**
+ * @tc.name: ClickRecognizerForceCleanRecognizerTest001
+ * @tc.desc: Test ClickRecognizer ForceCleanRecognizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerForceCleanRecognizerTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+    clickRecognizer->tappedCount_ = 1;
+    clickRecognizer->equalsToFingers_ = true;
+    clickRecognizer->currentTouchPointsNum_ = 1;
+
+    /**
+     * @tc.steps: step2. call ForceCleanRecognizer.
+     */
+    clickRecognizer->ForceCleanRecognizer();
+    EXPECT_EQ(clickRecognizer->touchPoints_.size(), 1);
+    EXPECT_EQ(clickRecognizer->tappedCount_, 0);
+    EXPECT_FALSE(clickRecognizer->equalsToFingers_);
+    EXPECT_EQ(clickRecognizer->currentTouchPointsNum_, 0);
+}
+
+/**
+ * @tc.name: ClickRecognizerGetGestureEventInfoTest001
+ * @tc.desc: Test ClickRecognizer GetGestureEventInfo with tiltX and tiltY
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerGetGestureEventInfoTest001, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    touchEvent.tiltX = 0.5f;
+    touchEvent.tiltY = 0.3f;
+    touchEvent.rollAngle = 1.0f;
+    touchEvent.sourceTool = SourceTool::FINGER;
+    touchEvent.targetDisplayId = 0;
+    clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+
+    /**
+     * @tc.steps: step2. call GetGestureEventInfo and verify values.
+     */
+    GestureEvent info = clickRecognizer->GetGestureEventInfo();
+    EXPECT_EQ(info.GetTargetDisplayId(), 0);
+}
+
+/**
+ * @tc.name: ClickRecognizerTest016
+ * @tc.desc: Test ClickRecognizer HandleTouchDownEvent with existing fingersId
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest016, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    clickRecognizer->refereeState_ = RefereeState::PENDING;
+    clickRecognizer->fingers_ = FINGER_NUMBER;
+    clickRecognizer->tappedCount_ = 1;
+    clickRecognizer->currentTouchPointsNum_ = 0;
+    clickRecognizer->fingersId_.insert(touchEvent.id);
+
+    /**
+     * @tc.steps: step2. call HandleTouchDownEvent when fingersId already contains the id.
+     */
+    clickRecognizer->HandleTouchDownEvent(touchEvent);
+    EXPECT_EQ(clickRecognizer->currentTouchPointsNum_, 0); // Should not increment
+}
+
+/**
+ * @tc.name: ClickRecognizerTest017
+ * @tc.desc: Test ClickRecognizer HandleReportClick with null ClickOptimizer
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest017, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer without FrameNode attached.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+
+    /**
+     * @tc.steps: step2. call HandleReportClick without FrameNode.
+     */
+    GestureEvent info = clickRecognizer->GetGestureEventInfo();
+    clickRecognizer->HandleReportClick(info); // Should not crash
+}
+
+/**
+ * @tc.name: ClickRecognizerTest018
+ * @tc.desc: Test ClickRecognizer HandleReports with CLICK recognizer type
+ * @tc.type: FUNC
+ */
+HWTEST_F(ClickRecognizerTestNg, ClickRecognizerTest018, TestSize.Level1)
+{
+    /**
+     * @tc.steps: step1. create ClickRecognizer with CLICK type.
+     */
+    RefPtr<ClickRecognizer> clickRecognizer = AceType::MakeRefPtr<ClickRecognizer>(FINGER_NUMBER, COUNT);
+    clickRecognizer->SetRecognizerType(GestureTypeName::CLICK);
+    auto frameNode = FrameNode::CreateFrameNode("testNode", 100, AceType::MakeRefPtr<Pattern>());
+    clickRecognizer->AttachFrameNode(frameNode);
+    TouchEvent touchEvent;
+    touchEvent.id = 1;
+    touchEvent.x = 100.0f;
+    touchEvent.y = 100.0f;
+    clickRecognizer->touchPoints_[touchEvent.id] = touchEvent;
+
+    /**
+     * @tc.steps: step2. call HandleReports with CLICK type.
+     */
+    GestureEvent info = clickRecognizer->GetGestureEventInfo();
+    clickRecognizer->HandleReports(info, GestureCallbackType::ACTION); // Should not crash
+}
 } // namespace OHOS::Ace::NG
