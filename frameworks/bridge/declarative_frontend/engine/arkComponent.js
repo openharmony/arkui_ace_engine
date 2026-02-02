@@ -36244,7 +36244,8 @@ if (globalThis.Checkbox === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkcheckbox');
       module.exportView();
       getUINativeModule().checkbox.create(params);
-    }
+    },
+    name: 'JSCheckbox'
   };
 }
 
@@ -36256,7 +36257,8 @@ if (globalThis.CheckboxGroup === undefined) {
       let module = globalThis.requireNapi('arkui.components.arkcheckboxgroup');
       module.exportView();
       getUINativeModule().checkboxgroup.create(params);
-    }
+    },
+    name: 'JSCheckboxGroup'
   };
 }
 

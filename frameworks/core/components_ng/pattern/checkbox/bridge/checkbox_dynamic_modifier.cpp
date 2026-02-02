@@ -50,10 +50,6 @@ const uint32_t ERROR_UINT_CODE = -1;
 const float ERROR_FLOAT_CODE = -1.0f;
 const int32_t ERROR_INT_CODE = -1;
 static std::string nameValue;
-constexpr int NUM_0 = 0;
-constexpr int NUM_1 = 1;
-constexpr int NUM_2 = 2;
-constexpr int NUM_3 = 3;
 
 FrameNode* GetFrameNode(ArkUINodeHandle node)
 {
@@ -310,7 +306,7 @@ void ResetCheckboxShape(ArkUINodeHandle node)
 
 void SetIsUserSetMargin(ArkUINodeHandle node, ArkUI_Bool isUserSet)
 {
-    auto* frameNode = reinterpret_cast<FrameNode*>(node);
+    auto* frameNode = GetFrameNode(node);
     CHECK_NULL_VOID(frameNode);
     CheckBoxModelNG::SetIsUserSetMargin(frameNode, static_cast<bool>(isUserSet));
 }
@@ -474,53 +470,6 @@ void SetCheckboxJsPadding(
                             : CalcLength(newValue->end.value, static_cast<DimensionUnit>(newValue->end.unit));
     }
     CheckBoxModelNG::SetPadding(frameNode, padding);
-}
-
-void SetCheckboxJsMargin(
-    const struct ArkUIPaddingType* values, ArkUI_Bool isLengthMetrics, void* rawPtr, ArkUI_Bool parse)
-{
-    auto frameNode = GetFrameNode(nullptr);
-    CHECK_NULL_VOID(frameNode);
-    CheckBoxModelNG::SetIsUserSetMargin(frameNode, static_cast<bool>(true));
-    ViewAbstract::ResetResObj(frameNode, "margin");
-    if (!parse) {
-        ViewAbstract::SetMargin(frameNode, NG::CalcLength(0.0));
-        return;
-    }
-    CHECK_NULL_VOID(values);
-    auto topDimen = values->top.string ? CalcLength(values->top.string)
-                                       : CalcLength(values->top.value, static_cast<DimensionUnit>(values->top.unit));
-    auto bottomDimen = values->bottom.string
-                           ? CalcLength(values->bottom.string)
-                           : CalcLength(values->bottom.value, static_cast<DimensionUnit>(values->bottom.unit));
-    auto leftDimen = values->start.string
-                         ? CalcLength(values->start.string)
-                         : CalcLength(values->start.value, static_cast<DimensionUnit>(values->start.unit));
-    auto rightDimen = values->end.string ? CalcLength(values->end.string)
-                                         : CalcLength(values->end.value, static_cast<DimensionUnit>(values->end.unit));
-    NG::PaddingProperty margins;
-    if (values->top.isSet) {
-        margins.top = std::optional<CalcLength>(topDimen);
-    }
-    if (values->bottom.isSet) {
-        margins.bottom = std::optional<CalcLength>(bottomDimen);
-    }
-    if (values->start.isSet) {
-        isLengthMetrics ? margins.start = std::optional<CalcLength>(leftDimen)
-                        : margins.left = std::optional<CalcLength>(leftDimen);
-    }
-    if (values->end.isSet) {
-        isLengthMetrics ? margins.end = std::optional<CalcLength>(rightDimen)
-                        : margins.right = std::optional<CalcLength>(rightDimen);
-    }
-    if (SystemProperties::ConfigChangePerform() && rawPtr) {
-        auto objs = *(reinterpret_cast<const std::vector<RefPtr<ResourceObject>>*>(rawPtr));
-        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.top", margins, objs[NUM_0]);
-        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.bottom", margins, objs[NUM_1]);
-        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.left", margins, objs[NUM_2]);
-        ViewAbstractModelNG::RegisterEdgeMarginsResObj("margin.right", margins, objs[NUM_3]);
-    }
-    ViewAbstract::SetMargin(frameNode, margins);
 }
 
 // for inner
@@ -690,42 +639,7 @@ void ResetCheckboxUnSelectedColorImpl(ArkUINodeHandle node) {}
 
 void ResetCheckboxMarkColorImpl(ArkUINodeHandle node) {}
 
-void SetCheckboxMarginImpl(
-    const struct ArkUIPaddingType* values, ArkUI_Bool isLengthMetrics, void* rawPtr, ArkUI_Bool parse)
-{
-    if (!parse) {
-        GetViewAbstractModelImpl()->SetMargin(CalcDimension(0.0));
-        return;
-    }
-    CHECK_NULL_VOID(values);
-    if (isLengthMetrics) {
-        return;
-    }
-    std::optional<CalcDimension> topDimen;
-    std::optional<CalcDimension> bottomDimen;
-    std::optional<CalcDimension> leftDimen;
-    std::optional<CalcDimension> rightDimen;
-    if (values->top.isSet) {
-        topDimen = values->top.string ? CalcDimension(values->top.string)
-                                      : CalcDimension(values->top.value, static_cast<DimensionUnit>(values->top.unit));
-    }
-    if (values->bottom.isSet) {
-        bottomDimen = values->bottom.string
-                          ? CalcDimension(values->bottom.string)
-                          : CalcDimension(values->bottom.value, static_cast<DimensionUnit>(values->bottom.unit));
-    }
-    if (values->start.isSet) {
-        leftDimen = values->start.string
-                        ? CalcDimension(values->start.string)
-                        : CalcDimension(values->start.value, static_cast<DimensionUnit>(values->start.unit));
-    }
-    if (values->end.isSet) {
-        rightDimen = values->end.string
-                         ? CalcDimension(values->end.string)
-                         : CalcDimension(values->end.value, static_cast<DimensionUnit>(values->end.unit));
-    }
-    GetViewAbstractModelImpl()->SetMargins(topDimen, bottomDimen, leftDimen, rightDimen);
-}
+void SetIsUserSetMarginImpl(ArkUINodeHandle node, ArkUI_Bool isUserSet) {}
 #endif
 
 const ArkUICheckboxModifier* GetCheckboxDynamicModifier()
@@ -755,7 +669,7 @@ const ArkUICheckboxModifier* GetCheckboxDynamicModifier()
             .resetCheckboxPadding = nullptr,
             .resetCheckboxResponseRegion = ResetCheckboxResponseRegionImpl,
             .resetCheckboxOnChange = nullptr,
-            .setIsUserSetMargin = nullptr,
+            .setIsUserSetMargin = SetIsUserSetMarginImpl,
             .getSelect = nullptr,
             .getSelectedColor = nullptr,
             .getUnSelectedColor = nullptr,
@@ -777,7 +691,6 @@ const ArkUICheckboxModifier* GetCheckboxDynamicModifier()
             .setCheckMarkWidth = nullptr,
             .setCheckboxChangeEvent = SetCheckboxChangeEventImpl,
             .setCheckboxJsPadding = SetCheckboxPaddingImpl,
-            .setCheckboxJsMargin = SetCheckboxMarginImpl,
         };
         CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
         return &modifier;
@@ -827,7 +740,6 @@ const ArkUICheckboxModifier* GetCheckboxDynamicModifier()
         .setCheckMarkWidth = SetCheckboxCheckMarkWidth,
         .setCheckboxChangeEvent = SetCheckboxChangeEvent,
         .setCheckboxJsPadding = SetCheckboxJsPadding,
-        .setCheckboxJsMargin = SetCheckboxJsMargin,
     };
     CHECK_INITIALIZED_FIELDS_END(modifier, 0, 0, 0); // don't move this line
     return &modifier;
