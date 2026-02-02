@@ -9138,7 +9138,7 @@ void JSViewAbstract::JsDispatchKeyEvent(const JSCallbackInfo& args)
     JSRef<JSObject> jsObject = JSRef<JSObject>::Cast(args[1]);
     auto eventInfoPtr = jsObject->Unwrap<KeyEventInfo>();
     KeyEvent keyEvent;
-    if (eventInfoPtr == NULL) {
+    if (!eventInfoPtr) {
         ParseJsKeyEvent(jsObject, keyEvent);
     } else {
         eventInfoPtr->ParseKeyEvent(keyEvent);
