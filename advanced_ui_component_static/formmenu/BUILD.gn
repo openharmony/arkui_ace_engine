@@ -22,6 +22,7 @@ ohos_shared_library("formmenu_ani") {
   include_dirs = [ "./include" ]
   sources = [ "./src/formmenu.cpp" ]
   external_deps = [
+    "ability_runtime:ability_business_error",
     "ability_runtime:ani_common",
     "ability_base:want",
     "form_fwk:fmskit_native",

@@ -198,6 +198,7 @@ ohos_unittest("high_contrast_observer_test") {
   external_deps = [
     "ability_base:view_data",
     "ability_runtime:abilitykit_native",
+    "ability_runtime:napi_common",
     "accessibility:accessibility_common",
     "accessibility:accessibilityconfig",
     "googletest:gmock_main",
@@ -247,6 +248,7 @@ ohos_unittest("layout_inspector_test") {
   external_deps = [
     "ability_runtime:abilitykit_native",
     "ability_runtime:connect_server_manager",
+    "ability_runtime:napi_common",
     "graphic_2d:librender_service_base",
     "graphic_2d:librender_service_client",
     "image_framework:image_native",
